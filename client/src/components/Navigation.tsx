@@ -54,7 +54,7 @@ export default function Navigation() {
               </button>
               <button
                 onClick={() => scrollToSection("impact")}
-                className="text-foreground hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors text-[#ffd780]"
                 data-testid="link-impact"
               >
                 Our Impact
