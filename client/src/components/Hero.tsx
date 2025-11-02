@@ -5,6 +5,7 @@ import heroImage from "@assets/generated_images/Hero_education_classroom_scene_8
 export default function Hero() {
   const [scrollScale, setScrollScale] = useState(1);
   const [textVisible, setTextVisible] = useState(false);
+  const [shadeVisible, setShadeVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,10 +20,18 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const textTimer = setTimeout(() => {
       setTextVisible(true);
     }, 200);
-    return () => clearTimeout(timer);
+    
+    const shadeTimer = setTimeout(() => {
+      setShadeVisible(true);
+    }, 1000);
+    
+    return () => {
+      clearTimeout(textTimer);
+      clearTimeout(shadeTimer);
+    };
   }, []);
 
   const scrollToSection = (sectionId: string) => {
@@ -46,7 +55,11 @@ export default function Hero() {
       
       {/* Horizontal shade between image and text */}
       <div className="absolute inset-0 flex items-center justify-center z-[5]">
-        <div className="w-full h-[400px] sm:h-[500px] bg-black/30" />
+        <div 
+          className={`w-full h-[400px] sm:h-[500px] bg-black/30 transition-opacity duration-1000 ${
+            shadeVisible ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
       </div>
 
       <div 
