@@ -131,7 +131,7 @@ export default function PersonalizedHero() {
             shadeVisible ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            background: 'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 20%, rgba(0, 0, 0, 0.3) 80%, transparent 100%)'
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 5%, rgba(0, 0, 0, 0.3) 95%, transparent 100%)'
           }}
         />
       </div>
