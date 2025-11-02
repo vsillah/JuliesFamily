@@ -39,7 +39,7 @@ export default function Navigation() {
                 className="h-12 w-auto"
                 data-testid="img-logo"
               />
-              <h1 className="text-xl sm:text-2xl font-serif font-semibold text-foreground">
+              <h1 className="text-xl sm:text-2xl font-serif font-semibold text-[#ffd780]">
                 Julie's Family Learning Program
               </h1>
             </div>
@@ -88,7 +88,6 @@ export default function Navigation() {
           </div>
         </div>
       </nav>
-
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-background md:hidden pt-20">
           <div className="flex flex-col items-center gap-6 p-8">
