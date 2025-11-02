@@ -25,45 +25,53 @@ export default function PersonaSelectionModal() {
 
   return (
     <Dialog open={showPersonaModal} onOpenChange={setShowPersonaModal}>
-      <DialogContent className="sm:max-w-[600px]" data-testid="dialog-persona-selection">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-serif">Welcome to Julie's Family Learning Program</DialogTitle>
-          <DialogDescription className="text-base pt-2">
-            Help us personalize your experience. What brings you here today?
+      <DialogContent className="sm:max-w-[650px] bg-muted/30 border-muted" data-testid="dialog-persona-selection">
+        <DialogHeader className="text-center pb-2">
+          <div className="mx-auto mb-4">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <Heart className="w-8 h-8 text-primary" />
+            </div>
+          </div>
+          <DialogTitle className="text-3xl sm:text-4xl font-serif font-semibold">
+            Welcome to <span className="italic">Julie's</span>
+          </DialogTitle>
+          <DialogDescription className="text-base sm:text-lg pt-3 text-foreground/80 max-w-md mx-auto leading-relaxed">
+            We're here to support your journey. Help us personalize your experience by telling us what brings you here today.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="grid gap-3 py-4">
+        <div className="grid gap-3 py-6 px-1">
           {personaConfigs.map((config) => {
             const IconComponent = iconComponents[config.iconName];
             return (
-              <Button
+              <button
                 key={config.id}
-                variant="outline"
-                className="h-auto p-4 justify-start text-left hover-elevate"
                 onClick={() => handlePersonaSelect(config.id)}
+                className="group relative bg-card border border-card-border rounded-md p-5 text-left transition-all hover-elevate active-elevate-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
                 data-testid={`button-persona-${config.id}`}
               >
-                <div className="flex items-start gap-3 w-full">
-                  <IconComponent className="w-6 h-6 flex-shrink-0 text-primary" />
-                  <div className="flex-1">
-                    <div className="font-semibold text-base mb-1">{config.label}</div>
-                    <div className="text-sm text-muted-foreground">{config.description}</div>
+                <div className="flex items-start gap-4 w-full">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+                    <IconComponent className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="flex-1 pt-1">
+                    <div className="font-semibold text-lg mb-1.5 text-foreground">{config.label}</div>
+                    <div className="text-sm text-muted-foreground leading-relaxed">{config.description}</div>
                   </div>
                 </div>
-              </Button>
+              </button>
             );
           })}
         </div>
 
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center pt-2 pb-2 border-t border-muted">
           <Button
             variant="ghost"
             onClick={handleSkip}
-            className="text-muted-foreground"
+            className="text-muted-foreground hover:text-foreground"
             data-testid="button-skip-persona"
           >
-            Skip for now
+            I'll explore on my own
           </Button>
         </div>
       </DialogContent>
