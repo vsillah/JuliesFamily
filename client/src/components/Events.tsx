@@ -1,9 +1,35 @@
 import EventCard from "./EventCard";
+import { usePersona } from "@/contexts/PersonaContext";
 import anniversaryImage from "@assets/April-6-Graduation-pzi49dxx55hv6neo81vxc4gp1ypmkznm7wn3q8iscg_1762057083004.jpg";
 import graduationImage from "@assets/Bobby-and-Zea-scaled-pzi3sypfqd0ibx9h4gbl9rnrelnr3dggamaov6vf28_1762057083010.jpg";
 import familyFairImage from "@assets/dinoeggs-scaled-qdm9d9cv1dd2no2htq0bzup92scsbyxw11jmwb3g8w_1762057083014.jpg";
 
+const headlineContent: Record<string, { title: string; description: string }> = {
+  student: {
+    title: "Be Part of Our Community",
+    description: "Connect with fellow students, celebrate achievements, and discover resources at our upcoming events."
+  },
+  provider: {
+    title: "Professional Events & Outcomes",
+    description: "Join us for networking opportunities, outcome celebrations, and community partnership events."
+  },
+  parent: {
+    title: "Family-Friendly Events",
+    description: "Bring your family to our open houses, learning fairs, and community celebrations."
+  },
+  donor: {
+    title: "Join Us in Celebrating Success",
+    description: "Be part of our community events and witness the transformative power of education."
+  },
+  volunteer: {
+    title: "Get Involved at Our Events",
+    description: "Meet our team, learn about volunteer opportunities, and celebrate with our community."
+  }
+};
+
 export default function Events() {
+  const { persona } = usePersona();
+  const headline = headlineContent[persona || "donor"];
   const events = [
     {
       title: "50th Anniversary Celebration",
@@ -39,11 +65,22 @@ export default function Events() {
             – Upcoming Events –
           </p>
           <h2 className="text-4xl sm:text-5xl font-serif font-semibold mb-6">
-            Join Us in <span className="italic">Celebrating</span>{" "}
-            <span className="font-bold">Success</span>
+            {headline.title.split(" ").map((word, i) => {
+              const isEmphasized = ["Success", "Community", "Celebrating", "Professional", "Involved"].includes(word);
+              const isItalic = ["Celebrating", "Part", "Our"].includes(word);
+              
+              return (
+                <span
+                  key={i}
+                  className={`${isEmphasized ? "font-bold" : ""} ${isItalic ? "italic" : ""}`}
+                >
+                  {word}{" "}
+                </span>
+              );
+            })}
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Be part of our community events and witness the transformative power of education.
+            {headline.description}
           </p>
         </div>
 

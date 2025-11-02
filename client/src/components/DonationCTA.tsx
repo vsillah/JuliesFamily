@@ -1,11 +1,55 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
+import { usePersona } from "@/contexts/PersonaContext";
 import heroImage from "@assets/grad-pzi78gq1oq1dmudvugdez6xi97qltaefkuknv8rmrk_1762057083020.jpg";
 
+interface CTAContent {
+  title: string;
+  description: string;
+  primaryButton: string;
+  secondaryButton: string;
+}
+
+const ctaContent: Record<string, CTAContent> = {
+  student: {
+    title: "Your Success Inspires Others",
+    description: "When you succeed, you show others what's possible. Help us support more students like you by spreading the word or giving back when you can.",
+    primaryButton: "Share Your Story",
+    secondaryButton: "Refer a Friend"
+  },
+  provider: {
+    title: "Partner in Transformation",
+    description: "Together we can reach more families in need. Learn about partnership opportunities and how we can better serve your clients.",
+    primaryButton: "Explore Partnership",
+    secondaryButton: "Download Outcomes"
+  },
+  parent: {
+    title: "Quality Care for Every Child",
+    description: "Your support helps us provide excellent early education to all Boston families. Help us keep our programs accessible and thriving.",
+    primaryButton: "Support Our PreK",
+    secondaryButton: "Learn About Programs"
+  },
+  donor: {
+    title: "Be the Change",
+    description: "Your support helps families achieve their educational dreams and build brighter futures. Every contribution makes a lasting difference in our community.",
+    primaryButton: "Make a Donation",
+    secondaryButton: "View Impact Report"
+  },
+  volunteer: {
+    title: "Your Time Changes Lives",
+    description: "Join our community of tutors, mentors, and supporters. Find opportunities that match your schedule and make a real difference.",
+    primaryButton: "Volunteer With Us",
+    secondaryButton: "See Opportunities"
+  }
+};
+
 export default function DonationCTA() {
+  const { persona } = usePersona();
   const [scale, setScale] = useState(1);
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
+  
+  const content = ctaContent[persona || "donor"];
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -60,15 +104,26 @@ export default function DonationCTA() {
 
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 className="text-4xl sm:text-5xl font-serif font-semibold text-white mb-6">
-          <span className="font-bold">Be</span> the <span className="italic">Change</span>
+          {content.title.split(" ").map((word, i) => {
+            const isEmphasized = ["Change", "Success", "Partner", "Quality", "Time"].includes(word);
+            const isItalic = ["the", "Lives", "Others"].includes(word);
+            
+            return (
+              <span
+                key={i}
+                className={`${isEmphasized ? "font-bold" : ""} ${isItalic ? "italic" : ""}`}
+              >
+                {word}{" "}
+              </span>
+            );
+          })}
         </h2>
         <p className="text-lg sm:text-xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed">
-          Your support helps families achieve their educational dreams and build brighter futures.
-          Every contribution makes a lasting difference in our community.
+          {content.description}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button variant="default" size="lg" data-testid="button-donate-cta">
-            Make a Donation
+            {content.primaryButton}
           </Button>
           <Button
             variant="outline"
@@ -76,7 +131,7 @@ export default function DonationCTA() {
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
             data-testid="button-volunteer"
           >
-            Volunteer With Us
+            {content.secondaryButton}
           </Button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import Navigation from "@/components/Navigation";
-import Hero from "@/components/Hero";
+import PersonalizedHero from "@/components/PersonalizedHero";
 import Services from "@/components/Services";
 import ImpactStats from "@/components/ImpactStats";
 import Testimonials from "@/components/Testimonials";
@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <Hero />
+      <PersonalizedHero />
       <Services />
       <ImpactStats />
       <Testimonials />

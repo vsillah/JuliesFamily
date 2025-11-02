@@ -1,11 +1,16 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Menu, X, User } from "lucide-react";
+import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import logo from "@assets/image_1762053021045.png";
 
 export default function Navigation() {
+  const { persona, setShowPersonaModal } = usePersona();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const currentPersonaConfig = personaConfigs.find(p => p.id === persona);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,7 +51,7 @@ export default function Navigation() {
               </h1>
             </div>
 
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center gap-6">
               <button
                 onClick={() => scrollToSection("services")}
                 className={`transition-colors duration-300 ${
@@ -83,6 +88,19 @@ export default function Navigation() {
               >
                 Events
               </button>
+              {currentPersonaConfig && (
+                <button
+                  onClick={() => setShowPersonaModal(true)}
+                  className="flex items-center gap-2"
+                  data-testid="button-change-persona"
+                  title="Change your experience"
+                >
+                  <Badge variant="secondary" className="cursor-pointer hover-elevate">
+                    <User className="w-3 h-3 mr-1" />
+                    {currentPersonaConfig.label}
+                  </Badge>
+                </button>
+              )}
               <Button variant="default" size="default" data-testid="button-donate">
                 Donate Now
               </Button>
@@ -103,6 +121,12 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-background md:hidden pt-20">
           <div className="flex flex-col items-center gap-6 p-8">
+            {currentPersonaConfig && (
+              <Badge variant="secondary" className="mb-2">
+                <User className="w-3 h-3 mr-1" />
+                Viewing as: {currentPersonaConfig.label}
+              </Badge>
+            )}
             <button
               onClick={() => scrollToSection("services")}
               className="text-lg text-foreground hover:text-primary transition-colors"
@@ -134,6 +158,19 @@ export default function Navigation() {
             <Button variant="default" size="lg" data-testid="button-donate-mobile">
               Donate Now
             </Button>
+            {currentPersonaConfig && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => {
+                  setShowPersonaModal(true);
+                  setMobileMenuOpen(false);
+                }}
+                data-testid="button-change-persona-mobile"
+              >
+                Change Experience
+              </Button>
+            )}
           </div>
         </div>
       )}
