@@ -25,7 +25,11 @@ Preferred communication style: Simple, everyday language.
 - Custom CSS variables for theming (light/dark mode support)
 - Design system based on warm, approachable non-profit aesthetic
 - Typography: Playfair Display (serif) for headlines, Inter (sans-serif) for body text
-- Color scheme: Neutral base colors with warm accents
+- Color scheme: 
+  - **Primary**: Warm orange/golden (hsl 28° 75% 35%) - matches Julie's sunflower logo
+  - **Secondary**: Olive/khaki green (hsl 75° 35% 45%) - from logo subtitle
+  - **Base**: Warm beige/cream backgrounds for approachable feel
+  - All colors meet WCAG AA accessibility standards (minimum 4.5:1 contrast ratio)
 
 **State Management**: 
 - TanStack Query (React Query) for server state management
@@ -41,7 +45,8 @@ Preferred communication style: Simple, everyday language.
 - Single-page application with smooth scrolling navigation
 - Responsive design (mobile-first approach)
 - Image assets stored in `attached_assets/` directory
-- Parallax scrolling effects on hero section
+- Dynamic parallax zoom effect on hero background (zooms out when scrolling down, zooms in when scrolling up)
+- Accessibility-first design with WCAG AA compliant colors
 
 ### Backend Architecture
 
