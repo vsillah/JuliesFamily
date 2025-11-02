@@ -39,11 +39,31 @@ Preferred communication style: Simple, everyday language.
 - Page components in `client/src/pages/`
 - Reusable UI components in `client/src/components/`
 - shadcn/ui primitives in `client/src/components/ui/`
+- Context providers in `client/src/contexts/` (PersonaContext for personalization)
 - Example components for development in `client/src/components/examples/`
+
+**Persona-Aware Components**:
+- `PersonaContext.tsx`: Core personalization provider with 5 persona types
+- `PersonaSelectionModal.tsx`: Initial persona selection UI with Lucide icons
+- `PersonalizedHero.tsx`: 5 distinct hero variations per persona
+- `Navigation.tsx`: Persona badge and switcher in nav bar
+- `Services.tsx`: Dynamic service ordering based on persona priorities
+- `Events.tsx`: Persona-specific headlines and descriptions
+- `DonationCTA.tsx`: Tailored call-to-action messaging per persona
 
 **Key Features**:
 - Single-page application with smooth scrolling navigation
 - Responsive design (mobile-first approach)
+- **Persona-Based Personalization System** (November 2025):
+  - 5 distinct persona types: Adult Education Student, Service Provider, Parent, Donor, Volunteer
+  - Privacy-friendly implementation using session storage (no cookies, GDPR-compliant)
+  - Personalized hero experiences with unique headlines, messaging, CTAs, and imagery for each persona
+  - Dynamic content reordering: Services section prioritizes most relevant programs per persona
+  - Adaptive messaging across all sections: Events headlines and Donation CTA tailored to persona
+  - Modal-based persona selection on first visit (2-second delay, skippable)
+  - Persona badge in navigation allows easy switching between experiences
+  - Session persistence maintains persona choice within browser session
+  - Implemented with PersonaContext provider, Lucide React icons, and shadcn/ui components
 - **Image assets**: 8 unique authentic photos from Julie's Family Learning Program stored in `attached_assets/`
   - **Hero**: Volunteer/student math tutoring session
   - **Children's Services**: PreK class group photo with diverse children
