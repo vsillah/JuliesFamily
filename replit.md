@@ -45,7 +45,18 @@ Preferred communication style: Simple, everyday language.
 - Single-page application with smooth scrolling navigation
 - Responsive design (mobile-first approach)
 - Image assets stored in `attached_assets/` directory
-- Dynamic parallax zoom effect on hero background (zooms out when scrolling down, zooms in when scrolling up)
+- **Parallax System**:
+  - Hero background: Zoom effect (1.0 to 1.1 scale) based on scroll position
+  - Service card images: ParallaxImage component with intensity 0.8
+  - Event card images: ParallaxImage component with intensity 0.8
+  - Donation CTA background: Custom parallax with intensity 0.04 (subtle)
+  - Each image animates independently based on viewport position
+  - Uses requestAnimationFrame for smooth 60fps performance
+- **Hero Section Enhancements**:
+  - Text fade-in animation (1 second smooth transition after 200ms delay)
+  - Horizontal semi-transparent shade (30% black) between image and text layers
+  - Shade height: 400px mobile, 500px desktop (covers mission text to buttons)
+  - Enhanced text readability over photography
 - Accessibility-first design with WCAG AA compliant colors
 
 ### Backend Architecture

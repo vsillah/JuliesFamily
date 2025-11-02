@@ -4,6 +4,7 @@ import heroImage from "@assets/generated_images/Hero_education_classroom_scene_8
 
 export default function Hero() {
   const [scrollScale, setScrollScale] = useState(1);
+  const [textVisible, setTextVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +16,13 @@ export default function Hero() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setTextVisible(true);
+    }, 200);
+    return () => clearTimeout(timer);
   }, []);
 
   const scrollToSection = (sectionId: string) => {
@@ -35,7 +43,17 @@ export default function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      
+      {/* Horizontal shade between image and text */}
+      <div className="absolute inset-0 flex items-center justify-center z-[5]">
+        <div className="w-full h-[400px] sm:h-[500px] bg-black/30" />
+      </div>
+
+      <div 
+        className={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-opacity duration-1000 ${
+          textVisible ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
         <p className="text-sm sm:text-base uppercase tracking-wider text-white/90 mb-4 font-sans">
           – Julie's Mission –
         </p>
