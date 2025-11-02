@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "@assets/image_1762053021045.png";
 
 export default function Navigation() {
   const { persona, setShowPersonaModal } = usePersona();
+  const { isAuthenticated, user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -104,6 +106,29 @@ export default function Navigation() {
               <Button variant="default" size="default" data-testid="button-donate">
                 Donate Now
               </Button>
+              {isAuthenticated ? (
+                <Button 
+                  variant="outline" 
+                  size="default" 
+                  onClick={() => window.location.href = '/api/logout'}
+                  data-testid="button-logout"
+                  className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="default" 
+                  onClick={() => window.location.href = '/api/login'}
+                  data-testid="button-login"
+                  className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
             </div>
 
             <button
@@ -169,6 +194,27 @@ export default function Navigation() {
                 data-testid="button-change-persona-mobile"
               >
                 Change Experience
+              </Button>
+            )}
+            {isAuthenticated ? (
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => window.location.href = '/api/logout'}
+                data-testid="button-logout-mobile"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="lg" 
+                onClick={() => window.location.href = '/api/login'}
+                data-testid="button-login-mobile"
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Sign In
               </Button>
             )}
           </div>
