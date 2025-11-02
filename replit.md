@@ -44,10 +44,16 @@ Preferred communication style: Simple, everyday language.
 **Key Features**:
 - Single-page application with smooth scrolling navigation
 - Responsive design (mobile-first approach)
-- **Image assets**: Real photos from Julie's Family Learning Program website stored in `attached_assets/`
-  - PreK classroom photo: Diverse group of happy children in educational setting
-  - Volunteer/student photo: Tutoring session showing math education
-  - Used strategically across hero, services, events, and donation sections
+- **Image assets**: 8 unique authentic photos from Julie's Family Learning Program stored in `attached_assets/`
+  - **Hero**: Volunteer/student math tutoring session
+  - **Children's Services**: PreK class group photo with diverse children
+  - **Family Development**: Mother and child engaged in art activity
+  - **Adult Education**: Full adult classroom with engaged learners
+  - **50th Anniversary Event**: Graduation celebration with cake cutting
+  - **Spring Graduation Event**: Outdoor graduation ceremony
+  - **Fall Family Fair Event**: Children doing hands-on dinosaur egg activity
+  - **Donation CTA**: Graduate with child celebrating achievement
+  - Each image used exactly once, strategically matched to content
 - **Parallax System**:
   - Hero background: Zoom effect (1.0 to 1.1 scale) based on scroll position
   - Service card images: ParallaxImage component with intensity 0.8

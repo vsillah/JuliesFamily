@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
-import heroImage from "@assets/PreK-Class-Photo-2025-600x451.jpg_1762056779821.webp";
+import heroImage from "@assets/grad-pzi78gq1oq1dmudvugdez6xi97qltaefkuknv8rmrk_1762057083020.jpg";
 
 export default function DonationCTA() {
   const [scale, setScale] = useState(1);

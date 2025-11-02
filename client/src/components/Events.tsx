@@ -1,5 +1,7 @@
 import EventCard from "./EventCard";
-import graduationImage from "@assets/PreK-Class-Photo-2025-600x451.jpg_1762056779821.webp";
+import anniversaryImage from "@assets/April-6-Graduation-pzi49dxx55hv6neo81vxc4gp1ypmkznm7wn3q8iscg_1762057083004.jpg";
+import graduationImage from "@assets/Bobby-and-Zea-scaled-pzi3sypfqd0ibx9h4gbl9rnrelnr3dggamaov6vf28_1762057083010.jpg";
+import familyFairImage from "@assets/dinoeggs-scaled-qdm9d9cv1dd2no2htq0bzup92scsbyxw11jmwb3g8w_1762057083014.jpg";
 
 export default function Events() {
   const events = [
@@ -9,7 +11,7 @@ export default function Events() {
       location: "UMass Club, Downtown Boston",
       description:
         "Join us as we celebrate five decades of empowering families through education and support. A special evening honoring our graduates, staff, and community partners.",
-      image: graduationImage,
+      image: anniversaryImage,
     },
     {
       title: "Spring Graduation Ceremony",
@@ -25,7 +27,7 @@ export default function Events() {
       location: "Julie's Family Learning Program",
       description:
         "An open house event featuring program information, family activities, and opportunities to meet our dedicated staff and volunteers.",
-      image: graduationImage,
+      image: familyFairImage,
     },
   ];
 
