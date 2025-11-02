@@ -99,8 +99,8 @@ Preferred communication style: Simple, everyday language.
 
 **Storage Pattern**: 
 - Interface-based storage abstraction (`IStorage`)
-- Currently using in-memory storage (`MemStorage`) for development
-- Designed to be swapped for database-backed storage (Drizzle ORM configured)
+- PostgreSQL database storage (`DatabaseStorage`) using Drizzle ORM
+- Active database integration with Neon serverless PostgreSQL
 
 **Development Features**:
 - Request/response logging middleware
@@ -120,7 +120,18 @@ Preferred communication style: Simple, everyday language.
 **Schema Location**: `shared/schema.ts` (shared between client and server).
 
 **Current Schema**:
-- `users` table with id, username, and password fields
+- `users` table: Stores authenticated users from Replit Auth
+  - id (varchar, primary key): OAuth sub claim (unique identifier)
+  - email (varchar): User's email address
+  - firstName (varchar): User's first name
+  - lastName (varchar): User's last name
+  - profileImageUrl (varchar, nullable): User's profile image URL
+  - createdAt (timestamp): Account creation time
+  - updatedAt (timestamp): Last update time
+- `sessions` table: Express session storage for authenticated sessions
+  - sid (varchar, primary key): Session ID
+  - sess (json): Session data including OAuth tokens
+  - expire (timestamp, indexed): Session expiration for automatic cleanup
 - Zod schemas for validation using drizzle-zod
 
 **Migration Strategy**: 
@@ -128,16 +139,47 @@ Preferred communication style: Simple, everyday language.
 - Migrations output to `./migrations` directory
 - Push-based deployment (`db:push` script)
 
-**Note**: The application is configured for PostgreSQL but currently uses in-memory storage. Database integration is prepared but not yet active.
-
 ### Authentication & Authorization
 
-**Prepared Infrastructure**:
-- User schema defined with username/password fields
-- Session management configured (connect-pg-simple for PostgreSQL session store)
-- No active authentication implementation currently
+**Implementation**: Replit Auth with OpenID Connect (November 2025)
 
-**Future Implementation**: System is prepared for adding authentication middleware and protected routes.
+**Architecture**:
+- **OpenID Connect Provider**: Replit's OIDC service (`ISSUER_URL` env variable)
+- **Strategy**: Passport.js with per-domain OIDC strategies
+- **Session Storage**: PostgreSQL via connect-pg-simple (secure, persistent sessions)
+- **Token Management**: Automatic access token refresh using refresh tokens
+- **Security**: Secure cookies (HTTPS-only), session expiry (7 days), protected routes via `isAuthenticated` middleware
+
+**Authentication Flow**:
+1. User clicks "Sign In" → redirects to `/api/login`
+2. Passport initiates OAuth flow with Replit OIDC provider
+3. User authenticates via Replit (supports Google, GitHub, X, Apple, email/password)
+4. OAuth callback at `/api/callback` creates session and upserts user in database
+5. User redirected to homepage with authenticated session
+6. Client-side `useAuth` hook queries `/api/auth/user` to get current user state
+7. "Sign Out" → `/api/logout` clears session and redirects to Replit logout
+
+**Key Files**:
+- `server/replitAuth.ts`: OIDC configuration, Passport strategies, session middleware
+- `server/routes.ts`: Authentication routes (`/api/login`, `/api/callback`, `/api/logout`, `/api/auth/user`)
+- `server/storage.ts`: Database operations for user upsert
+- `client/src/hooks/useAuth.ts`: Client-side authentication state hook
+- `client/src/components/Navigation.tsx`: Sign In/Sign Out UI in navigation bar
+
+**Required Environment Variables**:
+- `REPL_ID`: Replit application ID (auto-provided in Replit environment)
+- `SESSION_SECRET`: Secret key for session encryption (auto-generated)
+- `DATABASE_URL`: PostgreSQL connection string (auto-provided)
+- `ISSUER_URL`: OIDC issuer URL (defaults to `https://replit.com/oidc`)
+
+**Public Access**: The website maintains public accessibility—all content (services, events, testimonials, etc.) is viewable without authentication. Authentication is optional and designed for future features like donation management, volunteer coordination, or admin panels.
+
+**Supported OAuth Providers** (via Replit Auth):
+- Google
+- GitHub
+- X (formerly Twitter)
+- Apple
+- Email/password
 
 ## External Dependencies
 
