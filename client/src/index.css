@@ -32,15 +32,15 @@
 
   --sidebar-border: 30 15% 88%;
 
-  --sidebar-primary: 145 55% 35%;
+  --sidebar-primary: 28 85% 52%;
 
-  --sidebar-primary-foreground: 145 40% 98%;
+  --sidebar-primary-foreground: 28 20% 98%;
 
   --sidebar-accent: 30 25% 88%;
 
   --sidebar-accent-foreground: 30 8% 25%;
 
-  --sidebar-ring: 145 55% 45%;
+  --sidebar-ring: 28 85% 52%;
 
   --popover: 30 22% 92%;
 
@@ -48,13 +48,13 @@
 
   --popover-border: 30 18% 86%;
 
-  --primary: 145 55% 35%;
+  --primary: 28 85% 52%;
 
-  --primary-foreground: 145 40% 98%;
+  --primary-foreground: 28 20% 98%;
 
-  --secondary: 30 25% 86%;
+  --secondary: 75 35% 45%;
 
-  --secondary-foreground: 30 8% 25%;
+  --secondary-foreground: 75 15% 98%;
 
   --muted: 30 20% 90%;
 
@@ -69,9 +69,9 @@
   --destructive-foreground: 355 50% 98%;
 
   --input: 30 15% 75%;
-  --ring: 145 55% 45%;
-  --chart-1: 145 55% 38%;
-  --chart-2: 190 60% 42%;
+  --ring: 28 85% 52%;
+  --chart-1: 28 85% 52%;
+  --chart-2: 75 35% 45%;
   --chart-3: 35 65% 48%;
   --chart-4: 265 50% 52%;
   --chart-5: 25 75% 55%;
@@ -150,15 +150,15 @@
 
   --sidebar-border: 0 4% 18%;
 
-  --sidebar-primary: 145 50% 40%;
+  --sidebar-primary: 28 80% 55%;
 
-  --sidebar-primary-foreground: 145 35% 96%;
+  --sidebar-primary-foreground: 28 15% 95%;
 
   --sidebar-accent: 0 6% 18%;
 
   --sidebar-accent-foreground: 0 0% 85%;
 
-  --sidebar-ring: 145 50% 50%;
+  --sidebar-ring: 28 80% 55%;
 
   --popover: 0 4% 15%;
 
@@ -166,13 +166,13 @@
 
   --popover-border: 0 5% 20%;
 
-  --primary: 145 50% 40%;
+  --primary: 28 80% 55%;
 
-  --primary-foreground: 145 35% 96%;
+  --primary-foreground: 28 15% 95%;
 
-  --secondary: 0 6% 20%;
+  --secondary: 75 25% 50%;
 
-  --secondary-foreground: 0 0% 85%;
+  --secondary-foreground: 75 10% 95%;
 
   --muted: 0 5% 17%;
 
@@ -187,9 +187,9 @@
   --destructive-foreground: 355 40% 96%;
 
   --input: 0 0% 28%;
-  --ring: 145 50% 50%;
-  --chart-1: 145 50% 60%;
-  --chart-2: 190 55% 62%;
+  --ring: 28 80% 55%;
+  --chart-1: 28 80% 55%;
+  --chart-2: 75 25% 50%;
   --chart-3: 35 60% 65%;
   --chart-4: 265 45% 68%;
   --chart-5: 25 70% 70%;

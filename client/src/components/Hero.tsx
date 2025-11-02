@@ -1,7 +1,22 @@
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import heroImage from "@assets/generated_images/Hero_education_classroom_scene_8eef647c.png";
 
 export default function Hero() {
+  const [scrollScale, setScrollScale] = useState(1);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const maxScroll = window.innerHeight;
+      const scale = 1 + (scrollPosition / maxScroll) * 0.1;
+      setScrollScale(Math.min(scale, 1.1));
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -12,8 +27,11 @@ export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        className="absolute inset-0 bg-cover bg-center transition-transform duration-200 ease-out"
+        style={{ 
+          backgroundImage: `url(${heroImage})`,
+          transform: `scale(${scrollScale})`
+        }}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>
