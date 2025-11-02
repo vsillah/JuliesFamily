@@ -26,13 +26,13 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center transition-transform duration-200 ease-out"
-        style={{ 
-          backgroundImage: `url(${heroImage})`,
-          transform: `scale(${scrollScale})`
-        }}
-      >
+      <div className="absolute inset-0">
+        <img
+          src={heroImage}
+          alt="Julie's Family Learning Program classroom"
+          className="w-full h-full object-cover transition-transform duration-200 ease-out"
+          style={{ transform: `scale(${scrollScale})` }}
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>
 
