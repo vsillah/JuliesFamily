@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import heroImage from "@assets/generated_images/Hero_education_classroom_scene_8eef647c.png";
+import heroImage from "@assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg";
 
 export default function Hero() {
   const [scrollScale, setScrollScale] = useState(1);

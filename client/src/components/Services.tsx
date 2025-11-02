@@ -1,7 +1,7 @@
 import ServiceCard from "./ServiceCard";
-import childrenImage from "@assets/generated_images/Children's_services_classroom_0675fa23.png";
-import familyImage from "@assets/generated_images/Family_development_mentoring_0f176b69.png";
-import adultImage from "@assets/generated_images/Adult_basic_education_571dc60c.png";
+import childrenImage from "@assets/PreK-Class-Photo-2025-600x451.jpg_1762056779821.webp";
+import familyImage from "@assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg";
+import adultImage from "@assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg";
 
 export default function Services() {
   const services = [

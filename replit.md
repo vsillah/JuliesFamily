@@ -44,7 +44,10 @@ Preferred communication style: Simple, everyday language.
 **Key Features**:
 - Single-page application with smooth scrolling navigation
 - Responsive design (mobile-first approach)
-- Image assets stored in `attached_assets/` directory
+- **Image assets**: Real photos from Julie's Family Learning Program website stored in `attached_assets/`
+  - PreK classroom photo: Diverse group of happy children in educational setting
+  - Volunteer/student photo: Tutoring session showing math education
+  - Used strategically across hero, services, events, and donation sections
 - **Parallax System**:
   - Hero background: Zoom effect (1.0 to 1.1 scale) based on scroll position
   - Service card images: ParallaxImage component with intensity 0.8

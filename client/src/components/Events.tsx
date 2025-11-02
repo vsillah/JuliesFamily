@@ -1,5 +1,5 @@
 import EventCard from "./EventCard";
-import graduationImage from "@assets/generated_images/Graduation_celebration_ceremony_99c15e90.png";
+import graduationImage from "@assets/PreK-Class-Photo-2025-600x451.jpg_1762056779821.webp";
 
 export default function Events() {
   const events = [
