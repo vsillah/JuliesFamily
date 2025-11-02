@@ -1,0 +1,66 @@
+import { Button } from "@/components/ui/button";
+import heroImage from "@assets/generated_images/Hero_education_classroom_scene_8eef647c.png";
+
+export default function Hero() {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  return (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroImage})` }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
+      </div>
+
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <p className="text-sm sm:text-base uppercase tracking-wider text-white/90 mb-4 font-sans">
+          – Julie's Mission –
+        </p>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 leading-tight">
+          <span className="font-bold">Empowering</span>{" "}
+          <span className="italic">Families</span> Through{" "}
+          <span className="font-bold">Education</span>
+        </h1>
+        <p className="text-lg sm:text-xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed">
+          A family support, wellness, and education center committed to the development of strong,
+          stable, and healthy family functioning for over 50 years.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <Button
+            variant="outline"
+            size="lg"
+            className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
+            onClick={() => scrollToSection("services")}
+            data-testid="button-learn-more"
+          >
+            Learn More
+          </Button>
+          <Button
+            variant="default"
+            size="lg"
+            data-testid="button-hero-donate"
+          >
+            Donate Now
+          </Button>
+        </div>
+      </div>
+
+      <svg
+        className="absolute bottom-0 left-0 w-full h-24 sm:h-32"
+        viewBox="0 0 1200 120"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0,0 C300,90 900,90 1200,0 L1200,120 L0,120 Z"
+          fill="hsl(var(--background))"
+        />
+      </svg>
+    </section>
+  );
+}
