@@ -47,7 +47,7 @@ export default function Navigation() {
             <div className="hidden md:flex items-center gap-8">
               <button
                 onClick={() => scrollToSection("services")}
-                className="hover:text-primary transition-colors text-[#ffd780]"
+                className="text-foreground hover:text-primary transition-colors"
                 data-testid="link-services"
               >
                 Our Services
