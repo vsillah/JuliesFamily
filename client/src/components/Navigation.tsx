@@ -39,7 +39,9 @@ export default function Navigation() {
                 className="h-12 w-auto"
                 data-testid="img-logo"
               />
-              <h1 className="text-xl sm:text-2xl font-serif font-semibold text-[#ffd780]">
+              <h1 className={`text-xl sm:text-2xl font-serif font-semibold transition-colors duration-300 ${
+                isScrolled ? "text-primary" : "text-white"
+              }`}>
                 Julie's Family Learning Program
               </h1>
             </div>
@@ -47,28 +49,36 @@ export default function Navigation() {
             <div className="hidden md:flex items-center gap-8">
               <button
                 onClick={() => scrollToSection("services")}
-                className="text-foreground hover:text-primary transition-colors"
+                className={`transition-colors duration-300 ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
                 data-testid="link-services"
               >
                 Our Services
               </button>
               <button
                 onClick={() => scrollToSection("impact")}
-                className="hover:text-primary transition-colors text-[#ffd780]"
+                className={`transition-colors duration-300 ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
                 data-testid="link-impact"
               >
                 Our Impact
               </button>
               <button
                 onClick={() => scrollToSection("testimonials")}
-                className="hover:text-primary transition-colors text-[#ffd780]"
+                className={`transition-colors duration-300 ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
                 data-testid="link-testimonials"
               >
                 Testimonials
               </button>
               <button
                 onClick={() => scrollToSection("events")}
-                className="hover:text-primary transition-colors text-[#ffd780]"
+                className={`transition-colors duration-300 ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
                 data-testid="link-events"
               >
                 Events
@@ -79,7 +89,9 @@ export default function Navigation() {
             </div>
 
             <button
-              className="md:hidden"
+              className={`md:hidden transition-colors duration-300 ${
+                isScrolled ? "text-foreground" : "text-white"
+              }`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
             >
