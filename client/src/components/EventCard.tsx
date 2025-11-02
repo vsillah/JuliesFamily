@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Calendar, MapPin } from "lucide-react";
+import ParallaxImage from "./ParallaxImage";
 
 interface EventCardProps {
   title: string;
@@ -13,7 +14,7 @@ export default function EventCard({ title, date, location, description, image }:
   return (
     <Card className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105">
       <div className="relative aspect-[16/9] overflow-hidden">
-        <img src={image} alt={title} className="w-full h-full object-cover" />
+        <ParallaxImage src={image} alt={title} className="w-full h-full object-cover" intensity={0.8} />
         <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md">
           <div className="text-sm font-semibold">{date}</div>
         </div>

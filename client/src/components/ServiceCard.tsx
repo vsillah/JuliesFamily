@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
+import ParallaxImage from "./ParallaxImage";
 
 interface ServiceCardProps {
   number: string;
@@ -19,7 +20,7 @@ export default function ServiceCard({
   return (
     <Card className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <img src={image} alt={title} className="w-full h-full object-cover" />
+        <ParallaxImage src={image} alt={title} className="w-full h-full object-cover" intensity={0.8} />
         <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-serif font-semibold">
           {number}
         </div>
