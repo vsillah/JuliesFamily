@@ -61,7 +61,7 @@ export default function Navigation() {
               </button>
               <button
                 onClick={() => scrollToSection("testimonials")}
-                className="text-foreground hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors text-[#ffd780]"
                 data-testid="link-testimonials"
               >
                 Testimonials
