@@ -35,15 +35,14 @@ export default function Hero() {
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>
-
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <p className="text-sm sm:text-base uppercase tracking-wider text-white/90 mb-4 font-sans">
           – Julie's Mission –
         </p>
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold text-white mb-6 leading-tight">
-          <span className="font-bold">Empowering</span>{" "}
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold mb-6 leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+          <span className="font-bold text-[#ffd680]">Empowering</span>{" "}
           <span className="italic">Families</span> Through{" "}
-          <span className="font-bold">Education</span>
+          <span className="font-bold text-[#FFD580]">Education</span>
         </h1>
         <p className="text-lg sm:text-xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed">
           A family support, wellness, and education center committed to the development of strong,
@@ -68,7 +67,6 @@ export default function Hero() {
           </Button>
         </div>
       </div>
-
       <svg
         className="absolute bottom-0 left-0 w-full h-24 sm:h-32"
         viewBox="0 0 1200 120"
