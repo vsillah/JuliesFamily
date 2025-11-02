@@ -1,4 +1,79 @@
 import { GraduationCap, Users, Calendar, Award } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+
+// Animated counter component with easing
+function AnimatedCounter({ targetValue }: { targetValue: string }) {
+  const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  // Parse the target number and suffix from the string
+  const parseTarget = (value: string) => {
+    const numericValue = parseFloat(value.replace(/,/g, ""));
+    const suffix = value.match(/[+%]/)?.[0] || "";
+    return { number: numericValue, suffix };
+  };
+
+  const { number: target, suffix } = parseTarget(targetValue);
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element) return;
+
+    // Intersection Observer to trigger animation when visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+          
+          const duration = 2000; // 2 seconds
+          const startTime = Date.now();
+
+          // Easing function: ease-in-out (slow start, fast middle, slow end)
+          const easeInOutCubic = (t: number): number => {
+            return t < 0.5
+              ? 4 * t * t * t
+              : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          };
+
+          const animate = () => {
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Apply easing to progress
+            const easedProgress = easeInOutCubic(progress);
+            const currentValue = easedProgress * target;
+
+            setCount(currentValue);
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            }
+          };
+
+          requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [hasAnimated, target]);
+
+  // Format the number with commas for thousands
+  const formatNumber = (num: number) => {
+    return Math.floor(num).toLocaleString();
+  };
+
+  return (
+    <div ref={elementRef} className="text-4xl sm:text-5xl font-serif font-bold text-foreground mb-2">
+      {formatNumber(count)}{suffix}
+    </div>
+  );
+}
 
 export default function ImpactStats() {
   const stats = [
@@ -52,9 +127,7 @@ export default function ImpactStats() {
                 <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-primary/10">
                   <Icon className="w-8 h-8 text-primary" />
                 </div>
-                <div className="text-4xl sm:text-5xl font-serif font-bold text-foreground mb-2">
-                  {stat.number}
-                </div>
+                <AnimatedCounter targetValue={stat.number} />
                 <div className="text-base text-muted-foreground">{stat.label}</div>
               </div>
             );
