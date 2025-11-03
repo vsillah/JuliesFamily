@@ -36,20 +36,37 @@ export function ObjectUploader({
       autoProceed: false,
     }).use(AwsS3, {
       async getUploadParameters(file) {
-        const response = await fetch("/api/objects/upload", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        return {
-          method: "PUT",
-          url: data.uploadURL,
-          headers: {
-            "Content-Type": file.type || "application/octet-stream",
-          },
-        };
+        try {
+          const response = await fetch("/api/objects/upload", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+          });
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Failed to get upload URL: ${response.status} ${errorText}`);
+          }
+          
+          const data = await response.json();
+          
+          if (!data.uploadURL) {
+            throw new Error("No upload URL received from server");
+          }
+          
+          return {
+            method: "PUT",
+            url: data.uploadURL,
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+          };
+        } catch (error) {
+          console.error("Error getting upload parameters:", error);
+          throw error;
+        }
       },
     });
   });
@@ -75,7 +92,6 @@ export function ObjectUploader({
       uppy={uppy}
       open={open}
       onRequestClose={onClose}
-      plugins={["AwsS3"]}
       proudlyDisplayPoweredByUppy={false}
       note={`Upload up to ${maxNumberOfFiles} file(s), max ${Math.round(maxFileSize / 1024 / 1024)}MB each`}
     />

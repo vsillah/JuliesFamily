@@ -48,12 +48,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Object Storage Routes
   // Reference: blueprint:javascript_object_storage
   
+  // In-memory cache for tracking issued upload URLs (with 15 minute expiry)
+  const uploadUrlCache = new Map<string, { userId: string; expiresAt: number }>();
+  
   // Serve private objects (profile photos) with ACL check
-  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
+  app.get("/objects/*", isAuthenticated, async (req: any, res) => {
     const userId = req.user?.claims?.sub;
     const objectStorageService = new ObjectStorageService();
+    
+    // Sanitize path to prevent directory traversal
+    const rawPath = decodeURIComponent(req.params[0] || "");
+    const sanitizedPath = `/objects/${rawPath.replace(/\.\./g, "").replace(/^\/+/, "")}`;
+    
     try {
-      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      const objectFile = await objectStorageService.getObjectEntityFile(sanitizedPath);
       const canAccess = await objectStorageService.canAccessObjectEntity({
         objectFile,
         userId: userId,
@@ -73,10 +81,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get upload URL for profile photo
-  app.post("/api/objects/upload", isAuthenticated, async (req, res) => {
+  app.post("/api/objects/upload", isAuthenticated, async (req: any, res) => {
+    const userId = req.user?.claims?.sub;
     const objectStorageService = new ObjectStorageService();
-    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-    res.json({ uploadURL });
+    
+    try {
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      
+      // Track this upload URL as belonging to this user
+      uploadUrlCache.set(uploadURL, {
+        userId,
+        expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes
+      });
+      
+      // Clean up expired entries
+      for (const [url, data] of uploadUrlCache.entries()) {
+        if (data.expiresAt < Date.now()) {
+          uploadUrlCache.delete(url);
+        }
+      }
+      
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error generating upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
+    }
   });
 
   // Update user profile photo after upload
@@ -86,11 +115,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     const userId = req.user?.claims?.sub;
+    const uploadURL = req.body.profilePhotoURL;
 
     try {
+      // Validate that this upload URL was issued to this user
+      const urlData = uploadUrlCache.get(uploadURL);
+      if (!urlData || urlData.userId !== userId || urlData.expiresAt < Date.now()) {
+        return res.status(403).json({ error: "Invalid or expired upload URL" });
+      }
+      
+      // Remove from cache after validation
+      uploadUrlCache.delete(uploadURL);
+
       const objectStorageService = new ObjectStorageService();
       const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
-        req.body.profilePhotoURL,
+        uploadURL,
         {
           owner: userId,
           visibility: "public", // Profile photos are public
