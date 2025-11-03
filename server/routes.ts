@@ -4,10 +4,12 @@ import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
+import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "./cloudinary";
+import multer from "multer";
 
 // Admin authorization middleware
 const isAdmin: RequestHandler = async (req: any, res, next) => {
@@ -339,6 +341,158 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Image Asset Management Routes
+  const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  });
+
+  // Upload image to Cloudinary with auto-upscaling
+  app.post('/api/admin/images/upload', isAuthenticated, isAdmin, upload.single('image'), async (req: any, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file provided" });
+      }
+
+      const { name, usage, localPath } = req.body;
+      
+      // Validate input with partial schema (only the fields we're sending)
+      const validationResult = insertImageAssetSchema.pick({
+        name: true,
+        usage: true,
+        localPath: true,
+      }).safeParse({ name, usage, localPath: localPath || null });
+
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid input data",
+          errors: validationResult.error.errors 
+        });
+      }
+
+      // Upload to Cloudinary with AI upscaling
+      const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
+        folder: `julies-family-learning/${usage}`,
+        publicId: name.toLowerCase().replace(/\s+/g, '-'),
+        upscale: true,
+        quality: 'auto:best'
+      });
+
+      // Save to database
+      const imageAsset = await storage.createImageAsset({
+        name,
+        originalFilename: req.file.originalname,
+        localPath: localPath || null,
+        cloudinaryPublicId: cloudinaryResult.publicId,
+        cloudinaryUrl: cloudinaryResult.url,
+        cloudinarySecureUrl: cloudinaryResult.secureUrl,
+        width: cloudinaryResult.width,
+        height: cloudinaryResult.height,
+        format: cloudinaryResult.format,
+        fileSize: cloudinaryResult.bytes,
+        usage,
+        uploadedBy: req.user.claims.sub,
+        isActive: true
+      });
+
+      res.json(imageAsset);
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      res.status(500).json({ message: "Failed to upload image" });
+    }
+  });
+
+  // Get all image assets
+  app.get('/api/admin/images', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const images = await storage.getAllImageAssets();
+      res.json(images);
+    } catch (error) {
+      console.error("Error fetching images:", error);
+      res.status(500).json({ message: "Failed to fetch images" });
+    }
+  });
+
+  // Get image assets by usage
+  app.get('/api/admin/images/usage/:usage', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const images = await storage.getImageAssetsByUsage(req.params.usage);
+      res.json(images);
+    } catch (error) {
+      console.error("Error fetching images by usage:", error);
+      res.status(500).json({ message: "Failed to fetch images" });
+    }
+  });
+
+  // Get single image asset
+  app.get('/api/admin/images/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const image = await storage.getImageAsset(req.params.id);
+      if (!image) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      res.json(image);
+    } catch (error) {
+      console.error("Error fetching image:", error);
+      res.status(500).json({ message: "Failed to fetch image" });
+    }
+  });
+
+  // Update image asset metadata
+  app.patch('/api/admin/images/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertImageAssetSchema.partial().parse(req.body);
+      const image = await storage.updateImageAsset(req.params.id, validatedData);
+      if (!image) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      res.json(image);
+    } catch (error) {
+      console.error("Error updating image:", error);
+      res.status(500).json({ message: "Failed to update image" });
+    }
+  });
+
+  // Delete image asset (also deletes from Cloudinary)
+  app.delete('/api/admin/images/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const image = await storage.getImageAsset(req.params.id);
+      if (!image) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+
+      // Delete from Cloudinary
+      await deleteFromCloudinary(image.cloudinaryPublicId);
+
+      // Delete from database
+      await storage.deleteImageAsset(req.params.id);
+
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      res.status(500).json({ message: "Failed to delete image" });
+    }
+  });
+
+  // Public endpoint to get optimized image URL (no auth required)
+  app.get('/api/images/optimize/:publicId', async (req, res) => {
+    try {
+      const { width, height, quality, format } = req.query;
+      
+      const optimizedUrl = getOptimizedImageUrl(decodeURIComponent(req.params.publicId), {
+        width: width ? parseInt(width as string) : undefined,
+        height: height ? parseInt(height as string) : undefined,
+        quality: quality as string | undefined,
+        format: format as string | undefined
+      });
+
+      res.json({ url: optimizedUrl });
+    } catch (error) {
+      console.error("Error generating optimized URL:", error);
+      res.status(500).json({ message: "Failed to generate optimized URL" });
     }
   });
 

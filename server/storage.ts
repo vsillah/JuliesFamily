@@ -1,11 +1,12 @@
 // Database storage implementation for Replit Auth and CRM
 // Reference: blueprint:javascript_log_in_with_replit and blueprint:javascript_database
 import { 
-  users, leads, interactions, leadMagnets,
+  users, leads, interactions, leadMagnets, imageAssets,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
-  type LeadMagnet, type InsertLeadMagnet
+  type LeadMagnet, type InsertLeadMagnet,
+  type ImageAsset, type InsertImageAsset
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -36,6 +37,15 @@ export interface IStorage {
   getLeadMagnetsByPersona(persona: string): Promise<LeadMagnet[]>;
   updateLeadMagnet(id: string, updates: Partial<InsertLeadMagnet>): Promise<LeadMagnet | undefined>;
   deleteLeadMagnet(id: string): Promise<void>;
+  
+  // Image Asset operations
+  createImageAsset(asset: InsertImageAsset): Promise<ImageAsset>;
+  getImageAsset(id: string): Promise<ImageAsset | undefined>;
+  getImageAssetByPublicId(publicId: string): Promise<ImageAsset | undefined>;
+  getAllImageAssets(): Promise<ImageAsset[]>;
+  getImageAssetsByUsage(usage: string): Promise<ImageAsset[]>;
+  updateImageAsset(id: string, updates: Partial<InsertImageAsset>): Promise<ImageAsset | undefined>;
+  deleteImageAsset(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -166,6 +176,47 @@ export class DatabaseStorage implements IStorage {
 
   async deleteLeadMagnet(id: string): Promise<void> {
     await db.delete(leadMagnets).where(eq(leadMagnets.id, id));
+  }
+
+  // Image Asset operations
+  async createImageAsset(assetData: InsertImageAsset): Promise<ImageAsset> {
+    const [asset] = await db.insert(imageAssets).values(assetData).returning();
+    return asset;
+  }
+
+  async getImageAsset(id: string): Promise<ImageAsset | undefined> {
+    const [asset] = await db.select().from(imageAssets).where(eq(imageAssets.id, id));
+    return asset;
+  }
+
+  async getImageAssetByPublicId(publicId: string): Promise<ImageAsset | undefined> {
+    const [asset] = await db.select().from(imageAssets).where(eq(imageAssets.cloudinaryPublicId, publicId));
+    return asset;
+  }
+
+  async getAllImageAssets(): Promise<ImageAsset[]> {
+    return await db.select().from(imageAssets).orderBy(desc(imageAssets.createdAt));
+  }
+
+  async getImageAssetsByUsage(usage: string): Promise<ImageAsset[]> {
+    return await db
+      .select()
+      .from(imageAssets)
+      .where(and(eq(imageAssets.usage, usage), eq(imageAssets.isActive, true)))
+      .orderBy(desc(imageAssets.createdAt));
+  }
+
+  async updateImageAsset(id: string, updates: Partial<InsertImageAsset>): Promise<ImageAsset | undefined> {
+    const [asset] = await db
+      .update(imageAssets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(imageAssets.id, id))
+      .returning();
+    return asset;
+  }
+
+  async deleteImageAsset(id: string): Promise<void> {
+    await db.delete(imageAssets).where(eq(imageAssets.id, id));
   }
 }
 

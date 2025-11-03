@@ -7,11 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
-  BarChart3, Filter, Download, UserPlus
+  BarChart3, Filter, Download, UserPlus, Image as ImageIcon
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
+import { Link } from "wouter";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -84,10 +85,18 @@ export default function AdminDashboard() {
                 Manage leads and track funnel performance
               </p>
             </div>
-            <Button variant="default" data-testid="button-export-data">
-              <Download className="w-4 h-4 mr-2" />
-              Export Data
-            </Button>
+            <div className="flex gap-2">
+              <Link href="/admin/images">
+                <Button variant="outline" data-testid="button-manage-images">
+                  <ImageIcon className="w-4 h-4 mr-2" />
+                  Manage Images
+                </Button>
+              </Link>
+              <Button variant="default" data-testid="button-export-data">
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
+            </div>
           </div>
         </div>
       </div>
