@@ -1,10 +1,12 @@
-// API routes with Replit Auth integration and CRM functionality
-// Reference: blueprint:javascript_log_in_with_replit
+// API routes with Replit Auth integration, CRM functionality, and Object Storage
+// Reference: blueprint:javascript_log_in_with_replit, blueprint:javascript_object_storage
 import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema } from "@shared/schema";
+import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
+import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
 
 // Admin authorization middleware
@@ -40,6 +42,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Object Storage Routes
+  // Reference: blueprint:javascript_object_storage
+  
+  // Serve private objects (profile photos) with ACL check
+  app.get("/objects/:objectPath(*)", isAuthenticated, async (req: any, res) => {
+    const userId = req.user?.claims?.sub;
+    const objectStorageService = new ObjectStorageService();
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        objectFile,
+        userId: userId,
+        requestedPermission: ObjectPermission.READ,
+      });
+      if (!canAccess) {
+        return res.sendStatus(401);
+      }
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error checking object access:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
+
+  // Get upload URL for profile photo
+  app.post("/api/objects/upload", isAuthenticated, async (req, res) => {
+    const objectStorageService = new ObjectStorageService();
+    const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+    res.json({ uploadURL });
+  });
+
+  // Update user profile photo after upload
+  app.put("/api/profile-photo", isAuthenticated, async (req: any, res) => {
+    if (!req.body.profilePhotoURL) {
+      return res.status(400).json({ error: "profilePhotoURL is required" });
+    }
+
+    const userId = req.user?.claims?.sub;
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.profilePhotoURL,
+        {
+          owner: userId,
+          visibility: "public", // Profile photos are public
+        },
+      );
+
+      // Update user profile in database
+      await storage.updateUser(userId, { profileImageUrl: objectPath });
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting profile photo:", error);
+      res.status(500).json({ error: "Internal server error" });
     }
   });
 
