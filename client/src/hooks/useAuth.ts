@@ -9,6 +9,9 @@ export function useAuth() {
     queryKey: ["/api/auth/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
+    refetchOnMount: true,  // Always refetch on component mount
+    refetchOnWindowFocus: true,  // Refetch when window regains focus (after login redirect)
+    staleTime: 0,  // Always consider data stale to force refetches
   });
 
   return {

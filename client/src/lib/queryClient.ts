@@ -46,8 +46,8 @@ export const queryClient = new QueryClient({
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity,
+      refetchOnWindowFocus: true,  // Refetch when window regains focus (after login redirect)
+      staleTime: 0,  // Always refetch to get fresh auth state
       retry: false,
     },
     mutations: {
