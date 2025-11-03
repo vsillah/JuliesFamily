@@ -41,6 +41,18 @@ export class ObjectNotFoundError extends Error {
 export class ObjectStorageService {
   constructor() {}
 
+  private getDefaultBucketId(): string {
+    const bucketId = "replit-objstore-be2c0cad-ba5c-42a2-95cd-fae295239b69";
+    return bucketId;
+  }
+
+  private normalizePath(path: string): string {
+    if (path.startsWith("/")) {
+      return path;
+    }
+    return `/${this.getDefaultBucketId()}/${path}`;
+  }
+
   getPublicObjectSearchPaths(): Array<string> {
     const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
     const paths = Array.from(
@@ -49,6 +61,7 @@ export class ObjectStorageService {
           .split(",")
           .map((path) => path.trim())
           .filter((path) => path.length > 0)
+          .map((path) => this.normalizePath(path))
       )
     );
     if (paths.length === 0) {
@@ -68,7 +81,7 @@ export class ObjectStorageService {
           "tool and set PRIVATE_OBJECT_DIR env var."
       );
     }
-    return dir;
+    return this.normalizePath(dir);
   }
 
   async searchPublicObject(filePath: string): Promise<File | null> {
