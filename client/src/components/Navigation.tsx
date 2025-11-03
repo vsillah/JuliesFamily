@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, User, LogIn, LogOut } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut, Shield } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
 import logo from "@assets/image_1762053021045.png";
 
 export default function Navigation() {
@@ -102,6 +103,14 @@ export default function Navigation() {
                     {currentPersonaConfig.label}
                   </Badge>
                 </button>
+              )}
+              {user?.isAdmin && (
+                <Link href="/admin">
+                  <Button variant="outline" size="default" data-testid="button-admin-dashboard">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin
+                  </Button>
+                </Link>
               )}
               <Button variant="default" size="default" data-testid="button-donate">
                 Donate Now
