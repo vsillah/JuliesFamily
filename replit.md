@@ -20,11 +20,12 @@ Preferred communication style: Simple, everyday language.
 **Key Features**:
 - Single-page application, responsive design.
 - **Persona-Based Personalization System (November 2025)**: 5 distinct personas (Adult Education Student, Service Provider, Parent, Donor, Volunteer) with privacy-friendly session storage. Delivers personalized hero sections, dynamic content reordering, adaptive messaging, and a persona selection modal.
+- **Admin Preview Mode (November 2025)**: Administrators can switch between personas and funnel stages to preview the site from different user perspectives. Uses session storage with admin-specific override keys. Includes visual indicator showing current preview state and one-click reset to default view.
 - **Image Assets**: 8 unique, authentic images strategically matched to content sections.
 - **Parallax System**: Smooth parallax effects on hero background, service/event card images, and Donation CTA using `requestAnimationFrame`.
 - **Hero Section Enhancements**: Text fade-in animation, semi-transparent shade for readability over images.
 - **CRM Components (November 2025)**: Lead capture form, Student Readiness Quiz lead magnet, and an Admin Dashboard for lead management and analytics.
-- **Profile Photo Upload System (November 2025)**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs.
+- **Profile Photo Upload System (November 2025)**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs. Uses token-based authentication for secure upload validation.
 
 ### Backend Architecture
 
@@ -42,7 +43,8 @@ Preferred communication style: Simple, everyday language.
 
 **Implementation**: Replit Auth with OpenID Connect (November 2025).
 **Architecture**: Passport.js with per-domain OIDC strategies, PostgreSQL session storage (`connect-pg-simple`), automatic access token refresh, secure cookies, and protected routes.
-**Authentication Flow**: Standard OAuth flow with user upsert into the database and session creation.
+**Authentication Flow**: Standard OAuth flow with user upsert (using email as conflict target) into the database and session creation.
+**Admin Features**: Admin users (identified by `isAdmin` flag) can access additional features including the Admin Dashboard and Preview Mode for testing personalized content.
 **Public Access**: Website content is publicly accessible; authentication is optional for future features.
 **Supported OAuth Providers**: Google, GitHub, X, Apple, Email/password (via Replit Auth).
 
