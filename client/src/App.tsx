@@ -8,6 +8,7 @@ import PersonaSelectionModal from "@/components/PersonaSelectionModal";
 import Home from "@/pages/Home";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminImages from "@/pages/AdminImages";
+import ImageComparison from "@/pages/ImageComparison";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/images" component={AdminImages} />
+      <Route path="/comparison" component={ImageComparison} />
       <Route component={NotFound} />
     </Switch>
   );
