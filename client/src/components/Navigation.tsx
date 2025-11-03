@@ -205,6 +205,14 @@ export default function Navigation() {
                 Change Experience
               </Button>
             )}
+            {user?.isAdmin && (
+              <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                <Button variant="outline" size="lg" data-testid="button-admin-dashboard-mobile">
+                  <Shield className="w-4 h-4 mr-2" />
+                  Admin
+                </Button>
+              </Link>
+            )}
             {isAuthenticated ? (
               <Button 
                 variant="outline" 
