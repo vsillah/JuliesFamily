@@ -42,7 +42,12 @@ export class ObjectStorageService {
   constructor() {}
 
   private getDefaultBucketId(): string {
-    const bucketId = "replit-objstore-be2c0cad-ba5c-42a2-95cd-fae295239b69";
+    const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID || "";
+    if (!bucketId) {
+      throw new Error(
+        "DEFAULT_OBJECT_STORAGE_BUCKET_ID not set. Create a bucket in 'Object Storage' tool."
+      );
+    }
     return bucketId;
   }
 
