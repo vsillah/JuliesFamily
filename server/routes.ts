@@ -496,6 +496,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public endpoint to get image asset by name (no auth required)
+  app.get('/api/images/by-name/:name', async (req, res) => {
+    try {
+      const images = await storage.getAllImageAssets();
+      const image = images.find(img => 
+        img.name.toLowerCase() === decodeURIComponent(req.params.name).toLowerCase() && 
+        img.isActive
+      );
+      
+      if (!image) {
+        return res.status(404).json({ message: "Image not found" });
+      }
+      
+      res.json(image);
+    } catch (error) {
+      console.error("Error fetching image by name:", error);
+      res.status(500).json({ message: "Failed to fetch image" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
