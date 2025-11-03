@@ -6,6 +6,7 @@ import { Menu, X, User, LogIn, LogOut, Shield, Camera } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
 import { ObjectUploader } from "@/components/ObjectUploader";
+import { AdminPersonaSwitcher } from "@/components/AdminPersonaSwitcher";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -142,12 +143,15 @@ export default function Navigation() {
                 </button>
               )}
               {user?.isAdmin && (
-                <Link href="/admin">
-                  <Button variant="outline" size="default" data-testid="button-admin-dashboard">
-                    <Shield className="w-4 h-4 mr-2" />
-                    Admin
-                  </Button>
-                </Link>
+                <>
+                  <AdminPersonaSwitcher />
+                  <Link href="/admin">
+                    <Button variant="outline" size="default" data-testid="button-admin-dashboard">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Admin
+                    </Button>
+                  </Link>
+                </>
               )}
               <Button variant="default" size="default" data-testid="button-donate">
                 Donate Now
