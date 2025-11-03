@@ -38,6 +38,8 @@ export function getSession() {
       httpOnly: true,
       secure: true,
       sameSite: 'lax',
+      domain: undefined,  // Let browser handle domain automatically
+      path: '/',
       maxAge: sessionTtl,
     },
   });
@@ -128,7 +130,7 @@ export async function setupAuth(app: Express) {
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          post_logout_redirect_uri: `https://${req.hostname}`,  // Always use HTTPS
         }).href
       );
     });
