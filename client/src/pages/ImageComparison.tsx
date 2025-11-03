@@ -32,13 +32,13 @@ export default function ImageComparison() {
       usage: "Main hero section"
     },
     {
-      name: "Testimonial Portraits",
-      originalDimensions: "1024×1024px",
-      originalSize: "~148 KB each",
-      improvement: "Optimized file size",
-      cloudinaryUrl: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_64,h_64,q_auto:good,f_auto/julies-family-learning/testimonials/testimonial-1.jpg",
-      newDimensions: "64×64px (for avatars)",
-      usage: "Small avatars"
+      name: "Event Photo (Family Fair)",
+      originalDimensions: "640×480px",
+      originalSize: "58.6 KB",
+      improvement: "3x larger resolution",
+      cloudinaryUrl: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_800,q_auto:good,f_auto/julies-family-learning/events/event-family-fair.jpg",
+      newDimensions: "800px width",
+      usage: "Event cards"
     }
   ];
 
