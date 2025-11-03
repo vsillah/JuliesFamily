@@ -29,6 +29,10 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  // In production, require HTTPS. In dev, allow HTTP.
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -36,7 +40,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: isProduction ? 'auto' : false,  // Auto-detect HTTPS in production
       sameSite: 'lax',
       domain: undefined,  // Let browser handle domain automatically
       path: '/',
