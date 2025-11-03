@@ -1,14 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import CloudinaryImage from "./CloudinaryImage";
 
 interface TestimonialCardProps {
   quote: string;
   name: string;
-  image: string;
+  imageName: string;
   rating?: number;
 }
 
-export default function TestimonialCard({ quote, name, image, rating = 5 }: TestimonialCardProps) {
+export default function TestimonialCard({ quote, name, imageName, rating = 5 }: TestimonialCardProps) {
   return (
     <Card className="p-8 h-full flex flex-col">
       <div className="text-6xl font-serif text-primary mb-4">"</div>
@@ -24,11 +25,13 @@ export default function TestimonialCard({ quote, name, image, rating = 5 }: Test
       </blockquote>
 
       <div className="flex items-center gap-4">
-        <img
-          src={image}
+        <CloudinaryImage
+          name={imageName}
           alt={name}
           className="w-16 h-16 rounded-full object-cover"
-          data-testid={`img-testimonial-${name.toLowerCase().replace(/\s+/g, '-')}`}
+          width={64}
+          height={64}
+          quality="auto:good"
         />
         <div>
           <div className="font-semibold text-card-foreground" data-testid={`text-name-${name.toLowerCase().replace(/\s+/g, '-')}`}>

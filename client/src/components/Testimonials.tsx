@@ -1,7 +1,4 @@
 import TestimonialCard from "./TestimonialCard";
-import testimonial1 from "@assets/generated_images/Testimonial_portrait_woman_22b27ef2.png";
-import testimonial2 from "@assets/generated_images/Testimonial_portrait_woman_2_0247f113.png";
-import testimonial3 from "@assets/generated_images/Testimonial_portrait_woman_3_8f3e6a1d.png";
 
 export default function Testimonials() {
   const testimonials = [
@@ -9,19 +6,19 @@ export default function Testimonials() {
       quote:
         "Julie's always tries to provide us with the most important things we need. Always doing their best to try and take some weight off our shoulders. Julie's makes me feel that I am not alone. When we need help, Julie's is always there.",
       name: "Maria Garcia",
-      image: testimonial1,
+      imageName: "testimonial-1",
     },
     {
       quote:
         "Julie's helps me with budgeting, building my credit, and managing my daughter. This is the place you need to be if you want to better yourself for your family. You can work at your own pace. They don't judge. They have your back!",
       name: "Tasha Williams",
-      image: testimonial2,
+      imageName: "testimonial-2",
     },
     {
       quote:
         "I just want to say Thank You Julie's Family, you definitely are the best. I am so blessed to have come across the program. You teachers are angels, I love you all. We will get through this together.",
       name: "Sarah Johnson",
-      image: testimonial3,
+      imageName: "testimonial-3",
     },
   ];
 

@@ -1,8 +1,5 @@
 import ServiceCard from "./ServiceCard";
 import { usePersona } from "@/contexts/PersonaContext";
-import childrenImage from "@assets/PreK-Class-Photo-2025-600x451.jpg_1762056779821.webp";
-import familyImage from "@assets/kathleen-pzi74mjrs2s885yl9an9ansqxknnds5w1uoabkgi68_1762057083009.jpg";
-import adultImage from "@assets/Full-ABE-Classroom-scaled-qdm9b73m1gjf6h2cvbwt0vfu5cisfvr3eu09zg5jwg_1762057083015.jpg";
 
 export default function Services() {
   const { persona } = usePersona();
@@ -13,7 +10,7 @@ export default function Services() {
       title: "Children's Services",
       description:
         "Offering high-quality early education and care to the infant, toddler, and pre-school children of our adult learners, with curriculum tailored to the needs and abilities of each child.",
-      image: childrenImage,
+      imageName: "service-children",
       priority: {
         parent: 1,
         student: 3,
@@ -27,7 +24,7 @@ export default function Services() {
       title: "Family Development",
       description:
         "Offering family development, life skills, and education services to mothers. Services include adult education, high school equivalency preparation, career services, life skills, and supportive services.",
-      image: familyImage,
+      imageName: "service-family",
       priority: {
         parent: 3,
         student: 2,
@@ -41,7 +38,7 @@ export default function Services() {
       title: "Adult Basic Education",
       description:
         "Offering adult education, high school equivalency preparation, career services, and advising to any learner aged 16 or older.",
-      image: adultImage,
+      imageName: "service-adult",
       priority: {
         parent: 2,
         student: 1,

@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import heroImage from "@assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg";
+import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 
 export default function Hero() {
   const [scrollScale, setScrollScale] = useState(1);
   const [textVisible, setTextVisible] = useState(false);
   const [shadeVisible, setShadeVisible] = useState(false);
+  const { data: heroImageAsset } = useCloudinaryImage("hero-volunteer-student");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,14 +42,24 @@ export default function Hero() {
     }
   };
 
+  if (!heroImageAsset) {
+    return null;
+  }
+
+  const heroImageUrl = getOptimizedUrl(heroImageAsset.cloudinarySecureUrl, {
+    width: 1920,
+    quality: "auto:best",
+  });
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src={heroImage}
+          src={heroImageUrl}
           alt="Julie's Family Learning Program classroom"
           className="w-full h-full object-cover transition-transform duration-200 ease-out"
           style={{ transform: `scale(${scrollScale})` }}
+          loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>

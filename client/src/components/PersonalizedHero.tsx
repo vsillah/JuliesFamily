@@ -1,12 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { usePersona } from "@/contexts/PersonaContext";
-
-import studentImage from "@assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg";
-import parentImage from "@assets/PreK-Class-Photo-2025-600x451.jpg_1762056779821.webp";
-import donorImage from "@assets/grad-pzi78gq1oq1dmudvugdez6xi97qltaefkuknv8rmrk_1762057083020.jpg";
-import volunteerImage from "@assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg";
-import defaultImage from "@assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg";
+import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 
 interface HeroContent {
   subtitle: string;
@@ -14,7 +9,7 @@ interface HeroContent {
   description: string;
   primaryCTA: string;
   secondaryCTA: string;
-  image: string;
+  imageName: string;
 }
 
 const heroContent: Record<string, HeroContent> = {
@@ -24,7 +19,7 @@ const heroContent: Record<string, HeroContent> = {
     description: "Get your high school equivalency while we care for your children. Free classes, flexible schedules, and support every step of the way.",
     primaryCTA: "Check If You Qualify",
     secondaryCTA: "View Success Stories",
-    image: studentImage
+    imageName: "hero-student"
   },
   provider: {
     subtitle: "Trusted Partner",
@@ -32,7 +27,7 @@ const heroContent: Record<string, HeroContent> = {
     description: "50+ years of proven results helping families achieve educational goals. Download our referral packet and partnership information.",
     primaryCTA: "Download Referral Packet",
     secondaryCTA: "View Program Outcomes",
-    image: defaultImage
+    imageName: "hero-volunteer-student"
   },
   parent: {
     subtitle: "Boston PreK Program",
@@ -40,7 +35,7 @@ const heroContent: Record<string, HeroContent> = {
     description: "High-quality early education in a nurturing environment. Our PreK classroom is open to all Boston families with age-appropriate curriculum and caring teachers.",
     primaryCTA: "Schedule a Tour",
     secondaryCTA: "Learn About Our Curriculum",
-    image: parentImage
+    imageName: "hero-parent"
   },
   donor: {
     subtitle: "Your Impact Matters",
@@ -48,7 +43,7 @@ const heroContent: Record<string, HeroContent> = {
     description: "For 50 years, your support has helped families break cycles and build futures. See where your tax-deductible gift makes a difference.",
     primaryCTA: "Make Your Gift",
     secondaryCTA: "View Impact Report",
-    image: donorImage
+    imageName: "hero-donor"
   },
   volunteer: {
     subtitle: "Join Our Community",
@@ -56,7 +51,7 @@ const heroContent: Record<string, HeroContent> = {
     description: "Tutors, mentors, and supporters like you make our programs possible. Find volunteer opportunities that match your schedule and skills.",
     primaryCTA: "See Opportunities",
     secondaryCTA: "Hear From Volunteers",
-    image: volunteerImage
+    imageName: "hero-volunteer"
   },
   default: {
     subtitle: "Julie's Mission",
@@ -64,7 +59,7 @@ const heroContent: Record<string, HeroContent> = {
     description: "A family support, wellness, and education center committed to the development of strong, stable, and healthy family functioning for over 50 years.",
     primaryCTA: "Donate Now",
     secondaryCTA: "Learn More",
-    image: defaultImage
+    imageName: "hero-volunteer-student"
   }
 };
 
@@ -75,6 +70,7 @@ export default function PersonalizedHero() {
   const [shadeVisible, setShadeVisible] = useState(false);
 
   const content = heroContent[persona || "default"];
+  const { data: heroImageAsset } = useCloudinaryImage(content.imageName);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -113,14 +109,24 @@ export default function PersonalizedHero() {
     }
   };
 
+  if (!heroImageAsset) {
+    return null;
+  }
+
+  const heroImageUrl = getOptimizedUrl(heroImageAsset.cloudinarySecureUrl, {
+    width: 1920,
+    quality: "auto:best",
+  });
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src={content.image}
+          src={heroImageUrl}
           alt="Julie's Family Learning Program"
           className="w-full h-full object-cover transition-transform duration-200 ease-out"
           style={{ transform: `scale(${scrollScale})` }}
+          loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>

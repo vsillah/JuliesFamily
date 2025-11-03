@@ -1,8 +1,5 @@
 import EventCard from "./EventCard";
 import { usePersona } from "@/contexts/PersonaContext";
-import anniversaryImage from "@assets/April-6-Graduation-pzi49dxx55hv6neo81vxc4gp1ypmkznm7wn3q8iscg_1762057083004.jpg";
-import graduationImage from "@assets/Bobby-and-Zea-scaled-pzi3sypfqd0ibx9h4gbl9rnrelnr3dggamaov6vf28_1762057083010.jpg";
-import familyFairImage from "@assets/dinoeggs-scaled-qdm9d9cv1dd2no2htq0bzup92scsbyxw11jmwb3g8w_1762057083014.jpg";
 
 const headlineContent: Record<string, { title: string; description: string }> = {
   student: {
@@ -37,7 +34,7 @@ export default function Events() {
       location: "UMass Club, Downtown Boston",
       description:
         "Join us as we celebrate five decades of empowering families through education and support. A special evening honoring our graduates, staff, and community partners.",
-      image: anniversaryImage,
+      imageName: "event-anniversary",
     },
     {
       title: "Spring Graduation Ceremony",
@@ -45,7 +42,7 @@ export default function Events() {
       location: "Julie's Family Learning Program",
       description:
         "Celebrating our graduates who have completed their HiSET and are moving forward to college and career success.",
-      image: graduationImage,
+      imageName: "event-graduation",
     },
     {
       title: "Fall Family Learning Fair",
@@ -53,7 +50,7 @@ export default function Events() {
       location: "Julie's Family Learning Program",
       description:
         "An open house event featuring program information, family activities, and opportunities to meet our dedicated staff and volunteers.",
-      image: familyFairImage,
+      imageName: "event-family-fair",
     },
   ];
 

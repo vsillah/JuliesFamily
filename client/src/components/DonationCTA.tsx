@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { usePersona } from "@/contexts/PersonaContext";
-import heroImage from "@assets/grad-pzi78gq1oq1dmudvugdez6xi97qltaefkuknv8rmrk_1762057083020.jpg";
+import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 
 interface CTAContent {
   title: string;
@@ -48,6 +48,7 @@ export default function DonationCTA() {
   const [scale, setScale] = useState(1);
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
+  const { data: ctaImageAsset } = useCloudinaryImage("donation-cta");
   
   const content = ctaContent[persona || "donor"];
 
@@ -90,14 +91,24 @@ export default function DonationCTA() {
     };
   }, []);
 
+  if (!ctaImageAsset) {
+    return null;
+  }
+
+  const ctaImageUrl = getOptimizedUrl(ctaImageAsset.cloudinarySecureUrl, {
+    width: 1920,
+    quality: "auto:best",
+  });
+
   return (
     <section ref={sectionRef} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src={heroImage}
+          src={ctaImageUrl}
           alt="Donation background"
           className="w-full h-full object-cover transition-transform duration-200 ease-out"
           style={{ transform: `scale(${scale})` }}
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/70" />
       </div>

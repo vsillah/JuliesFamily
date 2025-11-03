@@ -4,6 +4,15 @@ import type { ImageAsset } from "@shared/schema";
 export function useCloudinaryImage(name: string | null) {
   return useQuery<ImageAsset | null>({
     queryKey: ["/api/images/by-name", name],
+    queryFn: async () => {
+      if (!name) return null;
+      const response = await fetch(`/api/images/by-name/${encodeURIComponent(name)}`);
+      if (!response.ok) {
+        if (response.status === 404) return null;
+        throw new Error("Failed to fetch image");
+      }
+      return response.json();
+    },
     enabled: !!name,
     retry: false,
     staleTime: 1000 * 60 * 60,
