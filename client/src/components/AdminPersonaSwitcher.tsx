@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -44,9 +44,25 @@ export function AdminPersonaSwitcher() {
   const { persona, setPersona } = usePersona();
   const [showDialog, setShowDialog] = useState(false);
   const [selectedPersona, setSelectedPersona] = useState<Persona>(persona);
-  const [selectedFunnel, setSelectedFunnel] = useState<FunnelStage | "">(
-    sessionStorage.getItem(ADMIN_FUNNEL_KEY) as FunnelStage || ""
+  const [selectedFunnel, setSelectedFunnel] = useState<FunnelStage | "none">(
+    sessionStorage.getItem(ADMIN_FUNNEL_KEY) as FunnelStage || "none"
   );
+
+  useEffect(() => {
+    const adminPersonaOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
+    if (adminPersonaOverride && adminPersonaOverride !== "none") {
+      setSelectedPersona(adminPersonaOverride as Persona);
+    } else {
+      setSelectedPersona(persona);
+    }
+
+    const adminFunnelOverride = sessionStorage.getItem(ADMIN_FUNNEL_KEY);
+    if (adminFunnelOverride) {
+      setSelectedFunnel(adminFunnelOverride as FunnelStage);
+    } else {
+      setSelectedFunnel("none");
+    }
+  }, [persona]);
 
   if (!user?.isAdmin) {
     return null;
@@ -54,7 +70,7 @@ export function AdminPersonaSwitcher() {
 
   const handleApply = () => {
     setPersona(selectedPersona);
-    if (selectedFunnel) {
+    if (selectedFunnel && selectedFunnel !== "none") {
       sessionStorage.setItem(ADMIN_FUNNEL_KEY, selectedFunnel);
     } else {
       sessionStorage.removeItem(ADMIN_FUNNEL_KEY);
@@ -67,7 +83,7 @@ export function AdminPersonaSwitcher() {
   const handleReset = () => {
     setPersona(null);
     setSelectedPersona(null);
-    setSelectedFunnel("");
+    setSelectedFunnel("none");
     sessionStorage.removeItem(ADMIN_FUNNEL_KEY);
     sessionStorage.removeItem(ADMIN_PERSONA_KEY);
     setShowDialog(false);
@@ -153,13 +169,13 @@ export function AdminPersonaSwitcher() {
               </label>
               <Select
                 value={selectedFunnel}
-                onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "")}
+                onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
               >
                 <SelectTrigger data-testid="select-funnel">
                   <SelectValue placeholder="Select a funnel stage" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None selected</SelectItem>
+                  <SelectItem value="none">None selected</SelectItem>
                   {funnelStageConfigs.map((config) => (
                     <SelectItem key={config.id} value={config.id}>
                       {config.label}
@@ -167,7 +183,7 @@ export function AdminPersonaSwitcher() {
                   ))}
                 </SelectContent>
               </Select>
-              {selectedFunnel && (
+              {selectedFunnel && selectedFunnel !== "none" && (
                 <p className="text-sm text-muted-foreground">
                   {funnelStageConfigs.find(f => f.id === selectedFunnel)?.description}
                 </p>
