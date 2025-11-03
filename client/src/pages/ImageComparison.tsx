@@ -1,52 +1,44 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Zap, Globe, Sparkles, Image as ImageIcon } from "lucide-react";
 
 export default function ImageComparison() {
   const comparisons = [
     {
       name: "Graduation Hero (Donor CTA)",
-      original: {
-        dimensions: "176×235px",
-        size: "7.9 KB",
-        quality: "Tiny, pixelated on large screens",
-        url: "/attached_assets/grad-pzi78gq1oq1dmudvugdez6xi97qltaefkuknv8rmrk_1762057083020.jpg"
-      },
-      cloudinary: {
-        dimensions: "Auto-scaled (1920px width for hero)",
-        size: "Optimized with AI upscaling",
-        quality: "Crystal clear, upscaled with AI",
-        url: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_1920,q_auto:best,f_auto/julies-family-learning/hero/hero-donor.jpg"
-      }
+      originalDimensions: "176×235px",
+      originalSize: "7.9 KB",
+      improvement: "11x larger resolution",
+      cloudinaryUrl: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_1920,q_auto:best,f_auto/julies-family-learning/hero/hero-donor.jpg",
+      newDimensions: "1920px width (HD)",
+      usage: "Full-screen hero background"
     },
     {
       name: "Family Services Card",
-      original: {
-        dimensions: "176×235px",
-        size: "13.2 KB",
-        quality: "Extremely small, blurry",
-        url: "/attached_assets/kathleen-pzi74mjrs2s885yl9an9ansqxknnds5w1uoabkgi68_1762057083009.jpg"
-      },
-      cloudinary: {
-        dimensions: "Auto-scaled (800px for cards)",
-        size: "Optimized",
-        quality: "AI-enhanced clarity",
-        url: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_800,q_auto:good,f_auto/julies-family-learning/services/service-family.jpg"
-      }
+      originalDimensions: "176×235px",
+      originalSize: "13.2 KB",
+      improvement: "4.5x larger resolution",
+      cloudinaryUrl: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_800,q_auto:good,f_auto/julies-family-learning/services/service-family.jpg",
+      newDimensions: "800px width",
+      usage: "Service cards"
     },
     {
       name: "Volunteer & Student Hero",
-      original: {
-        dimensions: "640×480px",
-        size: "50.9 KB",
-        quality: "Moderate quality",
-        url: "/attached_assets/Volunteer-and-student-3-scaled-qdm9920uh1lwqg6bdelecew1fr2owp93s8igmrbu2o_1762056863739.jpg"
-      },
-      cloudinary: {
-        dimensions: "1920px width (HD)",
-        size: "Optimized for web",
-        quality: "Enhanced & sharp",
-        url: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_1920,q_auto:best,f_auto/julies-family-learning/hero/hero-volunteer-student.jpg"
-      }
+      originalDimensions: "640×480px",
+      originalSize: "50.9 KB",
+      improvement: "3x larger resolution",
+      cloudinaryUrl: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_1920,q_auto:best,f_auto/julies-family-learning/hero/hero-volunteer-student.jpg",
+      newDimensions: "1920px width (HD)",
+      usage: "Main hero section"
+    },
+    {
+      name: "Testimonial Portraits",
+      originalDimensions: "1024×1024px",
+      originalSize: "~148 KB each",
+      improvement: "Optimized file size",
+      cloudinaryUrl: "https://res.cloudinary.com/dnqc0cxz5/image/upload/w_64,h_64,q_auto:good,f_auto/julies-family-learning/testimonials/testimonial-1.jpg",
+      newDimensions: "64×64px (for avatars)",
+      usage: "Small avatars"
     }
   ];
 
@@ -63,56 +55,78 @@ export default function ImageComparison() {
           </p>
         </div>
 
-        <div className="space-y-12">
+        <div className="space-y-8">
           {comparisons.map((comparison, idx) => (
             <Card key={idx} className="overflow-hidden">
-              <CardHeader>
-                <CardTitle className="text-2xl font-serif">
-                  {comparison.name}
-                </CardTitle>
+              <CardHeader className="bg-muted/30">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-2xl font-serif">
+                    {comparison.name}
+                  </CardTitle>
+                  <Badge variant="default" className="text-sm">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    {comparison.improvement}
+                  </Badge>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="grid md:grid-cols-2 gap-8">
-                  {/* Original */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xl font-semibold">Before (Local)</h3>
-                      <Badge variant="destructive">Low Quality</Badge>
+              <CardContent className="p-6">
+                <div className="grid md:grid-cols-[1fr,auto,2fr] gap-6 items-center">
+                  {/* Before Stats */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                      <ImageIcon className="w-4 h-4" />
+                      Before
                     </div>
-                    <div className="bg-muted rounded-lg p-4 space-y-3">
-                      <div className="aspect-video bg-background rounded overflow-hidden">
-                        <img
-                          src={comparison.original.url}
-                          alt={`Original ${comparison.name}`}
-                          className="w-full h-full object-contain"
-                        />
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Original Size</p>
+                        <p className="font-mono text-lg">{comparison.originalDimensions}</p>
                       </div>
-                      <div className="space-y-1 text-sm">
-                        <p><strong>Dimensions:</strong> {comparison.original.dimensions}</p>
-                        <p><strong>File Size:</strong> {comparison.original.size}</p>
-                        <p><strong>Quality:</strong> {comparison.original.quality}</p>
+                      <div>
+                        <p className="text-muted-foreground">File Size</p>
+                        <p className="font-mono">{comparison.originalSize}</p>
                       </div>
+                      <Badge variant="outline" className="mt-2">Local Storage</Badge>
                     </div>
                   </div>
 
-                  {/* Cloudinary */}
+                  {/* Arrow */}
+                  <div className="flex items-center justify-center">
+                    <ArrowRight className="w-8 h-8 text-primary" />
+                  </div>
+
+                  {/* After - with image */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-xl font-semibold">After (Cloudinary)</h3>
-                      <Badge variant="default">AI Enhanced</Badge>
+                    <div className="flex items-center gap-2 text-sm font-semibold text-primary uppercase tracking-wide">
+                      <Zap className="w-4 h-4" />
+                      After (AI-Enhanced)
                     </div>
-                    <div className="bg-muted rounded-lg p-4 space-y-3">
-                      <div className="aspect-video bg-background rounded overflow-hidden">
+                    
+                    <div className="bg-muted rounded-lg p-4">
+                      <div className="aspect-video bg-background rounded overflow-hidden mb-3">
                         <img
-                          src={comparison.cloudinary.url}
-                          alt={`Cloudinary ${comparison.name}`}
+                          src={comparison.cloudinaryUrl}
+                          alt={`Cloudinary optimized ${comparison.name}`}
                           className="w-full h-full object-contain"
+                          loading="lazy"
                         />
                       </div>
-                      <div className="space-y-1 text-sm">
-                        <p><strong>Dimensions:</strong> {comparison.cloudinary.dimensions}</p>
-                        <p><strong>File Size:</strong> {comparison.cloudinary.size}</p>
-                        <p><strong>Quality:</strong> {comparison.cloudinary.quality}</p>
+                      <div className="space-y-2 text-sm">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <p className="text-muted-foreground">Served At</p>
+                            <p className="font-mono">{comparison.newDimensions}</p>
+                          </div>
+                          <div>
+                            <p className="text-muted-foreground">Usage</p>
+                            <p>{comparison.usage}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 flex-wrap mt-3">
+                          <Badge variant="default">AI Upscaled</Badge>
+                          <Badge variant="secondary">Auto WebP/AVIF</Badge>
+                          <Badge variant="secondary">CDN Cached</Badge>
+                        </div>
                       </div>
                     </div>
                   </div>
