@@ -45,6 +45,8 @@ Preferred communication style: Simple, everyday language.
 **Implementation**: Replit Auth with OpenID Connect (November 2025).
 **Architecture**: Passport.js with per-domain OIDC strategies, PostgreSQL session storage (`connect-pg-simple`), automatic access token refresh, secure cookies, and protected routes.
 **Authentication Flow**: Standard OAuth flow with user upsert (using email as conflict target) into the database and session creation.
+**Session Persistence**: Cookie security set to 'auto' to work with Replit's HTTPS proxy, with 'trust proxy' enabled. CSP headers from infrastructure are removed to allow legitimate external resources (Google Fonts, Cloudinary CDN).
+**User IDs**: User IDs are immutable once created and always use the OIDC sub (subject) as the canonical identifier. The upsertUser function updates name and profile data but never changes the ID to avoid foreign key constraint violations.
 **Admin Features**: Admin users (identified by `isAdmin` flag) can access additional features including the Admin Dashboard and Preview Mode for testing personalized content.
 **Public Access**: Website content is publicly accessible; authentication is optional for future features.
 **Supported OAuth Providers**: Google, GitHub, X, Apple, Email/password (via Replit Auth).

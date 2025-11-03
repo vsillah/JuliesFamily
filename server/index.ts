@@ -18,11 +18,14 @@ app.use(express.urlencoded({ extended: false }));
 
 // Security headers middleware
 app.use((req, res, next) => {
-  // Remove any problematic CSP headers from Replit infrastructure
+  // Remove CSP headers injected by Replit's infrastructure that block legitimate resources
+  // (Google Fonts, Cloudinary CDN, etc.). In production, rely on Replit's platform-level
+  // security controls rather than implementing a custom CSP that may conflict with
+  // infrastructure headers.
   res.removeHeader('Content-Security-Policy');
   res.removeHeader('X-Content-Security-Policy');
   
-  // Set proper security headers
+  // Set standard security headers
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');

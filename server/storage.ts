@@ -62,8 +62,8 @@ export class DatabaseStorage implements IStorage {
       .onConflictDoUpdate({
         target: users.email,
         set: {
-          // Update ID to match OIDC sub - this is the canonical user ID
-          id: userData.id,
+          // Don't update ID - it's immutable once set (foreign key constraints)
+          // The ID should always be the OIDC sub from initial user creation
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
