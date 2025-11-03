@@ -91,25 +91,27 @@ export default function DonationCTA() {
     };
   }, []);
 
-  if (!ctaImageAsset) {
-    return null;
-  }
-
-  const ctaImageUrl = getOptimizedUrl(ctaImageAsset.cloudinarySecureUrl, {
-    width: 1920,
-    quality: "auto:best",
-  });
+  const ctaImageUrl = ctaImageAsset 
+    ? getOptimizedUrl(ctaImageAsset.cloudinarySecureUrl, {
+        width: 1920,
+        quality: "auto:best",
+      })
+    : "";
 
   return (
     <section ref={sectionRef} className="relative py-32 overflow-hidden">
       <div className="absolute inset-0">
-        <img
-          src={ctaImageUrl}
-          alt="Donation background"
-          className="w-full h-full object-cover transition-transform duration-200 ease-out"
-          style={{ transform: `scale(${scale})` }}
-          loading="lazy"
-        />
+        {ctaImageUrl ? (
+          <img
+            src={ctaImageUrl}
+            alt="Donation background"
+            className="w-full h-full object-cover transition-transform duration-200 ease-out"
+            style={{ transform: `scale(${scale})` }}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-muted animate-pulse" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/70" />
       </div>
 

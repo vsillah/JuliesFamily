@@ -18,21 +18,25 @@ export default function ServiceCard({
   imageName,
   onLearnMore,
 }: ServiceCardProps) {
-  const { data: imageAsset } = useCloudinaryImage(imageName);
+  const { data: imageAsset, isLoading } = useCloudinaryImage(imageName);
 
-  if (!imageAsset) {
-    return null;
-  }
-
-  const imageUrl = getOptimizedUrl(imageAsset.cloudinarySecureUrl, {
-    width: 800,
-    quality: "auto:good",
-  });
+  const imageUrl = imageAsset 
+    ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, {
+        width: 800,
+        quality: "auto:good",
+      })
+    : "";
 
   return (
     <Card className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <ParallaxImage src={imageUrl} alt={title} className="w-full h-full object-cover" intensity={0.8} />
+        {isLoading ? (
+          <div className="w-full h-full bg-muted animate-pulse" />
+        ) : imageUrl ? (
+          <ParallaxImage src={imageUrl} alt={title} className="w-full h-full object-cover" intensity={0.8} />
+        ) : (
+          <div className="w-full h-full bg-muted" />
+        )}
         <div className="absolute top-4 left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-lg font-serif font-semibold">
           {number}
         </div>

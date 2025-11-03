@@ -42,25 +42,27 @@ export default function Hero() {
     }
   };
 
-  if (!heroImageAsset) {
-    return null;
-  }
-
-  const heroImageUrl = getOptimizedUrl(heroImageAsset.cloudinarySecureUrl, {
-    width: 1920,
-    quality: "auto:best",
-  });
+  const heroImageUrl = heroImageAsset 
+    ? getOptimizedUrl(heroImageAsset.cloudinarySecureUrl, {
+        width: 1920,
+        quality: "auto:best",
+      })
+    : "";
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
-        <img
-          src={heroImageUrl}
-          alt="Julie's Family Learning Program classroom"
-          className="w-full h-full object-cover transition-transform duration-200 ease-out"
-          style={{ transform: `scale(${scrollScale})` }}
-          loading="eager"
-        />
+        {heroImageUrl ? (
+          <img
+            src={heroImageUrl}
+            alt="Julie's Family Learning Program classroom"
+            className="w-full h-full object-cover transition-transform duration-200 ease-out"
+            style={{ transform: `scale(${scrollScale})` }}
+            loading="eager"
+          />
+        ) : (
+          <div className="w-full h-full bg-muted animate-pulse" />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>
       

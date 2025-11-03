@@ -12,21 +12,25 @@ interface EventCardProps {
 }
 
 export default function EventCard({ title, date, location, description, imageName }: EventCardProps) {
-  const { data: imageAsset } = useCloudinaryImage(imageName);
+  const { data: imageAsset, isLoading } = useCloudinaryImage(imageName);
 
-  if (!imageAsset) {
-    return null;
-  }
-
-  const imageUrl = getOptimizedUrl(imageAsset.cloudinarySecureUrl, {
-    width: 800,
-    quality: "auto:good",
-  });
+  const imageUrl = imageAsset 
+    ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, {
+        width: 800,
+        quality: "auto:good",
+      })
+    : "";
 
   return (
     <Card className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105">
       <div className="relative aspect-[16/9] overflow-hidden">
-        <ParallaxImage src={imageUrl} alt={title} className="w-full h-full object-cover" intensity={0.8} />
+        {isLoading ? (
+          <div className="w-full h-full bg-muted animate-pulse" />
+        ) : imageUrl ? (
+          <ParallaxImage src={imageUrl} alt={title} className="w-full h-full object-cover" intensity={0.8} />
+        ) : (
+          <div className="w-full h-full bg-muted" />
+        )}
         <div className="absolute top-4 left-4 bg-primary text-primary-foreground px-4 py-2 rounded-md">
           <div className="text-sm font-semibold">{date}</div>
         </div>
