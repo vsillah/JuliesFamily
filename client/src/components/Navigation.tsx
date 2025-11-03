@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Menu, X, User, LogIn, LogOut, Shield } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Menu, X, User, LogIn, LogOut, Shield, Camera } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
 import logo from "@assets/image_1762053021045.png";
 
@@ -12,8 +16,41 @@ export default function Navigation() {
   const { isAuthenticated, user } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showUploader, setShowUploader] = useState(false);
+  const { toast } = useToast();
   
   const currentPersonaConfig = personaConfigs.find(p => p.id === persona);
+  
+  const handlePhotoUpload = async (uploadedFileURL: string) => {
+    try {
+      const response = await apiRequest("PUT", "/api/profile-photo", {
+        profilePhotoURL: uploadedFileURL,
+      });
+      
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      
+      toast({
+        title: "Profile photo updated",
+        description: "Your profile photo has been successfully uploaded.",
+      });
+      
+      setShowUploader(false);
+    } catch (error) {
+      console.error("Error updating profile photo:", error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error updating your profile photo. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const getUserInitials = () => {
+    if (!user) return "U";
+    const firstInitial = user.firstName?.charAt(0) || "";
+    const lastInitial = user.lastName?.charAt(0) || "";
+    return (firstInitial + lastInitial).toUpperCase() || "U";
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -115,17 +152,41 @@ export default function Navigation() {
               <Button variant="default" size="default" data-testid="button-donate">
                 Donate Now
               </Button>
-              {isAuthenticated ? (
-                <Button 
-                  variant="outline" 
-                  size="default" 
-                  onClick={() => window.location.href = '/api/logout'}
-                  data-testid="button-logout"
-                  className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
-                </Button>
+              {isAuthenticated && user ? (
+                <div className="flex items-center gap-3">
+                  <span className={`text-sm transition-colors duration-300 ${
+                    isScrolled ? "text-foreground" : "text-white"
+                  }`}>
+                    Hello, {user.firstName || "there"}!
+                  </span>
+                  <div className="relative group">
+                    <Avatar 
+                      className="cursor-pointer h-9 w-9 border-2 border-transparent group-hover:border-primary transition-colors"
+                      onClick={() => setShowUploader(true)}
+                      data-testid="button-profile-photo"
+                    >
+                      {user.profileImageUrl ? (
+                        <AvatarImage src={user.profileImageUrl} alt={`${user.firstName} ${user.lastName}`} />
+                      ) : null}
+                      <AvatarFallback className="bg-primary text-primary-foreground">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Camera className="w-3 h-3 text-primary" />
+                    </div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="default" 
+                    onClick={() => window.location.href = '/api/logout'}
+                    data-testid="button-logout"
+                    className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
               ) : (
                 <Button 
                   variant="outline" 
@@ -155,6 +216,33 @@ export default function Navigation() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-background md:hidden pt-20">
           <div className="flex flex-col items-center gap-6 p-8">
+            {isAuthenticated && user && (
+              <div className="flex flex-col items-center gap-3 mb-4">
+                <span className="text-sm text-foreground">
+                  Hello, {user.firstName || "there"}!
+                </span>
+                <div className="relative group">
+                  <Avatar 
+                    className="cursor-pointer h-16 w-16 border-2 border-transparent group-hover:border-primary transition-colors"
+                    onClick={() => {
+                      setShowUploader(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    data-testid="button-profile-photo-mobile"
+                  >
+                    {user.profileImageUrl ? (
+                      <AvatarImage src={user.profileImageUrl} alt={`${user.firstName} ${user.lastName}`} />
+                    ) : null}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-1">
+                    <Camera className="w-4 h-4 text-primary" />
+                  </div>
+                </div>
+              </div>
+            )}
             {currentPersonaConfig && (
               <Badge variant="secondary" className="mb-2">
                 <User className="w-3 h-3 mr-1" />
@@ -236,6 +324,18 @@ export default function Navigation() {
             )}
           </div>
         </div>
+      )}
+      
+      {/* Profile Photo Uploader Modal */}
+      {isAuthenticated && (
+        <ObjectUploader
+          open={showUploader}
+          onClose={() => setShowUploader(false)}
+          onUploadComplete={handlePhotoUpload}
+          acceptedFileTypes={["image/*"]}
+          maxFileSize={10 * 1024 * 1024}
+          maxNumberOfFiles={1}
+        />
       )}
     </>
   );
