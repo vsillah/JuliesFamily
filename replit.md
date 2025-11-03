@@ -2,9 +2,7 @@
 
 ## Overview
 
-This is a non-profit website for Julie's Family Learning Program, a family support, wellness, and education center that has been serving families for over 50 years. The website showcases their educational programs, impact statistics, testimonials, upcoming events, and provides ways for visitors to donate or volunteer.
-
-The application is built as a full-stack web application with a React frontend using shadcn/ui components and an Express backend. The design follows a warm, approachable aesthetic inspired by non-profit templates, featuring elegant serif typography (Playfair Display) for headlines and clean sans-serif fonts (Inter) for body text.
+This non-profit website for Julie's Family Learning Program, a family support, wellness, and education center, showcases educational programs, impact, testimonials, events, and facilitates donations/volunteering. It's a full-stack web application with a React frontend (shadcn/ui) and an Express backend, designed with a warm, approachable aesthetic, elegant serif typography (Playfair Display) for headlines, and clean sans-serif fonts (Inter) for body text. Key ambitions include a persona-based personalization system, a CRM for lead capture and tracking, and a secure user profile system with photo uploads.
 
 ## User Preferences
 
@@ -14,265 +12,80 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 
-**Framework**: React 18 with TypeScript, using Vite as the build tool and development server.
-
-**Routing**: wouter library for client-side routing (lightweight React Router alternative).
-
-**UI Component Library**: shadcn/ui components built on Radix UI primitives, providing accessible, customizable components following the "New York" style variant.
-
-**Styling**: 
-- Tailwind CSS for utility-first styling
-- Custom CSS variables for theming (light/dark mode support)
-- Design system based on warm, approachable non-profit aesthetic
-- Typography: Playfair Display (serif) for headlines, Inter (sans-serif) for body text
-- Color scheme: 
-  - **Primary**: Warm orange/golden (hsl 28° 75% 35%) - matches Julie's sunflower logo
-  - **Secondary**: Olive/khaki green (hsl 75° 35% 45%) - from logo subtitle
-  - **Base**: Warm beige/cream backgrounds for approachable feel
-  - All colors meet WCAG AA accessibility standards (minimum 4.5:1 contrast ratio)
-
-**State Management**: 
-- TanStack Query (React Query) for server state management
-- React hooks for local component state
-
-**Component Structure**:
-- Page components in `client/src/pages/`
-- Reusable UI components in `client/src/components/`
-- shadcn/ui primitives in `client/src/components/ui/`
-- Context providers in `client/src/contexts/` (PersonaContext for personalization)
-- Example components for development in `client/src/components/examples/`
-
-**Persona-Aware Components**:
-- `PersonaContext.tsx`: Core personalization provider with 5 persona types
-- `PersonaSelectionModal.tsx`: Initial persona selection UI with Lucide icons
-- `PersonalizedHero.tsx`: 5 distinct hero variations per persona
-- `Navigation.tsx`: Persona badge and switcher in nav bar
-- `Services.tsx`: Dynamic service ordering based on persona priorities
-- `Events.tsx`: Persona-specific headlines and descriptions
-- `DonationCTA.tsx`: Tailored call-to-action messaging per persona
-
-**CRM Components** (November 2025):
-- `LeadCaptureForm.tsx`: Reusable form for capturing contact information
-  - Validates required fields (firstName, email, persona)
-  - Submits to POST /api/leads with leadSource attribution
-  - Creates interaction records with metadata after lead creation
-  - Shows success toast and resets form on completion
-- `StudentReadinessQuiz.tsx`: Interactive 3-question quiz lead magnet
-  - Calculates program recommendations based on user answers
-  - Scores three programs: Basic Education, ESL, Workforce Development
-  - Passes quiz metadata to lead form for interaction tracking
-  - Stores quiz results (answers, scores, recommendation) in interaction data
-- `AdminDashboard.tsx`: CRM management interface (admin-only)
-  - Displays leads table with filtering by persona and funnel stage
-  - Shows analytics: total leads, conversion rate, engagement metrics
-  - Funnel stage distribution chart
-  - Protected by server-side admin authorization
-
+**Framework**: React 18 with TypeScript and Vite.
+**Routing**: wouter for client-side routing.
+**UI Component Library**: shadcn/ui on Radix UI, using "New York" style.
+**Styling**: Tailwind CSS, custom CSS variables for theming (light/dark mode), WCAG AA compliant colors (primary warm orange/golden, secondary olive/khaki green, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text.
+**State Management**: TanStack Query for server state, React hooks for local state.
 **Key Features**:
-- Single-page application with smooth scrolling navigation
-- Responsive design (mobile-first approach)
-- **Persona-Based Personalization System** (November 2025):
-  - 5 distinct persona types: Adult Education Student, Service Provider, Parent, Donor, Volunteer
-  - Privacy-friendly implementation using session storage (no cookies, GDPR-compliant)
-  - Personalized hero experiences with unique headlines, messaging, CTAs, and imagery for each persona
-  - Dynamic content reordering: Services section prioritizes most relevant programs per persona
-  - Adaptive messaging across all sections: Events headlines and Donation CTA tailored to persona
-  - Modal-based persona selection on first visit (2-second delay, skippable)
-  - Persona badge in navigation allows easy switching between experiences
-  - Session persistence maintains persona choice within browser session
-  - Implemented with PersonaContext provider, Lucide React icons, and shadcn/ui components
-- **Image assets**: 8 unique authentic photos from Julie's Family Learning Program stored in `attached_assets/`
-  - **Hero**: Volunteer/student math tutoring session
-  - **Children's Services**: PreK class group photo with diverse children
-  - **Family Development**: Mother and child engaged in art activity
-  - **Adult Education**: Full adult classroom with engaged learners
-  - **50th Anniversary Event**: Graduation celebration with cake cutting
-  - **Spring Graduation Event**: Outdoor graduation ceremony
-  - **Fall Family Fair Event**: Children doing hands-on dinosaur egg activity
-  - **Donation CTA**: Graduate with child celebrating achievement
-  - Each image used exactly once, strategically matched to content
-- **Parallax System**:
-  - Hero background: Zoom effect (1.0 to 1.1 scale) based on scroll position
-  - Service card images: ParallaxImage component with intensity 0.8
-  - Event card images: ParallaxImage component with intensity 0.8
-  - Donation CTA background: Custom parallax with intensity 0.04 (subtle)
-  - Each image animates independently based on viewport position
-  - Uses requestAnimationFrame for smooth 60fps performance
-- **Hero Section Enhancements**:
-  - Text fade-in animation (1 second smooth transition after 200ms delay)
-  - Horizontal semi-transparent shade (30% black) between image and text layers
-  - Shade height: 400px mobile, 500px desktop (covers mission text to buttons)
-  - Enhanced text readability over photography
-- Accessibility-first design with WCAG AA compliant colors
+- Single-page application, responsive design.
+- **Persona-Based Personalization System (November 2025)**: 5 distinct personas (Adult Education Student, Service Provider, Parent, Donor, Volunteer) with privacy-friendly session storage. Delivers personalized hero sections, dynamic content reordering, adaptive messaging, and a persona selection modal.
+- **Image Assets**: 8 unique, authentic images strategically matched to content sections.
+- **Parallax System**: Smooth parallax effects on hero background, service/event card images, and Donation CTA using `requestAnimationFrame`.
+- **Hero Section Enhancements**: Text fade-in animation, semi-transparent shade for readability over images.
+- **CRM Components (November 2025)**: Lead capture form, Student Readiness Quiz lead magnet, and an Admin Dashboard for lead management and analytics.
+- **Profile Photo Upload System (November 2025)**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs.
 
 ### Backend Architecture
 
-**Framework**: Express.js running on Node.js with TypeScript.
-
-**Server Structure**:
-- Main entry point: `server/index.ts`
-- Route registration: `server/routes.ts`
-- Storage abstraction: `server/storage.ts`
-
-**Storage Pattern**: 
-- Interface-based storage abstraction (`IStorage`)
-- PostgreSQL database storage (`DatabaseStorage`) using Drizzle ORM
-- Active database integration with Neon serverless PostgreSQL
-
-**Development Features**:
-- Request/response logging middleware
-- Raw body capture for webhook processing
-- Vite integration for hot module replacement in development
-- Replit-specific development tools (error overlay, cartographer, dev banner)
-
-**API Design**: 
-- RESTful API endpoints prefixed with `/api`
-- JSON request/response format
-- Session support prepared (express-session configured)
+**Framework**: Express.js on Node.js with TypeScript.
+**Storage Pattern**: Interface-based abstraction with PostgreSQL (Neon serverless) via Drizzle ORM.
+**API Design**: RESTful API endpoints (`/api`), JSON format, with session support. Includes object storage endpoints for signed upload URLs and private object serving with ACL checks.
 
 ### Data Storage
 
-**ORM**: Drizzle ORM configured for PostgreSQL via Neon serverless driver.
-
-**Schema Location**: `shared/schema.ts` (shared between client and server).
-
-**Current Schema**:
-- `users` table: Stores authenticated users from Replit Auth
-  - id (varchar, primary key): OAuth sub claim (unique identifier)
-  - email (varchar): User's email address
-  - firstName (varchar): User's first name
-  - lastName (varchar): User's last name
-  - profileImageUrl (varchar, nullable): User's profile image URL
-  - createdAt (timestamp): Account creation time
-  - updatedAt (timestamp): Last update time
-- `sessions` table: Express session storage for authenticated sessions
-  - sid (varchar, primary key): Session ID
-  - sess (json): Session data including OAuth tokens
-  - expire (timestamp, indexed): Session expiration for automatic cleanup
-- `leads` table: CRM system for capturing and tracking potential contacts
-  - id (varchar, primary key): Unique lead identifier (UUID)
-  - email (varchar, unique): Lead's email address
-  - firstName, lastName (varchar): Contact name
-  - phone (varchar, nullable): Contact phone number
-  - persona (varchar): One of 5 persona types (student, provider, parent, donor, volunteer)
-  - funnelStage (varchar): Awareness, Consideration, Decision, or Retention
-  - leadSource (varchar): Attribution (e.g., "student_readiness_quiz", "website")
-  - engagementScore (integer): Calculated engagement metric
-  - lastInteractionDate, convertedAt (timestamp, nullable): Tracking timestamps
-  - notes, metadata (text/json, nullable): Additional lead information
-  - createdAt, updatedAt (timestamp): Record timestamps
-- `interactions` table: Tracks all user interactions for analytics
-  - id (varchar, primary key): Unique interaction identifier (UUID)
-  - leadId (varchar, nullable, foreign key): Links to leads table
-  - interactionType (varchar): Type of interaction (e.g., "quiz_completion", "form_submission")
-  - channel (varchar): Source channel (e.g., "website", "email")
-  - data (json): Structured interaction metadata
-  - createdAt (timestamp): Interaction timestamp
-- `lead_magnets` table: Manages lead generation content
-  - id (varchar, primary key): Unique magnet identifier (UUID)
-  - name (varchar): Lead magnet name
-  - type (varchar): Type (quiz, calculator, guide, etc.)
-  - description (text, nullable): Description
-  - persona (varchar): Target persona
-  - funnelStage (varchar): Target funnel stage
-  - isActive (boolean): Active status
-  - conversionRate (numeric, nullable): Performance metric
-  - metadata (json, nullable): Configuration data
-  - createdAt, updatedAt (timestamp): Record timestamps
-- Zod schemas for validation using drizzle-zod
-
-**Migration Strategy**: 
-- Drizzle Kit configured for schema management
-- Migrations output to `./migrations` directory
-- Push-based deployment (`db:push` script)
+**ORM**: Drizzle ORM for PostgreSQL (Neon serverless).
+**Schema**: `shared/schema.ts` includes `users`, `sessions`, `leads`, `interactions`, and `lead_magnets` tables with Zod validation.
+**Migration Strategy**: Drizzle Kit for schema management and push-based deployment.
 
 ### Authentication & Authorization
 
-**Implementation**: Replit Auth with OpenID Connect (November 2025)
-
-**Architecture**:
-- **OpenID Connect Provider**: Replit's OIDC service (`ISSUER_URL` env variable)
-- **Strategy**: Passport.js with per-domain OIDC strategies
-- **Session Storage**: PostgreSQL via connect-pg-simple (secure, persistent sessions)
-- **Token Management**: Automatic access token refresh using refresh tokens
-- **Security**: Secure cookies (HTTPS-only), session expiry (7 days), protected routes via `isAuthenticated` middleware
-
-**Authentication Flow**:
-1. User clicks "Sign In" → redirects to `/api/login`
-2. Passport initiates OAuth flow with Replit OIDC provider
-3. User authenticates via Replit (supports Google, GitHub, X, Apple, email/password)
-4. OAuth callback at `/api/callback` creates session and upserts user in database
-5. User redirected to homepage with authenticated session
-6. Client-side `useAuth` hook queries `/api/auth/user` to get current user state
-7. "Sign Out" → `/api/logout` clears session and redirects to Replit logout
-
-**Key Files**:
-- `server/replitAuth.ts`: OIDC configuration, Passport strategies, session middleware
-- `server/routes.ts`: Authentication routes (`/api/login`, `/api/callback`, `/api/logout`, `/api/auth/user`)
-- `server/storage.ts`: Database operations for user upsert
-- `client/src/hooks/useAuth.ts`: Client-side authentication state hook
-- `client/src/components/Navigation.tsx`: Sign In/Sign Out UI in navigation bar
-
-**Required Environment Variables**:
-- `REPL_ID`: Replit application ID (auto-provided in Replit environment)
-- `SESSION_SECRET`: Secret key for session encryption (auto-generated)
-- `DATABASE_URL`: PostgreSQL connection string (auto-provided)
-- `ISSUER_URL`: OIDC issuer URL (defaults to `https://replit.com/oidc`)
-
-**Public Access**: The website maintains public accessibility—all content (services, events, testimonials, etc.) is viewable without authentication. Authentication is optional and designed for future features like donation management, volunteer coordination, or admin panels.
-
-**Supported OAuth Providers** (via Replit Auth):
-- Google
-- GitHub
-- X (formerly Twitter)
-- Apple
-- Email/password
+**Implementation**: Replit Auth with OpenID Connect (November 2025).
+**Architecture**: Passport.js with per-domain OIDC strategies, PostgreSQL session storage (`connect-pg-simple`), automatic access token refresh, secure cookies, and protected routes.
+**Authentication Flow**: Standard OAuth flow with user upsert into the database and session creation.
+**Public Access**: Website content is publicly accessible; authentication is optional for future features.
+**Supported OAuth Providers**: Google, GitHub, X, Apple, Email/password (via Replit Auth).
 
 ## External Dependencies
 
 ### UI Framework & Components
 
-- **Radix UI**: Comprehensive suite of accessible UI primitives (@radix-ui/react-*)
-- **shadcn/ui**: Pre-built component patterns using Radix UI and Tailwind CSS
-- **Lucide React**: Icon library for consistent iconography
-- **class-variance-authority**: Type-safe variant-based component styling
-- **tailwind-merge & clsx**: Utility for merging Tailwind classes
+- **Radix UI**: Accessible UI primitives.
+- **shadcn/ui**: Pre-built components.
+- **Lucide React**: Icon library.
+- **class-variance-authority**: Type-safe styling.
+- **tailwind-merge & clsx**: Tailwind class utilities.
 
 ### Data Fetching & State Management
 
-- **TanStack Query**: Server state management and data fetching
-- **React Hook Form**: Form state management (@hookform/resolvers for validation)
+- **TanStack Query**: Server state management.
+- **React Hook Form**: Form state management with resolvers.
 
 ### Database & ORM
 
-- **Drizzle ORM**: TypeScript ORM for PostgreSQL
-- **@neondatabase/serverless**: Neon serverless PostgreSQL driver
-- **connect-pg-simple**: PostgreSQL session store for Express
+- **Drizzle ORM**: TypeScript ORM.
+- **@neondatabase/serverless**: Neon PostgreSQL driver.
+- **connect-pg-simple**: PostgreSQL session store.
 
 ### Development Tools
 
-- **Vite**: Frontend build tool and development server
-- **esbuild**: Backend bundling for production
-- **tsx**: TypeScript execution for development server
-- **TypeScript**: Type safety across the stack
+- **Vite**: Frontend build tool.
+- **esbuild**: Backend bundling.
+- **tsx**: TypeScript execution.
+- **TypeScript**: Type safety.
 
 ### Replit-Specific Tools
 
-- **@replit/vite-plugin-runtime-error-modal**: Development error overlay
-- **@replit/vite-plugin-cartographer**: Code navigation tool
-- **@replit/vite-plugin-dev-banner**: Development environment indicator
+- **@replit/vite-plugin-runtime-error-modal**: Error overlay.
+- **@replit/vite-plugin-cartographer**: Code navigation.
+- **@replit/vite-plugin-dev-banner**: Development indicator.
 
 ### Fonts & Typography
 
-- **Google Fonts**: Playfair Display (serif headlines) and Inter (sans-serif body text)
+- **Google Fonts**: Playfair Display and Inter.
 
 ### Utility Libraries
 
-- **date-fns**: Date manipulation and formatting
-- **nanoid**: Unique ID generation
-- **zod**: Schema validation (via drizzle-zod)
-
-### Build & Deployment
-
-- **PostCSS**: CSS processing with Tailwind CSS and Autoprefixer
-- **Autoprefixer**: Automatic vendor prefix management
+- **date-fns**: Date manipulation.
+- **nanoid**: Unique ID generation.
+- **zod**: Schema validation.
