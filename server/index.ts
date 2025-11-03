@@ -16,6 +16,20 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: false }));
 
+// Security headers middleware
+app.use((req, res, next) => {
+  // Remove any problematic CSP headers from Replit infrastructure
+  res.removeHeader('Content-Security-Policy');
+  res.removeHeader('X-Content-Security-Policy');
+  
+  // Set proper security headers
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
