@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Clean up expired entries
-      for (const [url, data] of uploadUrlCache.entries()) {
+      for (const [url, data] of Array.from(uploadUrlCache.entries())) {
         if (data.expiresAt < Date.now()) {
           uploadUrlCache.delete(url);
         }
