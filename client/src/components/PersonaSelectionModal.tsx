@@ -32,10 +32,10 @@ export default function PersonaSelectionModal() {
               <Heart className="w-8 h-8 text-primary" />
             </div>
           </div>
-          <DialogTitle className="text-3xl sm:text-4xl font-serif font-semibold">
+          <DialogTitle className="text-3xl sm:text-4xl font-serif font-semibold text-[#f7f5f3]">
             Welcome to <span className="italic">Julie's</span>
           </DialogTitle>
-          <DialogDescription className="text-base sm:text-lg pt-3 text-foreground/80 max-w-md mx-auto leading-relaxed">
+          <DialogDescription className="text-base sm:text-lg pt-3 max-w-md mx-auto leading-relaxed text-[#f7f5f3]">
             We're here to support your journey. Help us personalize your experience by telling us what brings you here today.
           </DialogDescription>
         </DialogHeader>
