@@ -21,10 +21,11 @@ Preferred communication style: Simple, everyday language.
 - Single-page application, responsive design.
 - **Persona-Based Personalization System (November 2025)**: 5 distinct personas (Adult Education Student, Service Provider, Parent, Donor, Volunteer) with privacy-friendly session storage. Delivers personalized hero sections, dynamic content reordering, adaptive messaging, and a persona selection modal.
 - **Admin Preview Mode (November 2025)**: Administrators can switch between personas and funnel stages to preview the site from different user perspectives. Uses session storage with admin-specific override keys. Includes visual indicator showing current preview state and one-click reset to default view.
+- **Personalized Lead Magnets (November 2025)**: Dynamic lead magnet system delivering 10 unique offers based on persona and funnel stage (TOFU/MOFU). Each persona receives tailored content at Awareness and Consideration stages, including interactive quizzes, checklists, and downloadable guides. All lead magnets integrate with the CRM for lead tracking.
 - **Image Assets**: 8 unique, authentic images strategically matched to content sections.
 - **Parallax System**: Smooth parallax effects on hero background, service/event card images, and Donation CTA using `requestAnimationFrame`.
 - **Hero Section Enhancements**: Text fade-in animation, semi-transparent shade for readability over images.
-- **CRM Components (November 2025)**: Lead capture form, Student Readiness Quiz lead magnet, and an Admin Dashboard for lead management and analytics.
+- **CRM Components (November 2025)**: Lead capture form with persona and funnel stage tracking, and an Admin Dashboard for lead management and analytics.
 - **Profile Photo Upload System (November 2025)**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs. Uses token-based authentication for secure upload validation.
 
 ### Backend Architecture
