@@ -59,18 +59,26 @@ const PersonaContext = createContext<PersonaContextType | undefined>(undefined);
 
 const PERSONA_STORAGE_KEY = "julies-persona";
 const PERSONA_MODAL_SHOWN_KEY = "julies-persona-modal-shown";
+const ADMIN_PERSONA_KEY = "admin-persona-override";
 
 export function PersonaProvider({ children }: { children: ReactNode }) {
   const [persona, setPersonaState] = useState<Persona>(null);
   const [showPersonaModal, setShowPersonaModal] = useState(false);
 
   useEffect(() => {
+    const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
+    
+    if (adminOverride && adminOverride !== "none") {
+      setPersonaState(adminOverride as Persona);
+      return;
+    }
+    
     const storedPersona = sessionStorage.getItem(PERSONA_STORAGE_KEY);
     const modalShown = sessionStorage.getItem(PERSONA_MODAL_SHOWN_KEY);
     
     if (storedPersona && storedPersona !== "null") {
       setPersonaState(storedPersona as Persona);
-    } else if (!modalShown) {
+    } else if (!modalShown && !adminOverride) {
       setTimeout(() => {
         setShowPersonaModal(true);
         sessionStorage.setItem(PERSONA_MODAL_SHOWN_KEY, "true");
