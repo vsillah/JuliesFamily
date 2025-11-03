@@ -62,7 +62,7 @@ export class DatabaseStorage implements IStorage {
       .onConflictDoUpdate({
         target: users.email,
         set: {
-          id: userData.id,
+          // Don't update ID - it's the primary key and referenced by foreign keys
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
