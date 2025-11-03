@@ -12,7 +12,7 @@ type UppyInstance = Uppy;
 interface ObjectUploaderProps {
   open: boolean;
   onClose: () => void;
-  onUploadComplete: (uploadedFileURL: string) => void;
+  onUploadComplete: (uploadToken: string) => void;
   acceptedFileTypes?: string[];
   maxFileSize?: number;
   maxNumberOfFiles?: number;
@@ -26,6 +26,8 @@ export function ObjectUploader({
   maxFileSize = 10 * 1024 * 1024, // 10MB
   maxNumberOfFiles = 1,
 }: ObjectUploaderProps) {
+  const [uploadToken, setUploadToken] = useState<string>("");
+  
   const [uppy] = useState<UppyInstance>(() => {
     return new Uppy({
       restrictions: {
@@ -52,9 +54,12 @@ export function ObjectUploader({
           
           const data = await response.json();
           
-          if (!data.uploadURL) {
-            throw new Error("No upload URL received from server");
+          if (!data.uploadURL || !data.uploadToken) {
+            throw new Error("No upload URL or token received from server");
           }
+          
+          // Store the upload token for later use
+          setUploadToken(data.uploadToken);
           
           return {
             method: "PUT",
@@ -73,9 +78,8 @@ export function ObjectUploader({
 
   useEffect(() => {
     const handleComplete = (result: any) => {
-      if (result.successful && result.successful.length > 0) {
-        const uploadURL = result.successful[0].uploadURL;
-        onUploadComplete(uploadURL);
+      if (result.successful && result.successful.length > 0 && uploadToken) {
+        onUploadComplete(uploadToken);
         uppy.cancelAll();
       }
     };
@@ -85,7 +89,7 @@ export function ObjectUploader({
     return () => {
       uppy.off("complete", handleComplete);
     };
-  }, [uppy, onUploadComplete]);
+  }, [uppy, onUploadComplete, uploadToken]);
 
   return (
     <DashboardModal

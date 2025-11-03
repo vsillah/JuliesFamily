@@ -129,7 +129,7 @@ export class ObjectStorageService {
     }
   }
 
-  async getObjectEntityUploadURL(): Promise<string> {
+  async getObjectEntityUploadURL(): Promise<{ uploadURL: string; objectPath: string }> {
     const privateObjectDir = this.getPrivateObjectDir();
     if (!privateObjectDir) {
       throw new Error(
@@ -140,12 +140,16 @@ export class ObjectStorageService {
     const objectId = randomUUID();
     const fullPath = `${privateObjectDir}/uploads/${objectId}`;
     const { bucketName, objectName } = parseObjectPath(fullPath);
-    return signObjectURL({
+    const uploadURL = await signObjectURL({
       bucketName,
       objectName,
       method: "PUT",
       ttlSec: 900,
     });
+    
+    // Return both the upload URL and the object path for later reference
+    const objectPath = `/objects/uploads/${objectId}`;
+    return { uploadURL, objectPath };
   }
 
   async getObjectEntityFile(objectPath: string): Promise<File> {
@@ -187,6 +191,15 @@ export class ObjectStorageService {
     }
     const entityId = rawObjectPath.slice(objectEntityDir.length);
     return `/objects/${entityId}`;
+  }
+
+  async setObjectEntityAclPolicy(
+    objectPath: string,
+    aclPolicy: ObjectAclPolicy
+  ): Promise<string> {
+    const objectFile = await this.getObjectEntityFile(objectPath);
+    await setObjectAclPolicy(objectFile, aclPolicy);
+    return objectPath;
   }
 
   async trySetObjectEntityAclPolicy(

@@ -48,8 +48,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Object Storage Routes
   // Reference: blueprint:javascript_object_storage
   
-  // In-memory cache for tracking issued upload URLs (with 15 minute expiry)
-  const uploadUrlCache = new Map<string, { userId: string; expiresAt: number }>();
+  // In-memory cache for tracking issued upload tokens (with 15 minute expiry)
+  const uploadTokenCache = new Map<string, { userId: string; objectPath: string; expiresAt: number }>();
   
   // Serve private objects (profile photos) with ACL check
   app.get("/objects/*", isAuthenticated, async (req: any, res) => {
@@ -86,22 +86,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const objectStorageService = new ObjectStorageService();
     
     try {
-      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      const { uploadURL, objectPath } = await objectStorageService.getObjectEntityUploadURL();
       
-      // Track this upload URL as belonging to this user
-      uploadUrlCache.set(uploadURL, {
+      // Generate a unique token for this upload
+      const uploadToken = `upload_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+      
+      // Track this upload token as belonging to this user
+      uploadTokenCache.set(uploadToken, {
         userId,
+        objectPath,
         expiresAt: Date.now() + 15 * 60 * 1000, // 15 minutes
       });
       
       // Clean up expired entries
-      for (const [url, data] of Array.from(uploadUrlCache.entries())) {
+      for (const [token, data] of Array.from(uploadTokenCache.entries())) {
         if (data.expiresAt < Date.now()) {
-          uploadUrlCache.delete(url);
+          uploadTokenCache.delete(token);
         }
       }
       
-      res.json({ uploadURL });
+      res.json({ uploadURL, uploadToken });
     } catch (error) {
       console.error("Error generating upload URL:", error);
       res.status(500).json({ error: "Failed to generate upload URL" });
@@ -110,26 +114,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Update user profile photo after upload
   app.put("/api/profile-photo", isAuthenticated, async (req: any, res) => {
-    if (!req.body.profilePhotoURL) {
-      return res.status(400).json({ error: "profilePhotoURL is required" });
+    if (!req.body.uploadToken) {
+      return res.status(400).json({ error: "uploadToken is required" });
     }
 
     const userId = req.user?.claims?.sub;
-    const uploadURL = req.body.profilePhotoURL;
+    const uploadToken = req.body.uploadToken;
 
     try {
-      // Validate that this upload URL was issued to this user
-      const urlData = uploadUrlCache.get(uploadURL);
-      if (!urlData || urlData.userId !== userId || urlData.expiresAt < Date.now()) {
-        return res.status(403).json({ error: "Invalid or expired upload URL" });
+      // Validate that this upload token was issued to this user
+      const tokenData = uploadTokenCache.get(uploadToken);
+      if (!tokenData || tokenData.userId !== userId || tokenData.expiresAt < Date.now()) {
+        return res.status(403).json({ error: "Invalid or expired upload token" });
       }
       
       // Remove from cache after validation
-      uploadUrlCache.delete(uploadURL);
+      uploadTokenCache.delete(uploadToken);
 
       const objectStorageService = new ObjectStorageService();
-      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
-        uploadURL,
+      const objectPath = await objectStorageService.setObjectEntityAclPolicy(
+        tokenData.objectPath,
         {
           owner: userId,
           visibility: "public", // Profile photos are public

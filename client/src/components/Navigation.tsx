@@ -21,10 +21,10 @@ export default function Navigation() {
   
   const currentPersonaConfig = personaConfigs.find(p => p.id === persona);
   
-  const handlePhotoUpload = async (uploadedFileURL: string) => {
+  const handlePhotoUpload = async (uploadToken: string) => {
     try {
       const response = await apiRequest("PUT", "/api/profile-photo", {
-        profilePhotoURL: uploadedFileURL,
+        uploadToken: uploadToken,
       });
       
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
