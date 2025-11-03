@@ -51,6 +51,23 @@ Preferred communication style: Simple, everyday language.
 - `Events.tsx`: Persona-specific headlines and descriptions
 - `DonationCTA.tsx`: Tailored call-to-action messaging per persona
 
+**CRM Components** (November 2025):
+- `LeadCaptureForm.tsx`: Reusable form for capturing contact information
+  - Validates required fields (firstName, email, persona)
+  - Submits to POST /api/leads with leadSource attribution
+  - Creates interaction records with metadata after lead creation
+  - Shows success toast and resets form on completion
+- `StudentReadinessQuiz.tsx`: Interactive 3-question quiz lead magnet
+  - Calculates program recommendations based on user answers
+  - Scores three programs: Basic Education, ESL, Workforce Development
+  - Passes quiz metadata to lead form for interaction tracking
+  - Stores quiz results (answers, scores, recommendation) in interaction data
+- `AdminDashboard.tsx`: CRM management interface (admin-only)
+  - Displays leads table with filtering by persona and funnel stage
+  - Shows analytics: total leads, conversion rate, engagement metrics
+  - Funnel stage distribution chart
+  - Protected by server-side admin authorization
+
 **Key Features**:
 - Single-page application with smooth scrolling navigation
 - Responsive design (mobile-first approach)
@@ -132,6 +149,36 @@ Preferred communication style: Simple, everyday language.
   - sid (varchar, primary key): Session ID
   - sess (json): Session data including OAuth tokens
   - expire (timestamp, indexed): Session expiration for automatic cleanup
+- `leads` table: CRM system for capturing and tracking potential contacts
+  - id (varchar, primary key): Unique lead identifier (UUID)
+  - email (varchar, unique): Lead's email address
+  - firstName, lastName (varchar): Contact name
+  - phone (varchar, nullable): Contact phone number
+  - persona (varchar): One of 5 persona types (student, provider, parent, donor, volunteer)
+  - funnelStage (varchar): Awareness, Consideration, Decision, or Retention
+  - leadSource (varchar): Attribution (e.g., "student_readiness_quiz", "website")
+  - engagementScore (integer): Calculated engagement metric
+  - lastInteractionDate, convertedAt (timestamp, nullable): Tracking timestamps
+  - notes, metadata (text/json, nullable): Additional lead information
+  - createdAt, updatedAt (timestamp): Record timestamps
+- `interactions` table: Tracks all user interactions for analytics
+  - id (varchar, primary key): Unique interaction identifier (UUID)
+  - leadId (varchar, nullable, foreign key): Links to leads table
+  - interactionType (varchar): Type of interaction (e.g., "quiz_completion", "form_submission")
+  - channel (varchar): Source channel (e.g., "website", "email")
+  - data (json): Structured interaction metadata
+  - createdAt (timestamp): Interaction timestamp
+- `lead_magnets` table: Manages lead generation content
+  - id (varchar, primary key): Unique magnet identifier (UUID)
+  - name (varchar): Lead magnet name
+  - type (varchar): Type (quiz, calculator, guide, etc.)
+  - description (text, nullable): Description
+  - persona (varchar): Target persona
+  - funnelStage (varchar): Target funnel stage
+  - isActive (boolean): Active status
+  - conversionRate (numeric, nullable): Performance metric
+  - metadata (json, nullable): Configuration data
+  - createdAt, updatedAt (timestamp): Record timestamps
 - Zod schemas for validation using drizzle-zod
 
 **Migration Strategy**: 
