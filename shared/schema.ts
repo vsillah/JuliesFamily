@@ -97,3 +97,31 @@ export const insertLeadMagnetSchema = createInsertSchema(leadMagnets).omit({
 });
 export type InsertLeadMagnet = z.infer<typeof insertLeadMagnetSchema>;
 export type LeadMagnet = typeof leadMagnets.$inferSelect;
+
+// Image Assets table for managing Cloudinary uploads
+export const imageAssets = pgTable("image_assets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // Descriptive name (e.g., "Hero Background - Students")
+  originalFilename: varchar("original_filename"), // Original file name from upload
+  localPath: varchar("local_path"), // Original local path (e.g., @assets/...)
+  cloudinaryPublicId: varchar("cloudinary_public_id").notNull().unique(), // Cloudinary identifier
+  cloudinaryUrl: varchar("cloudinary_url").notNull(), // Full Cloudinary URL
+  cloudinarySecureUrl: varchar("cloudinary_secure_url").notNull(), // HTTPS URL
+  width: integer("width"), // Original width
+  height: integer("height"), // Original height
+  format: varchar("format"), // Image format (jpg, png, webp, etc)
+  fileSize: integer("file_size"), // File size in bytes
+  usage: varchar("usage"), // Where it's used (hero, service, event, testimonial, logo, etc)
+  isActive: boolean("is_active").default(true),
+  uploadedBy: varchar("uploaded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertImageAssetSchema = createInsertSchema(imageAssets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertImageAsset = z.infer<typeof insertImageAssetSchema>;
+export type ImageAsset = typeof imageAssets.$inferSelect;
