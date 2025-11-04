@@ -159,7 +159,7 @@ export default function Navigation() {
                 Donate Now
               </Button>
               {isAuthenticated && user ? (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <span className={`text-sm transition-colors duration-300 ${
                     isScrolled ? "text-foreground" : "text-white"
                   }`}>
