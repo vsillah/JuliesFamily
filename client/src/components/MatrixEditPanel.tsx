@@ -145,25 +145,13 @@ export default function MatrixEditPanel({
   const imageAsset = images.find(img => img.name === displayImage);
 
   return (
-    <div className="w-96 border-l bg-background sticky top-0 h-screen overflow-y-auto">
-      <Card className="rounded-none border-0 border-b">
-        <CardHeader className="flex flex-row items-start justify-between space-y-0">
-          <div className="flex-1">
-            <CardTitle className="text-lg">Edit Configuration</CardTitle>
-            <CardDescription>
-              {PERSONA_LABELS[persona]} • {FUNNEL_STAGE_LABELS[stage]}
-            </CardDescription>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            data-testid="button-close-edit-panel"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-      </Card>
+    <div className="w-full">
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold">Edit Configuration</h2>
+        <p className="text-sm text-muted-foreground">
+          {PERSONA_LABELS[persona]} • {FUNNEL_STAGE_LABELS[stage]}
+        </p>
+      </div>
 
       {!contentItem ? (
         <div className="p-6 text-center text-muted-foreground">
