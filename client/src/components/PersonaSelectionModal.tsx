@@ -68,7 +68,7 @@ export default function PersonaSelectionModal() {
           <Button
             variant="ghost"
             onClick={handleSkip}
-            className="text-foreground"
+            className="text-[#f7f5f3] mt-[0px] mb-[0px] pt-[6px] pb-[6px]"
             data-testid="button-skip-persona"
           >
             I'll explore on my own
