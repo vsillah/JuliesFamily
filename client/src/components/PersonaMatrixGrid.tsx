@@ -104,7 +104,7 @@ export default function PersonaMatrixGrid({
         {/* Scroll indicator - Right arrow */}
         {canScrollRight && (
           <div className="absolute right-0 top-0 bottom-0 w-16 pointer-events-none z-40">
-            <div className="sticky top-32 bg-gradient-to-l from-background/80 to-transparent h-24 flex items-center justify-end pr-2">
+            <div className="sticky top-1/2 -translate-y-1/2 bg-gradient-to-l from-background/80 to-transparent h-24 flex items-center justify-end pr-2">
               <Button
                 variant="default"
                 size="icon"
@@ -121,7 +121,7 @@ export default function PersonaMatrixGrid({
         {/* Scroll indicator - Left arrow */}
         {canScrollLeft && (
           <div className="absolute left-0 top-0 bottom-0 w-16 pointer-events-none z-40">
-            <div className="sticky top-32 bg-gradient-to-r from-background/80 to-transparent h-24 flex items-center justify-start pl-2">
+            <div className="sticky top-1/2 -translate-y-1/2 bg-gradient-to-r from-background/80 to-transparent h-24 flex items-center justify-start pl-2">
               <Button
                 variant="default"
                 size="icon"
