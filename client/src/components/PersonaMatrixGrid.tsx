@@ -314,7 +314,7 @@ export default function PersonaMatrixGrid({
 
         <div 
           ref={scrollContainerRef}
-          className="w-full overflow-auto scroll-smooth max-h-[calc(100vh-200px)]" 
+          className="w-full overflow-x-auto overflow-y-auto scroll-smooth max-h-[calc(100vh-200px)]" 
           style={{ scrollPaddingLeft: '6rem', scrollPaddingTop: '3rem' }}
         >
         <div className="min-w-max">
