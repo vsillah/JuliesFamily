@@ -392,7 +392,7 @@ export default function AdminContentManager() {
                   Configure content for all persona and funnel stage combinations. Click any card to edit its specific configuration.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="overflow-hidden">
                 <PersonaMatrixGrid
                   contentItems={{
                     hero: heroContent,
