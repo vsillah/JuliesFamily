@@ -92,10 +92,23 @@ export default function MatrixEditPanel({
       if (selectedImageFile) {
         const formData = new FormData();
         formData.append("image", selectedImageFile);
+        
+        // Generate unique name from filename without extension
+        const baseName = selectedImageFile.name.replace(/\.[^/.]+$/, "");
+        const uniqueName = `${baseName}-${Date.now()}`;
+        formData.append("name", uniqueName);
+        formData.append("usage", contentType);
+        formData.append("localPath", "");
+        
         const uploadResult = await fetch("/api/admin/images/upload", {
           method: "POST",
           body: formData,
         }).then(res => res.json());
+        
+        if (uploadResult.error || !uploadResult.name) {
+          throw new Error(uploadResult.message || "Image upload failed");
+        }
+        
         finalImageName = uploadResult.name;
       }
 
