@@ -7,6 +7,15 @@ import type { InsertContentItem } from "@shared/schema";
 async function seedContent() {
   console.log("Starting content seeding...\n");
 
+  // Check if content already exists
+  const existingContent = await storage.getAllContentItems();
+  if (existingContent.length > 0) {
+    console.log(`⚠️  Database already contains ${existingContent.length} content items.`);
+    console.log("To reseed, first delete existing content in the Admin Content Manager or run: DELETE FROM content_items;");
+    console.log("Exiting without changes.\n");
+    process.exit(0);
+  }
+
   // Services content
   const services: InsertContentItem[] = [
     {
