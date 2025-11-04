@@ -39,45 +39,40 @@ export default function PersonaMatrixGrid({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const checkScrollPosition = useCallback(() => {
+  const updateScrollArrows = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    const hasOverflow = scrollWidth > clientWidth;
+    const scrollLeft = container.scrollLeft;
+    const maxScroll = container.scrollWidth - container.clientWidth;
     
-    setCanScrollLeft(hasOverflow && scrollLeft > 5);
-    setCanScrollRight(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+    // Show left arrow if scrolled more than 10px from start
+    setCanScrollLeft(scrollLeft > 10);
+    // Show right arrow if more than 10px from end
+    setCanScrollRight(scrollLeft < maxScroll - 10);
   }, []);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    // Check scroll position
-    const handleCheck = () => {
-      requestAnimationFrame(checkScrollPosition);
-    };
-
-    // Initial checks with delays
-    handleCheck();
-    const timers = [50, 150, 300, 500, 1000].map(delay => 
-      setTimeout(handleCheck, delay)
-    );
-
-    // Listen for scroll events
-    container.addEventListener('scroll', handleCheck);
-
-    // Listen for resize
-    const resizeObserver = new ResizeObserver(handleCheck);
-    resizeObserver.observe(container);
+    // Update on scroll
+    container.addEventListener('scroll', updateScrollArrows);
+    
+    // Update on resize
+    window.addEventListener('resize', updateScrollArrows);
+    
+    // Initial update with multiple checks to ensure content is loaded
+    updateScrollArrows();
+    setTimeout(updateScrollArrows, 100);
+    setTimeout(updateScrollArrows, 300);
+    setTimeout(updateScrollArrows, 500);
 
     return () => {
-      timers.forEach(clearTimeout);
-      container.removeEventListener('scroll', handleCheck);
-      resizeObserver.disconnect();
+      container.removeEventListener('scroll', updateScrollArrows);
+      window.removeEventListener('resize', updateScrollArrows);
     };
-  }, [checkScrollPosition, contentItems, visibilitySettings, images, abTests]);
+  }, [updateScrollArrows]);
 
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
