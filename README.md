@@ -8,18 +8,20 @@ Preferred communication style: Simple, everyday language.
 
 ## System Architecture
 Frontend Architecture
-Framework: React 18 with TypeScript and Vite. Routing: wouter for client-side routing. UI Component Library: shadcn/ui on Radix UI, using "New York" style. Styling: Tailwind CSS, custom CSS variables for theming (light/dark mode), WCAG AA compliant colors (primary warm orange/golden, secondary olive/khaki green, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text. State Management: TanStack Query for server state, React hooks for local state. Key Features:
+### Framework: React 18 with TypeScript and Vite. Routing: wouter for client-side routing. UI ### Component Library: shadcn/ui on Radix UI, using "New York" style. Styling: Tailwind CSS, custom CSS variables for theming (light/dark mode), WCAG AA compliant colors (primary warm orange/golden, secondary olive/khaki green, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text. State Management: TanStack Query for server state, React hooks for local state. Key Features:
 
 ## Single-page application, responsive design.
-Persona-Based Personalization System (November 2025): 5 distinct personas (Adult Education Student, Service Provider, Parent, Donor, Volunteer) with privacy-friendly session storage. Delivers personalized hero sections, dynamic content reordering, adaptive messaging, and a persona selection modal.
-Admin Preview Mode (November 2025): Administrators can switch between personas and funnel stages to preview the site from different user perspectives. Uses session storage with admin-specific override keys. Includes visual indicator showing current preview state and one-click reset to default view.
-Personalized Lead Magnets (November 2025): Dynamic lead magnet system delivering 10 unique offers based on persona and funnel stage (TOFU/MOFU). Each persona receives tailored content at Awareness and Consideration stages, including interactive quizzes, checklists, and downloadable guides. All lead magnets integrate with the CRM for lead tracking.
-Image Assets: 8 unique, authentic images strategically matched to content sections.
-Parallax System: Smooth parallax effects on hero background, service/event card images, and Donation CTA using requestAnimationFrame.
-Hero Section Enhancements: Text fade-in animation, semi-transparent shade for readability over images.
-CRM Components (November 2025): Lead capture form with persona and funnel stage tracking, and an Admin Dashboard for lead management and analytics.
+### Persona-Based Personalization System (November 2025): 5 distinct personas (Adult Education Student, Service Provider, Parent, Donor, Volunteer) with privacy-friendly session storage. Delivers personalized hero sections, dynamic content reordering, adaptive messaging, and a persona selection modal.
+### Admin Preview Mode (November 2025): Administrators can switch between personas and funnel stages to preview the site from different user perspectives. Uses session storage with admin-specific override keys. Includes visual indicator showing current preview state and one-click reset to default view.
+### Personalized Lead Magnets (November 2025): Dynamic lead magnet system delivering 10 unique offers based on persona and funnel stage (TOFU/MOFU). Each persona receives tailored content at Awareness and Consideration stages, including interactive quizzes, checklists, and downloadable guides. All lead magnets integrate with the CRM for lead tracking.
+### Image Assets: 8 unique, authentic images strategically matched to content sections.
+### Parallax System: Smooth parallax effects on hero background, service/event card images, and Donation CTA using requestAnimationFrame.
+### Hero Section Enhancements: Text fade-in animation, semi-transparent shade for readability over images.
+
+## CRM Components (November 2025): Lead capture form with persona and funnel stage tracking, and an Admin Dashboard for lead management and analytics.
 Profile Photo Upload System (November 2025): Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs. Uses token-based authentication for secure upload validation.
-Backend Architecture
+
+## Backend Architecture
 Framework: Express.js on Node.js with TypeScript. Storage Pattern: Interface-based abstraction with PostgreSQL (Neon serverless) via Drizzle ORM. API Design: RESTful API endpoints (/api), JSON format, with session support. Includes object storage endpoints for signed upload URLs and private object serving with ACL checks.
 
 ## Data Storage
