@@ -3,13 +3,18 @@
 import { 
   users, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
+  abTests, abTestVariants, abTestAssignments, abTestEvents,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
   type LeadMagnet, type InsertLeadMagnet,
   type ImageAsset, type InsertImageAsset,
   type ContentItem, type InsertContentItem,
-  type ContentVisibility, type InsertContentVisibility
+  type ContentVisibility, type InsertContentVisibility,
+  type AbTest, type InsertAbTest,
+  type AbTestVariant, type InsertAbTestVariant,
+  type AbTestAssignment, type InsertAbTestAssignment,
+  type AbTestEvent, type InsertAbTestEvent
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -65,6 +70,38 @@ export interface IStorage {
   updateContentVisibility(id: string, updates: Partial<InsertContentVisibility>): Promise<ContentVisibility | undefined>;
   deleteContentVisibility(id: string): Promise<void>;
   getVisibleContentItems(type: string, persona?: string | null, funnelStage?: string | null): Promise<ContentItem[]>;
+  
+  // A/B Test operations
+  createAbTest(test: InsertAbTest): Promise<AbTest>;
+  getAbTest(id: string): Promise<AbTest | undefined>;
+  getAllAbTests(): Promise<AbTest[]>;
+  getActiveAbTests(persona?: string | null, funnelStage?: string | null): Promise<AbTest[]>;
+  updateAbTest(id: string, updates: Partial<InsertAbTest>): Promise<AbTest | undefined>;
+  deleteAbTest(id: string): Promise<void>;
+  
+  // A/B Test Variant operations
+  createAbTestVariant(variant: InsertAbTestVariant): Promise<AbTestVariant>;
+  getAbTestVariants(testId: string): Promise<AbTestVariant[]>;
+  updateAbTestVariant(id: string, updates: Partial<InsertAbTestVariant>): Promise<AbTestVariant | undefined>;
+  deleteAbTestVariant(id: string): Promise<void>;
+  
+  // A/B Test Assignment operations
+  createAbTestAssignment(assignment: InsertAbTestAssignment): Promise<AbTestAssignment>;
+  getAssignment(testId: string, sessionId: string): Promise<AbTestAssignment | undefined>;
+  getSessionAssignments(sessionId: string): Promise<AbTestAssignment[]>;
+  
+  // A/B Test Event operations
+  trackEvent(event: InsertAbTestEvent): Promise<AbTestEvent>;
+  getTestEvents(testId: string): Promise<AbTestEvent[]>;
+  getVariantEvents(variantId: string): Promise<AbTestEvent[]>;
+  getTestAnalytics(testId: string): Promise<{
+    variantId: string;
+    variantName: string;
+    totalViews: number;
+    uniqueViews: number;
+    totalEvents: number;
+    conversionRate: number;
+  }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -375,6 +412,174 @@ export class DatabaseStorage implements IStorage {
       .orderBy(sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`);
 
     return await query;
+  }
+  
+  // A/B Test operations
+  async createAbTest(testData: InsertAbTest): Promise<AbTest> {
+    const [test] = await db.insert(abTests).values(testData).returning();
+    return test;
+  }
+
+  async getAbTest(id: string): Promise<AbTest | undefined> {
+    const [test] = await db.select().from(abTests).where(eq(abTests.id, id));
+    return test;
+  }
+
+  async getAllAbTests(): Promise<AbTest[]> {
+    return await db.select().from(abTests).orderBy(desc(abTests.createdAt));
+  }
+
+  async getActiveAbTests(persona?: string | null, funnelStage?: string | null): Promise<AbTest[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(abTests)
+      .where(
+        and(
+          eq(abTests.status, 'active'),
+          or(
+            sql`${abTests.startDate} IS NULL`,
+            sql`${abTests.startDate} <= ${now}`
+          ),
+          or(
+            sql`${abTests.endDate} IS NULL`,
+            sql`${abTests.endDate} >= ${now}`
+          ),
+          or(
+            sql`${abTests.targetPersona} IS NULL`,
+            persona === null || persona === undefined
+              ? sql`TRUE`
+              : eq(abTests.targetPersona, persona)
+          ),
+          or(
+            sql`${abTests.targetFunnelStage} IS NULL`,
+            funnelStage === null || funnelStage === undefined
+              ? sql`TRUE`
+              : eq(abTests.targetFunnelStage, funnelStage)
+          )
+        )
+      );
+  }
+
+  async updateAbTest(id: string, updates: Partial<InsertAbTest>): Promise<AbTest | undefined> {
+    const [test] = await db
+      .update(abTests)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(abTests.id, id))
+      .returning();
+    return test;
+  }
+
+  async deleteAbTest(id: string): Promise<void> {
+    await db.delete(abTests).where(eq(abTests.id, id));
+  }
+
+  // A/B Test Variant operations
+  async createAbTestVariant(variantData: InsertAbTestVariant): Promise<AbTestVariant> {
+    const [variant] = await db.insert(abTestVariants).values(variantData).returning();
+    return variant;
+  }
+
+  async getAbTestVariants(testId: string): Promise<AbTestVariant[]> {
+    return await db
+      .select()
+      .from(abTestVariants)
+      .where(eq(abTestVariants.testId, testId))
+      .orderBy(desc(abTestVariants.isControl));
+  }
+
+  async updateAbTestVariant(id: string, updates: Partial<InsertAbTestVariant>): Promise<AbTestVariant | undefined> {
+    const [variant] = await db
+      .update(abTestVariants)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(abTestVariants.id, id))
+      .returning();
+    return variant;
+  }
+
+  async deleteAbTestVariant(id: string): Promise<void> {
+    await db.delete(abTestVariants).where(eq(abTestVariants.id, id));
+  }
+
+  // A/B Test Assignment operations
+  async createAbTestAssignment(assignmentData: InsertAbTestAssignment): Promise<AbTestAssignment> {
+    const [assignment] = await db.insert(abTestAssignments).values(assignmentData).returning();
+    return assignment;
+  }
+
+  async getAssignment(testId: string, sessionId: string): Promise<AbTestAssignment | undefined> {
+    const [assignment] = await db
+      .select()
+      .from(abTestAssignments)
+      .where(
+        and(
+          eq(abTestAssignments.testId, testId),
+          eq(abTestAssignments.sessionId, sessionId)
+        )
+      );
+    return assignment;
+  }
+
+  async getSessionAssignments(sessionId: string): Promise<AbTestAssignment[]> {
+    return await db
+      .select()
+      .from(abTestAssignments)
+      .where(eq(abTestAssignments.sessionId, sessionId));
+  }
+
+  // A/B Test Event operations
+  async trackEvent(eventData: InsertAbTestEvent): Promise<AbTestEvent> {
+    const [event] = await db.insert(abTestEvents).values(eventData).returning();
+    return event;
+  }
+
+  async getTestEvents(testId: string): Promise<AbTestEvent[]> {
+    return await db
+      .select()
+      .from(abTestEvents)
+      .where(eq(abTestEvents.testId, testId))
+      .orderBy(desc(abTestEvents.createdAt));
+  }
+
+  async getVariantEvents(variantId: string): Promise<AbTestEvent[]> {
+    return await db
+      .select()
+      .from(abTestEvents)
+      .where(eq(abTestEvents.variantId, variantId))
+      .orderBy(desc(abTestEvents.createdAt));
+  }
+
+  async getTestAnalytics(testId: string): Promise<{
+    variantId: string;
+    variantName: string;
+    totalViews: number;
+    uniqueViews: number;
+    totalEvents: number;
+    conversionRate: number;
+  }[]> {
+    const analytics = await db
+      .select({
+        variantId: abTestVariants.id,
+        variantName: abTestVariants.name,
+        totalViews: sql<number>`COUNT(DISTINCT ${abTestEvents.id}) FILTER (WHERE ${abTestEvents.eventType} = 'page_view')`.as('totalViews'),
+        uniqueViews: sql<number>`COUNT(DISTINCT ${abTestEvents.sessionId}) FILTER (WHERE ${abTestEvents.eventType} = 'page_view')`.as('uniqueViews'),
+        totalEvents: sql<number>`COUNT(DISTINCT ${abTestEvents.id}) FILTER (WHERE ${abTestEvents.eventType} != 'page_view')`.as('totalEvents'),
+      })
+      .from(abTestVariants)
+      .leftJoin(abTestEvents, eq(abTestEvents.variantId, abTestVariants.id))
+      .where(eq(abTestVariants.testId, testId))
+      .groupBy(abTestVariants.id, abTestVariants.name);
+
+    return analytics.map(row => ({
+      variantId: row.variantId,
+      variantName: row.variantName,
+      totalViews: Number(row.totalViews) || 0,
+      uniqueViews: Number(row.uniqueViews) || 0,
+      totalEvents: Number(row.totalEvents) || 0,
+      conversionRate: row.uniqueViews > 0 
+        ? (Number(row.totalEvents) / Number(row.uniqueViews)) * 100 
+        : 0,
+    }));
   }
 }
 

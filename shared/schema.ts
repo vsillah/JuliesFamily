@@ -167,3 +167,90 @@ export const insertContentVisibilitySchema = createInsertSchema(contentVisibilit
 });
 export type InsertContentVisibility = z.infer<typeof insertContentVisibilitySchema>;
 export type ContentVisibility = typeof contentVisibility.$inferSelect;
+
+// A/B Testing tables for experimentation and optimization
+export const abTests = pgTable("ab_tests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  type: varchar("type").notNull(), // 'card_order', 'layout', 'messaging', 'cta', 'hero'
+  status: varchar("status").notNull().default('draft'), // 'draft', 'active', 'paused', 'completed'
+  targetPersona: varchar("target_persona"), // null = all personas
+  targetFunnelStage: varchar("target_funnel_stage"), // null = all stages
+  trafficAllocation: integer("traffic_allocation").default(100), // Percentage of traffic to include (0-100)
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  winnerVariantId: varchar("winner_variant_id"), // ID of winning variant once determined
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAbTestSchema = createInsertSchema(abTests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAbTest = z.infer<typeof insertAbTestSchema>;
+export type AbTest = typeof abTests.$inferSelect;
+
+// Test variants - different configurations being tested
+export const abTestVariants = pgTable("ab_test_variants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
+  name: varchar("name").notNull(), // 'Control', 'Variant A', 'Variant B', etc
+  description: text("description"),
+  trafficWeight: integer("traffic_weight").default(50), // Percentage of test traffic (weights sum to 100)
+  configuration: jsonb("configuration").notNull(), // Variant-specific config (card order, layout changes, etc)
+  isControl: boolean("is_control").default(false), // Is this the control/baseline variant?
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAbTestVariantSchema = createInsertSchema(abTestVariants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAbTestVariant = z.infer<typeof insertAbTestVariantSchema>;
+export type AbTestVariant = typeof abTestVariants.$inferSelect;
+
+// Track which variant each session/user sees (ensures consistency)
+export const abTestAssignments = pgTable("ab_test_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
+  variantId: varchar("variant_id").notNull().references(() => abTestVariants.id, { onDelete: "cascade" }),
+  sessionId: varchar("session_id").notNull(), // Session-based tracking (from sessionStorage)
+  userId: varchar("user_id").references(() => users.id), // Optional - for authenticated users
+  persona: varchar("persona"), // Persona at time of assignment
+  funnelStage: varchar("funnel_stage"), // Funnel stage at time of assignment
+  assignedAt: timestamp("assigned_at").defaultNow(),
+});
+
+export const insertAbTestAssignmentSchema = createInsertSchema(abTestAssignments).omit({
+  id: true,
+  assignedAt: true,
+});
+export type InsertAbTestAssignment = z.infer<typeof insertAbTestAssignmentSchema>;
+export type AbTestAssignment = typeof abTestAssignments.$inferSelect;
+
+// Track events for A/B test analytics
+export const abTestEvents = pgTable("ab_test_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
+  variantId: varchar("variant_id").notNull().references(() => abTestVariants.id, { onDelete: "cascade" }),
+  assignmentId: varchar("assignment_id").references(() => abTestAssignments.id, { onDelete: "cascade" }),
+  sessionId: varchar("session_id").notNull(),
+  eventType: varchar("event_type").notNull(), // 'page_view', 'cta_click', 'lead_magnet_download', 'donation', 'volunteer_signup'
+  eventTarget: varchar("event_target"), // What was clicked/interacted with
+  eventValue: integer("event_value"), // Optional numeric value (e.g., donation amount)
+  metadata: jsonb("metadata"), // Additional context
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAbTestEventSchema = createInsertSchema(abTestEvents).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAbTestEvent = z.infer<typeof insertAbTestEventSchema>;
+export type AbTestEvent = typeof abTestEvents.$inferSelect;
