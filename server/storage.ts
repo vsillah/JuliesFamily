@@ -116,13 +116,15 @@ export class DatabaseStorage implements IStorage {
       .insert(users)
       .values(userData)
       .onConflictDoUpdate({
-        target: users.email,
+        target: users.id,
         set: {
           // Don't update ID - it's immutable once set (foreign key constraints)
           // The ID should always be the OIDC sub from initial user creation
+          email: userData.email,
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
+          isAdmin: userData.isAdmin,
           updatedAt: new Date(),
         },
       })
