@@ -1,0 +1,186 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { AbTest, AbTestVariant, AbTestAssignment } from "@shared/schema";
+
+// Generate or retrieve session ID for A/B testing
+const getSessionId = (): string => {
+  const storageKey = "ab-test-session-id";
+  let sessionId = sessionStorage.getItem(storageKey);
+  
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    sessionStorage.setItem(storageKey, sessionId);
+  }
+  
+  return sessionId;
+};
+
+// Track A/B test events
+export const trackABTestEvent = async (
+  testId: string,
+  variantId: string,
+  eventType: string,
+  eventTarget?: string,
+  eventValue?: number,
+  metadata?: Record<string, any>
+) => {
+  const sessionId = getSessionId();
+  
+  try {
+    await fetch("/api/ab-tests/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        testId,
+        variantId,
+        sessionId,
+        eventType,
+        eventTarget,
+        eventValue,
+        metadata,
+      }),
+    });
+  } catch (error) {
+    console.error("Failed to track A/B test event:", error);
+  }
+};
+
+interface UseABTestOptions {
+  persona?: string;
+  funnelStage?: string;
+  enabled?: boolean;
+}
+
+export function useABTest(testType: string, options: UseABTestOptions = {}) {
+  const { persona, funnelStage, enabled = true } = options;
+  const sessionId = getSessionId();
+  const [assignment, setAssignment] = useState<AbTestAssignment | null>(null);
+  const [variant, setVariant] = useState<AbTestVariant | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch active tests
+  const { data: activeTests = [] } = useQuery<AbTest[]>({
+    queryKey: ["/api/ab-tests/active", { persona, funnelStage }],
+    enabled,
+    retry: false,
+  });
+
+  // Find matching test for this type
+  const test = activeTests.find(t => t.type === testType);
+
+  useEffect(() => {
+    if (!test || !enabled) {
+      setIsLoading(false);
+      return;
+    }
+
+    const assignVariant = async () => {
+      try {
+        // Request variant assignment
+        const response = await fetch("/api/ab-tests/assign", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            testId: test.id,
+            sessionId,
+            persona,
+            funnelStage,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to assign variant");
+        }
+
+        const assignmentData: AbTestAssignment = await response.json();
+        setAssignment(assignmentData);
+
+        // Fetch variant details
+        const variantsResponse = await fetch(`/api/ab-tests/${test.id}/variants`);
+        if (variantsResponse.ok) {
+          const variants: AbTestVariant[] = await variantsResponse.json();
+          const assignedVariant = variants.find(v => v.id === assignmentData.variantId);
+          if (assignedVariant) {
+            setVariant(assignedVariant);
+          }
+        }
+
+        // Track page view
+        await trackABTestEvent(
+          test.id,
+          assignmentData.variantId,
+          "page_view"
+        );
+      } catch (error) {
+        console.error("Failed to assign A/B test variant:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    assignVariant();
+  }, [test?.id, sessionId, persona, funnelStage, enabled]);
+
+  // Helper function to track conversions
+  const trackConversion = async (eventTarget?: string, eventValue?: number) => {
+    if (!test || !assignment) return;
+    
+    await trackABTestEvent(
+      test.id,
+      assignment.variantId,
+      "cta_click",
+      eventTarget,
+      eventValue
+    );
+  };
+
+  // Helper function to track custom events
+  const trackEvent = async (
+    eventType: string,
+    eventTarget?: string,
+    eventValue?: number,
+    metadata?: Record<string, any>
+  ) => {
+    if (!test || !assignment) return;
+    
+    await trackABTestEvent(
+      test.id,
+      assignment.variantId,
+      eventType,
+      eventTarget,
+      eventValue,
+      metadata
+    );
+  };
+
+  return {
+    isLoading,
+    hasTest: !!test,
+    test,
+    variant,
+    configuration: variant?.configuration as Record<string, any> | null,
+    trackConversion,
+    trackEvent,
+  };
+}
+
+// Hook for getting variant configuration without side effects
+export function useVariantConfig(testType: string, defaultConfig: any = {}) {
+  const { configuration, isLoading } = useABTest(testType);
+  
+  if (isLoading || !configuration) {
+    return defaultConfig;
+  }
+  
+  return { ...defaultConfig, ...configuration };
+}
+
+// Hook for conditional rendering based on variant
+export function useVariantRender(testType: string, variantName: string) {
+  const { variant, isLoading } = useABTest(testType);
+  
+  return {
+    shouldRender: !isLoading && variant?.name === variantName,
+    isLoading,
+  };
+}

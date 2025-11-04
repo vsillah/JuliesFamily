@@ -27,6 +27,8 @@ Preferred communication style: Simple, everyday language.
 - **Hero Section Enhancements**: Text fade-in animation, semi-transparent shade for readability over images.
 - **CRM Components (November 2025)**: Lead capture form with persona and funnel stage tracking, and an Admin Dashboard for lead management and analytics.
 - **Profile Photo Upload System (November 2025)**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs. Uses token-based authentication for secure upload validation.
+- **Content Management System (November 2025)**: Full-featured CMS allowing admins to manage all website content (services, events, testimonials, lead magnets) with image selection, visibility controls, and ordering. Integrates with Cloudinary for AI-powered image upscaling and optimization.
+- **A/B Testing System (November 2025)**: Comprehensive experimentation platform for testing different card configurations, layouts, messaging, and CTAs. Features include weighted variant assignment, session-based tracking, conversion metrics, statistical significance calculation, and detailed analytics dashboards. Supports persona and funnel stage targeting for granular testing.
 
 ### Backend Architecture
 
@@ -37,7 +39,7 @@ Preferred communication style: Simple, everyday language.
 ### Data Storage
 
 **ORM**: Drizzle ORM for PostgreSQL (Neon serverless).
-**Schema**: `shared/schema.ts` includes `users`, `sessions`, `leads`, `interactions`, and `lead_magnets` tables with Zod validation.
+**Schema**: `shared/schema.ts` includes `users`, `sessions`, `leads`, `interactions`, `lead_magnets`, `imageAssets`, `contentItems`, `contentVisibility`, `abTests`, `abTestVariants`, `abTestAssignments`, and `abTestEvents` tables with Zod validation.
 **Migration Strategy**: Drizzle Kit for schema management and push-based deployment.
 
 ### Authentication & Authorization

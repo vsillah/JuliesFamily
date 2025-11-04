@@ -98,6 +98,12 @@ export default function AdminDashboard() {
                   Manage Images
                 </Button>
               </Link>
+              <Link href="/admin/ab-testing">
+                <Button variant="outline" data-testid="button-ab-testing">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  A/B Testing
+                </Button>
+              </Link>
               <Button variant="default" data-testid="button-export-data">
                 <Download className="w-4 h-4 mr-2" />
                 Export Data
