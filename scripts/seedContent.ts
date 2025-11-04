@@ -291,6 +291,137 @@ async function seedContent() {
         funnelStage: "consideration",
         leadMagnetType: "pdf"
       }
+    },
+    // Additional TOFU and MOFU lead magnets for each persona
+    {
+      type: "lead_magnet",
+      title: "Free Skills Assessment",
+      description: "Discover your current skill level and get personalized learning recommendations in just 5 minutes.",
+      imageName: null,
+      order: 11,
+      isActive: false,
+      metadata: {
+        persona: "student",
+        funnelStage: "awareness",
+        leadMagnetType: "assessment"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Student Success Webinar",
+      description: "Join our live webinar to hear from current students and learn proven strategies for balancing education with family and work.",
+      imageName: null,
+      order: 12,
+      isActive: false,
+      metadata: {
+        persona: "student",
+        funnelStage: "consideration",
+        leadMagnetType: "webinar"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Partnership Impact Webinar",
+      description: "Watch our 20-minute webinar showcasing real outcomes from successful community partnerships and collaborative programs.",
+      imageName: null,
+      order: 13,
+      isActive: false,
+      metadata: {
+        persona: "provider",
+        funnelStage: "awareness",
+        leadMagnetType: "webinar"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Partnership Case Studies",
+      description: "Read detailed case studies of successful partnerships and see measurable outcomes achieved through collaboration.",
+      imageName: null,
+      order: 14,
+      isActive: false,
+      metadata: {
+        persona: "provider",
+        funnelStage: "consideration",
+        leadMagnetType: "case_study"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Parent Resource Guide",
+      description: "Download our comprehensive guide to supporting your child's learning at home with age-appropriate activities and tips.",
+      imageName: null,
+      order: 15,
+      isActive: false,
+      metadata: {
+        persona: "parent",
+        funnelStage: "awareness",
+        leadMagnetType: "guide"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Family Success Workshop",
+      description: "Register for our interactive workshop where you'll meet other families and learn about our two-generation approach.",
+      imageName: null,
+      order: 16,
+      isActive: false,
+      metadata: {
+        persona: "parent",
+        funnelStage: "consideration",
+        leadMagnetType: "workshop"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Donation Impact Calculator",
+      description: "See exactly how your donation translates into educational opportunities, childcare hours, and family services.",
+      imageName: null,
+      order: 17,
+      isActive: false,
+      metadata: {
+        persona: "donor",
+        funnelStage: "awareness",
+        leadMagnetType: "calculator"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Donor Impact Video Tour",
+      description: "Take a virtual tour of our facility and meet the families whose lives you're helping transform through education.",
+      imageName: null,
+      order: 18,
+      isActive: false,
+      metadata: {
+        persona: "donor",
+        funnelStage: "consideration",
+        leadMagnetType: "video"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Volunteer Opportunities Guide",
+      description: "Browse all available volunteer roles with detailed descriptions, time commitments, and the impact you'll make.",
+      imageName: null,
+      order: 19,
+      isActive: false,
+      metadata: {
+        persona: "volunteer",
+        funnelStage: "awareness",
+        leadMagnetType: "guide"
+      }
+    },
+    {
+      type: "lead_magnet",
+      title: "Meet the Team Video",
+      description: "Meet our staff and current volunteers in this short video showcasing the rewarding experience of volunteering with us.",
+      imageName: null,
+      order: 20,
+      isActive: false,
+      metadata: {
+        persona: "volunteer",
+        funnelStage: "consideration",
+        leadMagnetType: "video"
+      }
     }
   ];
 
