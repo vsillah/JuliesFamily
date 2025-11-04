@@ -80,21 +80,14 @@ export default function AdminUserManagement() {
   });
 
   const handleToggleAdmin = (user: User) => {
-    if (user.id === currentUser?.id && user.isAdmin) {
-      toast({
-        title: "Action Not Allowed",
-        description: "You cannot remove your own admin privileges",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setConfirmAction({
       userId: user.id,
       currentStatus: user.isAdmin ?? false,
       userName: `${user.firstName} ${user.lastName}`,
     });
   };
+
+  const isCurrentUser = (userId: string) => userId === currentUser?.id;
 
   const confirmToggleAdmin = () => {
     if (!confirmAction) return;
@@ -184,16 +177,23 @@ export default function AdminUserManagement() {
                         </TableCell>
                         <TableCell className="text-right">
                           {user.isAdmin ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleToggleAdmin(user)}
-                              disabled={updateAdminStatusMutation.isPending}
-                              data-testid={`button-revoke-admin-${user.id}`}
-                            >
-                              <ShieldOff className="h-4 w-4 mr-2" />
-                              Revoke Admin
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleToggleAdmin(user)}
+                                disabled={updateAdminStatusMutation.isPending || isCurrentUser(user.id)}
+                                data-testid={`button-revoke-admin-${user.id}`}
+                              >
+                                <ShieldOff className="h-4 w-4 mr-2" />
+                                Revoke Admin
+                              </Button>
+                              {isCurrentUser(user.id) && (
+                                <span className="text-xs text-muted-foreground">
+                                  (Cannot remove own access)
+                                </span>
+                              )}
+                            </div>
                           ) : (
                             <Button
                               variant="default"
