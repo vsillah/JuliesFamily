@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
-  BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText
+  BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
+  Shield
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -101,6 +102,12 @@ export default function AdminDashboard() {
                 <Button variant="outline" data-testid="button-manage-images">
                   <ImageIcon className="w-4 h-4 mr-2" />
                   Manage Images
+                </Button>
+              </Link>
+              <Link href="/admin/users">
+                <Button variant="outline" data-testid="button-manage-users">
+                  <Shield className="w-4 h-4 mr-2" />
+                  Manage Users
                 </Button>
               </Link>
               <Link href="/admin/ab-testing">

@@ -9,6 +9,7 @@ import Home from "@/pages/Home";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminImages from "@/pages/AdminImages";
 import AdminContentManager from "@/pages/AdminContentManager";
+import AdminUserManagement from "@/pages/AdminUserManagement";
 import AdminABTesting from "@/pages/AdminABTesting";
 import AdminABTestAnalytics from "@/pages/AdminABTestAnalytics";
 import ImageComparison from "@/pages/ImageComparison";
@@ -21,6 +22,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/images" component={AdminImages} />
       <Route path="/admin/content" component={AdminContentManager} />
+      <Route path="/admin/users" component={AdminUserManagement} />
       <Route path="/admin/ab-testing" component={AdminABTesting} />
       <Route path="/admin/ab-testing/:id" component={AdminABTestAnalytics} />
       <Route path="/comparison" component={ImageComparison} />
