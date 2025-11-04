@@ -168,7 +168,8 @@ export default function AdminContentManager() {
 
   const uploadImageMutation = useMutation<ImageAsset, Error, FormData>({
     mutationFn: async (formData: FormData) => {
-      return await apiRequest<ImageAsset>("POST", "/api/admin/images/upload", formData);
+      const response = await apiRequest("POST", "/api/admin/images/upload", formData);
+      return await response.json();
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/images"] });
