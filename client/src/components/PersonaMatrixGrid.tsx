@@ -57,7 +57,7 @@ export default function PersonaMatrixGrid({
           {FUNNEL_STAGES.map((stage) => (
             <div key={stage} className="grid grid-cols-6 gap-2 mb-2">
               {/* Stage label */}
-              <div className="flex items-center justify-center bg-primary/10 rounded-md px-2">
+              <div className="flex items-center justify-center bg-primary/10 rounded-md px-2 pl-[0px] pr-[0px]">
                 <span className="text-xs font-semibold text-center">
                   {FUNNEL_STAGE_LABELS[stage]}
                 </span>
@@ -86,7 +86,6 @@ export default function PersonaMatrixGrid({
           ))}
         </div>
       </div>
-
       {/* Edit panel */}
       {selectedCard && (
         <MatrixEditPanel
