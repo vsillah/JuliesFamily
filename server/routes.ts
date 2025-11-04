@@ -670,6 +670,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get content visibility matrix for all persona×stage combinations (admin)
+  app.get('/api/content/:contentItemId/visibility-matrix', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const visibility = await storage.getContentVisibility(req.params.contentItemId);
+      res.json(visibility);
+    } catch (error) {
+      console.error("Error fetching content visibility matrix:", error);
+      res.status(500).json({ message: "Failed to fetch content visibility matrix" });
+    }
+  });
+
+  // Reset persona×stage overrides to defaults (admin)
+  app.post('/api/content/visibility/:id/reset', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const visibility = await storage.updateContentVisibility(req.params.id, {
+        titleOverride: null,
+        descriptionOverride: null,
+        imageNameOverride: null,
+      });
+      if (!visibility) {
+        return res.status(404).json({ message: "Content visibility setting not found" });
+      }
+      res.json(visibility);
+    } catch (error) {
+      console.error("Error resetting content visibility overrides:", error);
+      res.status(500).json({ message: "Failed to reset content visibility overrides" });
+    }
+  });
+
   // ============ A/B TESTING ROUTES ============
   
   // Get all A/B tests (admin)
