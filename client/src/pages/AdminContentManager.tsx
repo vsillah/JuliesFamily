@@ -429,14 +429,14 @@ export default function AdminContentManager() {
                 <div className="flex gap-2">
                   <div className="flex-1">
                     <Select
-                      value={editingItem.imageName || ""}
-                      onValueChange={(value) => setEditingItem({ ...editingItem, imageName: value })}
+                      value={editingItem.imageName || "none"}
+                      onValueChange={(value) => setEditingItem({ ...editingItem, imageName: value === "none" ? null : value })}
                     >
                       <SelectTrigger data-testid="select-edit-image">
                         <SelectValue placeholder="Select an existing image..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">No image</SelectItem>
+                        <SelectItem value="none">No image</SelectItem>
                         {images.map((img) => (
                           <SelectItem key={img.id} value={img.name}>
                             {img.name} ({img.usage})
@@ -569,14 +569,14 @@ export default function AdminContentManager() {
               <div className="flex gap-2">
                 <div className="flex-1">
                   <Select
-                    value={newItem.imageName}
-                    onValueChange={(value) => setNewItem({ ...newItem, imageName: value })}
+                    value={newItem.imageName || "none"}
+                    onValueChange={(value) => setNewItem({ ...newItem, imageName: value === "none" ? "" : value })}
                   >
                     <SelectTrigger data-testid="select-create-image">
                       <SelectValue placeholder="Select an existing image..." />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No image</SelectItem>
+                      <SelectItem value="none">No image</SelectItem>
                       {images.map((img) => (
                         <SelectItem key={img.id} value={img.name}>
                           {img.name} ({img.usage})
