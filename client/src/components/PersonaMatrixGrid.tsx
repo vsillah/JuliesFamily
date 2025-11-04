@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS } from "@shared/defaults/personas";
@@ -39,44 +39,45 @@ export default function PersonaMatrixGrid({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const checkScrollPosition = () => {
+  const checkScrollPosition = useCallback(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
     const { scrollLeft, scrollWidth, clientWidth } = container;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-  };
+    const hasOverflow = scrollWidth > clientWidth;
+    
+    setCanScrollLeft(hasOverflow && scrollLeft > 5);
+    setCanScrollRight(hasOverflow && scrollLeft < scrollWidth - clientWidth - 5);
+  }, []);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    // Check immediately
-    checkScrollPosition();
+    // Check scroll position
+    const handleCheck = () => {
+      requestAnimationFrame(checkScrollPosition);
+    };
 
-    // Add scroll listener
-    container.addEventListener('scroll', checkScrollPosition);
+    // Initial checks with delays
+    handleCheck();
+    const timers = [50, 150, 300, 500, 1000].map(delay => 
+      setTimeout(handleCheck, delay)
+    );
 
-    // Add resize observer to recheck when container or content size changes
-    const resizeObserver = new ResizeObserver(() => {
-      checkScrollPosition();
-    });
+    // Listen for scroll events
+    container.addEventListener('scroll', handleCheck);
+
+    // Listen for resize
+    const resizeObserver = new ResizeObserver(handleCheck);
     resizeObserver.observe(container);
 
-    // Recheck after delays to ensure content is rendered
-    const timeoutId1 = setTimeout(checkScrollPosition, 100);
-    const timeoutId2 = setTimeout(checkScrollPosition, 300);
-    const timeoutId3 = setTimeout(checkScrollPosition, 500);
-
     return () => {
-      container.removeEventListener('scroll', checkScrollPosition);
+      timers.forEach(clearTimeout);
+      container.removeEventListener('scroll', handleCheck);
       resizeObserver.disconnect();
-      clearTimeout(timeoutId1);
-      clearTimeout(timeoutId2);
-      clearTimeout(timeoutId3);
     };
-  }, [contentItems, visibilitySettings, images, abTests]);
+  }, [checkScrollPosition, contentItems, visibilitySettings, images, abTests]);
 
   const scrollLeft = () => {
     const container = scrollContainerRef.current;

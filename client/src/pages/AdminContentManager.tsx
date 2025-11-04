@@ -346,7 +346,7 @@ export default function AdminContentManager() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
         <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "Content Manager" }]} />
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold mb-2">Content Manager</h1>
@@ -385,27 +385,29 @@ export default function AdminContentManager() {
           </div>
 
           <TabsContent value="matrix">
-            <Card>
+            <Card className="overflow-hidden">
               <CardHeader>
                 <CardTitle>Persona × Journey Stage Matrix</CardTitle>
                 <CardDescription>
-                  Configure content for all persona and funnel stage combinations. Click any card to edit its specific configuration.
+                  Configure content for all persona and funnel stage combinations. Scroll horizontally to see all personas. Click any card to edit.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <PersonaMatrixGrid
-                  contentItems={{
-                    hero: heroContent,
-                    cta: ctaContent,
-                    service: services,
-                    event: events,
-                    testimonial: testimonials,
-                    lead_magnet: leadMagnets,
-                  }}
-                  visibilitySettings={allVisibilitySettings}
-                  images={images}
-                  abTests={allAbTests}
-                />
+              <CardContent className="p-0">
+                <div className="p-6 overflow-hidden">
+                  <PersonaMatrixGrid
+                    contentItems={{
+                      hero: heroContent,
+                      cta: ctaContent,
+                      service: services,
+                      event: events,
+                      testimonial: testimonials,
+                      lead_magnet: leadMagnets,
+                    }}
+                    visibilitySettings={allVisibilitySettings}
+                    images={images}
+                    abTests={allAbTests}
+                  />
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
