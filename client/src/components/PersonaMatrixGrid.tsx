@@ -99,8 +99,8 @@ export default function PersonaMatrixGrid({
   };
 
   return (
-    <div className="flex gap-4">
-      <div className="relative flex-1">
+    <div className="w-full">
+      <div className="relative w-full">
         {/* Scroll indicator - Right arrow */}
         {canScrollRight && (
           <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background/80 to-transparent z-40 flex items-center justify-end pr-2 pointer-events-none">
@@ -133,7 +133,7 @@ export default function PersonaMatrixGrid({
 
         <div 
           ref={scrollContainerRef}
-          className="overflow-x-auto overflow-y-visible scroll-smooth snap-x snap-mandatory" 
+          className="w-full overflow-x-auto overflow-y-visible scroll-smooth" 
           style={{ scrollPaddingLeft: '6rem' }}
         >
         <div className="min-w-max">
