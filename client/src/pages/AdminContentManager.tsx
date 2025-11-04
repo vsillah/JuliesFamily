@@ -18,7 +18,7 @@ import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 
 export default function AdminContentManager() {
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("service");
+  const [activeTab, setActiveTab] = useState("matrix");
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [matrixConfigItem, setMatrixConfigItem] = useState<ContentItem | null>(null);
