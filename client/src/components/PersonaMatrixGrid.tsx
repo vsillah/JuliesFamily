@@ -255,6 +255,7 @@ export default function PersonaMatrixGrid({
                 size="icon"
                 className="pointer-events-auto shadow-lg"
                 onClick={scrollRight}
+                aria-label="Scroll right to see more funnel stages"
                 data-testid="button-scroll-right"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -271,6 +272,7 @@ export default function PersonaMatrixGrid({
                 size="icon"
                 className="pointer-events-auto shadow-lg"
                 onClick={scrollLeft}
+                aria-label="Scroll left to see previous funnel stages"
                 data-testid="button-scroll-left"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -288,6 +290,7 @@ export default function PersonaMatrixGrid({
                 size="icon"
                 className="pointer-events-auto shadow-lg"
                 onClick={scrollDown}
+                aria-label="Scroll down to see more personas"
                 data-testid="button-scroll-down"
               >
                 <ChevronDown className="w-5 h-5" />
@@ -304,6 +307,7 @@ export default function PersonaMatrixGrid({
                 size="icon"
                 className="pointer-events-auto shadow-lg"
                 onClick={scrollUp}
+                aria-label="Scroll up to see previous personas"
                 data-testid="button-scroll-up"
               >
                 <ChevronUp className="w-5 h-5" />
