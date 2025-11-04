@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
-  BarChart3, Filter, Download, UserPlus, Image as ImageIcon
+  BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";

@@ -75,38 +75,38 @@ async function seedContent() {
   const events: InsertContentItem[] = [
     {
       type: "event",
-      title: "Summer Program Registration",
-      description: "Join us for an exciting summer of learning! Registration is now open for all our summer programs including childcare and adult education.",
-      imageName: "event-summer",
+      title: "50th Anniversary Celebration",
+      description: "Join us as we celebrate five decades of empowering families through education and support. A special evening honoring our graduates, staff, and community partners.",
+      imageName: "event-anniversary",
       order: 1,
       isActive: true,
       metadata: {
-        date: "June 1-15",
-        location: "Main Campus"
+        date: "April 4, 2024",
+        location: "UMass Club, Downtown Boston"
       }
     },
     {
       type: "event",
-      title: "Family Literacy Night",
-      description: "Celebrate reading as a family! Activities, books, and refreshments provided. All families welcome.",
-      imageName: "event-literacy",
+      title: "Spring Graduation Ceremony",
+      description: "Celebrating our graduates who have completed their HiSET and are moving forward to college and career success.",
+      imageName: "event-graduation",
       order: 2,
       isActive: true,
       metadata: {
-        date: "May 20th, 6-8 PM",
-        location: "Community Center"
+        date: "June 2024",
+        location: "Julie's Family Learning Program"
       }
     },
     {
       type: "event",
-      title: "Career Fair & Workshop",
-      description: "Meet local employers and learn job-ready skills. Resume building workshops available throughout the day.",
-      imageName: "event-career",
+      title: "Fall Family Learning Fair",
+      description: "An open house event featuring program information, family activities, and opportunities to meet our dedicated staff and volunteers.",
+      imageName: "event-family-fair",
       order: 3,
       isActive: true,
       metadata: {
-        date: "April 15th, 10 AM - 3 PM",
-        location: "Gymnasium"
+        date: "September 2024",
+        location: "Julie's Family Learning Program"
       }
     }
   ];
@@ -121,38 +121,35 @@ async function seedContent() {
   const testimonials: InsertContentItem[] = [
     {
       type: "testimonial",
-      title: "Sarah Johnson",
-      description: "This program changed my life. I not only earned my high school diploma, but gained confidence and skills that helped me advance in my career. The childcare services made it all possible.",
-      imageName: "testimonial-sarah",
+      title: "Maria Garcia",
+      description: "Julie's always tries to provide us with the most important things we need. Always doing their best to try and take some weight off our shoulders. Julie's makes me feel that I am not alone. When we need help, Julie's is always there.",
+      imageName: "testimonial-1",
       order: 1,
       isActive: true,
       metadata: {
-        rating: 5,
-        role: "Adult Education Graduate"
+        rating: 5
       }
     },
     {
       type: "testimonial",
-      title: "Maria Rodriguez",
-      description: "As a single mother, I didn't think continuing my education was possible. Julie's Family Learning Program proved me wrong. The support I received was incredible.",
-      imageName: "testimonial-maria",
+      title: "Tasha Williams",
+      description: "Julie's helps me with budgeting, building my credit, and managing my daughter. This is the place you need to be if you want to better yourself for your family. You can work at your own pace. They don't judge. They have your back!",
+      imageName: "testimonial-2",
       order: 2,
       isActive: true,
       metadata: {
-        rating: 5,
-        role: "Family Development Participant"
+        rating: 5
       }
     },
     {
       type: "testimonial",
-      title: "David Chen",
-      description: "The career counseling and job placement assistance gave me direction when I needed it most. I'm now working in a field I'm passionate about.",
-      imageName: "testimonial-david",
+      title: "Sarah Johnson",
+      description: "I just want to say Thank You Julie's Family, you definitely are the best. I am so blessed to have come across the program. You teachers are angels, I love you all. We will get through this together.",
+      imageName: "testimonial-3",
       order: 3,
       isActive: true,
       metadata: {
-        rating: 5,
-        role: "Career Services Graduate"
+        rating: 5
       }
     }
   ];

@@ -48,7 +48,12 @@ export default function AdminContentManager() {
       return apiRequest("PATCH", `/api/content/${id}`, updates);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/content/type"] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.startsWith("/api/content/type");
+        }
+      });
       toast({
         title: "Success",
         description: "Content updated successfully",
@@ -69,7 +74,12 @@ export default function AdminContentManager() {
       return apiRequest("POST", "/api/content", item);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/content/type"] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.startsWith("/api/content/type");
+        }
+      });
       toast({
         title: "Success",
         description: "Content created successfully",
@@ -97,7 +107,12 @@ export default function AdminContentManager() {
       return apiRequest("DELETE", `/api/content/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/content/type"] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.startsWith("/api/content/type");
+        }
+      });
       toast({
         title: "Success",
         description: "Content deleted successfully",
@@ -117,7 +132,12 @@ export default function AdminContentManager() {
       return apiRequest("PATCH", `/api/content/${id}`, { isActive });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/content/type"] });
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.startsWith("/api/content/type");
+        }
+      });
     },
   });
 
