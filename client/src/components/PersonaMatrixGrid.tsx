@@ -89,30 +89,34 @@ export default function PersonaMatrixGrid({
   return (
     <div className="flex gap-4">
       <div className="relative flex-1">
-        {/* Left scroll button */}
-        {canScrollLeft && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 shadow-lg bg-background"
-            onClick={scrollLeft}
-            data-testid="button-scroll-left"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-        )}
-
-        {/* Right scroll button */}
+        {/* Scroll indicator - Right arrow */}
         {canScrollRight && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 shadow-lg bg-background"
-            onClick={scrollRight}
-            data-testid="button-scroll-right"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
+          <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-background/80 to-transparent z-40 flex items-center justify-end pr-2 pointer-events-none">
+            <Button
+              variant="default"
+              size="icon"
+              className="pointer-events-auto shadow-lg"
+              onClick={scrollRight}
+              data-testid="button-scroll-right"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
+        )}
+        
+        {/* Scroll indicator - Left arrow */}
+        {canScrollLeft && (
+          <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-background/80 to-transparent z-40 flex items-center justify-start pl-2 pointer-events-none">
+            <Button
+              variant="default"
+              size="icon"
+              className="pointer-events-auto shadow-lg"
+              onClick={scrollLeft}
+              data-testid="button-scroll-left"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </Button>
+          </div>
         )}
 
         <div 
