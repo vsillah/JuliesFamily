@@ -132,22 +132,25 @@ export default function MatrixEditPanel({
         });
       }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ 
+    onSuccess: async () => {
+      // Invalidate and immediately refetch all related queries
+      await queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
           return key?.includes("/api/content") || key?.includes("/api/admin/images");
-        }
+        },
+        refetchType: 'active'
       });
+      
       toast({
         title: "Saved",
         description: "Configuration updated successfully",
       });
       
-      // Close dialog after a brief delay to allow queries to refetch
+      // Close dialog after refetch completes
       setTimeout(() => {
         onClose();
-      }, 500);
+      }, 300);
     },
     onError: () => {
       toast({
