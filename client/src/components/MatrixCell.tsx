@@ -84,12 +84,12 @@ export default function MatrixCell({
 
   return (
     <div 
-      className={`bg-card border rounded-lg p-2 min-h-[240px] transition-all ${
+      className={`bg-card border rounded-lg p-1 min-h-[180px] transition-all snap-start ${
         isSelected ? 'ring-2 ring-primary shadow-lg' : ''
       }`}
       data-testid={`matrix-cell-${persona}-${stage}`}
     >
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-1">
         {CONTENT_TYPES.map((type) => {
           const assignedItem = getAssignedContentItem(type);
           const visibility = assignedItem ? getVisibilityForItem(assignedItem.id) : null;

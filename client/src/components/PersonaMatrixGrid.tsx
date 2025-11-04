@@ -35,16 +35,16 @@ export default function PersonaMatrixGrid({
   const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
 
   return (
-    <div className="flex gap-6">
-      <div className="flex-1 overflow-x-auto">
+    <div className="flex gap-4">
+      <div className="flex-1 overflow-x-auto scroll-smooth snap-x snap-mandatory" style={{ scrollPaddingLeft: '6rem' }}>
         <div className="min-w-max">
           {/* Header row with persona labels */}
-          <div className="grid grid-cols-6 gap-2 mb-2">
-            <div className="h-12" /> {/* Empty corner */}
+          <div className="grid grid-cols-6 gap-1 mb-1">
+            <div className="h-10" /> {/* Empty corner */}
             {PERSONAS.map((persona) => (
               <div
                 key={persona}
-                className="h-12 flex items-center justify-center bg-primary/10 rounded-md px-2"
+                className="h-10 flex items-center justify-center bg-primary/10 rounded-md px-1 snap-start"
               >
                 <span className="text-xs font-semibold text-center leading-tight">
                   {PERSONA_LABELS[persona]}
@@ -55,9 +55,9 @@ export default function PersonaMatrixGrid({
 
           {/* Grid rows - one for each funnel stage */}
           {FUNNEL_STAGES.map((stage) => (
-            <div key={stage} className="grid grid-cols-6 gap-2 mb-2">
-              {/* Stage label */}
-              <div className="flex items-center justify-center bg-primary/10 rounded-md px-2 pl-[0px] pr-[0px]">
+            <div key={stage} className="grid grid-cols-6 gap-1 mb-1">
+              {/* Stage label - sticky on scroll */}
+              <div className="flex items-center justify-center bg-primary/10 rounded-md px-1 sticky left-0 z-10">
                 <span className="text-xs font-semibold text-center">
                   {FUNNEL_STAGE_LABELS[stage]}
                 </span>

@@ -57,23 +57,23 @@ export default function MiniContentCard({
   return (
     <button
       onClick={onClick}
-      className="w-full bg-background border rounded-md p-2 hover-elevate active-elevate-2 transition-all text-left relative group"
+      className="w-full bg-background border rounded-md p-1 hover-elevate active-elevate-2 transition-all text-left relative group"
       data-testid={`mini-card-${contentType}`}
     >
       {/* A/B Test Badge */}
       {activeTestCount > 0 && (
-        <div className="absolute -top-1 -right-1 z-10">
-          <div className="bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-md">
-            <FlaskConical className="w-3 h-3" />
+        <div className="absolute -top-0.5 -right-0.5 z-10">
+          <div className="bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center shadow-md">
+            <FlaskConical className="w-2.5 h-2.5" />
           </div>
-          <div className="absolute -bottom-1 -right-1 bg-background border border-primary rounded-full w-4 h-4 flex items-center justify-center text-xs font-semibold">
+          <div className="absolute -bottom-0.5 -right-0.5 bg-background border border-primary rounded-full w-3 h-3 flex items-center justify-center text-[10px] font-semibold">
             {activeTestCount}
           </div>
         </div>
       )}
 
       {/* Thumbnail or Icon */}
-      <div className="aspect-square mb-2 rounded overflow-hidden bg-muted flex items-center justify-center">
+      <div className="aspect-square mb-1 rounded overflow-hidden bg-muted flex items-center justify-center">
         {thumbnailUrl ? (
           <img src={thumbnailUrl} alt={title} className="w-full h-full object-cover" />
         ) : (
