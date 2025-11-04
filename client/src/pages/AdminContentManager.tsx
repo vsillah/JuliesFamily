@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { ContentItem } from "@shared/schema";
+import type { ContentItem, ImageAsset } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X } from "lucide-react";
 
 export default function AdminContentManager() {
   const { toast } = useToast();
@@ -42,6 +42,14 @@ export default function AdminContentManager() {
   const { data: leadMagnets = [], isLoading: leadMagnetsLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/lead_magnet"],
   });
+
+  const { data: images = [] } = useQuery<ImageAsset[]>({
+    queryKey: ["/api/admin/images"],
+  });
+
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<ContentItem> }) => {
@@ -158,6 +166,53 @@ export default function AdminContentManager() {
     createMutation.mutate(newItem);
   };
 
+  const uploadImageMutation = useMutation<ImageAsset, Error, FormData>({
+    mutationFn: async (formData: FormData) => {
+      return await apiRequest<ImageAsset>("POST", "/api/admin/images/upload", formData);
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/images"] });
+      toast({
+        title: "Image uploaded",
+        description: "Image has been successfully uploaded.",
+      });
+      if (editingItem) {
+        setEditingItem({ ...editingItem, imageName: data.name });
+      } else {
+        setNewItem({ ...newItem, imageName: data.name });
+      }
+      setSelectedImageFile(null);
+      setImagePreviewUrl(null);
+      setUploadingImage(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Upload failed",
+        description: error.message || "Failed to upload image",
+        variant: "destructive",
+      });
+      setUploadingImage(false);
+    },
+  });
+
+  const handleQuickImageUpload = async (file: File, type: string) => {
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("name", file.name.replace(/\.[^/.]+$/, ""));
+    formData.append("usage", type);
+    
+    setUploadingImage(true);
+    uploadImageMutation.mutate(formData);
+  };
+
+  const getImageUrl = (imageName: string | null) => {
+    if (!imageName) return null;
+    const image = images.find(img => img.name === imageName);
+    return image?.cloudinarySecureUrl || null;
+  };
+
   const renderContentList = (items: ContentItem[], type: string) => {
     if (items.length === 0) {
       return (
@@ -177,6 +232,16 @@ export default function AdminContentManager() {
                   <GripVertical className="w-5 h-5 text-muted-foreground" />
                 </div>
                 
+                {getImageUrl(item.imageName) && (
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={getImageUrl(item.imageName)!} 
+                      alt={item.title}
+                      className="w-24 h-24 object-cover rounded border border-border"
+                    />
+                  </div>
+                )}
+                
                 <div className="flex-1">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div className="flex-1">
@@ -188,9 +253,10 @@ export default function AdminContentManager() {
                           {item.description}
                         </p>
                       )}
-                      {item.imageName && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Image: <span className="font-mono">{item.imageName}</span>
+                      {item.imageName && item.imageName.length > 0 && (
+                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                          <ImageIcon className="w-3 h-3" />
+                          <span className="font-mono">{item.imageName}</span>
                         </p>
                       )}
                       {item.metadata && Object.keys(item.metadata).length > 0 && (
@@ -337,15 +403,80 @@ export default function AdminContentManager() {
                   data-testid="input-edit-description"
                 />
               </div>
-              <div>
-                <Label htmlFor="edit-image">Image Name (Cloudinary)</Label>
-                <Input
-                  id="edit-image"
-                  value={editingItem.imageName || ""}
-                  onChange={(e) => setEditingItem({ ...editingItem, imageName: e.target.value })}
-                  placeholder="e.g., service-children"
-                  data-testid="input-edit-image"
-                />
+              <div className="space-y-3">
+                <Label>Image</Label>
+                
+                {/* Image Preview */}
+                {getImageUrl(editingItem.imageName) && (
+                  <div className="relative inline-block">
+                    <img 
+                      src={getImageUrl(editingItem.imageName)!} 
+                      alt="Preview"
+                      className="w-full max-w-sm h-48 object-cover rounded border border-border"
+                    />
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="absolute top-2 right-2"
+                      onClick={() => setEditingItem({ ...editingItem, imageName: null })}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+                
+                {/* Image Selector */}
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Select
+                      value={editingItem.imageName || ""}
+                      onValueChange={(value) => setEditingItem({ ...editingItem, imageName: value })}
+                    >
+                      <SelectTrigger data-testid="select-edit-image">
+                        <SelectValue placeholder="Select an existing image..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">No image</SelectItem>
+                        {images.map((img) => (
+                          <SelectItem key={img.id} value={img.name}>
+                            {img.name} ({img.usage})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Quick Upload */}
+                  <div>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleQuickImageUpload(file, editingItem.type);
+                      }}
+                      className="hidden"
+                      id="quick-upload-edit"
+                      disabled={uploadingImage}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('quick-upload-edit')?.click()}
+                      disabled={uploadingImage}
+                      data-testid="button-upload-image-edit"
+                    >
+                      {uploadingImage ? (
+                        "Uploading..."
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Upload
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
               </div>
               <div>
                 <Label htmlFor="edit-metadata">Metadata (JSON)</Label>
@@ -364,7 +495,7 @@ export default function AdminContentManager() {
               </div>
               <div className="flex items-center gap-2">
                 <Switch
-                  checked={editingItem.isActive}
+                  checked={editingItem.isActive ?? true}
                   onCheckedChange={(checked) => setEditingItem({ ...editingItem, isActive: checked })}
                   data-testid="switch-edit-active"
                 />
@@ -412,15 +543,80 @@ export default function AdminContentManager() {
                 data-testid="input-create-description"
               />
             </div>
-            <div>
-              <Label htmlFor="create-image">Image Name (Cloudinary)</Label>
-              <Input
-                id="create-image"
-                value={newItem.imageName}
-                onChange={(e) => setNewItem({ ...newItem, imageName: e.target.value })}
-                placeholder="e.g., service-children"
-                data-testid="input-create-image"
-              />
+            <div className="space-y-3">
+              <Label>Image</Label>
+              
+              {/* Image Preview */}
+              {getImageUrl(newItem.imageName) && (
+                <div className="relative inline-block">
+                  <img 
+                    src={getImageUrl(newItem.imageName)!} 
+                    alt="Preview"
+                    className="w-full max-w-sm h-48 object-cover rounded border border-border"
+                  />
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="absolute top-2 right-2"
+                    onClick={() => setNewItem({ ...newItem, imageName: "" })}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              
+              {/* Image Selector */}
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Select
+                    value={newItem.imageName}
+                    onValueChange={(value) => setNewItem({ ...newItem, imageName: value })}
+                  >
+                    <SelectTrigger data-testid="select-create-image">
+                      <SelectValue placeholder="Select an existing image..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">No image</SelectItem>
+                      {images.map((img) => (
+                        <SelectItem key={img.id} value={img.name}>
+                          {img.name} ({img.usage})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Quick Upload */}
+                <div>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleQuickImageUpload(file, newItem.type);
+                    }}
+                    className="hidden"
+                    id="quick-upload-create"
+                    disabled={uploadingImage}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById('quick-upload-create')?.click()}
+                    disabled={uploadingImage}
+                    data-testid="button-upload-image-create"
+                  >
+                    {uploadingImage ? (
+                      "Uploading..."
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="flex gap-2 justify-end pt-4">
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} data-testid="button-cancel-create">
