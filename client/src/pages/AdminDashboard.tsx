@@ -14,12 +14,15 @@ import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import LeadDetailsDialog from "@/components/LeadDetailsDialog";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [selectedPersona, setSelectedPersona] = useState<string>("all");
   const [selectedFunnelStage, setSelectedFunnelStage] = useState<string>("all");
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
 
   // Fetch analytics data
   const { data: analytics } = useQuery<any>({
@@ -286,7 +289,15 @@ export default function AdminDashboard() {
                         )}
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" data-testid={`button-view-lead-${lead.id}`}>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => {
+                        setSelectedLeadId(lead.id);
+                        setIsLeadDialogOpen(true);
+                      }}
+                      data-testid={`button-view-lead-${lead.id}`}
+                    >
                       View Details
                     </Button>
                   </div>
@@ -296,6 +307,12 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <LeadDetailsDialog
+        leadId={selectedLeadId}
+        open={isLeadDialogOpen}
+        onOpenChange={setIsLeadDialogOpen}
+      />
     </div>
   );
 }
