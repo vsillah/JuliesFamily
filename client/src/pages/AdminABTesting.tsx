@@ -33,8 +33,8 @@ export default function AdminABTesting() {
     name: "",
     description: "",
     type: "card_order" as string,
-    targetPersona: "" as string,
-    targetFunnelStage: "" as string,
+    targetPersona: "all" as string,
+    targetFunnelStage: "all" as string,
     trafficAllocation: 100,
   });
 
@@ -65,8 +65,8 @@ export default function AdminABTesting() {
         name: "",
         description: "",
         type: "card_order",
-        targetPersona: "",
-        targetFunnelStage: "",
+        targetPersona: "all",
+        targetFunnelStage: "all",
         trafficAllocation: 100,
       });
       toast({
@@ -161,7 +161,13 @@ export default function AdminABTesting() {
   }
 
   const handleCreateTest = () => {
-    createTestMutation.mutate(newTest);
+    // Convert "all" values to null for the backend
+    const testData = {
+      ...newTest,
+      targetPersona: newTest.targetPersona === "all" ? null : newTest.targetPersona,
+      targetFunnelStage: newTest.targetFunnelStage === "all" ? null : newTest.targetFunnelStage,
+    };
+    createTestMutation.mutate(testData);
   };
 
   const handleCreateVariant = () => {
@@ -499,7 +505,7 @@ export default function AdminABTesting() {
                     <SelectValue placeholder="All personas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All personas</SelectItem>
+                    <SelectItem value="all">All personas</SelectItem>
                     <SelectItem value="student">Adult Education Student</SelectItem>
                     <SelectItem value="provider">Service Provider</SelectItem>
                     <SelectItem value="parent">Parent</SelectItem>
@@ -518,7 +524,7 @@ export default function AdminABTesting() {
                     <SelectValue placeholder="All stages" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All stages</SelectItem>
+                    <SelectItem value="all">All stages</SelectItem>
                     <SelectItem value="awareness">Awareness (TOFU)</SelectItem>
                     <SelectItem value="consideration">Consideration (MOFU)</SelectItem>
                     <SelectItem value="decision">Decision (BOFU)</SelectItem>
