@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { ContentItem, ImageAsset } from "@shared/schema";
+import type { ContentItem, ImageAsset, ContentVisibility, AbTest } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import MatrixConfigDialog from "@/components/MatrixConfigDialog";
+import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 
 export default function AdminContentManager() {
   const { toast } = useToast();
@@ -56,6 +56,18 @@ export default function AdminContentManager() {
 
   const { data: images = [] } = useQuery<ImageAsset[]>({
     queryKey: ["/api/admin/images"],
+  });
+
+  // Fetch all visibility settings for matrix view
+  const { data: allVisibilitySettings = [] } = useQuery<ContentVisibility[]>({
+    queryKey: ["/api/content/visibility"],
+    enabled: activeTab === "matrix",
+  });
+
+  // Fetch all A/B tests for matrix view
+  const { data: allAbTests = [] } = useQuery<AbTest[]>({
+    queryKey: ["/api/admin/ab-tests"],
+    enabled: activeTab === "matrix",
   });
 
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -346,6 +358,10 @@ export default function AdminContentManager() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex justify-between items-center">
             <TabsList>
+              <TabsTrigger value="matrix" data-testid="tab-matrix">
+                <Grid3x3 className="w-4 h-4 mr-2" />
+                Matrix View
+              </TabsTrigger>
               <TabsTrigger value="hero" data-testid="tab-hero">Hero ({heroContent.length})</TabsTrigger>
               <TabsTrigger value="cta" data-testid="tab-cta">CTA ({ctaContent.length})</TabsTrigger>
               <TabsTrigger value="service" data-testid="tab-services">Services ({services.length})</TabsTrigger>
@@ -354,17 +370,45 @@ export default function AdminContentManager() {
               <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets">Lead Magnets ({leadMagnets.length})</TabsTrigger>
             </TabsList>
             
-            <Button
-              onClick={() => {
-                setNewItem({ ...newItem, type: activeTab });
-                setIsCreateDialogOpen(true);
-              }}
-              data-testid="button-create-new"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create New
-            </Button>
+            {activeTab !== "matrix" && (
+              <Button
+                onClick={() => {
+                  setNewItem({ ...newItem, type: activeTab });
+                  setIsCreateDialogOpen(true);
+                }}
+                data-testid="button-create-new"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create New
+              </Button>
+            )}
           </div>
+
+          <TabsContent value="matrix">
+            <Card>
+              <CardHeader>
+                <CardTitle>Persona × Journey Stage Matrix</CardTitle>
+                <CardDescription>
+                  Configure content for all persona and funnel stage combinations. Click any card to edit its specific configuration.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <PersonaMatrixGrid
+                  contentItems={{
+                    hero: heroContent,
+                    cta: ctaContent,
+                    service: services,
+                    event: events,
+                    testimonial: testimonials,
+                    lead_magnet: leadMagnets,
+                  }}
+                  visibilitySettings={allVisibilitySettings}
+                  images={images}
+                  abTests={allAbTests}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="hero">
             {heroLoading ? (
