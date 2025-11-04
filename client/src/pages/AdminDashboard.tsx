@@ -13,6 +13,7 @@ import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
 import { format } from "date-fns";
 import { Link } from "wouter";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -78,6 +79,7 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-background">
       <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Breadcrumbs items={[{ label: "Admin Dashboard" }]} />
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-serif font-bold text-primary">CRM Dashboard</h1>

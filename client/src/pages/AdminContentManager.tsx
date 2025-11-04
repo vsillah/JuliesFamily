@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X } from "lucide-react";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function AdminContentManager() {
   const { toast } = useToast();
@@ -314,6 +315,7 @@ export default function AdminContentManager() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "Content Manager" }]} />
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold mb-2">Content Manager</h1>
           <p className="text-muted-foreground">

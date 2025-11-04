@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import type { AbTest, AbTestVariant } from "@shared/schema";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface AnalyticsData {
   variantId: string;
@@ -145,6 +146,11 @@ export default function AdminABTestAnalytics() {
     <div className="min-h-screen bg-background">
       <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Breadcrumbs items={[
+            { label: "Admin Dashboard", href: "/admin" },
+            { label: "A/B Testing", href: "/admin/ab-testing" },
+            { label: test.name || "Analytics" }
+          ]} />
           <div className="flex items-center justify-between">
             <div>
               <Link href="/admin/ab-testing">

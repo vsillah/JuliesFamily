@@ -18,6 +18,7 @@ import {
 import { useLocation, Link } from "wouter";
 import type { AbTest, AbTestVariant } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function AdminABTesting() {
   const { user } = useAuth();
@@ -243,6 +244,7 @@ export default function AdminABTesting() {
     <div className="min-h-screen bg-background">
       <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "A/B Testing" }]} />
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-serif font-bold text-primary flex items-center gap-2">
