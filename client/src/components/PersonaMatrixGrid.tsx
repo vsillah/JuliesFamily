@@ -64,15 +64,19 @@ export default function PersonaMatrixGrid({
     });
     resizeObserver.observe(container);
 
-    // Recheck after a short delay to ensure content is rendered
-    const timeoutId = setTimeout(checkScrollPosition, 100);
+    // Recheck after delays to ensure content is rendered
+    const timeoutId1 = setTimeout(checkScrollPosition, 100);
+    const timeoutId2 = setTimeout(checkScrollPosition, 300);
+    const timeoutId3 = setTimeout(checkScrollPosition, 500);
 
     return () => {
       container.removeEventListener('scroll', checkScrollPosition);
       resizeObserver.disconnect();
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
+      clearTimeout(timeoutId3);
     };
-  }, [contentItems]);
+  }, [contentItems, visibilitySettings, images, abTests]);
 
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
