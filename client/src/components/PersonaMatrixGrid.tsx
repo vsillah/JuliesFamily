@@ -36,15 +36,15 @@ export default function PersonaMatrixGrid({
 
   return (
     <div className="flex gap-4">
-      <div className="flex-1 overflow-x-auto scroll-smooth snap-x snap-mandatory" style={{ scrollPaddingLeft: '6rem' }}>
+      <div className="flex-1 overflow-x-auto overflow-y-visible scroll-smooth snap-x snap-mandatory" style={{ scrollPaddingLeft: '6rem' }}>
         <div className="min-w-max">
-          {/* Header row with persona labels */}
-          <div className="grid grid-cols-6 gap-1 mb-1">
-            <div className="h-10" /> {/* Empty corner */}
+          {/* Header row with persona labels - sticky on vertical scroll */}
+          <div className="grid gap-1 mb-1 sticky top-0 z-20 bg-background pb-1" style={{ gridTemplateColumns: '6rem repeat(5, minmax(200px, 1fr))' }}>
+            <div className="h-12 bg-background" /> {/* Empty corner */}
             {PERSONAS.map((persona) => (
               <div
                 key={persona}
-                className="h-10 flex items-center justify-center bg-primary/10 rounded-md px-1 snap-start"
+                className="h-12 flex items-center justify-center bg-primary/10 rounded-md px-2 snap-start"
               >
                 <span className="text-xs font-semibold text-center leading-tight">
                   {PERSONA_LABELS[persona]}
@@ -55,10 +55,10 @@ export default function PersonaMatrixGrid({
 
           {/* Grid rows - one for each funnel stage */}
           {FUNNEL_STAGES.map((stage) => (
-            <div key={stage} className="grid grid-cols-6 gap-1 mb-1">
-              {/* Stage label - sticky on scroll */}
-              <div className="flex items-center justify-center bg-primary/10 rounded-md px-1 sticky left-0 z-10">
-                <span className="text-xs font-semibold text-center">
+            <div key={stage} className="grid gap-1 mb-1" style={{ gridTemplateColumns: '6rem repeat(5, minmax(200px, 1fr))' }}>
+              {/* Stage label - sticky on horizontal scroll */}
+              <div className="h-full min-h-[120px] flex items-center justify-center bg-primary/10 rounded-md px-2 sticky left-0 z-10">
+                <span className="text-xs font-semibold text-center leading-tight">
                   {FUNNEL_STAGE_LABELS[stage]}
                 </span>
               </div>
