@@ -1,5 +1,5 @@
 import Navigation from "@/components/Navigation";
-import PersonalizedHero from "@/components/PersonalizedHero";
+import Hero from "@/components/Hero";
 import Services from "@/components/Services";
 import PersonalizedLeadMagnet from "@/components/PersonalizedLeadMagnet";
 import ImpactStats from "@/components/ImpactStats";
@@ -73,7 +73,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Navigation />
-      <PersonalizedHero />
+      <Hero />
       <Services />
       
       <section className="py-20 bg-muted/30" id="lead-magnet">
