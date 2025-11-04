@@ -44,7 +44,7 @@ export default function PersonaMatrixGrid({
             {PERSONAS.map((persona) => (
               <div
                 key={persona}
-                className="h-12 flex items-center justify-center bg-primary/10 rounded-md px-2 snap-start"
+                className="h-12 flex items-center justify-center bg-primary text-primary-foreground rounded-md px-2 snap-start shadow-sm"
               >
                 <span className="text-xs font-semibold text-center leading-tight">
                   {PERSONA_LABELS[persona]}
@@ -57,7 +57,7 @@ export default function PersonaMatrixGrid({
           {FUNNEL_STAGES.map((stage) => (
             <div key={stage} className="grid gap-1 mb-1" style={{ gridTemplateColumns: '6rem repeat(5, minmax(200px, 1fr))' }}>
               {/* Stage label - sticky on horizontal scroll */}
-              <div className="h-full min-h-[120px] flex items-center justify-center bg-primary/10 rounded-md px-2 sticky left-0 z-10">
+              <div className="h-full min-h-[120px] flex items-center justify-center bg-primary text-primary-foreground rounded-md px-2 sticky left-0 z-10 shadow-sm">
                 <span className="text-xs font-semibold text-center leading-tight">
                   {FUNNEL_STAGE_LABELS[stage]}
                 </span>
