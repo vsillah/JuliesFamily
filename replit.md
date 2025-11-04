@@ -29,6 +29,7 @@ Preferred communication style: Simple, everyday language.
 - **Profile Photo Upload System (November 2025)**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs. Uses token-based authentication for secure upload validation.
 - **Content Management System (November 2025)**: Full-featured CMS allowing admins to manage all website content (services, events, testimonials, lead magnets) with image selection, visibility controls, and ordering. Integrates with Cloudinary for AI-powered image upscaling and optimization.
 - **A/B Testing System (November 2025)**: Comprehensive experimentation platform for testing different card configurations, layouts, messaging, and CTAs. Features include weighted variant assignment, session-based tracking, conversion metrics, statistical significance calculation, and detailed analytics dashboards. Supports persona and funnel stage targeting for granular testing. Statistical significance uses two-tailed z-test with Abramowitz-Stegun approximation for accurate p-value calculation (95% confidence threshold at z ≥ 1.96).
+- **Breadcrumb Navigation (November 2025)**: Hierarchical navigation system across all admin pages showing the current location and providing quick access to parent pages. Includes proper ARIA labels, hover states, and semantic markup for accessibility.
 
 ### Backend Architecture
 
