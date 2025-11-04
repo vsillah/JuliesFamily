@@ -75,10 +75,7 @@ export default function MatrixConfigDialog({ contentItem, open, onOpenChange }: 
   // Update visibility mutation
   const updateVisibilityMutation = useMutation({
     mutationFn: async (data: { id: string; updates: Partial<ContentVisibility> }) => {
-      return await apiRequest(`/api/content/visibility/${data.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(data.updates),
-      });
+      return await apiRequest("PATCH", `/api/content/visibility/${data.id}`, data.updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/content", contentItem.id, "visibility-matrix"] });
@@ -98,11 +95,17 @@ export default function MatrixConfigDialog({ contentItem, open, onOpenChange }: 
 
   // Create visibility mutation
   const createVisibilityMutation = useMutation({
-    mutationFn: async (data: Partial<ContentVisibility> & { contentItemId: string; persona: string; funnelStage: string }) => {
-      return await apiRequest("/api/content/visibility", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+    mutationFn: async (data: {
+      contentItemId: string;
+      persona?: string | null;
+      funnelStage?: string | null;
+      isVisible?: boolean;
+      order?: number;
+      titleOverride?: string | null;
+      descriptionOverride?: string | null;
+      imageNameOverride?: string | null;
+    }) => {
+      return await apiRequest("POST", "/api/content/visibility", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/content", contentItem.id, "visibility-matrix"] });
@@ -123,9 +126,7 @@ export default function MatrixConfigDialog({ contentItem, open, onOpenChange }: 
   // Reset overrides mutation
   const resetOverridesMutation = useMutation({
     mutationFn: async (visibilityId: string) => {
-      return await apiRequest(`/api/content/visibility/${visibilityId}/reset`, {
-        method: "POST",
-      });
+      return await apiRequest("POST", `/api/content/visibility/${visibilityId}/reset`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/content", contentItem.id, "visibility-matrix"] });
@@ -153,7 +154,7 @@ export default function MatrixConfigDialog({ contentItem, open, onOpenChange }: 
     } else {
       createVisibilityMutation.mutate({
         contentItemId: contentItem.id,
-        persona,
+        persona: persona,
         funnelStage: stage,
         isVisible: true,
         order: 0,
@@ -306,9 +307,9 @@ function CellEditor({ persona, stage, contentItem, visibility, onSave }: CellEdi
 
   const handleSave = () => {
     onSave({
-      titleOverride: titleOverride || null,
-      descriptionOverride: descriptionOverride || null,
-      imageNameOverride: imageNameOverride || null,
+      titleOverride: titleOverride || undefined,
+      descriptionOverride: descriptionOverride || undefined,
+      imageNameOverride: imageNameOverride || undefined,
     });
     setHasChanges(false);
   };
