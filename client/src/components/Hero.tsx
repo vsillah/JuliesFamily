@@ -1,12 +1,27 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
+import type { ContentItem } from "@shared/schema";
 
 export default function Hero() {
+  const { persona } = usePersona();
   const [scrollScale, setScrollScale] = useState(1);
   const [textVisible, setTextVisible] = useState(false);
   const [shadeVisible, setShadeVisible] = useState(false);
-  const { data: heroImageAsset } = useCloudinaryImage("hero-volunteer-student");
+  
+  // Fetch hero content for current persona
+  const { data: heroContent } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/hero"],
+  });
+  
+  // Find hero content for current persona or fallback to donor
+  const currentHero = heroContent?.find(h => (h.metadata as any)?.persona === persona) 
+    || heroContent?.find(h => (h.metadata as any)?.persona === 'donor');
+  
+  const imageName = currentHero?.imageName || "hero-volunteer-student";
+  const { data: heroImageAsset } = useCloudinaryImage(imageName);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,7 +96,7 @@ export default function Hero() {
         }`}
       >
         <p className="text-sm sm:text-base uppercase tracking-wider text-white/90 mb-4 font-sans">
-          – Julie's Mission –
+          {(currentHero?.metadata as any)?.subtitle || "– Julie's Mission –"}
         </p>
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold mb-6 leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
           <span className="font-bold text-[#ffd680]">Empowering</span>{" "}
@@ -89,8 +104,7 @@ export default function Hero() {
           <span className="font-bold text-[#FFD580]">Education</span>
         </h1>
         <p className="text-lg sm:text-xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed">
-          A family support, wellness, and education center committed to the development of strong,
-          stable, and healthy family functioning for over 50 years.
+          {currentHero?.description || "A family support, wellness, and education center committed to the development of strong, stable, and healthy family functioning for over 50 years."}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button
@@ -100,14 +114,14 @@ export default function Hero() {
             onClick={() => scrollToSection("services")}
             data-testid="button-learn-more"
           >
-            Learn More
+            {(currentHero?.metadata as any)?.secondaryButton || "Learn More"}
           </Button>
           <Button
             variant="default"
             size="lg"
             data-testid="button-hero-donate"
           >
-            Donate Now
+            {(currentHero?.metadata as any)?.primaryButton || "Donate Now"}
           </Button>
         </div>
       </div>

@@ -44,6 +44,14 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/type/lead_magnet"],
   });
 
+  const { data: heroContent = [], isLoading: heroLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/hero"],
+  });
+
+  const { data: ctaContent = [], isLoading: ctaLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/cta"],
+  });
+
   const { data: images = [] } = useQuery<ImageAsset[]>({
     queryKey: ["/api/admin/images"],
   });
@@ -326,6 +334,8 @@ export default function AdminContentManager() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="flex justify-between items-center">
             <TabsList>
+              <TabsTrigger value="hero" data-testid="tab-hero">Hero ({heroContent.length})</TabsTrigger>
+              <TabsTrigger value="cta" data-testid="tab-cta">CTA ({ctaContent.length})</TabsTrigger>
               <TabsTrigger value="service" data-testid="tab-services">Services ({services.length})</TabsTrigger>
               <TabsTrigger value="event" data-testid="tab-events">Events ({events.length})</TabsTrigger>
               <TabsTrigger value="testimonial" data-testid="tab-testimonials">Testimonials ({testimonials.length})</TabsTrigger>
@@ -343,6 +353,22 @@ export default function AdminContentManager() {
               Create New
             </Button>
           </div>
+
+          <TabsContent value="hero">
+            {heroLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : (
+              renderContentList(heroContent, "hero")
+            )}
+          </TabsContent>
+
+          <TabsContent value="cta">
+            {ctaLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : (
+              renderContentList(ctaContent, "cta")
+            )}
+          </TabsContent>
 
           <TabsContent value="service">
             {servicesLoading ? (
@@ -481,6 +507,65 @@ export default function AdminContentManager() {
                   </div>
                 </div>
               </div>
+              {/* Hero/CTA specific fields */}
+              {(editingItem.type === 'hero' || editingItem.type === 'cta') && (
+                <>
+                  <div>
+                    <Label htmlFor="edit-persona">Persona</Label>
+                    <Select
+                      value={(editingItem.metadata as any)?.persona || "donor"}
+                      onValueChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), persona: value } })}
+                    >
+                      <SelectTrigger id="edit-persona" data-testid="select-edit-persona">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Adult Education Student</SelectItem>
+                        <SelectItem value="provider">Service Provider</SelectItem>
+                        <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="donor">Donor</SelectItem>
+                        <SelectItem value="volunteer">Volunteer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {editingItem.type === 'hero' && (
+                    <div>
+                      <Label htmlFor="edit-subtitle">Subtitle</Label>
+                      <Input
+                        id="edit-subtitle"
+                        value={(editingItem.metadata as any)?.subtitle || ""}
+                        onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), subtitle: e.target.value } })}
+                        placeholder="– Julie's Mission –"
+                        data-testid="input-edit-subtitle"
+                      />
+                    </div>
+                  )}
+                  
+                  <div>
+                    <Label htmlFor="edit-primary-button">Primary Button Text</Label>
+                    <Input
+                      id="edit-primary-button"
+                      value={(editingItem.metadata as any)?.primaryButton || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), primaryButton: e.target.value } })}
+                      placeholder="Donate Now"
+                      data-testid="input-edit-primary-button"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-secondary-button">Secondary Button Text</Label>
+                    <Input
+                      id="edit-secondary-button"
+                      value={(editingItem.metadata as any)?.secondaryButton || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), secondaryButton: e.target.value } })}
+                      placeholder="Learn More"
+                      data-testid="input-edit-secondary-button"
+                    />
+                  </div>
+                </>
+              )}
+              
               <div>
                 <Label htmlFor="edit-metadata">Metadata (JSON)</Label>
                 <Textarea
