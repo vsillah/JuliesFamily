@@ -156,6 +156,9 @@ export const contentVisibility = pgTable("content_visibility", {
   funnelStage: varchar("funnel_stage"), // null = applies to all funnel stages
   isVisible: boolean("is_visible").default(true),
   order: integer("order").notNull().default(0), // Persona-specific ordering
+  titleOverride: text("title_override"), // Custom title for this persona×stage combo
+  descriptionOverride: text("description_override"), // Custom description for this persona×stage combo
+  imageNameOverride: varchar("image_name_override"), // Custom image for this persona×stage combo
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
