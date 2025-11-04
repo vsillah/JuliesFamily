@@ -397,7 +397,7 @@ export default function AdminContentManager() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                   </svg>
-                  <span>Scroll horizontally to see all personas</span>
+                  <span>Scroll horizontally to see all funnel stages</span>
                 </div>
                 <PersonaMatrixGrid
                   contentItems={{

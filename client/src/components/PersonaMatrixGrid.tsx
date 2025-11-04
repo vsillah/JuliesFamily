@@ -141,33 +141,33 @@ export default function PersonaMatrixGrid({
           style={{ scrollPaddingLeft: '6rem' }}
         >
         <div className="min-w-max">
-          {/* Header row with persona labels - sticky on vertical scroll */}
-          <div className="grid gap-1 mb-1 sticky top-0 z-20 bg-background pb-1" style={{ gridTemplateColumns: '6rem repeat(5, minmax(200px, 1fr))' }}>
+          {/* Header row with funnel stage labels - sticky on vertical scroll */}
+          <div className="grid gap-1 mb-1 sticky top-0 z-20 bg-background pb-1" style={{ gridTemplateColumns: '6rem repeat(4, minmax(200px, 1fr))' }}>
             <div className="h-12 bg-background" /> {/* Empty corner */}
-            {PERSONAS.map((persona) => (
+            {FUNNEL_STAGES.map((stage) => (
               <div
-                key={persona}
+                key={stage}
                 className="h-12 flex items-center justify-center bg-primary text-primary-foreground rounded-md px-2 snap-start shadow-sm"
               >
                 <span className="text-xs font-semibold text-center leading-tight">
-                  {PERSONA_LABELS[persona]}
+                  {FUNNEL_STAGE_LABELS[stage]}
                 </span>
               </div>
             ))}
           </div>
 
-          {/* Grid rows - one for each funnel stage */}
-          {FUNNEL_STAGES.map((stage) => (
-            <div key={stage} className="grid gap-1 mb-1" style={{ gridTemplateColumns: '6rem repeat(5, minmax(200px, 1fr))' }}>
-              {/* Stage label - sticky on horizontal scroll */}
+          {/* Grid rows - one for each persona */}
+          {PERSONAS.map((persona) => (
+            <div key={persona} className="grid gap-1 mb-1" style={{ gridTemplateColumns: '6rem repeat(4, minmax(200px, 1fr))' }}>
+              {/* Persona label - sticky on horizontal scroll */}
               <div className="h-full min-h-[120px] flex items-center justify-center bg-primary text-primary-foreground rounded-md px-2 sticky left-0 z-10 shadow-sm">
                 <span className="text-xs font-semibold text-center leading-tight">
-                  {FUNNEL_STAGE_LABELS[stage]}
+                  {PERSONA_LABELS[persona]}
                 </span>
               </div>
 
-              {/* Cells for each persona in this stage */}
-              {PERSONAS.map((persona) => (
+              {/* Cells for each stage for this persona */}
+              {FUNNEL_STAGES.map((stage) => (
                 <MatrixCell
                   key={`${persona}-${stage}`}
                   persona={persona}
