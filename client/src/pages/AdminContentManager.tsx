@@ -706,6 +706,66 @@ export default function AdminContentManager() {
                 </div>
               </div>
             </div>
+            
+            {/* Hero/CTA specific fields for create */}
+            {(activeTab === 'hero' || activeTab === 'cta') && (
+              <>
+                <div>
+                  <Label htmlFor="create-persona">Persona</Label>
+                  <Select
+                    value={(newItem.metadata as any)?.persona || "donor"}
+                    onValueChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), persona: value } })}
+                  >
+                    <SelectTrigger id="create-persona" data-testid="select-create-persona">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">Adult Education Student</SelectItem>
+                      <SelectItem value="provider">Service Provider</SelectItem>
+                      <SelectItem value="parent">Parent</SelectItem>
+                      <SelectItem value="donor">Donor</SelectItem>
+                      <SelectItem value="volunteer">Volunteer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {activeTab === 'hero' && (
+                  <div>
+                    <Label htmlFor="create-subtitle">Subtitle</Label>
+                    <Input
+                      id="create-subtitle"
+                      value={(newItem.metadata as any)?.subtitle || ""}
+                      onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), subtitle: e.target.value } })}
+                      placeholder="– Julie's Mission –"
+                      data-testid="input-create-subtitle"
+                    />
+                  </div>
+                )}
+                
+                <div>
+                  <Label htmlFor="create-primary-button">Primary Button Text</Label>
+                  <Input
+                    id="create-primary-button"
+                    value={(newItem.metadata as any)?.primaryButton || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), primaryButton: e.target.value } })}
+                    placeholder="Donate Now"
+                    data-testid="input-create-primary-button"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="create-secondary-button">Secondary Button Text</Label>
+                  <Input
+                    id="create-secondary-button"
+                    value={(newItem.metadata as any)?.secondaryButton || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), secondaryButton: e.target.value } })}
+                    placeholder="Learn More"
+                    data-testid="input-create-secondary-button"
+                  />
+                </div>
+              </>
+            )}
+            
             <div className="flex gap-2 justify-end pt-4">
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} data-testid="button-cancel-create">
                 Cancel

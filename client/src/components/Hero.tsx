@@ -99,9 +99,19 @@ export default function Hero() {
           {(currentHero?.metadata as any)?.subtitle || "– Julie's Mission –"}
         </p>
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold mb-6 leading-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-          <span className="font-bold text-[#ffd680]">Empowering</span>{" "}
-          <span className="italic">Families</span> Through{" "}
-          <span className="font-bold text-[#FFD580]">Education</span>
+          {(currentHero?.title || "Empowering Families Through Education").split(" ").map((word, i) => {
+            const isEmphasized = ["Empowering", "Education"].includes(word);
+            const isItalic = ["Families"].includes(word);
+            
+            return (
+              <span
+                key={i}
+                className={`${isEmphasized ? "font-bold text-[#FFD580]" : ""} ${isItalic ? "italic" : ""}`}
+              >
+                {word}{" "}
+              </span>
+            );
+          })}
         </h1>
         <p className="text-lg sm:text-xl text-white/95 mb-8 max-w-2xl mx-auto leading-relaxed">
           {currentHero?.description || "A family support, wellness, and education center committed to the development of strong, stable, and healthy family functioning for over 50 years."}
