@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Upload, Trash2, ExternalLink, Image as ImageIcon } from "lucide-react";
 import type { ImageAsset } from "@shared/schema";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function AdminImages() {
   const { toast } = useToast();
@@ -108,6 +109,8 @@ export default function AdminImages() {
 
   return (
     <div className="container mx-auto py-8 px-4">
+      <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "Image Management" }]} />
+      
       <h1 className="text-4xl font-serif font-bold mb-2">Image Management</h1>
       <p className="text-muted-foreground mb-8">
         Upload and manage images with automatic AI upscaling via Cloudinary
