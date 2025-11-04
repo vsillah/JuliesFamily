@@ -91,7 +91,7 @@ export default function MatrixEditPanel({
       let finalImageName = imageNameOverride;
       if (selectedImageFile) {
         const formData = new FormData();
-        formData.append("file", selectedImageFile);
+        formData.append("image", selectedImageFile);
         const uploadResult = await fetch("/api/admin/images/upload", {
           method: "POST",
           body: formData,
