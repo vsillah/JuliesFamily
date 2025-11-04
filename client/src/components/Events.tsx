@@ -1,5 +1,7 @@
 import EventCard from "./EventCard";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useQuery } from "@tanstack/react-query";
+import type { ContentItem } from "@shared/schema";
 
 const headlineContent: Record<string, { title: string; description: string }> = {
   student: {
@@ -27,32 +29,22 @@ const headlineContent: Record<string, { title: string; description: string }> = 
 export default function Events() {
   const { persona } = usePersona();
   const headline = headlineContent[persona || "donor"];
-  const events = [
-    {
-      title: "50th Anniversary Celebration",
-      date: "April 4, 2024",
-      location: "UMass Club, Downtown Boston",
-      description:
-        "Join us as we celebrate five decades of empowering families through education and support. A special evening honoring our graduates, staff, and community partners.",
-      imageName: "event-anniversary",
-    },
-    {
-      title: "Spring Graduation Ceremony",
-      date: "June 2024",
-      location: "Julie's Family Learning Program",
-      description:
-        "Celebrating our graduates who have completed their HiSET and are moving forward to college and career success.",
-      imageName: "event-graduation",
-    },
-    {
-      title: "Fall Family Learning Fair",
-      date: "September 2024",
-      location: "Julie's Family Learning Program",
-      description:
-        "An open house event featuring program information, family activities, and opportunities to meet our dedicated staff and volunteers.",
-      imageName: "event-family-fair",
-    },
-  ];
+  
+  const { data: allEvents = [], isLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/event"],
+  });
+
+  const events = allEvents.filter(e => e.isActive);
+
+  if (isLoading) {
+    return (
+      <section id="events" className="py-20 sm:py-32 bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12 text-muted-foreground">Loading events...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="events" className="py-20 sm:py-32 bg-muted/30">
@@ -82,8 +74,15 @@ export default function Events() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.map((event, index) => (
-            <EventCard key={index} {...event} />
+          {events.map((event) => (
+            <EventCard 
+              key={event.id}
+              title={event.title}
+              date={(event.metadata as any)?.date || ""}
+              location={(event.metadata as any)?.location}
+              description={event.description || ""}
+              imageName={event.imageName || ""}
+            />
           ))}
         </div>
       </div>

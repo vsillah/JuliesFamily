@@ -1,59 +1,34 @@
 import ServiceCard from "./ServiceCard";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useQuery } from "@tanstack/react-query";
+import type { ContentItem } from "@shared/schema";
 
 export default function Services() {
   const { persona } = usePersona();
   
-  const allServices = [
-    {
-      number: "1",
-      title: "Children's Services",
-      description:
-        "Offering high-quality early education and care to the infant, toddler, and pre-school children of our adult learners, with curriculum tailored to the needs and abilities of each child.",
-      imageName: "service-children",
-      priority: {
-        parent: 1,
-        student: 3,
-        provider: 2,
-        donor: 2,
-        volunteer: 2
-      }
-    },
-    {
-      number: "2",
-      title: "Family Development",
-      description:
-        "Offering family development, life skills, and education services to mothers. Services include adult education, high school equivalency preparation, career services, life skills, and supportive services.",
-      imageName: "service-family",
-      priority: {
-        parent: 3,
-        student: 2,
-        provider: 1,
-        donor: 1,
-        volunteer: 3
-      }
-    },
-    {
-      number: "3",
-      title: "Adult Basic Education",
-      description:
-        "Offering adult education, high school equivalency preparation, career services, and advising to any learner aged 16 or older.",
-      imageName: "service-adult",
-      priority: {
-        parent: 2,
-        student: 1,
-        provider: 3,
-        donor: 3,
-        volunteer: 1
-      }
-    },
-  ];
+  const { data: allServices = [], isLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/service"],
+  });
+
+  const activeServices = allServices.filter(s => s.isActive);
   
-  const services = persona 
-    ? [...allServices].sort((a, b) => 
-        (a.priority[persona] || 99) - (b.priority[persona] || 99)
-      )
-    : allServices;
+  const services = persona && activeServices.length > 0
+    ? [...activeServices].sort((a, b) => {
+        const aPriority = (a.metadata as any)?.priority?.[persona] || 99;
+        const bPriority = (b.metadata as any)?.priority?.[persona] || 99;
+        return aPriority - bPriority;
+      })
+    : activeServices;
+
+  if (isLoading) {
+    return (
+      <section id="services" className="py-20 sm:py-32 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12 text-muted-foreground">Loading services...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="services" className="py-20 sm:py-32 bg-background">
@@ -74,10 +49,13 @@ export default function Services() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service) => (
+          {services.map((service, index) => (
             <ServiceCard
-              key={service.number}
-              {...service}
+              key={service.id}
+              number={String(index + 1)}
+              title={service.title}
+              description={service.description || ""}
+              imageName={service.imageName || ""}
               onLearnMore={() => console.log(`Learn more about ${service.title}`)}
             />
           ))}
