@@ -272,9 +272,9 @@ export default function AdminContentManager() {
                         </p>
                       )}
                       {item.metadata && Object.keys(item.metadata).length > 0 && (
-                        <div className="text-xs text-muted-foreground mt-2">
-                          <span className="font-medium">Metadata:</span> {JSON.stringify(item.metadata, null, 2).substring(0, 100)}...
-                        </div>
+                        <pre className="text-xs text-muted-foreground mt-2 whitespace-pre-wrap">
+                          <span className="font-medium">Metadata:</span> {String(JSON.stringify(item.metadata, null, 2).substring(0, 100))}...
+                        </pre>
                       )}
                     </div>
                     

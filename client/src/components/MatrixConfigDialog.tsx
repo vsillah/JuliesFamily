@@ -152,14 +152,20 @@ export default function MatrixConfigDialog({ contentItem, open, onOpenChange }: 
         updates,
       });
     } else {
-      createVisibilityMutation.mutate({
+      const payload: any = {
         contentItemId: contentItem.id,
         persona: persona,
         funnelStage: stage,
-        isVisible: true,
-        order: 0,
-        ...updates,
-      });
+        isVisible: updates.isVisible ?? true,
+        order: updates.order ?? 0,
+      };
+      
+      // Only include override fields if they're explicitly set in updates
+      if ('titleOverride' in updates) payload.titleOverride = updates.titleOverride;
+      if ('descriptionOverride' in updates) payload.descriptionOverride = updates.descriptionOverride;
+      if ('imageNameOverride' in updates) payload.imageNameOverride = updates.imageNameOverride;
+      
+      createVisibilityMutation.mutate(payload);
     }
   };
 
