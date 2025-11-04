@@ -123,13 +123,18 @@ export default function MatrixEditPanel({
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
-          return key?.includes("/api/content");
+          return key?.includes("/api/content") || key?.includes("/api/admin/images");
         }
       });
       toast({
         title: "Saved",
         description: "Configuration updated successfully",
       });
+      
+      // Close dialog after a brief delay to allow queries to refetch
+      setTimeout(() => {
+        onClose();
+      }, 500);
     },
     onError: () => {
       toast({

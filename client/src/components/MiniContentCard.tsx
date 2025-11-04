@@ -48,7 +48,7 @@ export default function MiniContentCard({
   const imageName = visibility?.imageNameOverride || contentItem?.imageName;
   const imageAsset = images.find(img => img.name === imageName);
   const thumbnailUrl = imageAsset 
-    ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, { width: 100, height: 100, quality: "auto:eco" })
+    ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, { width: 100, height: 100, quality: "auto:low" })
     : null;
 
   // Get title for display
