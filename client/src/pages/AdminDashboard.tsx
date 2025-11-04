@@ -86,6 +86,12 @@ export default function AdminDashboard() {
               </p>
             </div>
             <div className="flex gap-2">
+              <Link href="/admin/content">
+                <Button variant="outline" data-testid="button-manage-content">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Manage Content
+                </Button>
+              </Link>
               <Link href="/admin/images">
                 <Button variant="outline" data-testid="button-manage-images">
                   <ImageIcon className="w-4 h-4 mr-2" />
