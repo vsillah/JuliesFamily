@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS } from "@shared/defaults/personas";
 import type { Persona, FunnelStage } from "@shared/defaults/personas";
 import type { ContentItem, ContentVisibility, ImageAsset, AbTest } from "@shared/schema";
@@ -194,6 +194,14 @@ export default function PersonaMatrixGrid({
       {/* Edit modal */}
       <Dialog open={!!selectedCard} onOpenChange={(open) => !open && setSelectedCard(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="sr-only">
+            <DialogTitle>
+              Edit Content Configuration
+            </DialogTitle>
+            <DialogDescription>
+              {selectedCard && `Configure content for ${PERSONA_LABELS[selectedCard.persona]} at ${FUNNEL_STAGE_LABELS[selectedCard.stage]} stage`}
+            </DialogDescription>
+          </DialogHeader>
           {selectedCard && (
             <MatrixEditPanel
               selectedCard={selectedCard}
