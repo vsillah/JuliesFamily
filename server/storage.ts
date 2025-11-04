@@ -2,11 +2,14 @@
 // Reference: blueprint:javascript_log_in_with_replit and blueprint:javascript_database
 import { 
   users, leads, interactions, leadMagnets, imageAssets,
+  contentItems, contentVisibility,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
   type LeadMagnet, type InsertLeadMagnet,
-  type ImageAsset, type InsertImageAsset
+  type ImageAsset, type InsertImageAsset,
+  type ContentItem, type InsertContentItem,
+  type ContentVisibility, type InsertContentVisibility
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -46,6 +49,22 @@ export interface IStorage {
   getImageAssetsByUsage(usage: string): Promise<ImageAsset[]>;
   updateImageAsset(id: string, updates: Partial<InsertImageAsset>): Promise<ImageAsset | undefined>;
   deleteImageAsset(id: string): Promise<void>;
+  
+  // Content Item operations
+  createContentItem(item: InsertContentItem): Promise<ContentItem>;
+  getContentItem(id: string): Promise<ContentItem | undefined>;
+  getAllContentItems(): Promise<ContentItem[]>;
+  getContentItemsByType(type: string): Promise<ContentItem[]>;
+  updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined>;
+  deleteContentItem(id: string): Promise<void>;
+  updateContentItemOrder(id: string, newOrder: number): Promise<ContentItem | undefined>;
+  
+  // Content Visibility operations
+  createContentVisibility(visibility: InsertContentVisibility): Promise<ContentVisibility>;
+  getContentVisibility(contentItemId: string, persona?: string | null, funnelStage?: string | null): Promise<ContentVisibility[]>;
+  updateContentVisibility(id: string, updates: Partial<InsertContentVisibility>): Promise<ContentVisibility | undefined>;
+  deleteContentVisibility(id: string): Promise<void>;
+  getVisibleContentItems(type: string, persona?: string | null, funnelStage?: string | null): Promise<ContentItem[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -218,6 +237,144 @@ export class DatabaseStorage implements IStorage {
 
   async deleteImageAsset(id: string): Promise<void> {
     await db.delete(imageAssets).where(eq(imageAssets.id, id));
+  }
+
+  // Content Item operations
+  async createContentItem(itemData: InsertContentItem): Promise<ContentItem> {
+    const [item] = await db.insert(contentItems).values(itemData).returning();
+    return item;
+  }
+
+  async getContentItem(id: string): Promise<ContentItem | undefined> {
+    const [item] = await db.select().from(contentItems).where(eq(contentItems.id, id));
+    return item;
+  }
+
+  async getAllContentItems(): Promise<ContentItem[]> {
+    return await db.select().from(contentItems).orderBy(contentItems.order);
+  }
+
+  async getContentItemsByType(type: string): Promise<ContentItem[]> {
+    return await db
+      .select()
+      .from(contentItems)
+      .where(and(eq(contentItems.type, type), eq(contentItems.isActive, true)))
+      .orderBy(contentItems.order);
+  }
+
+  async updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined> {
+    const [item] = await db
+      .update(contentItems)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(contentItems.id, id))
+      .returning();
+    return item;
+  }
+
+  async deleteContentItem(id: string): Promise<void> {
+    await db.delete(contentItems).where(eq(contentItems.id, id));
+  }
+
+  async updateContentItemOrder(id: string, newOrder: number): Promise<ContentItem | undefined> {
+    const [item] = await db
+      .update(contentItems)
+      .set({ order: newOrder, updatedAt: new Date() })
+      .where(eq(contentItems.id, id))
+      .returning();
+    return item;
+  }
+
+  // Content Visibility operations
+  async createContentVisibility(visibilityData: InsertContentVisibility): Promise<ContentVisibility> {
+    const [visibility] = await db.insert(contentVisibility).values(visibilityData).returning();
+    return visibility;
+  }
+
+  async getContentVisibility(
+    contentItemId: string,
+    persona?: string | null,
+    funnelStage?: string | null
+  ): Promise<ContentVisibility[]> {
+    const conditions = [eq(contentVisibility.contentItemId, contentItemId)];
+    
+    if (persona !== undefined) {
+      conditions.push(persona === null ? sql`${contentVisibility.persona} IS NULL` : eq(contentVisibility.persona, persona));
+    }
+    
+    if (funnelStage !== undefined) {
+      conditions.push(funnelStage === null ? sql`${contentVisibility.funnelStage} IS NULL` : eq(contentVisibility.funnelStage, funnelStage));
+    }
+    
+    return await db
+      .select()
+      .from(contentVisibility)
+      .where(and(...conditions))
+      .orderBy(contentVisibility.order);
+  }
+
+  async updateContentVisibility(id: string, updates: Partial<InsertContentVisibility>): Promise<ContentVisibility | undefined> {
+    const [visibility] = await db
+      .update(contentVisibility)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(contentVisibility.id, id))
+      .returning();
+    return visibility;
+  }
+
+  async deleteContentVisibility(id: string): Promise<void> {
+    await db.delete(contentVisibility).where(eq(contentVisibility.id, id));
+  }
+
+  async getVisibleContentItems(
+    type: string,
+    persona?: string | null,
+    funnelStage?: string | null
+  ): Promise<ContentItem[]> {
+    const query = db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        order: sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`.as('order'),
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+      })
+      .from(contentItems)
+      .leftJoin(
+        contentVisibility,
+        and(
+          eq(contentVisibility.contentItemId, contentItems.id),
+          persona === null || persona === undefined
+            ? sql`${contentVisibility.persona} IS NULL`
+            : or(
+                sql`${contentVisibility.persona} IS NULL`,
+                eq(contentVisibility.persona, persona)
+              ),
+          funnelStage === null || funnelStage === undefined
+            ? sql`${contentVisibility.funnelStage} IS NULL`
+            : or(
+                sql`${contentVisibility.funnelStage} IS NULL`,
+                eq(contentVisibility.funnelStage, funnelStage)
+              )
+        )
+      )
+      .where(
+        and(
+          eq(contentItems.type, type),
+          eq(contentItems.isActive, true),
+          or(
+            sql`${contentVisibility.isVisible} IS NULL`,
+            eq(contentVisibility.isVisible, true)
+          )
+        )
+      )
+      .orderBy(sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`);
+
+    return await query;
   }
 }
 

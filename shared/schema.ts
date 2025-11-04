@@ -125,3 +125,45 @@ export const insertImageAssetSchema = createInsertSchema(imageAssets).omit({
 });
 export type InsertImageAsset = z.infer<typeof insertImageAssetSchema>;
 export type ImageAsset = typeof imageAssets.$inferSelect;
+
+// Content Items table for managing editable cards across the site
+export const contentItems = pgTable("content_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat'
+  title: text("title").notNull(),
+  description: text("description"),
+  imageName: varchar("image_name"), // Cloudinary image name
+  order: integer("order").notNull().default(0), // Display order
+  isActive: boolean("is_active").default(true),
+  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, etc
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertContentItemSchema = createInsertSchema(contentItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertContentItem = z.infer<typeof insertContentItemSchema>;
+export type ContentItem = typeof contentItems.$inferSelect;
+
+// Persona-specific visibility and ordering for content items
+export const contentVisibility = pgTable("content_visibility", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contentItemId: varchar("content_item_id").notNull().references(() => contentItems.id, { onDelete: "cascade" }),
+  persona: varchar("persona"), // null = applies to all personas
+  funnelStage: varchar("funnel_stage"), // null = applies to all funnel stages
+  isVisible: boolean("is_visible").default(true),
+  order: integer("order").notNull().default(0), // Persona-specific ordering
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertContentVisibilitySchema = createInsertSchema(contentVisibility).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertContentVisibility = z.infer<typeof insertContentVisibilitySchema>;
+export type ContentVisibility = typeof contentVisibility.$inferSelect;

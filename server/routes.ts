@@ -4,7 +4,7 @@ import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -513,6 +513,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching image by name:", error);
       res.status(500).json({ message: "Failed to fetch image" });
+    }
+  });
+
+  // ============ CONTENT MANAGEMENT ROUTES ============
+  
+  // Get all content items (admin)
+  app.get('/api/content', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const items = await storage.getAllContentItems();
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching content items:", error);
+      res.status(500).json({ message: "Failed to fetch content items" });
+    }
+  });
+
+  // Get content items by type (admin)
+  app.get('/api/content/type/:type', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const items = await storage.getContentItemsByType(req.params.type);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching content items by type:", error);
+      res.status(500).json({ message: "Failed to fetch content items" });
+    }
+  });
+
+  // Get visible content items (public, filtered by persona/funnel)
+  app.get('/api/content/visible/:type', async (req, res) => {
+    try {
+      const { persona, funnelStage } = req.query;
+      const items = await storage.getVisibleContentItems(
+        req.params.type,
+        persona as string | undefined,
+        funnelStage as string | undefined
+      );
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching visible content items:", error);
+      res.status(500).json({ message: "Failed to fetch content items" });
+    }
+  });
+
+  // Create content item (admin)
+  app.post('/api/content', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertContentItemSchema.parse(req.body);
+      const item = await storage.createContentItem(validatedData);
+      res.status(201).json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Error creating content item:", error);
+      res.status(500).json({ message: "Failed to create content item" });
+    }
+  });
+
+  // Update content item (admin)
+  app.patch('/api/content/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const item = await storage.updateContentItem(req.params.id, req.body);
+      if (!item) {
+        return res.status(404).json({ message: "Content item not found" });
+      }
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating content item:", error);
+      res.status(500).json({ message: "Failed to update content item" });
+    }
+  });
+
+  // Update content item order (admin)
+  app.patch('/api/content/:id/order', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { order } = req.body;
+      if (typeof order !== 'number') {
+        return res.status(400).json({ message: "Order must be a number" });
+      }
+      const item = await storage.updateContentItemOrder(req.params.id, order);
+      if (!item) {
+        return res.status(404).json({ message: "Content item not found" });
+      }
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating content item order:", error);
+      res.status(500).json({ message: "Failed to update content item order" });
+    }
+  });
+
+  // Delete content item (admin)
+  app.delete('/api/content/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteContentItem(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting content item:", error);
+      res.status(500).json({ message: "Failed to delete content item" });
+    }
+  });
+
+  // Get content visibility settings (admin)
+  app.get('/api/content/:contentItemId/visibility', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { persona, funnelStage } = req.query;
+      const visibility = await storage.getContentVisibility(
+        req.params.contentItemId,
+        persona as string | undefined,
+        funnelStage as string | undefined
+      );
+      res.json(visibility);
+    } catch (error) {
+      console.error("Error fetching content visibility:", error);
+      res.status(500).json({ message: "Failed to fetch content visibility" });
+    }
+  });
+
+  // Create content visibility setting (admin)
+  app.post('/api/content/visibility', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertContentVisibilitySchema.parse(req.body);
+      const visibility = await storage.createContentVisibility(validatedData);
+      res.status(201).json(visibility);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Error creating content visibility:", error);
+      res.status(500).json({ message: "Failed to create content visibility" });
+    }
+  });
+
+  // Update content visibility setting (admin)
+  app.patch('/api/content/visibility/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const visibility = await storage.updateContentVisibility(req.params.id, req.body);
+      if (!visibility) {
+        return res.status(404).json({ message: "Content visibility setting not found" });
+      }
+      res.json(visibility);
+    } catch (error) {
+      console.error("Error updating content visibility:", error);
+      res.status(500).json({ message: "Failed to update content visibility" });
+    }
+  });
+
+  // Delete content visibility setting (admin)
+  app.delete('/api/content/visibility/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteContentVisibility(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting content visibility:", error);
+      res.status(500).json({ message: "Failed to delete content visibility" });
     }
   });
 
