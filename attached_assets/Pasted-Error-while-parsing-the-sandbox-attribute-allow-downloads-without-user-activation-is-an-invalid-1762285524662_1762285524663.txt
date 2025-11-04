@@ -1,0 +1,1103 @@
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:34
+fetchFn @ @tanstack_react-query.js?v=1d878bb1:840
+run @ @tanstack_react-query.js?v=1d878bb1:494
+start @ @tanstack_react-query.js?v=1d878bb1:536
+fetch @ @tanstack_react-query.js?v=1d878bb1:926
+executeFetch_fn @ @tanstack_react-query.js?v=1d878bb1:2211
+onSubscribe @ @tanstack_react-query.js?v=1d878bb1:1898
+subscribe @ @tanstack_react-query.js?v=1d878bb1:24
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=1d878bb1:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=1d878bb1:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=1d878bb1:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=1d878bb1:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=1d878bb1:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=1d878bb1:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=1d878bb1:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19416
+commitRoot @ chunk-RPCDYKBN.js?v=1d878bb1:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=1d878bb1:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=1d878bb1:18627
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:20
+fetchFn @ @tanstack_react-query.js:840
+run @ @tanstack_react-query.js:494
+start @ @tanstack_react-query.js:536
+fetch @ @tanstack_react-query.js:926
+executeFetch_fn @ @tanstack_react-query.js:2211
+onSubscribe @ @tanstack_react-query.js:1898
+subscribe @ @tanstack_react-query.js:24
+(anonymous) @ @tanstack_react-query.js:3022
+subscribeToStore @ chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:20
+fetchFn @ @tanstack_react-query.js:840
+run @ @tanstack_react-query.js:494
+start @ @tanstack_react-query.js:536
+fetch @ @tanstack_react-query.js:926
+executeFetch_fn @ @tanstack_react-query.js:2211
+onSubscribe @ @tanstack_react-query.js:1898
+subscribe @ @tanstack_react-query.js:24
+(anonymous) @ @tanstack_react-query.js:3022
+subscribeToStore @ chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/leads/ 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:34
+fetchFn @ @tanstack_react-query.js?v=1d878bb1:840
+run @ @tanstack_react-query.js?v=1d878bb1:494
+start @ @tanstack_react-query.js?v=1d878bb1:536
+fetch @ @tanstack_react-query.js?v=1d878bb1:926
+executeFetch_fn @ @tanstack_react-query.js?v=1d878bb1:2211
+onSubscribe @ @tanstack_react-query.js?v=1d878bb1:1898
+subscribe @ @tanstack_react-query.js?v=1d878bb1:24
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=1d878bb1:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=1d878bb1:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=1d878bb1:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=1d878bb1:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=1d878bb1:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=1d878bb1:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=1d878bb1:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19416
+commitRoot @ chunk-RPCDYKBN.js?v=1d878bb1:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=1d878bb1:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=1d878bb1:18627
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/leads/ 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:20
+fetchFn @ @tanstack_react-query.js:840
+run @ @tanstack_react-query.js:494
+start @ @tanstack_react-query.js:536
+fetch @ @tanstack_react-query.js:926
+executeFetch_fn @ @tanstack_react-query.js:2211
+onSubscribe @ @tanstack_react-query.js:1898
+subscribe @ @tanstack_react-query.js:24
+(anonymous) @ @tanstack_react-query.js:3022
+subscribeToStore @ chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/leads/ 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:20
+fetchFn @ @tanstack_react-query.js:840
+run @ @tanstack_react-query.js:494
+start @ @tanstack_react-query.js:536
+fetch @ @tanstack_react-query.js:926
+executeFetch_fn @ @tanstack_react-query.js:2211
+onSubscribe @ @tanstack_react-query.js:1898
+subscribe @ @tanstack_react-query.js:24
+(anonymous) @ @tanstack_react-query.js:3022
+subscribeToStore @ chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ VM789 injected.js:204
+(anonymous) @ VM808 queryClient.ts:20
+fetchFn @ VM806 @tanstack_react-query.js:840
+run @ VM806 @tanstack_react-query.js:494
+start @ VM806 @tanstack_react-query.js:536
+fetch @ VM806 @tanstack_react-query.js:926
+executeFetch_fn @ VM806 @tanstack_react-query.js:2211
+onSubscribe @ VM806 @tanstack_react-query.js:1898
+subscribe @ VM806 @tanstack_react-query.js:24
+(anonymous) @ VM806 @tanstack_react-query.js:3022
+subscribeToStore @ VM800 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM800 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM800 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM800 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM800 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM800 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM800 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM800 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM800 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM800 chunk-RPCDYKBN.js:19432
+commitRoot @ VM800 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM800 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18718
+workLoop @ VM800 chunk-RPCDYKBN.js:197
+flushWork @ VM800 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM800 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/hero 401 (Unauthorized)
+apply @ VM789 injected.js:204
+(anonymous) @ VM808 queryClient.ts:20
+fetchFn @ VM806 @tanstack_react-query.js:840
+run @ VM806 @tanstack_react-query.js:494
+start @ VM806 @tanstack_react-query.js:536
+fetch @ VM806 @tanstack_react-query.js:926
+executeFetch_fn @ VM806 @tanstack_react-query.js:2211
+onSubscribe @ VM806 @tanstack_react-query.js:1898
+subscribe @ VM806 @tanstack_react-query.js:24
+(anonymous) @ VM806 @tanstack_react-query.js:3022
+subscribeToStore @ VM800 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM800 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM800 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM800 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM800 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM800 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM800 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM800 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM800 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM800 chunk-RPCDYKBN.js:19432
+commitRoot @ VM800 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM800 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18718
+workLoop @ VM800 chunk-RPCDYKBN.js:197
+flushWork @ VM800 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM800 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/testimonial 401 (Unauthorized)
+apply @ VM789 injected.js:204
+(anonymous) @ VM808 queryClient.ts:20
+fetchFn @ VM806 @tanstack_react-query.js:840
+run @ VM806 @tanstack_react-query.js:494
+start @ VM806 @tanstack_react-query.js:536
+fetch @ VM806 @tanstack_react-query.js:926
+executeFetch_fn @ VM806 @tanstack_react-query.js:2211
+onSubscribe @ VM806 @tanstack_react-query.js:1898
+subscribe @ VM806 @tanstack_react-query.js:24
+(anonymous) @ VM806 @tanstack_react-query.js:3022
+subscribeToStore @ VM800 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM800 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM800 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM800 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM800 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM800 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM800 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM800 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM800 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM800 chunk-RPCDYKBN.js:19432
+commitRoot @ VM800 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM800 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18718
+workLoop @ VM800 chunk-RPCDYKBN.js:197
+flushWork @ VM800 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM800 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/service 401 (Unauthorized)
+apply @ VM789 injected.js:204
+(anonymous) @ VM808 queryClient.ts:20
+fetchFn @ VM806 @tanstack_react-query.js:840
+run @ VM806 @tanstack_react-query.js:494
+start @ VM806 @tanstack_react-query.js:536
+fetch @ VM806 @tanstack_react-query.js:926
+executeFetch_fn @ VM806 @tanstack_react-query.js:2211
+onSubscribe @ VM806 @tanstack_react-query.js:1898
+subscribe @ VM806 @tanstack_react-query.js:24
+(anonymous) @ VM806 @tanstack_react-query.js:3022
+subscribeToStore @ VM800 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM800 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM800 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM800 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM800 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM800 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM800 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM800 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM800 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM800 chunk-RPCDYKBN.js:19432
+commitRoot @ VM800 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM800 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18718
+workLoop @ VM800 chunk-RPCDYKBN.js:197
+flushWork @ VM800 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM800 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta 401 (Unauthorized)
+apply @ VM789 injected.js:204
+(anonymous) @ VM808 queryClient.ts:20
+fetchFn @ VM806 @tanstack_react-query.js:840
+run @ VM806 @tanstack_react-query.js:494
+start @ VM806 @tanstack_react-query.js:536
+fetch @ VM806 @tanstack_react-query.js:926
+executeFetch_fn @ VM806 @tanstack_react-query.js:2211
+onSubscribe @ VM806 @tanstack_react-query.js:1898
+subscribe @ VM806 @tanstack_react-query.js:24
+(anonymous) @ VM806 @tanstack_react-query.js:3022
+subscribeToStore @ VM800 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM800 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM800 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM800 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM800 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM800 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM800 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM800 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM800 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM800 chunk-RPCDYKBN.js:19432
+commitRoot @ VM800 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM800 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18718
+workLoop @ VM800 chunk-RPCDYKBN.js:197
+flushWork @ VM800 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM800 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event 401 (Unauthorized)
+apply @ VM789 injected.js:204
+(anonymous) @ VM808 queryClient.ts:20
+fetchFn @ VM806 @tanstack_react-query.js:840
+run @ VM806 @tanstack_react-query.js:494
+start @ VM806 @tanstack_react-query.js:536
+fetch @ VM806 @tanstack_react-query.js:926
+executeFetch_fn @ VM806 @tanstack_react-query.js:2211
+onSubscribe @ VM806 @tanstack_react-query.js:1898
+subscribe @ VM806 @tanstack_react-query.js:24
+(anonymous) @ VM806 @tanstack_react-query.js:3022
+subscribeToStore @ VM800 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM800 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM800 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM800 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM800 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM800 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM800 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM800 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM800 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM800 chunk-RPCDYKBN.js:19432
+commitRoot @ VM800 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM800 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM800 chunk-RPCDYKBN.js:18718
+workLoop @ VM800 chunk-RPCDYKBN.js:197
+flushWork @ VM800 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM800 chunk-RPCDYKBN.js:384
+6c5f0f290ed89d4c.js:2 [Coframe] Failed to set cookie coframe.user.token for domain: replit.com {name: 'coframe.user.token', hostname: 'replit.com'}
+(anonymous) @ 6c5f0f290ed89d4c.js:2
+o @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+error @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+f @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+q @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+Pe @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+await in Pe
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+6c5f0f290ed89d4c.js:2 [Coframe] Failed to set cookie coframe.cvc for domain: replit.com {name: 'coframe.cvc', hostname: 'replit.com'}
+(anonymous) @ 6c5f0f290ed89d4c.js:2
+o @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+error @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+f @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+q @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+Pe @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+await in Pe
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+6c5f0f290ed89d4c.js:2 [Coframe] Failed to set cookie coframe.lastVisitTime for domain: replit.com {name: 'coframe.lastVisitTime', hostname: 'replit.com'}
+(anonymous) @ 6c5f0f290ed89d4c.js:2
+o @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+error @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+f @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+q @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+Pe @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+await in Pe
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+(anonymous) @ cf.js?config=%257B%2522projectId%2522%253A%252268c9ad4d4cddb58cf3a1f93d%2522%252C%2522startTime%2522%253A1762284747889%252C%2522timeoutMs%2522%253A1000%252C%2522currentUrl%2522%253A%2522https%253A%252F%252Freplit.com%252Foidc-login-consent%252F9P4HkD7k28E1Iix7wThu0%2522%252C%2522trackingOnly%2522%253Atrue%257D:10
+9P4HkD7k28E1Iix7wThu0:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+9P4HkD7k28E1Iix7wThu0:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+9P4HkD7k28E1Iix7wThu0:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+onSubscribe @ VM967 @tanstack_react-query.js:1898
+subscribe @ VM967 @tanstack_react-query.js:24
+(anonymous) @ VM967 @tanstack_react-query.js:3022
+subscribeToStore @ VM954 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM954 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM954 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM954 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM954 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM954 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM954 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM954 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM954 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM954 chunk-RPCDYKBN.js:19432
+commitRoot @ VM954 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM954 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18718
+workLoop @ VM954 chunk-RPCDYKBN.js:197
+flushWork @ VM954 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM954 chunk-RPCDYKBN.js:384
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/service 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+onSubscribe @ VM967 @tanstack_react-query.js:1898
+subscribe @ VM967 @tanstack_react-query.js:24
+(anonymous) @ VM967 @tanstack_react-query.js:3022
+subscribeToStore @ VM954 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM954 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM954 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM954 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM954 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM954 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM954 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM954 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM954 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM954 chunk-RPCDYKBN.js:19432
+commitRoot @ VM954 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM954 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18718
+workLoop @ VM954 chunk-RPCDYKBN.js:197
+flushWork @ VM954 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM954 chunk-RPCDYKBN.js:384
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/testimonial 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+onSubscribe @ VM967 @tanstack_react-query.js:1898
+subscribe @ VM967 @tanstack_react-query.js:24
+(anonymous) @ VM967 @tanstack_react-query.js:3022
+subscribeToStore @ VM954 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM954 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM954 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM954 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM954 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM954 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM954 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM954 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM954 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM954 chunk-RPCDYKBN.js:19432
+commitRoot @ VM954 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM954 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18718
+workLoop @ VM954 chunk-RPCDYKBN.js:197
+flushWork @ VM954 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM954 chunk-RPCDYKBN.js:384
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/hero 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+onSubscribe @ VM967 @tanstack_react-query.js:1898
+subscribe @ VM967 @tanstack_react-query.js:24
+(anonymous) @ VM967 @tanstack_react-query.js:3022
+subscribeToStore @ VM954 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM954 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM954 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM954 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM954 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM954 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM954 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM954 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM954 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM954 chunk-RPCDYKBN.js:19432
+commitRoot @ VM954 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM954 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18718
+workLoop @ VM954 chunk-RPCDYKBN.js:197
+flushWork @ VM954 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM954 chunk-RPCDYKBN.js:384
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+onSubscribe @ VM967 @tanstack_react-query.js:1898
+subscribe @ VM967 @tanstack_react-query.js:24
+(anonymous) @ VM967 @tanstack_react-query.js:3022
+subscribeToStore @ VM954 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM954 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM954 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM954 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM954 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM954 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM954 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM954 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM954 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM954 chunk-RPCDYKBN.js:19432
+commitRoot @ VM954 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM954 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18718
+workLoop @ VM954 chunk-RPCDYKBN.js:197
+flushWork @ VM954 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM954 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+onSubscribe @ VM967 @tanstack_react-query.js:1898
+subscribe @ VM967 @tanstack_react-query.js:24
+(anonymous) @ VM967 @tanstack_react-query.js:3022
+subscribeToStore @ VM954 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM954 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM954 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM954 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM954 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM954 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM954 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM954 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM954 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM954 chunk-RPCDYKBN.js:19432
+commitRoot @ VM954 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM954 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM954 chunk-RPCDYKBN.js:18718
+workLoop @ VM954 chunk-RPCDYKBN.js:197
+flushWork @ VM954 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM954 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/hero 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+fetch @ VM967 @tanstack_react-query.js:2011
+refetch @ VM967 @tanstack_react-query.js:2001
+onFocus @ VM967 @tanstack_react-query.js:749
+(anonymous) @ VM967 @tanstack_react-query.js:1112
+(anonymous) @ VM967 @tanstack_react-query.js:1111
+batch @ VM967 @tanstack_react-query.js:583
+onFocus @ VM967 @tanstack_react-query.js:1110
+(anonymous) @ VM967 @tanstack_react-query.js:1601
+await in (anonymous)
+(anonymous) @ VM967 @tanstack_react-query.js:313
+onFocus @ VM967 @tanstack_react-query.js:312
+(anonymous) @ VM967 @tanstack_react-query.js:299
+listener @ VM967 @tanstack_react-query.js:270
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/service 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+fetch @ VM967 @tanstack_react-query.js:2011
+refetch @ VM967 @tanstack_react-query.js:2001
+onFocus @ VM967 @tanstack_react-query.js:749
+(anonymous) @ VM967 @tanstack_react-query.js:1112
+(anonymous) @ VM967 @tanstack_react-query.js:1111
+batch @ VM967 @tanstack_react-query.js:583
+onFocus @ VM967 @tanstack_react-query.js:1110
+(anonymous) @ VM967 @tanstack_react-query.js:1601
+await in (anonymous)
+(anonymous) @ VM967 @tanstack_react-query.js:313
+onFocus @ VM967 @tanstack_react-query.js:312
+(anonymous) @ VM967 @tanstack_react-query.js:299
+listener @ VM967 @tanstack_react-query.js:270
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/testimonial 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+fetch @ VM967 @tanstack_react-query.js:2011
+refetch @ VM967 @tanstack_react-query.js:2001
+onFocus @ VM967 @tanstack_react-query.js:749
+(anonymous) @ VM967 @tanstack_react-query.js:1112
+(anonymous) @ VM967 @tanstack_react-query.js:1111
+batch @ VM967 @tanstack_react-query.js:583
+onFocus @ VM967 @tanstack_react-query.js:1110
+(anonymous) @ VM967 @tanstack_react-query.js:1601
+await in (anonymous)
+(anonymous) @ VM967 @tanstack_react-query.js:313
+onFocus @ VM967 @tanstack_react-query.js:312
+(anonymous) @ VM967 @tanstack_react-query.js:299
+listener @ VM967 @tanstack_react-query.js:270
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+fetch @ VM967 @tanstack_react-query.js:2011
+refetch @ VM967 @tanstack_react-query.js:2001
+onFocus @ VM967 @tanstack_react-query.js:749
+(anonymous) @ VM967 @tanstack_react-query.js:1112
+(anonymous) @ VM967 @tanstack_react-query.js:1111
+batch @ VM967 @tanstack_react-query.js:583
+onFocus @ VM967 @tanstack_react-query.js:1110
+(anonymous) @ VM967 @tanstack_react-query.js:1601
+await in (anonymous)
+(anonymous) @ VM967 @tanstack_react-query.js:313
+onFocus @ VM967 @tanstack_react-query.js:312
+(anonymous) @ VM967 @tanstack_react-query.js:299
+listener @ VM967 @tanstack_react-query.js:270
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+fetch @ VM967 @tanstack_react-query.js:2011
+refetch @ VM967 @tanstack_react-query.js:2001
+onFocus @ VM967 @tanstack_react-query.js:749
+(anonymous) @ VM967 @tanstack_react-query.js:1112
+(anonymous) @ VM967 @tanstack_react-query.js:1111
+batch @ VM967 @tanstack_react-query.js:583
+onFocus @ VM967 @tanstack_react-query.js:1110
+(anonymous) @ VM967 @tanstack_react-query.js:1601
+await in (anonymous)
+(anonymous) @ VM967 @tanstack_react-query.js:313
+onFocus @ VM967 @tanstack_react-query.js:312
+(anonymous) @ VM967 @tanstack_react-query.js:299
+listener @ VM967 @tanstack_react-query.js:270
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ VM923 injected.js:204
+(anonymous) @ VM1010 queryClient.ts:20
+fetchFn @ VM967 @tanstack_react-query.js:840
+run @ VM967 @tanstack_react-query.js:494
+start @ VM967 @tanstack_react-query.js:536
+fetch @ VM967 @tanstack_react-query.js:926
+executeFetch_fn @ VM967 @tanstack_react-query.js:2211
+fetch @ VM967 @tanstack_react-query.js:2011
+refetch @ VM967 @tanstack_react-query.js:2001
+onFocus @ VM967 @tanstack_react-query.js:749
+(anonymous) @ VM967 @tanstack_react-query.js:1112
+(anonymous) @ VM967 @tanstack_react-query.js:1111
+batch @ VM967 @tanstack_react-query.js:583
+onFocus @ VM967 @tanstack_react-query.js:1110
+(anonymous) @ VM967 @tanstack_react-query.js:1601
+await in (anonymous)
+(anonymous) @ VM967 @tanstack_react-query.js:313
+onFocus @ VM967 @tanstack_react-query.js:312
+(anonymous) @ VM967 @tanstack_react-query.js:299
+listener @ VM967 @tanstack_react-query.js:270
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM923 injected.js:204
+ping @ VM930 client:736
+waitForSuccessfulPing @ VM930 client:749
+(anonymous) @ VM930 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+(index):1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+85d8fa94505c4264.js:2 Failed when connecting: Connection closed (code: 1006)
+(anonymous) @ 85d8fa94505c4264.js:2
+k.<computed> @ e465cec459a5f4d9.js:2
+value @ e093fd8aa1ccade0.js:2
+value @ e093fd8aa1ccade0.js:2
+_websocket.onclose @ e093fd8aa1ccade0.js:2
+85d8fa94505c4264.js:2 Failed when connecting: Connection closed (code: 1006)
+(anonymous) @ 85d8fa94505c4264.js:2
+k.<computed> @ e465cec459a5f4d9.js:2
+value @ e093fd8aa1ccade0.js:2
+value @ e093fd8aa1ccade0.js:2
+_websocket.onclose @ e093fd8aa1ccade0.js:2
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/hero 401 (Unauthorized)
+apply @ VM2412 injected.js:204
+(anonymous) @ VM2441 queryClient.ts:20
+fetchFn @ VM2438 @tanstack_react-query.js:840
+run @ VM2438 @tanstack_react-query.js:494
+start @ VM2438 @tanstack_react-query.js:536
+fetch @ VM2438 @tanstack_react-query.js:926
+executeFetch_fn @ VM2438 @tanstack_react-query.js:2211
+onSubscribe @ VM2438 @tanstack_react-query.js:1898
+subscribe @ VM2438 @tanstack_react-query.js:24
+(anonymous) @ VM2438 @tanstack_react-query.js:3022
+subscribeToStore @ VM2426 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM2426 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM2426 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM2426 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM2426 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM2426 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM2426 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM2426 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM2426 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM2426 chunk-RPCDYKBN.js:19432
+commitRoot @ VM2426 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM2426 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18718
+workLoop @ VM2426 chunk-RPCDYKBN.js:197
+flushWork @ VM2426 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM2426 chunk-RPCDYKBN.js:384
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+hero:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ VM2412 injected.js:204
+(anonymous) @ VM2441 queryClient.ts:20
+fetchFn @ VM2438 @tanstack_react-query.js:840
+run @ VM2438 @tanstack_react-query.js:494
+start @ VM2438 @tanstack_react-query.js:536
+fetch @ VM2438 @tanstack_react-query.js:926
+executeFetch_fn @ VM2438 @tanstack_react-query.js:2211
+onSubscribe @ VM2438 @tanstack_react-query.js:1898
+subscribe @ VM2438 @tanstack_react-query.js:24
+(anonymous) @ VM2438 @tanstack_react-query.js:3022
+subscribeToStore @ VM2426 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM2426 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM2426 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM2426 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM2426 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM2426 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM2426 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM2426 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM2426 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM2426 chunk-RPCDYKBN.js:19432
+commitRoot @ VM2426 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM2426 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18718
+workLoop @ VM2426 chunk-RPCDYKBN.js:197
+flushWork @ VM2426 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM2426 chunk-RPCDYKBN.js:384
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/service 401 (Unauthorized)
+apply @ VM2412 injected.js:204
+(anonymous) @ VM2441 queryClient.ts:20
+fetchFn @ VM2438 @tanstack_react-query.js:840
+run @ VM2438 @tanstack_react-query.js:494
+start @ VM2438 @tanstack_react-query.js:536
+fetch @ VM2438 @tanstack_react-query.js:926
+executeFetch_fn @ VM2438 @tanstack_react-query.js:2211
+onSubscribe @ VM2438 @tanstack_react-query.js:1898
+subscribe @ VM2438 @tanstack_react-query.js:24
+(anonymous) @ VM2438 @tanstack_react-query.js:3022
+subscribeToStore @ VM2426 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM2426 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM2426 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM2426 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM2426 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM2426 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM2426 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM2426 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM2426 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM2426 chunk-RPCDYKBN.js:19432
+commitRoot @ VM2426 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM2426 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18718
+workLoop @ VM2426 chunk-RPCDYKBN.js:197
+flushWork @ VM2426 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM2426 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+service:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/testimonial 401 (Unauthorized)
+apply @ VM2412 injected.js:204
+(anonymous) @ VM2441 queryClient.ts:20
+fetchFn @ VM2438 @tanstack_react-query.js:840
+run @ VM2438 @tanstack_react-query.js:494
+start @ VM2438 @tanstack_react-query.js:536
+fetch @ VM2438 @tanstack_react-query.js:926
+executeFetch_fn @ VM2438 @tanstack_react-query.js:2211
+onSubscribe @ VM2438 @tanstack_react-query.js:1898
+subscribe @ VM2438 @tanstack_react-query.js:24
+(anonymous) @ VM2438 @tanstack_react-query.js:3022
+subscribeToStore @ VM2426 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM2426 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM2426 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM2426 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM2426 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM2426 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM2426 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM2426 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM2426 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM2426 chunk-RPCDYKBN.js:19432
+commitRoot @ VM2426 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM2426 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18718
+workLoop @ VM2426 chunk-RPCDYKBN.js:197
+flushWork @ VM2426 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM2426 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+testimonial:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta 401 (Unauthorized)
+apply @ VM2412 injected.js:204
+(anonymous) @ VM2441 queryClient.ts:20
+fetchFn @ VM2438 @tanstack_react-query.js:840
+run @ VM2438 @tanstack_react-query.js:494
+start @ VM2438 @tanstack_react-query.js:536
+fetch @ VM2438 @tanstack_react-query.js:926
+executeFetch_fn @ VM2438 @tanstack_react-query.js:2211
+onSubscribe @ VM2438 @tanstack_react-query.js:1898
+subscribe @ VM2438 @tanstack_react-query.js:24
+(anonymous) @ VM2438 @tanstack_react-query.js:3022
+subscribeToStore @ VM2426 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM2426 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM2426 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM2426 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM2426 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM2426 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM2426 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM2426 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM2426 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM2426 chunk-RPCDYKBN.js:19432
+commitRoot @ VM2426 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM2426 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18718
+workLoop @ VM2426 chunk-RPCDYKBN.js:197
+flushWork @ VM2426 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM2426 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+cta:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event 401 (Unauthorized)
+apply @ VM2412 injected.js:204
+(anonymous) @ VM2441 queryClient.ts:20
+fetchFn @ VM2438 @tanstack_react-query.js:840
+run @ VM2438 @tanstack_react-query.js:494
+start @ VM2438 @tanstack_react-query.js:536
+fetch @ VM2438 @tanstack_react-query.js:926
+executeFetch_fn @ VM2438 @tanstack_react-query.js:2211
+onSubscribe @ VM2438 @tanstack_react-query.js:1898
+subscribe @ VM2438 @tanstack_react-query.js:24
+(anonymous) @ VM2438 @tanstack_react-query.js:3022
+subscribeToStore @ VM2426 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM2426 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM2426 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM2426 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM2426 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM2426 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM2426 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM2426 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM2426 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM2426 chunk-RPCDYKBN.js:19432
+commitRoot @ VM2426 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM2426 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM2426 chunk-RPCDYKBN.js:18718
+workLoop @ VM2426 chunk-RPCDYKBN.js:197
+flushWork @ VM2426 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM2426 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/content/type/event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+event:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM2412 injected.js:204
+ping @ VM2420 client:736
+waitForSuccessfulPing @ VM2420 client:749
+(anonymous) @ VM2420 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/:1  Failed to load resource: the server responded with a status of 502 (Bad Gateway)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:34
+fetchFn @ @tanstack_react-query.js?v=1d878bb1:840
+run @ @tanstack_react-query.js?v=1d878bb1:494
+start @ @tanstack_react-query.js?v=1d878bb1:536
+fetch @ @tanstack_react-query.js?v=1d878bb1:926
+executeFetch_fn @ @tanstack_react-query.js?v=1d878bb1:2211
+onSubscribe @ @tanstack_react-query.js?v=1d878bb1:1898
+subscribe @ @tanstack_react-query.js?v=1d878bb1:24
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=1d878bb1:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=1d878bb1:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=1d878bb1:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=1d878bb1:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=1d878bb1:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=1d878bb1:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=1d878bb1:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=1d878bb1:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19432
+commitRoot @ chunk-RPCDYKBN.js?v=1d878bb1:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=1d878bb1:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18718
+workLoop @ chunk-RPCDYKBN.js?v=1d878bb1:197
+flushWork @ chunk-RPCDYKBN.js?v=1d878bb1:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=1d878bb1:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:34
+fetchFn @ @tanstack_react-query.js?v=1d878bb1:840
+run @ @tanstack_react-query.js?v=1d878bb1:494
+start @ @tanstack_react-query.js?v=1d878bb1:536
+fetch @ @tanstack_react-query.js?v=1d878bb1:926
+executeFetch_fn @ @tanstack_react-query.js?v=1d878bb1:2211
+onSubscribe @ @tanstack_react-query.js?v=1d878bb1:1898
+subscribe @ @tanstack_react-query.js?v=1d878bb1:24
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=1d878bb1:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=1d878bb1:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=1d878bb1:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=1d878bb1:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=1d878bb1:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=1d878bb1:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=1d878bb1:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=1d878bb1:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19432
+commitRoot @ chunk-RPCDYKBN.js?v=1d878bb1:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=1d878bb1:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18718
+workLoop @ chunk-RPCDYKBN.js?v=1d878bb1:197
+flushWork @ chunk-RPCDYKBN.js?v=1d878bb1:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=1d878bb1:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:34
+fetchFn @ @tanstack_react-query.js?v=1d878bb1:840
+run @ @tanstack_react-query.js?v=1d878bb1:494
+start @ @tanstack_react-query.js?v=1d878bb1:536
+fetch @ @tanstack_react-query.js?v=1d878bb1:926
+executeFetch_fn @ @tanstack_react-query.js?v=1d878bb1:2211
+onSubscribe @ @tanstack_react-query.js?v=1d878bb1:1898
+subscribe @ @tanstack_react-query.js?v=1d878bb1:24
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=1d878bb1:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=1d878bb1:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=1d878bb1:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=1d878bb1:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=1d878bb1:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=1d878bb1:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=1d878bb1:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=1d878bb1:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=1d878bb1:19432
+commitRoot @ chunk-RPCDYKBN.js?v=1d878bb1:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=1d878bb1:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=1d878bb1:18718
+workLoop @ chunk-RPCDYKBN.js?v=1d878bb1:197
+flushWork @ chunk-RPCDYKBN.js?v=1d878bb1:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=1d878bb1:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/auth/user 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:34
+fetchFn @ @tanstack_react-query.js?v=1d878bb1:840
+run @ @tanstack_react-query.js?v=1d878bb1:494
+start @ @tanstack_react-query.js?v=1d878bb1:536
+fetch @ @tanstack_react-query.js?v=1d878bb1:926
+executeFetch_fn @ @tanstack_react-query.js?v=1d878bb1:2211
+fetch @ @tanstack_react-query.js?v=1d878bb1:2011
+refetch @ @tanstack_react-query.js?v=1d878bb1:2001
+onFocus @ @tanstack_react-query.js?v=1d878bb1:749
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:1112
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:1111
+batch @ @tanstack_react-query.js?v=1d878bb1:583
+onFocus @ @tanstack_react-query.js?v=1d878bb1:1110
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:1601
+await in (anonymous)
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:313
+onFocus @ @tanstack_react-query.js?v=1d878bb1:312
+(anonymous) @ @tanstack_react-query.js?v=1d878bb1:299
+listener @ @tanstack_react-query.js?v=1d878bb1:270
