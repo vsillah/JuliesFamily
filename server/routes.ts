@@ -4,7 +4,7 @@ import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -667,6 +667,237 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting content visibility:", error);
       res.status(500).json({ message: "Failed to delete content visibility" });
+    }
+  });
+
+  // ============ A/B TESTING ROUTES ============
+  
+  // Get all A/B tests (admin)
+  app.get('/api/ab-tests', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const tests = await storage.getAllAbTests();
+      res.json(tests);
+    } catch (error) {
+      console.error("Error fetching A/B tests:", error);
+      res.status(500).json({ message: "Failed to fetch A/B tests" });
+    }
+  });
+
+  // Get specific A/B test (admin)
+  app.get('/api/ab-tests/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const test = await storage.getAbTest(req.params.id);
+      if (!test) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      res.json(test);
+    } catch (error) {
+      console.error("Error fetching A/B test:", error);
+      res.status(500).json({ message: "Failed to fetch A/B test" });
+    }
+  });
+
+  // Create A/B test (admin)
+  app.post('/api/ab-tests', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const validatedData = insertAbTestSchema.parse({
+        ...req.body,
+        createdBy: userId,
+      });
+      const test = await storage.createAbTest(validatedData);
+      res.status(201).json(test);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Error creating A/B test:", error);
+      res.status(500).json({ message: "Failed to create A/B test" });
+    }
+  });
+
+  // Update A/B test (admin)
+  app.patch('/api/ab-tests/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const test = await storage.updateAbTest(req.params.id, req.body);
+      if (!test) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      res.json(test);
+    } catch (error) {
+      console.error("Error updating A/B test:", error);
+      res.status(500).json({ message: "Failed to update A/B test" });
+    }
+  });
+
+  // Delete A/B test (admin)
+  app.delete('/api/ab-tests/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteAbTest(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting A/B test:", error);
+      res.status(500).json({ message: "Failed to delete A/B test" });
+    }
+  });
+
+  // Get variants for a test (admin)
+  app.get('/api/ab-tests/:testId/variants', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const variants = await storage.getAbTestVariants(req.params.testId);
+      res.json(variants);
+    } catch (error) {
+      console.error("Error fetching A/B test variants:", error);
+      res.status(500).json({ message: "Failed to fetch A/B test variants" });
+    }
+  });
+
+  // Create variant for a test (admin)
+  app.post('/api/ab-tests/:testId/variants', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertAbTestVariantSchema.parse({
+        ...req.body,
+        testId: req.params.testId,
+      });
+      const variant = await storage.createAbTestVariant(validatedData);
+      res.status(201).json(variant);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Error creating A/B test variant:", error);
+      res.status(500).json({ message: "Failed to create A/B test variant" });
+    }
+  });
+
+  // Update variant (admin)
+  app.patch('/api/ab-tests/variants/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const variant = await storage.updateAbTestVariant(req.params.id, req.body);
+      if (!variant) {
+        return res.status(404).json({ message: "A/B test variant not found" });
+      }
+      res.json(variant);
+    } catch (error) {
+      console.error("Error updating A/B test variant:", error);
+      res.status(500).json({ message: "Failed to update A/B test variant" });
+    }
+  });
+
+  // Delete variant (admin)
+  app.delete('/api/ab-tests/variants/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteAbTestVariant(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting A/B test variant:", error);
+      res.status(500).json({ message: "Failed to delete A/B test variant" });
+    }
+  });
+
+  // Get active tests for current session (public)
+  app.get('/api/ab-tests/active', async (req, res) => {
+    try {
+      const persona = req.query.persona as string | undefined;
+      const funnelStage = req.query.funnelStage as string | undefined;
+      const tests = await storage.getActiveAbTests(persona, funnelStage);
+      res.json(tests);
+    } catch (error) {
+      console.error("Error fetching active A/B tests:", error);
+      res.status(500).json({ message: "Failed to fetch active A/B tests" });
+    }
+  });
+
+  // Get or create variant assignment for session (public)
+  app.post('/api/ab-tests/assign', async (req: any, res) => {
+    try {
+      const { testId, sessionId, persona, funnelStage } = req.body;
+      
+      if (!testId || !sessionId) {
+        return res.status(400).json({ message: "testId and sessionId are required" });
+      }
+
+      // Check if assignment already exists
+      let assignment = await storage.getAssignment(testId, sessionId);
+      
+      if (!assignment) {
+        // Get test and variants
+        const test = await storage.getAbTest(testId);
+        if (!test || test.status !== 'active') {
+          return res.status(404).json({ message: "Active test not found" });
+        }
+
+        const variants = await storage.getAbTestVariants(testId);
+        if (variants.length === 0) {
+          return res.status(400).json({ message: "Test has no variants" });
+        }
+
+        // Weighted random selection based on traffic weights
+        const totalWeight = variants.reduce((sum, v) => sum + (v.trafficWeight || 50), 0);
+        let random = Math.random() * totalWeight;
+        let selectedVariant = variants[0];
+        
+        for (const variant of variants) {
+          random -= variant.trafficWeight || 50;
+          if (random <= 0) {
+            selectedVariant = variant;
+            break;
+          }
+        }
+
+        // Create assignment
+        const userId = req.user?.claims?.sub || null;
+        assignment = await storage.createAbTestAssignment({
+          testId,
+          variantId: selectedVariant.id,
+          sessionId,
+          userId,
+          persona,
+          funnelStage,
+        });
+      }
+
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error assigning A/B test variant:", error);
+      res.status(500).json({ message: "Failed to assign A/B test variant" });
+    }
+  });
+
+  // Track event (public)
+  app.post('/api/ab-tests/track', async (req, res) => {
+    try {
+      const validatedData = insertAbTestEventSchema.parse(req.body);
+      const event = await storage.trackEvent(validatedData);
+      res.status(201).json(event);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Error tracking A/B test event:", error);
+      res.status(500).json({ message: "Failed to track A/B test event" });
+    }
+  });
+
+  // Get test analytics (admin)
+  app.get('/api/ab-tests/:testId/analytics', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getTestAnalytics(req.params.testId);
+      res.json(analytics);
+    } catch (error) {
+      console.error("Error fetching A/B test analytics:", error);
+      res.status(500).json({ message: "Failed to fetch A/B test analytics" });
+    }
+  });
+
+  // Get test events (admin)
+  app.get('/api/ab-tests/:testId/events', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const events = await storage.getTestEvents(req.params.testId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching A/B test events:", error);
+      res.status(500).json({ message: "Failed to fetch A/B test events" });
     }
   });
 
