@@ -49,13 +49,30 @@ export default function PersonaMatrixGrid({
   };
 
   useEffect(() => {
-    checkScrollPosition();
     const container = scrollContainerRef.current;
-    if (container) {
-      container.addEventListener('scroll', checkScrollPosition);
-      return () => container.removeEventListener('scroll', checkScrollPosition);
-    }
-  }, []);
+    if (!container) return;
+
+    // Check immediately
+    checkScrollPosition();
+
+    // Add scroll listener
+    container.addEventListener('scroll', checkScrollPosition);
+
+    // Add resize observer to recheck when container or content size changes
+    const resizeObserver = new ResizeObserver(() => {
+      checkScrollPosition();
+    });
+    resizeObserver.observe(container);
+
+    // Recheck after a short delay to ensure content is rendered
+    const timeoutId = setTimeout(checkScrollPosition, 100);
+
+    return () => {
+      container.removeEventListener('scroll', checkScrollPosition);
+      resizeObserver.disconnect();
+      clearTimeout(timeoutId);
+    };
+  }, [contentItems]);
 
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
