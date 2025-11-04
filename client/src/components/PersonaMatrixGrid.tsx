@@ -36,20 +36,28 @@ export default function PersonaMatrixGrid({
 }: PersonaMatrixGridProps) {
   const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true); // Start with right arrow visible
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const updateScrollArrows = useCallback(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!container) {
+      // On mobile, grid is always wider, so show right arrow by default
+      setCanScrollRight(true);
+      return;
+    }
 
     const scrollLeft = container.scrollLeft;
-    const maxScroll = container.scrollWidth - container.clientWidth;
+    const scrollWidth = container.scrollWidth;
+    const clientWidth = container.clientWidth;
+    const maxScroll = scrollWidth - clientWidth;
     
-    // Show left arrow if scrolled more than 10px from start
-    setCanScrollLeft(scrollLeft > 10);
-    // Show right arrow if more than 10px from end
-    setCanScrollRight(scrollLeft < maxScroll - 10);
+    // Only hide arrows if we're truly at the edges
+    const isAtStart = scrollLeft < 5;
+    const isAtEnd = scrollLeft >= maxScroll - 5;
+    
+    setCanScrollLeft(!isAtStart && maxScroll > 0);
+    setCanScrollRight(!isAtEnd && maxScroll > 0);
   }, []);
 
   useEffect(() => {
@@ -57,20 +65,24 @@ export default function PersonaMatrixGrid({
     if (!container) return;
 
     // Update on scroll
-    container.addEventListener('scroll', updateScrollArrows);
+    const handleScroll = () => {
+      requestAnimationFrame(updateScrollArrows);
+    };
+    
+    container.addEventListener('scroll', handleScroll);
     
     // Update on resize
     window.addEventListener('resize', updateScrollArrows);
     
-    // Initial update with multiple checks to ensure content is loaded
-    updateScrollArrows();
-    setTimeout(updateScrollArrows, 100);
-    setTimeout(updateScrollArrows, 300);
-    setTimeout(updateScrollArrows, 500);
+    // Initial updates - multiple times to ensure content is loaded
+    const timers = [0, 100, 250, 500, 1000].map(delay =>
+      setTimeout(updateScrollArrows, delay)
+    );
 
     return () => {
-      container.removeEventListener('scroll', updateScrollArrows);
+      container.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', updateScrollArrows);
+      timers.forEach(clearTimeout);
     };
   }, [updateScrollArrows]);
 
