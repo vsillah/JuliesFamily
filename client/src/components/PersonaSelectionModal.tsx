@@ -64,7 +64,7 @@ export default function PersonaSelectionModal() {
           })}
         </div>
 
-        <div className="flex justify-center pt-2 pb-2 border-t border-muted">
+        <div className="flex justify-center border-t border-muted mt-[0px] mb-[0px] pt-[30px] pb-[30px]">
           <Button
             variant="ghost"
             onClick={handleSkip}
