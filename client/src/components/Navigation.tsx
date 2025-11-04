@@ -146,9 +146,14 @@ export default function Navigation() {
               )}
               {user?.isAdmin && (
                 <>
-                  <AdminPersonaSwitcher />
+                  <AdminPersonaSwitcher isScrolled={isScrolled} />
                   <Link href="/admin">
-                    <Button variant="outline" size="default" data-testid="button-admin-dashboard">
+                    <Button 
+                      variant="outline" 
+                      size="default" 
+                      data-testid="button-admin-dashboard"
+                      className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
+                    >
                       <Shield className="w-4 h-4 mr-2" />
                       Admin
                     </Button>
