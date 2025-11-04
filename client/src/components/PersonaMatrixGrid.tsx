@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS } from "@shared/defaults/personas";
 import type { Persona, FunnelStage } from "@shared/defaults/personas";
 import type { ContentItem, ContentVisibility, ImageAsset, AbTest } from "@shared/schema";
@@ -33,10 +35,74 @@ export default function PersonaMatrixGrid({
   abTests 
 }: PersonaMatrixGridProps) {
   const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const checkScrollPosition = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    setCanScrollLeft(scrollLeft > 0);
+    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+  };
+
+  useEffect(() => {
+    checkScrollPosition();
+    const container = scrollContainerRef.current;
+    if (container) {
+      container.addEventListener('scroll', checkScrollPosition);
+      return () => container.removeEventListener('scroll', checkScrollPosition);
+    }
+  }, []);
+
+  const scrollLeft = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollBy({ left: -300, behavior: 'smooth' });
+  };
+
+  const scrollRight = () => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    container.scrollBy({ left: 300, behavior: 'smooth' });
+  };
 
   return (
     <div className="flex gap-4">
-      <div className="flex-1 overflow-x-auto overflow-y-visible scroll-smooth snap-x snap-mandatory" style={{ scrollPaddingLeft: '6rem' }}>
+      <div className="relative flex-1">
+        {/* Left scroll button */}
+        {canScrollLeft && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 shadow-lg bg-background"
+            onClick={scrollLeft}
+            data-testid="button-scroll-left"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+        )}
+
+        {/* Right scroll button */}
+        {canScrollRight && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 shadow-lg bg-background"
+            onClick={scrollRight}
+            data-testid="button-scroll-right"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </Button>
+        )}
+
+        <div 
+          ref={scrollContainerRef}
+          className="overflow-x-auto overflow-y-visible scroll-smooth snap-x snap-mandatory" 
+          style={{ scrollPaddingLeft: '6rem' }}
+        >
         <div className="min-w-max">
           {/* Header row with persona labels - sticky on vertical scroll */}
           <div className="grid gap-1 mb-1 sticky top-0 z-20 bg-background pb-1" style={{ gridTemplateColumns: '6rem repeat(5, minmax(200px, 1fr))' }}>
@@ -84,6 +150,7 @@ export default function PersonaMatrixGrid({
               ))}
             </div>
           ))}
+        </div>
         </div>
       </div>
       {/* Edit panel */}
