@@ -568,8 +568,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get content items by type (admin)
-  app.get('/api/content/type/:type', isAuthenticated, isAdmin, async (req, res) => {
+  // Get content items by type (public - needed for matrix grid display)
+  app.get('/api/content/type/:type', async (req, res) => {
     try {
       const items = await storage.getContentItemsByType(req.params.type);
       res.json(items);
