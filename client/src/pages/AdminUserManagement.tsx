@@ -102,7 +102,7 @@ export default function AdminUserManagement() {
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       <Breadcrumbs
         items={[
-          { label: "Admin Dashboard", href: "/admin/dashboard" },
+          { label: "Admin Dashboard", href: "/admin" },
           { label: "User Management" },
         ]}
       />
