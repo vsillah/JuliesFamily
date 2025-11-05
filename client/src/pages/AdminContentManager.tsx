@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
+import ContentUsageIndicator from "@/components/ContentUsageIndicator";
 import {
   DndContext,
   closestCenter,
@@ -94,6 +95,9 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
                     {item.description}
                   </p>
                 )}
+                
+                <ContentUsageIndicator contentId={item.id} />
+                
                 {item.imageName && item.imageName.length > 0 && (
                   <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
                     <ImageIcon className="w-3 h-3" />
