@@ -105,6 +105,33 @@ export interface IStorage {
     totalEvents: number;
     conversionRate: number;
   }[]>;
+  
+  // Performance Metrics operations
+  getPerformanceMetrics(): Promise<{
+    personaMetrics: {
+      persona: string;
+      leadCount: number;
+      avgEngagementScore: number;
+      conversionRate: number;
+    }[];
+    funnelStageMetrics: {
+      funnelStage: string;
+      leadCount: number;
+      avgEngagementScore: number;
+    }[];
+    contentPerformance: {
+      type: string;
+      totalItems: number;
+      activeItems: number;
+      avgViews: number;
+    }[];
+    recommendations: {
+      type: string;
+      reason: string;
+      suggestedTest: string;
+      priority: "high" | "medium" | "low";
+    }[];
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -618,6 +645,137 @@ export class DatabaseStorage implements IStorage {
         ? (Number(row.totalEvents) / Number(row.uniqueViews)) * 100 
         : 0,
     }));
+  }
+
+  // Performance Metrics operations
+  async getPerformanceMetrics(): Promise<{
+    personaMetrics: {
+      persona: string;
+      leadCount: number;
+      avgEngagementScore: number;
+      conversionRate: number;
+    }[];
+    funnelStageMetrics: {
+      funnelStage: string;
+      leadCount: number;
+      avgEngagementScore: number;
+    }[];
+    contentPerformance: {
+      type: string;
+      totalItems: number;
+      activeItems: number;
+      avgViews: number;
+    }[];
+    recommendations: {
+      type: string;
+      reason: string;
+      suggestedTest: string;
+      priority: "high" | "medium" | "low";
+    }[];
+  }> {
+    // Get persona metrics
+    const personaMetricsData = await db
+      .select({
+        persona: leads.persona,
+        leadCount: sql<number>`COUNT(*)`.as('leadCount'),
+        avgEngagementScore: sql<number>`AVG(${leads.engagementScore})`.as('avgEngagementScore'),
+        conversionRate: sql<number>`(COUNT(*) FILTER (WHERE ${leads.convertedAt} IS NOT NULL)::float / NULLIF(COUNT(*), 0) * 100)`.as('conversionRate'),
+      })
+      .from(leads)
+      .where(sql`${leads.persona} IS NOT NULL`)
+      .groupBy(leads.persona);
+
+    // Get funnel stage metrics
+    const funnelStageMetricsData = await db
+      .select({
+        funnelStage: leads.funnelStage,
+        leadCount: sql<number>`COUNT(*)`.as('leadCount'),
+        avgEngagementScore: sql<number>`AVG(${leads.engagementScore})`.as('avgEngagementScore'),
+      })
+      .from(leads)
+      .where(sql`${leads.funnelStage} IS NOT NULL`)
+      .groupBy(leads.funnelStage);
+
+    // Get content performance metrics
+    const contentTypes = ['hero', 'cta', 'service', 'event', 'testimonial', 'lead_magnet'];
+    const contentPerformanceData = await Promise.all(
+      contentTypes.map(async (type) => {
+        const [stats] = await db
+          .select({
+            totalItems: sql<number>`COUNT(*)`.as('totalItems'),
+            activeItems: sql<number>`COUNT(*) FILTER (WHERE ${contentItems.isActive} = true)`.as('activeItems'),
+          })
+          .from(contentItems)
+          .where(eq(contentItems.type, type));
+
+        return {
+          type,
+          totalItems: Number(stats?.totalItems) || 0,
+          activeItems: Number(stats?.activeItems) || 0,
+          avgViews: 0, // Placeholder for now - would need view tracking
+        };
+      })
+    );
+
+    // Generate recommendations based on metrics
+    const recommendations: {
+      type: string;
+      reason: string;
+      suggestedTest: string;
+      priority: "high" | "medium" | "low";
+    }[] = [];
+
+    // Recommend tests for personas with low engagement
+    personaMetricsData.forEach((metric) => {
+      const avgScore = Number(metric.avgEngagementScore) || 0;
+      if (avgScore < 50 && Number(metric.leadCount) > 5) {
+        recommendations.push({
+          type: "hero",
+          reason: `${metric.persona} persona has ${avgScore.toFixed(0)}% engagement (below 50%)`,
+          suggestedTest: `Test different hero messaging for ${metric.persona}s`,
+          priority: "high",
+        });
+      }
+    });
+
+    // Recommend CTA tests for low conversion rates
+    personaMetricsData.forEach((metric) => {
+      const convRate = Number(metric.conversionRate) || 0;
+      if (convRate < 10 && Number(metric.leadCount) > 5) {
+        recommendations.push({
+          type: "cta",
+          reason: `${metric.persona} persona has ${convRate.toFixed(1)}% conversion rate`,
+          suggestedTest: `A/B test CTA buttons for ${metric.persona}s`,
+          priority: "medium",
+        });
+      }
+    });
+
+    // If no specific recommendations, suggest general improvements
+    if (recommendations.length === 0) {
+      recommendations.push({
+        type: "hero",
+        reason: "Optimize visitor engagement with different hero messages",
+        suggestedTest: "Test hero headlines and imagery",
+        priority: "low",
+      });
+    }
+
+    return {
+      personaMetrics: personaMetricsData.map(row => ({
+        persona: row.persona || 'unknown',
+        leadCount: Number(row.leadCount) || 0,
+        avgEngagementScore: Number(row.avgEngagementScore) || 0,
+        conversionRate: Number(row.conversionRate) || 0,
+      })),
+      funnelStageMetrics: funnelStageMetricsData.map(row => ({
+        funnelStage: row.funnelStage || 'unknown',
+        leadCount: Number(row.leadCount) || 0,
+        avgEngagementScore: Number(row.avgEngagementScore) || 0,
+      })),
+      contentPerformance: contentPerformanceData,
+      recommendations,
+    };
   }
 }
 

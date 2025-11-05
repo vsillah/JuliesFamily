@@ -1029,6 +1029,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get performance metrics for recommendations (admin)
+  app.get('/api/performance-metrics', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const metrics = await storage.getPerformanceMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching performance metrics:", error);
+      res.status(500).json({ message: "Failed to fetch performance metrics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

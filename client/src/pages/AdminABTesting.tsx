@@ -19,6 +19,7 @@ import { useLocation, Link } from "wouter";
 import type { AbTest, AbTestVariant } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { ABTestWizard, type TestConfiguration } from "@/components/ABTestWizard";
 
 export default function AdminABTesting() {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ export default function AdminABTesting() {
   const { toast } = useToast();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isVariantDialogOpen, setIsVariantDialogOpen] = useState(false);
   const [selectedTest, setSelectedTest] = useState<AbTest | null>(null);
 
@@ -53,6 +55,33 @@ export default function AdminABTesting() {
     queryKey: ["/api/ab-tests"],
     retry: false,
   });
+
+  // Handle wizard completion
+  const handleWizardComplete = async (config: TestConfiguration) => {
+    try {
+      // Create the test from the wizard configuration
+      const testData = {
+        name: config.name,
+        description: config.description,
+        type: config.type,
+        targetPersona: config.targetPersona === null ? undefined : config.targetPersona,
+        targetFunnelStage: config.targetFunnelStage === null ? undefined : config.targetFunnelStage,
+        trafficAllocation: config.trafficAllocation,
+        status: 'draft',
+      };
+
+      await createTestMutation.mutateAsync(testData);
+      
+      // Note: For now, we create the test in draft mode
+      // Full variant creation will be added when we build the Configure step
+      toast({
+        title: "Test created",
+        description: "Your A/B test has been created in draft mode. Add variants to activate it.",
+      });
+    } catch (error) {
+      console.error("Error creating test from wizard:", error);
+    }
+  };
 
   // Create test mutation
   const createTestMutation = useMutation({
@@ -264,7 +293,7 @@ export default function AdminABTesting() {
               </Link>
               <Button
                 variant="default"
-                onClick={() => setIsCreateDialogOpen(true)}
+                onClick={() => setIsWizardOpen(true)}
                 data-testid="button-create-test"
                 size="sm"
                 className="w-full sm:w-auto"
@@ -660,6 +689,13 @@ export default function AdminABTesting() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* A/B Test Wizard */}
+      <ABTestWizard
+        open={isWizardOpen}
+        onOpenChange={setIsWizardOpen}
+        onComplete={handleWizardComplete}
+      />
     </div>
   );
 }

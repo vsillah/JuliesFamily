@@ -209,6 +209,7 @@ export const abTestVariants = pgTable("ab_test_variants", {
   description: text("description"),
   trafficWeight: integer("traffic_weight").default(50), // Percentage of test traffic (weights sum to 100)
   configuration: jsonb("configuration").notNull(), // Variant-specific config (card order, layout changes, etc)
+  contentItemId: varchar("content_item_id").references(() => contentItems.id, { onDelete: "set null" }), // Optional link to Content Manager item
   isControl: boolean("is_control").default(false), // Is this the control/baseline variant?
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
