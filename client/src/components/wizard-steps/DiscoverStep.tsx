@@ -138,6 +138,31 @@ export function DiscoverStep({ onSelectRecommendation }: DiscoverStepProps) {
         </Card>
       )}
 
+      {/* Manual Test Creation */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Or Browse All Test Types</CardTitle>
+          <CardDescription>
+            Not interested in recommendations? Choose any test type to get started
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {Object.entries(testTypeLabels).map(([type, label]) => (
+              <Button
+                key={type}
+                variant="outline"
+                className="justify-start"
+                onClick={() => onSelectRecommendation(type as TestType, `Test ${label}`)}
+                data-testid={`button-test-type-${type}`}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Performance Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Persona Performance */}
@@ -256,31 +281,6 @@ export function DiscoverStep({ onSelectRecommendation }: DiscoverStepProps) {
                   of {content.totalItems} total
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Manual Test Creation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Or Browse All Test Types</CardTitle>
-          <CardDescription>
-            Not interested in recommendations? Choose any test type to get started
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {Object.entries(testTypeLabels).map(([type, label]) => (
-              <Button
-                key={type}
-                variant="outline"
-                className="justify-start"
-                onClick={() => onSelectRecommendation(type as TestType, `Test ${label}`)}
-                data-testid={`button-test-type-${type}`}
-              >
-                {label}
-              </Button>
             ))}
           </div>
         </CardContent>
