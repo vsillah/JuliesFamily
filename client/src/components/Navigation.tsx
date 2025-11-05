@@ -131,16 +131,6 @@ export default function Navigation() {
               >
                 Events
               </button>
-              <Link href="/how-it-works">
-                <button
-                  className={`transition-colors duration-300 ${
-                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                  }`}
-                  data-testid="link-how-it-works"
-                >
-                  How It Works
-                </button>
-              </Link>
               {currentPersonaConfig && (
                 <button
                   onClick={() => setShowPersonaModal(true)}
@@ -298,14 +288,6 @@ export default function Navigation() {
             >
               Events
             </button>
-            <Link href="/how-it-works" onClick={() => setMobileMenuOpen(false)}>
-              <button
-                className="text-lg text-foreground hover:text-primary transition-colors"
-                data-testid="link-how-it-works-mobile"
-              >
-                How It Works
-              </button>
-            </Link>
             <Button variant="default" size="lg" data-testid="button-donate-mobile">
               Donate Now
             </Button>
