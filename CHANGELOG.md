@@ -8,9 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Planned
-- Email/SMS automation for lead outreach via SendGrid or Twilio
-- Advanced analytics dashboard with conversion funnels
-- Mobile app for on-the-go access
+- **AI Chat Assistant**: Intelligent chatbot to help visitors find programs and answer questions
+- **N8N Integration**: Workflow automation for lead nurturing, event reminders, and donor follow-ups
+- **Stripe Integration**: Secure online donation processing with recurring giving options
+- **Email Integration**: Automated email campaigns for newsletters, event updates, and donor communications
 
 ---
 
