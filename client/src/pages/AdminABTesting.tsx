@@ -245,27 +245,29 @@ export default function AdminABTesting() {
       <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "A/B Testing" }]} />
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-serif font-bold text-primary flex items-center gap-2">
-                <FlaskConical className="w-8 h-8" />
-                A/B Testing Dashboard
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-serif font-bold text-primary flex items-center gap-2">
+                <FlaskConical className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
+                <span className="break-words">A/B Testing Dashboard</span>
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-muted-foreground mt-2 text-sm sm:text-base">
                 Create experiments and track conversion performance
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
               <Link href="/admin">
-                <Button variant="outline" data-testid="button-back-dashboard">
+                <Button variant="outline" data-testid="button-back-dashboard" size="sm" className="w-full sm:w-auto">
                   <BarChart3 className="w-4 h-4 mr-2" />
-                  CRM Dashboard
+                  <span className="sm:inline">CRM Dashboard</span>
                 </Button>
               </Link>
               <Button
                 variant="default"
                 onClick={() => setIsCreateDialogOpen(true)}
                 data-testid="button-create-test"
+                size="sm"
+                className="w-full sm:w-auto"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Test
@@ -349,34 +351,34 @@ export default function AdminABTesting() {
             tests.map(test => (
               <Card key={test.id} data-testid={`card-test-${test.id}`}>
                 <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CardTitle>{test.name}</CardTitle>
+                  <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <CardTitle className="break-words">{test.name}</CardTitle>
                         {getStatusBadge(test.status)}
                         <Badge variant="outline">{testTypeLabels[test.type]}</Badge>
                       </div>
-                      <CardDescription>{test.description}</CardDescription>
-                      <div className="flex gap-4 mt-4 text-sm text-muted-foreground">
+                      <CardDescription className="break-words">{test.description}</CardDescription>
+                      <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
                         {test.targetPersona && (
-                          <div className="flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            <span>{personaLabels[test.targetPersona]}</span>
+                          <div className="flex items-center gap-1 whitespace-nowrap">
+                            <Users className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{personaLabels[test.targetPersona]}</span>
                           </div>
                         )}
                         {test.targetFunnelStage && (
-                          <div className="flex items-center gap-1">
-                            <TrendingUp className="w-3 h-3" />
-                            <span>{funnelStageLabels[test.targetFunnelStage]}</span>
+                          <div className="flex items-center gap-1 whitespace-nowrap">
+                            <TrendingUp className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{funnelStageLabels[test.targetFunnelStage]}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-1">
-                          <Target className="w-3 h-3" />
+                        <div className="flex items-center gap-1 whitespace-nowrap">
+                          <Target className="w-3 h-3 flex-shrink-0" />
                           <span>{test.trafficAllocation}% traffic</span>
                         </div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2 lg:flex-nowrap">
                       {test.status === 'draft' && (
                         <Button
                           size="sm"
