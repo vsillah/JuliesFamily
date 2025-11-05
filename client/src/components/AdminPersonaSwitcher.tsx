@@ -72,8 +72,8 @@ export function AdminPersonaSwitcher({ isScrolled = false }: AdminPersonaSwitche
     return null;
   }
 
-  const handleApply = () => {
-    setPersona(selectedPersona);
+  const handleApply = async () => {
+    await setPersona(selectedPersona);
     if (selectedFunnel && selectedFunnel !== "none") {
       sessionStorage.setItem(ADMIN_FUNNEL_KEY, selectedFunnel);
     } else {
@@ -84,8 +84,8 @@ export function AdminPersonaSwitcher({ isScrolled = false }: AdminPersonaSwitche
     window.location.reload();
   };
 
-  const handleReset = () => {
-    setPersona(null);
+  const handleReset = async () => {
+    await setPersona(null);
     setSelectedPersona(null);
     setSelectedFunnel("none");
     sessionStorage.removeItem(ADMIN_FUNNEL_KEY);

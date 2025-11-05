@@ -94,6 +94,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Persona Preference Route
+  app.patch('/api/user/persona', isAuthenticated, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const { persona } = req.body;
+      
+      // Validate persona value
+      const validPersonas = ['student', 'provider', 'parent', 'donor', 'volunteer', null];
+      if (!validPersonas.includes(persona)) {
+        return res.status(400).json({ message: "Invalid persona value" });
+      }
+      
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const updatedUser = await storage.updateUser(currentUser.id, { persona });
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user persona:", error);
+      res.status(500).json({ message: "Failed to update persona preference" });
+    }
+  });
+
   // Object Storage Routes
   // Reference: blueprint:javascript_object_storage
   

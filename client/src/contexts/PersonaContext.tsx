@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from "@/lib/queryClient";
 
 export type Persona = 
   | "student"
@@ -52,7 +54,7 @@ export const personaConfigs: PersonaConfig[] = [
 
 interface PersonaContextType {
   persona: Persona;
-  setPersona: (persona: Persona) => void;
+  setPersona: (persona: Persona) => Promise<void>;
   funnelStage: FunnelStage;
   showPersonaModal: boolean;
   setShowPersonaModal: (show: boolean) => void;
@@ -66,22 +68,35 @@ const ADMIN_PERSONA_KEY = "admin-persona-override";
 const ADMIN_FUNNEL_KEY = "admin-funnel-override";
 
 export function PersonaProvider({ children }: { children: ReactNode }) {
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [persona, setPersonaState] = useState<Persona>(null);
   const [funnelStage, setFunnelStage] = useState<FunnelStage>(null);
   const [showPersonaModal, setShowPersonaModal] = useState(false);
 
   useEffect(() => {
+    // Don't do anything while auth is loading
+    if (isLoading) return;
+
     const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
     
     if (adminOverride && adminOverride !== "none") {
+      // Admin override takes priority
       setPersonaState(adminOverride as Persona);
+    } else if (isAuthenticated && user) {
+      // For authenticated users, load persona from database
+      if (user.persona) {
+        setPersonaState(user.persona as Persona);
+      }
+      // Don't show modal for authenticated users
     } else {
+      // For unauthenticated users, use session storage
       const storedPersona = sessionStorage.getItem(PERSONA_STORAGE_KEY);
       const modalShown = sessionStorage.getItem(PERSONA_MODAL_SHOWN_KEY);
       
       if (storedPersona && storedPersona !== "null") {
         setPersonaState(storedPersona as Persona);
       } else if (!modalShown && !adminOverride) {
+        // Only show modal for unauthenticated users
         setTimeout(() => {
           setShowPersonaModal(true);
           sessionStorage.setItem(PERSONA_MODAL_SHOWN_KEY, "true");
@@ -95,14 +110,25 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     } else {
       setFunnelStage("awareness");
     }
-  }, []);
+  }, [isAuthenticated, user, isLoading]);
 
-  const setPersona = (newPersona: Persona) => {
+  const setPersona = async (newPersona: Persona) => {
     setPersonaState(newPersona);
-    if (newPersona) {
-      sessionStorage.setItem(PERSONA_STORAGE_KEY, newPersona);
+    
+    if (isAuthenticated) {
+      // For authenticated users, save to database
+      try {
+        await apiRequest("PATCH", "/api/user/persona", { persona: newPersona });
+      } catch (error) {
+        console.error("Failed to save persona preference:", error);
+      }
     } else {
-      sessionStorage.removeItem(PERSONA_STORAGE_KEY);
+      // For unauthenticated users, save to session storage
+      if (newPersona) {
+        sessionStorage.setItem(PERSONA_STORAGE_KEY, newPersona);
+      } else {
+        sessionStorage.removeItem(PERSONA_STORAGE_KEY);
+      }
     }
   };
 
