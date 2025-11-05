@@ -59,27 +59,79 @@ export default function AdminABTesting() {
   // Handle wizard completion
   const handleWizardComplete = async (config: TestConfiguration) => {
     try {
-      // Create the test from the wizard configuration
+      // Validate configuration
+      if (config.variants.length < 2) {
+        toast({
+          title: "Invalid configuration",
+          description: "You must have at least 2 variants to create a test.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const hasControl = config.variants.some(v => v.isControl);
+      if (!hasControl) {
+        toast({
+          title: "Invalid configuration",
+          description: "At least one variant must be marked as the control (baseline).",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const totalWeight = config.variants.reduce((sum, v) => sum + v.trafficWeight, 0);
+      if (totalWeight !== 100) {
+        toast({
+          title: "Invalid configuration",
+          description: "Variant traffic weights must sum to 100%.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Create the test
       const testData = {
         name: config.name,
         description: config.description,
         type: config.type,
-        targetPersona: config.targetPersona === null ? undefined : config.targetPersona,
-        targetFunnelStage: config.targetFunnelStage === null ? undefined : config.targetFunnelStage,
+        targetPersona: config.targetPersona || undefined,
+        targetFunnelStage: config.targetFunnelStage || undefined,
         trafficAllocation: config.trafficAllocation,
-        status: 'draft',
+        status: 'active', // Start as active since it's fully configured
       };
 
-      await createTestMutation.mutateAsync(testData);
+      const createdTest = await createTestMutation.mutateAsync(testData) as unknown as AbTest;
       
-      // Note: For now, we create the test in draft mode
-      // Full variant creation will be added when we build the Configure step
+      // Create variants for the test
+      for (const variant of config.variants) {
+        const variantData = {
+          name: variant.name,
+          description: variant.description,
+          trafficWeight: variant.trafficWeight,
+          configuration: JSON.stringify(variant.configuration),
+          isControl: variant.isControl,
+          contentItemId: variant.contentItemId || undefined,
+        };
+        
+        await createVariantMutation.mutateAsync({ 
+          testId: createdTest.id, 
+          variantData 
+        });
+      }
+
       toast({
-        title: "Test created",
-        description: "Your A/B test has been created in draft mode. Add variants to activate it.",
+        title: "Test created successfully!",
+        description: `${config.variants.length} variants added. Your test is now active.`,
       });
+      
+      setIsWizardOpen(false);
     } catch (error) {
       console.error("Error creating test from wizard:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create A/B test. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

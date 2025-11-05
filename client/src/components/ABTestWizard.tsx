@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { DiscoverStep } from "./wizard-steps/DiscoverStep";
+import { ConfigureStep } from "./wizard-steps/ConfigureStep";
+import { TargetStep } from "./wizard-steps/TargetStep";
+import { ReviewStep } from "./wizard-steps/ReviewStep";
 
 export type TestType = "hero" | "cta" | "card_order" | "messaging" | "layout";
 export type Persona = "student" | "provider" | "parent" | "volunteer" | "donor" | null;
@@ -41,6 +44,17 @@ const WIZARD_STEPS = [
   { id: "target", label: "Target", description: "Choose audience" },
   { id: "review", label: "Review", description: "Preview & launch" },
 ];
+
+function mapTestTypeToInternal(type: TestType): string {
+  const typeMap: Record<TestType, string> = {
+    hero: "hero_variation",
+    cta: "cta_variation",
+    card_order: "service_card_order",
+    messaging: "messaging_test",
+    layout: "layout_test",
+  };
+  return typeMap[type] || type;
+}
 
 export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -82,6 +96,15 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
   const handleComplete = () => {
     onComplete(testConfig);
     handleClose();
+  };
+
+  const isLaunchReady = () => {
+    if (testConfig.variants.length < 2) return false;
+    const hasControl = testConfig.variants.some(v => v.isControl);
+    if (!hasControl) return false;
+    const totalWeight = testConfig.variants.reduce((sum, v) => sum + v.trafficWeight, 0);
+    if (totalWeight !== 100) return false;
+    return true;
   };
 
   const handleClose = () => {
@@ -152,39 +175,34 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
           )}
 
           {currentStep === 1 && (
-            <div className="space-y-4">
-              <div className="text-center py-12">
-                <h3 className="text-xl font-semibold mb-2">Configure Test</h3>
-                <p className="text-muted-foreground">
-                  Selected test type: {testConfig.type}
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  {testConfig.name || "No test selected"}
-                </p>
-              </div>
-            </div>
+            <ConfigureStep
+              testType={mapTestTypeToInternal(testConfig.type)}
+              variants={testConfig.variants}
+              onVariantsChange={(variants) => updateConfig({ variants })}
+            />
           )}
 
           {currentStep === 2 && (
-            <div className="space-y-4">
-              <div className="text-center py-12">
-                <h3 className="text-xl font-semibold mb-2">Target Audience</h3>
-                <p className="text-muted-foreground">
-                  Choose who will see this test
-                </p>
-              </div>
-            </div>
+            <TargetStep
+              targetPersona={testConfig.targetPersona}
+              targetFunnelStage={testConfig.targetFunnelStage}
+              trafficAllocation={testConfig.trafficAllocation}
+              onPersonaChange={(persona) => updateConfig({ targetPersona: persona })}
+              onFunnelStageChange={(stage) => updateConfig({ targetFunnelStage: stage })}
+              onTrafficChange={(traffic) => updateConfig({ trafficAllocation: traffic })}
+            />
           )}
 
           {currentStep === 3 && (
-            <div className="space-y-4">
-              <div className="text-center py-12">
-                <h3 className="text-xl font-semibold mb-2">Review & Launch</h3>
-                <p className="text-muted-foreground">
-                  Preview your test before launching
-                </p>
-              </div>
-            </div>
+            <ReviewStep
+              testName={testConfig.name}
+              testDescription={testConfig.description}
+              testType={mapTestTypeToInternal(testConfig.type)}
+              variants={testConfig.variants}
+              targetPersona={testConfig.targetPersona}
+              targetFunnelStage={testConfig.targetFunnelStage}
+              trafficAllocation={testConfig.trafficAllocation}
+            />
           )}
         </div>
 
@@ -220,6 +238,7 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
             ) : (
               <Button
                 onClick={handleComplete}
+                disabled={!isLaunchReady()}
                 data-testid="button-wizard-complete"
               >
                 Launch Test
