@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
   BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
-  Shield
+  Shield, BookOpen
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -92,6 +92,12 @@ export default function AdminDashboard() {
               </p>
             </div>
             <div className="flex gap-2">
+              <Link href="/admin/guide">
+                <Button variant="outline" data-testid="button-admin-guide">
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Help Guide
+                </Button>
+              </Link>
               <Link href="/admin/content">
                 <Button variant="outline" data-testid="button-manage-content">
                   <FileText className="w-4 h-4 mr-2" />

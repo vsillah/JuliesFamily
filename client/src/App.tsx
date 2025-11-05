@@ -6,7 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { PersonaProvider } from "@/contexts/PersonaContext";
 import PersonaSelectionModal from "@/components/PersonaSelectionModal";
 import Home from "@/pages/Home";
+import HowItWorks from "@/pages/HowItWorks";
 import AdminDashboard from "@/pages/AdminDashboard";
+import AdminGuide from "@/pages/AdminGuide";
 import AdminImages from "@/pages/AdminImages";
 import AdminContentManager from "@/pages/AdminContentManager";
 import AdminUserManagement from "@/pages/AdminUserManagement";
@@ -19,7 +21,9 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/guide" component={AdminGuide} />
       <Route path="/admin/images" component={AdminImages} />
       <Route path="/admin/content" component={AdminContentManager} />
       <Route path="/admin/users" component={AdminUserManagement} />
