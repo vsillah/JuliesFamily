@@ -6,7 +6,7 @@ import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage"
 import type { ContentItem } from "@shared/schema";
 
 export default function Hero() {
-  const { persona } = usePersona();
+  const { persona, funnelStage } = usePersona();
   const [scrollScale, setScrollScale] = useState(1);
   const [textVisible, setTextVisible] = useState(false);
   const [shadeVisible, setShadeVisible] = useState(false);
@@ -16,9 +16,14 @@ export default function Hero() {
     queryKey: ["/api/content/type/hero"],
   });
   
-  // Find hero content for current persona or fallback to donor
-  const currentHero = heroContent?.find(h => (h.metadata as any)?.persona === persona) 
-    || heroContent?.find(h => (h.metadata as any)?.persona === 'donor');
+  // Find hero content for current persona AND funnel stage, or fallback to donor awareness
+  const currentHero = heroContent?.find(h => {
+    const meta = h.metadata as any;
+    return meta?.persona === persona && meta?.funnelStage === funnelStage;
+  }) || heroContent?.find(h => {
+    const meta = h.metadata as any;
+    return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
+  });
   
   const imageName = currentHero?.imageName || "hero-volunteer-student";
   const { data: heroImageAsset } = useCloudinaryImage(imageName);

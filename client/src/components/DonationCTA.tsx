@@ -6,7 +6,7 @@ import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage"
 import type { ContentItem } from "@shared/schema";
 
 export default function DonationCTA() {
-  const { persona } = usePersona();
+  const { persona, funnelStage } = usePersona();
   const [scale, setScale] = useState(1);
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
@@ -16,9 +16,14 @@ export default function DonationCTA() {
     queryKey: ["/api/content/type/cta"],
   });
   
-  // Find CTA content for current persona or fallback to donor
-  const currentCta = ctaContent?.find(c => (c.metadata as any)?.persona === persona) 
-    || ctaContent?.find(c => (c.metadata as any)?.persona === 'donor');
+  // Find CTA content for current persona AND funnel stage, or fallback to donor awareness
+  const currentCta = ctaContent?.find(c => {
+    const meta = c.metadata as any;
+    return meta?.persona === persona && meta?.funnelStage === funnelStage;
+  }) || ctaContent?.find(c => {
+    const meta = c.metadata as any;
+    return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
+  });
   
   const imageName = currentCta?.imageName || "donation-cta";
   const { data: ctaImageAsset } = useCloudinaryImage(imageName);
