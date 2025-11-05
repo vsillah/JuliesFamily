@@ -50,22 +50,22 @@ export default function AdminGuide() {
         </div>
 
         <Tabs defaultValue="content" className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
-            <TabsTrigger value="content" data-testid="tab-content-management">
-              <FileEdit className="w-4 h-4 mr-2" />
-              Content Management
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 mb-8 h-auto">
+            <TabsTrigger value="content" data-testid="tab-content-management" className="flex-col sm:flex-row gap-1 py-3">
+              <FileEdit className="w-4 h-4 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Content</span>
             </TabsTrigger>
-            <TabsTrigger value="ab-testing" data-testid="tab-ab-testing">
-              <FlaskConical className="w-4 h-4 mr-2" />
-              A/B Testing
+            <TabsTrigger value="ab-testing" data-testid="tab-ab-testing" className="flex-col sm:flex-row gap-1 py-3">
+              <FlaskConical className="w-4 h-4 sm:mr-2" />
+              <span className="text-xs sm:text-sm">A/B Testing</span>
             </TabsTrigger>
-            <TabsTrigger value="leads" data-testid="tab-lead-management">
-              <Users className="w-4 h-4 mr-2" />
-              Lead Management
+            <TabsTrigger value="leads" data-testid="tab-lead-management" className="flex-col sm:flex-row gap-1 py-3">
+              <Users className="w-4 h-4 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Leads</span>
             </TabsTrigger>
-            <TabsTrigger value="users" data-testid="tab-user-permissions">
-              <Shield className="w-4 h-4 mr-2" />
-              User Permissions
+            <TabsTrigger value="users" data-testid="tab-user-permissions" className="flex-col sm:flex-row gap-1 py-3">
+              <Shield className="w-4 h-4 sm:mr-2" />
+              <span className="text-xs sm:text-sm">Users</span>
             </TabsTrigger>
           </TabsList>
 
