@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Users, FlaskConical, Eye, CheckCircle2 } from "lucide-react";
+import { Users, FlaskConical, Eye, CheckCircle2, Pause, FileEdit } from "lucide-react";
 
 interface UsageData {
   visibilityAssignments: { persona: string | null; funnelStage: string | null; }[];
-  abTests: { testId: string; testName: string; variantName: string; isActive: boolean; }[];
+  abTests: { testId: string; testName: string; variantName: string; status: string; }[];
 }
 
 interface ContentUsageIndicatorProps {
@@ -38,7 +38,12 @@ export default function ContentUsageIndicator({ contentId }: ContentUsageIndicat
   }
 
   const { visibilityAssignments, abTests } = usage;
-  const activeTests = abTests.filter(test => test.isActive);
+  
+  // Group tests by status
+  const activeTests = abTests.filter(test => test.status === 'active');
+  const pausedTests = abTests.filter(test => test.status === 'paused');
+  const completedTests = abTests.filter(test => test.status === 'completed');
+  const draftTests = abTests.filter(test => test.status === 'draft');
 
   // No usage at all
   if (visibilityAssignments.length === 0 && abTests.length === 0) {
@@ -109,9 +114,9 @@ export default function ContentUsageIndicator({ contentId }: ContentUsageIndicat
     if (abTests.length > 0) {
       if (lines.length > 0) lines.push("");
       lines.push("A/B Tests:");
-      abTests.forEach(({ testName, variantName, isActive }) => {
-        const status = isActive ? "🟢 Active" : "⚪ Inactive";
-        lines.push(`  ${status} ${testName} (${variantName})`);
+      abTests.forEach(({ testName, variantName, status }) => {
+        const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+        lines.push(`  [${statusLabel}] ${testName} (${variantName})`);
       });
     }
 
@@ -137,7 +142,7 @@ export default function ContentUsageIndicator({ contentId }: ContentUsageIndicat
       {activeTests.length > 0 && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Badge variant="destructive" className="text-xs cursor-help" data-testid={`badge-ab-test-${contentId}`}>
+            <Badge variant="destructive" className="text-xs cursor-help" data-testid={`badge-ab-test-active-${contentId}`}>
               <FlaskConical className="w-3 h-3 mr-1" />
               {activeTests.length} Active {activeTests.length === 1 ? "Test" : "Tests"}
             </Badge>
@@ -155,10 +160,24 @@ export default function ContentUsageIndicator({ contentId }: ContentUsageIndicat
         </Tooltip>
       )}
 
-      {abTests.length > activeTests.length && (
-        <Badge variant="outline" className="text-xs" data-testid={`badge-inactive-test-${contentId}`}>
+      {pausedTests.length > 0 && (
+        <Badge variant="outline" className="text-xs" data-testid={`badge-ab-test-paused-${contentId}`}>
+          <Pause className="w-3 h-3 mr-1" />
+          {pausedTests.length} Paused
+        </Badge>
+      )}
+
+      {draftTests.length > 0 && (
+        <Badge variant="secondary" className="text-xs" data-testid={`badge-ab-test-draft-${contentId}`}>
+          <FileEdit className="w-3 h-3 mr-1" />
+          {draftTests.length} Draft
+        </Badge>
+      )}
+
+      {completedTests.length > 0 && (
+        <Badge variant="outline" className="text-xs" data-testid={`badge-ab-test-completed-${contentId}`}>
           <CheckCircle2 className="w-3 h-3 mr-1" />
-          {abTests.length - activeTests.length} Completed
+          {completedTests.length} Completed
         </Badge>
       )}
     </div>

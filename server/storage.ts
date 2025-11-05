@@ -67,7 +67,7 @@ export interface IStorage {
   updateContentItemOrder(id: string, newOrder: number): Promise<ContentItem | undefined>;
   getContentItemUsage(id: string): Promise<{
     visibilityAssignments: { persona: string | null; funnelStage: string | null; }[];
-    abTests: { testId: string; testName: string; variantName: string; isActive: boolean; }[];
+    abTests: { testId: string; testName: string; variantName: string; status: string; }[];
   }>;
   
   // Content Visibility operations
@@ -385,7 +385,7 @@ export class DatabaseStorage implements IStorage {
 
   async getContentItemUsage(id: string): Promise<{
     visibilityAssignments: { persona: string | null; funnelStage: string | null; }[];
-    abTests: { testId: string; testName: string; variantName: string; isActive: boolean; }[];
+    abTests: { testId: string; testName: string; variantName: string; status: string; }[];
   }> {
     // Get visibility assignments
     const visibilityAssignments = await db
@@ -402,7 +402,7 @@ export class DatabaseStorage implements IStorage {
         testId: abTests.id,
         testName: abTests.name,
         variantName: abTestVariants.name,
-        isActive: sql<boolean>`${abTests.status} = 'active'`.as('is_active'),
+        status: abTests.status,
       })
       .from(abTestVariants)
       .innerJoin(abTests, eq(abTestVariants.testId, abTests.id))
