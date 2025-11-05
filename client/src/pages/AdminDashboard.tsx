@@ -219,14 +219,14 @@ export default function AdminDashboard() {
         {/* Leads Management */}
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4">
               <div>
                 <CardTitle>Leads Management</CardTitle>
                 <CardDescription>View and manage all leads</CardDescription>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <select
-                  className="px-3 py-2 border rounded-md text-sm"
+                  className="px-3 py-2 border rounded-md text-sm flex-1"
                   value={selectedPersona}
                   onChange={(e) => setSelectedPersona(e.target.value)}
                   data-testid="select-persona-filter"
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
                   ))}
                 </select>
                 <select
-                  className="px-3 py-2 border rounded-md text-sm"
+                  className="px-3 py-2 border rounded-md text-sm flex-1"
                   value={selectedFunnelStage}
                   onChange={(e) => setSelectedFunnelStage(e.target.value)}
                   data-testid="select-funnel-filter"
@@ -261,50 +261,52 @@ export default function AdminDashboard() {
                 leads.map((lead) => (
                   <div
                     key={lead.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover-elevate"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 border rounded-lg hover-elevate"
                     data-testid={`lead-card-${lead.id}`}
                   >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
                         <h3 className="font-semibold">
                           {lead.firstName} {lead.lastName}
                         </h3>
-                        <Badge variant="secondary">
+                        <Badge variant="secondary" className="text-xs">
                           {personaLabels[lead.persona] || lead.persona}
                         </Badge>
                         <Badge 
                           variant="outline"
-                          className={`${funnelStageColors[lead.funnelStage]} text-white border-0`}
+                          className={`${funnelStageColors[lead.funnelStage]} text-white border-0 text-xs`}
                         >
                           {funnelStageLabels[lead.funnelStage] || lead.funnelStage}
                         </Badge>
                       </div>
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Mail className="w-4 h-4" />
-                          {lead.email}
+                      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1 min-w-0">
+                          <Mail className="w-4 h-4 flex-shrink-0" />
+                          <span className="truncate">{lead.email}</span>
                         </div>
                         {lead.phone && (
                           <div className="flex items-center gap-1">
-                            <Phone className="w-4 h-4" />
-                            {lead.phone}
+                            <Phone className="w-4 h-4 flex-shrink-0" />
+                            <span>{lead.phone}</span>
                           </div>
                         )}
                         <div className="flex items-center gap-1">
-                          <TrendingUp className="w-4 h-4" />
-                          Score: {lead.engagementScore}
+                          <TrendingUp className="w-4 h-4 flex-shrink-0" />
+                          <span>Score: {lead.engagementScore}</span>
                         </div>
                         {lead.lastInteractionDate && (
                           <div className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            Last: {format(new Date(lead.lastInteractionDate), "MMM d, yyyy")}
+                            <Calendar className="w-4 h-4 flex-shrink-0" />
+                            <span className="hidden sm:inline">Last: </span>
+                            <span>{format(new Date(lead.lastInteractionDate), "MMM d, yyyy")}</span>
                           </div>
                         )}
                       </div>
                     </div>
                     <Button 
                       variant="outline" 
-                      size="sm" 
+                      size="sm"
+                      className="w-full sm:w-auto flex-shrink-0"
                       onClick={() => {
                         setSelectedLeadId(lead.id);
                         setIsLeadDialogOpen(true);
