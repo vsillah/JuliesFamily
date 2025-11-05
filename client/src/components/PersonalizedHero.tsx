@@ -10,6 +10,8 @@ interface HeroContent {
   primaryCTA: string;
   secondaryCTA: string;
   imageName: string;
+  primaryAction: string;
+  secondaryAction: string;
 }
 
 const heroContent: Record<string, HeroContent> = {
@@ -19,7 +21,9 @@ const heroContent: Record<string, HeroContent> = {
     description: "Get your high school equivalency while we care for your children. Free classes, flexible schedules, and support every step of the way.",
     primaryCTA: "Check If You Qualify",
     secondaryCTA: "View Success Stories",
-    imageName: "hero-student"
+    imageName: "hero-student",
+    primaryAction: "lead-magnet",
+    secondaryAction: "testimonials"
   },
   provider: {
     subtitle: "Trusted Partner",
@@ -27,7 +31,9 @@ const heroContent: Record<string, HeroContent> = {
     description: "50+ years of proven results helping families achieve educational goals. Download our referral packet and partnership information.",
     primaryCTA: "Download Referral Packet",
     secondaryCTA: "View Program Outcomes",
-    imageName: "hero-volunteer-student"
+    imageName: "hero-volunteer-student",
+    primaryAction: "lead-magnet",
+    secondaryAction: "impact"
   },
   parent: {
     subtitle: "Boston PreK Program",
@@ -35,7 +41,9 @@ const heroContent: Record<string, HeroContent> = {
     description: "High-quality early education in a nurturing environment. Our PreK classroom is open to all Boston families with age-appropriate curriculum and caring teachers.",
     primaryCTA: "Schedule a Tour",
     secondaryCTA: "Learn About Our Curriculum",
-    imageName: "hero-parent"
+    imageName: "hero-parent",
+    primaryAction: "lead-magnet",
+    secondaryAction: "services"
   },
   donor: {
     subtitle: "Your Impact Matters",
@@ -43,7 +51,9 @@ const heroContent: Record<string, HeroContent> = {
     description: "For 50 years, your support has helped families break cycles and build futures. See where your tax-deductible gift makes a difference.",
     primaryCTA: "Make Your Gift",
     secondaryCTA: "View Impact Report",
-    imageName: "hero-donor"
+    imageName: "hero-donor",
+    primaryAction: "donation",
+    secondaryAction: "impact"
   },
   volunteer: {
     subtitle: "Join Our Community",
@@ -51,7 +61,9 @@ const heroContent: Record<string, HeroContent> = {
     description: "Tutors, mentors, and supporters like you make our programs possible. Find volunteer opportunities that match your schedule and skills.",
     primaryCTA: "See Opportunities",
     secondaryCTA: "Hear From Volunteers",
-    imageName: "hero-volunteer"
+    imageName: "hero-volunteer",
+    primaryAction: "services",
+    secondaryAction: "testimonials"
   },
   default: {
     subtitle: "Julie's Mission",
@@ -59,7 +71,9 @@ const heroContent: Record<string, HeroContent> = {
     description: "A family support, wellness, and education center committed to the development of strong, stable, and healthy family functioning for over 50 years.",
     primaryCTA: "Donate Now",
     secondaryCTA: "Learn More",
-    imageName: "hero-volunteer-student"
+    imageName: "hero-volunteer-student",
+    primaryAction: "donation",
+    secondaryAction: "services"
   }
 };
 
@@ -174,7 +188,7 @@ export default function PersonalizedHero() {
           <Button
             variant="default"
             size="lg"
-            onClick={() => scrollToSection("services")}
+            onClick={() => scrollToSection(content.primaryAction)}
             data-testid="button-hero-primary"
           >
             {content.primaryCTA}
@@ -183,7 +197,7 @@ export default function PersonalizedHero() {
             variant="outline"
             size="lg"
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
-            onClick={() => scrollToSection("services")}
+            onClick={() => scrollToSection(content.secondaryAction)}
             data-testid="button-hero-secondary"
           >
             {content.secondaryCTA}
