@@ -1,14 +1,21 @@
-import { neon } from '@neondatabase/serverless';
+import { Pool, neonConfig } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { eq, and } from 'drizzle-orm';
+import ws from 'ws';
 import * as schema from '../shared/schema';
 import { HERO_DEFAULTS } from '../shared/defaults/heroDefaults';
 import { CTA_DEFAULTS } from '../shared/defaults/ctaDefaults';
 import type { Persona, FunnelStage } from '../shared/defaults/personas';
 
 // Database connection
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql, { schema });
+neonConfig.webSocketConstructor = ws;
+
+if (!process.env.DATABASE_URL) {
+  throw new Error('DATABASE_URL must be set. Did you forget to provision a database?');
+}
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const db = drizzle({ client: pool, schema });
 
 const PERSONAS: Persona[] = ['student', 'provider', 'parent', 'volunteer', 'donor'];
 const FUNNEL_STAGES: FunnelStage[] = ['awareness', 'consideration', 'decision', 'retention'];
