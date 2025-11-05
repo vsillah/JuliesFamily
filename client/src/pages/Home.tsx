@@ -8,6 +8,7 @@ import Events from "@/components/Events";
 import DonationCTA from "@/components/DonationCTA";
 import Sponsors from "@/components/Sponsors";
 import Footer from "@/components/Footer";
+import SchemaMarkup from "@/components/SchemaMarkup";
 import { usePersona } from "@/contexts/PersonaContext";
 
 const leadMagnetTitles: Record<string, Record<string, { title: string; description: string }>> = {
@@ -72,6 +73,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
+      <SchemaMarkup />
       <Navigation />
       <Hero />
       <Services />
