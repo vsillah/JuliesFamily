@@ -100,13 +100,16 @@ export default function MatrixEditPanel({
         formData.append("usage", contentType);
         formData.append("localPath", "");
         
-        const uploadResult = await fetch("/api/admin/images/upload", {
+        const uploadResponse = await fetch("/api/admin/images/upload", {
           method: "POST",
           body: formData,
-        }).then(res => res.json());
+        });
         
-        if (uploadResult.error || !uploadResult.name) {
-          throw new Error(uploadResult.message || "Image upload failed");
+        const uploadResult = await uploadResponse.json();
+        
+        // Check if upload failed (non-200 status or missing name)
+        if (!uploadResponse.ok || !uploadResult.name) {
+          throw new Error(uploadResult.message || `Upload failed with status ${uploadResponse.status}`);
         }
         
         finalImageName = uploadResult.name;
@@ -133,24 +136,21 @@ export default function MatrixEditPanel({
       }
     },
     onSuccess: async () => {
-      // Invalidate and immediately refetch all related queries
-      await queryClient.invalidateQueries({ 
-        predicate: (query) => {
-          const key = query.queryKey[0] as string;
-          return key?.includes("/api/content") || key?.includes("/api/admin/images");
-        },
-        refetchType: 'active'
-      });
-      
       toast({
         title: "Saved",
         description: "Configuration updated successfully",
       });
       
-      // Close dialog after refetch completes
-      setTimeout(() => {
-        onClose();
-      }, 300);
+      // Close dialog first to unmount this component
+      onClose();
+      
+      // Then invalidate and refetch all related queries
+      await queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.includes("/api/content") || key?.includes("/api/admin/images");
+        }
+      });
     },
     onError: () => {
       toast({
