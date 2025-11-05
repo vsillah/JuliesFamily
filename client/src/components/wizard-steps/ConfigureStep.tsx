@@ -290,9 +290,21 @@ function renderVariantConfig(
                 <SelectContent>
                   {contentItems.map((item) => (
                     <SelectItem key={item.id} value={item.id}>
-                      <div className="flex items-center gap-2">
-                        {item.imageName && <ImageIcon className="w-4 h-4" />}
-                        <span>{item.title}</span>
+                      <div className="flex flex-col gap-1 py-1">
+                        <div className="flex items-center gap-2">
+                          {item.imageName && <ImageIcon className="w-3 h-3 text-muted-foreground" />}
+                          <span className="font-medium">{item.title}</span>
+                        </div>
+                        {item.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">
+                            {item.description}
+                          </p>
+                        )}
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          {item.imageName && <span>Image: {item.imageName}</span>}
+                          <span>•</span>
+                          <span>ID: {item.id.slice(-8)}</span>
+                        </div>
                       </div>
                     </SelectItem>
                   ))}
@@ -356,7 +368,7 @@ function renderVariantConfig(
             </div>
 
             {/* Title */}
-            <div>
+            <div className="space-y-2">
               <Label>Title / Headline</Label>
               <Input
                 value={variant.configuration?.title || ''}
@@ -368,6 +380,17 @@ function renderVariantConfig(
                 placeholder="Enter headline text"
                 data-testid={`input-custom-title-${variant.id}`}
               />
+              {variant.configuration?.title && 
+                contentItems.some(item => 
+                  item.title.toLowerCase() === variant.configuration?.title?.toLowerCase()
+                ) && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-xs">
+                    A content item with this title already exists. Consider using a unique name to avoid confusion.
+                  </AlertDescription>
+                </Alert>
+              )}
             </div>
 
             {/* Description */}
