@@ -80,8 +80,8 @@ export default function MiniContentCard({
     ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, { width: 100, height: 100, quality: "auto:low" })
     : null;
 
-  // Get title for display - prioritize overrides, then content item, then persona × stage defaults
-  const title = visibility?.titleOverride || contentItem?.title || getDefaultTitle();
+  // Get title for display - prioritize overrides, then persona × stage defaults, then content item
+  const title = visibility?.titleOverride || getDefaultTitle();
 
   return (
     <button
