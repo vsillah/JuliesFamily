@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
   BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
-  Shield, BookOpen
+  Shield, BookOpen, Star, RefreshCw
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -16,10 +16,13 @@ import { format } from "date-fns";
 import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import LeadDetailsDialog from "@/components/LeadDetailsDialog";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const [selectedPersona, setSelectedPersona] = useState<string>("all");
   const [selectedFunnelStage, setSelectedFunnelStage] = useState<string>("all");
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
@@ -40,6 +43,28 @@ export default function AdminDashboard() {
   const { data: leads = [] } = useQuery<Lead[]>({
     queryKey: ["/api/admin/leads", queryString],
     retry: false,
+  });
+
+  // Google Reviews sync mutation
+  const syncReviewsMutation = useMutation({
+    mutationFn: async () => {
+      const placeId = "ChIJJXlESYp444kRYe2fI3UyQsw"; // Julie's Family Learning Program Place ID
+      const response = await apiRequest("POST", "/api/google-reviews/sync", { placeId });
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Reviews Synced Successfully",
+        description: `Synced ${data.reviews?.length || 0} reviews from Google. Rating: ${data.placeRating}/5 (${data.totalRatings} total ratings)`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync Google Reviews. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Redirect if not admin
@@ -122,6 +147,22 @@ export default function AdminDashboard() {
                   <span className="hidden sm:inline">A/B Testing</span>
                 </Button>
               </Link>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => syncReviewsMutation.mutate()}
+                disabled={syncReviewsMutation.isPending}
+                data-testid="button-sync-reviews"
+              >
+                {syncReviewsMutation.isPending ? (
+                  <RefreshCw className="w-4 h-4 sm:mr-2 animate-spin" />
+                ) : (
+                  <Star className="w-4 h-4 sm:mr-2" />
+                )}
+                <span className="hidden sm:inline">
+                  {syncReviewsMutation.isPending ? "Syncing..." : "Sync Reviews"}
+                </span>
+              </Button>
               <Button variant="default" size="sm" data-testid="button-export-data">
                 <Download className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline">Export Data</span>
