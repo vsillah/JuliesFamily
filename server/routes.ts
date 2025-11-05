@@ -638,6 +638,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get visible sections for navigation (public, filtered by persona/funnel)
+  app.get('/api/content/visible-sections', async (req, res) => {
+    try {
+      const { persona, funnelStage } = req.query;
+      
+      // Query visible content for each type
+      const sectionTypes = ['service', 'testimonial', 'event', 'lead_magnet', 'cta'];
+      const visibleSections: Record<string, boolean> = {};
+      
+      for (const type of sectionTypes) {
+        const items = await storage.getVisibleContentItems(
+          type,
+          persona as string | undefined,
+          funnelStage as string | undefined
+        );
+        
+        // Map types to section IDs
+        let sectionId = type;
+        if (type === 'cta') sectionId = 'donation';
+        if (type === 'lead_magnet') sectionId = 'lead-magnet';
+        if (type === 'service') sectionId = 'services';
+        if (type === 'testimonial') sectionId = 'testimonials';
+        if (type === 'event') sectionId = 'events';
+        
+        visibleSections[sectionId] = items.length > 0;
+      }
+      
+      // Impact stats are always visible (static component, not CMS-managed)
+      visibleSections.impact = true;
+      
+      res.json(visibleSections);
+    } catch (error) {
+      console.error("Error fetching visible sections:", error);
+      res.status(500).json({ message: "Failed to fetch visible sections" });
+    }
+  });
+
   // Create content item (admin)
   app.post('/api/content', isAuthenticated, isAdmin, async (req, res) => {
     try {
