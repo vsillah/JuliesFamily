@@ -8,6 +8,18 @@ This non-profit website for Julie's Family Learning Program, a family support, w
 
 Preferred communication style: Simple, everyday language.
 
+## Development Guidelines
+
+### Content Manager Navigation Integration
+
+**Critical**: When making changes to the Content Manager (personas, journey stages, content assignments, visibility settings), always verify:
+
+1. **Navigation paths** - Hero CTAs, card action buttons, and section links must route to the correct destinations based on visible content
+2. **Card layouts** - Service cards, testimonial cards, event cards should display properly with new content configurations
+3. **Action button redirects** - CTAs on cards must navigate to appropriate sections for each persona×journey combination
+
+**Implementation**: Navigation should be **dynamic and data-driven**, not hardcoded. The system queries `contentVisibility` settings to determine which sections are available for the current persona and funnel stage, then automatically routes to visible content with intelligent fallbacks.
+
 ## System Architecture
 
 ### Frontend Architecture
