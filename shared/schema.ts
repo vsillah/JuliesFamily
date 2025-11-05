@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, index, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, jsonb, index, boolean, integer, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -161,7 +161,9 @@ export const contentVisibility = pgTable("content_visibility", {
   imageNameOverride: varchar("image_name_override"), // Custom image for this persona×stage combo
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  uniqueIndex("content_visibility_unique_idx").on(table.contentItemId, table.persona, table.funnelStage),
+]);
 
 export const insertContentVisibilitySchema = createInsertSchema(contentVisibility).omit({
   id: true,

@@ -32,9 +32,14 @@ export default function MatrixEditPanel({
   const { toast } = useToast();
   const { persona, stage, contentType, contentItem } = selectedCard;
 
-  // Find existing visibility setting
+  // Query visibility settings directly to always have the latest data
+  const { data: latestVisibilitySettings = [] } = useQuery<ContentVisibility[]>({
+    queryKey: ["/api/content/visibility"],
+  });
+
+  // Find existing visibility setting from latest data
   const existingVisibility = contentItem
-    ? visibilitySettings.find(
+    ? latestVisibilitySettings.find(
         v => v.contentItemId === contentItem.id && 
              v.persona === persona && 
              v.funnelStage === stage
