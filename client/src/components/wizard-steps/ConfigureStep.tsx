@@ -285,7 +285,16 @@ function renderVariantConfig(
                 onValueChange={(value) => updateVariant(variant.id, { contentItemId: value })}
               >
                 <SelectTrigger data-testid={`select-content-item-${variant.id}`}>
-                  <SelectValue placeholder="Choose an existing item..." />
+                  {variant.contentItemId ? (
+                    <span className="truncate">
+                      {contentItems.find(item => item.id === variant.contentItemId)?.title || "Unknown item"} 
+                      <span className="text-muted-foreground ml-2">
+                        • ID: {variant.contentItemId.slice(-8)}
+                      </span>
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">Choose an existing item...</span>
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {contentItems.map((item) => (
