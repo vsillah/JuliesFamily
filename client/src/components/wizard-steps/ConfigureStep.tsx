@@ -34,7 +34,7 @@ export function ConfigureStep({ testType, variants, onVariantsChange }: Configur
   // Fetch content items based on test type
   const contentType = getContentTypeForTest(testType);
   const { data: contentItems = [], isLoading: isLoadingContent } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content-items", { type: contentType }],
+    queryKey: contentType ? [`/api/content/type/${contentType}`] : [],
     enabled: !!contentType && (testType === 'hero_variation' || testType === 'cta_variation'),
   });
 
