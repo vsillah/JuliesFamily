@@ -22,6 +22,7 @@ import { eq, desc, and, or, sql } from "drizzle-orm";
 export interface IStorage {
   // User operations for Replit Auth
   getUser(id: string): Promise<User | undefined>;
+  getUserByOidcSub(oidcSub: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<UpsertUser>): Promise<User | undefined>;
@@ -67,6 +68,7 @@ export interface IStorage {
   
   // Content Visibility operations
   createContentVisibility(visibility: InsertContentVisibility): Promise<ContentVisibility>;
+  getAllContentVisibility(): Promise<ContentVisibility[]>;
   getContentVisibility(contentItemId: string, persona?: string | null, funnelStage?: string | null): Promise<ContentVisibility[]>;
   updateContentVisibility(id: string, updates: Partial<InsertContentVisibility>): Promise<ContentVisibility | undefined>;
   deleteContentVisibility(id: string): Promise<void>;
@@ -112,29 +114,51 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserByOidcSub(oidcSub: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.oidcSub, oidcSub));
+    return user;
+  }
+
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          // Don't update ID - it's immutable once set (foreign key constraints)
-          // The ID should always be the OIDC sub from initial user creation
+    // Try to find existing user by oidcSub first, then by email
+    let existingUser: User | undefined;
+    
+    if (userData.oidcSub) {
+      [existingUser] = await db.select().from(users).where(eq(users.oidcSub, userData.oidcSub));
+    }
+    
+    if (!existingUser && userData.email) {
+      [existingUser] = await db.select().from(users).where(eq(users.email, userData.email));
+    }
+
+    if (existingUser) {
+      // Update existing user - ID never changes, preserving FK relationships
+      const [user] = await db
+        .update(users)
+        .set({
+          oidcSub: userData.oidcSub,
           email: userData.email,
           firstName: userData.firstName,
           lastName: userData.lastName,
           profileImageUrl: userData.profileImageUrl,
-          isAdmin: userData.isAdmin,
+          isAdmin: userData.isAdmin !== undefined ? userData.isAdmin : existingUser.isAdmin,
           updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+        })
+        .where(eq(users.id, existingUser.id))
+        .returning();
+      return user;
+    } else {
+      // Create new user
+      const [user] = await db
+        .insert(users)
+        .values(userData)
+        .returning();
+      return user;
+    }
   }
 
   async updateUser(id: string, updates: Partial<UpsertUser>): Promise<User | undefined> {
@@ -332,6 +356,13 @@ export class DatabaseStorage implements IStorage {
   async createContentVisibility(visibilityData: InsertContentVisibility): Promise<ContentVisibility> {
     const [visibility] = await db.insert(contentVisibility).values(visibilityData).returning();
     return visibility;
+  }
+
+  async getAllContentVisibility(): Promise<ContentVisibility[]> {
+    return await db
+      .select()
+      .from(contentVisibility)
+      .orderBy(contentVisibility.contentItemId, contentVisibility.order);
   }
 
   async getContentVisibility(

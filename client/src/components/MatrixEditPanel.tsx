@@ -120,9 +120,21 @@ export default function MatrixEditPanel({
         finalImageName = uploadResult.name;
       }
 
-      // Create or update visibility setting
-      if (existingVisibility) {
-        return await apiRequest("PATCH", `/api/content/visibility/${existingVisibility.id}`, {
+      // Refetch visibility settings to ensure we have the latest data
+      const latestVisibility = await queryClient.fetchQuery<ContentVisibility[]>({
+        queryKey: ["/api/content/visibility"],
+      });
+
+      // Find if visibility record exists with latest data
+      const currentVisibility = latestVisibility.find(
+        v => v.contentItemId === contentItem.id && 
+             v.persona === persona && 
+             v.funnelStage === stage
+      );
+
+      // Create or update visibility setting based on latest data
+      if (currentVisibility) {
+        return await apiRequest("PATCH", `/api/content/visibility/${currentVisibility.id}`, {
           titleOverride: titleOverride || null,
           descriptionOverride: descriptionOverride || null,
           imageNameOverride: finalImageName || null,
@@ -157,10 +169,11 @@ export default function MatrixEditPanel({
       // Close dialog after invalidation completes
       onClose();
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Save configuration error:", error);
       toast({
         title: "Error",
-        description: "Failed to save configuration",
+        description: error?.message || "Failed to save configuration",
         variant: "destructive",
       });
     },

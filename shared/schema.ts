@@ -19,6 +19,7 @@ export const sessions = pgTable(
 // Reference: blueprint:javascript_log_in_with_replit
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  oidcSub: varchar("oidc_sub").unique(), // OIDC subject identifier
   email: varchar("email").unique(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),

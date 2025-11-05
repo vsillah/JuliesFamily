@@ -14,16 +14,23 @@ import multer from "multer";
 // Admin authorization middleware
 const isAdmin: RequestHandler = async (req: any, res, next) => {
   try {
-    const userId = req.user?.claims?.sub;
-    if (!userId) {
+    const oidcSub = req.user?.claims?.sub;
+    console.log("[isAdmin] Checking admin access for oidcSub:", oidcSub);
+    
+    if (!oidcSub) {
+      console.log("[isAdmin] No oidcSub found - returning 401");
       return res.status(401).json({ message: "Unauthorized" });
     }
     
-    const user = await storage.getUser(userId);
+    const user = await storage.getUserByOidcSub(oidcSub);
+    console.log("[isAdmin] Found user:", user ? { id: user.id, email: user.email, isAdmin: user.isAdmin } : null);
+    
     if (!user?.isAdmin) {
+      console.log("[isAdmin] User not admin - returning 403");
       return res.status(403).json({ message: "Forbidden: Admin access required" });
     }
     
+    console.log("[isAdmin] Admin check passed");
     next();
   } catch (error) {
     console.error("Admin auth error:", error);
@@ -38,8 +45,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth route: get current user
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
+      const oidcSub = req.user.claims.sub;
+      const user = await storage.getUserByOidcSub(oidcSub);
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -64,8 +71,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { isAdmin: newAdminStatus } = req.body;
       
       // Prevent admins from removing their own admin access
-      const currentUserId = req.user.claims.sub;
-      if (userId === currentUserId && newAdminStatus === false) {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      if (currentUser && userId === currentUser.id && newAdminStatus === false) {
         return res.status(400).json({ message: "You cannot remove your own admin privileges" });
       }
       
@@ -172,17 +180,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Remove from cache after validation
       uploadTokenCache.delete(uploadToken);
 
+      // Get current user's UUID
+      const currentUser = await storage.getUserByOidcSub(userId);
+      if (!currentUser) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
       const objectStorageService = new ObjectStorageService();
       const objectPath = await objectStorageService.setObjectEntityAclPolicy(
         tokenData.objectPath,
         {
-          owner: userId,
+          owner: userId, // ACL uses OIDC sub
           visibility: "public", // Profile photos are public
         },
       );
 
-      // Update user profile in database
-      await storage.updateUser(userId, { profileImageUrl: objectPath });
+      // Update user profile in database with UUID
+      await storage.updateUser(currentUser.id, { profileImageUrl: objectPath });
 
       res.status(200).json({
         objectPath: objectPath,
@@ -412,6 +426,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Get current user's UUID
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
       // Upload to Cloudinary with AI upscaling
       const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
         folder: `julies-family-learning/${usage}`,
@@ -433,7 +451,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         format: cloudinaryResult.format,
         fileSize: cloudinaryResult.bytes,
         usage,
-        uploadedBy: req.user.claims.sub,
+        uploadedBy: currentUser?.id || null,
         isActive: true
       });
 
@@ -653,7 +671,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get content visibility settings (admin)
+  // Get all content visibility settings (admin)
+  app.get('/api/content/visibility', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const allVisibility = await storage.getAllContentVisibility();
+      res.json(allVisibility);
+    } catch (error) {
+      console.error("Error fetching all content visibility:", error);
+      res.status(500).json({ message: "Failed to fetch all content visibility" });
+    }
+  });
+
+  // Get content visibility settings for specific item (admin)
   app.get('/api/content/:contentItemId/visibility', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { persona, funnelStage } = req.query;
@@ -768,10 +797,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create A/B test (admin)
   app.post('/api/ab-tests', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
       const validatedData = insertAbTestSchema.parse({
         ...req.body,
-        createdBy: userId,
+        createdBy: currentUser?.id || null,
       });
       const test = await storage.createAbTest(validatedData);
       res.status(201).json(test);
@@ -913,8 +943,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Create assignment
-        const userId = req.user?.claims?.sub || null;
+        // Create assignment - get user UUID if authenticated
+        let userId = null;
+        if (req.user?.claims?.sub) {
+          const currentUser = await storage.getUserByOidcSub(req.user.claims.sub);
+          userId = currentUser?.id || null;
+        }
+        
         assignment = await storage.createAbTestAssignment({
           testId,
           variantId: selectedVariant.id,

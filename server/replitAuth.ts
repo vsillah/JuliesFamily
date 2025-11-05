@@ -63,12 +63,13 @@ async function upsertUser(
   claims: any,
 ) {
   await storage.upsertUser({
-    id: claims["sub"],
+    oidcSub: claims["sub"],
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
     profileImageUrl: claims["profile_image_url"],
-    isAdmin: claims["isAdmin"] || false,
+    // Only set isAdmin if explicitly provided in claims, otherwise preserve existing value
+    ...(claims["isAdmin"] !== undefined && { isAdmin: claims["isAdmin"] }),
   });
 }
 
