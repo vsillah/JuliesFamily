@@ -40,26 +40,22 @@ async function seedContent() {
       for (const stage of FUNNEL_STAGES) {
         const heroData = HERO_DEFAULTS[persona][stage];
         
-        // Create a unique identifier for this hero content
-        const heroIdentifier = `hero-${persona}-${stage}`;
-        
-        // Check if this content item already exists
-        const existing = await db
+        // Check if this content item already exists by querying all heroes and filtering by metadata
+        const allHeroes = await db
           .select()
           .from(schema.contentItems)
-          .where(
-            and(
-              eq(schema.contentItems.type, 'hero'),
-              eq(schema.contentItems.metadata, { persona, funnelStage: stage } as any)
-            )
-          )
-          .limit(1);
+          .where(eq(schema.contentItems.type, 'hero'));
+        
+        const existing = allHeroes.find(h => {
+          const meta = h.metadata as any;
+          return meta?.persona === persona && meta?.funnelStage === stage;
+        });
 
         let contentItemId: string;
 
-        if (existing.length > 0) {
+        if (existing) {
           // Update existing content item
-          contentItemId = existing[0].id;
+          contentItemId = existing.id;
           await db
             .update(schema.contentItems)
             .set({
@@ -113,8 +109,7 @@ async function seedContent() {
               eq(schema.contentVisibility.persona, persona),
               eq(schema.contentVisibility.funnelStage, stage)
             )
-          )
-          .limit(1);
+          );
 
         if (existingVisibility.length === 0) {
           await db
@@ -136,23 +131,22 @@ async function seedContent() {
       for (const stage of FUNNEL_STAGES) {
         const ctaData = CTA_DEFAULTS[persona][stage];
         
-        // Check if this content item already exists
-        const existing = await db
+        // Check if this content item already exists by querying all CTAs and filtering by metadata
+        const allCTAs = await db
           .select()
           .from(schema.contentItems)
-          .where(
-            and(
-              eq(schema.contentItems.type, 'cta'),
-              eq(schema.contentItems.metadata, { persona, funnelStage: stage } as any)
-            )
-          )
-          .limit(1);
+          .where(eq(schema.contentItems.type, 'cta'));
+        
+        const existing = allCTAs.find(c => {
+          const meta = c.metadata as any;
+          return meta?.persona === persona && meta?.funnelStage === stage;
+        });
 
         let contentItemId: string;
 
-        if (existing.length > 0) {
+        if (existing) {
           // Update existing content item
-          contentItemId = existing[0].id;
+          contentItemId = existing.id;
           await db
             .update(schema.contentItems)
             .set({
@@ -204,8 +198,7 @@ async function seedContent() {
               eq(schema.contentVisibility.persona, persona),
               eq(schema.contentVisibility.funnelStage, stage)
             )
-          )
-          .limit(1);
+          );
 
         if (existingVisibility.length === 0) {
           await db
