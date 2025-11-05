@@ -100,7 +100,13 @@ export default function AdminABTesting() {
         status: 'active', // Start as active since it's fully configured
       };
 
-      const createdTest = await createTestMutation.mutateAsync(testData) as unknown as AbTest;
+      // Create the test using apiRequest directly to get proper response
+      const response = await apiRequest("POST", "/api/ab-tests", testData);
+      const createdTest = await response.json() as AbTest;
+      
+      if (!createdTest?.id) {
+        throw new Error("Failed to create test - no ID returned");
+      }
       
       // Create variants for the test
       for (const variant of config.variants) {
@@ -113,11 +119,11 @@ export default function AdminABTesting() {
           contentItemId: variant.contentItemId || undefined,
         };
         
-        await createVariantMutation.mutateAsync({ 
-          testId: createdTest.id, 
-          variantData 
-        });
+        await apiRequest("POST", `/api/ab-tests/${createdTest.id}/variants`, variantData);
       }
+      
+      // Invalidate queries to refresh the list
+      queryClient.invalidateQueries({ queryKey: ["/api/ab-tests"] });
 
       toast({
         title: "Test created successfully!",
