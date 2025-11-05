@@ -141,16 +141,17 @@ export default function MatrixEditPanel({
         description: "Configuration updated successfully",
       });
       
-      // Close dialog first to unmount this component
-      onClose();
-      
-      // Then invalidate and refetch all related queries
-      await queryClient.invalidateQueries({ 
+      // Explicitly refetch all related queries to ensure matrix updates
+      await queryClient.refetchQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
           return key?.includes("/api/content") || key?.includes("/api/admin/images");
-        }
+        },
+        type: 'active'
       });
+      
+      // Close dialog after refetch completes
+      onClose();
     },
     onError: () => {
       toast({
