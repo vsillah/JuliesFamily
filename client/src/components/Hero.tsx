@@ -152,7 +152,10 @@ export default function Hero() {
         ) : (
           <div className="w-full h-full bg-muted animate-pulse" />
         )}
+        {/* Vertical gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
+        {/* Radial gradient for edge vignette effect */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_50%,rgba(0,0,0,0.4)_100%)]" />
       </div>
       
       {/* Horizontal shade between image and text */}
