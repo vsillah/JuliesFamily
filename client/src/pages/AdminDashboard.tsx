@@ -84,47 +84,47 @@ export default function AdminDashboard() {
       <div className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Breadcrumbs items={[{ label: "Admin Dashboard" }]} />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4">
             <div>
               <h1 className="text-3xl font-serif font-bold text-primary">CRM Dashboard</h1>
               <p className="text-muted-foreground mt-2">
                 Manage leads and track funnel performance
               </p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Link href="/admin/guide">
-                <Button variant="outline" data-testid="button-admin-guide">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Help Guide
+                <Button variant="outline" size="sm" data-testid="button-admin-guide">
+                  <BookOpen className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Help Guide</span>
                 </Button>
               </Link>
               <Link href="/admin/content">
-                <Button variant="outline" data-testid="button-manage-content">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Manage Content
+                <Button variant="outline" size="sm" data-testid="button-manage-content">
+                  <FileText className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Manage Content</span>
                 </Button>
               </Link>
               <Link href="/admin/images">
-                <Button variant="outline" data-testid="button-manage-images">
-                  <ImageIcon className="w-4 h-4 mr-2" />
-                  Manage Images
+                <Button variant="outline" size="sm" data-testid="button-manage-images">
+                  <ImageIcon className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Manage Images</span>
                 </Button>
               </Link>
               <Link href="/admin/users">
-                <Button variant="outline" data-testid="button-manage-users">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Manage Users
+                <Button variant="outline" size="sm" data-testid="button-manage-users">
+                  <Shield className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Manage Users</span>
                 </Button>
               </Link>
               <Link href="/admin/ab-testing">
-                <Button variant="outline" data-testid="button-ab-testing">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  A/B Testing
+                <Button variant="outline" size="sm" data-testid="button-ab-testing">
+                  <BarChart3 className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">A/B Testing</span>
                 </Button>
               </Link>
-              <Button variant="default" data-testid="button-export-data">
-                <Download className="w-4 h-4 mr-2" />
-                Export Data
+              <Button variant="default" size="sm" data-testid="button-export-data">
+                <Download className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Export Data</span>
               </Button>
             </div>
           </div>
