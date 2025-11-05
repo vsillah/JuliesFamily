@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, Filter } from "lucide-react";
+import { useState } from "react";
+import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -43,96 +43,8 @@ export default function PersonaMatrixGrid({
   abTests 
 }: PersonaMatrixGridProps) {
   const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const [canScrollUp, setCanScrollUp] = useState(false);
-  const [canScrollDown, setCanScrollDown] = useState(true);
   const [selectedPersonas, setSelectedPersonas] = useState<Set<Persona>>(new Set(PERSONAS));
   const [selectedStages, setSelectedStages] = useState<Set<FunnelStage>>(new Set(FUNNEL_STAGES));
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const updateScrollArrows = useCallback(() => {
-    const container = scrollContainerRef.current;
-    if (!container) {
-      setCanScrollRight(true);
-      setCanScrollDown(true);
-      return;
-    }
-
-    // Horizontal scroll
-    const scrollLeft = container.scrollLeft;
-    const scrollWidth = container.scrollWidth;
-    const clientWidth = container.clientWidth;
-    const maxScrollX = scrollWidth - clientWidth;
-    
-    const isAtLeftEdge = scrollLeft < 5;
-    const isAtRightEdge = scrollLeft >= maxScrollX - 5;
-    
-    setCanScrollLeft(!isAtLeftEdge && maxScrollX > 0);
-    setCanScrollRight(!isAtRightEdge && maxScrollX > 0);
-
-    // Vertical scroll
-    const scrollTop = container.scrollTop;
-    const scrollHeight = container.scrollHeight;
-    const clientHeight = container.clientHeight;
-    const maxScrollY = scrollHeight - clientHeight;
-    
-    const isAtTopEdge = scrollTop < 5;
-    const isAtBottomEdge = scrollTop >= maxScrollY - 5;
-    
-    setCanScrollUp(!isAtTopEdge && maxScrollY > 0);
-    setCanScrollDown(!isAtBottomEdge && maxScrollY > 0);
-  }, []);
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    // Update on scroll
-    const handleScroll = () => {
-      requestAnimationFrame(updateScrollArrows);
-    };
-    
-    container.addEventListener('scroll', handleScroll);
-    
-    // Update on resize
-    window.addEventListener('resize', updateScrollArrows);
-    
-    // Initial updates - multiple times to ensure content is loaded
-    const timers = [0, 100, 250, 500, 1000].map(delay =>
-      setTimeout(updateScrollArrows, delay)
-    );
-
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', updateScrollArrows);
-      timers.forEach(clearTimeout);
-    };
-  }, [updateScrollArrows]);
-
-  const scrollLeft = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    container.scrollBy({ left: -300, behavior: 'smooth' });
-  };
-
-  const scrollRight = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    container.scrollBy({ left: 300, behavior: 'smooth' });
-  };
-
-  const scrollUp = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    container.scrollBy({ top: -300, behavior: 'smooth' });
-  };
-
-  const scrollDown = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    container.scrollBy({ top: 300, behavior: 'smooth' });
-  };
 
   const togglePersona = (persona: Persona) => {
     setSelectedPersonas(prev => {
@@ -245,82 +157,7 @@ export default function PersonaMatrixGrid({
         )}
       </div>
 
-      <div className="relative w-full">
-        {/* Horizontal scroll arrows */}
-        {canScrollRight && (
-          <div className="fixed right-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
-            <div className="bg-gradient-to-l from-background/80 to-transparent h-24 w-16 flex items-center justify-end pr-2">
-              <Button
-                variant="default"
-                size="icon"
-                className="pointer-events-auto shadow-lg"
-                onClick={scrollRight}
-                aria-label="Scroll right to see more funnel stages"
-                data-testid="button-scroll-right"
-              >
-                <ChevronRight className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        {canScrollLeft && (
-          <div className="fixed left-4 top-1/2 -translate-y-1/2 z-40 pointer-events-none">
-            <div className="bg-gradient-to-r from-background/80 to-transparent h-24 w-16 flex items-center justify-start pl-2">
-              <Button
-                variant="default"
-                size="icon"
-                className="pointer-events-auto shadow-lg"
-                onClick={scrollLeft}
-                aria-label="Scroll left to see previous funnel stages"
-                data-testid="button-scroll-left"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Vertical scroll arrows */}
-        {canScrollDown && (
-          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
-            <div className="bg-gradient-to-t from-background/80 to-transparent w-24 h-16 flex items-end justify-center pb-2">
-              <Button
-                variant="default"
-                size="icon"
-                className="pointer-events-auto shadow-lg"
-                onClick={scrollDown}
-                aria-label="Scroll down to see more personas"
-                data-testid="button-scroll-down"
-              >
-                <ChevronDown className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        )}
-        
-        {canScrollUp && (
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
-            <div className="bg-gradient-to-b from-background/80 to-transparent w-24 h-16 flex items-start justify-center pt-2">
-              <Button
-                variant="default"
-                size="icon"
-                className="pointer-events-auto shadow-lg"
-                onClick={scrollUp}
-                aria-label="Scroll up to see previous personas"
-                data-testid="button-scroll-up"
-              >
-                <ChevronUp className="w-5 h-5" />
-              </Button>
-            </div>
-          </div>
-        )}
-
-        <div 
-          ref={scrollContainerRef}
-          className="w-full overflow-x-auto overflow-y-auto scroll-smooth max-h-[calc(100vh-200px)]" 
-          style={{ scrollPaddingLeft: '6rem', scrollPaddingTop: '3rem' }}
-        >
+      <div className="w-full overflow-auto custom-scrollbar" style={{ maxHeight: 'calc(100vh - 200px)' }}>
         <div className="min-w-max">
           {/* Header row with funnel stage labels - sticky on vertical scroll */}
           <div 
@@ -375,7 +212,6 @@ export default function PersonaMatrixGrid({
               ))}
             </div>
           ))}
-        </div>
         </div>
       </div>
       {/* Edit modal */}
