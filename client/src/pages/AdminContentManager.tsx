@@ -21,7 +21,6 @@ export default function AdminContentManager() {
   const [activeTab, setActiveTab] = useState("matrix");
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [matrixConfigItem, setMatrixConfigItem] = useState<ContentItem | null>(null);
   const [newItem, setNewItem] = useState({
     type: "service",
     title: "",
@@ -283,24 +282,15 @@ export default function AdminContentManager() {
                           <span className="font-mono">{item.imageName}</span>
                         </p>
                       )}
-                      {item.metadata && Object.keys(item.metadata).length > 0 && (
+                      {item.metadata && typeof item.metadata === 'object' && item.metadata !== null && Object.keys(item.metadata as Record<string, any>).length > 0 ? (
                         <div className="text-xs text-muted-foreground mt-2">
                           <span className="font-medium">Metadata: </span>
                           <code className="text-xs">{JSON.stringify(item.metadata).substring(0, 100)}...</code>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                     
                     <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setMatrixConfigItem(item)}
-                        data-testid={`button-configure-variants-${item.id}`}
-                        title="Configure persona×stage variants"
-                      >
-                        <Grid3x3 className="w-4 h-4" />
-                      </Button>
                       <Button
                         size="sm"
                         variant="ghost"
@@ -839,14 +829,6 @@ export default function AdminContentManager() {
           </div>
         </DialogContent>
       </Dialog>
-
-      {matrixConfigItem && (
-        <MatrixConfigDialog
-          contentItem={matrixConfigItem}
-          open={!!matrixConfigItem}
-          onOpenChange={(open) => !open && setMatrixConfigItem(null)}
-        />
-      )}
     </div>
   );
 }

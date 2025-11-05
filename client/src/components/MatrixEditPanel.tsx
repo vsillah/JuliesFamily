@@ -141,16 +141,15 @@ export default function MatrixEditPanel({
         description: "Configuration updated successfully",
       });
       
-      // Explicitly refetch all related queries to ensure matrix updates
-      await queryClient.refetchQueries({ 
+      // Invalidate all related queries to ensure matrix updates
+      await queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
           return key?.includes("/api/content") || key?.includes("/api/admin/images");
-        },
-        type: 'active'
+        }
       });
       
-      // Close dialog after refetch completes
+      // Close dialog after invalidation completes
       onClose();
     },
     onError: () => {
