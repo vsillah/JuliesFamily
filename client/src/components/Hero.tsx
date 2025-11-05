@@ -12,8 +12,8 @@ export default function Hero() {
   const [textVisible, setTextVisible] = useState(false);
   const [shadeVisible, setShadeVisible] = useState(false);
   
-  // Check for active A/B test
-  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('hero', { 
+  // Check for active A/B test (using internal type name)
+  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('hero_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
   });

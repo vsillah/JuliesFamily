@@ -12,8 +12,8 @@ export default function DonationCTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
   
-  // Check for active A/B test
-  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('cta', { 
+  // Check for active A/B test (using internal type name)
+  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('cta_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
   });
