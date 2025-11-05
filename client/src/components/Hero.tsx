@@ -16,6 +16,11 @@ export default function Hero() {
     queryKey: ["/api/content/type/hero"],
   });
   
+  // Fetch visible sections for current persona and funnel stage
+  const { data: visibleSections } = useQuery<Record<string, boolean>>({
+    queryKey: ["/api/content/visible-sections", { persona, funnelStage }],
+  });
+  
   // Find hero content for current persona AND funnel stage, or fallback to donor awareness
   const currentHero = heroContent?.find(h => {
     const meta = h.metadata as any;
@@ -62,8 +67,8 @@ export default function Hero() {
     }
   };
 
-  // Persona-specific navigation mapping
-  const getNavigationTargets = () => {
+  // Get preferred navigation targets based on persona
+  const getPreferredTargets = () => {
     switch(persona) {
       case 'student':
         return { primary: 'lead-magnet', secondary: 'testimonials' };
@@ -76,9 +81,35 @@ export default function Hero() {
       case 'volunteer':
         return { primary: 'services', secondary: 'testimonials' };
       default:
-        // Fallback to student navigation for unknown personas
         return { primary: 'lead-magnet', secondary: 'testimonials' };
     }
+  };
+
+  // Determine actual navigation targets based on visibility
+  const getNavigationTargets = () => {
+    const preferred = getPreferredTargets();
+    
+    // If no visibility data yet, use preferred targets
+    if (!visibleSections) {
+      return preferred;
+    }
+    
+    // Priority order for fallbacks (sections most likely to be useful)
+    const fallbackOrder = ['services', 'lead-magnet', 'impact', 'testimonials', 'donation', 'events'];
+    
+    // Helper to find first visible section from a list
+    const findVisibleSection = (preferredSection: string) => {
+      if (visibleSections[preferredSection]) {
+        return preferredSection;
+      }
+      // Fallback to first visible section
+      return fallbackOrder.find(section => visibleSections[section]) || preferredSection;
+    };
+    
+    return {
+      primary: findVisibleSection(preferred.primary),
+      secondary: findVisibleSection(preferred.secondary)
+    };
   };
 
   const navigationTargets = getNavigationTargets();
