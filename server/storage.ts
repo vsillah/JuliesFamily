@@ -4,6 +4,7 @@ import {
   users, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
   abTests, abTestVariants, abTestAssignments, abTestEvents,
+  googleReviews,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -14,7 +15,8 @@ import {
   type AbTest, type InsertAbTest,
   type AbTestVariant, type InsertAbTestVariant,
   type AbTestAssignment, type InsertAbTestAssignment,
-  type AbTestEvent, type InsertAbTestEvent
+  type AbTestEvent, type InsertAbTestEvent,
+  type GoogleReview, type InsertGoogleReview
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -136,6 +138,12 @@ export interface IStorage {
       priority: "high" | "medium" | "low";
     }[];
   }>;
+  
+  // Google Reviews operations
+  upsertGoogleReview(review: InsertGoogleReview): Promise<GoogleReview>;
+  getGoogleReviews(): Promise<GoogleReview[]>;
+  getActiveGoogleReviews(): Promise<GoogleReview[]>;
+  updateGoogleReviewVisibility(id: string, isActive: boolean): Promise<GoogleReview | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -811,6 +819,47 @@ export class DatabaseStorage implements IStorage {
       contentPerformance: contentPerformanceData,
       recommendations,
     };
+  }
+
+  // Google Reviews operations
+  async upsertGoogleReview(reviewData: InsertGoogleReview): Promise<GoogleReview> {
+    const existingReview = await db
+      .select()
+      .from(googleReviews)
+      .where(eq(googleReviews.googleReviewId, reviewData.googleReviewId));
+
+    if (existingReview.length > 0) {
+      const [updated] = await db
+        .update(googleReviews)
+        .set({ ...reviewData, updatedAt: new Date() })
+        .where(eq(googleReviews.googleReviewId, reviewData.googleReviewId))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db.insert(googleReviews).values(reviewData).returning();
+    return created;
+  }
+
+  async getGoogleReviews(): Promise<GoogleReview[]> {
+    return await db.select().from(googleReviews).orderBy(desc(googleReviews.time));
+  }
+
+  async getActiveGoogleReviews(): Promise<GoogleReview[]> {
+    return await db
+      .select()
+      .from(googleReviews)
+      .where(eq(googleReviews.isActive, true))
+      .orderBy(desc(googleReviews.time));
+  }
+
+  async updateGoogleReviewVisibility(id: string, isActive: boolean): Promise<GoogleReview | undefined> {
+    const [updated] = await db
+      .update(googleReviews)
+      .set({ isActive, updatedAt: new Date() })
+      .where(eq(googleReviews.id, id))
+      .returning();
+    return updated;
   }
 }
 

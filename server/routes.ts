@@ -4,7 +4,7 @@ import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -1085,6 +1085,108 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching performance metrics:", error);
       res.status(500).json({ message: "Failed to fetch performance metrics" });
+    }
+  });
+
+  // Google Reviews Routes
+  
+  // Sync reviews from Google Places API (admin only)
+  app.post('/api/google-reviews/sync', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { placeId } = req.body;
+      
+      if (!placeId) {
+        return res.status(400).json({ message: "placeId is required" });
+      }
+
+      const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+      if (!apiKey) {
+        return res.status(500).json({ message: "Google Places API key not configured" });
+      }
+
+      // Fetch place details from Google Places API
+      const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=reviews,rating,user_ratings_total&key=${apiKey}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.status !== 'OK') {
+        return res.status(400).json({ 
+          message: `Google Places API error: ${data.status}`,
+          error: data.error_message 
+        });
+      }
+
+      const reviews = data.result?.reviews || [];
+      const syncedReviews = [];
+
+      for (const review of reviews) {
+        // Create a unique ID from author name and time
+        const googleReviewId = `${review.author_name}_${review.time}`.replace(/\s+/g, '_');
+        
+        const reviewData = {
+          googleReviewId,
+          authorName: review.author_name,
+          authorPhotoUrl: review.profile_photo_url || null,
+          rating: review.rating,
+          text: review.text || null,
+          relativeTimeDescription: review.relative_time_description || null,
+          time: review.time,
+          isActive: true,
+        };
+
+        const synced = await storage.upsertGoogleReview(reviewData);
+        syncedReviews.push(synced);
+      }
+
+      res.json({
+        message: `Successfully synced ${syncedReviews.length} reviews`,
+        reviews: syncedReviews,
+        placeRating: data.result.rating,
+        totalRatings: data.result.user_ratings_total,
+      });
+    } catch (error) {
+      console.error("Error syncing Google reviews:", error);
+      res.status(500).json({ message: "Failed to sync Google reviews" });
+    }
+  });
+
+  // Get all Google reviews (public)
+  app.get('/api/google-reviews', async (req, res) => {
+    try {
+      const reviews = await storage.getActiveGoogleReviews();
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching Google reviews:", error);
+      res.status(500).json({ message: "Failed to fetch Google reviews" });
+    }
+  });
+
+  // Get all reviews including inactive (admin only)
+  app.get('/api/google-reviews/all', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const reviews = await storage.getGoogleReviews();
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching all Google reviews:", error);
+      res.status(500).json({ message: "Failed to fetch all Google reviews" });
+    }
+  });
+
+  // Update review visibility (admin only)
+  app.patch('/api/google-reviews/:id/visibility', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { isActive } = req.body;
+
+      const updated = await storage.updateGoogleReviewVisibility(id, isActive);
+      if (!updated) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating review visibility:", error);
+      res.status(500).json({ message: "Failed to update review visibility" });
     }
   });
 
