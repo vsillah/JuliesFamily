@@ -12,13 +12,144 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3 } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Sortable Item Component
+function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageUrl }: {
+  item: ContentItem;
+  onToggleActive: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  getImageUrl: (name: string | null) => string | null;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : undefined,
+  };
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      className={item.isActive ? "" : "opacity-60"}
+    >
+      <CardContent className="p-6">
+        <div className="flex items-start gap-4">
+          <div
+            className="flex-shrink-0 cursor-move hover-elevate p-2 rounded"
+            data-testid={`drag-handle-${item.id}`}
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="w-5 h-5 text-muted-foreground" />
+          </div>
+
+          {getImageUrl(item.imageName) && (
+            <div className="flex-shrink-0">
+              <img
+                src={getImageUrl(item.imageName)!}
+                alt={item.title}
+                className="w-24 h-24 object-cover rounded border border-border"
+              />
+            </div>
+          )}
+
+          <div className="flex-1">
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-1" data-testid={`text-title-${item.id}`}>
+                  {item.title}
+                </h3>
+                {item.description && (
+                  <p className="text-sm text-muted-foreground leading-relaxed" data-testid={`text-description-${item.id}`}>
+                    {item.description}
+                  </p>
+                )}
+                {item.imageName && item.imageName.length > 0 && (
+                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                    <ImageIcon className="w-3 h-3" />
+                    <span className="font-mono">{item.imageName}</span>
+                  </p>
+                )}
+                {item.metadata && typeof item.metadata === 'object' && item.metadata !== null && Object.keys(item.metadata as Record<string, any>).length > 0 ? (
+                  <div className="text-xs text-muted-foreground mt-2">
+                    <span className="font-medium">Metadata: </span>
+                    <code className="text-xs">{JSON.stringify(item.metadata).substring(0, 100)}...</code>
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={onToggleActive}
+                  data-testid={`button-toggle-active-${item.id}`}
+                >
+                  {item.isActive ? (
+                    <Eye className="w-4 h-4" />
+                  ) : (
+                    <EyeOff className="w-4 h-4" />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={onEdit}
+                  data-testid={`button-edit-${item.id}`}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={onDelete}
+                  data-testid={`button-delete-${item.id}`}
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AdminContentManager() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("matrix");
+  const [showInactive, setShowInactive] = useState(true);
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newItem, setNewItem] = useState({
@@ -236,101 +367,90 @@ export default function AdminContentManager() {
     return image?.cloudinarySecureUrl || null;
   };
 
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handle drag end
+  const handleDragEnd = (event: DragEndEvent, items: ContentItem[], type: string) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = items.findIndex((item) => item.id === active.id);
+      const newIndex = items.findIndex((item) => item.id === over.id);
+
+      const reorderedItems = arrayMove(items, oldIndex, newIndex);
+
+      // Update order values
+      const updates = reorderedItems.map((item, index) => ({
+        id: item.id,
+        order: index,
+      }));
+
+      // Batch update the orders
+      Promise.all(
+        updates.map(({ id, order }) =>
+          apiRequest("PATCH", `/api/content/${id}`, { order })
+        )
+      ).then(() => {
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            const key = query.queryKey[0] as string;
+            return key?.startsWith("/api/content/type");
+          }
+        });
+        toast({
+          title: "Order Updated",
+          description: `${type} order has been saved`,
+        });
+      });
+    }
+  };
+
   const renderContentList = (items: ContentItem[], type: string) => {
-    if (items.length === 0) {
+    // Filter items based on showInactive toggle
+    const filteredItems = showInactive ? items : items.filter(item => item.isActive);
+    
+    if (filteredItems.length === 0) {
       return (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No {type}s found. Create your first one!</p>
+          <p>No {type}s found{!showInactive ? " (try showing inactive items)" : ""}. {showInactive ? "Create your first one!" : ""}</p>
         </div>
       );
     }
 
     return (
-      <div className="space-y-4">
-        {items.map((item) => (
-          <Card key={item.id} className={item.isActive ? "" : "opacity-60"}>
-            <CardContent className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 cursor-move hover-elevate p-2 rounded" data-testid={`drag-handle-${item.id}`}>
-                  <GripVertical className="w-5 h-5 text-muted-foreground" />
-                </div>
-                
-                {getImageUrl(item.imageName) && (
-                  <div className="flex-shrink-0">
-                    <img 
-                      src={getImageUrl(item.imageName)!} 
-                      alt={item.title}
-                      className="w-24 h-24 object-cover rounded border border-border"
-                    />
-                  </div>
-                )}
-                
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-1" data-testid={`text-title-${item.id}`}>
-                        {item.title}
-                      </h3>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed" data-testid={`text-description-${item.id}`}>
-                          {item.description}
-                        </p>
-                      )}
-                      {item.imageName && item.imageName.length > 0 && (
-                        <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                          <ImageIcon className="w-3 h-3" />
-                          <span className="font-mono">{item.imageName}</span>
-                        </p>
-                      )}
-                      {item.metadata && typeof item.metadata === 'object' && item.metadata !== null && Object.keys(item.metadata as Record<string, any>).length > 0 ? (
-                        <div className="text-xs text-muted-foreground mt-2">
-                          <span className="font-medium">Metadata: </span>
-                          <code className="text-xs">{JSON.stringify(item.metadata).substring(0, 100)}...</code>
-                        </div>
-                      ) : null}
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => toggleActiveMutation.mutate({ id: item.id, isActive: !item.isActive })}
-                        data-testid={`button-toggle-active-${item.id}`}
-                      >
-                        {item.isActive ? (
-                          <Eye className="w-4 h-4" />
-                        ) : (
-                          <EyeOff className="w-4 h-4" />
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setEditingItem(item)}
-                        data-testid={`button-edit-${item.id}`}
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
-                            deleteMutation.mutate(item.id);
-                          }
-                        }}
-                        data-testid={`button-delete-${item.id}`}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={(event) => handleDragEnd(event, filteredItems, type)}
+      >
+        <SortableContext
+          items={filteredItems.map(item => item.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-4">
+            {filteredItems.map((item) => (
+              <SortableContentCard
+                key={item.id}
+                item={item}
+                onToggleActive={() => toggleActiveMutation.mutate({ id: item.id, isActive: !item.isActive })}
+                onEdit={() => setEditingItem(item)}
+                onDelete={() => {
+                  if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
+                    deleteMutation.mutate(item.id);
+                  }
+                }}
+                getImageUrl={getImageUrl}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     );
   };
 
@@ -360,18 +480,31 @@ export default function AdminContentManager() {
               <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets">Lead Magnets ({leadMagnets.length})</TabsTrigger>
             </TabsList>
             
-            {activeTab !== "matrix" && (
-              <Button
-                onClick={() => {
-                  setNewItem({ ...newItem, type: activeTab });
-                  setIsCreateDialogOpen(true);
-                }}
-                data-testid="button-create-new"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create New
-              </Button>
-            )}
+            <div className="flex items-center gap-2">
+              {activeTab !== "matrix" && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowInactive(!showInactive)}
+                    data-testid="button-toggle-inactive"
+                  >
+                    <Filter className="w-4 h-4 mr-2" />
+                    {showInactive ? "Hide" : "Show"} Inactive
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setNewItem({ ...newItem, type: activeTab });
+                      setIsCreateDialogOpen(true);
+                    }}
+                    data-testid="button-create-new"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
 
           <TabsContent value="matrix">
