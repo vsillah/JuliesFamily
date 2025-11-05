@@ -10,6 +10,9 @@ import {
   Circle
 } from "lucide-react";
 import type { ContentItem, ContentVisibility, ImageAsset } from "@shared/schema";
+import type { Persona, FunnelStage } from "@shared/defaults/personas";
+import { HERO_DEFAULTS } from "@shared/defaults/heroDefaults";
+import { CTA_DEFAULTS } from "@shared/defaults/ctaDefaults";
 import { getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 
 const CONTENT_TYPE_CONFIG = {
@@ -28,6 +31,8 @@ interface MiniContentCardProps {
   images: ImageAsset[];
   activeTestCount: number;
   onClick: () => void;
+  persona: Persona;
+  stage: FunnelStage;
 }
 
 export default function MiniContentCard({
@@ -37,6 +42,8 @@ export default function MiniContentCard({
   images,
   activeTestCount,
   onClick,
+  persona,
+  stage,
 }: MiniContentCardProps) {
   const config = CONTENT_TYPE_CONFIG[contentType];
   const Icon = config.icon;
@@ -44,15 +51,37 @@ export default function MiniContentCard({
   // Determine if customized (has overrides)
   const isCustomized = !!(visibility?.titleOverride || visibility?.descriptionOverride || visibility?.imageNameOverride);
   
-  // Get image for display
-  const imageName = visibility?.imageNameOverride || contentItem?.imageName;
-  const imageAsset = images.find(img => img.name === imageName);
+  // Get persona × stage-specific default title
+  const getDefaultTitle = (): string => {
+    if (contentType === 'hero') {
+      return HERO_DEFAULTS[persona][stage].title;
+    }
+    if (contentType === 'cta') {
+      return CTA_DEFAULTS[persona][stage].title;
+    }
+    // For other types, use the content item title if available, otherwise use generic label
+    return contentItem?.title || config.label;
+  };
+
+  // Get image for display with persona × stage-specific defaults
+  const getDefaultImageName = (): string | null | undefined => {
+    if (contentType === 'hero') {
+      return HERO_DEFAULTS[persona][stage].imageName;
+    }
+    if (contentType === 'cta') {
+      return CTA_DEFAULTS[persona][stage].imageName;
+    }
+    return contentItem?.imageName;
+  };
+
+  const imageName = visibility?.imageNameOverride || getDefaultImageName();
+  const imageAsset = imageName ? images.find(img => img.name === imageName) : undefined;
   const thumbnailUrl = imageAsset 
     ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, { width: 100, height: 100, quality: "auto:low" })
     : null;
 
-  // Get title for display
-  const title = visibility?.titleOverride || contentItem?.title || config.label;
+  // Get title for display - prioritize overrides, then content item, then persona × stage defaults
+  const title = visibility?.titleOverride || contentItem?.title || getDefaultTitle();
 
   return (
     <button

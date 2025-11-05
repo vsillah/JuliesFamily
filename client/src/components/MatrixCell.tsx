@@ -104,6 +104,8 @@ export default function MatrixCell({
               images={images}
               activeTestCount={activeTests.length}
               onClick={() => onCardClick(type, assignedItem)}
+              persona={persona}
+              stage={stage}
             />
           );
         })}
