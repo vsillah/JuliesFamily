@@ -733,6 +733,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get content item usage (admin) - shows where content is being used
+  app.get('/api/content/:id/usage', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const usage = await storage.getContentItemUsage(req.params.id);
+      res.json(usage);
+    } catch (error) {
+      console.error("Error fetching content item usage:", error);
+      res.status(500).json({ message: "Failed to fetch content item usage" });
+    }
+  });
+
   // Get all content visibility settings (admin)
   app.get('/api/content/visibility', isAuthenticated, isAdmin, async (req, res) => {
     try {

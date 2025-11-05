@@ -65,6 +65,10 @@ export interface IStorage {
   updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined>;
   deleteContentItem(id: string): Promise<void>;
   updateContentItemOrder(id: string, newOrder: number): Promise<ContentItem | undefined>;
+  getContentItemUsage(id: string): Promise<{
+    visibilityAssignments: { persona: string | null; funnelStage: string | null; }[];
+    abTests: { testId: string; testName: string; variantName: string; isActive: boolean; }[];
+  }>;
   
   // Content Visibility operations
   createContentVisibility(visibility: InsertContentVisibility): Promise<ContentVisibility>;
@@ -377,6 +381,37 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contentItems.id, id))
       .returning();
     return item;
+  }
+
+  async getContentItemUsage(id: string): Promise<{
+    visibilityAssignments: { persona: string | null; funnelStage: string | null; }[];
+    abTests: { testId: string; testName: string; variantName: string; isActive: boolean; }[];
+  }> {
+    // Get visibility assignments
+    const visibilityAssignments = await db
+      .select({
+        persona: contentVisibility.persona,
+        funnelStage: contentVisibility.funnelStage,
+      })
+      .from(contentVisibility)
+      .where(eq(contentVisibility.contentItemId, id));
+
+    // Get A/B test usage
+    const abTestUsage = await db
+      .select({
+        testId: abTests.id,
+        testName: abTests.name,
+        variantName: abTestVariants.name,
+        isActive: sql<boolean>`${abTests.status} = 'active'`.as('is_active'),
+      })
+      .from(abTestVariants)
+      .innerJoin(abTests, eq(abTestVariants.testId, abTests.id))
+      .where(eq(abTestVariants.contentItemId, id));
+
+    return {
+      visibilityAssignments,
+      abTests: abTestUsage,
+    };
   }
 
   // Content Visibility operations
