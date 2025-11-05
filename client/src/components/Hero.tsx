@@ -62,6 +62,27 @@ export default function Hero() {
     }
   };
 
+  // Persona-specific navigation mapping
+  const getNavigationTargets = () => {
+    switch(persona) {
+      case 'student':
+        return { primary: 'lead-magnet', secondary: 'testimonials' };
+      case 'provider':
+        return { primary: 'lead-magnet', secondary: 'impact' };
+      case 'parent':
+        return { primary: 'lead-magnet', secondary: 'services' };
+      case 'donor':
+        return { primary: 'donation', secondary: 'impact' };
+      case 'volunteer':
+        return { primary: 'services', secondary: 'testimonials' };
+      default:
+        // Fallback to student navigation for unknown personas
+        return { primary: 'lead-magnet', secondary: 'testimonials' };
+    }
+  };
+
+  const navigationTargets = getNavigationTargets();
+
   const heroImageUrl = heroImageAsset 
     ? getOptimizedUrl(heroImageAsset.cloudinarySecureUrl, {
         width: 1920,
@@ -126,7 +147,7 @@ export default function Hero() {
             variant="outline"
             size="lg"
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
-            onClick={() => scrollToSection("services")}
+            onClick={() => scrollToSection(navigationTargets.secondary)}
             data-testid="button-learn-more"
           >
             {(currentHero?.metadata as any)?.secondaryButton || "Learn More"}
@@ -134,6 +155,7 @@ export default function Hero() {
           <Button
             variant="default"
             size="lg"
+            onClick={() => scrollToSection(navigationTargets.primary)}
             data-testid="button-hero-donate"
           >
             {(currentHero?.metadata as any)?.primaryButton || "Donate Now"}
