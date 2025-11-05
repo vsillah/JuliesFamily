@@ -32,7 +32,7 @@ export const HERO_DEFAULTS: HeroDefaultsMatrix = {
       description: "See how students like you earned their HiSET and transformed their lives. Free classes with childcare included.",
       primaryCTA: "Read Alumni Stories",
       secondaryCTA: "Schedule a Visit",
-      imageName: "hero-student"
+      imageName: "hero-student-success"
     },
     decision: {
       subtitle: "Your Education Journey",
@@ -48,7 +48,7 @@ export const HERO_DEFAULTS: HeroDefaultsMatrix = {
       description: "Access ongoing support, career services, and alumni resources. We're here for you beyond graduation.",
       primaryCTA: "Access Resources",
       secondaryCTA: "Connect With Alumni",
-      imageName: "hero-student"
+      imageName: "hero-student-success"
     }
   },
   provider: {
@@ -58,7 +58,7 @@ export const HERO_DEFAULTS: HeroDefaultsMatrix = {
       description: "50+ years of proven results helping families achieve educational goals. Download our referral packet and partnership information.",
       primaryCTA: "Download Referral Packet",
       secondaryCTA: "View Program Outcomes",
-      imageName: "hero-volunteer-student"
+      imageName: "hero-provider"
     },
     consideration: {
       subtitle: "Trusted Partner",
@@ -66,7 +66,7 @@ export const HERO_DEFAULTS: HeroDefaultsMatrix = {
       description: "Review our outcomes data and see how collaborative partnerships improve client success rates.",
       primaryCTA: "View Impact Report",
       secondaryCTA: "Schedule Partnership Call",
-      imageName: "hero-volunteer-student"
+      imageName: "hero-provider"
     },
     decision: {
       subtitle: "Trusted Partner",
@@ -74,7 +74,7 @@ export const HERO_DEFAULTS: HeroDefaultsMatrix = {
       description: "Start referring clients today. Simple process, dedicated liaison, and regular outcome updates.",
       primaryCTA: "Complete Partnership Form",
       secondaryCTA: "Talk to Partnership Team",
-      imageName: "hero-volunteer-student"
+      imageName: "hero-provider"
     },
     retention: {
       subtitle: "Trusted Partner",
@@ -82,7 +82,7 @@ export const HERO_DEFAULTS: HeroDefaultsMatrix = {
       description: "Access referral tracking, quarterly reports, and collaborative case management tools.",
       primaryCTA: "Partner Portal Login",
       secondaryCTA: "Request Consultation",
-      imageName: "hero-volunteer-student"
+      imageName: "hero-provider"
     }
   },
   parent: {

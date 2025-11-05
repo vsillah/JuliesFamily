@@ -22,28 +22,28 @@ export const CTA_DEFAULTS: CTADefaultsMatrix = {
       description: "Join hundreds of students who've earned their high school equivalency with us. Free classes start every month.",
       primaryButton: "Get Started Today",
       secondaryButton: "Download Class Schedule",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     consideration: {
       title: "Success Starts Here",
       description: "95% of our graduates report improved job opportunities. See what's possible when you invest in your education.",
       primaryButton: "Read Success Stories",
       secondaryButton: "Schedule a Visit",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     decision: {
       title: "Your Seat Is Waiting",
       description: "Enroll now and start classes this month. Free childcare, books, and supplies included.",
       primaryButton: "Enroll Now",
       secondaryButton: "Talk to Advisor",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     retention: {
       title: "Keep Moving Forward",
       description: "Access career services, college prep, and alumni support as you build your future.",
       primaryButton: "Explore Resources",
       secondaryButton: "Join Alumni Network",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     }
   },
   provider: {
@@ -52,28 +52,28 @@ export const CTA_DEFAULTS: CTADefaultsMatrix = {
       description: "50+ years serving Boston families with measurable outcomes. Download our partnership packet today.",
       primaryButton: "Download Partnership Info",
       secondaryButton: "View Outcomes Data",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     consideration: {
       title: "Better Outcomes Together",
       description: "Our collaborative model improves client success rates by 40%. See the partnership difference.",
       primaryButton: "Request Impact Report",
       secondaryButton: "Schedule Consultation",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     decision: {
       title: "Start Referring Today",
       description: "Simple referral process with dedicated liaison support and regular client updates.",
       primaryButton: "Begin Partnership",
       secondaryButton: "Contact Partnership Team",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     retention: {
       title: "Strengthen Our Partnership",
       description: "Access enhanced reporting, co-location opportunities, and collaborative case management.",
       primaryButton: "Partner Portal",
       secondaryButton: "Request Training",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     }
   },
   parent: {
@@ -82,28 +82,28 @@ export const CTA_DEFAULTS: CTADefaultsMatrix = {
       description: "Quality PreK education with caring teachers and age-appropriate curriculum. Tours available daily.",
       primaryButton: "Schedule a Tour",
       secondaryButton: "Learn About Our Program",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     consideration: {
       title: "See the Difference",
       description: "Visit our classroom, meet our teachers, and see why parents choose our PreK program.",
       primaryButton: "Book Your Tour",
       secondaryButton: "Read Parent Reviews",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     decision: {
       title: "Secure Your Child's Spot",
       description: "Limited spaces available for this year. Enroll now and ensure your child's place.",
       primaryButton: "Enroll Now",
       secondaryButton: "View Tuition Options",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     retention: {
       title: "Growing Together",
       description: "Stay engaged through parent workshops, family events, and ongoing support resources.",
       primaryButton: "View Family Events",
       secondaryButton: "Access Parent Portal",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     }
   },
   donor: {
@@ -112,28 +112,28 @@ export const CTA_DEFAULTS: CTADefaultsMatrix = {
       description: "Your support helps families break cycles and build futures. See where your tax-deductible gift makes a difference.",
       primaryButton: "Make a Donation",
       secondaryButton: "View Impact Report",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     consideration: {
       title: "Your Impact Multiplied",
       description: "Every $100 provides 20 hours of free instruction. See exactly how your gift creates change.",
       primaryButton: "View Impact Breakdown",
       secondaryButton: "Read Donor Stories",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     decision: {
       title: "Give Today",
       description: "Join 500+ supporters who make our programs possible. One-time or monthly giving options available.",
       primaryButton: "Donate Now",
       secondaryButton: "Set Up Monthly Giving",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     retention: {
       title: "Thank You for Your Partnership",
       description: "Access exclusive updates, impact reports, and invitations to donor appreciation events.",
       primaryButton: "View Your Impact",
       secondaryButton: "Increase Your Gift",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     }
   },
   volunteer: {
@@ -142,28 +142,28 @@ export const CTA_DEFAULTS: CTADefaultsMatrix = {
       description: "Volunteers like you make our programs possible. Find opportunities that fit your schedule and skills.",
       primaryButton: "See Opportunities",
       secondaryButton: "Hear From Volunteers",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     consideration: {
       title: "Find Your Role",
       description: "From tutoring to event support, discover how your unique skills can make a real difference.",
       primaryButton: "Browse Roles",
       secondaryButton: "Attend Info Session",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     decision: {
       title: "Join Our Team",
       description: "Apply today and complete our simple onboarding. Training and ongoing support provided.",
       primaryButton: "Apply Now",
       secondaryButton: "Contact Coordinator",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     },
     retention: {
       title: "Thank You for Serving",
       description: "Access resources, track your impact, and connect with our volunteer community.",
       primaryButton: "Volunteer Portal",
       secondaryButton: "Refer a Friend",
-      imageName: "donation-cta"
+      imageName: "cta-community"
     }
   }
 };
