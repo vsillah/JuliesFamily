@@ -262,3 +262,26 @@ export const insertAbTestEventSchema = createInsertSchema(abTestEvents).omit({
 });
 export type InsertAbTestEvent = z.infer<typeof insertAbTestEventSchema>;
 export type AbTestEvent = typeof abTestEvents.$inferSelect;
+
+// Google Reviews table for caching reviews from Google Places API
+export const googleReviews = pgTable("google_reviews", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  googleReviewId: varchar("google_review_id").unique().notNull(), // Unique ID from Google
+  authorName: varchar("author_name").notNull(),
+  authorPhotoUrl: varchar("author_photo_url"),
+  rating: integer("rating").notNull(),
+  text: text("text"),
+  relativeTimeDescription: varchar("relative_time_description"), // "7 months ago"
+  time: integer("time").notNull(), // Unix timestamp
+  isActive: boolean("is_active").default(true), // Allow hiding specific reviews
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertGoogleReviewSchema = createInsertSchema(googleReviews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertGoogleReview = z.infer<typeof insertGoogleReviewSchema>;
+export type GoogleReview = typeof googleReviews.$inferSelect;
