@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
+import { useABTest } from "@/hooks/useABTest";
 import type { ContentItem } from "@shared/schema";
 
 export default function Hero() {
@@ -10,6 +11,12 @@ export default function Hero() {
   const [scrollScale, setScrollScale] = useState(1);
   const [textVisible, setTextVisible] = useState(false);
   const [shadeVisible, setShadeVisible] = useState(false);
+  
+  // Check for active A/B test
+  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('hero', { 
+    persona: persona || undefined, 
+    funnelStage: funnelStage || undefined 
+  });
   
   // Fetch hero content for current persona
   const { data: heroContent } = useQuery<ContentItem[]>({
@@ -21,14 +28,24 @@ export default function Hero() {
     queryKey: ["/api/content/visible-sections", { persona, funnelStage }],
   });
   
-  // Find hero content for current persona AND funnel stage, or fallback to donor awareness
-  const currentHero = heroContent?.find(h => {
-    const meta = h.metadata as any;
-    return meta?.persona === persona && meta?.funnelStage === funnelStage;
-  }) || heroContent?.find(h => {
-    const meta = h.metadata as any;
-    return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
-  });
+  // Determine content to display: A/B variant > persona/stage match > default
+  let currentHero: ContentItem | undefined;
+  
+  if (abVariant?.contentItemId) {
+    // Use content item from A/B test variant
+    currentHero = heroContent?.find(h => h.id === abVariant.contentItemId);
+  }
+  
+  if (!currentHero) {
+    // Fallback to persona/funnel stage matching
+    currentHero = heroContent?.find(h => {
+      const meta = h.metadata as any;
+      return meta?.persona === persona && meta?.funnelStage === funnelStage;
+    }) || heroContent?.find(h => {
+      const meta = h.metadata as any;
+      return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
+    });
+  }
   
   const imageName = currentHero?.imageName || "hero-volunteer-student";
   const { data: heroImageAsset } = useCloudinaryImage(imageName);
@@ -178,7 +195,12 @@ export default function Hero() {
             variant="outline"
             size="lg"
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
-            onClick={() => scrollToSection(navigationTargets.secondary)}
+            onClick={() => {
+              if (abVariant) {
+                trackConversion('secondary_button_click');
+              }
+              scrollToSection(navigationTargets.secondary);
+            }}
             data-testid="button-learn-more"
           >
             {(currentHero?.metadata as any)?.secondaryButton || "Learn More"}
@@ -186,7 +208,12 @@ export default function Hero() {
           <Button
             variant="default"
             size="lg"
-            onClick={() => scrollToSection(navigationTargets.primary)}
+            onClick={() => {
+              if (abVariant) {
+                trackConversion('primary_button_click');
+              }
+              scrollToSection(navigationTargets.primary);
+            }}
             data-testid="button-hero-donate"
           >
             {(currentHero?.metadata as any)?.primaryButton || "Donate Now"}

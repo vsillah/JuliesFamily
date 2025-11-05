@@ -100,6 +100,41 @@ export default function AdminABTesting() {
         status: 'active', // Start as active since it's fully configured
       };
 
+      // First, create content items for custom variants
+      const variantsWithContentIds = await Promise.all(
+        config.variants.map(async (variant) => {
+          // If it's a custom variant, create a content item first
+          if (variant.creationMode === 'custom' && variant.configuration) {
+            const contentType = config.type === 'hero' ? 'hero' : 'cta';
+            const contentItemData = {
+              type: contentType,
+              title: variant.configuration.title || variant.name,
+              description: variant.configuration.description || '',
+              imageName: variant.configuration.imageName || null,
+              isActive: true,
+              order: 0,
+              metadata: {
+                persona: config.targetPersona || null,
+                funnelStage: config.targetFunnelStage || null,
+                primaryButton: variant.configuration.primaryButton || '',
+                secondaryButton: variant.configuration.secondaryButton || '',
+                subtitle: `A/B Test Variant: ${variant.name}`,
+              },
+            };
+            
+            const response = await apiRequest("POST", "/api/content", contentItemData);
+            const createdContent = await response.json();
+            
+            return {
+              ...variant,
+              contentItemId: createdContent.id,
+            };
+          }
+          
+          return variant;
+        })
+      );
+      
       // Create the test using apiRequest directly to get proper response
       const response = await apiRequest("POST", "/api/ab-tests", testData);
       const createdTest = await response.json() as AbTest;
@@ -109,12 +144,12 @@ export default function AdminABTesting() {
       }
       
       // Create variants for the test
-      for (const variant of config.variants) {
+      for (const variant of variantsWithContentIds) {
         const variantData = {
           name: variant.name,
           description: variant.description,
           trafficWeight: variant.trafficWeight,
-          configuration: JSON.stringify(variant.configuration),
+          configuration: JSON.stringify(variant.configuration || {}),
           isControl: variant.isControl,
           contentItemId: variant.contentItemId || undefined,
         };

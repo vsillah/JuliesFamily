@@ -20,6 +20,7 @@ export interface TestVariantConfig {
   isControl: boolean;
   contentItemId?: string;
   configuration: Record<string, any>;
+  creationMode?: 'existing' | 'custom'; // How this variant was created
 }
 
 export interface TestConfiguration {

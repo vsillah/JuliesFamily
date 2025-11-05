@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, Image as ImageIcon, AlertCircle, GripVertical } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Plus, Trash2, Image as ImageIcon, AlertCircle, GripVertical, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { ContentItem } from "@shared/schema";
 
@@ -20,6 +21,7 @@ interface Variant {
   isControl: boolean;
   contentItemId?: string;
   configuration: Record<string, any>;
+  creationMode?: 'existing' | 'custom'; // How this variant was created
 }
 
 interface ConfigureStepProps {
@@ -36,6 +38,12 @@ export function ConfigureStep({ testType, variants, onVariantsChange }: Configur
   const { data: contentItems = [], isLoading: isLoadingContent } = useQuery<ContentItem[]>({
     queryKey: contentType ? [`/api/content/type/${contentType}`] : [],
     enabled: !!contentType && (testType === 'hero_variation' || testType === 'cta_variation'),
+  });
+  
+  // Fetch images for image selection
+  const { data: images = [] } = useQuery<any[]>({
+    queryKey: ["/api/images"],
+    enabled: testType === 'hero_variation' || testType === 'cta_variation',
   });
 
   const addVariant = () => {
@@ -186,7 +194,7 @@ export function ConfigureStep({ testType, variants, onVariantsChange }: Configur
                 </div>
 
                 {/* Content selection based on test type */}
-                {renderVariantConfig(testType, variant, updateVariant, contentItems, isLoadingContent)}
+                {renderVariantConfig(testType, variant, updateVariant, contentItems, isLoadingContent, images)}
               </CardContent>
             )}
           </Card>
@@ -232,41 +240,184 @@ function renderVariantConfig(
   variant: Variant,
   updateVariant: (id: string, updates: Partial<Variant>) => void,
   contentItems: ContentItem[],
-  isLoading: boolean
+  isLoading: boolean,
+  images: any[]
 ) {
-  // Hero or CTA variation: select from existing content items
+  // Hero or CTA variation: support both existing and custom modes
   if (testType === 'hero_variation' || testType === 'cta_variation') {
+    const mode = variant.creationMode || 'existing';
+    const contentTypeLabel = testType === 'hero_variation' ? 'Hero Section' : 'CTA Section';
+    
     return (
-      <div>
-        <Label>
-          {testType === 'hero_variation' ? 'Select Hero Section' : 'Select CTA Section'}
-        </Label>
-        {isLoading ? (
-          <div className="text-sm text-muted-foreground py-2">Loading content items...</div>
-        ) : (
-          <Select
-            value={variant.contentItemId || ""}
-            onValueChange={(value) => updateVariant(variant.id, { contentItemId: value })}
+      <div className="space-y-4">
+        {/* Mode selector */}
+        <div>
+          <Label>Content Source</Label>
+          <RadioGroup
+            value={mode}
+            onValueChange={(value) => updateVariant(variant.id, { creationMode: value as 'existing' | 'custom' })}
+            className="flex gap-4 mt-2"
           >
-            <SelectTrigger data-testid={`select-content-item-${variant.id}`}>
-              <SelectValue placeholder="Choose an existing item..." />
-            </SelectTrigger>
-            <SelectContent>
-              {contentItems.map((item) => (
-                <SelectItem key={item.id} value={item.id}>
-                  <div className="flex items-center gap-2">
-                    {item.imageName && <ImageIcon className="w-4 h-4" />}
-                    <span>{item.title}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="existing" id={`${variant.id}-existing`} />
+              <Label htmlFor={`${variant.id}-existing`} className="font-normal cursor-pointer">
+                Select Existing
+              </Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="custom" id={`${variant.id}-custom`} />
+              <Label htmlFor={`${variant.id}-custom`} className="font-normal cursor-pointer">
+                Create Custom
+              </Label>
+            </div>
+          </RadioGroup>
+        </div>
+
+        {/* Existing content selector */}
+        {mode === 'existing' && (
+          <div>
+            <Label>{contentTypeLabel}</Label>
+            {isLoading ? (
+              <div className="text-sm text-muted-foreground py-2">Loading content items...</div>
+            ) : (
+              <Select
+                value={variant.contentItemId || ""}
+                onValueChange={(value) => updateVariant(variant.id, { contentItemId: value })}
+              >
+                <SelectTrigger data-testid={`select-content-item-${variant.id}`}>
+                  <SelectValue placeholder="Choose an existing item..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {contentItems.map((item) => (
+                    <SelectItem key={item.id} value={item.id}>
+                      <div className="flex items-center gap-2">
+                        {item.imageName && <ImageIcon className="w-4 h-4" />}
+                        <span>{item.title}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+            {variant.contentItemId && (
+              <p className="text-xs text-muted-foreground mt-1">
+                This variant will display the selected {contentTypeLabel.toLowerCase()}
+              </p>
+            )}
+          </div>
         )}
-        {variant.contentItemId && (
-          <p className="text-xs text-muted-foreground mt-1">
-            This variant will display the selected {testType === 'hero_variation' ? 'hero' : 'CTA'} content
-          </p>
+
+        {/* Custom content form */}
+        {mode === 'custom' && (
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/20">
+            <p className="text-sm text-muted-foreground">
+              Create a new {contentTypeLabel.toLowerCase()} that will be saved to the Content Manager
+            </p>
+            
+            {/* Image selection */}
+            <div className="space-y-2">
+              <Label>Image</Label>
+              
+              {/* Image preview */}
+              {variant.configuration?.imageName && (
+                <div className="relative aspect-video rounded-md overflow-hidden bg-muted max-w-xs">
+                  <img
+                    src={images.find(img => img.name === variant.configuration?.imageName)?.cloudinarySecureUrl || ''}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              
+              {/* Image selector */}
+              <Select 
+                value={variant.configuration?.imageName || ''}
+                onValueChange={(imageName: string) => 
+                  updateVariant(variant.id, { 
+                    configuration: { ...variant.configuration, imageName } 
+                  })
+                }
+              >
+                <SelectTrigger data-testid={`select-image-${variant.id}`}>
+                  <SelectValue placeholder="Select from library" />
+                </SelectTrigger>
+                <SelectContent>
+                  {images.map((img) => (
+                    <SelectItem key={img.id} value={img.name}>
+                      {img.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <p className="text-xs text-muted-foreground">
+                Note: Upload new images through the Content Manager
+              </p>
+            </div>
+
+            {/* Title */}
+            <div>
+              <Label>Title / Headline</Label>
+              <Input
+                value={variant.configuration?.title || ''}
+                onChange={(e) =>
+                  updateVariant(variant.id, {
+                    configuration: { ...variant.configuration, title: e.target.value }
+                  })
+                }
+                placeholder="Enter headline text"
+                data-testid={`input-custom-title-${variant.id}`}
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={variant.configuration?.description || ''}
+                onChange={(e) =>
+                  updateVariant(variant.id, {
+                    configuration: { ...variant.configuration, description: e.target.value }
+                  })
+                }
+                placeholder="Enter description text"
+                rows={3}
+                data-testid={`input-custom-description-${variant.id}`}
+              />
+            </div>
+
+            {/* CTA Buttons (for hero only) */}
+            {testType === 'hero_variation' && (
+              <>
+                <div>
+                  <Label>Primary Button Text</Label>
+                  <Input
+                    value={variant.configuration?.primaryButton || ''}
+                    onChange={(e) =>
+                      updateVariant(variant.id, {
+                        configuration: { ...variant.configuration, primaryButton: e.target.value }
+                      })
+                    }
+                    placeholder="e.g., Get Started"
+                    data-testid={`input-custom-primary-btn-${variant.id}`}
+                  />
+                </div>
+                <div>
+                  <Label>Secondary Button Text</Label>
+                  <Input
+                    value={variant.configuration?.secondaryButton || ''}
+                    onChange={(e) =>
+                      updateVariant(variant.id, {
+                        configuration: { ...variant.configuration, secondaryButton: e.target.value }
+                      })
+                    }
+                    placeholder="e.g., Learn More"
+                    data-testid={`input-custom-secondary-btn-${variant.id}`}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
     );

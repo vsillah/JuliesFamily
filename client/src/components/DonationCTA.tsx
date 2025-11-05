@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
+import { useABTest } from "@/hooks/useABTest";
 import type { ContentItem } from "@shared/schema";
 
 export default function DonationCTA() {
@@ -11,19 +12,35 @@ export default function DonationCTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
   
+  // Check for active A/B test
+  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('cta', { 
+    persona: persona || undefined, 
+    funnelStage: funnelStage || undefined 
+  });
+  
   // Fetch CTA content for current persona
   const { data: ctaContent } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/cta"],
   });
   
-  // Find CTA content for current persona AND funnel stage, or fallback to donor awareness
-  const currentCta = ctaContent?.find(c => {
-    const meta = c.metadata as any;
-    return meta?.persona === persona && meta?.funnelStage === funnelStage;
-  }) || ctaContent?.find(c => {
-    const meta = c.metadata as any;
-    return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
-  });
+  // Determine content to display: A/B variant > persona/stage match > default
+  let currentCta: ContentItem | undefined;
+  
+  if (abVariant?.contentItemId) {
+    // Use content item from A/B test variant
+    currentCta = ctaContent?.find(c => c.id === abVariant.contentItemId);
+  }
+  
+  if (!currentCta) {
+    // Fallback to persona/funnel stage matching
+    currentCta = ctaContent?.find(c => {
+      const meta = c.metadata as any;
+      return meta?.persona === persona && meta?.funnelStage === funnelStage;
+    }) || ctaContent?.find(c => {
+      const meta = c.metadata as any;
+      return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
+    });
+  }
   
   const imageName = currentCta?.imageName || "donation-cta";
   const { data: ctaImageAsset } = useCloudinaryImage(imageName);
@@ -111,7 +128,16 @@ export default function DonationCTA() {
           {currentCta?.description || "Your support helps families achieve their educational dreams and build brighter futures."}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button variant="default" size="lg" data-testid="button-donate-cta">
+          <Button 
+            variant="default" 
+            size="lg" 
+            data-testid="button-donate-cta"
+            onClick={() => {
+              if (abVariant) {
+                trackConversion('primary_button_click');
+              }
+            }}
+          >
             {(currentCta?.metadata as any)?.primaryButton || "Make a Donation"}
           </Button>
           <Button
@@ -119,6 +145,11 @@ export default function DonationCTA() {
             size="lg"
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
             data-testid="button-volunteer"
+            onClick={() => {
+              if (abVariant) {
+                trackConversion('secondary_button_click');
+              }
+            }}
           >
             {(currentCta?.metadata as any)?.secondaryButton || "View Impact Report"}
           </Button>
