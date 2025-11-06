@@ -10,6 +10,7 @@ import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
 import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "./cloudinary";
 import multer from "multer";
+import { analyzeSocialPostScreenshot } from "./gemini";
 
 // Admin authorization middleware
 const isAdmin: RequestHandler = async (req: any, res, next) => {
@@ -1085,6 +1086,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching performance metrics:", error);
       res.status(500).json({ message: "Failed to fetch performance metrics" });
+    }
+  });
+
+  // AI-Powered Social Media Screenshot Analysis (admin only)
+  app.post('/api/analyze-social-post', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { imageBase64 } = req.body;
+
+      if (!imageBase64) {
+        return res.status(400).json({ message: "imageBase64 is required" });
+      }
+
+      // Remove data URL prefix if present
+      const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+
+      const analysis = await analyzeSocialPostScreenshot(base64Data);
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error analyzing social post:", error);
+      res.status(500).json({ 
+        message: "Failed to analyze screenshot",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   });
 

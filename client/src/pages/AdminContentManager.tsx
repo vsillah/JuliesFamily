@@ -196,6 +196,8 @@ export default function AdminContentManager() {
     imageName: "",
     metadata: {} as any
   });
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
 
   const { data: services = [], isLoading: servicesLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/service"],
@@ -381,6 +383,69 @@ export default function AdminContentManager() {
       : newItem;
     
     createMutation.mutate(itemToCreate);
+  };
+
+  const handleScreenshotAnalysis = async (file: File, isEdit: boolean = false) => {
+    setIsAnalyzing(true);
+    try {
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setScreenshotPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Convert to base64 for API
+      const base64 = await new Promise<string>((resolve) => {
+        const r = new FileReader();
+        r.onloadend = () => resolve(r.result as string);
+        r.readAsDataURL(file);
+      });
+
+      const response = await apiRequest("POST", "/api/analyze-social-post", {
+        imageBase64: base64,
+      });
+      const analysis = await response.json();
+
+      // Auto-populate fields based on analysis
+      if (isEdit && editingItem) {
+        setEditingItem({
+          ...editingItem,
+          title: analysis.suggestedTitle || editingItem.title,
+          description: analysis.caption || editingItem.description,
+          metadata: {
+            ...(editingItem.metadata || {}),
+            platform: analysis.platform || 'instagram',
+            link: analysis.suggestedLink || (editingItem.metadata as any)?.link || '',
+          },
+        });
+      } else {
+        setNewItem({
+          ...newItem,
+          title: analysis.suggestedTitle || newItem.title,
+          description: analysis.caption || newItem.description,
+          metadata: {
+            ...(newItem.metadata || {}),
+            platform: analysis.platform || 'instagram',
+            link: analysis.suggestedLink || (newItem.metadata as any)?.link || '',
+          },
+        });
+      }
+
+      toast({
+        title: "Analysis Complete",
+        description: "Post details have been extracted from the screenshot. Please review and adjust as needed.",
+      });
+    } catch (error) {
+      console.error("Screenshot analysis error:", error);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not analyze the screenshot. Please fill in the details manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const uploadImageMutation = useMutation<ImageAsset, Error, FormData>({
@@ -906,14 +971,66 @@ export default function AdminContentManager() {
               </div>
               {/* Social Media specific fields */}
               {editingItem.type === 'socialMedia' && (
-                <div>
-                  <Label htmlFor="edit-platform">Platform</Label>
-                  <Select
-                    value={(editingItem.metadata as any)?.platform || "instagram"}
-                    onValueChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), platform: value } })}
-                  >
-                    <SelectTrigger id="edit-platform" data-testid="select-edit-platform">
-                      <SelectValue />
+                <>
+                  {/* AI Screenshot Analysis */}
+                  <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <Label className="text-sm font-semibold">Quick Import from Screenshot</Label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Upload a screenshot of your social media post and we'll automatically extract the caption, platform, and link.
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2 items-start">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleScreenshotAnalysis(file, true);
+                        }}
+                        className="hidden"
+                        id="screenshot-upload-edit"
+                        disabled={isAnalyzing}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('screenshot-upload-edit')?.click()}
+                        disabled={isAnalyzing}
+                        data-testid="button-analyze-screenshot-edit"
+                        className="flex-shrink-0"
+                      >
+                        {isAnalyzing ? (
+                          "Analyzing..."
+                        ) : (
+                          <>
+                            <ImageIcon className="w-4 h-4 mr-2" />
+                            Analyze Screenshot
+                          </>
+                        )}
+                      </Button>
+                      {screenshotPreview && (
+                        <img 
+                          src={screenshotPreview} 
+                          alt="Screenshot preview"
+                          className="w-20 h-20 object-cover rounded border border-border"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-platform">Platform</Label>
+                    <Select
+                      value={(editingItem.metadata as any)?.platform || "instagram"}
+                      onValueChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), platform: value } })}
+                    >
+                      <SelectTrigger id="edit-platform" data-testid="select-edit-platform">
+                        <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="instagram">Instagram</SelectItem>
@@ -924,6 +1041,7 @@ export default function AdminContentManager() {
                     Select which platform this post is from
                   </p>
                 </div>
+              </>
               )}
               
               {/* Hero/CTA specific fields */}
@@ -1128,14 +1246,66 @@ export default function AdminContentManager() {
             
             {/* Social Media specific fields for create */}
             {activeTab === 'socialMedia' && (
-              <div>
-                <Label htmlFor="create-platform">Platform</Label>
-                <Select
-                  value={(newItem.metadata as any)?.platform || "instagram"}
-                  onValueChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), platform: value } })}
-                >
-                  <SelectTrigger id="create-platform" data-testid="select-create-platform">
-                    <SelectValue />
+              <>
+                {/* AI Screenshot Analysis */}
+                <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-sm font-semibold">Quick Import from Screenshot</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Upload a screenshot of your social media post and we'll automatically extract the caption, platform, and link.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2 items-start">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleScreenshotAnalysis(file, false);
+                      }}
+                      className="hidden"
+                      id="screenshot-upload-create"
+                      disabled={isAnalyzing}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => document.getElementById('screenshot-upload-create')?.click()}
+                      disabled={isAnalyzing}
+                      data-testid="button-analyze-screenshot-create"
+                      className="flex-shrink-0"
+                    >
+                      {isAnalyzing ? (
+                        "Analyzing..."
+                      ) : (
+                        <>
+                          <ImageIcon className="w-4 h-4 mr-2" />
+                          Analyze Screenshot
+                        </>
+                      )}
+                    </Button>
+                    {screenshotPreview && (
+                      <img 
+                        src={screenshotPreview} 
+                        alt="Screenshot preview"
+                        className="w-20 h-20 object-cover rounded border border-border"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="create-platform">Platform</Label>
+                  <Select
+                    value={(newItem.metadata as any)?.platform || "instagram"}
+                    onValueChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), platform: value } })}
+                  >
+                    <SelectTrigger id="create-platform" data-testid="select-create-platform">
+                      <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="instagram">Instagram</SelectItem>
@@ -1146,6 +1316,7 @@ export default function AdminContentManager() {
                   Select which platform this post is from
                 </p>
               </div>
+              </>
             )}
             
             {/* Hero/CTA specific fields for create */}
