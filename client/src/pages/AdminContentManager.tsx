@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { ContentItem, ImageAsset, ContentVisibility, AbTest, GoogleReview } from "@shared/schema";
@@ -282,6 +282,48 @@ export default function AdminContentManager() {
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
 
+  // Load existing persona×journey assignments when editing
+  useEffect(() => {
+    if (editingItem) {
+      const currentItemId = editingItem.id;
+      const controller = new AbortController();
+      
+      // Fetch existing assignments
+      fetch(`/api/content/${currentItemId}/usage`, { signal: controller.signal })
+        .then(res => res.json())
+        .then(data => {
+          // Verify this response is still for the current item
+          if (editingItem?.id === currentItemId) {
+            if (data.visibilityAssignments && data.visibilityAssignments.length > 0) {
+              const firstAssignment = data.visibilityAssignments[0];
+              setEditItemPersona(firstAssignment.persona || "");
+              setEditItemFunnelStage(firstAssignment.funnelStage || "");
+            } else {
+              // Reset if no assignments
+              setEditItemPersona("");
+              setEditItemFunnelStage("");
+            }
+          }
+        })
+        .catch(err => {
+          // Ignore abort errors
+          if (err.name !== 'AbortError') {
+            console.error("Error loading assignments:", err);
+            if (editingItem?.id === currentItemId) {
+              setEditItemPersona("");
+              setEditItemFunnelStage("");
+            }
+          }
+        });
+      
+      return () => controller.abort();
+    } else {
+      // Reset when dialog closes
+      setEditItemPersona("");
+      setEditItemFunnelStage("");
+    }
+  }, [editingItem]);
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<ContentItem> }) => {
       return apiRequest("PATCH", `/api/content/${id}`, updates);
@@ -412,6 +454,7 @@ export default function AdminContentManager() {
       title: editingItem.title,
       description: editingItem.description,
       imageName: editingItem.imageName,
+      isActive: editingItem.isActive,
       metadata
     };
     
