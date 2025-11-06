@@ -293,6 +293,7 @@ export default function AdminContentManager() {
           return key?.startsWith("/api/content/type");
         }
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/content/visibility"] });
       toast({
         title: "Success",
         description: "Content updated successfully",
@@ -319,6 +320,7 @@ export default function AdminContentManager() {
           return key?.startsWith("/api/content/type");
         }
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/content/visibility"] });
       toast({
         title: "Success",
         description: "Content created successfully",
@@ -352,6 +354,7 @@ export default function AdminContentManager() {
           return key?.startsWith("/api/content/type");
         }
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/content/visibility"] });
       toast({
         title: "Success",
         description: "Content deleted successfully",
