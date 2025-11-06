@@ -666,23 +666,35 @@ export default function AdminContentManager() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-4 mb-2">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <h3 className={`font-semibold text-lg ${
-                                  !review.isActive ? "text-muted-foreground" : ""
-                                }`}>
-                                  {review.authorName}
-                                </h3>
-                                {!review.isActive && (
-                                  <Badge variant="secondary" className="text-xs flex-shrink-0 font-semibold">
-                                    <EyeOff className="w-3 h-3 mr-1" />
-                                    Hidden from website
-                                  </Badge>
-                                )}
-                                {review.isActive && (
-                                  <Badge className="text-xs flex-shrink-0 bg-primary/10 text-primary border border-primary/30 font-semibold">
+                              <h3 className={`font-semibold text-lg mb-2 ${
+                                !review.isActive ? "text-muted-foreground" : ""
+                              }`}>
+                                {review.authorName}
+                              </h3>
+                              
+                              <div className="flex flex-col gap-1 mb-2">
+                                {review.isActive ? (
+                                  <Badge 
+                                    className="text-xs flex-shrink-0 bg-primary/10 text-primary border border-primary/30 font-semibold w-fit" 
+                                    data-testid={`badge-visible-${review.id}`}
+                                  >
                                     <Eye className="w-3 h-3 mr-1" />
-                                    Visible on website
+                                    Visible
                                   </Badge>
+                                ) : (
+                                  <>
+                                    <Badge 
+                                      variant="secondary" 
+                                      className="text-xs flex-shrink-0 font-semibold w-fit" 
+                                      data-testid={`badge-not-visible-${review.id}`}
+                                    >
+                                      <EyeOff className="w-3 h-3 mr-1" />
+                                      Not visible
+                                    </Badge>
+                                    <p className="text-xs text-muted-foreground" data-testid={`text-reason-${review.id}`}>
+                                      Item is disabled
+                                    </p>
+                                  </>
                                 )}
                               </div>
                               <div className="flex items-center gap-1 mb-1">
