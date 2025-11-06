@@ -456,17 +456,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const oidcSub = req.user.claims.sub;
       const currentUser = await storage.getUserByOidcSub(oidcSub);
       
+      // Auto-rename if duplicate name exists
+      // Helper to create slug exactly as Cloudinary will, to prevent collisions
+      const createSlug = (str: string) => 
+        str.toLowerCase().trim().replace(/\s+/g, '-');
+      
+      let uniqueName = name.trim();
+      const existingImages = await storage.getAllImageAssets();
+      
+      // Create slug-based map for collision detection (matches Cloudinary public ID logic)
+      const existingSlugsMap = new Map<string, string>();
+      existingImages.forEach(img => {
+        existingSlugsMap.set(createSlug(img.name), img.name);
+      });
+      
+      const currentSlug = createSlug(uniqueName);
+      if (existingSlugsMap.has(currentSlug)) {
+        let counter = 2;
+        const baseName = uniqueName;
+        while (existingSlugsMap.has(createSlug(`${baseName} (${counter})`))) {
+          counter++;
+        }
+        uniqueName = `${baseName} (${counter})`;
+        console.log(`[Image Upload] Renamed duplicate image from "${name}" to "${uniqueName}"`);
+      }
+      
       // Upload to Cloudinary with AI upscaling
       const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
         folder: `julies-family-learning/${usage}`,
-        publicId: name.toLowerCase().replace(/\s+/g, '-'),
+        publicId: createSlug(uniqueName),
         upscale: true,
         quality: 'auto:best'
       });
 
       // Save to database
       const imageAsset = await storage.createImageAsset({
-        name,
+        name: uniqueName,
         originalFilename: req.file.originalname,
         localPath: localPath || null,
         cloudinaryPublicId: cloudinaryResult.publicId,
