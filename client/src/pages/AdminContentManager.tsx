@@ -62,7 +62,7 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
     <Card
       ref={setNodeRef}
       style={style}
-      className={item.isActive ? "" : "opacity-60"}
+      className={`w-full max-w-full ${item.isActive ? "" : "opacity-60"}`}
     >
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
@@ -85,21 +85,21 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
             </div>
           )}
 
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 mb-2">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-lg" data-testid={`text-title-${item.id}`}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h3 className="font-semibold text-lg break-words" data-testid={`text-title-${item.id}`}>
                     {item.title}
                   </h3>
                   {!item.isActive && (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs flex-shrink-0">
                       Hidden from website
                     </Badge>
                   )}
                 </div>
                 {item.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed" data-testid={`text-description-${item.id}`}>
+                  <p className="text-sm text-muted-foreground leading-relaxed break-words" data-testid={`text-description-${item.id}`}>
                     {item.description}
                   </p>
                 )}
@@ -107,20 +107,20 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
                 <ContentUsageIndicator contentId={item.id} />
                 
                 {item.imageName && item.imageName.length > 0 && (
-                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                    <ImageIcon className="w-3 h-3" />
-                    <span className="font-mono">{item.imageName}</span>
+                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1 flex-wrap">
+                    <ImageIcon className="w-3 h-3 flex-shrink-0" />
+                    <span className="font-mono break-all">{item.imageName}</span>
                   </p>
                 )}
                 {item.metadata && typeof item.metadata === 'object' && item.metadata !== null && Object.keys(item.metadata as Record<string, any>).length > 0 ? (
                   <div className="text-xs text-muted-foreground mt-2">
                     <span className="font-medium">Metadata: </span>
-                    <code className="text-xs">{JSON.stringify(item.metadata).substring(0, 100)}...</code>
+                    <code className="text-xs break-all">{JSON.stringify(item.metadata).substring(0, 100)}...</code>
                   </div>
                 ) : null}
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <Button
                   size="sm"
                   variant="ghost"
@@ -483,7 +483,7 @@ export default function AdminContentManager() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "Content Manager" }]} />
         <div className="mb-8">
           <h1 className="text-4xl font-serif font-bold mb-2">Content Manager</h1>
@@ -491,44 +491,50 @@ export default function AdminContentManager() {
             Manage all website content including services, events, testimonials, and lead magnets
           </p>
         </div>
+      </div>
 
+      <div className="w-full">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-              <TabsList className="inline-flex w-max min-w-full sm:min-w-0">
-                <TabsTrigger value="matrix" data-testid="tab-matrix" className="whitespace-nowrap">
-                  <Grid3x3 className="w-4 h-4 mr-2" />
-                  Matrix View
-                </TabsTrigger>
-                <TabsTrigger value="hero" data-testid="tab-hero" className="whitespace-nowrap">Hero ({heroContent.length})</TabsTrigger>
-                <TabsTrigger value="cta" data-testid="tab-cta" className="whitespace-nowrap">CTA ({ctaContent.length})</TabsTrigger>
-                <TabsTrigger value="service" data-testid="tab-services" className="whitespace-nowrap">Services ({services.length})</TabsTrigger>
-                <TabsTrigger value="event" data-testid="tab-events" className="whitespace-nowrap">Events ({events.length})</TabsTrigger>
-                <TabsTrigger value="testimonial" data-testid="tab-testimonials" className="whitespace-nowrap">Testimonials ({testimonials.length})</TabsTrigger>
-                <TabsTrigger value="socialMedia" data-testid="tab-social-media" className="whitespace-nowrap">Social Media ({socialMediaPosts.length})</TabsTrigger>
-                <TabsTrigger value="googleReviews" data-testid="tab-google-reviews" className="whitespace-nowrap">Google Reviews ({googleReviews.length})</TabsTrigger>
-                <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets" className="whitespace-nowrap">Lead Magnets ({leadMagnets.length})</TabsTrigger>
-              </TabsList>
-            </div>
-            
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {activeTab !== "matrix" && activeTab !== "googleReviews" && (
-                <Button
-                  onClick={() => {
-                    setNewItem({ ...newItem, type: activeTab });
-                    setIsCreateDialogOpen(true);
-                  }}
-                  data-testid="button-create-new"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create New
-                </Button>
-              )}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
+                <div className="px-4 sm:px-0">
+                  <TabsList className="inline-flex">
+                    <TabsTrigger value="matrix" data-testid="tab-matrix" className="whitespace-nowrap flex-shrink-0">
+                      <Grid3x3 className="w-4 h-4 mr-2" />
+                      Matrix View
+                    </TabsTrigger>
+                    <TabsTrigger value="hero" data-testid="tab-hero" className="whitespace-nowrap flex-shrink-0">Hero ({heroContent.length})</TabsTrigger>
+                    <TabsTrigger value="cta" data-testid="tab-cta" className="whitespace-nowrap flex-shrink-0">CTA ({ctaContent.length})</TabsTrigger>
+                    <TabsTrigger value="service" data-testid="tab-services" className="whitespace-nowrap flex-shrink-0">Services ({services.length})</TabsTrigger>
+                    <TabsTrigger value="event" data-testid="tab-events" className="whitespace-nowrap flex-shrink-0">Events ({events.length})</TabsTrigger>
+                    <TabsTrigger value="testimonial" data-testid="tab-testimonials" className="whitespace-nowrap flex-shrink-0">Testimonials ({testimonials.length})</TabsTrigger>
+                    <TabsTrigger value="socialMedia" data-testid="tab-social-media" className="whitespace-nowrap flex-shrink-0">Social Media ({socialMediaPosts.length})</TabsTrigger>
+                    <TabsTrigger value="googleReviews" data-testid="tab-google-reviews" className="whitespace-nowrap flex-shrink-0">Google Reviews ({googleReviews.length})</TabsTrigger>
+                    <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets" className="whitespace-nowrap flex-shrink-0">Lead Magnets ({leadMagnets.length})</TabsTrigger>
+                  </TabsList>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {activeTab !== "matrix" && activeTab !== "googleReviews" && (
+                  <Button
+                    onClick={() => {
+                      setNewItem({ ...newItem, type: activeTab });
+                      setIsCreateDialogOpen(true);
+                    }}
+                    data-testid="button-create-new"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
-          <TabsContent value="matrix">
-            <Card>
+          <TabsContent value="matrix" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Card className="w-full">
               <CardHeader>
                 <CardTitle>Persona × Journey Stage Matrix</CardTitle>
                 <CardDescription>
@@ -559,7 +565,7 @@ export default function AdminContentManager() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="hero">
+          <TabsContent value="hero" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {heroLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
@@ -567,7 +573,7 @@ export default function AdminContentManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="cta">
+          <TabsContent value="cta" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {ctaLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
@@ -575,7 +581,7 @@ export default function AdminContentManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="service">
+          <TabsContent value="service" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {servicesLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
@@ -583,7 +589,7 @@ export default function AdminContentManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="event">
+          <TabsContent value="event" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {eventsLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
@@ -591,7 +597,7 @@ export default function AdminContentManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="testimonial">
+          <TabsContent value="testimonial" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {testimonialsLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
@@ -599,7 +605,7 @@ export default function AdminContentManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="socialMedia">
+          <TabsContent value="socialMedia" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {socialMediaLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
@@ -607,11 +613,11 @@ export default function AdminContentManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="googleReviews">
+          <TabsContent value="googleReviews" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {googleReviewsLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : googleReviews.length === 0 ? (
-              <Card>
+              <Card className="w-full">
                 <CardContent className="text-center py-12">
                   <p className="text-muted-foreground">No Google Reviews synced yet.</p>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -624,7 +630,7 @@ export default function AdminContentManager() {
                 {googleReviews.map((review) => (
                   <Card
                     key={review.id}
-                    className={review.isActive ? "" : "opacity-60"}
+                    className={`w-full ${review.isActive ? "" : "opacity-60"}`}
                     data-testid={`google-review-card-${review.id}`}
                   >
                     <CardContent className="p-6">
@@ -712,7 +718,7 @@ export default function AdminContentManager() {
             )}
           </TabsContent>
 
-          <TabsContent value="lead_magnet">
+          <TabsContent value="lead_magnet" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {leadMagnetsLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
