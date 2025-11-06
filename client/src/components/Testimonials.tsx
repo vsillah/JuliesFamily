@@ -1,5 +1,4 @@
-import TestimonialCard from "./TestimonialCard";
-import GoogleReviewsCarousel from "./GoogleReviewsCarousel";
+import UnifiedTestimonialsCarousel from "./UnifiedTestimonialsCarousel";
 import { useQuery } from "@tanstack/react-query";
 import type { ContentItem, GoogleReview } from "@shared/schema";
 
@@ -25,10 +24,6 @@ export default function Testimonials() {
     );
   }
 
-  // Combine CMS testimonials and Google Reviews
-  const hasGoogleReviews = googleReviews.length > 0;
-  const hasTestimonials = testimonials.length > 0;
-
   return (
     <section id="testimonials" className="py-20 sm:py-32 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -44,23 +39,11 @@ export default function Testimonials() {
           </p>
         </div>
 
-        {/* CMS Testimonials */}
-        {hasTestimonials && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-            {testimonials.map((testimonial) => (
-              <TestimonialCard 
-                key={testimonial.id}
-                quote={testimonial.description || ""}
-                name={testimonial.title}
-                imageName={testimonial.imageName || ""}
-                rating={(testimonial.metadata as any)?.rating}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Google Reviews Carousel */}
-        {hasGoogleReviews && <GoogleReviewsCarousel reviews={googleReviews} />}
+        {/* Unified Testimonials Carousel - CMS + Google Reviews */}
+        <UnifiedTestimonialsCarousel 
+          cmsTestimonials={testimonials} 
+          googleReviews={googleReviews} 
+        />
       </div>
     </section>
   );
