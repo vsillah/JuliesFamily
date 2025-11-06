@@ -178,27 +178,30 @@ export default function SocialMediaCarousel() {
       )}
 
       {/* Social Media Links */}
-      <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
-        <a
-          href="https://instagram.com/juliesfamilylearning"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-primary hover:underline"
-          data-testid="link-instagram"
-        >
-          <Instagram className="w-5 h-5" />
-          <span>Follow on Instagram</span>
-        </a>
-        <a
-          href="https://www.facebook.com/Juliesfamilylearningprogram"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-primary hover:underline"
-          data-testid="link-facebook"
-        >
-          <Facebook className="w-5 h-5" />
-          <span>Follow on Facebook</span>
-        </a>
+      <div className="flex flex-col items-center justify-center gap-4 mt-8">
+        <p className="text-sm text-muted-foreground">Follow us on socials</p>
+        <div className="flex items-center gap-4">
+          <a
+            href="https://instagram.com/juliesfamilylearning"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover-elevate active-elevate-2 rounded-full p-2"
+            aria-label="Follow us on Instagram"
+            data-testid="link-instagram"
+          >
+            <Instagram className="w-6 h-6" />
+          </a>
+          <a
+            href="https://www.facebook.com/Juliesfamilylearningprogram"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover-elevate active-elevate-2 rounded-full p-2"
+            aria-label="Follow us on Facebook"
+            data-testid="link-facebook"
+          >
+            <Facebook className="w-6 h-6" />
+          </a>
+        </div>
       </div>
       </div>
     </section>
