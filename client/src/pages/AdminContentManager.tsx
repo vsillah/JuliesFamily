@@ -516,18 +516,31 @@ export default function AdminContentManager() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-4 flex-shrink-0">
                 {activeTab !== "matrix" && activeTab !== "googleReviews" && (
-                  <Button
-                    onClick={() => {
-                      setNewItem({ ...newItem, type: activeTab });
-                      setIsCreateDialogOpen(true);
-                    }}
-                    data-testid="button-create-new"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create New
-                  </Button>
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        id="show-inactive"
+                        checked={showInactive}
+                        onCheckedChange={setShowInactive}
+                        data-testid="toggle-show-inactive"
+                      />
+                      <Label htmlFor="show-inactive" className="text-sm cursor-pointer whitespace-nowrap">
+                        Show hidden items
+                      </Label>
+                    </div>
+                    <Button
+                      onClick={() => {
+                        setNewItem({ ...newItem, type: activeTab });
+                        setIsCreateDialogOpen(true);
+                      }}
+                      data-testid="button-create-new"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create New
+                    </Button>
+                  </>
                 )}
               </div>
             </div>
