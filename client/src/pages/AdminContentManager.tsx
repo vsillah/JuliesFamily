@@ -332,7 +332,7 @@ export default function AdminContentManager() {
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
-          return key?.startsWith("/api/content/type");
+          return key?.startsWith("/api/content/type") || key?.startsWith("/api/content/") && key?.includes("/usage");
         }
       });
       queryClient.invalidateQueries({ queryKey: ["/api/content/visibility"] });
@@ -359,7 +359,7 @@ export default function AdminContentManager() {
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
-          return key?.startsWith("/api/content/type");
+          return key?.startsWith("/api/content/type") || key?.startsWith("/api/content/") && key?.includes("/usage");
         }
       });
       queryClient.invalidateQueries({ queryKey: ["/api/content/visibility"] });
@@ -393,7 +393,7 @@ export default function AdminContentManager() {
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
-          return key?.startsWith("/api/content/type");
+          return key?.startsWith("/api/content/type") || key?.startsWith("/api/content/") && key?.includes("/usage");
         }
       });
       queryClient.invalidateQueries({ queryKey: ["/api/content/visibility"] });
