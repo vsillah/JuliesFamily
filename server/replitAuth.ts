@@ -62,12 +62,29 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
+  // Log claims for debugging
+  console.log("[OIDC Claims] Received claims:", JSON.stringify(claims, null, 2));
+  
+  // Extract user data from claims with fallbacks
+  // Replit Auth uses different claim names than standard OIDC
+  const email = claims["email"] || claims["preferred_username"];
+  const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(' ')[0];
+  const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(' ')[1];
+  
+  console.log("[OIDC Claims] Extracted data:", {
+    sub: claims["sub"],
+    email,
+    firstName,
+    lastName,
+    profileImageUrl: claims["profile_image_url"] || claims["picture"]
+  });
+  
   await storage.upsertUser({
     oidcSub: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
+    email: email,
+    firstName: firstName,
+    lastName: lastName,
+    profileImageUrl: claims["profile_image_url"] || claims["picture"],
     // Only set isAdmin if explicitly provided in claims, otherwise preserve existing value
     ...(claims["isAdmin"] !== undefined && { isAdmin: claims["isAdmin"] }),
   });
