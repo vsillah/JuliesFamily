@@ -217,7 +217,7 @@ export default function AdminContentManager() {
   });
 
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
-    queryKey: ["/api/google-reviews"],
+    queryKey: ["/api/google-reviews/all"],
   });
 
   const { data: images = [] } = useQuery<ImageAsset[]>({
@@ -343,6 +343,7 @@ export default function AdminContentManager() {
       return apiRequest("PATCH", `/api/google-reviews/${id}/visibility`, { isActive });
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/google-reviews/all"] });
       queryClient.invalidateQueries({ queryKey: ["/api/google-reviews"] });
     },
   });
@@ -645,7 +646,11 @@ export default function AdminContentManager() {
                 {googleReviews.map((review) => (
                   <Card
                     key={review.id}
-                    className={`w-full ${review.isActive ? "" : "opacity-60"}`}
+                    className={`w-full ${
+                      !review.isActive 
+                        ? "border-2 border-dashed border-muted-foreground/30 bg-muted/20" 
+                        : ""
+                    }`}
                     data-testid={`google-review-card-${review.id}`}
                   >
                     <CardContent className="p-6">
@@ -654,10 +659,14 @@ export default function AdminContentManager() {
                           <img
                             src={review.authorPhotoUrl}
                             alt={review.authorName}
-                            className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                            className={`w-12 h-12 rounded-full object-cover flex-shrink-0 ${
+                              !review.isActive ? "opacity-50" : ""
+                            }`}
                           />
                         ) : (
-                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                          <div className={`w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 ${
+                            !review.isActive ? "opacity-50" : ""
+                          }`}>
                             <span className="text-lg font-semibold text-primary">
                               {review.authorName.charAt(0).toUpperCase()}
                             </span>
@@ -666,14 +675,23 @@ export default function AdminContentManager() {
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-4 mb-2">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-semibold text-lg">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                <h3 className={`font-semibold text-lg ${
+                                  !review.isActive ? "text-muted-foreground" : ""
+                                }`}>
                                   {review.authorName}
                                 </h3>
                                 {!review.isActive && (
-                                  <Badge variant="secondary" className="text-xs">
+                                  <Badge variant="secondary" className="text-xs flex-shrink-0 font-semibold">
+                                    <EyeOff className="w-3 h-3 mr-1" />
                                     Hidden from website
+                                  </Badge>
+                                )}
+                                {review.isActive && (
+                                  <Badge className="text-xs flex-shrink-0 bg-primary/10 text-primary border border-primary/30 font-semibold">
+                                    <Eye className="w-3 h-3 mr-1" />
+                                    Visible on website
                                   </Badge>
                                 )}
                               </div>
@@ -698,10 +716,10 @@ export default function AdminContentManager() {
                               )}
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                               <Button
                                 size="sm"
-                                variant="ghost"
+                                variant="outline"
                                 onClick={() =>
                                   toggleGoogleReviewActiveMutation.mutate({
                                     id: review.id,
@@ -709,11 +727,21 @@ export default function AdminContentManager() {
                                   })
                                 }
                                 data-testid={`button-toggle-review-${review.id}`}
+                                aria-label={review.isActive ? "Hide from website" : "Show on website"}
+                                aria-pressed={!!review.isActive}
+                                title={review.isActive ? "Hide from website" : "Show on website"}
+                                className="gap-1.5"
                               >
                                 {review.isActive ? (
-                                  <Eye className="w-4 h-4" />
+                                  <>
+                                    <EyeOff className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Hide</span>
+                                  </>
                                 ) : (
-                                  <EyeOff className="w-4 h-4" />
+                                  <>
+                                    <Eye className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Show</span>
+                                  </>
                                 )}
                               </Button>
                             </div>
