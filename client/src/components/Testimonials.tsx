@@ -1,7 +1,7 @@
 import TestimonialCard from "./TestimonialCard";
+import GoogleReviewsCarousel from "./GoogleReviewsCarousel";
 import { useQuery } from "@tanstack/react-query";
 import type { ContentItem, GoogleReview } from "@shared/schema";
-import { Star } from "lucide-react";
 
 export default function Testimonials() {
   const { data: allTestimonials = [], isLoading: loadingCms } = useQuery<ContentItem[]>({
@@ -59,65 +59,8 @@ export default function Testimonials() {
           </div>
         )}
 
-        {/* Google Reviews Section */}
-        {hasGoogleReviews && (
-          <div className="mt-16">
-            <div className="flex items-center justify-center gap-2 mb-8">
-              <img 
-                src="https://www.gstatic.com/images/branding/product/1x/google_g_standard_color_64dp.png" 
-                alt="Google"
-                className="w-6 h-6"
-              />
-              <h3 className="text-2xl font-serif font-semibold">Google Reviews</h3>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {googleReviews.slice(0, 6).map((review) => (
-                <div 
-                  key={review.id}
-                  className="bg-card border rounded-lg p-6 hover-elevate"
-                  data-testid={`google-review-${review.id}`}
-                >
-                  <div className="flex items-start gap-4 mb-4">
-                    {review.authorPhotoUrl && (
-                      <img 
-                        src={review.authorPhotoUrl}
-                        alt={review.authorName}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-foreground">{review.authorName}</h4>
-                      <div className="flex items-center gap-1 mt-1">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < review.rating
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "fill-muted text-muted"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      {review.relativeTimeDescription && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {review.relativeTimeDescription}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {review.text && (
-                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">
-                      {review.text}
-                    </p>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Google Reviews Carousel */}
+        {hasGoogleReviews && <GoogleReviewsCarousel reviews={googleReviews} />}
       </div>
     </section>
   );
