@@ -1098,10 +1098,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "imageBase64 is required" });
       }
 
-      // Remove data URL prefix if present
+      // Extract MIME type from data URL (e.g., "data:image/png;base64,...")
+      const mimeTypeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
+      const mimeType = mimeTypeMatch ? mimeTypeMatch[1] : 'image/jpeg';
+
+      // Remove data URL prefix
       const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
 
-      const analysis = await analyzeSocialPostScreenshot(base64Data);
+      const analysis = await analyzeSocialPostScreenshot(base64Data, mimeType);
       res.json(analysis);
     } catch (error) {
       console.error("Error analyzing social post:", error);

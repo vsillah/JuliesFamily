@@ -4,7 +4,10 @@ const genAI = new GoogleGenAI({
   apiKey: process.env.GOOGLE_API_KEY!,
 });
 
-export async function analyzeSocialPostScreenshot(imageBase64: string): Promise<{
+export async function analyzeSocialPostScreenshot(
+  imageBase64: string,
+  mimeType: string = 'image/jpeg'
+): Promise<{
   caption: string;
   platform: 'instagram' | 'facebook';
   username: string;
@@ -48,7 +51,7 @@ If you cannot determine a field with confidence, use these defaults:
           { text: prompt },
           {
             inlineData: {
-              mimeType: "image/jpeg",
+              mimeType: mimeType,
               data: imageBase64,
             },
           },
