@@ -27,6 +27,7 @@ interface PersonaMatrixGridProps {
   visibilitySettings: ContentVisibility[];
   images: ImageAsset[];
   abTests: AbTest[];
+  onCreateContent?: (contentType: string, persona: Persona, stage: FunnelStage) => void;
 }
 
 export interface SelectedCard {
@@ -40,7 +41,8 @@ export default function PersonaMatrixGrid({
   contentItems, 
   visibilitySettings, 
   images,
-  abTests 
+  abTests,
+  onCreateContent
 }: PersonaMatrixGridProps) {
   const [selectedCard, setSelectedCard] = useState<SelectedCard | null>(null);
   const [selectedPersonas, setSelectedPersonas] = useState<Set<Persona>>(new Set(PERSONAS));
@@ -202,7 +204,13 @@ export default function PersonaMatrixGrid({
                   images={images}
                   abTests={abTests}
                   onCardClick={(contentType: any, contentItem: any) => {
-                    setSelectedCard({ persona, stage, contentType, contentItem });
+                    if (!contentItem && onCreateContent) {
+                      // If no content exists and we have a create handler, trigger creation
+                      onCreateContent(contentType, persona, stage);
+                    } else {
+                      // Otherwise, open edit panel
+                      setSelectedCard({ persona, stage, contentType, contentItem });
+                    }
                   }}
                   isSelected={
                     selectedCard?.persona === persona && 

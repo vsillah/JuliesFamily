@@ -450,6 +450,27 @@ export default function AdminContentManager() {
     createMutation.mutate(payload);
   };
 
+  const handleCreateFromMatrix = (contentType: string, persona: Persona, stage: FunnelStage) => {
+    // Reset newItem with the selected type
+    setNewItem({
+      type: contentType,
+      title: "",
+      description: "",
+      imageName: "",
+      metadata: contentType === 'socialMedia' ? { platform: 'instagram' } : contentType === 'video' ? { videoId: '', category: 'student_story' } : {}
+    });
+    
+    // Pre-fill persona and journey stage
+    setNewItemPersona(persona);
+    setNewItemFunnelStage(stage);
+    
+    // Open create dialog
+    setIsCreateDialogOpen(true);
+    
+    // Switch to the appropriate tab
+    setActiveTab(contentType);
+  };
+
   const handleScreenshotAnalysis = async (file: File, isEdit: boolean = false) => {
     setIsAnalyzing(true);
     try {
@@ -725,6 +746,7 @@ export default function AdminContentManager() {
                   visibilitySettings={allVisibilitySettings}
                   images={images}
                   abTests={allAbTests}
+                  onCreateContent={handleCreateFromMatrix}
                 />
               </CardContent>
             </Card>

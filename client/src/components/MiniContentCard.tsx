@@ -7,7 +7,8 @@ import {
   Gift,
   FlaskConical,
   CheckCircle2,
-  Circle
+  Circle,
+  Plus
 } from "lucide-react";
 import type { ContentItem, ContentVisibility, ImageAsset } from "@shared/schema";
 import type { Persona, FunnelStage } from "@shared/defaults/personas";
@@ -83,6 +84,36 @@ export default function MiniContentCard({
   // Get title for display - prioritize overrides, then persona × stage defaults, then content item
   const title = visibility?.titleOverride || getDefaultTitle();
 
+  // If no content item exists, show create button
+  if (!contentItem) {
+    return (
+      <button
+        onClick={onClick}
+        className="w-full bg-background border-2 border-dashed border-muted-foreground/30 rounded-md p-1 hover-elevate active-elevate-2 transition-all text-left relative group"
+        data-testid={`mini-card-create-${contentType}`}
+      >
+        {/* Create Icon */}
+        <div className="aspect-square mb-1 rounded overflow-hidden bg-muted/50 flex flex-col items-center justify-center gap-1">
+          <Plus className="w-5 h-5 text-muted-foreground" />
+          <Icon className={`w-4 h-4 ${config.color}`} />
+        </div>
+
+        {/* Title */}
+        <div className="text-xs font-medium text-muted-foreground truncate mb-1" title={`Create ${config.label}`}>
+          Create {config.label}
+        </div>
+
+        {/* Status indicator */}
+        <div className="flex items-center gap-1">
+          <Circle className="w-3 h-3 text-muted-foreground/30" />
+          <span className="text-xs text-muted-foreground">
+            None
+          </span>
+        </div>
+      </button>
+    );
+  }
+
   return (
     <button
       onClick={onClick}
@@ -119,13 +150,11 @@ export default function MiniContentCard({
       <div className="flex items-center gap-1">
         {isCustomized ? (
           <CheckCircle2 className="w-3 h-3 text-green-500" />
-        ) : contentItem ? (
-          <Circle className="w-3 h-3 text-muted-foreground" />
         ) : (
-          <Circle className="w-3 h-3 text-muted-foreground/30" />
+          <Circle className="w-3 h-3 text-muted-foreground" />
         )}
         <span className="text-xs text-muted-foreground">
-          {isCustomized ? 'Custom' : contentItem ? 'Default' : 'None'}
+          {isCustomized ? 'Custom' : 'Default'}
         </span>
       </div>
     </button>
