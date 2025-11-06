@@ -45,16 +45,9 @@ export default function ContentUsageIndicator({ contentId }: ContentUsageIndicat
   const completedTests = abTests.filter(test => test.status === 'completed');
   const draftTests = abTests.filter(test => test.status === 'draft');
 
-  // No usage at all
+  // No usage badges to show (consolidated badge handles visibility status)
   if (visibilityAssignments.length === 0 && abTests.length === 0) {
-    return (
-      <div className="flex items-center gap-1.5 mt-2">
-        <Badge variant="secondary" className="text-xs">
-          <Eye className="w-3 h-3 mr-1" />
-          Not Used
-        </Badge>
-      </div>
-    );
+    return null;
   }
 
   // Format visibility assignments for display

@@ -17,6 +17,7 @@ import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Up
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
+import ConsolidatedVisibilityBadge from "@/components/ConsolidatedVisibilityBadge";
 import {
   DndContext,
   closestCenter,
@@ -88,25 +89,14 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-4 mb-2">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <h3 className={`font-semibold text-lg break-words ${!item.isActive ? "text-muted-foreground" : ""}`} data-testid={`text-title-${item.id}`}>
-                    {item.title}
-                  </h3>
-                  {!item.isActive && (
-                    <Badge variant="secondary" className="text-xs flex-shrink-0 font-semibold" data-testid={`badge-hidden-${item.id}`}>
-                      <EyeOff className="w-3 h-3 mr-1" />
-                      Hidden from website
-                    </Badge>
-                  )}
-                  {item.isActive && (
-                    <Badge className="text-xs flex-shrink-0 bg-primary/10 text-primary border border-primary/30 font-semibold" data-testid={`badge-visible-${item.id}`}>
-                      <Eye className="w-3 h-3 mr-1" />
-                      Visible on website
-                    </Badge>
-                  )}
-                </div>
+                <h3 className={`font-semibold text-lg break-words mb-2 ${!item.isActive ? "text-muted-foreground" : ""}`} data-testid={`text-title-${item.id}`}>
+                  {item.title}
+                </h3>
+                
+                <ConsolidatedVisibilityBadge contentId={item.id} isActive={item.isActive} />
+                
                 {item.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed break-words" data-testid={`text-description-${item.id}`}>
+                  <p className="text-sm text-muted-foreground leading-relaxed break-words mt-2" data-testid={`text-description-${item.id}`}>
                     {item.description}
                   </p>
                 )}
