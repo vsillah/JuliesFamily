@@ -28,7 +28,8 @@ The frontend is a single-page application using `wouter` for client-side routing
 - **Lead Details Dialog with Outreach**: A comprehensive dialog for lead management, displaying contact information, engagement scores, notes, interaction history, and outreach suggestions.
 - **User Management System**: An admin-only interface for managing user accounts and privileges, including searchable tables and secure access controls.
 - **User Guide System**: Provides public documentation for visitors ("How It Works" page) and protected documentation for administrators ("Admin Guide") covering various system functionalities.
-- **Google Reviews Integration**: Automated fetching and display of authentic Google business reviews, with admin visibility controls and SEO-optimized JSON-LD schema markup.
+- **Google Reviews Integration**: Automated fetching and display of authentic Google business reviews with responsive carousel (1/2/3 reviews per viewport), admin visibility controls, and SEO-optimized JSON-LD schema markup.
+- **Social Media Feed**: Instagram-style grid for displaying curated social media posts with responsive layout (1/2/3 columns per viewport), graceful handling of posts without images, and Content Manager integration.
 
 ### System Design Choices
 The backend is built with Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data storage uses PostgreSQL (Neon serverless) via Drizzle ORM, with a defined schema for various entities including users, sessions, leads, content, and A/B tests. Authentication and authorization are handled by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage, secure cookies, and protected routes. User IDs are immutable, and an `isAdmin` flag controls access to administrative features. Content is publicly accessible, with authentication optional for future features.

@@ -131,7 +131,7 @@ export type ImageAsset = typeof imageAssets.$inferSelect;
 // Content Items table for managing editable cards across the site
 export const contentItems = pgTable("content_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta'
+  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia'
   title: text("title").notNull(),
   description: text("description"),
   imageName: varchar("image_name"), // Cloudinary image name

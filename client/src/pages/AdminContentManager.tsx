@@ -188,6 +188,10 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/type/cta"],
   });
 
+  const { data: socialMediaPosts = [], isLoading: socialMediaLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/socialMedia"],
+  });
+
   const { data: images = [] } = useQuery<ImageAsset[]>({
     queryKey: ["/api/admin/images"],
   });
@@ -481,6 +485,7 @@ export default function AdminContentManager() {
               <TabsTrigger value="service" data-testid="tab-services">Services ({services.length})</TabsTrigger>
               <TabsTrigger value="event" data-testid="tab-events">Events ({events.length})</TabsTrigger>
               <TabsTrigger value="testimonial" data-testid="tab-testimonials">Testimonials ({testimonials.length})</TabsTrigger>
+              <TabsTrigger value="socialMedia" data-testid="tab-social-media">Social Media ({socialMediaPosts.length})</TabsTrigger>
               <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets">Lead Magnets ({leadMagnets.length})</TabsTrigger>
             </TabsList>
             
@@ -580,6 +585,14 @@ export default function AdminContentManager() {
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
               renderContentList(testimonials, "testimonial")
+            )}
+          </TabsContent>
+
+          <TabsContent value="socialMedia">
+            {socialMediaLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : (
+              renderContentList(socialMediaPosts, "socialMedia")
             )}
           </TabsContent>
 
