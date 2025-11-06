@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter } from "lucide-react";
@@ -87,9 +88,16 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
           <div className="flex-1">
             <div className="flex items-start justify-between gap-4 mb-2">
               <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-1" data-testid={`text-title-${item.id}`}>
-                  {item.title}
-                </h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-lg" data-testid={`text-title-${item.id}`}>
+                    {item.title}
+                  </h3>
+                  {!item.isActive && (
+                    <Badge variant="secondary" className="text-xs">
+                      Hidden from website
+                    </Badge>
+                  )}
+                </div>
                 {item.description && (
                   <p className="text-sm text-muted-foreground leading-relaxed" data-testid={`text-description-${item.id}`}>
                     {item.description}
@@ -433,13 +441,11 @@ export default function AdminContentManager() {
   };
 
   const renderContentList = (items: ContentItem[], type: string) => {
-    // Filter items based on showInactive toggle
-    const filteredItems = showInactive ? items : items.filter(item => item.isActive);
-    
-    if (filteredItems.length === 0) {
+    // Always show all items, use visual styling to indicate inactive ones
+    if (items.length === 0) {
       return (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No {type}s found{!showInactive ? " (try showing inactive items)" : ""}. {showInactive ? "Create your first one!" : ""}</p>
+          <p>No {type}s found. Create your first one!</p>
         </div>
       );
     }
@@ -448,14 +454,14 @@ export default function AdminContentManager() {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        onDragEnd={(event) => handleDragEnd(event, filteredItems, type)}
+        onDragEnd={(event) => handleDragEnd(event, items, type)}
       >
         <SortableContext
-          items={filteredItems.map(item => item.id)}
+          items={items.map(item => item.id)}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-4">
-            {filteredItems.map((item) => (
+            {items.map((item) => (
               <SortableContentCard
                 key={item.id}
                 item={item}
@@ -504,28 +510,17 @@ export default function AdminContentManager() {
             </TabsList>
             
             <div className="flex items-center gap-2">
-              {activeTab !== "matrix" && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowInactive(!showInactive)}
-                    data-testid="button-toggle-inactive"
-                  >
-                    <Filter className="w-4 h-4 mr-2" />
-                    {showInactive ? "Hide" : "Show"} Inactive
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setNewItem({ ...newItem, type: activeTab });
-                      setIsCreateDialogOpen(true);
-                    }}
-                    data-testid="button-create-new"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create New
-                  </Button>
-                </>
+              {activeTab !== "matrix" && activeTab !== "googleReviews" && (
+                <Button
+                  onClick={() => {
+                    setNewItem({ ...newItem, type: activeTab });
+                    setIsCreateDialogOpen(true);
+                  }}
+                  data-testid="button-create-new"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New
+                </Button>
               )}
             </div>
           </div>
@@ -649,9 +644,16 @@ export default function AdminContentManager() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-4 mb-2">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-lg mb-1">
-                                {review.authorName}
-                              </h3>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-lg">
+                                  {review.authorName}
+                                </h3>
+                                {!review.isActive && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    Hidden from website
+                                  </Badge>
+                                )}
+                              </div>
                               <div className="flex items-center gap-1 mb-1">
                                 {Array.from({ length: 5 }).map((_, i) => (
                                   <span
