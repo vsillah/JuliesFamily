@@ -73,19 +73,19 @@ export default function PersonalizedLeadMagnet() {
   // Get the first matching lead magnet (highest priority)
   const leadMagnet = leadMagnets[0];
   
-  // Fallback UI for critical persona/stage combinations
+  // Fallback UI - ONLY when no DB data is returned
   if (!leadMagnet) {
-    // Student awareness - always show quiz as fallback
+    // Student awareness fallback - only if DB has no data
     if (persona === "student" && funnelStage === "awareness") {
       return <StudentReadinessQuiz />;
     }
     
-    // Volunteer awareness - always show match quiz as fallback
+    // Volunteer awareness fallback - only if DB has no data
     if (persona === "volunteer" && funnelStage === "awareness") {
       return <VolunteerMatchQuiz />;
     }
     
-    // Parent awareness - show checklist as fallback
+    // Parent awareness fallback - only if DB has no data
     if (persona === "parent" && funnelStage === "awareness") {
       const fallbackLeadMagnet: ContentItem = {
         id: 0,
@@ -101,25 +101,26 @@ export default function PersonalizedLeadMagnet() {
     return null; // No lead magnet for other persona/stage combinations
   }
 
+  // DB data exists - render based on leadMagnetType in metadata
   const metadata = leadMagnet.metadata as any;
   const leadMagnetType = metadata?.leadMagnetType || "pdf";
   const leadMagnetId = leadMagnet.title.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
-  // Special handling for quiz types
+  // Render quiz types (DB-driven)
   if (leadMagnetType === "quiz") {
-    // Student Readiness Quiz
-    if (persona === "student" && funnelStage === "awareness") {
+    // Determine which quiz based on title or persona
+    if (leadMagnet.title.includes("Student") || leadMagnet.title.includes("Perfect Program")) {
       return <StudentReadinessQuiz />;
     }
-
-    // Volunteer Match Quiz
-    if (persona === "volunteer" && funnelStage === "awareness") {
+    if (leadMagnet.title.includes("Volunteer")) {
       return <VolunteerMatchQuiz />;
     }
+    // Default quiz rendering if title doesn't match
+    return <StudentReadinessQuiz />;
   }
 
-  // Special handling for checklist type
-  if (leadMagnetType === "checklist" && persona === "parent" && funnelStage === "awareness") {
+  // Render checklist types (DB-driven)
+  if (leadMagnetType === "checklist") {
     return <SchoolReadinessChecklist leadMagnet={leadMagnet} />;
   }
 
