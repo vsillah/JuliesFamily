@@ -4,7 +4,7 @@ import Services from "@/components/Services";
 import PersonalizedLeadMagnet from "@/components/PersonalizedLeadMagnet";
 import ImpactStats from "@/components/ImpactStats";
 import Testimonials from "@/components/Testimonials";
-import SocialMediaFeed from "@/components/SocialMediaFeed";
+import SocialMediaCarousel from "@/components/SocialMediaCarousel";
 import Events from "@/components/Events";
 import DonationCTA from "@/components/DonationCTA";
 import Sponsors from "@/components/Sponsors";
@@ -95,7 +95,7 @@ export default function Home() {
 
       <ImpactStats />
       <Testimonials />
-      <SocialMediaFeed />
+      <SocialMediaCarousel />
       <Events />
       <DonationCTA />
       <Sponsors />
