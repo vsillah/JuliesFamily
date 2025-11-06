@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Instagram } from "lucide-react";
+import { ChevronLeft, ChevronRight, Instagram, Facebook } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ContentItem } from "@shared/schema";
 
@@ -69,55 +69,65 @@ export default function SocialMediaCarousel() {
   return (
     <section className="py-20 sm:py-32 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Header with Instagram branding */}
-      <div className="flex items-center justify-center gap-2 mb-8">
-        <Instagram className="w-6 h-6 text-[#E4405F]" />
-        <h3 className="text-2xl font-serif font-semibold">Follow Our Journey</h3>
+      {/* Header */}
+      <div className="text-center mb-8">
+        <h3 className="text-2xl font-serif font-semibold">Join us on socials</h3>
+        <p className="text-muted-foreground text-sm mt-1">Stay connected with our community</p>
       </div>
 
       {/* Carousel */}
       <div className="relative">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-4">
-            {validPosts.map((post) => (
-              <div
-                key={post.id}
-                className="flex-[0_0_100%] sm:flex-[0_0_calc(50%-0.5rem)] lg:flex-[0_0_calc(33.333%-0.667rem)] min-w-0"
-                data-testid={`social-post-${post.id}`}
-              >
-                <div className="bg-card border rounded-lg overflow-hidden hover-elevate h-full aspect-square flex flex-col">
-                  {/* Image */}
-                  {post.imageName ? (
-                    <div className="relative flex-1 flex flex-col">
-                      <img
-                        src={`https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${post.imageName}`}
-                        alt={post.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                      {/* Caption overlay on bottom */}
-                      {post.description && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm p-4">
-                          <p className="text-white text-sm line-clamp-2">
+            {validPosts.map((post) => {
+              const platform = (post.metadata as any)?.platform || 'instagram';
+              const PlatformIcon = platform === 'facebook' ? Facebook : Instagram;
+              
+              return (
+                <div
+                  key={post.id}
+                  className="flex-[0_0_100%] sm:flex-[0_0_calc(50%-0.5rem)] lg:flex-[0_0_calc(33.333%-0.667rem)] min-w-0"
+                  data-testid={`social-post-${post.id}`}
+                >
+                  <div className="bg-card border rounded-lg overflow-hidden hover-elevate h-full aspect-square flex flex-col relative">
+                    {/* Platform badge */}
+                    <div className="absolute top-3 right-3 z-10 bg-white/90 dark:bg-black/90 backdrop-blur-sm rounded-full p-2 shadow-md">
+                      <PlatformIcon className="w-4 h-4 text-primary" data-testid={`icon-platform-${platform}`} />
+                    </div>
+                    
+                    {/* Image */}
+                    {post.imageName ? (
+                      <div className="relative flex-1 flex flex-col">
+                        <img
+                          src={`https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${post.imageName}`}
+                          alt={post.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        {/* Caption overlay on bottom */}
+                        {post.description && (
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm p-4">
+                            <p className="text-white text-sm line-clamp-2">
+                              {post.description}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      // Placeholder when no image - show title and description
+                      <div className="flex flex-col items-center justify-center p-6 text-center h-full bg-muted/30">
+                        <h4 className="font-semibold text-lg mb-2">{post.title}</h4>
+                        {post.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-4">
                             {post.description}
                           </p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    // Placeholder when no image - show title and description
-                    <div className="flex flex-col items-center justify-center p-6 text-center h-full bg-muted/30">
-                      <h4 className="font-semibold text-lg mb-2">{post.title}</h4>
-                      {post.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-4">
-                          {post.description}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -167,17 +177,27 @@ export default function SocialMediaCarousel() {
         </div>
       )}
 
-      {/* Instagram Link */}
-      <div className="text-center mt-8">
+      {/* Social Media Links */}
+      <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
         <a
           href="https://instagram.com/juliesfamilylearning"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-primary hover:underline inline-flex items-center gap-2"
+          className="inline-flex items-center gap-2 text-primary hover:underline"
           data-testid="link-instagram"
         >
-          <Instagram className="w-4 h-4" />
-          Follow us on Instagram
+          <Instagram className="w-5 h-5" />
+          <span>Follow on Instagram</span>
+        </a>
+        <a
+          href="https://www.facebook.com/Juliesfamilylearningprogram"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-primary hover:underline"
+          data-testid="link-facebook"
+        >
+          <Facebook className="w-5 h-5" />
+          <span>Follow on Facebook</span>
         </a>
       </div>
       </div>
