@@ -2,79 +2,40 @@
 
 ## Overview
 
-This non-profit website for Julie's Family Learning Program, a family support, wellness, and education center, showcases educational programs, impact, testimonials, events, and facilitates donations/volunteering. It's a full-stack web application with a React frontend (shadcn/ui) and an Express backend, designed with a warm, approachable aesthetic, elegant serif typography (Playfair Display) for headlines, and clean sans-serif fonts (Inter) for body text. Key ambitions include a persona-based personalization system, a CRM for lead capture and tracking, and a secure user profile system with photo uploads.
+Julie's Family Learning Program website is a non-profit, full-stack web application designed to showcase educational programs, impact, testimonials, and events. It facilitates donations and volunteering efforts. The platform features a React frontend with shadcn/ui and an Express backend, aiming for a warm and approachable aesthetic. Key ambitions include a persona-based personalization system, a CRM for lead capture, and a secure user profile system with photo uploads. The project seeks to enhance user engagement and streamline administrative tasks.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
-## Development Guidelines
-
-### Content Manager Navigation Integration
-
-**Critical**: When making changes to the Content Manager (personas, journey stages, content assignments, visibility settings), always verify:
-
-1. **Navigation paths** - Hero CTAs, card action buttons, and section links must route to the correct destinations based on visible content
-2. **Card layouts** - Service cards, testimonial cards, event cards should display properly with new content configurations
-3. **Action button redirects** - CTAs on cards must navigate to appropriate sections for each persona×journey combination
-
-**Implementation**: Navigation should be **dynamic and data-driven**, not hardcoded. The system queries `contentVisibility` settings to determine which sections are available for the current persona and funnel stage, then automatically routes to visible content with intelligent fallbacks.
-
 ## System Architecture
 
-### Frontend Architecture
+### UI/UX Decisions
+The website uses a React 18 frontend with TypeScript and Vite. Styling is handled by Tailwind CSS with custom CSS variables for theming, supporting light/dark modes. WCAG AA compliant colors are used, featuring a warm orange/golden primary, olive/khaki green secondary, and warm beige backgrounds. Typography includes Playfair Display (serif) for headlines and Inter (sans-serif) for body text. The UI component library is shadcn/ui on Radix UI, utilizing the "New York" style. Responsive design is a critical aspect, ensuring proper display across mobile, tablet, and desktop viewports, with a strong emphasis on preventing horizontal overflow. Dynamic and data-driven navigation is implemented, querying `contentVisibility` settings for persona and funnel stage-based routing.
 
-**Framework**: React 18 with TypeScript and Vite.
-**Routing**: wouter for client-side routing.
-**UI Component Library**: shadcn/ui on Radix UI, using "New York" style.
-**Styling**: Tailwind CSS, custom CSS variables for theming (light/dark mode), WCAG AA compliant colors (primary warm orange/golden, secondary olive/khaki green, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text.
-**State Management**: TanStack Query for server state, React hooks for local state.
-**Key Features**:
-- Single-page application, responsive design.
-- **Persona-Based Personalization System (November 2025)**: 5 distinct personas (Adult Education Student, Service Provider, Parent, Donor, Volunteer) with database persistence for authenticated users and session storage for unauthenticated users. Delivers personalized hero sections, dynamic content reordering, adaptive messaging, and a persona selection modal. Authenticated users' persona preferences are stored in the database and maintained across sessions; unauthenticated users see a selection modal on first visit with preferences stored in sessionStorage.
-- **Admin Preview Mode (November 2025)**: Administrators can switch between personas and funnel stages to preview the site from different user perspectives. Uses session storage with admin-specific override keys. Includes visual indicator showing current preview state and one-click reset to default view.
-- **Personalized Lead Magnets (November 2025)**: Dynamic lead magnet system delivering 10 unique offers based on persona and funnel stage (TOFU/MOFU). Each persona receives tailored content at Awareness and Consideration stages, including interactive quizzes, checklists, and downloadable guides. All lead magnets integrate with the CRM for lead tracking.
-- **Image Assets**: 8 unique, authentic images strategically matched to content sections.
-- **Parallax System**: Smooth parallax effects on hero background, service/event card images, and Donation CTA using `requestAnimationFrame`.
-- **Hero Section Enhancements**: Text fade-in animation, semi-transparent shade for readability over images.
-- **CRM Components (November 2025)**: Lead capture form with persona and funnel stage tracking, and an Admin Dashboard for lead management and analytics.
-- **Profile Photo Upload System (November 2025)**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited upload URLs and ACLs. Uses token-based authentication for secure upload validation.
-- **Content Management System (November 2025)**: Full-featured CMS allowing admins to manage all website content (services, events, testimonials, lead magnets) with image selection, visibility controls, drag-and-drop reordering, and show/hide inactive items filter. Integrates with Cloudinary for AI-powered image upscaling and optimization. Each content card displays usage indicators showing where the content is actively being used: persona/funnel stage visibility assignments and A/B test status (active, paused, draft, completed) with detailed tooltips for transparency.
-- **Persona×Journey Matrix Grid (November 2025)**: Visual content configuration interface displaying all 120 permutations (5 personas × 4 stages × 6 content types) in an always-visible 5×4 grid layout. Each cell contains 6 mini-cards showing thumbnails, customization status, and A/B test variant counts. Features inline editing panel with image upload/selection, title/description overrides, and A/B test variant management. Uses visibility settings to correctly resolve and display persona-stage-specific content assignments.
-- **A/B Testing System (November 2025)**: Comprehensive experimentation platform for testing different card configurations, layouts, messaging, and CTAs. Features include weighted variant assignment, session-based tracking, conversion metrics, statistical significance calculation, and detailed analytics dashboards. Supports persona and funnel stage targeting for granular testing. Statistical significance uses two-tailed z-test with Abramowitz-Stegun approximation for accurate p-value calculation (95% confidence threshold at z ≥ 1.96). **Dual-mode variant creation** (November 2025): Admins can create test variants by either selecting existing Content Manager items OR creating custom variants inline with dedicated form fields for images, titles, descriptions, and CTA button text. Custom variants are automatically saved to Content Manager for reusability and centralized management. **Enhanced content selection** (November 2025): Content selection dropdowns display detailed information including title, truncated description, image name, and unique ID suffix to help distinguish similar items. Real-time duplicate title validation warns users when creating custom content with names that already exist, promoting unique naming conventions.
-- **Breadcrumb Navigation (November 2025)**: Hierarchical navigation system across all admin pages showing the current location and providing quick access to parent pages. Includes proper ARIA labels, hover states, and semantic markup for accessibility.
-- **Lead Details Dialog with Outreach (November 2025)**: Comprehensive lead management dialog displaying full contact information, persona, funnel stage, engagement score, editable notes, complete interaction history, and funnel-stage-specific outreach action suggestions. Provides guided outreach capabilities with placeholder integration points for future email/SMS automation via SendGrid, Resend, or Twilio.
-- **User Management System (November 2025)**: Admin-only interface for managing user accounts and admin privileges. Features include searchable user table displaying name, email, and admin status; one-click admin privilege granting/revocation with confirmation dialogs; safety features preventing admins from removing their own access (disabled button with helper text); real-time updates using TanStack Query; backend validation ensuring secure admin-only access.
-- **User Guide System (November 2025)**: Comprehensive documentation for both visitors and administrators. **How It Works page** (/how-it-works) is publicly accessible and explains the personalized experience, profiles five personas, outlines involvement pathways (enrollment, donation, volunteering, events), and includes a 9-question FAQ covering programs, services, and support. **Admin Guide** (/admin/guide) is protected and accessible only to admin users, featuring tabbed documentation for Content Management (adding content, reordering, usage indicators, image management), A/B Testing (creating tests, status lifecycle, result interpretation), Lead Management (scoring system, follow-up strategies, notes), and User Permissions (granting/revoking access, admin capabilities). Both guides are accessible via navigation links (visitor nav for How It Works, admin dashboard header for Admin Guide) and include quick links to relevant features.
-- **Google Reviews Integration (November 2025)**: Automated integration with Google Places API to fetch and display authentic business reviews. Admin-only sync endpoint fetches up to 5 most recent reviews and caches them in PostgreSQL database. Public endpoint serves active reviews to Testimonials section alongside CMS testimonials. Features include visibility controls for admins to hide specific reviews, responsive card layout with author photos/names/ratings/text, and SEO-optimized JSON-LD schema markup (Organization with aggregateRating and individual Review objects) for enhanced search visibility with star ratings. Reviews display Google branding and are limited to 6 most recent for optimal page performance.
+### Technical Implementations
+The frontend is a single-page application using `wouter` for client-side routing. State management relies on TanStack Query for server state and React hooks for local state. Key features include:
+- **Persona-Based Personalization System**: Delivers personalized content, hero sections, and messaging based on 5 distinct personas, with preferences stored in the database for authenticated users and session storage for unauthenticated users.
+- **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives.
+- **Personalized Lead Magnets**: A dynamic system delivering 10 unique offers tailored to persona and funnel stage, integrated with the CRM.
+- **Parallax System**: Smooth parallax effects on various page elements.
+- **CRM Components**: Lead capture forms with tracking and an Admin Dashboard for lead management.
+- **Profile Photo Upload System**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage with secure, time-limited URLs.
+- **Content Management System (CMS)**: A full-featured CMS for managing all website content, including images, visibility controls, drag-and-drop reordering, and integration with Cloudinary for image optimization.
+- **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations, enabling inline editing and A/B test variant management.
+- **A/B Testing System**: A comprehensive platform for testing content, layouts, messaging, and CTAs, supporting weighted variant assignment, session-based tracking, and detailed analytics with statistical significance calculations. It supports dual-mode variant creation (existing CM items or custom inline variants) and enhanced content selection with real-time duplicate title validation.
+- **Breadcrumb Navigation**: Hierarchical navigation across all admin pages for improved accessibility and usability.
+- **Lead Details Dialog with Outreach**: A comprehensive dialog for lead management, displaying contact information, engagement scores, notes, interaction history, and outreach suggestions.
+- **User Management System**: An admin-only interface for managing user accounts and privileges, including searchable tables and secure access controls.
+- **User Guide System**: Provides public documentation for visitors ("How It Works" page) and protected documentation for administrators ("Admin Guide") covering various system functionalities.
+- **Google Reviews Integration**: Automated fetching and display of authentic Google business reviews, with admin visibility controls and SEO-optimized JSON-LD schema markup.
 
-### Backend Architecture
-
-**Framework**: Express.js on Node.js with TypeScript.
-**Storage Pattern**: Interface-based abstraction with PostgreSQL (Neon serverless) via Drizzle ORM.
-**API Design**: RESTful API endpoints (`/api`), JSON format, with session support. Includes object storage endpoints for signed upload URLs and private object serving with ACL checks.
-
-### Data Storage
-
-**ORM**: Drizzle ORM for PostgreSQL (Neon serverless).
-**Schema**: `shared/schema.ts` includes `users`, `sessions`, `leads`, `interactions`, `lead_magnets`, `imageAssets`, `contentItems`, `contentVisibility`, `abTests`, `abTestVariants`, `abTestAssignments`, and `abTestEvents` tables with Zod validation.
-**Migration Strategy**: Drizzle Kit for schema management and push-based deployment.
-
-### Authentication & Authorization
-
-**Implementation**: Replit Auth with OpenID Connect (November 2025).
-**Architecture**: Passport.js with per-domain OIDC strategies, PostgreSQL session storage (`connect-pg-simple`), automatic access token refresh, secure cookies, and protected routes.
-**Authentication Flow**: Standard OAuth flow with user upsert (using email as conflict target) into the database and session creation.
-**Session Persistence**: Cookie security set to 'auto' to work with Replit's HTTPS proxy, with 'trust proxy' enabled. CSP headers from infrastructure are removed to allow legitimate external resources (Google Fonts, Cloudinary CDN).
-**User IDs**: User IDs are immutable once created and always use the OIDC sub (subject) as the canonical identifier. The upsertUser function updates name and profile data but never changes the ID to avoid foreign key constraint violations.
-**Admin Features**: Admin users (identified by `isAdmin` flag) can access additional features including the Admin Dashboard and Preview Mode for testing personalized content.
-**Public Access**: Website content is publicly accessible; authentication is optional for future features.
-**Supported OAuth Providers**: Google, GitHub, X, Apple, Email/password (via Replit Auth).
+### System Design Choices
+The backend is built with Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data storage uses PostgreSQL (Neon serverless) via Drizzle ORM, with a defined schema for various entities including users, sessions, leads, content, and A/B tests. Authentication and authorization are handled by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage, secure cookies, and protected routes. User IDs are immutable, and an `isAdmin` flag controls access to administrative features. Content is publicly accessible, with authentication optional for future features.
 
 ## External Dependencies
 
 ### UI Framework & Components
-
 - **Radix UI**: Accessible UI primitives.
 - **shadcn/ui**: Pre-built components.
 - **Lucide React**: Icon library.
@@ -82,35 +43,26 @@ Preferred communication style: Simple, everyday language.
 - **tailwind-merge & clsx**: Tailwind class utilities.
 
 ### Data Fetching & State Management
-
 - **TanStack Query**: Server state management.
 - **React Hook Form**: Form state management with resolvers.
 
 ### Database & ORM
-
 - **Drizzle ORM**: TypeScript ORM.
 - **@neondatabase/serverless**: Neon PostgreSQL driver.
 - **connect-pg-simple**: PostgreSQL session store.
 
-### Development Tools
-
-- **Vite**: Frontend build tool.
-- **esbuild**: Backend bundling.
-- **tsx**: TypeScript execution.
-- **TypeScript**: Type safety.
-
 ### Replit-Specific Tools
-
 - **@replit/vite-plugin-runtime-error-modal**: Error overlay.
 - **@replit/vite-plugin-cartographer**: Code navigation.
 - **@replit/vite-plugin-dev-banner**: Development indicator.
 
 ### Fonts & Typography
-
 - **Google Fonts**: Playfair Display and Inter.
 
 ### Utility Libraries
-
 - **date-fns**: Date manipulation.
 - **nanoid**: Unique ID generation.
 - **zod**: Schema validation.
+- **Uppy**: Profile photo upload system.
+- **Cloudinary**: Image upscaling and optimization (integrated with CMS).
+- **Google Places API**: For fetching business reviews.
