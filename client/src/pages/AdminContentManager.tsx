@@ -493,23 +493,25 @@ export default function AdminContentManager() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="flex justify-between items-center">
-            <TabsList>
-              <TabsTrigger value="matrix" data-testid="tab-matrix">
-                <Grid3x3 className="w-4 h-4 mr-2" />
-                Matrix View
-              </TabsTrigger>
-              <TabsTrigger value="hero" data-testid="tab-hero">Hero ({heroContent.length})</TabsTrigger>
-              <TabsTrigger value="cta" data-testid="tab-cta">CTA ({ctaContent.length})</TabsTrigger>
-              <TabsTrigger value="service" data-testid="tab-services">Services ({services.length})</TabsTrigger>
-              <TabsTrigger value="event" data-testid="tab-events">Events ({events.length})</TabsTrigger>
-              <TabsTrigger value="testimonial" data-testid="tab-testimonials">Testimonials ({testimonials.length})</TabsTrigger>
-              <TabsTrigger value="socialMedia" data-testid="tab-social-media">Social Media ({socialMediaPosts.length})</TabsTrigger>
-              <TabsTrigger value="googleReviews" data-testid="tab-google-reviews">Google Reviews ({googleReviews.length})</TabsTrigger>
-              <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets">Lead Magnets ({leadMagnets.length})</TabsTrigger>
-            </TabsList>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+              <TabsList className="inline-flex w-max min-w-full sm:min-w-0">
+                <TabsTrigger value="matrix" data-testid="tab-matrix" className="whitespace-nowrap">
+                  <Grid3x3 className="w-4 h-4 mr-2" />
+                  Matrix View
+                </TabsTrigger>
+                <TabsTrigger value="hero" data-testid="tab-hero" className="whitespace-nowrap">Hero ({heroContent.length})</TabsTrigger>
+                <TabsTrigger value="cta" data-testid="tab-cta" className="whitespace-nowrap">CTA ({ctaContent.length})</TabsTrigger>
+                <TabsTrigger value="service" data-testid="tab-services" className="whitespace-nowrap">Services ({services.length})</TabsTrigger>
+                <TabsTrigger value="event" data-testid="tab-events" className="whitespace-nowrap">Events ({events.length})</TabsTrigger>
+                <TabsTrigger value="testimonial" data-testid="tab-testimonials" className="whitespace-nowrap">Testimonials ({testimonials.length})</TabsTrigger>
+                <TabsTrigger value="socialMedia" data-testid="tab-social-media" className="whitespace-nowrap">Social Media ({socialMediaPosts.length})</TabsTrigger>
+                <TabsTrigger value="googleReviews" data-testid="tab-google-reviews" className="whitespace-nowrap">Google Reviews ({googleReviews.length})</TabsTrigger>
+                <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets" className="whitespace-nowrap">Lead Magnets ({leadMagnets.length})</TabsTrigger>
+              </TabsList>
+            </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {activeTab !== "matrix" && activeTab !== "googleReviews" && (
                 <Button
                   onClick={() => {
