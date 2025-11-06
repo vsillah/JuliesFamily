@@ -71,12 +71,16 @@ async function upsertUser(
   const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(' ')[0];
   const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(' ')[1];
   
+  // Handle isAdmin flag from claims (both camelCase and snake_case)
+  const isAdmin = claims["isAdmin"] !== undefined ? claims["isAdmin"] : claims["is_admin"];
+  
   console.log("[OIDC Claims] Extracted data:", {
     sub: claims["sub"],
     email,
     firstName,
     lastName,
-    profileImageUrl: claims["profile_image_url"] || claims["picture"]
+    profileImageUrl: claims["profile_image_url"] || claims["picture"],
+    isAdmin
   });
   
   await storage.upsertUser({
@@ -86,7 +90,7 @@ async function upsertUser(
     lastName: lastName,
     profileImageUrl: claims["profile_image_url"] || claims["picture"],
     // Only set isAdmin if explicitly provided in claims, otherwise preserve existing value
-    ...(claims["isAdmin"] !== undefined && { isAdmin: claims["isAdmin"] }),
+    ...(isAdmin !== undefined && { isAdmin: isAdmin }),
   });
 }
 
