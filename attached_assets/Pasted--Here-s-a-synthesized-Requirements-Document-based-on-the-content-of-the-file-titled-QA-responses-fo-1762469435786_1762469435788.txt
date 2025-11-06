@@ -1,0 +1,123 @@
+
+Here’s a synthesized Requirements Document based on the content of the file titled “QA responses for Fidelity team.docx”. This document outlines the functional, technical, and strategic needs for a redesigned website for Julie’s Family Learning Program (JFLP).
+
+Website Redesign Requirements Document
+
+1. Project Overview
+
+Julie’s Family Learning Program (JFLP) seeks to redesign its current WordPress website to better serve its core audiences, improve usability, enhance storytelling, and support fundraising and outreach efforts. The current site is outdated, difficult to manage, and lacks integration with internal systems.
+
+2. Target Audiences & Personas
+
+Donors
+Individual and corporate/foundation donors
+Wishlist donors (food, clothes, equipment)
+Adult Learners
+Ages 16+, seeking high school equivalency via ABE or FD programs
+Referral Partners
+Organizations referring adult learners
+Volunteers
+Tutors, interns, corporate groups
+Community Members
+Alumni, Boston Public School parents, workforce development participants
+3. Program Areas & Web Pages
+
+Adult Education
+ABE and FD program details
+Intake process and interest form
+Children’s Services
+Early childhood education (3 months – 5 years)
+Boston Pre-K partnership
+Workforce Development
+ESOL, digital literacy, alumni services
+4. User Journeys & Lifecycle
+
+Donors
+Discover via events, social media, or outreach
+Donate via website → receive automated email → manual database entry → hard copy thank-you
+Adult Learners
+Mostly in-person or phone/text intake
+Small percentage via embedded website form
+Volunteers
+Discover via website or college partnerships
+Submit interest form → contacted by Volunteer Coordinator
+5. Website Goals
+
+Primary Goals
+Fundraising
+Outreach to prospective students and referral sources
+Secondary Goals
+Volunteer coordination
+Storytelling and engagement
+Integration with CRM and internal systems
+6. Communication Ecosystem
+
+Channels
+Social Media: Facebook, Instagram, LinkedIn, YouTube (1–2 posts/week)
+Email: E-news, appeals, event invites (1–4/month)
+Print: Direct mail, gala invitations, annual reports
+Segmentation
+Minimal segmentation; most communications go to full list
+Direct communication for enrolled students and volunteers
+7. Technical & Platform Requirements
+
+Current Platform: WordPress
+Desired Features
+Easy-to-update CMS
+CRM integration (DonorPerfect or similar)
+Embedded and accessible interest forms
+Improved image handling and design layout
+Mobile responsiveness
+Design Preferences
+Empowering, modern, clean aesthetic
+Student stories and virtual donor tour
+Canva-compatible assets
+Staff Capacity
+Limited: ~2 hours/week
+No full-time communications staff
+Trainable staff with limited technical expertise
+External Support
+Currently using a consultant (technical but not design-focused)
+Open to replacing consultant
+8. Analytics & Reporting
+
+Current Use: No analytics in place
+Desired Capabilities
+Basic website performance metrics
+Donation tracking
+Form submission tracking
+Recommendations welcome
+9. Design & Collaboration Tools
+
+Preferred Tools
+Microsoft Office 365
+Canva
+Not Used
+Figma (not currently part of workflow)
+10. Success Metrics
+
+Website
+Increased donor retention and acquisition
+Improved user experience and accessibility
+Higher form submission rates
+Programs
+Adult Learner outcomes tracked via LACES
+Children’s Services tracked via educator assessments and parent reviews
+Would you like this formatted into a downloadable document (e.g., Word or PDF)? Or would you like to add specific technical specs or design inspirations to this requirements doc?
+
+ 
+
+ 
+
+Vambah Sillah (he|him|his)
+
+Fidelity Institutional
+
+Director, CoE Product Strategy and Execution
+
+vambah.sillah@fmr.com
+
+“Pursue something so important that even if you fail, the world is better off with you having tried” – Tim O’Reilly
+
+ 
+
