@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
@@ -441,27 +441,42 @@ export default function AdminContentManager() {
   };
 
   const renderContentList = (items: ContentItem[], type: string) => {
-    // Always show all items, use visual styling to indicate inactive ones
-    if (items.length === 0) {
+    // Filter items based on showInactive toggle
+    const filteredItems = showInactive ? items : items.filter(item => item.isActive);
+    
+    if (filteredItems.length === 0) {
       return (
         <div className="text-center py-12 text-muted-foreground">
-          <p>No {type}s found. Create your first one!</p>
+          {items.length === 0 ? (
+            <p>No {type}s found. Create your first one!</p>
+          ) : (
+            <p>All {type}s are hidden. Toggle "Show hidden items" to see them.</p>
+          )}
         </div>
       );
     }
 
+    // Only enable drag-and-drop when showing all items to prevent order corruption
+    const enableDragDrop = showInactive;
+
     return (
       <DndContext
-        sensors={sensors}
+        sensors={enableDragDrop ? sensors : []}
         collisionDetection={closestCenter}
         onDragEnd={(event) => handleDragEnd(event, items, type)}
       >
         <SortableContext
-          items={items.map(item => item.id)}
+          items={filteredItems.map(item => item.id)}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-4">
-            {items.map((item) => (
+            {!enableDragDrop && filteredItems.length < items.length && (
+              <div className="bg-muted/50 px-4 py-3 rounded-md text-sm text-muted-foreground flex items-center gap-2">
+                <Info className="w-4 h-4 flex-shrink-0" />
+                <span>Drag-and-drop reordering is disabled when hidden items are excluded. Toggle "Show hidden items" to reorder.</span>
+              </div>
+            )}
+            {filteredItems.map((item) => (
               <SortableContentCard
                 key={item.id}
                 item={item}
