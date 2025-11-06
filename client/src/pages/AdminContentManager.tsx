@@ -1213,6 +1213,12 @@ export default function AdminContentManager() {
                     <p className="text-xs text-muted-foreground mt-1">
                       Paste a YouTube URL or just the video ID
                     </p>
+                    <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md">
+                      <p className="text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                        <span className="text-base">⚠️</span>
+                        <span><strong>Note:</strong> YouTube Shorts often have embedding restrictions and may not display properly. For best results, use regular YouTube videos (not /shorts/ URLs).</span>
+                      </p>
+                    </div>
                   </div>
 
                   <div>
@@ -1595,6 +1601,12 @@ export default function AdminContentManager() {
                   <p className="text-xs text-muted-foreground mt-1">
                     Paste a YouTube URL or just the video ID
                   </p>
+                  <div className="mt-2 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-md">
+                    <p className="text-xs text-amber-800 dark:text-amber-200 flex items-start gap-2">
+                      <span className="text-base">⚠️</span>
+                      <span><strong>Note:</strong> YouTube Shorts often have embedding restrictions and may not display properly. For best results, use regular YouTube videos (not /shorts/ URLs).</span>
+                    </p>
+                  </div>
                 </div>
 
                 <div>
