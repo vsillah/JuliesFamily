@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { ContentItem, ImageAsset, ContentVisibility, AbTest } from "@shared/schema";
+import type { ContentItem, ImageAsset, ContentVisibility, AbTest, GoogleReview } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -192,6 +192,10 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/type/socialMedia"],
   });
 
+  const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
+    queryKey: ["/api/google-reviews"],
+  });
+
   const { data: images = [] } = useQuery<ImageAsset[]>({
     queryKey: ["/api/admin/images"],
   });
@@ -307,6 +311,15 @@ export default function AdminContentManager() {
           return key?.startsWith("/api/content/type");
         }
       });
+    },
+  });
+
+  const toggleGoogleReviewActiveMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      return apiRequest("PATCH", `/api/google-reviews/${id}/visibility`, { isActive });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/google-reviews"] });
     },
   });
 
@@ -486,6 +499,7 @@ export default function AdminContentManager() {
               <TabsTrigger value="event" data-testid="tab-events">Events ({events.length})</TabsTrigger>
               <TabsTrigger value="testimonial" data-testid="tab-testimonials">Testimonials ({testimonials.length})</TabsTrigger>
               <TabsTrigger value="socialMedia" data-testid="tab-social-media">Social Media ({socialMediaPosts.length})</TabsTrigger>
+              <TabsTrigger value="googleReviews" data-testid="tab-google-reviews">Google Reviews ({googleReviews.length})</TabsTrigger>
               <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets">Lead Magnets ({leadMagnets.length})</TabsTrigger>
             </TabsList>
             
@@ -593,6 +607,104 @@ export default function AdminContentManager() {
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
               renderContentList(socialMediaPosts, "socialMedia")
+            )}
+          </TabsContent>
+
+          <TabsContent value="googleReviews">
+            {googleReviewsLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : googleReviews.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <p className="text-muted-foreground">No Google Reviews synced yet.</p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Sync reviews from the Dashboard to manage them here.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-3">
+                {googleReviews.map((review) => (
+                  <Card
+                    key={review.id}
+                    className={review.isActive ? "" : "opacity-60"}
+                    data-testid={`google-review-card-${review.id}`}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        {review.authorPhotoUrl ? (
+                          <img
+                            src={review.authorPhotoUrl}
+                            alt={review.authorName}
+                            className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-lg font-semibold text-primary">
+                              {review.authorName.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-2">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-lg mb-1">
+                                {review.authorName}
+                              </h3>
+                              <div className="flex items-center gap-1 mb-1">
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                  <span
+                                    key={i}
+                                    className={`text-sm ${
+                                      i < review.rating
+                                        ? "text-yellow-400"
+                                        : "text-muted"
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                              {review.relativeTimeDescription && (
+                                <p className="text-xs text-muted-foreground">
+                                  {review.relativeTimeDescription}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() =>
+                                  toggleGoogleReviewActiveMutation.mutate({
+                                    id: review.id,
+                                    isActive: !review.isActive,
+                                  })
+                                }
+                                data-testid={`button-toggle-review-${review.id}`}
+                              >
+                                {review.isActive ? (
+                                  <Eye className="w-4 h-4" />
+                                ) : (
+                                  <EyeOff className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+
+                          {review.text && (
+                            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+                              {review.text}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
           </TabsContent>
 
