@@ -679,8 +679,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create content item (admin)
   app.post('/api/content', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const validatedData = insertContentItemSchema.parse(req.body);
+      const { persona, funnelStage, ...contentData } = req.body;
+      const validatedData = insertContentItemSchema.parse(contentData);
       const item = await storage.createContentItem(validatedData);
+      
+      // If persona and funnelStage are provided, create a visibility record
+      if (persona && funnelStage) {
+        try {
+          await storage.createContentVisibility({
+            contentItemId: item.id,
+            persona,
+            funnelStage,
+            isVisible: true
+          });
+        } catch (visError) {
+          console.error("Error creating visibility record:", visError);
+          // Don't fail the whole request if visibility creation fails
+        }
+      }
+      
       res.status(201).json(item);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -694,10 +711,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update content item (admin)
   app.patch('/api/content/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const item = await storage.updateContentItem(req.params.id, req.body);
+      const { persona, funnelStage, ...contentData } = req.body;
+      const item = await storage.updateContentItem(req.params.id, contentData);
       if (!item) {
         return res.status(404).json({ message: "Content item not found" });
       }
+      
+      // If persona and funnelStage are provided, create or update visibility record
+      if (persona && funnelStage) {
+        try {
+          // Check if visibility record already exists for this combo
+          const allVis = await storage.getAllContentVisibility();
+          const existingVis = allVis.find(
+            (v: any) => v.contentItemId === req.params.id && v.persona === persona && v.funnelStage === funnelStage
+          );
+          
+          if (existingVis) {
+            await storage.updateContentVisibility(existingVis.id, { isVisible: true });
+          } else {
+            await storage.createContentVisibility({
+              contentItemId: req.params.id,
+              persona,
+              funnelStage,
+              isVisible: true
+            });
+          }
+        } catch (visError) {
+          console.error("Error updating visibility record:", visError);
+          // Don't fail the whole request if visibility update fails
+        }
+      }
+      
       res.json(item);
     } catch (error) {
       console.error("Error updating content item:", error);

@@ -18,6 +18,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
 import ConsolidatedVisibilityBadge from "@/components/ConsolidatedVisibilityBadge";
+import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS, type Persona, type FunnelStage } from "@shared/defaults/personas";
 import {
   DndContext,
   closestCenter,
@@ -218,6 +219,10 @@ export default function AdminContentManager() {
     imageName: "",
     metadata: {} as any
   });
+  const [newItemPersona, setNewItemPersona] = useState<Persona | "">(""); 
+  const [newItemFunnelStage, setNewItemFunnelStage] = useState<FunnelStage | "">(""); 
+  const [editItemPersona, setEditItemPersona] = useState<Persona | "">(""); 
+  const [editItemFunnelStage, setEditItemFunnelStage] = useState<FunnelStage | "">("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
 
@@ -400,14 +405,22 @@ export default function AdminContentManager() {
       };
     }
     
+    const updates: any = {
+      title: editingItem.title,
+      description: editingItem.description,
+      imageName: editingItem.imageName,
+      metadata
+    };
+    
+    // Add persona and funnel stage assignment if selected
+    if (editItemPersona && editItemFunnelStage) {
+      updates.persona = editItemPersona;
+      updates.funnelStage = editItemFunnelStage;
+    }
+    
     updateMutation.mutate({
       id: editingItem.id,
-      updates: {
-        title: editingItem.title,
-        description: editingItem.description,
-        imageName: editingItem.imageName,
-        metadata
-      }
+      updates
     });
   };
 
@@ -427,7 +440,14 @@ export default function AdminContentManager() {
       };
     }
     
-    createMutation.mutate(itemToCreate);
+    // Add persona and funnel stage assignment if selected
+    const payload: any = itemToCreate;
+    if (newItemPersona && newItemFunnelStage) {
+      payload.persona = newItemPersona;
+      payload.funnelStage = newItemFunnelStage;
+    }
+    
+    createMutation.mutate(payload);
   };
 
   const handleScreenshotAnalysis = async (file: File, isEdit: boolean = false) => {
@@ -1231,6 +1251,62 @@ export default function AdminContentManager() {
                 />
                 <Label>Active (visible on website)</Label>
               </div>
+              
+              {/* Persona & Journey Stage Assignment (for all content types) */}
+              <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <Label className="text-sm font-semibold">Visibility Assignment (Optional)</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Assign this content to a specific persona and journey stage. Leave blank to manually assign later in the Matrix Grid.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="edit-assign-persona">Persona</Label>
+                    <Select
+                      value={editItemPersona || "none"}
+                      onValueChange={(value) => setEditItemPersona(value === "none" ? "" : value as Persona)}
+                    >
+                      <SelectTrigger id="edit-assign-persona" data-testid="select-edit-assign-persona">
+                        <SelectValue placeholder="Select persona..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Not assigned</SelectItem>
+                        {PERSONAS.map((persona) => (
+                          <SelectItem key={persona} value={persona}>
+                            {PERSONA_LABELS[persona]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-assign-stage">Journey Stage</Label>
+                    <Select
+                      value={editItemFunnelStage || "none"}
+                      onValueChange={(value) => setEditItemFunnelStage(value === "none" ? "" : value as FunnelStage)}
+                    >
+                      <SelectTrigger id="edit-assign-stage" data-testid="select-edit-assign-stage">
+                        <SelectValue placeholder="Select stage..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Not assigned</SelectItem>
+                        {FUNNEL_STAGES.map((stage) => (
+                          <SelectItem key={stage} value={stage}>
+                            {FUNNEL_STAGE_LABELS[stage]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              
               <div className="flex gap-2 justify-end pt-4">
                 <Button variant="outline" onClick={() => setEditingItem(null)} data-testid="button-cancel-edit">
                   Cancel
@@ -1533,6 +1609,61 @@ export default function AdminContentManager() {
                 </div>
               </>
             )}
+            
+            {/* Persona & Journey Stage Assignment (for all content types) */}
+            <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+              <div className="flex items-start gap-2">
+                <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <Label className="text-sm font-semibold">Visibility Assignment (Optional)</Label>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Assign this content to a specific persona and journey stage. Leave blank to manually assign later in the Matrix Grid.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="create-assign-persona">Persona</Label>
+                  <Select
+                    value={newItemPersona || "none"}
+                    onValueChange={(value) => setNewItemPersona(value === "none" ? "" : value as Persona)}
+                  >
+                    <SelectTrigger id="create-assign-persona" data-testid="select-create-assign-persona">
+                      <SelectValue placeholder="Select persona..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Not assigned</SelectItem>
+                      {PERSONAS.map((persona) => (
+                        <SelectItem key={persona} value={persona}>
+                          {PERSONA_LABELS[persona]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="create-assign-stage">Journey Stage</Label>
+                  <Select
+                    value={newItemFunnelStage || "none"}
+                    onValueChange={(value) => setNewItemFunnelStage(value === "none" ? "" : value as FunnelStage)}
+                  >
+                    <SelectTrigger id="create-assign-stage" data-testid="select-create-assign-stage">
+                      <SelectValue placeholder="Select stage..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Not assigned</SelectItem>
+                      {FUNNEL_STAGES.map((stage) => (
+                        <SelectItem key={stage} value={stage}>
+                          {FUNNEL_STAGE_LABELS[stage]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
             
             <div className="flex gap-2 justify-end pt-4">
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} data-testid="button-cancel-create">
