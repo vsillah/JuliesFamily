@@ -86,17 +86,17 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
             </div>
           )}
 
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-4 mb-2">
-              <div className="flex-1 min-w-0">
-                <h3 className={`font-semibold text-lg break-words mb-2 ${!item.isActive ? "text-muted-foreground" : ""}`} data-testid={`text-title-${item.id}`}>
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-2">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <h3 className={`font-semibold text-lg mb-2 break-normal ${!item.isActive ? "text-muted-foreground" : ""}`} data-testid={`text-title-${item.id}`}>
                   {item.title}
                 </h3>
                 
                 <ConsolidatedVisibilityBadge contentId={item.id} isActive={item.isActive} />
                 
                 {item.description && (
-                  <p className="text-sm text-muted-foreground leading-relaxed break-words mt-2" data-testid={`text-description-${item.id}`}>
+                  <p className="text-sm text-muted-foreground leading-relaxed mt-2 break-normal" data-testid={`text-description-${item.id}`}>
                     {item.description}
                   </p>
                 )}
@@ -663,10 +663,10 @@ export default function AdminContentManager() {
                           </div>
                         )}
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4 mb-2">
-                            <div className="flex-1 min-w-0">
-                              <h3 className={`font-semibold text-lg mb-2 ${
+                        <div className="flex-1 min-w-0 overflow-hidden">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-2">
+                            <div className="flex-1 min-w-0 overflow-hidden">
+                              <h3 className={`font-semibold text-lg mb-2 break-normal ${
                                 !review.isActive ? "text-muted-foreground" : ""
                               }`}>
                                 {review.authorName}
@@ -750,7 +750,7 @@ export default function AdminContentManager() {
                           </div>
 
                           {review.text && (
-                            <p className="text-sm text-muted-foreground leading-relaxed mt-2">
+                            <p className="text-sm text-muted-foreground leading-relaxed mt-2 break-normal">
                               {review.text}
                             </p>
                           )}
