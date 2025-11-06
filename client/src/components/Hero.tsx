@@ -159,13 +159,13 @@ export default function Hero() {
       </div>
       
       {/* Horizontal shade between image and text with gradient edges */}
-      <div className="absolute inset-0 flex items-center justify-center z-[5]">
+      <div className="absolute inset-0 z-[5]">
         <div 
-          className={`w-full h-[400px] sm:h-[500px] bg-gradient-to-b from-transparent via-black/50 to-transparent transition-opacity duration-1000 ${
+          className={`absolute inset-0 transition-opacity duration-1000 ${
             shadeVisible ? 'opacity-100' : 'opacity-0'
           }`}
           style={{
-            backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 12%, rgba(0,0,0,0.50) 25%, rgba(0,0,0,0.50) 75%, transparent 88%, transparent 100%)'
+            backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.50) 70%, transparent 85%, transparent 100%)'
           }}
         />
       </div>
