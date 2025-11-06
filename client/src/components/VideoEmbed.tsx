@@ -55,7 +55,7 @@ export function VideoEmbed({
         id={extractedId}
         title={title}
         poster={poster}
-        noCookie={true}
+        noCookie={false}
       />
     </div>
   );
