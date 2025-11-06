@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 const genAI = new GoogleGenAI({
   apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+  baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL || undefined,
 });
 
 export async function analyzeSocialPostScreenshot(imageBase64: string): Promise<{
