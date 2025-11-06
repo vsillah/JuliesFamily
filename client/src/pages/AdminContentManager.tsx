@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
@@ -102,6 +102,25 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
                 )}
                 
                 <ContentUsageIndicator contentId={item.id} />
+                
+                {/* Platform indicator for social media posts */}
+                {item.type === 'socialMedia' && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Badge variant="outline" className="text-xs">
+                      {((item.metadata as any)?.platform ?? 'instagram') === 'facebook' ? (
+                        <>
+                          <Facebook className="w-3 h-3 mr-1" />
+                          Facebook
+                        </>
+                      ) : (
+                        <>
+                          <Instagram className="w-3 h-3 mr-1" />
+                          Instagram
+                        </>
+                      )}
+                    </Badge>
+                  </div>
+                )}
                 
                 {item.imageName && item.imageName.length > 0 && (
                   <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1 flex-wrap">
@@ -340,19 +359,28 @@ export default function AdminContentManager() {
 
   const handleSaveEdit = () => {
     if (!editingItem) return;
+    
+    const metadata = editingItem.type === 'socialMedia' 
+      ? { ...(editingItem.metadata || {}), platform: (editingItem.metadata as any)?.platform || 'instagram' }
+      : editingItem.metadata;
+    
     updateMutation.mutate({
       id: editingItem.id,
       updates: {
         title: editingItem.title,
         description: editingItem.description,
         imageName: editingItem.imageName,
-        metadata: editingItem.metadata
+        metadata
       }
     });
   };
 
   const handleCreate = () => {
-    createMutation.mutate(newItem);
+    const itemToCreate = newItem.type === 'socialMedia'
+      ? { ...newItem, metadata: { ...newItem.metadata, platform: (newItem.metadata as any)?.platform || 'instagram' } }
+      : newItem;
+    
+    createMutation.mutate(itemToCreate);
   };
 
   const uploadImageMutation = useMutation<ImageAsset, Error, FormData>({
@@ -876,6 +904,28 @@ export default function AdminContentManager() {
                   </div>
                 </div>
               </div>
+              {/* Social Media specific fields */}
+              {editingItem.type === 'socialMedia' && (
+                <div>
+                  <Label htmlFor="edit-platform">Platform</Label>
+                  <Select
+                    value={(editingItem.metadata as any)?.platform || "instagram"}
+                    onValueChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), platform: value } })}
+                  >
+                    <SelectTrigger id="edit-platform" data-testid="select-edit-platform">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="instagram">Instagram</SelectItem>
+                      <SelectItem value="facebook">Facebook</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Select which platform this post is from
+                  </p>
+                </div>
+              )}
+              
               {/* Hero/CTA specific fields */}
               {(editingItem.type === 'hero' || editingItem.type === 'cta') && (
                 <>
@@ -1075,6 +1125,28 @@ export default function AdminContentManager() {
                 </div>
               </div>
             </div>
+            
+            {/* Social Media specific fields for create */}
+            {activeTab === 'socialMedia' && (
+              <div>
+                <Label htmlFor="create-platform">Platform</Label>
+                <Select
+                  value={(newItem.metadata as any)?.platform || "instagram"}
+                  onValueChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), platform: value } })}
+                >
+                  <SelectTrigger id="create-platform" data-testid="select-create-platform">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="instagram">Instagram</SelectItem>
+                    <SelectItem value="facebook">Facebook</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select which platform this post is from
+                </p>
+              </div>
+            )}
             
             {/* Hero/CTA specific fields for create */}
             {(activeTab === 'hero' || activeTab === 'cta') && (
