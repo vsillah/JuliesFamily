@@ -9,7 +9,7 @@ export async function analyzeSocialPostScreenshot(
   mimeType: string = 'image/jpeg'
 ): Promise<{
   caption: string;
-  platform: 'instagram' | 'facebook';
+  platform: 'instagram' | 'facebook' | 'linkedin';
   username: string;
   suggestedTitle: string;
   suggestedLink: string;
@@ -18,13 +18,19 @@ export async function analyzeSocialPostScreenshot(
   const prompt = `You are analyzing a screenshot of a social media post. Extract the following information:
 
 1. **Caption/Description**: The full text content of the post
-2. **Platform**: Whether this is from Instagram or Facebook (look for visual indicators like interface design, icons, etc.)
-3. **Username**: The account name/handle that posted this
+2. **Platform**: Whether this is from Instagram, Facebook, or LinkedIn (look for visual indicators like interface design, icons, colors, layout, etc.)
+3. **Username**: The account name/handle or company name that posted this
 4. **Suggested Title**: Create a short, descriptive title (max 60 characters) that summarizes what this post is about
-5. **Link**: If visible, extract any links mentioned in the post. If the username is visible, construct a profile link.
+5. **Link**: If visible, extract any links mentioned in the post. If the username/company name is visible, construct a profile link.
 
 For Instagram: https://instagram.com/{username}
 For Facebook: https://www.facebook.com/{username}
+For LinkedIn: https://linkedin.com/company/{company-name}
+
+Visual platform indicators:
+- Instagram: Camera icon, colorful gradient theme, square/portrait photos
+- Facebook: Blue theme, "f" logo, reactions icons (Like, Love, etc.)
+- LinkedIn: Blue and white professional theme, "in" logo, corporate/professional content
 
 Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
 {
@@ -73,10 +79,17 @@ If you cannot determine a field with confidence, use these defaults:
   try {
     const parsed = JSON.parse(cleanedResponse);
     
-    // Validate and provide defaults
+    // Validate platform and provide defaults
+    let platform: 'instagram' | 'facebook' | 'linkedin' = 'instagram';
+    if (parsed.platform === 'facebook') {
+      platform = 'facebook';
+    } else if (parsed.platform === 'linkedin') {
+      platform = 'linkedin';
+    }
+    
     return {
       caption: parsed.caption || "",
-      platform: (parsed.platform === 'facebook' ? 'facebook' : 'instagram') as 'instagram' | 'facebook',
+      platform,
       username: parsed.username || "",
       suggestedTitle: parsed.suggestedTitle || "Social Media Post",
       suggestedLink: parsed.suggestedLink || "",
