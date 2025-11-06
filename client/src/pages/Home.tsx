@@ -4,6 +4,7 @@ import Services from "@/components/Services";
 import PersonalizedLeadMagnet from "@/components/PersonalizedLeadMagnet";
 import ImpactStats from "@/components/ImpactStats";
 import Testimonials from "@/components/Testimonials";
+import { StudentStoriesCarousel } from "@/components/StudentStoriesCarousel";
 import SocialMediaCarousel from "@/components/SocialMediaCarousel";
 import Events from "@/components/Events";
 import DonationCTA from "@/components/DonationCTA";
@@ -95,6 +96,7 @@ export default function Home() {
 
       <ImpactStats />
       <Testimonials />
+      <StudentStoriesCarousel />
       <SocialMediaCarousel />
       <Events />
       <DonationCTA />

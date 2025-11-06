@@ -131,6 +131,15 @@ export default function Navigation() {
               >
                 Events
               </button>
+              <Link 
+                href="/virtual-tour"
+                className={`transition-colors duration-300 ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
+                data-testid="link-virtual-tour"
+              >
+                Virtual Tour
+              </Link>
               {currentPersonaConfig && (
                 <button
                   onClick={() => setShowPersonaModal(true)}
@@ -288,6 +297,14 @@ export default function Navigation() {
             >
               Events
             </button>
+            <Link 
+              href="/virtual-tour"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-lg text-foreground hover:text-primary transition-colors"
+              data-testid="link-virtual-tour-mobile"
+            >
+              Virtual Tour
+            </Link>
             <Button variant="default" size="lg" data-testid="button-donate-mobile">
               Donate Now
             </Button>
