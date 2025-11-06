@@ -327,12 +327,20 @@ export default function Navigation() {
               </Button>
             )}
             {user?.isAdmin && (
-              <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" size="lg" data-testid="button-admin-dashboard-mobile">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Admin
-                </Button>
-              </Link>
+              <>
+                <div className="w-full flex justify-center">
+                  <AdminPersonaSwitcher 
+                    isScrolled={true} 
+                    onOpenDialog={() => setMobileMenuOpen(false)}
+                  />
+                </div>
+                <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" size="lg" data-testid="button-admin-dashboard-mobile">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Admin
+                  </Button>
+                </Link>
+              </>
             )}
             {isAuthenticated ? (
               <Button 

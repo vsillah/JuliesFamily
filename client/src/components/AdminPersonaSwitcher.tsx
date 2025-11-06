@@ -41,9 +41,10 @@ const ADMIN_FUNNEL_KEY = "admin-funnel-override";
 
 interface AdminPersonaSwitcherProps {
   isScrolled?: boolean;
+  onOpenDialog?: () => void;
 }
 
-export function AdminPersonaSwitcher({ isScrolled = false }: AdminPersonaSwitcherProps) {
+export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: AdminPersonaSwitcherProps) {
   const { user } = useAuth();
   const { persona, setPersona } = usePersona();
   const [showDialog, setShowDialog] = useState(false);
@@ -114,7 +115,10 @@ export function AdminPersonaSwitcher({ isScrolled = false }: AdminPersonaSwitche
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setShowDialog(true)}
+          onClick={() => {
+            onOpenDialog?.();
+            setShowDialog(true);
+          }}
           data-testid="button-admin-persona-switcher"
           className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
         >
