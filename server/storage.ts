@@ -365,7 +365,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(contentItems)
-      .where(and(eq(contentItems.type, type), eq(contentItems.isActive, true)))
+      .where(eq(contentItems.type, type))
       .orderBy(contentItems.order);
   }
 
