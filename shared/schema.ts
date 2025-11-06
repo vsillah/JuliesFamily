@@ -131,13 +131,13 @@ export type ImageAsset = typeof imageAssets.$inferSelect;
 // Content Items table for managing editable cards across the site
 export const contentItems = pgTable("content_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia'
+  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review'
   title: text("title").notNull(),
   description: text("description"),
   imageName: varchar("image_name"), // Cloudinary image name
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
-  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, etc
+  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, etc
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

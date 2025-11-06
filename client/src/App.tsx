@@ -7,6 +7,7 @@ import { PersonaProvider } from "@/contexts/PersonaContext";
 import PersonaSelectionModal from "@/components/PersonaSelectionModal";
 import Home from "@/pages/Home";
 import HowItWorks from "@/pages/HowItWorks";
+import VirtualTour from "@/pages/VirtualTour";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminGuide from "@/pages/AdminGuide";
 import AdminImages from "@/pages/AdminImages";
@@ -22,6 +23,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/how-it-works" component={HowItWorks} />
+      <Route path="/virtual-tour" component={VirtualTour} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/guide" component={AdminGuide} />
       <Route path="/admin/images" component={AdminImages} />

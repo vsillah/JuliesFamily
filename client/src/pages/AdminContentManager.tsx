@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
@@ -127,6 +127,23 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
                   </div>
                 )}
                 
+                {/* Category indicator for videos */}
+                {item.type === 'video' && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Badge variant="outline" className="text-xs">
+                      <VideoIcon className="w-3 h-3 mr-1" />
+                      {((item.metadata as any)?.category === 'virtual_tour') ? 'Virtual Tour' : 
+                       ((item.metadata as any)?.category === 'program_highlight') ? 'Program Highlight' : 
+                       'Student Story'}
+                    </Badge>
+                    {(item.metadata as any)?.videoId && (
+                      <code className="text-xs bg-muted px-1 py-0.5 rounded">
+                        ID: {(item.metadata as any)?.videoId}
+                      </code>
+                    )}
+                  </div>
+                )}
+                
                 {item.imageName && item.imageName.length > 0 && (
                   <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1 flex-wrap">
                     <ImageIcon className="w-3 h-3 flex-shrink-0" />
@@ -230,6 +247,10 @@ export default function AdminContentManager() {
 
   const { data: socialMediaPosts = [], isLoading: socialMediaLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/socialMedia"],
+  });
+
+  const { data: videos = [], isLoading: videosLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/video"],
   });
 
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
@@ -367,9 +388,17 @@ export default function AdminContentManager() {
   const handleSaveEdit = () => {
     if (!editingItem) return;
     
-    const metadata = editingItem.type === 'socialMedia' 
-      ? { ...(editingItem.metadata || {}), platform: (editingItem.metadata as any)?.platform || 'instagram' }
-      : editingItem.metadata;
+    let metadata = editingItem.metadata;
+    
+    if (editingItem.type === 'socialMedia') {
+      metadata = { ...(editingItem.metadata || {}), platform: (editingItem.metadata as any)?.platform || 'instagram' };
+    } else if (editingItem.type === 'video') {
+      metadata = { 
+        ...(editingItem.metadata || {}), 
+        videoId: (editingItem.metadata as any)?.videoId || '',
+        category: (editingItem.metadata as any)?.category || 'student_story'
+      };
+    }
     
     updateMutation.mutate({
       id: editingItem.id,
@@ -383,9 +412,20 @@ export default function AdminContentManager() {
   };
 
   const handleCreate = () => {
-    const itemToCreate = newItem.type === 'socialMedia'
-      ? { ...newItem, metadata: { ...newItem.metadata, platform: (newItem.metadata as any)?.platform || 'instagram' } }
-      : newItem;
+    let itemToCreate = newItem;
+    
+    if (newItem.type === 'socialMedia') {
+      itemToCreate = { ...newItem, metadata: { ...newItem.metadata, platform: (newItem.metadata as any)?.platform || 'instagram' } };
+    } else if (newItem.type === 'video') {
+      itemToCreate = { 
+        ...newItem, 
+        metadata: { 
+          ...newItem.metadata, 
+          videoId: (newItem.metadata as any)?.videoId || '',
+          category: (newItem.metadata as any)?.category || 'student_story'
+        } 
+      };
+    }
     
     createMutation.mutate(itemToCreate);
   };
@@ -614,6 +654,7 @@ export default function AdminContentManager() {
                     <TabsTrigger value="event" data-testid="tab-events" className="whitespace-nowrap flex-shrink-0">Events ({events.length})</TabsTrigger>
                     <TabsTrigger value="testimonial" data-testid="tab-testimonials" className="whitespace-nowrap flex-shrink-0">Testimonials ({testimonials.length})</TabsTrigger>
                     <TabsTrigger value="socialMedia" data-testid="tab-social-media" className="whitespace-nowrap flex-shrink-0">Social Media ({socialMediaPosts.length})</TabsTrigger>
+                    <TabsTrigger value="video" data-testid="tab-videos" className="whitespace-nowrap flex-shrink-0">Videos ({videos.length})</TabsTrigger>
                     <TabsTrigger value="googleReviews" data-testid="tab-google-reviews" className="whitespace-nowrap flex-shrink-0">Google Reviews ({googleReviews.length})</TabsTrigger>
                     <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets" className="whitespace-nowrap flex-shrink-0">Lead Magnets ({leadMagnets.length})</TabsTrigger>
                   </TabsList>
@@ -714,6 +755,14 @@ export default function AdminContentManager() {
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
               renderContentList(socialMediaPosts, "socialMedia")
+            )}
+          </TabsContent>
+
+          <TabsContent value="video" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {videosLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : (
+              renderContentList(videos, "video")
             )}
           </TabsContent>
 
@@ -1050,6 +1099,56 @@ export default function AdminContentManager() {
               </>
               )}
               
+              {/* Video specific fields for edit */}
+              {editingItem.type === 'video' && (
+                <>
+                  <div>
+                    <Label htmlFor="edit-video-url">YouTube URL or Video ID</Label>
+                    <Input
+                      id="edit-video-url"
+                      value={(editingItem.metadata as any)?.videoId || ""}
+                      onChange={(e) => {
+                        const input = e.target.value.trim();
+                        let videoId = input;
+                        
+                        // Extract video ID from full YouTube URL
+                        if (input.includes('youtube.com') || input.includes('youtu.be')) {
+                          const urlMatch = input.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                          if (urlMatch) videoId = urlMatch[1];
+                        }
+                        
+                        setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), videoId } });
+                      }}
+                      placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ or dQw4w9WgXcQ"
+                      data-testid="input-edit-video-url"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Paste a YouTube URL or just the video ID
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-video-category">Category</Label>
+                    <Select
+                      value={(editingItem.metadata as any)?.category || "student_story"}
+                      onValueChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), category: value } })}
+                    >
+                      <SelectTrigger id="edit-video-category" data-testid="select-edit-category">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student_story">Student Story</SelectItem>
+                        <SelectItem value="virtual_tour">Virtual Tour</SelectItem>
+                        <SelectItem value="program_highlight">Program Highlight</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Select the type of video content
+                    </p>
+                  </div>
+                </>
+              )}
+              
               {/* Hero/CTA specific fields */}
               {(editingItem.type === 'hero' || editingItem.type === 'cta') && (
                 <>
@@ -1323,6 +1422,56 @@ export default function AdminContentManager() {
                   Select which platform this post is from
                 </p>
               </div>
+              </>
+            )}
+            
+            {/* Video specific fields for create */}
+            {activeTab === 'video' && (
+              <>
+                <div>
+                  <Label htmlFor="create-video-url">YouTube URL or Video ID</Label>
+                  <Input
+                    id="create-video-url"
+                    value={(newItem.metadata as any)?.videoId || ""}
+                    onChange={(e) => {
+                      const input = e.target.value.trim();
+                      let videoId = input;
+                      
+                      // Extract video ID from full YouTube URL
+                      if (input.includes('youtube.com') || input.includes('youtu.be')) {
+                        const urlMatch = input.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+                        if (urlMatch) videoId = urlMatch[1];
+                      }
+                      
+                      setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), videoId } });
+                    }}
+                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ or dQw4w9WgXcQ"
+                    data-testid="input-create-video-url"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Paste a YouTube URL or just the video ID
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="create-video-category">Category</Label>
+                  <Select
+                    value={(newItem.metadata as any)?.category || "student_story"}
+                    onValueChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), category: value } })}
+                  >
+                    <SelectTrigger id="create-video-category" data-testid="select-create-category">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student_story">Student Story</SelectItem>
+                      <SelectItem value="virtual_tour">Virtual Tour</SelectItem>
+                      <SelectItem value="program_highlight">Program Highlight</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Select the type of video content
+                  </p>
+                </div>
               </>
             )}
             
