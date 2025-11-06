@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import useEmblaCarousel from "embla-carousel-react";
-import { ChevronLeft, ChevronRight, Instagram, Facebook } from "lucide-react";
+import { ChevronLeft, ChevronRight, Instagram, Facebook, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ContentItem } from "@shared/schema";
 
@@ -81,7 +81,7 @@ export default function SocialMediaCarousel() {
           <div className="flex gap-4">
             {validPosts.map((post) => {
               const platform = (post.metadata as any)?.platform || 'instagram';
-              const PlatformIcon = platform === 'facebook' ? Facebook : Instagram;
+              const PlatformIcon = platform === 'facebook' ? Facebook : platform === 'linkedin' ? Linkedin : Instagram;
               
               return (
                 <div
@@ -200,6 +200,16 @@ export default function SocialMediaCarousel() {
             data-testid="link-facebook"
           >
             <Facebook className="w-6 h-6" />
+          </a>
+          <a
+            href="https://www.linkedin.com/company/julies-family-learning-program"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover-elevate active-elevate-2 rounded-full p-2"
+            aria-label="Follow us on LinkedIn"
+            data-testid="link-linkedin"
+          >
+            <Linkedin className="w-6 h-6" />
           </a>
         </div>
       </div>
