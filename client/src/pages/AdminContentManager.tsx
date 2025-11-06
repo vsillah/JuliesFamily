@@ -62,7 +62,7 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
     <Card
       ref={setNodeRef}
       style={style}
-      className={`w-full max-w-full ${item.isActive ? "" : "opacity-60"}`}
+      className={`w-full max-w-full ${!item.isActive ? "border-2 border-dashed border-muted-foreground/30 bg-muted/20" : ""}`}
     >
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
@@ -80,7 +80,7 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
               <img
                 src={getImageUrl(item.imageName)!}
                 alt={item.title}
-                className="w-24 h-24 object-cover rounded border border-border"
+                className={`w-24 h-24 object-cover rounded border border-border ${!item.isActive ? "opacity-50" : ""}`}
               />
             </div>
           )}
@@ -89,12 +89,19 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
             <div className="flex items-start justify-between gap-4 mb-2">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <h3 className="font-semibold text-lg break-words" data-testid={`text-title-${item.id}`}>
+                  <h3 className={`font-semibold text-lg break-words ${!item.isActive ? "text-muted-foreground" : ""}`} data-testid={`text-title-${item.id}`}>
                     {item.title}
                   </h3>
                   {!item.isActive && (
-                    <Badge variant="secondary" className="text-xs flex-shrink-0" data-testid={`badge-hidden-${item.id}`}>
+                    <Badge variant="secondary" className="text-xs flex-shrink-0 font-semibold" data-testid={`badge-hidden-${item.id}`}>
+                      <EyeOff className="w-3 h-3 mr-1" />
                       Hidden from website
+                    </Badge>
+                  )}
+                  {item.isActive && (
+                    <Badge className="text-xs flex-shrink-0 bg-primary/10 text-primary border border-primary/30 font-semibold" data-testid={`badge-visible-${item.id}`}>
+                      <Eye className="w-3 h-3 mr-1" />
+                      Visible on website
                     </Badge>
                   )}
                 </div>
@@ -123,17 +130,24 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
               <div className="flex items-center gap-2 flex-shrink-0">
                 <Button
                   size="sm"
-                  variant="ghost"
+                  variant="outline"
                   onClick={onToggleActive}
                   data-testid={`button-toggle-active-${item.id}`}
                   aria-label={item.isActive ? "Hide from website" : "Show on website"}
-                  aria-pressed={item.isActive}
+                  aria-pressed={!!item.isActive}
                   title={item.isActive ? "Hide from website" : "Show on website"}
+                  className="gap-1.5"
                 >
                   {item.isActive ? (
-                    <Eye className="w-4 h-4" data-testid={`icon-visible-${item.id}`} />
+                    <>
+                      <EyeOff className="w-4 h-4" data-testid={`icon-action-hide-${item.id}`} />
+                      <span className="hidden sm:inline">Hide</span>
+                    </>
                   ) : (
-                    <EyeOff className="w-4 h-4" data-testid={`icon-hidden-${item.id}`} />
+                    <>
+                      <Eye className="w-4 h-4" data-testid={`icon-action-show-${item.id}`} />
+                      <span className="hidden sm:inline">Show</span>
+                    </>
                   )}
                 </Button>
                 <Button
@@ -164,7 +178,6 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
 export default function AdminContentManager() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("matrix");
-  const [showInactive, setShowInactive] = useState(true);
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newItem, setNewItem] = useState({
@@ -444,42 +457,26 @@ export default function AdminContentManager() {
   };
 
   const renderContentList = (items: ContentItem[], type: string) => {
-    // Filter items based on showInactive toggle
-    const filteredItems = showInactive ? items : items.filter(item => item.isActive);
-    
-    if (filteredItems.length === 0) {
+    if (items.length === 0) {
       return (
         <div className="text-center py-12 text-muted-foreground">
-          {items.length === 0 ? (
-            <p>No {type}s found. Create your first one!</p>
-          ) : (
-            <p>All {type}s are hidden. Toggle "Show hidden items" to see them.</p>
-          )}
+          <p>No {type}s found. Create your first one!</p>
         </div>
       );
     }
 
-    // Only enable drag-and-drop when showing all items to prevent order corruption
-    const enableDragDrop = showInactive;
-
     return (
       <DndContext
-        sensors={enableDragDrop ? sensors : []}
+        sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={(event) => handleDragEnd(event, items, type)}
       >
         <SortableContext
-          items={filteredItems.map(item => item.id)}
+          items={items.map(item => item.id)}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-4">
-            {!enableDragDrop && filteredItems.length < items.length && (
-              <div className="bg-muted/50 px-4 py-3 rounded-md text-sm text-muted-foreground flex items-center gap-2">
-                <Info className="w-4 h-4 flex-shrink-0" />
-                <span>Drag-and-drop reordering is disabled when hidden items are excluded. Toggle "Show hidden items" to reorder.</span>
-              </div>
-            )}
-            {filteredItems.map((item) => (
+            {items.map((item) => (
               <SortableContentCard
                 key={item.id}
                 item={item}
@@ -536,29 +533,16 @@ export default function AdminContentManager() {
               
               <div className="flex items-center gap-4 flex-shrink-0">
                 {activeTab !== "matrix" && activeTab !== "googleReviews" && (
-                  <>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        id="show-inactive"
-                        checked={showInactive}
-                        onCheckedChange={setShowInactive}
-                        data-testid="toggle-show-inactive"
-                      />
-                      <Label htmlFor="show-inactive" className="text-sm cursor-pointer whitespace-nowrap">
-                        Show hidden items
-                      </Label>
-                    </div>
-                    <Button
-                      onClick={() => {
-                        setNewItem({ ...newItem, type: activeTab });
-                        setIsCreateDialogOpen(true);
-                      }}
-                      data-testid="button-create-new"
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Create New
-                    </Button>
-                  </>
+                  <Button
+                    onClick={() => {
+                      setNewItem({ ...newItem, type: activeTab });
+                      setIsCreateDialogOpen(true);
+                    }}
+                    data-testid="button-create-new"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create New
+                  </Button>
                 )}
               </div>
             </div>
