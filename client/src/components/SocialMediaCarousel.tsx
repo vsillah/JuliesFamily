@@ -179,7 +179,7 @@ export default function SocialMediaCarousel() {
 
       {/* Social Media Links */}
       <div className="flex flex-col items-center justify-center gap-4 mt-8">
-        <p className="text-sm text-muted-foreground">Follow us on socials</p>
+        <p className="text-sm text-muted-foreground">Follow us</p>
         <div className="flex items-center gap-4">
           <a
             href="https://instagram.com/juliesfamilylearning"
