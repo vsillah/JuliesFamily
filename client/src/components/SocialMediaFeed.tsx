@@ -1,11 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import type { ContentItem } from "@shared/schema";
+import type { ContentItem, ImageAsset } from "@shared/schema";
 import { Instagram, Facebook } from "lucide-react";
 
 export default function SocialMediaFeed() {
   const { data: allPosts = [], isLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/socialMedia"],
   });
+
+  const { data: images = [] } = useQuery<ImageAsset[]>({
+    queryKey: ["/api/admin/images"],
+  });
+
+  // Helper to get image URL by name
+  const getImageUrl = (imageName?: string) => {
+    if (!imageName) return undefined;
+    const image = images.find(img => img.name === imageName);
+    return image?.cloudinaryUrl;
+  };
 
   const posts = allPosts.filter(p => p.isActive);
 
@@ -54,10 +65,10 @@ export default function SocialMediaFeed() {
                 </div>
                 
                 {/* Image */}
-                {post.imageName ? (
+                {post.imageName && getImageUrl(post.imageName) ? (
                   <div className="relative flex-1 flex flex-col">
                     <img
-                      src={`https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${post.imageName}`}
+                      src={getImageUrl(post.imageName)}
                       alt={post.title}
                       className="w-full h-full object-cover sm:absolute sm:inset-0"
                       loading="lazy"
