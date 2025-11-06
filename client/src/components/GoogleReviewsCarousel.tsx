@@ -10,6 +10,11 @@ interface GoogleReviewsCarouselProps {
 }
 
 export default function GoogleReviewsCarousel({ reviews }: GoogleReviewsCarouselProps) {
+  // Filter out reviews with missing critical data
+  const validReviews = reviews.filter(
+    (review) => review.authorName && review.rating > 0
+  );
+
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     slidesToScroll: 1,
@@ -49,10 +54,10 @@ export default function GoogleReviewsCarousel({ reviews }: GoogleReviewsCarousel
     };
   }, [emblaApi, onSelect]);
 
-  if (reviews.length === 0) return null;
+  if (validReviews.length === 0) return null;
 
   // Calculate total slides based on screen size
-  const totalSlides = reviews.length;
+  const totalSlides = validReviews.length;
 
   return (
     <div className="mt-16">
@@ -66,7 +71,7 @@ export default function GoogleReviewsCarousel({ reviews }: GoogleReviewsCarousel
       <div className="relative">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-4">
-            {reviews.map((review) => (
+            {validReviews.map((review) => (
               <div
                 key={review.id}
                 className="flex-[0_0_100%] sm:flex-[0_0_calc(50%-0.5rem)] lg:flex-[0_0_calc(33.333%-0.667rem)] min-w-0"
