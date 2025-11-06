@@ -57,7 +57,7 @@ If you cannot determine a field with confidence, use these defaults:
     ],
   });
 
-  const responseText = result.text || "";
+  const responseText = result.response?.text() || result.text || "";
   
   // Clean up the response to ensure it's valid JSON
   let cleanedResponse = responseText.trim();
