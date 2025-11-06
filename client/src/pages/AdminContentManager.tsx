@@ -93,7 +93,7 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
                     {item.title}
                   </h3>
                   {!item.isActive && (
-                    <Badge variant="secondary" className="text-xs flex-shrink-0">
+                    <Badge variant="secondary" className="text-xs flex-shrink-0" data-testid={`badge-hidden-${item.id}`}>
                       Hidden from website
                     </Badge>
                   )}
@@ -126,11 +126,14 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
                   variant="ghost"
                   onClick={onToggleActive}
                   data-testid={`button-toggle-active-${item.id}`}
+                  aria-label={item.isActive ? "Hide from website" : "Show on website"}
+                  aria-pressed={item.isActive}
+                  title={item.isActive ? "Hide from website" : "Show on website"}
                 >
                   {item.isActive ? (
-                    <Eye className="w-4 h-4" />
+                    <Eye className="w-4 h-4" data-testid={`icon-visible-${item.id}`} />
                   ) : (
-                    <EyeOff className="w-4 h-4" />
+                    <EyeOff className="w-4 h-4" data-testid={`icon-hidden-${item.id}`} />
                   )}
                 </Button>
                 <Button
