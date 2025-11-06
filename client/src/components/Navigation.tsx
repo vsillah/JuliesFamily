@@ -77,7 +77,8 @@ export default function Navigation() {
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-20 gap-8">
+            {/* Left: Brand */}
             <div className="flex-shrink-0 flex items-center gap-3">
               <CloudinaryImage 
                 name="site-logo"
@@ -87,35 +88,38 @@ export default function Navigation() {
                 quality="auto:best"
                 loading="eager"
               />
-              <h1 className={`text-xl sm:text-2xl font-serif font-semibold transition-colors duration-300 ${
-                isScrolled ? "text-primary" : "text-white"
-              }`}>
-                Julie's Family Learning Program
-              </h1>
+              <div className="hidden lg:block">
+                <h1 className={`text-lg font-serif font-semibold transition-colors duration-300 leading-tight ${
+                  isScrolled ? "text-primary" : "text-white"
+                }`}>
+                  Julie's Family<br />Learning Program
+                </h1>
+              </div>
             </div>
 
-            <div className="hidden md:flex items-center gap-6">
+            {/* Center: Primary Navigation */}
+            <nav className="hidden md:flex items-center gap-6 flex-1 justify-center">
               <button
                 onClick={() => scrollToSection("services")}
-                className={`transition-colors duration-300 ${
+                className={`text-sm font-medium transition-colors duration-300 ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-services"
               >
-                Our Services
+                Services
               </button>
               <button
                 onClick={() => scrollToSection("impact")}
-                className={`transition-colors duration-300 ${
+                className={`text-sm font-medium transition-colors duration-300 ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-impact"
               >
-                Our Impact
+                Impact
               </button>
               <button
                 onClick={() => scrollToSection("testimonials")}
-                className={`transition-colors duration-300 ${
+                className={`text-sm font-medium transition-colors duration-300 ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-testimonials"
@@ -124,7 +128,7 @@ export default function Navigation() {
               </button>
               <button
                 onClick={() => scrollToSection("events")}
-                className={`transition-colors duration-300 ${
+                className={`text-sm font-medium transition-colors duration-300 ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-events"
@@ -133,62 +137,63 @@ export default function Navigation() {
               </button>
               <Link 
                 href="/virtual-tour"
-                className={`transition-colors duration-300 ${
+                className={`text-sm font-medium transition-colors duration-300 ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-virtual-tour"
               >
                 Virtual Tour
               </Link>
+            </nav>
+
+            {/* Right: Utilities */}
+            <div className="hidden md:flex items-center gap-3">
               {currentPersonaConfig && (
                 <button
                   onClick={() => setShowPersonaModal(true)}
-                  className="flex items-center gap-2"
                   data-testid="button-change-persona"
                   title="Change your experience"
                 >
-                  <Badge variant="secondary" className="cursor-pointer hover-elevate">
+                  <Badge variant="secondary" className="cursor-pointer hover-elevate text-xs">
                     <User className="w-3 h-3 mr-1" />
                     {currentPersonaConfig.label}
                   </Badge>
                 </button>
               )}
+              
               {user?.isAdmin && (
                 <>
                   <AdminPersonaSwitcher isScrolled={isScrolled} />
                   <Link href="/admin">
                     <Button 
-                      variant="outline" 
-                      size="default" 
+                      variant="ghost" 
+                      size="sm" 
                       data-testid="button-admin-dashboard"
-                      className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
+                      className={isScrolled ? "" : "text-white hover:bg-white/10"}
                     >
-                      <Shield className="w-4 h-4 mr-2" />
-                      Admin
+                      <Shield className="w-4 h-4" />
                     </Button>
                   </Link>
                 </>
               )}
-              <Button variant="default" size="default" data-testid="button-donate">
-                Donate Now
+              
+              <Button variant="default" size="sm" data-testid="button-donate" className="font-semibold">
+                Donate
               </Button>
+              
               {isAuthenticated && user ? (
-                <div className="flex items-center gap-4">
-                  <span className={`text-sm transition-colors duration-300 ${
-                    isScrolled ? "text-foreground" : "text-white"
-                  }`}>
-                    Hello, {user.firstName || "there"}!
-                  </span>
+                <>
                   <div className="relative group">
                     <Avatar 
                       className="cursor-pointer h-9 w-9 border-2 border-transparent group-hover:border-primary transition-colors"
                       onClick={() => setShowUploader(true)}
                       data-testid="button-profile-photo"
+                      title={`${user.firstName || "User"} - Click to update photo`}
                     >
                       {user.profileImageUrl ? (
                         <AvatarImage src={user.profileImageUrl} alt={`${user.firstName} ${user.lastName}`} />
                       ) : null}
-                      <AvatarFallback className="bg-primary text-primary-foreground">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                         {getUserInitials()}
                       </AvatarFallback>
                     </Avatar>
@@ -197,20 +202,19 @@ export default function Navigation() {
                     </div>
                   </div>
                   <Button 
-                    variant="outline" 
-                    size="default" 
+                    variant="ghost" 
+                    size="sm" 
                     onClick={() => window.location.href = '/api/logout'}
                     data-testid="button-logout"
-                    className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
+                    className={isScrolled ? "" : "text-white hover:bg-white/10"}
                   >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
+                    <LogOut className="w-4 h-4" />
                   </Button>
-                </div>
+                </>
               ) : (
                 <Button 
                   variant="outline" 
-                  size="default" 
+                  size="sm" 
                   onClick={() => window.location.href = '/api/login'}
                   data-testid="button-login"
                   className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}
@@ -221,6 +225,7 @@ export default function Navigation() {
               )}
             </div>
 
+            {/* Mobile Menu Button */}
             <button
               className={`md:hidden transition-colors duration-300 ${
                 isScrolled ? "text-foreground" : "text-white"
