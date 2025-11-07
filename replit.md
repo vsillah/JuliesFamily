@@ -3,6 +3,13 @@
 ## Overview
 Julie's Family Learning Program website is a non-profit, full-stack web application designed to showcase educational programs, impact, testimonials, and events. It facilitates donations and volunteering efforts. The platform features a React frontend with shadcn/ui and an Express backend, aiming for a warm and approachable aesthetic. The project seeks to enhance user engagement and streamline administrative tasks, with future ambitions including a persona-based personalization system, a CRM for lead capture, and a secure user profile system with photo uploads.
 
+## Development Checklist
+**Mandatory requirements for all new pages and features:**
+
+- ✅ **Verify responsive behavior** - Test every new or updated page across mobile (< 640px), tablet (640px-1024px), and desktop (> 1024px) breakpoints. Ensure no horizontal overflow, proper text wrapping, and appropriate spacing adjustments.
+- ✅ **Add breadcrumb navigation** - All new admin pages must include the `<Breadcrumbs>` component with proper hierarchy (Home → Admin Dashboard → Current Page). Use consistent container structure (`container mx-auto py-8 px-4 max-w-7xl`).
+- ✅ **Ensure mobile-first layouts** - Headers and action buttons should stack vertically on mobile (`flex-col`) and align horizontally on larger screens (`sm:flex-row`). Buttons should be full-width on mobile (`w-full sm:w-auto`).
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
