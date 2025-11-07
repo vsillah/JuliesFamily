@@ -386,28 +386,7 @@ export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit
 export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
 export type EmailTemplate = typeof emailTemplates.$inferSelect;
 
-// Email Logs table for tracking sent emails
-export const emailLogs = pgTable("email_logs", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  templateId: varchar("template_id").references(() => emailTemplates.id),
-  recipientEmail: varchar("recipient_email").notNull(),
-  recipientName: varchar("recipient_name"),
-  subject: varchar("subject").notNull(),
-  status: varchar("status").notNull().default('pending'), // 'pending', 'sent', 'failed', 'bounced'
-  emailProvider: varchar("email_provider"), // 'sendgrid', 'resend', etc
-  providerMessageId: varchar("provider_message_id"), // ID from email service
-  errorMessage: text("error_message"), // If failed
-  metadata: jsonb("metadata"), // Variables used, related donation ID, etc
-  sentAt: timestamp("sent_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
-  id: true,
-  createdAt: true,
-});
-export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
-export type EmailLog = typeof emailLogs.$inferSelect;
+// Email Logs table moved to after campaign tables for proper foreign key references
 
 // AI Copy Generations table for tracking Value Equation-based copy generation
 export const aiCopyGenerations = pgTable("ai_copy_generations", {
@@ -433,3 +412,174 @@ export const insertAiCopyGenerationSchema = createInsertSchema(aiCopyGenerations
 });
 export type InsertAiCopyGeneration = z.infer<typeof insertAiCopyGenerationSchema>;
 export type AiCopyGeneration = typeof aiCopyGenerations.$inferSelect;
+
+// Email Campaigns table for drip campaign definitions
+export const emailCampaigns = pgTable("email_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  persona: varchar("persona"), // Target persona or null for all
+  funnelStage: varchar("funnel_stage"), // Target funnel stage or null for all
+  triggerType: varchar("trigger_type").notNull(), // 'manual', 'lead_created', 'quiz_completed', 'download', 'funnel_stage_change'
+  triggerConditions: jsonb("trigger_conditions"), // Additional conditions like specific quiz, download, etc
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEmailCampaignSchema = createInsertSchema(emailCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEmailCampaign = z.infer<typeof insertEmailCampaignSchema>;
+export type EmailCampaign = typeof emailCampaigns.$inferSelect;
+
+// Email Sequence Steps table for individual emails in a campaign
+export const emailSequenceSteps = pgTable("email_sequence_steps", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => emailCampaigns.id, { onDelete: "cascade" }),
+  stepNumber: integer("step_number").notNull(), // Order in sequence (1, 2, 3...)
+  delayDays: integer("delay_days").notNull().default(0), // Days after trigger or previous email
+  delayHours: integer("delay_hours").notNull().default(0), // Additional hours
+  templateId: varchar("template_id").references(() => emailTemplates.id),
+  subject: varchar("subject").notNull(),
+  htmlContent: text("html_content").notNull(),
+  textContent: text("text_content"),
+  variables: jsonb("variables"), // Available variables for this email
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEmailSequenceStepSchema = createInsertSchema(emailSequenceSteps).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEmailSequenceStep = z.infer<typeof insertEmailSequenceStepSchema>;
+export type EmailSequenceStep = typeof emailSequenceSteps.$inferSelect;
+
+// Email Campaign Enrollments table for tracking which leads are in which campaigns
+export const emailCampaignEnrollments = pgTable("email_campaign_enrollments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => emailCampaigns.id, { onDelete: "cascade" }),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  status: varchar("status").notNull().default('active'), // 'active', 'completed', 'unsubscribed', 'bounced'
+  currentStepNumber: integer("current_step_number").default(0), // Which step they're on
+  lastEmailSentAt: timestamp("last_email_sent_at"),
+  completedAt: timestamp("completed_at"),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+  enrolledAt: timestamp("enrolled_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("enrollment_unique_idx").on(table.campaignId, table.leadId),
+]);
+
+export const insertEmailCampaignEnrollmentSchema = createInsertSchema(emailCampaignEnrollments).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEmailCampaignEnrollment = z.infer<typeof insertEmailCampaignEnrollmentSchema>;
+export type EmailCampaignEnrollment = typeof emailCampaignEnrollments.$inferSelect;
+
+// SMS Templates table for reusable SMS messages
+export const smsTemplates = pgTable("sms_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  messageContent: text("message_content").notNull(), // SMS body with {{variables}}
+  category: varchar("category"), // 'reminder', 'confirmation', 'notification', 'marketing'
+  persona: varchar("persona"), // Target persona or null for all
+  variables: jsonb("variables"), // Available variables: ['firstName', 'appointmentTime', etc]
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSmsTemplateSchema = createInsertSchema(smsTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSmsTemplate = z.infer<typeof insertSmsTemplateSchema>;
+export type SmsTemplate = typeof smsTemplates.$inferSelect;
+
+// SMS Sends table for tracking sent SMS messages
+export const smsSends = pgTable("sms_sends", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").references(() => smsTemplates.id),
+  leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }), // Links SMS to campaign
+  sequenceStepId: varchar("sequence_step_id").references(() => emailSequenceSteps.id, { onDelete: "set null" }), // Links to specific step
+  enrollmentId: varchar("enrollment_id").references(() => emailCampaignEnrollments.id, { onDelete: "set null" }), // Links to enrollment
+  recipientPhone: varchar("recipient_phone").notNull(),
+  recipientName: varchar("recipient_name"),
+  messageContent: text("message_content").notNull(),
+  status: varchar("status").notNull().default('pending'), // 'pending', 'sent', 'delivered', 'failed', 'undelivered'
+  smsProvider: varchar("sms_provider"), // 'twilio', etc
+  providerMessageId: varchar("provider_message_id"), // SID from Twilio
+  errorMessage: text("error_message"),
+  metadata: jsonb("metadata"), // Variables used, campaign ID, etc
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSmsSendSchema = createInsertSchema(smsSends).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSmsSend = z.infer<typeof insertSmsSendSchema>;
+export type SmsSend = typeof smsSends.$inferSelect;
+
+// Communication Logs table for unified timeline of all communications with leads
+export const communicationLogs = pgTable("communication_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").references(() => users.id), // Admin who initiated, if manual
+  communicationType: varchar("communication_type").notNull(), // 'email', 'sms', 'call', 'note', 'meeting'
+  direction: varchar("direction"), // 'inbound', 'outbound'
+  subject: varchar("subject"),
+  content: text("content"),
+  emailLogId: varchar("email_log_id").references(() => emailLogs.id),
+  smsSendId: varchar("sms_send_id").references(() => smsSends.id),
+  metadata: jsonb("metadata"), // Call duration, meeting attendees, campaign ID, etc
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertCommunicationLogSchema = createInsertSchema(communicationLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCommunicationLog = z.infer<typeof insertCommunicationLogSchema>;
+export type CommunicationLog = typeof communicationLogs.$inferSelect;
+
+// Email Logs table for tracking sent emails (moved here to reference campaign tables)
+export const emailLogs = pgTable("email_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").references(() => emailTemplates.id),
+  leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
+  sequenceStepId: varchar("sequence_step_id").references(() => emailSequenceSteps.id, { onDelete: "set null" }),
+  enrollmentId: varchar("enrollment_id").references(() => emailCampaignEnrollments.id, { onDelete: "set null" }),
+  recipientEmail: varchar("recipient_email").notNull(),
+  recipientName: varchar("recipient_name"),
+  subject: varchar("subject").notNull(),
+  status: varchar("status").notNull().default('pending'), // 'pending', 'sent', 'failed', 'bounced'
+  emailProvider: varchar("email_provider"), // 'sendgrid', 'resend', etc
+  providerMessageId: varchar("provider_message_id"), // ID from email service
+  errorMessage: text("error_message"), // If failed
+  metadata: jsonb("metadata"), // Variables used, related donation ID, etc
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
+export type EmailLog = typeof emailLogs.$inferSelect;
