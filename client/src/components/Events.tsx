@@ -82,6 +82,8 @@ export default function Events() {
               location={(event.metadata as any)?.location}
               description={event.description || ""}
               imageName={event.imageName || ""}
+              startTime={(event.metadata as any)?.startTime}
+              endTime={(event.metadata as any)?.endTime}
             />
           ))}
         </div>

@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Calendar, MapPin } from "lucide-react";
 import ParallaxImage from "./ParallaxImage";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
+import "add-to-calendar-button";
 
 interface EventCardProps {
   title: string;
@@ -9,9 +10,11 @@ interface EventCardProps {
   location?: string;
   description: string;
   imageName: string;
+  startTime?: string;
+  endTime?: string;
 }
 
-export default function EventCard({ title, date, location, description, imageName }: EventCardProps) {
+export default function EventCard({ title, date, location, description, imageName, startTime, endTime }: EventCardProps) {
   const { data: imageAsset, isLoading } = useCloudinaryImage(imageName);
 
   const imageUrl = imageAsset 
@@ -20,6 +23,31 @@ export default function EventCard({ title, date, location, description, imageNam
         quality: "auto:good",
       })
     : "";
+
+  // Validate and format date for calendar button (YYYY-MM-DD)
+  const parseEventDate = (): string | null => {
+    if (!date || date.trim() === '') return null;
+    
+    try {
+      const dateObj = new Date(date);
+      // Check if date is valid and in the future (or within last 7 days)
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      
+      if (!isNaN(dateObj.getTime()) && dateObj >= sevenDaysAgo) {
+        return dateObj.toISOString().split('T')[0];
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
+  // Only show calendar button if we have valid date and times
+  const hasValidCalendarData = () => {
+    const validDate = parseEventDate();
+    return validDate !== null && startTime && endTime;
+  };
 
   return (
     <Card className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105">
@@ -43,7 +71,29 @@ export default function EventCard({ title, date, location, description, imageNam
             {location}
           </div>
         )}
-        <p className="text-muted-foreground leading-relaxed">{description}</p>
+        <p className="text-muted-foreground leading-relaxed mb-4">{description}</p>
+        
+        {hasValidCalendarData() ? (
+          <add-to-calendar-button
+            name={title}
+            description={description}
+            startDate={parseEventDate()!}
+            startTime={startTime}
+            endTime={endTime}
+            location={location || ""}
+            options={JSON.stringify(['Apple','Google','Microsoft365','Outlook.com','Yahoo','iCal'])}
+            timeZone="America/New_York"
+            buttonStyle="default"
+            listStyle="modal"
+            size="3"
+            lightMode="bodyScheme"
+            data-testid="add-to-calendar-button"
+          />
+        ) : (
+          <div className="text-sm text-muted-foreground italic">
+            Calendar details pending - check back soon!
+          </div>
+        )}
       </div>
     </Card>
   );
