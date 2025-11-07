@@ -18,6 +18,7 @@ import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFol
 import Stripe from "stripe";
 import * as XLSX from "xlsx";
 import { CalendarService } from "./calendarService";
+import { fromZonedTime } from "date-fns-tz";
 
 // Extend Express Request to properly type authenticated user
 interface AuthenticatedRequest extends Request {
@@ -2818,17 +2819,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
+      // Convert datetime strings from Eastern Time to UTC (handles DST)
+      const timezone = start.timeZone || 'America/New_York';
+      const startUTC = fromZonedTime(start.dateTime, timezone);
+      const endUTC = fromZonedTime(end.dateTime, timezone);
+
       const event = await CalendarService.createEvent({
         summary,
         description,
         location,
         start: {
-          dateTime: start.dateTime,
-          timeZone: start.timeZone || 'America/New_York'
+          dateTime: startUTC.toISOString(),
+          timeZone: timezone
         },
         end: {
-          dateTime: end.dateTime,
-          timeZone: end.timeZone || 'America/New_York'
+          dateTime: endUTC.toISOString(),
+          timeZone: timezone
         },
         attendees
       });
@@ -2872,6 +2878,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching calendar event:", error);
       res.status(500).json({ 
         message: error.message || "Failed to fetch calendar event" 
+      });
+    }
+  });
+
+  // Get available time slots for a specific date
+  // TODO: Optimize by using CalendarService freebusy API to batch check all slots at once
+  // instead of making individual availability checks (currently 16 API calls per request)
+  app.get('/api/calendar/availability', async (req, res) => {
+    try {
+      const { date } = req.query;
+      
+      if (!date || typeof date !== 'string') {
+        return res.status(400).json({ 
+          message: "Missing required parameter: date (YYYY-MM-DD format)" 
+        });
+      }
+
+      // Validate date format (YYYY-MM-DD)
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return res.status(400).json({ 
+          message: "Invalid date format. Expected YYYY-MM-DD" 
+        });
+      }
+
+      // Use the date string directly to avoid timezone issues
+      const dateString = date;
+      const timezone = 'America/New_York';
+      
+      // Generate time slots from 9 AM to 5 PM (30-minute intervals)
+      const slots = [];
+      for (let hour = 9; hour < 17; hour++) {
+        for (let minute = 0; minute < 60; minute += 30) {
+          const startHour = hour.toString().padStart(2, '0');
+          const startMinute = minute.toString().padStart(2, '0');
+          const endMinute = ((minute + 30) % 60).toString().padStart(2, '0');
+          const endHour = (minute === 30 ? hour + 1 : hour).toString().padStart(2, '0');
+          
+          // Build datetime strings in Eastern Time (no timezone offset)
+          const startTime = `${dateString}T${startHour}:${startMinute}:00`;
+          const endTime = `${dateString}T${endHour}:${endMinute}:00`;
+          
+          // Convert from Eastern Time to UTC using date-fns-tz (handles DST correctly)
+          const startUTC = fromZonedTime(startTime, timezone);
+          const endUTC = fromZonedTime(endTime, timezone);
+          
+          // Check if this slot is available
+          const availability = await CalendarService.checkAvailability(
+            startUTC.toISOString(),
+            endUTC.toISOString()
+          );
+          
+          slots.push({
+            start: startTime,
+            end: endTime,
+            available: availability.available
+          });
+        }
+      }
+      
+      res.json(slots);
+    } catch (error: any) {
+      console.error("Error getting availability:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to get availability" 
       });
     }
   });
