@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Calendar, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, MapPin, UserPlus } from "lucide-react";
 import ParallaxImage from "./ParallaxImage";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
+import EventRegistrationForm from "./EventRegistrationForm";
 import "add-to-calendar-button";
 
 interface EventCardProps {
+  eventId?: string;
   title: string;
   date: string;
   location?: string;
@@ -12,10 +16,22 @@ interface EventCardProps {
   imageName: string;
   startTime?: string;
   endTime?: string;
+  allowRegistration?: boolean;
 }
 
-export default function EventCard({ title, date, location, description, imageName, startTime, endTime }: EventCardProps) {
+export default function EventCard({ 
+  eventId, 
+  title, 
+  date, 
+  location, 
+  description, 
+  imageName, 
+  startTime, 
+  endTime,
+  allowRegistration = false,
+}: EventCardProps) {
   const { data: imageAsset, isLoading } = useCloudinaryImage(imageName);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
   const imageUrl = imageAsset 
     ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, {
@@ -73,28 +89,54 @@ export default function EventCard({ title, date, location, description, imageNam
         )}
         <p className="text-muted-foreground leading-relaxed mb-4">{description}</p>
         
-        {hasValidCalendarData() ? (
-          <add-to-calendar-button
-            name={title}
-            description={description}
-            startDate={parseEventDate()!}
-            startTime={startTime}
-            endTime={endTime}
-            location={location || ""}
-            options={JSON.stringify(['Apple','Google','Microsoft365','Outlook.com','Yahoo','iCal'])}
-            timeZone="America/New_York"
-            buttonStyle="default"
-            listStyle="modal"
-            size="3"
-            lightMode="bodyScheme"
-            data-testid="add-to-calendar-button"
-          />
-        ) : (
-          <div className="text-sm text-muted-foreground italic">
-            Calendar details pending - check back soon!
-          </div>
-        )}
+        <div className="space-y-3">
+          {allowRegistration && hasValidCalendarData() && eventId && (
+            <Button
+              className="w-full"
+              onClick={() => setShowRegistrationForm(true)}
+              data-testid="button-register-event"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Register for Event
+            </Button>
+          )}
+          
+          {hasValidCalendarData() ? (
+            <add-to-calendar-button
+              name={title}
+              description={description}
+              startDate={parseEventDate()!}
+              startTime={startTime}
+              endTime={endTime}
+              location={location || ""}
+              options={JSON.stringify(['Apple','Google','Microsoft365','Outlook.com','Yahoo','iCal'])}
+              timeZone="America/New_York"
+              buttonStyle="default"
+              listStyle="modal"
+              size="3"
+              lightMode="bodyScheme"
+              data-testid="add-to-calendar-button"
+            />
+          ) : (
+            <div className="text-sm text-muted-foreground italic">
+              Calendar details pending - check back soon!
+            </div>
+          )}
+        </div>
       </div>
+      
+      {allowRegistration && hasValidCalendarData() && eventId && (
+        <EventRegistrationForm
+          eventId={eventId}
+          eventTitle={title}
+          eventDate={parseEventDate()!}
+          eventLocation={location}
+          startTime={startTime!}
+          endTime={endTime!}
+          open={showRegistrationForm}
+          onClose={() => setShowRegistrationForm(false)}
+        />
+      )}
     </Card>
   );
 }

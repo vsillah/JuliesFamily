@@ -17,6 +17,7 @@ import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter"
 import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps } from "./taskAutomation";
 import Stripe from "stripe";
 import * as XLSX from "xlsx";
+import { CalendarService } from "./calendarService";
 
 // Extend Express Request to properly type authenticated user
 interface AuthenticatedRequest extends Request {
@@ -2791,6 +2792,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error generating A/B test variants:", error);
       res.status(500).json({ 
         message: error.message || "Failed to generate test variants" 
+      });
+    }
+  });
+
+  // Google Calendar Integration Routes
+  
+  // Create a calendar event
+  app.post('/api/calendar/events', isAuthenticated, async (req, res) => {
+    try {
+      const { summary, description, location, start, end, attendees } = req.body;
+      
+      if (!summary || !start || !end) {
+        return res.status(400).json({ 
+          message: "Missing required fields: summary, start, end" 
+        });
+      }
+
+      const event = await CalendarService.createEvent({
+        summary,
+        description,
+        location,
+        start: {
+          dateTime: start.dateTime,
+          timeZone: start.timeZone || 'America/New_York'
+        },
+        end: {
+          dateTime: end.dateTime,
+          timeZone: end.timeZone || 'America/New_York'
+        },
+        attendees
+      });
+      
+      res.json(event);
+    } catch (error: any) {
+      console.error("Error creating calendar event:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to create calendar event" 
+      });
+    }
+  });
+
+  // List upcoming calendar events (must come before parameterized route)
+  app.get('/api/calendar/events', isAuthenticated, async (req, res) => {
+    try {
+      const { timeMin, timeMax, maxResults } = req.query;
+      
+      const events = await CalendarService.listEvents(
+        timeMin as string,
+        timeMax as string,
+        maxResults ? parseInt(maxResults as string) : undefined
+      );
+      
+      res.json(events);
+    } catch (error: any) {
+      console.error("Error listing calendar events:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to list calendar events" 
+      });
+    }
+  });
+
+  // Get a specific calendar event
+  app.get('/api/calendar/events/:eventId', isAuthenticated, async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const event = await CalendarService.getEvent(eventId);
+      res.json(event);
+    } catch (error: any) {
+      console.error("Error fetching calendar event:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to fetch calendar event" 
+      });
+    }
+  });
+
+  // Check availability for a time slot
+  app.post('/api/calendar/check-availability', isAuthenticated, async (req, res) => {
+    try {
+      const { startDateTime, endDateTime } = req.body;
+      
+      if (!startDateTime || !endDateTime) {
+        return res.status(400).json({ 
+          message: "Missing required fields: startDateTime, endDateTime" 
+        });
+      }
+
+      const availability = await CalendarService.checkAvailability(
+        startDateTime,
+        endDateTime
+      );
+      
+      res.json(availability);
+    } catch (error: any) {
+      console.error("Error checking availability:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to check availability" 
+      });
+    }
+  });
+
+  // Update calendar event
+  app.patch('/api/calendar/events/:eventId', isAuthenticated, async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const updates = req.body;
+      
+      const event = await CalendarService.updateEvent(eventId, updates);
+      res.json(event);
+    } catch (error: any) {
+      console.error("Error updating calendar event:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to update calendar event" 
+      });
+    }
+  });
+
+  // Delete calendar event
+  app.delete('/api/calendar/events/:eventId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { eventId } = req.params;
+      const result = await CalendarService.deleteEvent(eventId);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error deleting calendar event:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to delete calendar event" 
       });
     }
   });

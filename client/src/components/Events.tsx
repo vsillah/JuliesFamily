@@ -77,6 +77,7 @@ export default function Events() {
           {events.map((event) => (
             <EventCard 
               key={event.id}
+              eventId={event.id}
               title={event.title}
               date={(event.metadata as any)?.date || ""}
               location={(event.metadata as any)?.location}
@@ -84,6 +85,7 @@ export default function Events() {
               imageName={event.imageName || ""}
               startTime={(event.metadata as any)?.startTime}
               endTime={(event.metadata as any)?.endTime}
+              allowRegistration={(event.metadata as any)?.allowRegistration || false}
             />
           ))}
         </div>
