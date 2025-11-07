@@ -116,8 +116,9 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
           variant="outline"
           size="sm"
           onClick={() => {
-            onOpenDialog?.();
             setShowDialog(true);
+            // Small delay before closing mobile menu to allow dialog to open
+            setTimeout(() => onOpenDialog?.(), 100);
           }}
           data-testid="button-admin-persona-switcher"
           className={isScrolled ? "" : "border-white/30 text-white hover:bg-white/10"}

@@ -17,7 +17,7 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const PRESET_AMOUNTS = [25, 50, 100, 250];
+const PRESET_AMOUNTS = [25, 50, 100, 250, 500, 1000];
 
 function DonationForm({ amount, donationType, frequency, donorInfo, onAmountChange, onTypeChange, onFrequencyChange, onDonorInfoChange }: {
   amount: number;
@@ -48,7 +48,7 @@ function DonationForm({ amount, donationType, frequency, donorInfo, onAmountChan
     <div className="space-y-6">
       <div>
         <Label className="text-base font-semibold mb-3 block">Donation Amount</Label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
           {PRESET_AMOUNTS.map((preset) => (
             <Button
               key={preset}

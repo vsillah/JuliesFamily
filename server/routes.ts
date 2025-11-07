@@ -1366,40 +1366,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe webhook handler for payment confirmations
-  app.post("/api/donations/webhook", async (req, res) => {
+  // IMPORTANT: This endpoint requires express.json middleware with verify callback
+  // to capture rawBody (configured in server/index.ts). Do not reorder middleware!
+  app.post("/api/donations/webhook", async (req: any, res) => {
     const sig = req.headers['stripe-signature'];
     
-    // For development, we'll process without signature verification
-    // In production, you should set STRIPE_WEBHOOK_SECRET and verify the signature
+    if (!sig) {
+      console.error('Missing stripe-signature header');
+      return res.status(400).send('Webhook Error: Missing signature');
+    }
+    
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+      console.error('STRIPE_WEBHOOK_SECRET not configured');
+      return res.status(500).send('Webhook Error: Server not configured');
+    }
+    
     let event;
     
     try {
-      if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          sig as string,
-          process.env.STRIPE_WEBHOOK_SECRET
-        );
-      } else {
-        // For testing without webhook secret
-        event = req.body;
+      // Verify rawBody is available (captured by express.json verify callback in server/index.ts)
+      // This is required for Stripe signature verification
+      const rawBody = req.rawBody;
+      if (!rawBody) {
+        console.error('Raw body not available - check middleware configuration');
+        throw new Error('Raw body not available for signature verification');
       }
+      
+      event = stripe.webhooks.constructEvent(
+        rawBody,
+        sig as string,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
     } catch (err: any) {
       console.error('Webhook signature verification failed:', err.message);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event
+    // Handle the event with idempotency (check status before updating)
     try {
       switch (event.type) {
         case 'payment_intent.succeeded': {
           const paymentIntent = event.data.object;
           console.log('Payment succeeded:', paymentIntent.id);
           
+          // Get current donation to check if already processed (idempotency)
+          const donation = await storage.getDonationByStripeId(paymentIntent.id);
+          if (donation && donation.status === 'succeeded') {
+            console.log('Payment already processed:', paymentIntent.id);
+            return res.json({ received: true, note: 'Already processed' });
+          }
+          
           // Update donation status
+          // Note: charges might need to be expanded in webhook, so use optional chaining
+          const receiptUrl = (paymentIntent as any).charges?.data?.[0]?.receipt_url || null;
           await storage.updateDonationByStripeId(paymentIntent.id, {
             status: 'succeeded',
-            receiptUrl: paymentIntent.charges?.data[0]?.receipt_url || null,
+            receiptUrl,
           });
           
           // TODO: Send thank-you email (will implement in task 7)
@@ -1409,6 +1431,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'payment_intent.payment_failed': {
           const paymentIntent = event.data.object;
           console.log('Payment failed:', paymentIntent.id);
+          
+          // Get current donation to check if already processed
+          const donation = await storage.getDonationByStripeId(paymentIntent.id);
+          if (donation && donation.status === 'failed') {
+            console.log('Payment failure already processed:', paymentIntent.id);
+            return res.json({ received: true, note: 'Already processed' });
+          }
           
           await storage.updateDonationByStripeId(paymentIntent.id, {
             status: 'failed',

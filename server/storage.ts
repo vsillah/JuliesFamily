@@ -150,6 +150,7 @@ export interface IStorage {
   // Donation operations
   createDonation(donation: InsertDonation): Promise<Donation>;
   getDonationById(id: string): Promise<Donation | undefined>;
+  getDonationByStripeId(stripePaymentIntentId: string): Promise<Donation | undefined>;
   updateDonationByStripeId(stripePaymentIntentId: string, updates: Partial<InsertDonation>): Promise<Donation | undefined>;
   getAllDonations(): Promise<Donation[]>;
   getDonationsByLeadId(leadId: string): Promise<Donation[]>;
@@ -886,6 +887,11 @@ export class DatabaseStorage implements IStorage {
 
   async getDonationById(id: string): Promise<Donation | undefined> {
     const [donation] = await db.select().from(donations).where(eq(donations.id, id));
+    return donation;
+  }
+
+  async getDonationByStripeId(stripePaymentIntentId: string): Promise<Donation | undefined> {
+    const [donation] = await db.select().from(donations).where(eq(donations.stripePaymentIntentId, stripePaymentIntentId));
     return donation;
   }
 
