@@ -5,6 +5,7 @@ import {
   contentItems, contentVisibility,
   abTests, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems,
+  emailTemplates, emailLogs,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -18,7 +19,9 @@ import {
   type AbTestEvent, type InsertAbTestEvent,
   type GoogleReview, type InsertGoogleReview,
   type Donation, type InsertDonation,
-  type WishlistItem, type InsertWishlistItem
+  type WishlistItem, type InsertWishlistItem,
+  type EmailTemplate, type InsertEmailTemplate,
+  type EmailLog, type InsertEmailLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -161,6 +164,17 @@ export interface IStorage {
   getAllWishlistItems(): Promise<WishlistItem[]>;
   updateWishlistItem(id: string, updates: Partial<InsertWishlistItem>): Promise<WishlistItem | undefined>;
   deleteWishlistItem(id: string): Promise<boolean>;
+  
+  // Email Template operations
+  getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined>;
+  getAllEmailTemplates(): Promise<EmailTemplate[]>;
+  createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
+  updateEmailTemplate(id: string, updates: Partial<InsertEmailTemplate>): Promise<EmailTemplate | undefined>;
+  
+  // Email Log operations
+  createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
+  getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]>;
+  getRecentEmailLogs(limit?: number): Promise<EmailLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -945,6 +959,55 @@ export class DatabaseStorage implements IStorage {
   async deleteWishlistItem(id: string): Promise<boolean> {
     const result = await db.delete(wishlistItems).where(eq(wishlistItems.id, id));
     return result.rowCount !== null && result.rowCount > 0;
+  }
+  
+  // Email Template operations
+  async getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.name, name));
+    return template;
+  }
+
+  async getAllEmailTemplates(): Promise<EmailTemplate[]> {
+    return await db.select().from(emailTemplates).orderBy(desc(emailTemplates.createdAt));
+  }
+
+  async createEmailTemplate(templateData: InsertEmailTemplate): Promise<EmailTemplate> {
+    const [template] = await db.insert(emailTemplates).values(templateData).returning();
+    return template;
+  }
+
+  async updateEmailTemplate(id: string, updates: Partial<InsertEmailTemplate>): Promise<EmailTemplate | undefined> {
+    const [updated] = await db
+      .update(emailTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(emailTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Email Log operations
+  async createEmailLog(logData: InsertEmailLog): Promise<EmailLog> {
+    const [log] = await db.insert(emailLogs).values(logData).returning();
+    return log;
+  }
+
+  async getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]> {
+    return await db
+      .select()
+      .from(emailLogs)
+      .where(eq(emailLogs.recipientEmail, recipientEmail))
+      .orderBy(desc(emailLogs.createdAt));
+  }
+
+  async getRecentEmailLogs(limit: number = 50): Promise<EmailLog[]> {
+    return await db
+      .select()
+      .from(emailLogs)
+      .orderBy(desc(emailLogs.createdAt))
+      .limit(limit);
   }
 }
 
