@@ -20,7 +20,7 @@ The frontend is a single-page application using `wouter` for client-side routing
 - **Profile Photo Upload System**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage.
 - **Content Management System (CMS)**: A full-featured CMS for managing all website content, including images, universal multi-select visibility controls across all content types, and integration with Cloudinary for image optimization. JSON metadata fields have been removed from dialogs to prevent conflicts with UI-based visibility controls.
 - **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations, enabling inline editing and content creation.
-- **A/B Testing System**: A comprehensive platform for testing content, layouts, messaging, and CTAs, supporting weighted variant assignment, session-based tracking, and analytics.
+- **A/B Testing System**: A comprehensive platform for testing content, layouts, messaging, and CTAs, supporting weighted variant assignment, session-based tracking, and analytics. Uses the same responsive multi-select checkbox grid interface as content management for targeting multiple persona×journey stage combinations simultaneously. Tests persist combinations via abTestTargets junction table and serve variants only to matching visitor profiles.
 - **Breadcrumb Navigation**: Hierarchical navigation across all admin pages.
 - **User Management System**: An admin-only interface for managing user accounts and privileges.
 - **User Guide System**: Provides public and protected documentation.
