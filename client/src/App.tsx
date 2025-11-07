@@ -22,6 +22,7 @@ import AdminSmsNotifications from "@/pages/AdminSmsNotifications";
 import AdminTasks from "@/pages/AdminTasks";
 import AdminPipeline from "@/pages/AdminPipeline";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
+import ProductLanding from "@/pages/ProductLanding";
 import ImageComparison from "@/pages/ImageComparison";
 import NotFound from "@/pages/not-found";
 
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/admin/tasks" component={AdminTasks} />
       <Route path="/admin/pipeline" component={AdminPipeline} />
       <Route path="/schedule" component={AppointmentScheduling} />
+      <Route path="/product" component={ProductLanding} />
       <Route path="/comparison" component={ImageComparison} />
       <Route component={NotFound} />
     </Switch>
