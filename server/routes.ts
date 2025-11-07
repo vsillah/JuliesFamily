@@ -14,7 +14,7 @@ import multer from "multer";
 import { analyzeSocialPostScreenshot } from "./gemini";
 import { sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
-import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps } from "./taskAutomation";
+import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps, syncTaskToCalendar } from "./taskAutomation";
 import Stripe from "stripe";
 import * as XLSX from "xlsx";
 import { CalendarService } from "./calendarService";
@@ -2166,6 +2166,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const task = await storage.createTask(taskData);
+      
+      // Sync task to Google Calendar asynchronously (fire-and-forget)
+      // Don't block task creation response on calendar sync
+      if (task.dueDate) {
+        syncTaskToCalendar(storage, task).catch(error => {
+          console.error('Background calendar sync failed:', error);
+        });
+      }
+      
       res.status(201).json(task);
     } catch (error) {
       console.error("Error creating task:", error);

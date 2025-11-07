@@ -1,5 +1,6 @@
 import type { IStorage } from "./storage";
-import type { InsertTask, Lead } from "@shared/schema";
+import type { InsertTask, Lead, Task } from "@shared/schema";
+import { CalendarService } from "./calendarService";
 
 // Task templates for different triggers
 interface TaskTemplate {
@@ -278,5 +279,74 @@ export async function createTasksForMissedFollowUps(
     }
   } catch (error) {
     console.error('Error creating tasks for missed follow-ups:', error);
+  }
+}
+
+/**
+ * Sync task to Google Calendar
+ * Creates a calendar event for the task if it has a due date
+ */
+export async function syncTaskToCalendar(
+  storage: IStorage,
+  task: Task
+): Promise<string | null> {
+  try {
+    // Only sync tasks with due dates
+    if (!task.dueDate) {
+      console.log(`Task ${task.id} has no due date, skipping calendar sync`);
+      return null;
+    }
+
+    // Get lead information for context
+    let leadInfo = '';
+    if (task.leadId) {
+      const lead = await storage.getLeadById(task.leadId);
+      if (lead) {
+        leadInfo = `\n\nLead: ${lead.firstName} ${lead.lastName}\nEmail: ${lead.email}\nPersona: ${lead.persona}`;
+      }
+    }
+
+    // Get assignee information for calendar invite
+    const assignee = await storage.getUserById(task.assignedTo);
+    if (!assignee || !assignee.email) {
+      console.log(`Task ${task.id} assignee has no email, cannot send calendar invite`);
+      return null;
+    }
+
+    // Create calendar event on the due date
+    // Default to 9 AM - 10 AM on the due date if no specific time is set
+    const dueDate = new Date(task.dueDate);
+    const startDateTime = new Date(dueDate);
+    startDateTime.setHours(9, 0, 0, 0);
+    
+    const endDateTime = new Date(dueDate);
+    endDateTime.setHours(10, 0, 0, 0);
+
+    const calendarEvent = await CalendarService.createEvent({
+      summary: `Task: ${task.title}`,
+      description: `${task.description || 'No description'}${leadInfo}\n\nPriority: ${task.priority}\nType: ${task.taskType}`,
+      location: '',
+      start: {
+        dateTime: startDateTime.toISOString(),
+        timeZone: 'America/New_York',
+      },
+      end: {
+        dateTime: endDateTime.toISOString(),
+        timeZone: 'America/New_York',
+      },
+      attendees: [
+        {
+          email: assignee.email,
+          displayName: `${assignee.firstName} ${assignee.lastName}`,
+        },
+      ],
+    });
+
+    console.log(`Task ${task.id} synced to calendar: ${calendarEvent.id}`);
+    return calendarEvent.id;
+  } catch (error) {
+    console.error(`Error syncing task ${task.id} to calendar:`, error);
+    // Don't throw - we don't want to fail task creation if calendar sync fails
+    return null;
   }
 }
