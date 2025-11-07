@@ -193,7 +193,7 @@ export default function Hero() {
         <div 
           className="absolute inset-0"
           style={{
-            backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 20%, rgba(0,0,0,0.60) 45%, rgba(0,0,0,0.60) 55%, transparent 80%, transparent 100%)'
+            backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 20%, rgba(0,0,0,0.60) 45%, rgba(0,0,0,0.60) 65%, transparent 85%, transparent 100%)'
           }}
         />
         {/* Subtle radial vignette for edge darkening */}
