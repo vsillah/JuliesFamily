@@ -5,10 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
   BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
-  Shield, BookOpen, Star, RefreshCw, MessageSquare, Kanban
+  Shield, BookOpen, Star, RefreshCw, MessageSquare, Kanban, Settings, ChevronDown
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -117,60 +123,89 @@ export default function AdminDashboard() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link href="/admin/guide">
-                <Button variant="outline" size="sm" data-testid="button-admin-guide">
-                  <BookOpen className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Help Guide</span>
-                </Button>
-              </Link>
-              <Link href="/admin/content">
-                <Button variant="outline" size="sm" data-testid="button-manage-content">
-                  <FileText className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Manage Content</span>
-                </Button>
-              </Link>
-              <Link href="/admin/images">
-                <Button variant="outline" size="sm" data-testid="button-manage-images">
-                  <ImageIcon className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Manage Images</span>
-                </Button>
-              </Link>
-              <Link href="/admin/users">
-                <Button variant="outline" size="sm" data-testid="button-manage-users">
-                  <Shield className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Manage Users</span>
-                </Button>
-              </Link>
-              <Link href="/admin/ab-testing">
-                <Button variant="outline" size="sm" data-testid="button-ab-testing">
-                  <BarChart3 className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">A/B Testing</span>
-                </Button>
-              </Link>
-              <Link href="/admin/email-campaigns">
-                <Button variant="outline" size="sm" data-testid="button-email-campaigns">
-                  <Mail className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Email Campaigns</span>
-                </Button>
-              </Link>
-              <Link href="/admin/sms-notifications">
-                <Button variant="outline" size="sm" data-testid="button-sms-notifications">
-                  <MessageSquare className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">SMS Notifications</span>
-                </Button>
-              </Link>
+              {/* Primary CRM Actions */}
               <Link href="/admin/pipeline">
-                <Button variant="outline" size="sm" data-testid="button-pipeline-board">
-                  <Kanban className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Pipeline Board</span>
+                <Button variant="default" size="sm" data-testid="button-pipeline-board">
+                  <Kanban className="w-4 h-4 mr-2" />
+                  Pipeline
                 </Button>
               </Link>
               <Link href="/admin/tasks">
-                <Button variant="outline" size="sm" data-testid="button-tasks">
-                  <Target className="w-4 h-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Tasks</span>
+                <Button variant="default" size="sm" data-testid="button-tasks">
+                  <Target className="w-4 h-4 mr-2" />
+                  Tasks
                 </Button>
               </Link>
+              
+              {/* Communication Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" data-testid="button-communication-menu">
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                    Communication
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/email-campaigns" className="flex items-center cursor-pointer">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Email Campaigns
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/sms-notifications" className="flex items-center cursor-pointer">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      SMS Notifications
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Content & Settings Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" data-testid="button-settings-menu">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/content" className="flex items-center cursor-pointer">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Manage Content
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/images" className="flex items-center cursor-pointer">
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      Manage Images
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/ab-testing" className="flex items-center cursor-pointer">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      A/B Testing
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/users" className="flex items-center cursor-pointer">
+                      <Shield className="w-4 h-4 mr-2" />
+                      Manage Users
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/guide" className="flex items-center cursor-pointer">
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Help Guide
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Quick Actions */}
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -179,17 +214,15 @@ export default function AdminDashboard() {
                 data-testid="button-sync-reviews"
               >
                 {syncReviewsMutation.isPending ? (
-                  <RefreshCw className="w-4 h-4 sm:mr-2 animate-spin" />
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
-                  <Star className="w-4 h-4 sm:mr-2" />
+                  <Star className="w-4 h-4 mr-2" />
                 )}
-                <span className="hidden sm:inline">
-                  {syncReviewsMutation.isPending ? "Syncing..." : "Sync Reviews"}
-                </span>
+                Sync Reviews
               </Button>
-              <Button variant="default" size="sm" data-testid="button-export-data">
-                <Download className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Export Data</span>
+              <Button variant="outline" size="sm" data-testid="button-export-data">
+                <Download className="w-4 h-4 mr-2" />
+                Export
               </Button>
             </div>
           </div>
