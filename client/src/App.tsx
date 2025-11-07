@@ -20,6 +20,7 @@ import AdminABTestAnalytics from "@/pages/AdminABTestAnalytics";
 import AdminEmailCampaigns from "@/pages/AdminEmailCampaigns";
 import AdminSmsNotifications from "@/pages/AdminSmsNotifications";
 import AdminTasks from "@/pages/AdminTasks";
+import AdminPipeline from "@/pages/AdminPipeline";
 import ImageComparison from "@/pages/ImageComparison";
 import NotFound from "@/pages/not-found";
 
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/admin/email-campaigns" component={AdminEmailCampaigns} />
       <Route path="/admin/sms-notifications" component={AdminSmsNotifications} />
       <Route path="/admin/tasks" component={AdminTasks} />
+      <Route path="/admin/pipeline" component={AdminPipeline} />
       <Route path="/comparison" component={ImageComparison} />
       <Route component={NotFound} />
     </Switch>

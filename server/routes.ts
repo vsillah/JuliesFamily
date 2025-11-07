@@ -2100,31 +2100,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leads = await storage.getAllLeads();
       const stages = await storage.getPipelineStages();
       
-      // Group leads by pipeline stage
-      const board: Record<string, any[]> = {};
+      // Group leads by pipeline stage slug (canonical identifier)
+      const leadsByStage: Record<string, any[]> = {};
       
+      // Initialize empty arrays for each stage using slug as key
       stages.forEach(stage => {
-        board[stage.name] = [];
+        leadsByStage[stage.slug] = [];
       });
 
+      // Group leads by their pipelineStage value (which matches stage slug)
       leads.forEach(lead => {
-        const stageName = lead.pipelineStage || 'new_lead';
-        // Find matching stage by position/name logic
-        const matchingStage = stages.find(s => 
-          s.name.toLowerCase().replace(/\s+/g, '_') === stageName.toLowerCase()
-        );
+        const stageSlug = lead.pipelineStage || 'new_lead';
         
-        if (matchingStage) {
-          board[matchingStage.name].push(lead);
+        // Add lead to the appropriate stage bucket
+        if (leadsByStage[stageSlug]) {
+          leadsByStage[stageSlug].push(lead);
         } else {
-          // Default to "New Lead" if stage not found
-          if (board['New Lead']) {
-            board['New Lead'].push(lead);
+          // Fallback to new_lead if stage slug not found
+          if (leadsByStage['new_lead']) {
+            leadsByStage['new_lead'].push(lead);
           }
         }
       });
 
-      res.json({ stages, board });
+      res.json({ stages, leadsByStage });
     } catch (error) {
       console.error("Error fetching pipeline board:", error);
       res.status(500).json({ message: "Failed to fetch pipeline board" });

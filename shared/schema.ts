@@ -83,6 +83,7 @@ export type Interaction = typeof interactions.$inferSelect;
 export const pipelineStages = pgTable("pipeline_stages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(), // New Lead, Contacted, Qualified, Nurturing, Converted, Lost
+  slug: varchar("slug").notNull().unique(), // new_lead, contacted, qualified, etc. - canonical identifier for pipelineStage field
   description: text("description"),
   position: integer("position").notNull(), // Order of stages (1, 2, 3, etc.)
   color: varchar("color"), // UI color for kanban board
