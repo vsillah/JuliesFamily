@@ -15,7 +15,7 @@ The website uses a React 18 frontend with TypeScript and Vite. Styling is handle
 The frontend is a single-page application using `wouter` for client-side routing. State management relies on TanStack Query for server state and React hooks for local state. Key features include:
 - **Persona-Based Personalization System**: Delivers personalized content based on 5 distinct personas.
 - **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives.
-- **Personalized Lead Magnets**: A database-driven system delivering unique offers tailored to persona and funnel stage, integrated with the CRM.
+- **Personalized Lead Magnets**: A database-driven system delivering unique offers tailored to persona and funnel stage, integrated with the CRM. Features multi-select checkbox grid interface in admin panel allowing lead magnets to be assigned to multiple persona×journey stage combinations simultaneously, with bulk contentVisibility record creation.
 - **CRM Components**: Lead capture forms with tracking and an Admin Dashboard for lead management.
 - **Profile Photo Upload System**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage.
 - **Content Management System (CMS)**: A full-featured CMS for managing all website content, including images, visibility controls, and integration with Cloudinary for image optimization.
