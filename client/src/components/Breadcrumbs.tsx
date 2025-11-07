@@ -8,14 +8,20 @@ interface BreadcrumbItem {
 
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
+  variant?: 'light' | 'dark';
 }
 
-export default function Breadcrumbs({ items }: BreadcrumbsProps) {
+export default function Breadcrumbs({ items, variant = 'light' }: BreadcrumbsProps) {
+  const isDark = variant === 'dark';
+  const baseColor = isDark ? "text-white/70" : "text-muted-foreground";
+  const hoverColor = isDark ? "hover:text-white" : "hover:text-foreground";
+  const activeColor = isDark ? "text-white" : "text-foreground";
+  
   return (
     <nav className="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
       <Link 
         href="/" 
-        className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors" 
+        className={`flex items-center gap-1 ${baseColor} ${hoverColor} transition-colors`}
         data-testid="breadcrumb-home"
       >
         <Home className="w-4 h-4" />
@@ -27,17 +33,17 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
         
         return (
           <div key={index} className="flex items-center gap-2">
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            <ChevronRight className={`w-4 h-4 ${baseColor}`} />
             {item.href && !isLast ? (
               <Link 
                 href={item.href}
-                className="text-muted-foreground hover:text-foreground transition-colors" 
+                className={`${baseColor} ${hoverColor} transition-colors`}
                 data-testid={`breadcrumb-${index}`}
               >
                 {item.label}
               </Link>
             ) : (
-              <span className={isLast ? "text-foreground font-medium" : "text-muted-foreground"} data-testid={`breadcrumb-${index}`}>
+              <span className={isLast ? `${activeColor} font-medium` : baseColor} data-testid={`breadcrumb-${index}`}>
                 {item.label}
               </span>
             )}
