@@ -137,11 +137,11 @@ export default function ProgramDetailDialog({
           {/* Tabbed Content */}
           <div className="px-6 pb-6">
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="overview" data-testid="tab-overview">Overview</TabsTrigger>
-                <TabsTrigger value="features" data-testid="tab-features">What's Included</TabsTrigger>
-                <TabsTrigger value="enroll" data-testid="tab-enroll">How to Enroll</TabsTrigger>
-                <TabsTrigger value="faq" data-testid="tab-faq">FAQ</TabsTrigger>
+              <TabsList className="w-full inline-flex h-auto flex-nowrap overflow-x-auto sm:grid sm:grid-cols-4">
+                <TabsTrigger value="overview" data-testid="tab-overview" className="flex-shrink-0">Overview</TabsTrigger>
+                <TabsTrigger value="features" data-testid="tab-features" className="flex-shrink-0">What's Included</TabsTrigger>
+                <TabsTrigger value="enroll" data-testid="tab-enroll" className="flex-shrink-0">How to Enroll</TabsTrigger>
+                <TabsTrigger value="faq" data-testid="tab-faq" className="flex-shrink-0">FAQ</TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
