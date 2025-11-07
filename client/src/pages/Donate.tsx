@@ -259,7 +259,7 @@ export default function Donate() {
 
     try {
       const response = await apiRequest('POST', '/api/donations/create-checkout', {
-        amount,
+        amount: Math.round(amount * 100), // Convert dollars to cents for Stripe
         donationType,
         frequency: donationType === 'recurring' ? frequency : null,
         donorEmail: donorInfo.email,

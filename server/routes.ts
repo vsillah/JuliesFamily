@@ -1314,7 +1314,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid donation type" });
       }
 
-      const amountInCents = Math.round(amount * 100);
+      // Amount is already in cents from frontend
+      const amountInCents = Math.round(amount);
 
       if (donationType === 'recurring') {
         // For recurring donations, we need to create a subscription
