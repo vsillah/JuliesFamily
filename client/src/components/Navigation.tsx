@@ -182,10 +182,6 @@ export default function Navigation() {
                 </>
               )}
               
-              <Button variant="default" size="sm" data-testid="button-donate" className="font-semibold">
-                Donate
-              </Button>
-              
               {isAuthenticated && user ? (
                 <>
                   <div className="relative group">
