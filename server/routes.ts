@@ -1,10 +1,10 @@
 // API routes with Replit Auth integration, CRM functionality, and Object Storage
 // Reference: blueprint:javascript_log_in_with_replit, blueprint:javascript_object_storage
-import type { Express, RequestHandler } from "express";
+import type { Express, RequestHandler, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, type User } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -14,6 +14,11 @@ import { analyzeSocialPostScreenshot } from "./gemini";
 import { sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
 import Stripe from "stripe";
+
+// Extend Express Request to properly type authenticated user
+interface AuthenticatedRequest extends Request {
+  user: User & { id: string };
+}
 
 // Reference: blueprint:javascript_stripe
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -1816,8 +1821,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             id: enrollment.id,
             campaignId: enrollment.campaignId,
             status: enrollment.status,
-            currentStep: enrollment.currentStep,
-            completedSteps: enrollment.completedSteps,
+            currentStep: enrollment.currentStepNumber || 0,
+            completedSteps: enrollment.currentStepNumber || 0,
           }
         });
       });
@@ -1882,11 +1887,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Assign lead to team member
-  app.post("/api/leads/:leadId/assignment", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/leads/:leadId/assignment", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { leadId } = req.params;
       const { assignedTo, assignmentType, notes } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user.id;
 
       // Validate required fields
       if (!assignedTo) {
@@ -1951,10 +1956,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new task
-  app.post("/api/tasks", isAuthenticated, isAdmin, async (req, res) => {
+  app.post("/api/tasks", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const taskData = req.body;
-      const userId = req.user!.id;
+      const userId = req.user.id;
 
       // Set createdBy to current user
       taskData.createdBy = userId;
@@ -2009,11 +2014,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update lead pipeline stage
-  app.patch("/api/leads/:leadId/pipeline-stage", isAuthenticated, isAdmin, async (req, res) => {
+  app.patch("/api/leads/:leadId/pipeline-stage", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
     try {
       const { leadId } = req.params;
       const { pipelineStage, reason } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user.id;
 
       if (!pipelineStage) {
         return res.status(400).json({ message: "pipelineStage is required" });
