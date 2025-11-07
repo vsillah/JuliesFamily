@@ -5,7 +5,8 @@ import {
   contentItems, contentVisibility,
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems,
-  emailTemplates, emailLogs,
+  emailTemplates, emailLogs, smsTemplates, smsSends, communicationLogs,
+  emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -22,7 +23,13 @@ import {
   type Donation, type InsertDonation,
   type WishlistItem, type InsertWishlistItem,
   type EmailTemplate, type InsertEmailTemplate,
-  type EmailLog, type InsertEmailLog
+  type EmailLog, type InsertEmailLog,
+  type SmsTemplate, type InsertSmsTemplate,
+  type SmsSend, type InsertSmsSend,
+  type CommunicationLog, type InsertCommunicationLog,
+  type EmailCampaign, type InsertEmailCampaign,
+  type EmailSequenceStep, type InsertEmailSequenceStep,
+  type EmailCampaignEnrollment, type InsertEmailCampaignEnrollment
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -180,6 +187,45 @@ export interface IStorage {
   createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
   getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]>;
   getRecentEmailLogs(limit?: number): Promise<EmailLog[]>;
+  
+  // SMS Template operations
+  createSmsTemplate(template: InsertSmsTemplate): Promise<SmsTemplate>;
+  getAllSmsTemplates(): Promise<SmsTemplate[]>;
+  getSmsTemplateById(id: string): Promise<SmsTemplate | undefined>;
+  getSmsTemplatesByPersona(persona: string): Promise<SmsTemplate[]>;
+  updateSmsTemplate(id: string, updates: Partial<InsertSmsTemplate>): Promise<SmsTemplate | undefined>;
+  deleteSmsTemplate(id: string): Promise<void>;
+  
+  // SMS Send operations
+  createSmsSend(send: InsertSmsSend): Promise<SmsSend>;
+  getSmsSendsByLead(leadId: string): Promise<SmsSend[]>;
+  getRecentSmsSends(limit?: number): Promise<SmsSend[]>;
+  updateSmsSendStatus(id: string, status: string, deliveredAt?: Date): Promise<SmsSend | undefined>;
+  
+  // Communication Log operations
+  createCommunicationLog(log: InsertCommunicationLog): Promise<CommunicationLog>;
+  getLeadCommunications(leadId: string): Promise<CommunicationLog[]>;
+  
+  // Email Campaign operations
+  createEmailCampaign(campaign: InsertEmailCampaign): Promise<EmailCampaign>;
+  getAllEmailCampaigns(): Promise<EmailCampaign[]>;
+  getEmailCampaign(id: string): Promise<EmailCampaign | undefined>;
+  getActiveCampaigns(): Promise<EmailCampaign[]>;
+  updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign | undefined>;
+  deleteEmailCampaign(id: string): Promise<void>;
+  
+  // Email Sequence Step operations
+  createEmailSequenceStep(step: InsertEmailSequenceStep): Promise<EmailSequenceStep>;
+  getCampaignSteps(campaignId: string): Promise<EmailSequenceStep[]>;
+  updateEmailSequenceStep(id: string, updates: Partial<InsertEmailSequenceStep>): Promise<EmailSequenceStep | undefined>;
+  deleteEmailSequenceStep(id: string): Promise<void>;
+  
+  // Email Campaign Enrollment operations
+  createEnrollment(enrollment: InsertEmailCampaignEnrollment): Promise<EmailCampaignEnrollment>;
+  getLeadEnrollments(leadId: string): Promise<EmailCampaignEnrollment[]>;
+  getCampaignEnrollments(campaignId: string): Promise<EmailCampaignEnrollment[]>;
+  getEnrollment(campaignId: string, leadId: string): Promise<EmailCampaignEnrollment | undefined>;
+  updateEnrollment(id: string, updates: Partial<InsertEmailCampaignEnrollment>): Promise<EmailCampaignEnrollment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1096,6 +1142,192 @@ export class DatabaseStorage implements IStorage {
       .from(emailLogs)
       .orderBy(desc(emailLogs.createdAt))
       .limit(limit);
+  }
+
+  // SMS Template operations
+  async createSmsTemplate(templateData: InsertSmsTemplate): Promise<SmsTemplate> {
+    const [template] = await db.insert(smsTemplates).values(templateData).returning();
+    return template;
+  }
+
+  async getAllSmsTemplates(): Promise<SmsTemplate[]> {
+    return await db.select().from(smsTemplates).orderBy(desc(smsTemplates.createdAt));
+  }
+
+  async getSmsTemplateById(id: string): Promise<SmsTemplate | undefined> {
+    const [template] = await db.select().from(smsTemplates).where(eq(smsTemplates.id, id));
+    return template;
+  }
+
+  async getSmsTemplatesByPersona(persona: string): Promise<SmsTemplate[]> {
+    return await db
+      .select()
+      .from(smsTemplates)
+      .where(or(eq(smsTemplates.persona, persona), sql`${smsTemplates.persona} IS NULL`))
+      .orderBy(desc(smsTemplates.createdAt));
+  }
+
+  async updateSmsTemplate(id: string, updates: Partial<InsertSmsTemplate>): Promise<SmsTemplate | undefined> {
+    const [updated] = await db
+      .update(smsTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(smsTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSmsTemplate(id: string): Promise<void> {
+    await db.delete(smsTemplates).where(eq(smsTemplates.id, id));
+  }
+
+  // SMS Send operations
+  async createSmsSend(sendData: InsertSmsSend): Promise<SmsSend> {
+    const [send] = await db.insert(smsSends).values(sendData).returning();
+    return send;
+  }
+
+  async getSmsSendsByLead(leadId: string): Promise<SmsSend[]> {
+    return await db
+      .select()
+      .from(smsSends)
+      .where(eq(smsSends.leadId, leadId))
+      .orderBy(desc(smsSends.createdAt));
+  }
+
+  async getRecentSmsSends(limit: number = 50): Promise<SmsSend[]> {
+    return await db
+      .select()
+      .from(smsSends)
+      .orderBy(desc(smsSends.createdAt))
+      .limit(limit);
+  }
+
+  async updateSmsSendStatus(id: string, status: string, deliveredAt?: Date): Promise<SmsSend | undefined> {
+    const [updated] = await db
+      .update(smsSends)
+      .set({ status, deliveredAt })
+      .where(eq(smsSends.id, id))
+      .returning();
+    return updated;
+  }
+
+  // Communication Log operations
+  async createCommunicationLog(logData: InsertCommunicationLog): Promise<CommunicationLog> {
+    const [log] = await db.insert(communicationLogs).values(logData).returning();
+    return log;
+  }
+
+  async getLeadCommunications(leadId: string): Promise<CommunicationLog[]> {
+    return await db
+      .select()
+      .from(communicationLogs)
+      .where(eq(communicationLogs.leadId, leadId))
+      .orderBy(desc(communicationLogs.createdAt));
+  }
+
+  // Email Campaign operations
+  async createEmailCampaign(campaignData: InsertEmailCampaign): Promise<EmailCampaign> {
+    const [campaign] = await db.insert(emailCampaigns).values(campaignData).returning();
+    return campaign;
+  }
+
+  async getAllEmailCampaigns(): Promise<EmailCampaign[]> {
+    return await db.select().from(emailCampaigns).orderBy(desc(emailCampaigns.createdAt));
+  }
+
+  async getEmailCampaign(id: string): Promise<EmailCampaign | undefined> {
+    const [campaign] = await db.select().from(emailCampaigns).where(eq(emailCampaigns.id, id));
+    return campaign;
+  }
+
+  async getActiveCampaigns(): Promise<EmailCampaign[]> {
+    return await db
+      .select()
+      .from(emailCampaigns)
+      .where(eq(emailCampaigns.isActive, true))
+      .orderBy(desc(emailCampaigns.createdAt));
+  }
+
+  async updateEmailCampaign(id: string, updates: Partial<InsertEmailCampaign>): Promise<EmailCampaign | undefined> {
+    const [updated] = await db
+      .update(emailCampaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(emailCampaigns.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteEmailCampaign(id: string): Promise<void> {
+    await db.delete(emailCampaigns).where(eq(emailCampaigns.id, id));
+  }
+
+  // Email Sequence Step operations
+  async createEmailSequenceStep(stepData: InsertEmailSequenceStep): Promise<EmailSequenceStep> {
+    const [step] = await db.insert(emailSequenceSteps).values(stepData).returning();
+    return step;
+  }
+
+  async getCampaignSteps(campaignId: string): Promise<EmailSequenceStep[]> {
+    return await db
+      .select()
+      .from(emailSequenceSteps)
+      .where(eq(emailSequenceSteps.campaignId, campaignId))
+      .orderBy(emailSequenceSteps.stepNumber);
+  }
+
+  async updateEmailSequenceStep(id: string, updates: Partial<InsertEmailSequenceStep>): Promise<EmailSequenceStep | undefined> {
+    const [updated] = await db
+      .update(emailSequenceSteps)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(emailSequenceSteps.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteEmailSequenceStep(id: string): Promise<void> {
+    await db.delete(emailSequenceSteps).where(eq(emailSequenceSteps.id, id));
+  }
+
+  // Email Campaign Enrollment operations
+  async createEnrollment(enrollmentData: InsertEmailCampaignEnrollment): Promise<EmailCampaignEnrollment> {
+    const [enrollment] = await db.insert(emailCampaignEnrollments).values(enrollmentData).returning();
+    return enrollment;
+  }
+
+  async getLeadEnrollments(leadId: string): Promise<EmailCampaignEnrollment[]> {
+    return await db
+      .select()
+      .from(emailCampaignEnrollments)
+      .where(eq(emailCampaignEnrollments.leadId, leadId))
+      .orderBy(desc(emailCampaignEnrollments.enrolledAt));
+  }
+
+  async getCampaignEnrollments(campaignId: string): Promise<EmailCampaignEnrollment[]> {
+    return await db
+      .select()
+      .from(emailCampaignEnrollments)
+      .where(eq(emailCampaignEnrollments.campaignId, campaignId))
+      .orderBy(desc(emailCampaignEnrollments.enrolledAt));
+  }
+
+  async getEnrollment(campaignId: string, leadId: string): Promise<EmailCampaignEnrollment | undefined> {
+    const [enrollment] = await db
+      .select()
+      .from(emailCampaignEnrollments)
+      .where(and(
+        eq(emailCampaignEnrollments.campaignId, campaignId),
+        eq(emailCampaignEnrollments.leadId, leadId)
+      ));
+    return enrollment;
+  }
+
+  async updateEnrollment(id: string, updates: Partial<InsertEmailCampaignEnrollment>): Promise<EmailCampaignEnrollment | undefined> {
+    const [updated] = await db
+      .update(emailCampaignEnrollments)
+      .set(updates)
+      .where(eq(emailCampaignEnrollments.id, id))
+      .returning();
+    return updated;
   }
 }
 
