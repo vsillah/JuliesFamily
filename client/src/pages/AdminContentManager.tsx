@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon } from "lucide-react";
@@ -1360,20 +1361,18 @@ export default function AdminContentManager() {
                           const isChecked = selectedLeadMagnetCombos.has(comboKey);
                           return (
                             <div key={comboKey} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
+                              <Checkbox
                                 id={`edit-combo-${comboKey}`}
                                 checked={isChecked}
-                                onChange={(e) => {
+                                onCheckedChange={(checked) => {
                                   const newSet = new Set(selectedLeadMagnetCombos);
-                                  if (e.target.checked) {
+                                  if (checked) {
                                     newSet.add(comboKey);
                                   } else {
                                     newSet.delete(comboKey);
                                   }
                                   setSelectedLeadMagnetCombos(newSet);
                                 }}
-                                className="rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
                                 data-testid={`checkbox-edit-${comboKey}`}
                               />
                               <Label htmlFor={`edit-combo-${comboKey}`} className="text-sm font-normal cursor-pointer leading-tight">
@@ -1719,20 +1718,18 @@ export default function AdminContentManager() {
                         const isChecked = selectedLeadMagnetCombos.has(comboKey);
                         return (
                           <div key={comboKey} className="flex items-center space-x-2">
-                            <input
-                              type="checkbox"
+                            <Checkbox
                               id={`create-combo-${comboKey}`}
                               checked={isChecked}
-                              onChange={(e) => {
+                              onCheckedChange={(checked) => {
                                 const newSet = new Set(selectedLeadMagnetCombos);
-                                if (e.target.checked) {
+                                if (checked) {
                                   newSet.add(comboKey);
                                 } else {
                                   newSet.delete(comboKey);
                                 }
                                 setSelectedLeadMagnetCombos(newSet);
                               }}
-                              className="rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
                               data-testid={`checkbox-create-${comboKey}`}
                             />
                             <Label htmlFor={`create-combo-${comboKey}`} className="text-sm font-normal cursor-pointer leading-tight">

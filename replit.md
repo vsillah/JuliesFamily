@@ -15,10 +15,10 @@ The website uses a React 18 frontend with TypeScript and Vite. Styling is handle
 The frontend is a single-page application using `wouter` for client-side routing. State management relies on TanStack Query for server state and React hooks for local state. Key features include:
 - **Persona-Based Personalization System**: Delivers personalized content based on 5 distinct personas.
 - **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives.
-- **Personalized Lead Magnets**: A database-driven system delivering unique offers tailored to persona and funnel stage, integrated with the CRM. Features multi-select checkbox grid interface in admin panel allowing lead magnets to be assigned to multiple persona×journey stage combinations simultaneously, with bulk contentVisibility record creation.
+- **Universal Multi-Select Visibility System**: ALL content types (services, events, testimonials, CTAs, heroes, videos, social media, program details, and lead magnets) support assignment to multiple persona×journey stage combinations simultaneously via a responsive multi-select checkbox grid interface in the admin panel, with bulk contentVisibility record creation. The grid uses mobile-first responsive design (1 column mobile, 2 columns tablet/desktop).
 - **CRM Components**: Lead capture forms with tracking and an Admin Dashboard for lead management.
 - **Profile Photo Upload System**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage.
-- **Content Management System (CMS)**: A full-featured CMS for managing all website content, including images, visibility controls, and integration with Cloudinary for image optimization.
+- **Content Management System (CMS)**: A full-featured CMS for managing all website content, including images, universal multi-select visibility controls across all content types, and integration with Cloudinary for image optimization. JSON metadata fields have been removed from dialogs to prevent conflicts with UI-based visibility controls.
 - **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations, enabling inline editing and content creation.
 - **A/B Testing System**: A comprehensive platform for testing content, layouts, messaging, and CTAs, supporting weighted variant assignment, session-based tracking, and analytics.
 - **Breadcrumb Navigation**: Hierarchical navigation across all admin pages.
