@@ -1886,6 +1886,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all assignments for a lead (assignment history)
+  app.get("/api/leads/:leadId/assignments", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const assignments = await storage.getLeadAssignments({ leadId });
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching lead assignments:", error);
+      res.status(500).json({ message: "Failed to fetch lead assignments" });
+    }
+  });
+
   // Assign lead to team member
   app.post("/api/leads/:leadId/assignment", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
     try {

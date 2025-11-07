@@ -12,10 +12,12 @@ import { format } from "date-fns";
 import {
   User, Mail, Phone, Calendar, TrendingUp, MessageSquare,
   History, Send, MessageCircle, CalendarCheck, RefreshCcw,
-  Edit2, Check, X, Download, FileText, CheckCircle2, Target
+  Edit2, Check, X, Download, FileText, CheckCircle2, Target, Users
 } from "lucide-react";
 import type { Lead, Interaction } from "@shared/schema";
 import CommunicationTimeline from "@/components/CommunicationTimeline";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Helper to format interaction type labels
 const formatInteractionType = (type: string): string => {
@@ -55,6 +57,8 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   const { toast } = useToast();
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notes, setNotes] = useState("");
+  const [selectedAssignee, setSelectedAssignee] = useState("");
+  const [assignmentNotes, setAssignmentNotes] = useState("");
 
   // Fetch lead details
   const { data: lead, isLoading: leadLoading, error: leadError } = useQuery<Lead>({
@@ -68,6 +72,55 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
     queryKey: ["/api/admin/leads", leadId, "interactions"],
     enabled: !!leadId && open,
     retry: false,
+  });
+
+  // Fetch all users (team members) for assignment dropdown
+  const { data: users = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/users"],
+    enabled: open,
+  });
+
+  // Fetch current assignment
+  const { data: currentAssignment } = useQuery<any>({
+    queryKey: ["/api/leads", leadId, "assignment"],
+    enabled: !!leadId && open,
+    retry: false,
+  });
+
+  // Fetch assignment history
+  const { data: assignmentHistory = [] } = useQuery<any[]>({
+    queryKey: ["/api/leads", leadId, "assignments"],
+    enabled: !!leadId && open,
+    retry: false,
+  });
+
+  // Assignment mutation
+  const assignLeadMutation = useMutation({
+    mutationFn: async (data: { assignedTo: string; notes: string }) => {
+      return await apiRequest("POST", `/api/leads/${leadId}/assignment`, {
+        assignedTo: data.assignedTo,
+        assignmentType: "manual",
+        notes: data.notes || null,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/leads", leadId, "assignment"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/leads", leadId, "assignments"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/assignments"] });
+      toast({
+        title: "Lead Assigned",
+        description: "The lead has been successfully assigned.",
+      });
+      setAssignmentNotes("");
+      setSelectedAssignee("");
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to assign lead. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   // Update notes mutation
@@ -146,6 +199,21 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   const handleCancelNotes = () => {
     setNotes(lead?.notes || "");
     setIsEditingNotes(false);
+  };
+
+  const handleAssignLead = () => {
+    if (!selectedAssignee) {
+      toast({
+        title: "Error",
+        description: "Please select a team member to assign.",
+        variant: "destructive",
+      });
+      return;
+    }
+    assignLeadMutation.mutate({
+      assignedTo: selectedAssignee,
+      notes: assignmentNotes,
+    });
   };
 
   const handleOutreachAction = (action: string) => {
@@ -271,6 +339,112 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
                       </div>
                     </div>
                   </>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Lead Assignment Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Lead Assignment
+                </CardTitle>
+                <CardDescription>
+                  {currentAssignment 
+                    ? "Reassign this lead to a different team member" 
+                    : "Assign this lead to a team member"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {currentAssignment && (
+                  <div className="p-4 bg-muted/50 rounded-md space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium">Currently Assigned To:</span>
+                      <Badge variant="secondary" data-testid="badge-current-assignee">
+                        {users.find((u: any) => u.id === currentAssignment.assignedTo)?.firstName || "Unknown"} {users.find((u: any) => u.id === currentAssignment.assignedTo)?.lastName || ""}
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Assigned {currentAssignment.createdAt ? format(new Date(currentAssignment.createdAt), "MMM d, yyyy 'at' h:mm a") : "recently"}
+                    </div>
+                    {currentAssignment.notes && (
+                      <div className="text-sm">
+                        <span className="font-medium">Notes:</span> {currentAssignment.notes}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="assignee-select">Assign To</Label>
+                    <Select
+                      value={selectedAssignee}
+                      onValueChange={setSelectedAssignee}
+                    >
+                      <SelectTrigger id="assignee-select" data-testid="select-assignee">
+                        <SelectValue placeholder="Select team member..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {users.map((user: any) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.firstName} {user.lastName} ({user.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="assignment-notes">Assignment Notes (Optional)</Label>
+                    <Textarea
+                      id="assignment-notes"
+                      value={assignmentNotes}
+                      onChange={(e) => setAssignmentNotes(e.target.value)}
+                      placeholder="Add notes about this assignment..."
+                      className="min-h-24"
+                      data-testid="textarea-assignment-notes"
+                    />
+                  </div>
+                  
+                  <Button
+                    onClick={handleAssignLead}
+                    disabled={!selectedAssignee || assignLeadMutation.isPending}
+                    className="w-full"
+                    data-testid="button-assign-lead"
+                  >
+                    {assignLeadMutation.isPending ? "Assigning..." : currentAssignment ? "Reassign Lead" : "Assign Lead"}
+                  </Button>
+                </div>
+
+                {/* Assignment History */}
+                {assignmentHistory.length > 1 && (
+                  <div className="space-y-3">
+                    <Separator />
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-medium">Assignment History</h4>
+                      <div className="space-y-2">
+                        {assignmentHistory.slice(1).map((assignment: any) => (
+                          <div key={assignment.id} className="p-3 bg-muted/30 rounded-md text-sm space-y-1" data-testid={`assignment-history-${assignment.id}`}>
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">
+                                {users.find((u: any) => u.id === assignment.assignedTo)?.firstName || "Unknown"} {users.find((u: any) => u.id === assignment.assignedTo)?.lastName || ""}
+                              </span>
+                              <span className="text-muted-foreground text-xs">
+                                {assignment.createdAt ? format(new Date(assignment.createdAt), "MMM d, yyyy") : "N/A"}
+                              </span>
+                            </div>
+                            {assignment.notes && (
+                              <div className="text-muted-foreground text-xs">
+                                {assignment.notes}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
