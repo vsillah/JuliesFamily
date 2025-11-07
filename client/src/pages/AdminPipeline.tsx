@@ -214,19 +214,60 @@ export default function AdminPipeline() {
       });
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/pipeline/board'] });
-      toast({
-        title: "Success",
-        description: "Lead moved to new stage",
-      });
+    onMutate: async ({ leadId, newStage }) => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: ['/api/pipeline/board'] });
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueryData<BoardData>(['/api/pipeline/board']);
+
+      // Optimistically update to the new value
+      if (previousData) {
+        queryClient.setQueryData<BoardData>(['/api/pipeline/board'], (old) => {
+          if (!old) return old;
+
+          // Create a deep copy of leadsByStage
+          const newLeadsByStage = { ...old.leadsByStage };
+          
+          // Find the lead and remove it from its current stage
+          let movedLead: Lead | undefined;
+          Object.entries(newLeadsByStage).forEach(([stageSlug, leads]) => {
+            const leadIndex = leads.findIndex(l => l.id === leadId);
+            if (leadIndex !== -1) {
+              movedLead = { ...leads[leadIndex], pipelineStage: newStage };
+              newLeadsByStage[stageSlug] = leads.filter(l => l.id !== leadId);
+            }
+          });
+
+          // Add the lead to the new stage
+          if (movedLead && newLeadsByStage[newStage]) {
+            newLeadsByStage[newStage] = [...newLeadsByStage[newStage], movedLead];
+          }
+
+          return {
+            ...old,
+            leadsByStage: newLeadsByStage,
+          };
+        });
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData };
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        queryClient.setQueryData(['/api/pipeline/board'], context.previousData);
+      }
       toast({
         variant: "destructive",
         title: "Error",
         description: error.message || "Failed to update lead stage",
       });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we're in sync with the server
+      queryClient.invalidateQueries({ queryKey: ['/api/pipeline/board'] });
     },
   });
 
