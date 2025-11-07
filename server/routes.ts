@@ -1744,6 +1744,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get communication timeline for a lead
+  app.get('/api/leads/:leadId/timeline', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      
+      // Fetch lead to get email for email logs
+      const lead = await storage.getLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      // Fetch all communication types
+      const [interactions, smsSends, enrollments, emailLogs] = await Promise.all([
+        storage.getLeadInteractions(leadId),
+        storage.getSmsSendsByLead(leadId),
+        storage.getLeadEnrollments(leadId),
+        lead.email ? storage.getEmailLogsByRecipient(lead.email) : Promise.resolve([])
+      ]);
+      
+      // Transform to unified timeline format
+      const timeline: any[] = [];
+      
+      // Add interactions (notes, calls, meetings)
+      interactions.forEach(interaction => {
+        // Use contentEngaged as primary fallback, then notes
+        const content = interaction.contentEngaged || interaction.notes || '';
+        
+        timeline.push({
+          id: `interaction-${interaction.id}`,
+          type: 'interaction',
+          subType: interaction.interactionType,
+          timestamp: interaction.createdAt,
+          content,
+          metadata: {
+            id: interaction.id,
+            interactionType: interaction.interactionType,
+            contentEngaged: interaction.contentEngaged,
+            notes: interaction.notes,
+            data: interaction.data,
+          }
+        });
+      });
+      
+      // Add SMS sends
+      smsSends.forEach(sms => {
+        timeline.push({
+          id: `sms-${sms.id}`,
+          type: 'sms',
+          subType: sms.status,
+          timestamp: sms.sentAt || sms.createdAt,
+          content: sms.messageContent,
+          metadata: {
+            id: sms.id,
+            status: sms.status,
+            recipientPhone: sms.recipientPhone,
+            errorMessage: sms.errorMessage,
+          }
+        });
+      });
+      
+      // Add email campaign enrollments
+      enrollments.forEach(enrollment => {
+        timeline.push({
+          id: `enrollment-${enrollment.id}`,
+          type: 'email_campaign',
+          subType: enrollment.status,
+          timestamp: enrollment.enrolledAt,
+          content: `Enrolled in email campaign`,
+          metadata: {
+            id: enrollment.id,
+            campaignId: enrollment.campaignId,
+            status: enrollment.status,
+            currentStep: enrollment.currentStep,
+            completedSteps: enrollment.completedSteps,
+          }
+        });
+      });
+      
+      // Add individual email logs
+      emailLogs.forEach(email => {
+        timeline.push({
+          id: `email-${email.id}`,
+          type: 'email',
+          subType: email.status,
+          timestamp: email.sentAt || email.createdAt,
+          content: email.subject || 'Email sent',
+          metadata: {
+            id: email.id,
+            subject: email.subject,
+            status: email.status,
+            errorMessage: email.errorMessage,
+          }
+        });
+      });
+      
+      // Sort by timestamp descending (newest first)
+      timeline.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      res.json(timeline);
+    } catch (error) {
+      console.error("Error fetching lead timeline:", error);
+      res.status(500).json({ message: "Failed to fetch lead timeline" });
+    }
+  });
+
   // Donation Routes
   // Reference: blueprint:javascript_stripe
 

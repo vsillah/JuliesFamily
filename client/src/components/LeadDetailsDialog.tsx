@@ -15,6 +15,7 @@ import {
   Edit2, Check, X, Download, FileText, CheckCircle2, Target
 } from "lucide-react";
 import type { Lead, Interaction } from "@shared/schema";
+import CommunicationTimeline from "@/components/CommunicationTimeline";
 
 // Helper to format interaction type labels
 const formatInteractionType = (type: string): string => {
@@ -385,129 +386,8 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
               </CardContent>
             </Card>
 
-            {/* Interaction History */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <History className="w-5 h-5" />
-                  Interaction History
-                </CardTitle>
-                <CardDescription>
-                  {interactions.length} interaction{interactions.length !== 1 ? "s" : ""} recorded
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {interactionsLoading ? (
-                  <div className="text-center py-4 text-muted-foreground">Loading interactions...</div>
-                ) : interactionsError ? (
-                  <div className="text-center py-4">
-                    <div className="text-destructive text-sm">Error loading interactions</div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/leads", leadId, "interactions"] })}
-                    >
-                      Retry
-                    </Button>
-                  </div>
-                ) : interactions.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No interactions recorded yet.
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {interactions.map((interaction, index) => {
-                      const Icon = getInteractionIcon(interaction.interactionType);
-                      const data = interaction.data as Record<string, any> | null;
-                      
-                      return (
-                        <div
-                          key={interaction.id}
-                          className="p-4 border rounded-lg hover-elevate"
-                          data-testid={`interaction-${index}`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="p-2 rounded-md bg-primary/10 text-primary">
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start justify-between gap-4">
-                                <div className="flex-1">
-                                  <div className="font-medium text-sm">
-                                    {formatInteractionType(interaction.interactionType)}
-                                  </div>
-                                  {interaction.contentEngaged && (
-                                    <div className="text-sm text-muted-foreground mt-0.5">
-                                      {interaction.contentEngaged}
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="text-xs text-muted-foreground whitespace-nowrap">
-                                  {interaction.createdAt ? format(new Date(interaction.createdAt), "MMM d, yyyy h:mm a") : "Unknown"}
-                                </div>
-                              </div>
-                              
-                              {/* Format interaction-specific data */}
-                              {data && (
-                                <div className="mt-3 space-y-2">
-                                  {interaction.interactionType === 'quiz_completion' && data.recommendation && (
-                                    <div className="flex items-center gap-2">
-                                      <Badge variant="secondary" className="text-xs">
-                                        Recommended: {data.programTitle || data.recommendation}
-                                      </Badge>
-                                    </div>
-                                  )}
-                                  
-                                  {data.quizType && (
-                                    <div className="text-xs text-muted-foreground">
-                                      Quiz Type: <span className="font-medium">{data.quizType.replace(/_/g, ' ')}</span>
-                                    </div>
-                                  )}
-                                  
-                                  {data.scores && typeof data.scores === 'object' && (
-                                    <div className="text-xs">
-                                      <div className="text-muted-foreground mb-1">Scores:</div>
-                                      <div className="flex flex-wrap gap-2">
-                                        {Object.entries(data.scores).map(([key, value]) => (
-                                          <Badge key={key} variant="outline" className="text-xs">
-                                            {key.replace(/_/g, ' ')}: {String(value)}/5
-                                          </Badge>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )}
-                                  
-                                  {data.downloadUrl && (
-                                    <div className="text-xs text-muted-foreground">
-                                      File: <span className="font-medium">{data.fileName || 'Resource'}</span>
-                                    </div>
-                                  )}
-                                  
-                                  {data.scheduledDate && (
-                                    <div className="text-xs">
-                                      <Badge variant="outline" className="text-xs">
-                                        {format(new Date(data.scheduledDate), "EEEE, MMMM d 'at' h:mm a")}
-                                      </Badge>
-                                    </div>
-                                  )}
-                                  
-                                  {data.formType && (
-                                    <div className="text-xs text-muted-foreground">
-                                      Form: <span className="font-medium">{data.formType}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            {/* Communication Timeline - unified view of all interactions */}
+            <CommunicationTimeline leadId={leadId} />
           </div>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
