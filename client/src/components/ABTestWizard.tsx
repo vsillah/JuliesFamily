@@ -9,8 +9,6 @@ import { TargetStep } from "./wizard-steps/TargetStep";
 import { ReviewStep } from "./wizard-steps/ReviewStep";
 
 export type TestType = "hero" | "cta" | "card_order" | "messaging" | "layout";
-export type Persona = "student" | "provider" | "parent" | "volunteer" | "donor" | null;
-export type FunnelStage = "awareness" | "consideration" | "decision" | "retention" | null;
 
 export interface TestVariantConfig {
   id: string;
@@ -27,8 +25,7 @@ export interface TestConfiguration {
   name: string;
   description: string;
   type: TestType;
-  targetPersona: Persona;
-  targetFunnelStage: FunnelStage;
+  selectedCombinations: Set<string>; // Persona×stage combinations like "student:awareness"
   trafficAllocation: number;
   variants: TestVariantConfig[];
 }
@@ -63,8 +60,7 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
     name: "",
     description: "",
     type: "hero",
-    targetPersona: null,
-    targetFunnelStage: null,
+    selectedCombinations: new Set<string>(),
     trafficAllocation: 100,
     variants: [],
   });
@@ -95,7 +91,12 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
   };
 
   const handleComplete = () => {
-    onComplete(testConfig);
+    // Convert Set to array for JSON serialization
+    const configToSend = {
+      ...testConfig,
+      selectedCombinations: Array.from(testConfig.selectedCombinations),
+    };
+    onComplete(configToSend as any);
     handleClose();
   };
 
@@ -114,8 +115,7 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
       name: "",
       description: "",
       type: "hero",
-      targetPersona: null,
-      targetFunnelStage: null,
+      selectedCombinations: new Set<string>(),
       trafficAllocation: 100,
       variants: [],
     });
@@ -185,11 +185,9 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
 
           {currentStep === 2 && (
             <TargetStep
-              targetPersona={testConfig.targetPersona}
-              targetFunnelStage={testConfig.targetFunnelStage}
+              selectedCombinations={testConfig.selectedCombinations}
               trafficAllocation={testConfig.trafficAllocation}
-              onPersonaChange={(persona) => updateConfig({ targetPersona: persona })}
-              onFunnelStageChange={(stage) => updateConfig({ targetFunnelStage: stage })}
+              onCombinationsChange={(combinations) => updateConfig({ selectedCombinations: combinations })}
               onTrafficChange={(traffic) => updateConfig({ trafficAllocation: traffic })}
             />
           )}
@@ -200,8 +198,7 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
               testDescription={testConfig.description}
               testType={mapTestTypeToInternal(testConfig.type)}
               variants={testConfig.variants}
-              targetPersona={testConfig.targetPersona}
-              targetFunnelStage={testConfig.targetFunnelStage}
+              selectedCombinations={testConfig.selectedCombinations}
               trafficAllocation={testConfig.trafficAllocation}
             />
           )}

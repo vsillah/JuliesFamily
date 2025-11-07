@@ -182,8 +182,8 @@ export const abTests = pgTable("ab_tests", {
   description: text("description"),
   type: varchar("type").notNull(), // 'card_order', 'layout', 'messaging', 'cta', 'hero'
   status: varchar("status").notNull().default('draft'), // 'draft', 'active', 'paused', 'completed'
-  targetPersona: varchar("target_persona"), // null = all personas
-  targetFunnelStage: varchar("target_funnel_stage"), // null = all stages
+  targetPersona: varchar("target_persona"), // DEPRECATED: Legacy field for migration - use abTestTargets junction table
+  targetFunnelStage: varchar("target_funnel_stage"), // DEPRECATED: Legacy field for migration - use abTestTargets junction table
   trafficAllocation: integer("traffic_allocation").default(100), // Percentage of traffic to include (0-100)
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
@@ -195,11 +195,31 @@ export const abTests = pgTable("ab_tests", {
 
 export const insertAbTestSchema = createInsertSchema(abTests).omit({
   id: true,
+  targetPersona: true, // Deprecated - use abTestTargets junction table
+  targetFunnelStage: true, // Deprecated - use abTestTargets junction table
   createdAt: true,
   updatedAt: true,
 });
 export type InsertAbTest = z.infer<typeof insertAbTestSchema>;
 export type AbTest = typeof abTests.$inferSelect;
+
+// Junction table for A/B test targeting - links tests to multiple persona×stage combinations
+export const abTestTargets = pgTable("ab_test_targets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
+  persona: varchar("persona").notNull(), // Specific persona this test targets
+  funnelStage: varchar("funnel_stage").notNull(), // Specific funnel stage this test targets
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("ab_test_targets_unique_idx").on(table.testId, table.persona, table.funnelStage),
+]);
+
+export const insertAbTestTargetSchema = createInsertSchema(abTestTargets).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAbTestTarget = z.infer<typeof insertAbTestTargetSchema>;
+export type AbTestTarget = typeof abTestTargets.$inferSelect;
 
 // Test variants - different configurations being tested
 export const abTestVariants = pgTable("ab_test_variants", {

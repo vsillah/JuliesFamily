@@ -3,7 +3,7 @@
 import { 
   users, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
-  abTests, abTestVariants, abTestAssignments, abTestEvents,
+  abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems,
   emailTemplates, emailLogs,
   type User, type UpsertUser, 
@@ -14,6 +14,7 @@ import {
   type ContentItem, type InsertContentItem,
   type ContentVisibility, type InsertContentVisibility,
   type AbTest, type InsertAbTest,
+  type AbTestTarget, type InsertAbTestTarget,
   type AbTestVariant, type InsertAbTestVariant,
   type AbTestAssignment, type InsertAbTestAssignment,
   type AbTestEvent, type InsertAbTestEvent,
@@ -84,6 +85,7 @@ export interface IStorage {
   updateContentVisibility(id: string, updates: Partial<InsertContentVisibility>): Promise<ContentVisibility | undefined>;
   deleteContentVisibility(id: string): Promise<void>;
   getVisibleContentItems(type: string, persona?: string | null, funnelStage?: string | null): Promise<ContentItem[]>;
+  getAvailablePersonaStageCombinations(): Promise<{ persona: string; funnelStage: string; }[]>;
   
   // A/B Test operations
   createAbTest(test: InsertAbTest): Promise<AbTest>;
@@ -92,6 +94,9 @@ export interface IStorage {
   getActiveAbTests(persona?: string | null, funnelStage?: string | null): Promise<AbTest[]>;
   updateAbTest(id: string, updates: Partial<InsertAbTest>): Promise<AbTest | undefined>;
   deleteAbTest(id: string): Promise<void>;
+  createAbTestTargets(testId: string, combinations: string[]): Promise<void>;
+  getAbTestTargets(testId: string): Promise<{ persona: string; funnelStage: string; }[]>;
+  deleteAbTestTargets(testId: string): Promise<void>;
   
   // A/B Test Variant operations
   createAbTestVariant(variant: InsertAbTestVariant): Promise<AbTestVariant>;
@@ -552,6 +557,28 @@ export class DatabaseStorage implements IStorage {
 
     return await query;
   }
+
+  async getAvailablePersonaStageCombinations(): Promise<{ persona: string; funnelStage: string; }[]> {
+    const combinations = await db
+      .selectDistinct({
+        persona: contentVisibility.persona,
+        funnelStage: contentVisibility.funnelStage,
+      })
+      .from(contentVisibility)
+      .innerJoin(contentItems, eq(contentVisibility.contentItemId, contentItems.id))
+      .where(
+        and(
+          eq(contentVisibility.isVisible, true),
+          eq(contentItems.isActive, true),
+          sql`${contentVisibility.persona} IS NOT NULL`,
+          sql`${contentVisibility.funnelStage} IS NOT NULL`
+        )
+      );
+    
+    return combinations.filter((c): c is { persona: string; funnelStage: string } => 
+      c.persona !== null && c.funnelStage !== null
+    );
+  }
   
   // A/B Test operations
   async createAbTest(testData: InsertAbTest): Promise<AbTest> {
@@ -570,9 +597,47 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveAbTests(persona?: string | null, funnelStage?: string | null): Promise<AbTest[]> {
     const now = new Date();
-    return await db
-      .select()
+    
+    // If no persona or funnelStage provided, return all active tests
+    if (!persona || !funnelStage) {
+      return await db
+        .select()
+        .from(abTests)
+        .where(
+          and(
+            eq(abTests.status, 'active'),
+            or(
+              sql`${abTests.startDate} IS NULL`,
+              sql`${abTests.startDate} <= ${now}`
+            ),
+            or(
+              sql`${abTests.endDate} IS NULL`,
+              sql`${abTests.endDate} >= ${now}`
+            )
+          )
+        );
+    }
+    
+    // Return tests that target the specific persona:funnelStage combination
+    const tests = await db
+      .selectDistinct({
+        id: abTests.id,
+        name: abTests.name,
+        description: abTests.description,
+        type: abTests.type,
+        status: abTests.status,
+        targetPersona: abTests.targetPersona,
+        targetFunnelStage: abTests.targetFunnelStage,
+        trafficAllocation: abTests.trafficAllocation,
+        startDate: abTests.startDate,
+        endDate: abTests.endDate,
+        winnerVariantId: abTests.winnerVariantId,
+        createdBy: abTests.createdBy,
+        createdAt: abTests.createdAt,
+        updatedAt: abTests.updatedAt,
+      })
       .from(abTests)
+      .innerJoin(abTestTargets, eq(abTestTargets.testId, abTests.id))
       .where(
         and(
           eq(abTests.status, 'active'),
@@ -584,20 +649,12 @@ export class DatabaseStorage implements IStorage {
             sql`${abTests.endDate} IS NULL`,
             sql`${abTests.endDate} >= ${now}`
           ),
-          or(
-            sql`${abTests.targetPersona} IS NULL`,
-            persona === null || persona === undefined
-              ? sql`TRUE`
-              : eq(abTests.targetPersona, persona)
-          ),
-          or(
-            sql`${abTests.targetFunnelStage} IS NULL`,
-            funnelStage === null || funnelStage === undefined
-              ? sql`TRUE`
-              : eq(abTests.targetFunnelStage, funnelStage)
-          )
+          eq(abTestTargets.persona, persona),
+          eq(abTestTargets.funnelStage, funnelStage)
         )
       );
+    
+    return tests;
   }
 
   async updateAbTest(id: string, updates: Partial<InsertAbTest>): Promise<AbTest | undefined> {
@@ -611,6 +668,37 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAbTest(id: string): Promise<void> {
     await db.delete(abTests).where(eq(abTests.id, id));
+  }
+
+  async createAbTestTargets(testId: string, combinations: string[]): Promise<void> {
+    const targets = combinations.map(combo => {
+      const [persona, funnelStage] = combo.split(':');
+      return {
+        testId,
+        persona,
+        funnelStage,
+      };
+    });
+    
+    if (targets.length > 0) {
+      await db.insert(abTestTargets).values(targets);
+    }
+  }
+
+  async getAbTestTargets(testId: string): Promise<{ persona: string; funnelStage: string; }[]> {
+    const targets = await db
+      .select({
+        persona: abTestTargets.persona,
+        funnelStage: abTestTargets.funnelStage,
+      })
+      .from(abTestTargets)
+      .where(eq(abTestTargets.testId, testId));
+    
+    return targets as { persona: string; funnelStage: string; }[];
+  }
+
+  async deleteAbTestTargets(testId: string): Promise<void> {
+    await db.delete(abTestTargets).where(eq(abTestTargets.testId, testId));
   }
 
   // A/B Test Variant operations

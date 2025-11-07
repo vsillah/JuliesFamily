@@ -7,9 +7,6 @@ import {
   TrendingUp, CheckCircle2, AlertCircle 
 } from "lucide-react";
 
-type Persona = "student" | "provider" | "parent" | "volunteer" | "donor" | null;
-type FunnelStage = "awareness" | "consideration" | "decision" | "retention" | null;
-
 interface Variant {
   id: string;
   name: string;
@@ -25,8 +22,7 @@ interface ReviewStepProps {
   testDescription: string;
   testType: string;
   variants: Variant[];
-  targetPersona: Persona;
-  targetFunnelStage: FunnelStage;
+  selectedCombinations: Set<string>; // Persona×stage combinations like "student:awareness"
   trafficAllocation: number;
 }
 
@@ -59,15 +55,14 @@ export function ReviewStep({
   testDescription,
   testType,
   variants,
-  targetPersona,
-  targetFunnelStage,
+  selectedCombinations,
   trafficAllocation,
 }: ReviewStepProps) {
   const totalWeight = variants.reduce((sum, v) => sum + v.trafficWeight, 0);
   const hasControl = variants.some(v => v.isControl);
   const hasValidWeights = totalWeight === 100;
 
-  const isReadyToLaunch = variants.length >= 2 && hasControl && hasValidWeights;
+  const isReadyToLaunch = variants.length >= 2 && hasControl && hasValidWeights && selectedCombinations.size > 0;
 
   return (
     <div className="space-y-6">
@@ -166,20 +161,24 @@ export function ReviewStep({
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Persona</p>
-              <Badge variant="outline">
-                {targetPersona ? PERSONA_LABELS[targetPersona] : "All Personas"}
-              </Badge>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Funnel Stage</p>
-              <Badge variant="outline">
-                {targetFunnelStage ? STAGE_LABELS[targetFunnelStage] : "All Stages"}
-              </Badge>
-            </div>
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Selected Combinations ({selectedCombinations.size})</p>
+            {selectedCombinations.size > 0 ? (
+              <div className="flex flex-wrap gap-1">
+                {Array.from(selectedCombinations).map((combo) => {
+                  const [persona, stage] = combo.split(':');
+                  return (
+                    <Badge key={combo} variant="secondary" className="text-xs">
+                      {PERSONA_LABELS[persona]} - {STAGE_LABELS[stage]}
+                    </Badge>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground italic">No combinations selected. Go back to Target step to select audience segments.</p>
+            )}
           </div>
+          <Separator />
           <div>
             <p className="text-sm text-muted-foreground mb-1">Traffic Allocation</p>
             <div className="flex items-center gap-2">
@@ -209,7 +208,10 @@ export function ReviewStep({
                 <li>Mark one variant as the control</li>
               )}
               {!hasValidWeights && variants.length > 0 && (
-                <li>Ensure traffic weights sum to 100%</li>
+                <li>Ensure traffic weights sum to 100% (current: {totalWeight}%)</li>
+              )}
+              {selectedCombinations.size === 0 && (
+                <li>Select at least one persona×stage combination to target</li>
               )}
             </ul>
           </AlertDescription>

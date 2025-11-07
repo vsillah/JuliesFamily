@@ -711,6 +711,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get available persona×stage combinations (admin) - for A/B test targeting
+  app.get('/api/content/available-combinations', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const combinations = await storage.getAvailablePersonaStageCombinations();
+      res.json(combinations);
+    } catch (error) {
+      console.error("Error fetching available combinations:", error);
+      res.status(500).json({ message: "Failed to fetch available combinations" });
+    }
+  });
+
   // Create content item (admin)
   app.post('/api/content', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -996,11 +1007,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const oidcSub = req.user.claims.sub;
       const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      // Extract selectedCombinations (array of "persona:stage" strings) from request
+      const { selectedCombinations = [], ...testData } = req.body;
+      
       const validatedData = insertAbTestSchema.parse({
-        ...req.body,
+        ...testData,
         createdBy: currentUser?.id || null,
       });
+      
       const test = await storage.createAbTest(validatedData);
+      
+      // Create abTestTargets entries for each selected combination
+      if (Array.isArray(selectedCombinations) && selectedCombinations.length > 0) {
+        await storage.createAbTestTargets(test.id, selectedCombinations);
+      }
+      
       res.status(201).json(test);
     } catch (error) {
       if (error instanceof z.ZodError) {

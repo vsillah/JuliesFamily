@@ -1,58 +1,84 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Users, Target as TargetIcon, TrendingUp } from "lucide-react";
-
-type Persona = "student" | "provider" | "parent" | "volunteer" | "donor" | null;
-type FunnelStage = "awareness" | "consideration" | "decision" | "retention" | null;
+import { Checkbox } from "@/components/ui/checkbox";
+import { AlertCircle, Users, TrendingUp, Info } from "lucide-react";
 
 interface TargetStepProps {
-  targetPersona: Persona;
-  targetFunnelStage: FunnelStage;
+  selectedCombinations: Set<string>;
   trafficAllocation: number;
-  onPersonaChange: (persona: Persona) => void;
-  onFunnelStageChange: (stage: FunnelStage) => void;
+  onCombinationsChange: (combinations: Set<string>) => void;
   onTrafficChange: (traffic: number) => void;
 }
 
 const PERSONAS = [
-  { value: null, label: "All Personas", description: "Show to everyone" },
-  { value: "student", label: "Adult Education Student", description: "Prospective or current students" },
-  { value: "provider", label: "Service Provider", description: "Healthcare or social service professionals" },
-  { value: "parent", label: "Parent", description: "Parents seeking family services" },
-  { value: "volunteer", label: "Volunteer", description: "Potential or active volunteers" },
-  { value: "donor", label: "Donor", description: "Current or prospective donors" },
+  { value: "student", label: "Adult Education Student" },
+  { value: "provider", label: "Service Provider" },
+  { value: "parent", label: "Parent" },
+  { value: "volunteer", label: "Volunteer" },
+  { value: "donor", label: "Donor" },
 ];
 
 const FUNNEL_STAGES = [
-  { value: null, label: "All Stages", description: "Every visitor" },
-  { value: "awareness", label: "Awareness (TOFU)", description: "Just discovered your organization" },
-  { value: "consideration", label: "Consideration (MOFU)", description: "Evaluating options" },
-  { value: "decision", label: "Decision (BOFU)", description: "Ready to take action" },
-  { value: "retention", label: "Retention", description: "Existing clients/donors" },
+  { value: "awareness", label: "Awareness" },
+  { value: "consideration", label: "Consideration" },
+  { value: "decision", label: "Decision" },
+  { value: "retention", label: "Retention" },
 ];
 
+const PERSONA_LABELS: Record<string, string> = {
+  student: "Adult Education Student",
+  provider: "Service Provider",
+  parent: "Parent",
+  volunteer: "Volunteer",
+  donor: "Donor",
+};
+
+const FUNNEL_STAGE_LABELS: Record<string, string> = {
+  awareness: "Awareness",
+  consideration: "Consideration",
+  decision: "Decision",
+  retention: "Retention",
+};
+
+const getComboKey = (persona: string, stage: string) => `${persona}:${stage}`;
+
 export function TargetStep({
-  targetPersona,
-  targetFunnelStage,
+  selectedCombinations,
   trafficAllocation,
-  onPersonaChange,
-  onFunnelStageChange,
+  onCombinationsChange,
   onTrafficChange,
 }: TargetStepProps) {
-  const selectedPersona = PERSONAS.find(p => p.value === targetPersona);
-  const selectedStage = FUNNEL_STAGES.find(s => s.value === targetFunnelStage);
+  // Fetch available persona×stage combinations that have visible content
+  const { data: availableCombinations = [], isLoading } = useQuery<{ persona: string; funnelStage: string; }[]>({
+    queryKey: ['/api/content/available-combinations'],
+  });
 
-  // Calculate estimated audience size (simplified)
+  // Create a Set of available combination keys for quick lookup
+  const availableCombosSet = new Set(
+    availableCombinations.map(c => getComboKey(c.persona, c.funnelStage))
+  );
+
+  // Calculate estimated audience reach
   const getAudienceSize = () => {
-    let base = 100;
-    if (targetPersona) base *= 0.20; // Each persona is ~20% of traffic
-    if (targetFunnelStage) base *= 0.25; // Each stage is ~25% of traffic
-    base *= (trafficAllocation / 100);
-    return Math.round(base);
+    const totalPossibleCombinations = 20; // 5 personas × 4 stages
+    const selectedCount = selectedCombinations.size;
+    
+    if (selectedCount === 0) {
+      return 0;
+    }
+    
+    // Calculate percentage of all possible combinations
+    const combinationPercentage = (selectedCount / totalPossibleCombinations) * 100;
+    
+    // Apply traffic allocation
+    const reach = (combinationPercentage * (trafficAllocation / 100));
+    
+    return Math.round(reach);
   };
 
   const audienceSize = getAudienceSize();
@@ -62,97 +88,106 @@ export function TargetStep({
       <div>
         <h3 className="text-lg font-semibold mb-2">Target Audience</h3>
         <p className="text-sm text-muted-foreground">
-          Choose which visitors will see this test. More specific targeting gives clearer insights but requires more time to reach statistical significance.
+          Select which persona and journey stage combinations should see this test. Only combinations with existing content are available for selection.
         </p>
       </div>
 
-      {/* Persona Selection */}
+      {/* Persona × Stage Multi-Select Grid */}
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-primary" />
-            <div>
-              <CardTitle className="text-base">Persona Targeting</CardTitle>
+            <div className="flex-1">
+              <CardTitle className="text-base">Persona × Journey Stage Selection</CardTitle>
               <CardDescription className="text-sm">
-                Limit test to a specific visitor persona
+                Select the audience segments you want to test
               </CardDescription>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Select Persona</Label>
-            <Select
-              value={targetPersona || "all"}
-              onValueChange={(value) => onPersonaChange(value === "all" ? null : value as Persona)}
-            >
-              <SelectTrigger data-testid="select-persona">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-sm text-muted-foreground">Loading available combinations...</div>
+          ) : availableCombinations.length === 0 ? (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                No content visibility combinations found. Create content in the Content Manager first with specific persona×stage assignments before creating A/B tests.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-start gap-2 p-3 bg-muted/20 rounded-lg">
+                <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">
+                    Select multiple combinations to test. Grayed-out checkboxes indicate no content is currently assigned to that combination.
+                  </p>
+                </div>
+              </div>
+              
+              <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
                 {PERSONAS.map((persona) => (
-                  <SelectItem key={persona.value || "all"} value={persona.value || "all"}>
-                    <div>
-                      <div className="font-medium">{persona.label}</div>
-                      <div className="text-xs text-muted-foreground">{persona.description}</div>
+                  <div key={persona.value} className="space-y-2">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      {persona.label}
                     </div>
-                  </SelectItem>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2 sm:pl-4">
+                      {FUNNEL_STAGES.map((stage) => {
+                        const comboKey = getComboKey(persona.value, stage.value);
+                        const isAvailable = availableCombosSet.has(comboKey);
+                        const isChecked = selectedCombinations.has(comboKey);
+                        
+                        return (
+                          <div key={comboKey} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`target-combo-${comboKey}`}
+                              checked={isChecked}
+                              disabled={!isAvailable}
+                              onCheckedChange={(checked) => {
+                                const newSet = new Set(selectedCombinations);
+                                if (checked) {
+                                  newSet.add(comboKey);
+                                } else {
+                                  newSet.delete(comboKey);
+                                }
+                                onCombinationsChange(newSet);
+                              }}
+                              data-testid={`checkbox-target-${comboKey}`}
+                            />
+                            <Label 
+                              htmlFor={`target-combo-${comboKey}`} 
+                              className={`text-sm font-normal cursor-pointer leading-tight ${
+                                !isAvailable ? 'text-muted-foreground opacity-50' : ''
+                              }`}
+                            >
+                              {stage.label}
+                            </Label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {selectedPersona && (
-            <div className="p-3 bg-muted rounded-md">
-              <p className="text-sm">
-                <strong>Selected:</strong> {selectedPersona.label}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">{selectedPersona.description}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
 
-      {/* Funnel Stage Selection */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <TargetIcon className="w-5 h-5 text-primary" />
-            <div>
-              <CardTitle className="text-base">Funnel Stage Targeting</CardTitle>
-              <CardDescription className="text-sm">
-                Limit test to a specific point in the visitor journey
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Select Funnel Stage</Label>
-            <Select
-              value={targetFunnelStage || "all"}
-              onValueChange={(value) => onFunnelStageChange(value === "all" ? null : value as FunnelStage)}
-            >
-              <SelectTrigger data-testid="select-funnel-stage">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FUNNEL_STAGES.map((stage) => (
-                  <SelectItem key={stage.value || "all"} value={stage.value || "all"}>
-                    <div>
-                      <div className="font-medium">{stage.label}</div>
-                      <div className="text-xs text-muted-foreground">{stage.description}</div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {selectedStage && (
-            <div className="p-3 bg-muted rounded-md">
-              <p className="text-sm">
-                <strong>Selected:</strong> {selectedStage.label}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">{selectedStage.description}</p>
+              {selectedCombinations.size > 0 && (
+                <div className="p-3 bg-muted rounded-md">
+                  <p className="text-sm font-medium mb-2">
+                    Selected: {selectedCombinations.size} combination{selectedCombinations.size !== 1 ? 's' : ''}
+                  </p>
+                  <div className="flex flex-wrap gap-1">
+                    {Array.from(selectedCombinations).map((combo) => {
+                      const [persona, stage] = combo.split(':');
+                      return (
+                        <Badge key={combo} variant="secondary" className="text-xs">
+                          {PERSONA_LABELS[persona]} - {FUNNEL_STAGE_LABELS[stage]}
+                        </Badge>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
@@ -209,9 +244,14 @@ export function TargetStep({
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           <strong>Estimated reach:</strong> ~{audienceSize}% of total website traffic will see this test.
-          {audienceSize < 20 && (
+          {audienceSize < 20 && selectedCombinations.size > 0 && (
             <span className="block mt-1 text-xs">
               ⚠️ Small audience size may require 2-4 weeks to reach statistical significance.
+            </span>
+          )}
+          {selectedCombinations.size === 0 && (
+            <span className="block mt-1 text-xs">
+              ⚠️ Please select at least one persona×stage combination to target.
             </span>
           )}
         </AlertDescription>
