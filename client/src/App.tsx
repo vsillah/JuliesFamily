@@ -17,6 +17,7 @@ import AdminContentManager from "@/pages/AdminContentManager";
 import AdminUserManagement from "@/pages/AdminUserManagement";
 import AdminABTesting from "@/pages/AdminABTesting";
 import AdminABTestAnalytics from "@/pages/AdminABTestAnalytics";
+import AdminEmailCampaigns from "@/pages/AdminEmailCampaigns";
 import ImageComparison from "@/pages/ImageComparison";
 import NotFound from "@/pages/not-found";
 
@@ -35,6 +36,7 @@ function Router() {
       <Route path="/admin/users" component={AdminUserManagement} />
       <Route path="/admin/ab-testing" component={AdminABTesting} />
       <Route path="/admin/ab-testing/:id" component={AdminABTestAnalytics} />
+      <Route path="/admin/email-campaigns" component={AdminEmailCampaigns} />
       <Route path="/comparison" component={ImageComparison} />
       <Route component={NotFound} />
     </Switch>

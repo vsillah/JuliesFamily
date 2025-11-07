@@ -147,6 +147,12 @@ export default function AdminDashboard() {
                   <span className="hidden sm:inline">A/B Testing</span>
                 </Button>
               </Link>
+              <Link href="/admin/email-campaigns">
+                <Button variant="outline" size="sm" data-testid="button-email-campaigns">
+                  <Mail className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Email Campaigns</span>
+                </Button>
+              </Link>
               <Button 
                 variant="outline" 
                 size="sm" 

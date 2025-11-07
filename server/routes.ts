@@ -4,7 +4,7 @@ import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -1361,6 +1361,221 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating review visibility:", error);
       res.status(500).json({ message: "Failed to update review visibility" });
+    }
+  });
+
+  // Email Campaign Routes (admin only)
+  
+  // Get all email campaigns
+  app.get('/api/email-campaigns', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const campaigns = await storage.getAllEmailCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching email campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch email campaigns" });
+    }
+  });
+
+  // Get active email campaigns
+  app.get('/api/email-campaigns/active', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const campaigns = await storage.getActiveCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching active email campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch active email campaigns" });
+    }
+  });
+
+  // Get single email campaign with sequence steps
+  app.get('/api/email-campaigns/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const campaign = await storage.getEmailCampaign(id);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+
+      // Get sequence steps for this campaign
+      const steps = await storage.getCampaignSteps(id);
+      
+      res.json({ ...campaign, steps });
+    } catch (error) {
+      console.error("Error fetching email campaign:", error);
+      res.status(500).json({ message: "Failed to fetch email campaign" });
+    }
+  });
+
+  // Create email campaign
+  app.post('/api/email-campaigns', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertEmailCampaignSchema.parse(req.body);
+      const campaign = await storage.createEmailCampaign(validatedData);
+      res.json(campaign);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid campaign data", errors: error.errors });
+      }
+      console.error("Error creating email campaign:", error);
+      res.status(500).json({ message: "Failed to create email campaign" });
+    }
+  });
+
+  // Update email campaign
+  app.patch('/api/email-campaigns/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertEmailCampaignSchema.partial().parse(req.body);
+      const updated = await storage.updateEmailCampaign(id, validatedData);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json(updated);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid campaign data", errors: error.errors });
+      }
+      console.error("Error updating email campaign:", error);
+      res.status(500).json({ message: "Failed to update email campaign" });
+    }
+  });
+
+  // Delete email campaign
+  app.delete('/api/email-campaigns/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteEmailCampaign(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting email campaign:", error);
+      res.status(500).json({ message: "Failed to delete email campaign" });
+    }
+  });
+
+  // Email Sequence Step Routes
+  
+  // Create email sequence step
+  app.post('/api/email-sequence-steps', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertEmailSequenceStepSchema.parse(req.body);
+      const step = await storage.createEmailSequenceStep(validatedData);
+      res.json(step);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid sequence step data", errors: error.errors });
+      }
+      console.error("Error creating email sequence step:", error);
+      res.status(500).json({ message: "Failed to create email sequence step" });
+    }
+  });
+
+  // Update email sequence step
+  app.patch('/api/email-sequence-steps/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertEmailSequenceStepSchema.partial().parse(req.body);
+      const updated = await storage.updateEmailSequenceStep(id, validatedData);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Sequence step not found" });
+      }
+      
+      res.json(updated);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid sequence step data", errors: error.errors });
+      }
+      console.error("Error updating email sequence step:", error);
+      res.status(500).json({ message: "Failed to update email sequence step" });
+    }
+  });
+
+  // Delete email sequence step
+  app.delete('/api/email-sequence-steps/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteEmailSequenceStep(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting email sequence step:", error);
+      res.status(500).json({ message: "Failed to delete email sequence step" });
+    }
+  });
+
+  // Email Campaign Enrollment Routes
+  
+  // Enroll a lead in a campaign
+  app.post('/api/email-enrollments', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertEmailCampaignEnrollmentSchema.parse(req.body);
+      
+      // Check if already enrolled
+      const existing = await storage.getEnrollment(
+        validatedData.campaignId,
+        validatedData.leadId
+      );
+      
+      if (existing) {
+        return res.status(400).json({ message: "Lead already enrolled in this campaign" });
+      }
+      
+      const enrollment = await storage.createEnrollment(validatedData);
+      res.json(enrollment);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid enrollment data", errors: error.errors });
+      }
+      console.error("Error enrolling lead in campaign:", error);
+      res.status(500).json({ message: "Failed to enroll lead in campaign" });
+    }
+  });
+
+  // Get enrollments for a lead
+  app.get('/api/email-enrollments/lead/:leadId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const enrollments = await storage.getLeadEnrollments(leadId);
+      res.json(enrollments);
+    } catch (error) {
+      console.error("Error fetching lead enrollments:", error);
+      res.status(500).json({ message: "Failed to fetch lead enrollments" });
+    }
+  });
+
+  // Get enrollments for a campaign
+  app.get('/api/email-enrollments/campaign/:campaignId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const enrollments = await storage.getCampaignEnrollments(campaignId);
+      res.json(enrollments);
+    } catch (error) {
+      console.error("Error fetching campaign enrollments:", error);
+      res.status(500).json({ message: "Failed to fetch campaign enrollments" });
+    }
+  });
+
+  // Update enrollment status
+  app.patch('/api/email-enrollments/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertEmailCampaignEnrollmentSchema.partial().parse(req.body);
+      const updated = await storage.updateEnrollment(id, validatedData);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Enrollment not found" });
+      }
+      
+      res.json(updated);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid enrollment data", errors: error.errors });
+      }
+      console.error("Error updating enrollment:", error);
+      res.status(500).json({ message: "Failed to update enrollment" });
     }
   });
 
