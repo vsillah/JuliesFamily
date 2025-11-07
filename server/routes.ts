@@ -12,6 +12,7 @@ import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "
 import multer from "multer";
 import { analyzeSocialPostScreenshot } from "./gemini";
 import { sendTemplatedEmail } from "./email";
+import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
 import Stripe from "stripe";
 
 // Reference: blueprint:javascript_stripe
@@ -1730,6 +1731,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting wishlist item:", error);
       res.status(500).json({ message: "Failed to delete wishlist item" });
+    }
+  });
+
+  // AI Copy Generation Routes (Admin only)
+  
+  // Generate Value Equation-based copy variants
+  app.post('/api/ai/generate-copy', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const response = await generateValueEquationCopy(req.body);
+      res.json(response);
+    } catch (error: any) {
+      console.error("Error generating copy:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to generate copy variants" 
+      });
+    }
+  });
+
+  // Generate A/B test variants from control variant
+  app.post('/api/ai/generate-ab-test-variants', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { controlContent, contentType, persona, funnelStage } = req.body;
+      
+      if (!controlContent || !contentType) {
+        return res.status(400).json({ 
+          message: "Missing required fields: controlContent and contentType" 
+        });
+      }
+
+      const response = await generateAbTestVariants(
+        controlContent,
+        contentType,
+        persona,
+        funnelStage
+      );
+      
+      res.json(response);
+    } catch (error: any) {
+      console.error("Error generating A/B test variants:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to generate test variants" 
+      });
     }
   });
 

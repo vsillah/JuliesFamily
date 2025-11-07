@@ -408,3 +408,28 @@ export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
 });
 export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
 export type EmailLog = typeof emailLogs.$inferSelect;
+
+// AI Copy Generations table for tracking Value Equation-based copy generation
+export const aiCopyGenerations = pgTable("ai_copy_generations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  originalContent: text("original_content").notNull(),
+  contentType: varchar("content_type").notNull(), // hero, cta, service, event, testimonial, lead_magnet
+  persona: varchar("persona"), // student, provider, parent, donor, volunteer, or null for general
+  funnelStage: varchar("funnel_stage"), // awareness, consideration, decision, retention
+  generatedVariants: jsonb("generated_variants").notNull(), // Array of {text, focus, explanation}
+  dreamOutcome: text("dream_outcome"),
+  perceivedLikelihood: text("perceived_likelihood"),
+  timeDelay: text("time_delay"),
+  effortSacrifice: text("effort_sacrifice"),
+  selectedVariantIndex: integer("selected_variant_index"), // Which variant the user chose (0-2)
+  wasCustomPrompt: boolean("was_custom_prompt").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertAiCopyGenerationSchema = createInsertSchema(aiCopyGenerations).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAiCopyGeneration = z.infer<typeof insertAiCopyGenerationSchema>;
+export type AiCopyGeneration = typeof aiCopyGenerations.$inferSelect;
