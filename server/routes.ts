@@ -1849,6 +1849,250 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // Phase 2: Lead Assignment, Task Management & Pipeline
+  // ========================================
+
+  // Get all pipeline stages
+  app.get("/api/pipeline/stages", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const stages = await storage.getPipelineStages();
+      res.json(stages);
+    } catch (error) {
+      console.error("Error fetching pipeline stages:", error);
+      res.status(500).json({ message: "Failed to fetch pipeline stages" });
+    }
+  });
+
+  // Get current assignment for a lead
+  app.get("/api/leads/:leadId/assignment", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const assignment = await storage.getLeadAssignment(leadId);
+      
+      if (!assignment) {
+        return res.status(404).json({ message: "No assignment found for this lead" });
+      }
+      
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error fetching lead assignment:", error);
+      res.status(500).json({ message: "Failed to fetch lead assignment" });
+    }
+  });
+
+  // Assign lead to team member
+  app.post("/api/leads/:leadId/assignment", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const { assignedTo, assignmentType, notes } = req.body;
+      const userId = req.user!.id;
+
+      // Validate required fields
+      if (!assignedTo) {
+        return res.status(400).json({ message: "assignedTo is required" });
+      }
+
+      // Check if lead exists
+      const lead = await storage.getLeadById(leadId);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+
+      // Create assignment
+      const assignment = await storage.createLeadAssignment({
+        leadId,
+        assignedTo,
+        assignedBy: userId,
+        assignmentType: assignmentType || 'manual',
+        notes: notes || null,
+      });
+
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error("Error creating lead assignment:", error);
+      res.status(500).json({ message: "Failed to create lead assignment" });
+    }
+  });
+
+  // Get all assignments with filters
+  app.get("/api/admin/assignments", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { assignedTo, leadId } = req.query;
+      
+      const assignments = await storage.getLeadAssignments({
+        assignedTo: assignedTo as string | undefined,
+        leadId: leadId as string | undefined,
+      });
+
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error fetching assignments:", error);
+      res.status(500).json({ message: "Failed to fetch assignments" });
+    }
+  });
+
+  // Get all tasks with filters
+  app.get("/api/tasks", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId, assignedTo, status } = req.query;
+      
+      const tasks = await storage.getTasks({
+        leadId: leadId as string | undefined,
+        assignedTo: assignedTo as string | undefined,
+        status: status as string | undefined,
+      });
+
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Failed to fetch tasks" });
+    }
+  });
+
+  // Create a new task
+  app.post("/api/tasks", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const taskData = req.body;
+      const userId = req.user!.id;
+
+      // Set createdBy to current user
+      taskData.createdBy = userId;
+
+      // Validate required fields
+      if (!taskData.leadId || !taskData.assignedTo || !taskData.title || !taskData.taskType) {
+        return res.status(400).json({ message: "Missing required fields: leadId, assignedTo, title, taskType" });
+      }
+
+      const task = await storage.createTask(taskData);
+      res.status(201).json(task);
+    } catch (error) {
+      console.error("Error creating task:", error);
+      res.status(500).json({ message: "Failed to create task" });
+    }
+  });
+
+  // Update a task
+  app.patch("/api/tasks/:taskId", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      const updates = req.body;
+
+      // If marking as completed, set completedAt
+      if (updates.status === 'completed' && !updates.completedAt) {
+        updates.completedAt = new Date().toISOString();
+      }
+
+      const task = await storage.updateTask(taskId, updates);
+      
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      res.json(task);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ message: "Failed to update task" });
+    }
+  });
+
+  // Delete a task
+  app.delete("/api/tasks/:taskId", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      await storage.deleteTask(taskId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      res.status(500).json({ message: "Failed to delete task" });
+    }
+  });
+
+  // Update lead pipeline stage
+  app.patch("/api/leads/:leadId/pipeline-stage", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const { pipelineStage, reason } = req.body;
+      const userId = req.user!.id;
+
+      if (!pipelineStage) {
+        return res.status(400).json({ message: "pipelineStage is required" });
+      }
+
+      // Get current lead to track history
+      const lead = await storage.getLeadById(leadId);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+
+      // Update lead's pipeline stage
+      const updatedLead = await storage.updateLead(leadId, { pipelineStage });
+
+      // Create pipeline history entry
+      await storage.createPipelineHistory({
+        leadId,
+        fromStage: lead.pipelineStage || null,
+        toStage: pipelineStage,
+        changedBy: userId,
+        reason: reason || null,
+      });
+
+      res.json(updatedLead);
+    } catch (error) {
+      console.error("Error updating pipeline stage:", error);
+      res.status(500).json({ message: "Failed to update pipeline stage" });
+    }
+  });
+
+  // Get pipeline history for a lead
+  app.get("/api/leads/:leadId/pipeline-history", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const history = await storage.getPipelineHistory(leadId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching pipeline history:", error);
+      res.status(500).json({ message: "Failed to fetch pipeline history" });
+    }
+  });
+
+  // Get leads grouped by pipeline stage (for kanban board)
+  app.get("/api/pipeline/board", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const leads = await storage.getAllLeads();
+      const stages = await storage.getPipelineStages();
+      
+      // Group leads by pipeline stage
+      const board: Record<string, any[]> = {};
+      
+      stages.forEach(stage => {
+        board[stage.name] = [];
+      });
+
+      leads.forEach(lead => {
+        const stageName = lead.pipelineStage || 'new_lead';
+        // Find matching stage by position/name logic
+        const matchingStage = stages.find(s => 
+          s.name.toLowerCase().replace(/\s+/g, '_') === stageName.toLowerCase()
+        );
+        
+        if (matchingStage) {
+          board[matchingStage.name].push(lead);
+        } else {
+          // Default to "New Lead" if stage not found
+          if (board['New Lead']) {
+            board['New Lead'].push(lead);
+          }
+        }
+      });
+
+      res.json({ stages, board });
+    } catch (error) {
+      console.error("Error fetching pipeline board:", error);
+      res.status(500).json({ message: "Failed to fetch pipeline board" });
+    }
+  });
+
   // Donation Routes
   // Reference: blueprint:javascript_stripe
 

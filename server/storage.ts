@@ -7,6 +7,7 @@ import {
   googleReviews, donations, wishlistItems,
   emailTemplates, emailLogs, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
+  pipelineStages, leadAssignments, tasks, pipelineHistory,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -29,7 +30,11 @@ import {
   type CommunicationLog, type InsertCommunicationLog,
   type EmailCampaign, type InsertEmailCampaign,
   type EmailSequenceStep, type InsertEmailSequenceStep,
-  type EmailCampaignEnrollment, type InsertEmailCampaignEnrollment
+  type EmailCampaignEnrollment, type InsertEmailCampaignEnrollment,
+  type PipelineStage, type InsertPipelineStage,
+  type LeadAssignment, type InsertLeadAssignment,
+  type Task, type InsertTask,
+  type PipelineHistory, type InsertPipelineHistory
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -226,6 +231,28 @@ export interface IStorage {
   getCampaignEnrollments(campaignId: string): Promise<EmailCampaignEnrollment[]>;
   getEnrollment(campaignId: string, leadId: string): Promise<EmailCampaignEnrollment | undefined>;
   updateEnrollment(id: string, updates: Partial<InsertEmailCampaignEnrollment>): Promise<EmailCampaignEnrollment | undefined>;
+  
+  // Pipeline Stage operations
+  getPipelineStages(): Promise<PipelineStage[]>;
+  getPipelineStage(id: string): Promise<PipelineStage | undefined>;
+  
+  // Lead Assignment operations
+  createLeadAssignment(assignment: InsertLeadAssignment): Promise<LeadAssignment>;
+  getLeadAssignment(leadId: string): Promise<LeadAssignment | undefined>;
+  getLeadAssignments(filters: { assignedTo?: string; leadId?: string }): Promise<LeadAssignment[]>;
+  
+  // Task operations
+  createTask(task: InsertTask): Promise<Task>;
+  getTasks(filters: { leadId?: string; assignedTo?: string; status?: string }): Promise<Task[]>;
+  updateTask(id: string, updates: Partial<InsertTask>): Promise<Task | undefined>;
+  deleteTask(id: string): Promise<void>;
+  
+  // Pipeline History operations
+  createPipelineHistory(history: InsertPipelineHistory): Promise<PipelineHistory>;
+  getPipelineHistory(leadId: string): Promise<PipelineHistory[]>;
+  
+  // Helper method used by routes
+  getLeadById(id: string): Promise<Lead | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1328,6 +1355,102 @@ export class DatabaseStorage implements IStorage {
       .where(eq(emailCampaignEnrollments.id, id))
       .returning();
     return updated;
+  }
+
+  // Pipeline Stage operations
+  async getPipelineStages(): Promise<PipelineStage[]> {
+    return await db.select().from(pipelineStages).where(eq(pipelineStages.isActive, true)).orderBy(pipelineStages.position);
+  }
+
+  async getPipelineStage(id: string): Promise<PipelineStage | undefined> {
+    const [stage] = await db.select().from(pipelineStages).where(eq(pipelineStages.id, id));
+    return stage;
+  }
+
+  // Lead Assignment operations
+  async createLeadAssignment(assignmentData: InsertLeadAssignment): Promise<LeadAssignment> {
+    const [assignment] = await db.insert(leadAssignments).values(assignmentData).returning();
+    return assignment;
+  }
+
+  async getLeadAssignment(leadId: string): Promise<LeadAssignment | undefined> {
+    const [assignment] = await db.select().from(leadAssignments)
+      .where(eq(leadAssignments.leadId, leadId))
+      .orderBy(desc(leadAssignments.createdAt))
+      .limit(1);
+    return assignment;
+  }
+
+  async getLeadAssignments(filters: { assignedTo?: string; leadId?: string }): Promise<LeadAssignment[]> {
+    let query = db.select().from(leadAssignments);
+    
+    if (filters.assignedTo) {
+      query = query.where(eq(leadAssignments.assignedTo, filters.assignedTo)) as any;
+    }
+    
+    if (filters.leadId) {
+      query = query.where(eq(leadAssignments.leadId, filters.leadId)) as any;
+    }
+    
+    return await query.orderBy(desc(leadAssignments.createdAt));
+  }
+
+  // Task operations
+  async createTask(taskData: InsertTask): Promise<Task> {
+    const [task] = await db.insert(tasks).values(taskData).returning();
+    return task;
+  }
+
+  async getTasks(filters: { leadId?: string; assignedTo?: string; status?: string }): Promise<Task[]> {
+    const conditions = [];
+    
+    if (filters.leadId) {
+      conditions.push(eq(tasks.leadId, filters.leadId));
+    }
+    
+    if (filters.assignedTo) {
+      conditions.push(eq(tasks.assignedTo, filters.assignedTo));
+    }
+    
+    if (filters.status) {
+      conditions.push(eq(tasks.status, filters.status));
+    }
+    
+    if (conditions.length === 0) {
+      return await db.select().from(tasks).orderBy(desc(tasks.createdAt));
+    }
+    
+    return await db.select().from(tasks).where(and(...conditions)).orderBy(desc(tasks.createdAt));
+  }
+
+  async updateTask(id: string, updates: Partial<InsertTask>): Promise<Task | undefined> {
+    const [task] = await db
+      .update(tasks)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(tasks.id, id))
+      .returning();
+    return task;
+  }
+
+  async deleteTask(id: string): Promise<void> {
+    await db.delete(tasks).where(eq(tasks.id, id));
+  }
+
+  // Pipeline History operations
+  async createPipelineHistory(historyData: InsertPipelineHistory): Promise<PipelineHistory> {
+    const [history] = await db.insert(pipelineHistory).values(historyData).returning();
+    return history;
+  }
+
+  async getPipelineHistory(leadId: string): Promise<PipelineHistory[]> {
+    return await db.select().from(pipelineHistory)
+      .where(eq(pipelineHistory.leadId, leadId))
+      .orderBy(desc(pipelineHistory.createdAt));
+  }
+
+  // Helper method used by routes
+  async getLeadById(id: string): Promise<Lead | undefined> {
+    return this.getLead(id);
   }
 }
 

@@ -67,6 +67,7 @@ export const interactions = pgTable("interactions", {
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   interactionType: varchar("interaction_type").notNull(), // quiz, download, form_submit, call_scheduled, etc
   contentEngaged: varchar("content_engaged"), // Name of the lead magnet or content
+  notes: text("notes"), // Optional notes about the interaction
   data: jsonb("data"), // Quiz answers, form data, etc
   createdAt: timestamp("created_at").defaultNow(),
 });
