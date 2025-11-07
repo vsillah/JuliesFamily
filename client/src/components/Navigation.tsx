@@ -104,13 +104,13 @@ export default function Navigation() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 gap-8">
+          <div className="flex items-center justify-between h-14 md:h-20 gap-8">
             {/* Left: Brand */}
             <div className="flex-shrink-0 flex items-center gap-3">
               <CloudinaryImage 
                 name="site-logo"
                 alt="Julie's Family Learning Program Logo" 
-                className="h-12 w-auto"
+                className="h-9 md:h-12 w-auto"
                 width={120}
                 quality="auto:best"
                 loading="eager"
@@ -272,7 +272,7 @@ export default function Navigation() {
             ? "bg-background/95 backdrop-blur-md border-b" 
             : "bg-transparent"
         }`}>
-          <div className="flex items-center gap-2 px-4 py-1 min-w-max">
+          <div className="flex items-center gap-2 pl-4 pr-8 py-1 min-w-max">
             <Button
               variant="ghost"
               size="sm"
