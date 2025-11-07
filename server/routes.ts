@@ -718,8 +718,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertContentItemSchema.parse(contentData);
       const item = await storage.createContentItem(validatedData);
       
-      // For lead magnets, create multiple visibility records from visibilityCombos array
-      if (contentData.type === 'lead_magnet' && visibilityCombos && Array.isArray(visibilityCombos)) {
+      // Create multiple visibility records from visibilityCombos array for all content types
+      if (visibilityCombos && Array.isArray(visibilityCombos) && visibilityCombos.length > 0) {
         try {
           for (const combo of visibilityCombos) {
             if (combo.persona && combo.funnelStage) {
@@ -732,11 +732,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         } catch (visError) {
-          console.error("Error creating visibility records for lead magnet:", visError);
+          console.error("Error creating visibility records:", visError);
           // Don't fail the whole request if visibility creation fails
         }
       }
-      // For other content types, create single visibility record if persona and funnelStage provided
+      // Fallback: create single visibility record if persona and funnelStage provided (backward compatibility)
       else if (persona && funnelStage) {
         try {
           await storage.createContentVisibility({
@@ -770,17 +770,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Content item not found" });
       }
       
-      // For lead magnets, replace all visibility records with new ones from visibilityCombos array
-      if (item.type === 'lead_magnet' && visibilityCombos && Array.isArray(visibilityCombos)) {
+      // Replace all visibility records with new ones from visibilityCombos array for all content types
+      if (visibilityCombos && Array.isArray(visibilityCombos)) {
         try {
-          // Delete all existing visibility records for this lead magnet
+          // Delete all existing visibility records for this content item
           const allVis = await storage.getAllContentVisibility();
           const existingVis = allVis.filter((v: any) => v.contentItemId === req.params.id);
           for (const vis of existingVis) {
             await storage.deleteContentVisibility(vis.id);
           }
           
-          // Create new visibility records
+          // Create new visibility records from visibilityCombos array
           for (const combo of visibilityCombos) {
             if (combo.persona && combo.funnelStage) {
               await storage.createContentVisibility({
@@ -792,11 +792,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         } catch (visError) {
-          console.error("Error updating visibility records for lead magnet:", visError);
+          console.error("Error updating visibility records:", visError);
           // Don't fail the whole request if visibility update fails
         }
       }
-      // For other content types, create or update single visibility record if persona and funnelStage provided
+      // Fallback: create or update single visibility record if persona and funnelStage provided (backward compatibility)
       else if (persona && funnelStage) {
         try {
           // Check if visibility record already exists for this combo
