@@ -9,6 +9,10 @@ import type { ContentItem } from "@shared/schema";
 export default function DonationCTA() {
   const { persona, funnelStage } = usePersona();
   const [scale, setScale] = useState(1);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const [textVisible, setTextVisible] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
   
@@ -44,6 +48,45 @@ export default function DonationCTA() {
   
   const imageName = currentCta?.imageName || "donation-cta";
   const { data: ctaImageAsset } = useCloudinaryImage(imageName);
+
+  // Reset loading states when image changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setOverlayVisible(false);
+    setTextVisible(false);
+    setImageError(false);
+  }, [imageName]);
+
+  // Trigger overlay and text visibility after image loads
+  useEffect(() => {
+    if (!imageLoaded && !imageError) return;
+    
+    // Show overlay shortly after image loads
+    const overlayTimer = setTimeout(() => {
+      setOverlayVisible(true);
+    }, 100);
+    
+    // Show text after overlay
+    const textTimer = setTimeout(() => {
+      setTextVisible(true);
+    }, 300);
+    
+    return () => {
+      clearTimeout(overlayTimer);
+      clearTimeout(textTimer);
+    };
+  }, [imageLoaded, imageError]);
+
+  // Fallback timeout in case image never loads
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      if (!imageLoaded && !imageError) {
+        setImageError(true);
+      }
+    }, 5000); // 5 second timeout
+    
+    return () => clearTimeout(fallbackTimer);
+  }, [imageLoaded, imageError]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -93,22 +136,36 @@ export default function DonationCTA() {
 
   return (
     <section id="donation" ref={sectionRef} className="relative py-32 overflow-hidden">
+      {/* Layer 1: Background Image (renders first) */}
       <div className="absolute inset-0">
         {ctaImageUrl ? (
           <img
             src={ctaImageUrl}
             alt="Donation background"
-            className="w-full h-full object-cover transition-transform duration-200 ease-out"
+            className={`w-full h-full object-cover transition-all duration-500 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{ transform: `scale(${scale})` }}
             loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
           />
         ) : (
           <div className="w-full h-full bg-muted animate-pulse" />
         )}
+      </div>
+
+      {/* Layer 2: Overlay Gradient (renders second, after image loads) */}
+      <div className={`absolute inset-0 z-[2] transition-opacity duration-700 ${
+        overlayVisible ? 'opacity-100' : 'opacity-0'
+      }`}>
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/70" />
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* Layer 3: Content (renders last, after overlay) */}
+      <div className={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-opacity duration-700 ${
+        textVisible ? 'opacity-100' : 'opacity-0'
+      }`}>
         <h2 className="text-4xl sm:text-5xl font-serif font-semibold text-white mb-6">
           {(currentCta?.title || "Be the Change").split(" ").map((word, i) => {
             const isEmphasized = ["Change", "Success", "Partner", "Quality", "Time", "Be"].includes(word);

@@ -9,8 +9,10 @@ import type { ContentItem } from "@shared/schema";
 export default function Hero() {
   const { persona, funnelStage } = usePersona();
   const [scrollScale, setScrollScale] = useState(1);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const [textVisible, setTextVisible] = useState(false);
-  const [shadeVisible, setShadeVisible] = useState(false);
+  const [imageError, setImageError] = useState(false);
   
   // Check for active A/B test (using internal type name)
   const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('hero_variation', { 
@@ -50,6 +52,14 @@ export default function Hero() {
   const imageName = currentHero?.imageName || "hero-volunteer-student";
   const { data: heroImageAsset } = useCloudinaryImage(imageName);
 
+  // Reset loading states when image changes
+  useEffect(() => {
+    setImageLoaded(false);
+    setOverlayVisible(false);
+    setTextVisible(false);
+    setImageError(false);
+  }, [imageName]);
+
   useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
@@ -62,20 +72,36 @@ export default function Hero() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Trigger overlay and text visibility after image loads
   useEffect(() => {
+    if (!imageLoaded && !imageError) return;
+    
+    // Show overlay shortly after image loads
+    const overlayTimer = setTimeout(() => {
+      setOverlayVisible(true);
+    }, 100);
+    
+    // Show text after overlay
     const textTimer = setTimeout(() => {
       setTextVisible(true);
-    }, 200);
-    
-    const shadeTimer = setTimeout(() => {
-      setShadeVisible(true);
-    }, 1000);
+    }, 300);
     
     return () => {
+      clearTimeout(overlayTimer);
       clearTimeout(textTimer);
-      clearTimeout(shadeTimer);
     };
-  }, []);
+  }, [imageLoaded, imageError]);
+
+  // Fallback timeout in case image never loads
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      if (!imageLoaded && !imageError) {
+        setImageError(true);
+      }
+    }, 5000); // 5 second timeout
+    
+    return () => clearTimeout(fallbackTimer);
+  }, [imageLoaded, imageError]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -140,38 +166,45 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Layer 1: Background Image (renders first) */}
       <div className="absolute inset-0">
         {heroImageUrl ? (
           <img
             src={heroImageUrl}
             alt="Julie's Family Learning Program classroom"
-            className="w-full h-full object-cover transition-transform duration-200 ease-out"
+            className={`w-full h-full object-cover transition-all duration-500 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{ transform: `scale(${scrollScale})` }}
             loading="eager"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
           />
         ) : (
           <div className="w-full h-full bg-muted animate-pulse" />
         )}
+      </div>
+
+      {/* Layer 2: Overlay Gradients (renders second, after image loads) */}
+      <div className={`absolute inset-0 z-[2] transition-opacity duration-700 ${
+        overlayVisible ? 'opacity-100' : 'opacity-0'
+      }`}>
         {/* Vertical gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
         {/* Radial gradient for edge vignette effect */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_50%,rgba(0,0,0,0.4)_100%)]" />
-      </div>
-      
-      {/* Horizontal shade between image and text with gradient edges */}
-      <div className="absolute inset-0 z-[5]">
+        {/* Horizontal shade between image and text with gradient edges */}
         <div 
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            shadeVisible ? 'opacity-100' : 'opacity-0'
-          }`}
+          className="absolute inset-0"
           style={{
             backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 15%, rgba(0,0,0,0.50) 30%, rgba(0,0,0,0.50) 70%, transparent 85%, transparent 100%)'
           }}
         />
       </div>
 
+      {/* Layer 3: Content (renders last, after overlay) */}
       <div 
-        className={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-opacity duration-1000 ${
+        className={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-opacity duration-700 ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
