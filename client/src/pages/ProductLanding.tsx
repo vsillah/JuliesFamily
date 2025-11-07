@@ -32,15 +32,11 @@ export default function ProductLanding() {
 
   const submitLeadMutation = useMutation({
     mutationFn: async (data: { email: string; firstName: string; lastName: string }) => {
-      return await apiRequest("/api/leads", {
-        method: "POST",
-        body: JSON.stringify({
-          ...data,
-          persona: "provider",
-          funnelStage: "awareness",
-          source: "Product Landing Page",
-        }),
-        headers: { "Content-Type": "application/json" },
+      return await apiRequest("POST", "/api/leads", {
+        ...data,
+        persona: "provider",
+        funnelStage: "awareness",
+        leadSource: "Product Landing Page",
       });
     },
     onSuccess: () => {
