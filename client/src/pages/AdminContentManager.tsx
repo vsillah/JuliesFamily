@@ -482,19 +482,12 @@ export default function AdminContentManager() {
       metadata
     };
     
-    // For lead magnets, send multiple visibility combinations
-    if (editingItem.type === 'lead_magnet') {
-      const combos = Array.from(selectedLeadMagnetCombos).map(key => {
-        const [persona, funnelStage] = key.split(':');
-        return { persona, funnelStage };
-      });
-      updates.visibilityCombos = combos;
-    }
-    // For other content types, add single persona and funnel stage if selected
-    else if (editItemPersona && editItemFunnelStage) {
-      updates.persona = editItemPersona;
-      updates.funnelStage = editItemFunnelStage;
-    }
+    // Send visibility combinations for all content types
+    const combos = Array.from(selectedLeadMagnetCombos).map(key => {
+      const [persona, funnelStage] = key.split(':');
+      return { persona, funnelStage };
+    });
+    updates.visibilityCombos = combos;
     
     updateMutation.mutate({
       id: editingItem.id,
@@ -520,19 +513,12 @@ export default function AdminContentManager() {
     
     const payload: any = itemToCreate;
     
-    // For lead magnets, send multiple visibility combinations
-    if (newItem.type === 'lead_magnet') {
-      const combos = Array.from(selectedLeadMagnetCombos).map(key => {
-        const [persona, funnelStage] = key.split(':');
-        return { persona, funnelStage };
-      });
-      payload.visibilityCombos = combos;
-    }
-    // For other content types, add single persona and funnel stage if selected
-    else if (newItemPersona && newItemFunnelStage) {
-      payload.persona = newItemPersona;
-      payload.funnelStage = newItemFunnelStage;
-    }
+    // Send visibility combinations for all content types
+    const combos = Array.from(selectedLeadMagnetCombos).map(key => {
+      const [persona, funnelStage] = key.split(':');
+      return { persona, funnelStage };
+    });
+    payload.visibilityCombos = combos;
     
     createMutation.mutate(payload);
   };
