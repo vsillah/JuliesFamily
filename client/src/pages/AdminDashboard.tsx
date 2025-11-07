@@ -113,14 +113,13 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Header Section */}
-      <div className="relative bg-gradient-to-r from-primary/90 to-primary text-white shadow-lg">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <div className="relative bg-gradient-to-r from-secondary/20 to-secondary/30 shadow-sm border-b">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <Breadcrumbs items={[{ label: "Admin Dashboard" }]} variant="dark" />
+          <Breadcrumbs items={[{ label: "Admin Dashboard" }]} />
           <div className="flex flex-col gap-6 mt-4">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-serif font-bold text-white">CRM Dashboard</h1>
-              <p className="text-white/90 text-base sm:text-lg mt-2">
+              <h1 className="text-3xl sm:text-4xl font-serif font-bold">CRM Dashboard</h1>
+              <p className="text-muted-foreground text-base sm:text-lg mt-2">
                 Manage leads and track funnel performance
               </p>
             </div>
