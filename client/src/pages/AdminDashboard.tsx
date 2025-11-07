@@ -113,7 +113,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Header Section */}
-      <div className="relative bg-gradient-to-r from-secondary/20 to-secondary/30 shadow-sm border-b">
+      <div className="relative bg-muted/30 border-b">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <Breadcrumbs items={[{ label: "Admin Dashboard" }]} />
           <div className="flex flex-col gap-6 mt-4">
