@@ -13,7 +13,7 @@ export interface GeneratedVariant {
   explanation: string;
 }
 
-export type ContentType = 'hero' | 'cta' | 'service' | 'event' | 'testimonial' | 'lead_magnet';
+export type ContentType = 'hero' | 'cta' | 'service' | 'event' | 'testimonial' | 'lead_magnet' | 'email_subject' | 'email_body';
 
 export interface CopyGenerationRequest {
   originalContent: string;
@@ -378,5 +378,15 @@ export const CONTENT_TYPE_GUIDANCE: Record<ContentType, {
     tone: 'Value-forward and enticing',
     length: '20-40 words',
     focus: 'Quick win and minimal commitment'
+  },
+  email_subject: {
+    tone: 'Compelling and curiosity-driven',
+    length: '6-10 words, max 50 characters',
+    focus: 'Hook with dream outcome or urgency, avoid spam triggers'
+  },
+  email_body: {
+    tone: 'Personal and conversational',
+    length: '150-300 words',
+    focus: 'Lead with value, build trust, clear single call-to-action'
   }
 };

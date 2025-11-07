@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Mail, Clock, Users, ChevronRight } from "lucide-react";
 import type { EmailCampaign, EmailSequenceStep } from "@shared/schema";
+import type { Persona } from "@shared/defaults/personas";
+import CopyVariantGenerator from "@/components/CopyVariantGenerator";
 
 interface CampaignWithSteps extends EmailCampaign {
   steps?: EmailSequenceStep[];
@@ -25,6 +27,10 @@ export default function AdminEmailCampaigns() {
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
   const [showStepDialog, setShowStepDialog] = useState(false);
   const [editingStep, setEditingStep] = useState<EmailSequenceStep | null>(null);
+  
+  // State for AI-generated content
+  const [subjectText, setSubjectText] = useState("");
+  const [bodyText, setBodyText] = useState("");
 
   // Fetch all campaigns
   const { data: campaigns = [], isLoading } = useQuery<EmailCampaign[]>({
@@ -478,6 +484,8 @@ export default function AdminEmailCampaigns() {
                       size="sm"
                       onClick={() => {
                         setEditingStep(null);
+                        setSubjectText("");
+                        setBodyText("");
                         setShowStepDialog(true);
                       }}
                       data-testid="button-add-step"
@@ -512,6 +520,8 @@ export default function AdminEmailCampaigns() {
                                   variant="ghost"
                                   onClick={() => {
                                     setEditingStep(step);
+                                    setSubjectText(step.subject);
+                                    setBodyText(step.htmlContent);
                                     setShowStepDialog(true);
                                   }}
                                   data-testid={`button-edit-step-${step.id}`}
@@ -574,11 +584,26 @@ export default function AdminEmailCampaigns() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="subject">Email Subject</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="subject">Email Subject</Label>
+                <CopyVariantGenerator
+                  originalContent={subjectText || editingStep?.subject || ""}
+                  contentType="email_subject"
+                  persona={selectedCampaign?.persona as Persona}
+                  onSelectVariant={(variant) => {
+                    setSubjectText(variant);
+                    const input = document.getElementById('subject') as HTMLInputElement;
+                    if (input) input.value = variant;
+                  }}
+                  buttonText="✨ AI Subject"
+                  buttonVariant="outline"
+                />
+              </div>
               <Input
                 id="subject"
                 name="subject"
-                defaultValue={editingStep?.subject || ''}
+                value={subjectText || editingStep?.subject || ''}
+                onChange={(e) => setSubjectText(e.target.value)}
                 placeholder="Enter email subject"
                 required
                 data-testid="input-subject"
@@ -586,11 +611,26 @@ export default function AdminEmailCampaigns() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="htmlContent">HTML Content</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="htmlContent">HTML Content</Label>
+                <CopyVariantGenerator
+                  originalContent={bodyText || editingStep?.htmlContent || ""}
+                  contentType="email_body"
+                  persona={selectedCampaign?.persona as Persona}
+                  onSelectVariant={(variant) => {
+                    setBodyText(variant);
+                    const textarea = document.getElementById('htmlContent') as HTMLTextAreaElement;
+                    if (textarea) textarea.value = variant;
+                  }}
+                  buttonText="✨ AI Content"
+                  buttonVariant="outline"
+                />
+              </div>
               <Textarea
                 id="htmlContent"
                 name="htmlContent"
-                defaultValue={editingStep?.htmlContent || ''}
+                value={bodyText || editingStep?.htmlContent || ''}
+                onChange={(e) => setBodyText(e.target.value)}
                 placeholder="Enter HTML email content"
                 rows={6}
                 required
