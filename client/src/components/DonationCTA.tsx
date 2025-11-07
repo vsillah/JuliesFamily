@@ -135,7 +135,7 @@ export default function DonationCTA() {
     : "";
 
   return (
-    <section id="donation" ref={sectionRef} className="relative py-32 overflow-hidden">
+    <section id="donation" ref={sectionRef} className="relative py-16 sm:py-20 overflow-hidden">
       {/* Layer 1: Background Image (renders first) */}
       <div className="absolute inset-0">
         {ctaImageUrl ? (

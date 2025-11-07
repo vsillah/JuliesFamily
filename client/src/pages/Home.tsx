@@ -80,9 +80,9 @@ export default function Home() {
       <Hero />
       <Services />
       
-      <section className="py-20 bg-muted/30" id="lead-magnet">
+      <section className="py-12 sm:py-16 bg-muted/30" id="lead-magnet">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-8">
             <h2 className="text-4xl font-serif font-bold text-primary mb-4">
               {leadMagnetContent.title}
             </h2>

@@ -100,9 +100,9 @@ export default function ImpactStats() {
   ];
 
   return (
-    <section id="impact" className="py-20 sm:py-32 bg-muted/30">
+    <section id="impact" className="py-12 sm:py-16 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+        <div className="text-center mb-8">
           <p className="text-sm uppercase tracking-wider text-muted-foreground mb-4">
             – Our Impact –
           </p>

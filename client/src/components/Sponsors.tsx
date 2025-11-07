@@ -3,9 +3,9 @@ import { Award } from "lucide-react";
 
 export default function Sponsors() {
   return (
-    <section className="py-20 bg-background">
+    <section className="py-12 sm:py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <p className="text-sm uppercase tracking-wider text-muted-foreground mb-4">
             – Our Partners –
           </p>

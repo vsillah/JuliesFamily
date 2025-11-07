@@ -54,7 +54,7 @@ export default function SocialMediaCarousel() {
 
   if (isLoading) {
     return (
-      <section className="py-20 sm:py-32 bg-background">
+      <section className="py-12 sm:py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12 text-muted-foreground">Loading posts...</div>
         </div>
@@ -67,7 +67,7 @@ export default function SocialMediaCarousel() {
   const totalSlides = validPosts.length;
 
   return (
-    <section className="py-20 sm:py-32 bg-background">
+    <section className="py-12 sm:py-16 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="text-center mb-8">
