@@ -76,18 +76,15 @@ export default function Hero() {
   useEffect(() => {
     if (!imageLoaded && !imageError) return;
     
-    // Show overlay shortly after image loads
-    const overlayTimer = setTimeout(() => {
-      setOverlayVisible(true);
-    }, 100);
+    // Show overlay immediately (no delay) to protect navigation
+    setOverlayVisible(true);
     
-    // Show text after overlay
+    // Show text after brief delay
     const textTimer = setTimeout(() => {
       setTextVisible(true);
-    }, 300);
+    }, 200);
     
     return () => {
-      clearTimeout(overlayTimer);
       clearTimeout(textTimer);
     };
   }, [imageLoaded, imageError]);
@@ -193,7 +190,7 @@ export default function Hero() {
         <div 
           className="absolute inset-0"
           style={{
-            backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.60) 0%, rgba(0,0,0,0.60) 35%, rgba(0,0,0,0.60) 65%, transparent 85%, transparent 100%)'
+            backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 35%, rgba(0,0,0,0.60) 65%, transparent 85%, transparent 100%)'
           }}
         />
       </div>
