@@ -111,18 +111,42 @@ export async function sendTemplatedEmail(
   templateName: string,
   recipientEmail: string,
   recipientName: string | undefined,
-  variables: Record<string, any>
+  variables: Record<string, any>,
+  additionalMetadata?: Record<string, any>
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Get template from database
     const template = await storage.getEmailTemplateByName(templateName);
     
     if (!template) {
-      throw new Error(`Email template not found: ${templateName}`);
+      const error = `Email template not found: ${templateName}`;
+      // Log template lookup failure
+      await storage.createEmailLog({
+        recipientEmail,
+        recipientName,
+        subject: `Template Error: ${templateName}`,
+        status: 'failed',
+        emailProvider: 'sendgrid',
+        errorMessage: error,
+        metadata: { templateName, variables, ...additionalMetadata },
+      });
+      throw new Error(error);
     }
 
     if (!template.isActive) {
-      throw new Error(`Email template is inactive: ${templateName}`);
+      const error = `Email template is inactive: ${templateName}`;
+      // Log inactive template attempt
+      await storage.createEmailLog({
+        templateId: template.id,
+        recipientEmail,
+        recipientName,
+        subject: template.subject,
+        status: 'failed',
+        emailProvider: 'sendgrid',
+        errorMessage: error,
+        metadata: { templateName, variables, ...additionalMetadata },
+      });
+      throw new Error(error);
     }
 
     // Render template with variables
@@ -132,7 +156,7 @@ export async function sendTemplatedEmail(
       : undefined;
     const subject = renderTemplate(template.subject, variables);
 
-    // Send email
+    // Send email with merged metadata
     return await sendEmail(storage, {
       to: recipientEmail,
       toName: recipientName,
@@ -140,7 +164,7 @@ export async function sendTemplatedEmail(
       html: htmlBody,
       text: textBody,
       templateId: template.id,
-      metadata: { templateName, variables },
+      metadata: { templateName, variables, ...additionalMetadata },
     });
     
   } catch (error: any) {

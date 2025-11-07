@@ -11,6 +11,7 @@ import { z } from "zod";
 import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "./cloudinary";
 import multer from "multer";
 import { analyzeSocialPostScreenshot } from "./gemini";
+import { sendTemplatedEmail } from "./email";
 import Stripe from "stripe";
 
 // Reference: blueprint:javascript_stripe
@@ -1424,7 +1425,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
             receiptUrl,
           });
           
-          // TODO: Send thank-you email (will implement in task 7)
+          // Get updated donation with recipient details
+          const updatedDonation = await storage.getDonationByStripeId(paymentIntent.id);
+          if (!updatedDonation) {
+            console.error('Donation not found after update:', paymentIntent.id);
+            break;
+          }
+          
+          // Check if emails were already sent (idempotency for retries)
+          // Note: If no donor email, we cannot reliably check for duplicates
+          let alreadySentThankYou = false;
+          let alreadySentReceipt = false;
+          
+          if (updatedDonation.donorEmail) {
+            try {
+              const existingEmails = await storage.getEmailLogsByRecipient(updatedDonation.donorEmail);
+              
+              // Check for already-sent emails using metadata
+              // Note: This system is new and all emails will have proper metadata.
+              // If metadata is missing (shouldn't happen), we'll send the email to be safe.
+              alreadySentThankYou = existingEmails.some(log => {
+                const meta = log.metadata as any;
+                return meta?.donationId === updatedDonation.id &&
+                       meta?.templateName === 'donation_thank_you' &&
+                       log.status === 'sent';
+              });
+              
+              alreadySentReceipt = existingEmails.some(log => {
+                const meta = log.metadata as any;
+                return meta?.donationId === updatedDonation.id &&
+                       meta?.templateName === 'donation_receipt' &&
+                       log.status === 'sent';
+              });
+              
+              if (alreadySentThankYou && alreadySentReceipt) {
+                console.log('Both emails already sent for donation:', updatedDonation.id);
+                break;
+              }
+            } catch (error) {
+              console.error('Error checking email logs for idempotency:', error);
+              // Continue to send emails if we can't check (better to risk duplicates than miss emails)
+            }
+          } else {
+            console.warn('No donor email for donation, cannot check for duplicate emails:', updatedDonation.id);
+          }
+          
+          // Send thank-you and receipt emails
+          if (updatedDonation.donorEmail) {
+            const donorName = updatedDonation.donorName || 'Friend';
+            const amountDollars = (updatedDonation.amount / 100).toFixed(2);
+            const date = new Date(updatedDonation.createdAt!).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            });
+            
+            // Send thank-you email only if not already sent
+            if (!alreadySentThankYou) {
+              console.log('Sending thank-you email to:', updatedDonation.donorEmail);
+              const thankYouResult = await sendTemplatedEmail(
+                storage,
+                'donation_thank_you',
+                updatedDonation.donorEmail,
+                donorName,
+                {
+                  donorName,
+                  amount: amountDollars,
+                  date,
+                  organizationName: 'Julie\'s Family Learning Program'
+                },
+                { donationId: updatedDonation.id }
+              );
+              
+              if (thankYouResult.success) {
+                console.log('Thank-you email sent successfully:', thankYouResult.messageId);
+              } else {
+                console.error('Failed to send thank-you email:', thankYouResult.error);
+              }
+            } else {
+              console.log('Thank-you email already sent for donation:', updatedDonation.id);
+            }
+            
+            // Send receipt email only if not already sent
+            if (!alreadySentReceipt) {
+              console.log('Sending receipt email to:', updatedDonation.donorEmail);
+              const receiptResult = await sendTemplatedEmail(
+                storage,
+                'donation_receipt',
+                updatedDonation.donorEmail,
+                donorName,
+                {
+                  donorName,
+                  donorEmail: updatedDonation.donorEmail,
+                  amount: amountDollars,
+                  date,
+                  donationId: updatedDonation.id,
+                  taxId: '12-3456789' // TODO: Replace with actual EIN
+                },
+                { donationId: updatedDonation.id }
+              );
+              
+              if (receiptResult.success) {
+                console.log('Receipt email sent successfully:', receiptResult.messageId);
+              } else {
+                console.error('Failed to send receipt email:', receiptResult.error);
+              }
+            } else {
+              console.log('Receipt email already sent for donation:', updatedDonation.id);
+            }
+          }
+          
           break;
         }
         
