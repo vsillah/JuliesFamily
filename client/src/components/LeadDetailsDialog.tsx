@@ -12,12 +12,14 @@ import { format } from "date-fns";
 import {
   User, Mail, Phone, Calendar, TrendingUp, MessageSquare,
   History, Send, MessageCircle, CalendarCheck, RefreshCcw,
-  Edit2, Check, X, Download, FileText, CheckCircle2, Target, Users
+  Edit2, Check, X, Download, FileText, CheckCircle2, Target, Users,
+  ListTodo, Plus, Clock
 } from "lucide-react";
 import type { Lead, Interaction } from "@shared/schema";
 import CommunicationTimeline from "@/components/CommunicationTimeline";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 // Helper to format interaction type labels
 const formatInteractionType = (type: string): string => {
@@ -59,6 +61,13 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   const [notes, setNotes] = useState("");
   const [selectedAssignee, setSelectedAssignee] = useState("");
   const [assignmentNotes, setAssignmentNotes] = useState("");
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskType, setTaskType] = useState("");
+  const [taskAssignee, setTaskAssignee] = useState("");
+  const [taskDueDate, setTaskDueDate] = useState("");
+  const [taskPriority, setTaskPriority] = useState("medium");
+  const [taskDescription, setTaskDescription] = useState("");
 
   // Fetch lead details
   const { data: lead, isLoading: leadLoading, error: leadError } = useQuery<Lead>({
@@ -94,6 +103,14 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
     retry: false,
   });
 
+  // Fetch tasks for this lead (only when dialog is open and leadId is valid)
+  const taskQueryUrl = leadId ? `/api/tasks?leadId=${leadId}` : "/api/tasks";
+  const { data: tasks = [] } = useQuery<any[]>({
+    queryKey: [taskQueryUrl],
+    enabled: !!leadId && open,
+    retry: false,
+  });
+
   // Assignment mutation
   const assignLeadMutation = useMutation({
     mutationFn: async (data: { assignedTo: string; notes: string }) => {
@@ -118,6 +135,67 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
       toast({
         title: "Error",
         description: "Failed to assign lead. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Task creation mutation
+  const createTaskMutation = useMutation({
+    mutationFn: async (taskData: any) => {
+      return await apiRequest("POST", "/api/tasks", taskData);
+    },
+    onSuccess: () => {
+      // Invalidate all task queries (predicate matches any query key starting with /api/tasks)
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.startsWith('/api/tasks');
+        }
+      });
+      toast({
+        title: "Task Created",
+        description: "The task has been created successfully.",
+      });
+      setShowAddTask(false);
+      setTaskTitle("");
+      setTaskType("");
+      setTaskAssignee("");
+      setTaskDueDate("");
+      setTaskPriority("medium");
+      setTaskDescription("");
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to create task. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Task update mutation (for marking complete)
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, updates }: { taskId: string; updates: any }) => {
+      return await apiRequest("PATCH", `/api/tasks/${taskId}`, updates);
+    },
+    onSuccess: () => {
+      // Invalidate all task queries (predicate matches any query key starting with /api/tasks)
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0];
+          return typeof key === 'string' && key.startsWith('/api/tasks');
+        }
+      });
+      toast({
+        title: "Task Updated",
+        description: "The task has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
         variant: "destructive",
       });
     },
@@ -213,6 +291,36 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
     assignLeadMutation.mutate({
       assignedTo: selectedAssignee,
       notes: assignmentNotes,
+    });
+  };
+
+  const handleCreateTask = () => {
+    if (!taskTitle || !taskType || !taskAssignee) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields (Title, Type, Assignee).",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    createTaskMutation.mutate({
+      leadId,
+      title: taskTitle,
+      taskType,
+      assignedTo: taskAssignee,
+      dueDate: taskDueDate || null,
+      priority: taskPriority,
+      description: taskDescription || null,
+      status: "pending",
+    });
+  };
+
+  const handleToggleTaskComplete = (taskId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "completed" ? "pending" : "completed";
+    updateTaskMutation.mutate({
+      taskId,
+      updates: { status: newStatus },
     });
   };
 
@@ -446,6 +554,215 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Task Management Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ListTodo className="w-5 h-5" />
+                    Tasks
+                  </CardTitle>
+                  <CardDescription>Manage follow-up tasks for this lead</CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddTask(!showAddTask)}
+                  data-testid="button-toggle-add-task"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Task
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Add Task Form */}
+                {showAddTask && (
+                  <div className="p-4 bg-muted/50 rounded-md space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="task-title">Task Title *</Label>
+                        <Input
+                          id="task-title"
+                          value={taskTitle}
+                          onChange={(e) => setTaskTitle(e.target.value)}
+                          placeholder="e.g., Follow up call"
+                          data-testid="input-task-title"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="task-type">Task Type *</Label>
+                        <Select
+                          value={taskType}
+                          onValueChange={setTaskType}
+                        >
+                          <SelectTrigger id="task-type" data-testid="select-task-type">
+                            <SelectValue placeholder="Select type..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="follow_up">Follow Up</SelectItem>
+                            <SelectItem value="call">Call</SelectItem>
+                            <SelectItem value="email">Email</SelectItem>
+                            <SelectItem value="meeting">Meeting</SelectItem>
+                            <SelectItem value="document">Document</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="task-assignee">Assign To *</Label>
+                        <Select
+                          value={taskAssignee}
+                          onValueChange={setTaskAssignee}
+                        >
+                          <SelectTrigger id="task-assignee" data-testid="select-task-assignee">
+                            <SelectValue placeholder="Select..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users.map((user: any) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.firstName} {user.lastName}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="task-due-date">Due Date</Label>
+                        <Input
+                          id="task-due-date"
+                          type="date"
+                          value={taskDueDate}
+                          onChange={(e) => setTaskDueDate(e.target.value)}
+                          data-testid="input-task-due-date"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="task-priority">Priority</Label>
+                        <Select
+                          value={taskPriority}
+                          onValueChange={setTaskPriority}
+                        >
+                          <SelectTrigger id="task-priority" data-testid="select-task-priority">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="task-description">Description (Optional)</Label>
+                      <Textarea
+                        id="task-description"
+                        value={taskDescription}
+                        onChange={(e) => setTaskDescription(e.target.value)}
+                        placeholder="Add task details..."
+                        className="min-h-20"
+                        data-testid="textarea-task-description"
+                      />
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleCreateTask}
+                        disabled={createTaskMutation.isPending}
+                        size="sm"
+                        data-testid="button-create-task"
+                      >
+                        {createTaskMutation.isPending ? "Creating..." : "Create Task"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setShowAddTask(false)}
+                        size="sm"
+                        data-testid="button-cancel-task"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Task List */}
+                <div className="space-y-3">
+                  {tasks.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-8">
+                      No tasks yet. Create one to get started.
+                    </div>
+                  ) : (
+                    tasks.map((task: any) => {
+                      const taskUser = users.find((u: any) => u.id === task.assignedTo);
+                      const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "completed";
+                      
+                      return (
+                        <div
+                          key={task.id}
+                          className={`p-4 border rounded-md space-y-2 ${task.status === "completed" ? "bg-muted/30 opacity-75" : ""}`}
+                          data-testid={`task-${task.id}`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-5 w-5 mt-0.5"
+                                onClick={() => handleToggleTaskComplete(task.id, task.status)}
+                                data-testid={`button-toggle-task-${task.id}`}
+                              >
+                                {task.status === "completed" ? (
+                                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <div className="h-5 w-5 border-2 rounded-full" />
+                                )}
+                              </Button>
+                              <div className="flex-1 space-y-1">
+                                <div className={`font-medium ${task.status === "completed" ? "line-through" : ""}`}>
+                                  {task.title}
+                                </div>
+                                {task.description && (
+                                  <div className="text-sm text-muted-foreground">{task.description}</div>
+                                )}
+                                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                  <span className="flex items-center gap-1">
+                                    <User className="w-3 h-3" />
+                                    {taskUser ? `${taskUser.firstName} ${taskUser.lastName}` : "Unassigned"}
+                                  </span>
+                                  {task.dueDate && (
+                                    <span className={`flex items-center gap-1 ${isOverdue ? "text-destructive font-medium" : ""}`}>
+                                      <Clock className="w-3 h-3" />
+                                      {format(new Date(task.dueDate), "MMM d, yyyy")}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={
+                                task.priority === "high" ? "destructive" :
+                                task.priority === "medium" ? "default" :
+                                "secondary"
+                              } className="text-xs">
+                                {task.priority}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {task.taskType.replace("_", " ")}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </CardContent>
             </Card>
 
