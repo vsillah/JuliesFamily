@@ -4,6 +4,7 @@
 
 /* LIGHT MODE */
 :root {
+  --nav-height: 0px; /* Dynamically set by Navigation component */
   --button-outline: rgba(0,0,0, .10);
   --badge-outline: rgba(0,0,0, .05);
 

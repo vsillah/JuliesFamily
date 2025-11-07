@@ -20,8 +20,29 @@ export default function Navigation() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
   const { toast } = useToast();
+  const navRef = useState<HTMLElement | null>(null)[0];
   
   const currentPersonaConfig = personaConfigs.find(p => p.id === persona);
+  
+  // Dynamically measure and sync navigation height to CSS variable
+  useEffect(() => {
+    const nav = document.querySelector('nav');
+    if (!nav) return;
+    
+    const updateNavHeight = () => {
+      const height = nav.offsetHeight;
+      document.documentElement.style.setProperty('--nav-height', `${height}px`);
+    };
+    
+    // Initial measurement
+    updateNavHeight();
+    
+    // Watch for size changes
+    const observer = new ResizeObserver(updateNavHeight);
+    observer.observe(nav);
+    
+    return () => observer.disconnect();
+  }, []);
   
   const handlePhotoUpload = async (uploadToken: string) => {
     try {
