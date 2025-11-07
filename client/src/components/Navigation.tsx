@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -244,9 +245,9 @@ export default function Navigation() {
           </div>
         </div>
       </nav>
-      {mobileMenuOpen && (
+      {mobileMenuOpen && createPortal(
         <div 
-          className="fixed inset-0 z-[999] bg-background/95 backdrop-blur-sm md:hidden pt-32"
+          className="fixed inset-0 z-[1000] bg-background/95 backdrop-blur-sm md:hidden pt-32"
         >
           <div className="flex flex-col items-center gap-6 p-8">
             {isAuthenticated && user && (
@@ -374,7 +375,8 @@ export default function Navigation() {
               </Button>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       
       {/* Profile Photo Uploader Modal */}
