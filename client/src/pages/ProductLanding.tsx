@@ -84,13 +84,13 @@ export default function ProductLanding() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <Badge className="mb-4" data-testid="badge-platform-type">
-                All-in-One Nonprofit Platform
+                Introducing Kinflo
               </Badge>
               <h1 className="text-5xl font-bold mb-6" data-testid="text-hero-title">
-                The CRM that knows your donors like you do
+                The relationship-first CRM for nonprofits
               </h1>
               <p className="text-xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
-                Personalize every touchpoint with AI-powered insights, automate your outreach, and grow donations by 28% in your first year
+                Kinflo personalizes every touchpoint with AI-powered insights, automates your outreach, and helps grow donations by 28% in your first year
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="text-lg" data-testid="button-cta-primary">
@@ -179,10 +179,10 @@ export default function ProductLanding() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4" data-testid="text-differentiators-title">
-              Why nonprofits choose us over the competition
+              Why nonprofits choose Kinflo over the competition
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              While others charge $99-$1,299/month for basic CRMs, we built the first truly intelligent nonprofit platform
+              While others charge $99-$1,299/month for basic CRMs, Kinflo is the first truly intelligent nonprofit platform built for relationships
             </p>
           </div>
 
@@ -199,7 +199,7 @@ export default function ProductLanding() {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Generate high-converting emails, SMS messages, and landing pages in seconds. Our AI creates 3 variants optimized for Dream Outcome, Trust, Speed, and Ease.
+                  Generate high-converting emails, SMS messages, and landing pages in seconds. Kinflo's AI creates 3 variants optimized for Dream Outcome, Trust, Speed, and Ease.
                 </p>
                 <div className="mt-4 flex items-center text-sm text-primary">
                   <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -303,7 +303,7 @@ export default function ProductLanding() {
       <section className="py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-5xl">
           <h2 className="text-4xl font-bold mb-12 text-center" data-testid="text-comparison-title">
-            How we compare to traditional nonprofit CRMs
+            How Kinflo compares to traditional nonprofit CRMs
           </h2>
 
           <div className="bg-card rounded-lg border overflow-hidden">
@@ -311,7 +311,7 @@ export default function ProductLanding() {
               <thead className="bg-muted">
                 <tr>
                   <th className="p-4 text-left font-semibold">Feature</th>
-                  <th className="p-4 text-center font-semibold">Our Platform</th>
+                  <th className="p-4 text-center font-semibold">Kinflo</th>
                   <th className="p-4 text-center font-semibold text-muted-foreground">Bloomerang</th>
                   <th className="p-4 text-center font-semibold text-muted-foreground">Neon CRM</th>
                   <th className="p-4 text-center font-semibold text-muted-foreground">DonorPerfect</th>
@@ -392,10 +392,10 @@ export default function ProductLanding() {
                   <Users className="h-8 w-8 text-primary" />
                 </div>
                 <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-affiliate-title">
-                  Interested in implementing this platform for your organization?
+                  Interested in implementing Kinflo for your organization?
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  We're looking for nonprofit partners and affiliates who want to leverage this powerful, persona-based CRM and website platform. Whether you're a nonprofit seeking a complete digital transformation or an agency wanting to offer this solution to your clients, we'd love to connect.
+                  We're looking for nonprofit partners and affiliates who want to leverage Kinflo's powerful, persona-based CRM and website platform. Whether you're a nonprofit seeking a complete digital transformation or an agency wanting to offer Kinflo to your clients, we'd love to connect.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                   <Button size="lg" variant="default" asChild data-testid="button-partner-contact">

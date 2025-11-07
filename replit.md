@@ -1,14 +1,7 @@
-# Julie's Family Learning Program Website
+# Julie's Family Learning Program Website (Powered by Kinflo)
 
 ## Overview
-Julie's Family Learning Program website is a non-profit, full-stack web application designed to showcase educational programs, impact, testimonials, and events. It facilitates donations and volunteering efforts. The platform features a React frontend with shadcn/ui and an Express backend, aiming for a warm and approachable aesthetic. The project seeks to enhance user engagement and streamline administrative tasks, with future ambitions including a persona-based personalization system, a CRM for lead capture, and a secure user profile system with photo uploads.
-
-## Development Checklist
-**Mandatory requirements for all new pages and features:**
-
-- ✅ **Verify responsive behavior** - Test every new or updated page across mobile (< 640px), tablet (640px-1024px), and desktop (> 1024px) breakpoints. Ensure no horizontal overflow, proper text wrapping, and appropriate spacing adjustments.
-- ✅ **Add breadcrumb navigation** - All new admin pages must include the `<Breadcrumbs>` component with proper hierarchy (Home → Admin Dashboard → Current Page). Use consistent container structure (`container mx-auto py-8 px-4 max-w-7xl`).
-- ✅ **Ensure mobile-first layouts** - Headers and action buttons should stack vertically on mobile (`flex-col`) and align horizontally on larger screens (`sm:flex-row`). Buttons should be full-width on mobile (`w-full sm:w-auto`).
+Julie's Family Learning Program website is a non-profit, full-stack web application showcasing educational programs, impact, testimonials, and events. It facilitates donations and volunteering. The platform also serves as a demonstration of **Kinflo**, a relationship-first CRM powering persona-based personalization, lead management, and communication automation. The project aims to provide a warm, approachable online presence while demonstrating advanced CRM functionalities for nonprofits.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -16,74 +9,69 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Decisions
-The website uses a React 18 frontend with TypeScript and Vite. Styling is handled by Tailwind CSS with custom CSS variables for theming, supporting light/dark modes. WCAG AA compliant colors are used, featuring a warm orange/golden primary, olive/khaki green secondary, and warm beige backgrounds. Typography includes Playfair Display (serif) for headlines and Inter (sans-serif) for body text. The UI component library is shadcn/ui on Radix UI, utilizing the "New York" style. Responsive design is a critical aspect, ensuring proper display across mobile, tablet, and desktop viewports, with a strong emphasis on preventing horizontal overflow. Dynamic and data-driven navigation is implemented.
+The frontend uses React 18 with TypeScript and Vite, styled with Tailwind CSS, custom CSS variables, and shadcn/ui (New York style). It supports light/dark modes and WCAG AA compliant colors (orange/golden primary, olive/khaki secondary, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text. Responsive design is paramount, ensuring optimal display across mobile, tablet, and desktop, with dynamic and data-driven navigation.
 
 ### Technical Implementations
-The frontend is a single-page application using `wouter` for client-side routing. State management relies on TanStack Query for server state and React hooks for local state. Key features include:
-- **Persona-Based Personalization System**: Delivers personalized content based on 5 distinct personas.
-- **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives.
-- **Universal Multi-Select Visibility System**: ALL content types (services, events, testimonials, CTAs, heroes, videos, social media, program details, and lead magnets) support assignment to multiple persona×journey stage combinations simultaneously via a responsive multi-select checkbox grid interface in the admin panel, with bulk contentVisibility record creation. The grid uses mobile-first responsive design (1 column mobile, 2 columns tablet/desktop).
-- **CRM Components**: Lead capture forms with tracking and an Admin Dashboard for lead management.
-- **Profile Photo Upload System**: Authenticated users can upload profile photos via Uppy, stored in Replit App Storage.
-- **Content Management System (CMS)**: A full-featured CMS for managing all website content, including images, universal multi-select visibility controls across all content types, and integration with Cloudinary for image optimization. JSON metadata fields have been removed from dialogs to prevent conflicts with UI-based visibility controls.
-- **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations, enabling inline editing and content creation.
-- **A/B Testing System**: A comprehensive platform for testing content, layouts, messaging, and CTAs, supporting weighted variant assignment, session-based tracking, and analytics. Uses the same responsive multi-select checkbox grid interface as content management for targeting multiple persona×journey stage combinations simultaneously. Tests persist combinations via abTestTargets junction table and serve variants only to matching visitor profiles.
-- **Breadcrumb Navigation**: Hierarchical navigation across all admin pages.
-- **User Management System**: An admin-only interface for managing user accounts and privileges. Admins can create new users (with email, first name, last name, and optional admin privileges), delete existing users, and grant/revoke admin access. Features robust validation including duplicate email detection, self-deletion prevention, and confirmation dialogs for destructive actions.
-- **User Guide System**: Provides public and protected documentation.
-- **Google Reviews Integration**: Automated fetching and display of authentic Google business reviews with admin visibility controls.
-- **Social Media Feed**: Carousel-based display of curated social media posts supporting Instagram, Facebook, and LinkedIn.
-- **AI-Powered Screenshot Analysis for Social Media**: Uses Google's Gemini AI API to automatically extract post metadata from social media screenshots to pre-populate CMS fields.
-- **YouTube Video Integration**: Zero-cost video hosting using YouTube embeds for student stories, virtual tours, and program highlights, integrated with the content visibility system.
-- **Expandable Program Detail Dialogs**: Full-screen dialog modals providing comprehensive information about Julie's three core programs (Adult Education, Children's Services, Workforce Development) without separate pages.
-- **Stripe Donation System**: Secure payment processing for one-time donations using Stripe Payment Intents with Elements UI, including preset and custom amounts, donor information capture, and anonymous donation options.
-- **Email Automation System**: Automated transactional email delivery using SendGrid with template management, variable substitution, and an email audit trail. Includes webhook integration for thank-you and tax receipt emails on successful Stripe payments. Supports AI-powered copywriting for subject lines and body content.
-- **SMS Notification System**: Template-based SMS messaging using Twilio with full CRUD capabilities for template management, variable substitution ({{firstName}}, {{lastName}}), persona targeting, and delivery tracking. Supports both template-based and custom one-off messages with AI-powered SMS copywriting integration. Features include E.164 phone number validation, character count warnings, and comprehensive send history.
-- **Communication Timeline**: Unified chronological view of all lead interactions in a single timeline component, integrated into the Lead Details dialog. Aggregates data from interactions (notes, calls, meetings), SMS sends, email campaign enrollments, and individual email logs. Features type-specific icons and color coding (email: blue, SMS: green, campaigns: purple, interactions: orange), status badges for delivery/read/failed states, content previews, and robust error handling with retry functionality. Uses contentEngaged field as primary content source to ensure all interaction types display meaningful information.
-- **Task Management System**: Comprehensive task tracking and assignment system integrated into the CRM. Features a global Admin Tasks page (/admin/tasks) with stats dashboard showing total, pending, completed, and overdue tasks. Supports task creation with full metadata (title, type, assignee, due date, priority, description), task completion toggling, and comprehensive filtering by lead, assignee, and status. Lead-specific task views are integrated into LeadDetailsDialog for contextual task management. Uses URL-based query keys with predicate-based cache invalidation for real-time UI updates across all views. Task types include follow-up, call, email, meeting, and document tasks with priority levels (low, medium, high).
-- **Pipeline Management & Analytics**: Visual kanban board for managing leads through pipeline stages with drag-and-drop functionality using @dnd-kit (closestCenter collision detection). Features slug-based stage identification, optimistic updates for instant visual feedback, and entire card draggability for improved mobile UX. Comprehensive analytics dashboard calculates conversion rates between stages, average time in each stage (days), and automatically identifies bottlenecks (stages with >7 day average or <50% conversion). Analytics intelligently handle terminal stages and empty stages by using nullable metrics, preventing false positive bottleneck flags. Supports real-time pipeline visualization with lead counts per stage, automated task creation on stage transitions, and complete pipeline history tracking.
-- **AI-Powered Copy Generation System**: Assists non-technical users in creating high-converting copy using Alex Hormozi's Value Equation framework (Dream Outcome × Perceived Likelihood / Time Delay × Effort & Sacrifice). Features persona-specific templates for all 5 personas, generates 3 variants per request with different framework focuses (balanced, dream outcome, trust/proof, speed, ease), supports both guided wizard mode and advanced custom prompt editing, costs ~$0.000017 per generation using Google Gemini AI, and integrates with A/B testing for data-driven copy optimization. Works across email campaigns, SMS notifications, and content management. Admin-only access with generation tracking via aiCopyGenerations table.
-- **Bulk Lead Import System**: Excel-based bulk lead import feature enabling Julie's to migrate existing client data safely. Supports uploading spreadsheets with columns for Email, First Name, Last Name, Phone, Persona, Funnel Stage, Pipeline Stage, Lead Source, and Notes. Includes downloadable template with sample data. For existing leads, only updates fields explicitly provided in the spreadsheet, preventing data corruption. For new leads, applies sensible defaults (persona='student', pipelineStage='new_lead', etc.). Features comprehensive error handling with per-row validation, success/failure statistics, and detailed error reporting. Automatically creates follow-up tasks for newly imported leads. Uses xlsx library for Excel file parsing.
-- **Google Calendar Integration**: Comprehensive calendar integration enabling appointment scheduling, volunteer event registration, and task synchronization. Features include: OAuth authentication via Replit Google Calendar connector, "Add to Calendar" buttons on public events with iCal download support, appointment scheduling interface at /schedule with real-time availability checking (30-minute slots, 9 AM - 5 PM Eastern Time), automated calendar event creation for task due dates using fire-and-forget async pattern, DST-aware timezone conversion using date-fns-tz library for RFC3339-compliant timestamps. Event registration form creates authenticated calendar events with attendee notifications. All calendar operations wrapped in CalendarService with automatic credential refresh.
-- **Product Landing Page**: Comprehensive marketing page at /product showcasing the platform as a marketable modular website/CRM solution for nonprofits. Based on competitive research (Bloomerang, DonorPerfect, Neon CRM, HubSpot, Giveffect), the page highlights unique differentiators: persona-based personalization (120 combinations), built-in A/B testing, AI-powered copy generation using Alex Hormozi's Value Equation, all-in-one platform (website + CRM + automation + calendar), purpose-built for nonprofits, and affordable/free pricing vs. competitors charging $99-1,299/month. Features hero section with value proposition (28% donation increase), stats showcase, feature cards with benefits, head-to-head comparison table, and lead capture form integrated with CRM. All leads auto-tagged with persona='provider', funnelStage='awareness', source='Product Landing Page'. Mobile-responsive design inspired by Pipedrive's structure.
+The frontend is a single-page application using `wouter` for routing, TanStack Query for server state, and React hooks for local state. Key features include:
+- **Persona-Based Personalization**: Delivers tailored content based on 5 distinct user personas.
+- **Admin Preview Mode**: Allows administrators to view the site from different persona and funnel stage perspectives.
+- **Universal Multi-Select Visibility System**: A responsive interface in the admin panel for assigning all content types to multiple persona and journey stage combinations.
+- **CRM Components**: Lead capture forms, an Admin Dashboard for lead management, and a unified Communication Timeline.
+- **Content Management System (CMS)**: Full-featured CMS with image management via Cloudinary and universal content visibility controls.
+- **Persona×Journey Matrix Grid**: Visual interface for configuring content visibility across 120 permutations.
+- **A/B Testing System**: Comprehensive platform for testing content, layouts, and messaging with weighted variant assignment and session-based tracking.
+- **User Management System**: Admin interface for managing user accounts and privileges, including creation, deletion, and access control.
+- **Google Reviews & Social Media Integration**: Automated display of Google reviews and a carousel for curated social media posts.
+- **AI-Powered Social Media Analysis**: Uses Google Gemini AI to extract metadata from social media screenshots for CMS pre-population.
+- **YouTube Video Integration**: Zero-cost video hosting via YouTube embeds, integrated with content visibility.
+- **Expandable Program Detail Dialogs**: Full-screen modals for detailed program information.
+- **Stripe Donation System**: Secure payment processing for one-time donations.
+- **Email Automation System**: Transactional email delivery via SendGrid with template management, webhooks, and AI-powered copywriting.
+- **SMS Notification System**: Twilio-based template SMS messaging with CRUD capabilities, persona targeting, delivery tracking, and AI-powered copywriting.
+- **Task Management System**: Comprehensive task tracking and assignment integrated into the CRM, with a global dashboard and lead-specific views.
+- **Pipeline Management & Analytics**: Kanban board for lead management with drag-and-drop, optimistic updates, and an analytics dashboard for conversion rates and bottlenecks.
+- **AI-Powered Copy Generation System**: Assists in creating high-converting copy using Alex Hormozi's Value Equation framework and Google Gemini AI, with persona-specific templates and A/B testing integration.
+- **Bulk Lead Import System**: Excel-based import for lead data with validation, error reporting, and automated task creation.
+- **Google Calendar Integration**: OAuth-authenticated integration for appointment scheduling, event registration, and task synchronization, with real-time availability and timezone awareness.
+- **Kinflo Product Landing Page**: Marketing page showcasing Kinflo's features as a modular CRM solution for nonprofits.
 
 ### System Design Choices
-The backend is built with Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data storage uses PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are handled by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage, secure cookies, and protected routes. User IDs are immutable, and an `isAdmin` flag controls access to administrative features.
+The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage.
 
 ## External Dependencies
 
 ### UI Framework & Components
-- **Radix UI**: Accessible UI primitives.
-- **shadcn/ui**: Pre-built components.
-- **Lucide React**: Icon library.
-- **class-variance-authority**: Type-safe styling.
-- **tailwind-merge & clsx**: Tailwind class utilities.
+- Radix UI
+- shadcn/ui
+- Lucide React
+- class-variance-authority
+- tailwind-merge & clsx
 
 ### Data Fetching & State Management
-- **TanStack Query**: Server state management.
-- **React Hook Form**: Form state management with resolvers.
+- TanStack Query
+- React Hook Form
 
 ### Database & ORM
-- **Drizzle ORM**: TypeScript ORM.
-- **@neondatabase/serverless**: Neon PostgreSQL driver.
-- **connect-pg-simple**: PostgreSQL session store.
+- Drizzle ORM
+- @neondatabase/serverless
+- connect-pg-simple
 
 ### Replit-Specific Tools
-- **@replit/vite-plugin-runtime-error-modal**: Error overlay.
-- **@replit/vite-plugin-cartographer**: Code navigation.
-- **@replit/vite-plugin-dev-banner**: Development indicator.
+- @replit/vite-plugin-runtime-error-modal
+- @replit/vite-plugin-cartographer
+- @replit/vite-plugin-dev-banner
 
 ### Fonts & Typography
-- **Google Fonts**: Playfair Display and Inter.
+- Google Fonts (Playfair Display, Inter)
 
-### Utility Libraries
-- **date-fns**: Date manipulation.
-- **nanoid**: Unique ID generation.
-- **zod**: Schema validation.
-- **Uppy**: Profile photo upload system.
-- **Cloudinary**: Image upscaling and optimization.
-- **Google Places API**: For fetching business reviews.
-- **react-lite-youtube-embed**: Lightweight YouTube embed component.
-- **Google Gemini AI API**: For social media screenshot analysis.
-- **Stripe**: Payment processing for donations.
-- **SendGrid**: Email delivery service.
+### Utility Libraries & Services
+- date-fns
+- nanoid
+- zod
+- Uppy
+- Cloudinary
+- Google Places API
+- react-lite-youtube-embed
+- Google Gemini AI API
+- Stripe
+- SendGrid
