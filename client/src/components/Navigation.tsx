@@ -77,6 +77,9 @@ export default function Navigation() {
             ? "bg-background/95 backdrop-blur-md shadow-sm" 
             : "bg-transparent"
         }`}
+        style={{
+          paddingTop: 'max(env(safe-area-inset-top), 1rem)'
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20 gap-8">
@@ -242,7 +245,12 @@ export default function Navigation() {
         </div>
       </nav>
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-background md:hidden pt-20">
+        <div 
+          className="fixed inset-0 z-40 bg-background md:hidden"
+          style={{
+            paddingTop: 'calc(max(env(safe-area-inset-top), 1rem) + 5rem)'
+          }}
+        >
           <div className="flex flex-col items-center gap-6 p-8">
             {isAuthenticated && user && (
               <div className="flex flex-col items-center gap-3 mb-4">
