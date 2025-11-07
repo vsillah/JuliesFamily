@@ -1383,11 +1383,11 @@ export default function AdminContentManager() {
                     </div>
                   </div>
                   
-                  <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                  <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                     {PERSONAS.map((persona) => (
-                      <div key={persona} className="space-y-1">
+                      <div key={persona} className="space-y-2">
                         <div className="text-sm font-medium text-muted-foreground">{PERSONA_LABELS[persona]}</div>
-                        <div className="grid grid-cols-2 gap-2 pl-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2 sm:pl-4">
                           {FUNNEL_STAGES.map((stage) => {
                             const comboKey = getComboKey(persona, stage);
                             const isChecked = selectedLeadMagnetCombos.has(comboKey);
@@ -1406,10 +1406,10 @@ export default function AdminContentManager() {
                                     }
                                     setSelectedLeadMagnetCombos(newSet);
                                   }}
-                                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                                  className="rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
                                   data-testid={`checkbox-edit-${comboKey}`}
                                 />
-                                <Label htmlFor={`edit-combo-${comboKey}`} className="text-sm font-normal cursor-pointer">
+                                <Label htmlFor={`edit-combo-${comboKey}`} className="text-sm font-normal cursor-pointer leading-tight">
                                   {FUNNEL_STAGE_LABELS[stage]}
                                 </Label>
                               </div>
@@ -1798,11 +1798,11 @@ export default function AdminContentManager() {
                   </div>
                 </div>
                 
-                <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                   {PERSONAS.map((persona) => (
-                    <div key={persona} className="space-y-1">
+                    <div key={persona} className="space-y-2">
                       <div className="text-sm font-medium text-muted-foreground">{PERSONA_LABELS[persona]}</div>
-                      <div className="grid grid-cols-2 gap-2 pl-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-2 sm:pl-4">
                         {FUNNEL_STAGES.map((stage) => {
                           const comboKey = getComboKey(persona, stage);
                           const isChecked = selectedLeadMagnetCombos.has(comboKey);
@@ -1821,10 +1821,10 @@ export default function AdminContentManager() {
                                   }
                                   setSelectedLeadMagnetCombos(newSet);
                                 }}
-                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                                className="rounded border-gray-300 text-primary focus:ring-primary flex-shrink-0"
                                 data-testid={`checkbox-create-${comboKey}`}
                               />
-                              <Label htmlFor={`create-combo-${comboKey}`} className="text-sm font-normal cursor-pointer">
+                              <Label htmlFor={`create-combo-${comboKey}`} className="text-sm font-normal cursor-pointer leading-tight">
                                 {FUNNEL_STAGE_LABELS[stage]}
                               </Label>
                             </div>
