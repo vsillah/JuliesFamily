@@ -13,6 +13,7 @@ import multer from "multer";
 import { analyzeSocialPostScreenshot } from "./gemini";
 import { sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
+import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps } from "./taskAutomation";
 import Stripe from "stripe";
 
 // Extend Express Request to properly type authenticated user
@@ -263,6 +264,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const lead = await storage.createLead(validatedData);
+      
+      // Automatically create a follow-up task for the new lead
+      await createTaskForNewLead(storage, lead);
+      
       res.status(201).json(lead);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -2025,6 +2030,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check for overdue tasks and create follow-up tasks (automated maintenance endpoint)
+  app.post("/api/tasks/check-overdue", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await createTasksForMissedFollowUps(storage);
+      res.json({ message: "Checked for overdue tasks and created follow-ups where needed" });
+    } catch (error) {
+      console.error("Error checking overdue tasks:", error);
+      res.status(500).json({ message: "Failed to check overdue tasks" });
+    }
+  });
+
   // Update lead pipeline stage
   app.patch("/api/leads/:leadId/pipeline-stage", isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
     try {
@@ -2053,6 +2069,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         changedBy: userId,
         reason: reason || null,
       });
+
+      // Automatically create appropriate task for new pipeline stage
+      if (updatedLead) {
+        await createTaskForStageChange(storage, updatedLead, pipelineStage);
+      }
 
       res.json(updatedLead);
     } catch (error) {
