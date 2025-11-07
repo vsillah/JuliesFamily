@@ -63,10 +63,10 @@ export default function ProgramDetailDialog({
                 alt={program.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
               <div className="absolute bottom-0 left-0 right-0 p-6">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl sm:text-4xl font-serif font-bold text-primary-foreground">
+                  <DialogTitle className="text-3xl sm:text-4xl font-serif font-bold text-white">
                     {program.title}
                   </DialogTitle>
                 </DialogHeader>
