@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,7 @@ import { DndContext, DragOverlay, closestCenter, PointerSensor, useSensor, useSe
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Calendar, Mail, Phone, GripVertical } from "lucide-react";
+import { Calendar, Mail, Phone, GripVertical, TrendingUp, Clock, AlertTriangle } from "lucide-react";
 import type { Lead, PipelineStage } from "@shared/schema";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
@@ -17,6 +17,21 @@ import { format } from "date-fns";
 interface BoardData {
   stages: PipelineStage[];
   leadsByStage: Record<string, Lead[]>;
+}
+
+interface StageAnalytics {
+  stage: string;
+  stageSlug: string;
+  position: number;
+  leadsInStage: number;
+  totalEntered: number;
+  conversionRate: number | null;
+  avgTimeInDays: number | null;
+  isBottleneck: boolean;
+}
+
+interface AnalyticsData {
+  analytics: StageAnalytics[];
 }
 
 interface LeadCardProps {
@@ -206,6 +221,10 @@ export default function AdminPipeline() {
     queryKey: ['/api/pipeline/board'],
   });
 
+  const { data: analyticsData } = useQuery<AnalyticsData>({
+    queryKey: ['/api/pipeline/analytics'],
+  });
+
   const updateStageMutation = useMutation({
     mutationFn: async ({ leadId, newStage }: { leadId: string; newStage: string }) => {
       const res = await apiRequest('PATCH', `/api/leads/${leadId}/pipeline-stage`, {
@@ -353,6 +372,75 @@ export default function AdminPipeline() {
             </p>
           </div>
         </div>
+
+        {/* Pipeline Analytics */}
+        {analyticsData && analyticsData.analytics.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Pipeline Analytics</CardTitle>
+              <CardDescription>
+                Track conversion rates, time in stage, and identify bottlenecks
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {analyticsData.analytics.map((stageAnalytics) => (
+                  <Card key={stageAnalytics.stageSlug} className={stageAnalytics.isBottleneck ? 'border-destructive/50' : ''}>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-sm font-medium">
+                          {stageAnalytics.stage}
+                        </CardTitle>
+                        {stageAnalytics.isBottleneck && (
+                          <Badge variant="destructive" className="text-xs">
+                            <AlertTriangle className="w-3 h-3 mr-1" />
+                            Bottleneck
+                          </Badge>
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Currently In Stage</span>
+                        <span className="font-semibold">{stageAnalytics.leadsInStage}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Total Entered</span>
+                        <span className="font-semibold">{stageAnalytics.totalEntered}</span>
+                      </div>
+                      {stageAnalytics.conversionRate !== null && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            Conversion Rate
+                          </span>
+                          <span className={`font-semibold ${
+                            stageAnalytics.conversionRate >= 50 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'
+                          }`}>
+                            {stageAnalytics.conversionRate}%
+                          </span>
+                        </div>
+                      )}
+                      {stageAnalytics.avgTimeInDays !== null && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            Avg. Time
+                          </span>
+                          <span className={`font-semibold ${
+                            stageAnalytics.avgTimeInDays <= 7 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'
+                          }`}>
+                            {stageAnalytics.avgTimeInDays} days
+                          </span>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <DndContext
           sensors={sensors}

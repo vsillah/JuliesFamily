@@ -2130,6 +2130,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pipeline analytics (conversion rates, time in stage, bottlenecks)
+  app.get("/api/pipeline/analytics", isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const stages = await storage.getPipelineStages();
+      const leads = await storage.getAllLeads();
+      const allHistory = await db.select().from(pipelineHistory).orderBy(pipelineHistory.createdAt);
+
+      // Calculate analytics for each stage
+      const analytics = stages.map((stage, index) => {
+        const stageSlug = stage.slug;
+        const nextStage = stages[index + 1];
+        
+        // Count leads currently in this stage
+        const leadsInStage = leads.filter(l => l.pipelineStage === stageSlug).length;
+        
+        // Find all historical entries into this stage
+        const entriesIntoStage = allHistory.filter(h => h.toStage === stageSlug);
+        const totalEntered = entriesIntoStage.length;
+        
+        // Calculate conversion rate (if not the last stage)
+        let conversionRate: number | null = null;
+        if (nextStage && totalEntered > 0) {
+          const exitedToNext = allHistory.filter(
+            h => h.fromStage === stageSlug && h.toStage === nextStage.slug
+          ).length;
+          conversionRate = (exitedToNext / totalEntered) * 100;
+        }
+        
+        // Calculate average time in stage
+        let avgTimeInStage: number | null = null;
+        const stageTimesMs: number[] = [];
+        
+        entriesIntoStage.forEach(entry => {
+          // Find when this lead left this stage
+          const exitEntry = allHistory.find(
+            h => h.leadId === entry.leadId && 
+                 h.fromStage === stageSlug && 
+                 new Date(h.createdAt).getTime() > new Date(entry.createdAt).getTime()
+          );
+          
+          if (exitEntry) {
+            const timeInStage = new Date(exitEntry.createdAt).getTime() - new Date(entry.createdAt).getTime();
+            stageTimesMs.push(timeInStage);
+          }
+        });
+        
+        if (stageTimesMs.length > 0) {
+          const avgMs = stageTimesMs.reduce((sum, t) => sum + t, 0) / stageTimesMs.length;
+          avgTimeInStage = avgMs / (1000 * 60 * 60 * 24); // Convert to days
+        }
+        
+        // Only flag as bottleneck if we have meaningful metrics
+        const isBottleneck = 
+          (avgTimeInStage !== null && avgTimeInStage > 7) || 
+          (conversionRate !== null && conversionRate < 50);
+        
+        return {
+          stage: stage.name,
+          stageSlug,
+          position: stage.position,
+          leadsInStage,
+          totalEntered,
+          conversionRate: conversionRate !== null ? Math.round(conversionRate * 10) / 10 : null,
+          avgTimeInDays: avgTimeInStage !== null ? Math.round(avgTimeInStage * 10) / 10 : null,
+          isBottleneck,
+        };
+      });
+
+      res.json({ analytics });
+    } catch (error) {
+      console.error("Error fetching pipeline analytics:", error);
+      res.status(500).json({ message: "Failed to fetch pipeline analytics" });
+    }
+  });
+
   // Donation Routes
   // Reference: blueprint:javascript_stripe
 
