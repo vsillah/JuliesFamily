@@ -185,7 +185,7 @@ export default function Hero() {
         )}
       </div>
 
-      {/* Layer 2: Overlay Gradients (renders second, after image loads) */}
+      {/* Layer 2: Overlay Gradient (renders second, after image loads) */}
       <div className={`absolute inset-x-0 top-0 bottom-24 sm:bottom-32 z-[2] transition-opacity duration-700 ${
         overlayVisible ? 'opacity-100' : 'opacity-0'
       }`}>
@@ -196,8 +196,6 @@ export default function Hero() {
             backgroundImage: 'linear-gradient(to bottom, transparent 0%, transparent 20%, rgba(0,0,0,0.60) 45%, rgba(0,0,0,0.60) 65%, transparent 85%, transparent 100%)'
           }}
         />
-        {/* Subtle radial vignette for edge darkening */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_60%,rgba(0,0,0,0.2)_100%)]" />
       </div>
 
       {/* Layer 3: Content (renders last, after overlay) */}
