@@ -42,6 +42,7 @@ export const leads = pgTable("leads", {
   phone: varchar("phone"),
   persona: varchar("persona").notNull(), // student, provider, parent, donor, volunteer
   funnelStage: varchar("funnel_stage").notNull(), // awareness, consideration, decision, retention
+  pipelineStage: varchar("pipeline_stage").default('new_lead'), // References pipeline stages: new_lead, contacted, qualified, etc.
   leadSource: varchar("lead_source"), // organic, referral, ad, etc
   engagementScore: integer("engagement_score").default(0),
   lastInteractionDate: timestamp("last_interaction_date"),
@@ -76,6 +77,96 @@ export const insertInteractionSchema = createInsertSchema(interactions).omit({
 });
 export type InsertInteraction = z.infer<typeof insertInteractionSchema>;
 export type Interaction = typeof interactions.$inferSelect;
+
+// Pipeline Stages - defines the stages leads move through in the sales pipeline
+export const pipelineStages = pgTable("pipeline_stages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // New Lead, Contacted, Qualified, Nurturing, Converted, Lost
+  description: text("description"),
+  position: integer("position").notNull(), // Order of stages (1, 2, 3, etc.)
+  color: varchar("color"), // UI color for kanban board
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPipelineStageSchema = createInsertSchema(pipelineStages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertPipelineStage = z.infer<typeof insertPipelineStageSchema>;
+export type PipelineStage = typeof pipelineStages.$inferSelect;
+
+// Lead Assignments - tracks which team member is assigned to each lead
+export const leadAssignments = pgTable("lead_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  assignedTo: varchar("assigned_to").notNull().references(() => users.id, { onDelete: "cascade" }),
+  assignedBy: varchar("assigned_by").references(() => users.id), // Who made the assignment
+  assignmentType: varchar("assignment_type").notNull(), // 'manual', 'auto_persona', 'auto_geography', 'auto_round_robin'
+  notes: text("notes"), // Reason for assignment
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertLeadAssignmentSchema = createInsertSchema(leadAssignments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertLeadAssignment = z.infer<typeof insertLeadAssignmentSchema>;
+export type LeadAssignment = typeof leadAssignments.$inferSelect;
+
+// Tasks - follow-up tasks for leads
+export const tasks = pgTable("tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  assignedTo: varchar("assigned_to").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdBy: varchar("created_by").references(() => users.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  taskType: varchar("task_type").notNull(), // 'call', 'email', 'meeting', 'follow_up', 'send_materials', 'other'
+  priority: varchar("priority").notNull().default('medium'), // 'low', 'medium', 'high', 'urgent'
+  status: varchar("status").notNull().default('pending'), // 'pending', 'in_progress', 'completed', 'cancelled'
+  dueDate: timestamp("due_date"),
+  completedAt: timestamp("completed_at"),
+  isAutomated: boolean("is_automated").default(false), // True if auto-created by trigger
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("tasks_assigned_to_idx").on(table.assignedTo),
+  index("tasks_lead_id_idx").on(table.leadId),
+  index("tasks_status_idx").on(table.status),
+]);
+
+export const insertTaskSchema = createInsertSchema(tasks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTask = z.infer<typeof insertTaskSchema>;
+export type Task = typeof tasks.$inferSelect;
+
+// Pipeline History - tracks when leads move between pipeline stages
+export const pipelineHistory = pgTable("pipeline_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  fromStage: varchar("from_stage"), // Null for first entry
+  toStage: varchar("to_stage").notNull(),
+  changedBy: varchar("changed_by").references(() => users.id), // Null if automated
+  reason: text("reason"), // Optional reason for stage change
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("pipeline_history_lead_id_idx").on(table.leadId),
+]);
+
+export const insertPipelineHistorySchema = createInsertSchema(pipelineHistory).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertPipelineHistory = z.infer<typeof insertPipelineHistorySchema>;
+export type PipelineHistory = typeof pipelineHistory.$inferSelect;
 
 // Lead Magnets table for managing content offers
 export const leadMagnets = pgTable("lead_magnets", {
