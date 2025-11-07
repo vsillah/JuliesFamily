@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
   BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
-  Shield, BookOpen, Star, RefreshCw
+  Shield, BookOpen, Star, RefreshCw, MessageSquare
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -151,6 +151,12 @@ export default function AdminDashboard() {
                 <Button variant="outline" size="sm" data-testid="button-email-campaigns">
                   <Mail className="w-4 h-4 sm:mr-2" />
                   <span className="hidden sm:inline">Email Campaigns</span>
+                </Button>
+              </Link>
+              <Link href="/admin/sms-notifications">
+                <Button variant="outline" size="sm" data-testid="button-sms-notifications">
+                  <MessageSquare className="w-4 h-4 sm:mr-2" />
+                  <span className="hidden sm:inline">SMS Notifications</span>
                 </Button>
               </Link>
               <Button 

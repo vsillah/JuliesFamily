@@ -4,7 +4,7 @@ import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -1576,6 +1576,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error updating enrollment:", error);
       res.status(500).json({ message: "Failed to update enrollment" });
+    }
+  });
+
+  // SMS Template Routes
+  
+  // Get all SMS templates
+  app.get('/api/sms-templates', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const templates = await storage.getAllSmsTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching SMS templates:", error);
+      res.status(500).json({ message: "Failed to fetch SMS templates" });
+    }
+  });
+
+  // Get SMS template by ID
+  app.get('/api/sms-templates/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const template = await storage.getSmsTemplateById(id);
+      
+      if (!template) {
+        return res.status(404).json({ message: "SMS template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching SMS template:", error);
+      res.status(500).json({ message: "Failed to fetch SMS template" });
+    }
+  });
+
+  // Create SMS template
+  app.post('/api/sms-templates', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertSmsTemplateSchema.parse(req.body);
+      const template = await storage.createSmsTemplate(validatedData);
+      res.json(template);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid template data", errors: error.errors });
+      }
+      console.error("Error creating SMS template:", error);
+      res.status(500).json({ message: "Failed to create SMS template" });
+    }
+  });
+
+  // Update SMS template
+  app.patch('/api/sms-templates/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertSmsTemplateSchema.partial().parse(req.body);
+      const updated = await storage.updateSmsTemplate(id, validatedData);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "SMS template not found" });
+      }
+      
+      res.json(updated);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid template data", errors: error.errors });
+      }
+      console.error("Error updating SMS template:", error);
+      res.status(500).json({ message: "Failed to update SMS template" });
+    }
+  });
+
+  // Delete SMS template
+  app.delete('/api/sms-templates/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSmsTemplate(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting SMS template:", error);
+      res.status(500).json({ message: "Failed to delete SMS template" });
+    }
+  });
+
+  // Send SMS Routes
+  
+  // Send SMS to a lead using a template
+  app.post('/api/sms/send', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId, templateId, customMessage, recipientPhone, recipientName, variables } = req.body;
+      
+      let messageContent: string;
+      let usedTemplateId: string | undefined;
+      
+      // If using a template, fetch and render it
+      if (templateId) {
+        const template = await storage.getSmsTemplateById(templateId);
+        if (!template) {
+          return res.status(404).json({ message: "SMS template not found" });
+        }
+        
+        // Replace variables in template
+        const { replaceVariables } = await import('./twilio');
+        messageContent = replaceVariables(template.messageContent, variables || {});
+        usedTemplateId = templateId;
+      } else if (customMessage) {
+        // Use custom message directly
+        messageContent = customMessage;
+      } else {
+        return res.status(400).json({ message: "Either templateId or customMessage is required" });
+      }
+      
+      // Validate phone number
+      if (!recipientPhone) {
+        return res.status(400).json({ message: "Recipient phone number is required" });
+      }
+      
+      // Send SMS via Twilio
+      const { sendSMS } = await import('./twilio');
+      const result = await sendSMS(recipientPhone, messageContent, { leadId, templateId: usedTemplateId });
+      
+      // Create SMS send record
+      const smsSend = await storage.createSmsSend({
+        templateId: usedTemplateId,
+        leadId: leadId || null,
+        recipientPhone,
+        recipientName: recipientName || null,
+        messageContent,
+        status: result.success ? 'sent' : 'failed',
+        smsProvider: 'twilio',
+        providerMessageId: result.messageId || null,
+        errorMessage: result.error || null,
+        metadata: { variables },
+        sentAt: result.success ? new Date() : null,
+      });
+      
+      res.json({
+        success: result.success,
+        smsSend,
+        error: result.error
+      });
+    } catch (error: any) {
+      console.error("Error sending SMS:", error);
+      res.status(500).json({ message: error.message || "Failed to send SMS" });
+    }
+  });
+
+  // Get SMS sends for a lead
+  app.get('/api/sms/lead/:leadId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const sends = await storage.getSmsSendsByLead(leadId);
+      res.json(sends);
+    } catch (error) {
+      console.error("Error fetching SMS sends:", error);
+      res.status(500).json({ message: "Failed to fetch SMS sends" });
+    }
+  });
+
+  // Get recent SMS sends
+  app.get('/api/sms/recent', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const sends = await storage.getRecentSmsSends(limit);
+      res.json(sends);
+    } catch (error) {
+      console.error("Error fetching recent SMS sends:", error);
+      res.status(500).json({ message: "Failed to fetch recent SMS sends" });
     }
   });
 
