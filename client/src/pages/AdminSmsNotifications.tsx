@@ -16,6 +16,7 @@ import { Plus, Edit, Trash2, MessageSquare, Send, Clock } from "lucide-react";
 import type { SmsTemplate, SmsSend } from "@shared/schema";
 import type { Persona } from "@shared/defaults/personas";
 import CopyVariantGenerator from "@/components/CopyVariantGenerator";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 export default function AdminSmsNotifications() {
   const { toast } = useToast();
@@ -200,15 +201,21 @@ export default function AdminSmsNotifications() {
   };
 
   return (
-    <div className="container mx-auto p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">SMS Notifications</h1>
-          <p className="text-muted-foreground">
-            Manage SMS templates and send notifications to leads
-          </p>
+    <div className="container mx-auto py-8 px-4 max-w-7xl">
+      <Breadcrumbs items={[
+        { label: "Admin Dashboard", href: "/admin" },
+        { label: "SMS Notifications" }
+      ]} />
+      
+      <div className="mt-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">SMS Notifications</h1>
+            <p className="text-muted-foreground">
+              Manage SMS templates and send notifications to leads
+            </p>
+          </div>
         </div>
-      </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
         <TabsList>
@@ -491,6 +498,7 @@ export default function AdminSmsNotifications() {
           )}
         </TabsContent>
       </Tabs>
+      </div>
 
       {/* Template Dialog */}
       <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>

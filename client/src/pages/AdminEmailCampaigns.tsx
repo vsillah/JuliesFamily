@@ -16,6 +16,7 @@ import { Plus, Edit, Trash2, Mail, Clock, Users, ChevronRight } from "lucide-rea
 import type { EmailCampaign, EmailSequenceStep } from "@shared/schema";
 import type { Persona } from "@shared/defaults/personas";
 import CopyVariantGenerator from "@/components/CopyVariantGenerator";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 interface CampaignWithSteps extends EmailCampaign {
   steps?: EmailSequenceStep[];
@@ -263,25 +264,32 @@ export default function AdminEmailCampaigns() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Email Campaigns</h1>
-          <p className="text-muted-foreground mt-1">
-            Create and manage automated email drip campaigns
-          </p>
+    <div className="container mx-auto py-8 px-4 max-w-7xl">
+      <Breadcrumbs items={[
+        { label: "Admin Dashboard", href: "/admin" },
+        { label: "Email Campaigns" }
+      ]} />
+      
+      <div className="mt-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Email Campaigns</h1>
+            <p className="text-muted-foreground mt-1">
+              Create and manage automated email drip campaigns
+            </p>
+          </div>
+          <Button
+            onClick={() => {
+              setSelectedCampaign(null);
+              setShowCampaignDialog(true);
+            }}
+            data-testid="button-create-campaign"
+            className="w-full sm:w-auto"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Create Campaign
+          </Button>
         </div>
-        <Button
-          onClick={() => {
-            setSelectedCampaign(null);
-            setShowCampaignDialog(true);
-          }}
-          data-testid="button-create-campaign"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Create Campaign
-        </Button>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {campaigns.map((campaign) => (
@@ -716,6 +724,7 @@ export default function AdminEmailCampaigns() {
           </form>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
