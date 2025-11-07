@@ -382,6 +382,44 @@ export default function ProductLanding() {
         </div>
       </section>
 
+      {/* Affiliate/Partnership Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <Card className="bg-gradient-to-br from-secondary/10 to-accent/10 border-2">
+            <CardContent className="p-8 md:p-12">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 mb-6">
+                  <Users className="h-8 w-8 text-primary" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold mb-4" data-testid="text-affiliate-title">
+                  Interested in implementing this platform for your organization?
+                </h2>
+                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+                  We're looking for nonprofit partners and affiliates who want to leverage this powerful, persona-based CRM and website platform. Whether you're a nonprofit seeking a complete digital transformation or an agency wanting to offer this solution to your clients, we'd love to connect.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <Button size="lg" variant="default" asChild data-testid="button-partner-contact">
+                    <a href="mailto:vsillah@gmail.com?subject=Partnership Inquiry - Nonprofit CRM Platform">
+                      <Mail className="mr-2 h-5 w-5" />
+                      Contact Us About Partnership
+                    </a>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild data-testid="button-schedule-demo">
+                    <a href="/schedule">
+                      <Calendar className="mr-2 h-5 w-5" />
+                      Schedule a Demo
+                    </a>
+                  </Button>
+                </div>
+                <p className="text-sm text-muted-foreground mt-6">
+                  Perfect for: Nonprofit organizations, digital agencies, consultants, and technology partners
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
       {/* Lead Capture Form */}
       <section className="py-20 px-4 bg-gradient-to-br from-primary/10 to-secondary/10">
         <div className="container mx-auto max-w-2xl">
