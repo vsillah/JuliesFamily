@@ -266,68 +266,68 @@ export default function Navigation() {
           </div>
         </div>
 
-        {/* Mobile Quick Links Bar - Horizontally Scrollable */}
-        <div className={`md:hidden overflow-x-auto transition-all duration-300 ${
+        {/* Mobile Quick Links Bar - No Scrolling, Evenly Distributed */}
+        <div className={`md:hidden transition-all duration-300 ${
           isScrolled 
             ? "bg-background/95 backdrop-blur-md border-b" 
             : "bg-transparent"
         }`}>
-          <div className="flex items-center gap-2 pl-4 pr-8 py-1 min-w-max">
-            <Button
-              variant="ghost"
-              size="sm"
+          <div className="flex items-center justify-between w-full px-2 py-2">
+            <button
               onClick={() => scrollToSection("services")}
-              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+                isScrolled ? "text-foreground" : "text-white/95"
+              }`}
               data-testid="link-services-mobile-quick"
             >
               Services
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+            </button>
+            <button
               onClick={() => scrollToSection("impact")}
-              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+                isScrolled ? "text-foreground" : "text-white/95"
+              }`}
               data-testid="link-impact-mobile-quick"
             >
               Impact
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+            </button>
+            <button
               onClick={() => scrollToSection("testimonials")}
-              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+                isScrolled ? "text-foreground" : "text-white/95"
+              }`}
               data-testid="link-testimonials-mobile-quick"
             >
               Testimonials
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
+            </button>
+            <button
               onClick={() => scrollToSection("events")}
-              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+                isScrolled ? "text-foreground" : "text-white/95"
+              }`}
               data-testid="link-events-mobile-quick"
             >
               Events
-            </Button>
+            </button>
             <Link href="/virtual-tour">
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              <button
+                className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+                  isScrolled ? "text-foreground" : "text-white/95"
+                }`}
                 data-testid="link-virtual-tour-mobile-quick"
               >
-                Virtual Tour
-              </Button>
+                Tour
+              </button>
             </Link>
             <Link href="/donate">
-              <Button
-                variant="default"
-                size="sm"
-                className="whitespace-nowrap"
+              <button
+                className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+                  isScrolled ? "text-primary" : "text-white"
+                }`}
                 data-testid="button-donate-mobile-quick"
               >
                 Donate
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
