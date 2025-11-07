@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Shield, ShieldOff, User as UserIcon } from "lucide-react";
+import { Search, Shield, ShieldOff, User as UserIcon, UserPlus, Trash2 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import {
   AlertDialog,
@@ -19,6 +19,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -36,6 +46,17 @@ export default function AdminUserManagement() {
     currentStatus: boolean;
     userName: string;
   } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    userId: string;
+    userName: string;
+  } | null>(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [newUser, setNewUser] = useState({
+    email: "",
+    firstName: "",
+    lastName: "",
+    isAdmin: false,
+  });
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
@@ -69,6 +90,50 @@ export default function AdminUserManagement() {
     },
   });
 
+  const createUserMutation = useMutation({
+    mutationFn: async (userData: typeof newUser) => {
+      return apiRequest("POST", "/api/admin/users", userData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Success",
+        description: "User created successfully",
+      });
+      setCreateDialogOpen(false);
+      setNewUser({ email: "", firstName: "", lastName: "", isAdmin: false });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create user",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest("DELETE", `/api/admin/users/${userId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Success",
+        description: "User deleted successfully",
+      });
+      setDeleteConfirm(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+      setDeleteConfirm(null);
+    },
+  });
+
   const filteredUsers = users.filter((user) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -98,6 +163,30 @@ export default function AdminUserManagement() {
     });
   };
 
+  const handleCreateUser = () => {
+    if (!newUser.email.trim() || !newUser.firstName.trim() || !newUser.lastName.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    createUserMutation.mutate(newUser);
+  };
+
+  const handleDeleteUser = (user: User) => {
+    setDeleteConfirm({
+      userId: user.id,
+      userName: `${user.firstName} ${user.lastName}`,
+    });
+  };
+
+  const confirmDeleteUser = () => {
+    if (!deleteConfirm) return;
+    deleteUserMutation.mutate(deleteConfirm.userId);
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       <Breadcrumbs
@@ -110,13 +199,25 @@ export default function AdminUserManagement() {
       <div className="mt-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserIcon className="h-5 w-5" />
-              User Management
-            </CardTitle>
-            <CardDescription>
-              Manage user accounts and admin privileges
-            </CardDescription>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <UserIcon className="h-5 w-5" />
+                  User Management
+                </CardTitle>
+                <CardDescription>
+                  Manage user accounts and admin privileges
+                </CardDescription>
+              </div>
+              <Button
+                onClick={() => setCreateDialogOpen(true)}
+                className="w-full sm:w-auto"
+                data-testid="button-create-user"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Create User
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="mb-6">
@@ -176,36 +277,47 @@ export default function AdminUserManagement() {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          {user.isAdmin ? (
-                            <div className="flex items-center justify-end gap-2">
+                          <div className="flex items-center justify-end gap-2">
+                            {user.isAdmin ? (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleToggleAdmin(user)}
+                                  disabled={updateAdminStatusMutation.isPending || isCurrentUser(user.id)}
+                                  data-testid={`button-revoke-admin-${user.id}`}
+                                >
+                                  <ShieldOff className="h-4 w-4 mr-2" />
+                                  Revoke Admin
+                                </Button>
+                                {isCurrentUser(user.id) && (
+                                  <span className="text-xs text-muted-foreground">
+                                    (Cannot remove own access)
+                                  </span>
+                                )}
+                              </>
+                            ) : (
                               <Button
-                                variant="outline"
+                                variant="default"
                                 size="sm"
                                 onClick={() => handleToggleAdmin(user)}
-                                disabled={updateAdminStatusMutation.isPending || isCurrentUser(user.id)}
-                                data-testid={`button-revoke-admin-${user.id}`}
+                                disabled={updateAdminStatusMutation.isPending}
+                                data-testid={`button-grant-admin-${user.id}`}
                               >
-                                <ShieldOff className="h-4 w-4 mr-2" />
-                                Revoke Admin
+                                <Shield className="h-4 w-4 mr-2" />
+                                Grant Admin
                               </Button>
-                              {isCurrentUser(user.id) && (
-                                <span className="text-xs text-muted-foreground">
-                                  (Cannot remove own access)
-                                </span>
-                              )}
-                            </div>
-                          ) : (
+                            )}
                             <Button
-                              variant="default"
+                              variant="outline"
                               size="sm"
-                              onClick={() => handleToggleAdmin(user)}
-                              disabled={updateAdminStatusMutation.isPending}
-                              data-testid={`button-grant-admin-${user.id}`}
+                              onClick={() => handleDeleteUser(user)}
+                              disabled={deleteUserMutation.isPending || isCurrentUser(user.id)}
+                              data-testid={`button-delete-${user.id}`}
                             >
-                              <Shield className="h-4 w-4 mr-2" />
-                              Grant Admin
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -251,6 +363,100 @@ export default function AdminUserManagement() {
               data-testid="button-confirm-action"
             >
               {confirmAction?.currentStatus ? "Revoke Admin" : "Grant Admin"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent data-testid="dialog-create-user">
+          <DialogHeader>
+            <DialogTitle>Create New User</DialogTitle>
+            <DialogDescription>
+              Add a new user account. They will be able to log in with their email once created.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="user@example.com"
+                value={newUser.email}
+                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                data-testid="input-email"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name *</Label>
+              <Input
+                id="firstName"
+                placeholder="John"
+                value={newUser.firstName}
+                onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+                data-testid="input-firstname"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name *</Label>
+              <Input
+                id="lastName"
+                placeholder="Doe"
+                value={newUser.lastName}
+                onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+                data-testid="input-lastname"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="isAdmin">Admin Privileges</Label>
+              <Switch
+                id="isAdmin"
+                checked={newUser.isAdmin}
+                onCheckedChange={(checked) => setNewUser({ ...newUser, isAdmin: checked })}
+                data-testid="switch-admin"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setCreateDialogOpen(false);
+                setNewUser({ email: "", firstName: "", lastName: "", isAdmin: false });
+              }}
+              data-testid="button-cancel-create"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              disabled={createUserMutation.isPending}
+              data-testid="button-confirm-create"
+            >
+              {createUserMutation.isPending ? "Creating..." : "Create User"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete User Account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <strong>{deleteConfirm?.userName}</strong>? This action
+              cannot be undone. The user will lose access to their account and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteUser}
+              data-testid="button-confirm-delete"
+              className="bg-destructive text-destructive-foreground hover-elevate"
+            >
+              Delete User
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -114,6 +114,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { email, firstName, lastName, isAdmin } = req.body;
+      
+      // Validate required fields
+      if (!email || !email.trim()) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      if (!firstName || !firstName.trim()) {
+        return res.status(400).json({ message: "First name is required" });
+      }
+      
+      if (!lastName || !lastName.trim()) {
+        return res.status(400).json({ message: "Last name is required" });
+      }
+      
+      // Check for duplicate email before creating
+      const existingUser = await storage.getUserByEmail(email.trim());
+      if (existingUser) {
+        return res.status(409).json({ message: "A user with this email already exists" });
+      }
+      
+      const newUser = await storage.createUser({
+        email: email.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        isAdmin: isAdmin ?? false,
+      });
+      
+      res.json(newUser);
+    } catch (error: any) {
+      console.error("Error creating user:", error);
+      res.status(500).json({ message: "Failed to create user" });
+    }
+  });
+
+  app.delete('/api/admin/users/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Prevent admins from deleting their own account
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      if (currentUser && userId === currentUser.id) {
+        return res.status(400).json({ message: "You cannot delete your own account" });
+      }
+      
+      // Check if user exists
+      const userToDelete = await storage.getUser(userId);
+      if (!userToDelete) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      await storage.deleteUser(userId);
+      res.json({ message: "User deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
   // User Persona Preference Route
   app.patch('/api/user/persona', isAuthenticated, async (req: any, res) => {
     try {

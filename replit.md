@@ -29,7 +29,7 @@ The frontend is a single-page application using `wouter` for client-side routing
 - **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations, enabling inline editing and content creation.
 - **A/B Testing System**: A comprehensive platform for testing content, layouts, messaging, and CTAs, supporting weighted variant assignment, session-based tracking, and analytics. Uses the same responsive multi-select checkbox grid interface as content management for targeting multiple persona×journey stage combinations simultaneously. Tests persist combinations via abTestTargets junction table and serve variants only to matching visitor profiles.
 - **Breadcrumb Navigation**: Hierarchical navigation across all admin pages.
-- **User Management System**: An admin-only interface for managing user accounts and privileges.
+- **User Management System**: An admin-only interface for managing user accounts and privileges. Admins can create new users (with email, first name, last name, and optional admin privileges), delete existing users, and grant/revoke admin access. Features robust validation including duplicate email detection, self-deletion prevention, and confirmation dialogs for destructive actions.
 - **User Guide System**: Provides public and protected documentation.
 - **Google Reviews Integration**: Automated fetching and display of authentic Google business reviews with admin visibility controls.
 - **Social Media Feed**: Carousel-based display of curated social media posts supporting Instagram, Facebook, and LinkedIn.
