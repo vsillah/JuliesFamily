@@ -278,10 +278,10 @@ export default function AdminContentManager() {
     enabled: activeTab === "matrix",
   });
   
-  // Load visibility settings when editing a lead magnet
+  // Load visibility settings when editing any content item
   useEffect(() => {
-    if (editingItem?.type === 'lead_magnet' && editingItem.id) {
-      // Find all visibility records for this lead magnet
+    if (editingItem?.id) {
+      // Find all visibility records for this content item
       const visibilityForItem = allVisibilitySettings.filter(v => v.contentItemId === editingItem.id);
       const combos = new Set<string>();
       visibilityForItem.forEach(v => {
