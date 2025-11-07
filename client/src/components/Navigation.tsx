@@ -75,7 +75,7 @@ export default function Navigation() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled 
             ? "bg-background/95 backdrop-blur-md shadow-sm" 
-            : "bg-background/95 backdrop-blur-md shadow-sm md:bg-transparent md:backdrop-blur-none md:shadow-none"
+            : "bg-black/40 md:bg-transparent backdrop-blur-sm md:backdrop-blur-none"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -92,7 +92,7 @@ export default function Navigation() {
               />
               <div className="hidden lg:block">
                 <h1 className={`text-lg font-serif font-semibold transition-colors duration-300 leading-tight ${
-                  isScrolled ? "text-primary" : "text-primary md:text-white"
+                  isScrolled ? "text-primary" : "text-white"
                 }`}>
                   Julie's Family<br />Learning Program
                 </h1>
@@ -231,7 +231,7 @@ export default function Navigation() {
             {/* Mobile Menu Button */}
             <button
               className={`md:hidden transition-colors duration-300 ${
-                isScrolled ? "text-foreground" : "text-foreground md:text-white"
+                isScrolled ? "text-foreground" : "text-white"
               }`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               data-testid="button-mobile-menu"
