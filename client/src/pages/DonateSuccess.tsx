@@ -7,8 +7,8 @@ import { CheckCircle2, Heart, Home, Mail } from 'lucide-react';
 export default function DonateSuccess() {
   useEffect(() => {
     // Track successful donation for analytics
-    if (window.gtag) {
-      window.gtag('event', 'donation_complete', {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'donation_complete', {
         event_category: 'donations',
       });
     }
