@@ -107,6 +107,10 @@ export default function CopyVariantGenerator({
 
   const handleGenerate = () => {
     if (pendingInputs) {
+      // Update the mutation to use custom prompt if provided
+      if (customPrompt && customPrompt.trim() !== "Default AI prompt will be used based on your Value Equation inputs.") {
+        setShowCustomPrompt(true);
+      }
       generateMutation.mutate(pendingInputs);
       setShowPromptEditor(false);
     }

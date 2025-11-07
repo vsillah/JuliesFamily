@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Plus, Trash2, Image as ImageIcon, AlertCircle, GripVertical, Upload } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import CopyVariantGenerator from "../CopyVariantGenerator";
 import type { ContentItem } from "@shared/schema";
 
 interface Variant {
@@ -404,7 +405,19 @@ function renderVariantConfig(
 
             {/* Description */}
             <div>
-              <Label>Description</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label>Description</Label>
+                <CopyVariantGenerator
+                  buttonText="Generate with AI"
+                  buttonVariant="outline"
+                  contentType={testType === 'hero_variation' ? 'hero' : 'cta'}
+                  onSelectVariant={(text) => {
+                    updateVariant(variant.id, {
+                      configuration: { ...variant.configuration, description: text }
+                    });
+                  }}
+                />
+              </div>
               <Textarea
                 value={variant.configuration?.description || ''}
                 onChange={(e) =>

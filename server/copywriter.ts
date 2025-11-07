@@ -89,7 +89,7 @@ function buildValueEquationPrompt(
   persona?: Persona,
   funnelStage?: FunnelStage
 ): string {
-  const wordCount = originalContent.split(/\s+/).length;
+  const wordCount = originalContent ? originalContent.split(/\s+/).length : 0;
   const personaLabel = persona ? PERSONA_LABELS[persona] : 'General Audience';
   const stageLabel = funnelStage ? FUNNEL_STAGE_LABELS[funnelStage] : '';
   const stagContext = funnelStage ? ` They are in the ${stageLabel} stage of their journey.` : '';
@@ -102,9 +102,7 @@ function buildValueEquationPrompt(
 
 **Target Audience**: ${personaLabel}${stagContext}
 
-**Original Content**: "${originalContent}"
-
-**Content Type**: ${contentType}
+${originalContent ? `**Original Content for Reference**: "${originalContent}"\n` : ''}**Content Type**: ${contentType}
 - Tone: ${guidance.tone}
 - Length: ${guidance.length} (original is ~${wordCount} words)
 - Focus: ${guidance.focus}
