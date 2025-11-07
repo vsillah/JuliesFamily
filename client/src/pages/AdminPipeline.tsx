@@ -45,10 +45,11 @@ function LeadCard({ lead, isDragging = false }: LeadCardProps) {
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="group"
+      {...listeners}
+      className="group cursor-grab active:cursor-grabbing touch-none"
       data-testid={`lead-card-${lead.id}`}
     >
-      <Card className="hover-elevate cursor-move">
+      <Card className="hover-elevate">
         <CardHeader className="p-4">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
@@ -62,8 +63,7 @@ function LeadCard({ lead, isDragging = false }: LeadCardProps) {
               )}
             </div>
             <div
-              {...listeners}
-              className="cursor-grab active:cursor-grabbing p-1 hover-elevate rounded"
+              className="p-1 pointer-events-none"
               data-testid={`drag-handle-${lead.id}`}
             >
               <GripVertical className="w-4 h-4 text-muted-foreground" />
