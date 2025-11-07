@@ -244,6 +244,72 @@ export default function Navigation() {
             </button>
           </div>
         </div>
+
+        {/* Mobile Quick Links Bar - Horizontally Scrollable */}
+        <div className={`md:hidden overflow-x-auto transition-all duration-300 ${
+          isScrolled 
+            ? "bg-background/95 backdrop-blur-md border-b" 
+            : "bg-transparent"
+        }`}>
+          <div className="flex items-center gap-4 px-4 py-3 min-w-max">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => scrollToSection("services")}
+              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              data-testid="link-services-mobile-quick"
+            >
+              Services
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => scrollToSection("impact")}
+              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              data-testid="link-impact-mobile-quick"
+            >
+              Impact
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => scrollToSection("testimonials")}
+              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              data-testid="link-testimonials-mobile-quick"
+            >
+              Testimonials
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => scrollToSection("events")}
+              className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+              data-testid="link-events-mobile-quick"
+            >
+              Events
+            </Button>
+            <Link href="/virtual-tour">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`${isScrolled ? "" : "text-white hover:bg-white/10"} whitespace-nowrap`}
+                data-testid="link-virtual-tour-mobile-quick"
+              >
+                Virtual Tour
+              </Button>
+            </Link>
+            <Link href="/donate">
+              <Button
+                variant="default"
+                size="sm"
+                className="whitespace-nowrap"
+                data-testid="button-donate-mobile-quick"
+              >
+                Donate
+              </Button>
+            </Link>
+          </div>
+        </div>
       </nav>
       {mobileMenuOpen && createPortal(
         <div 
