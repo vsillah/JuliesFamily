@@ -251,7 +251,7 @@ export default function Navigation() {
             ? "bg-background/95 backdrop-blur-md border-b" 
             : "bg-transparent"
         }`}>
-          <div className="flex items-center gap-4 px-4 py-3 min-w-max">
+          <div className="flex items-center gap-2 px-4 py-1 min-w-max">
             <Button
               variant="ghost"
               size="sm"
