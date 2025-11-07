@@ -16,6 +16,7 @@ import { sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
 import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps } from "./taskAutomation";
 import Stripe from "stripe";
+import * as XLSX from "xlsx";
 
 // Extend Express Request to properly type authenticated user
 interface AuthenticatedRequest extends Request {
@@ -315,6 +316,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Download Excel Template (must be before /:id route)
+  app.get('/api/admin/leads/template', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const templateData = [
+        {
+          Email: 'example@email.com',
+          'First Name': 'John',
+          'Last Name': 'Doe',
+          Phone: '+1234567890',
+          Persona: 'student',
+          'Funnel Stage': 'awareness',
+          'Pipeline Stage': 'new_lead',
+          'Lead Source': 'bulk_import',
+          Notes: 'Sample lead notes',
+        },
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(templateData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Leads');
+
+      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+      res.setHeader('Content-Disposition', 'attachment; filename=leads_import_template.xlsx');
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.send(buffer);
+    } catch (error) {
+      console.error("Error generating template:", error);
+      res.status(500).json({ message: "Failed to generate template" });
+    }
+  });
+
   app.get('/api/admin/leads/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const lead = await storage.getLead(req.params.id);
@@ -348,6 +381,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting lead:", error);
       res.status(500).json({ message: "Failed to delete lead" });
+    }
+  });
+
+  // Bulk Import Leads from Excel
+  const excelUpload = multer({ storage: multer.memoryStorage() });
+  
+  app.post('/api/admin/leads/bulk-import', isAuthenticated, isAdmin, excelUpload.single('file'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+
+      const results = {
+        total: data.length,
+        successful: 0,
+        failed: 0,
+        errors: [] as { row: number; email: string; error: string }[],
+      };
+
+      for (let i = 0; i < data.length; i++) {
+        const row: any = data[i];
+        try {
+          const email = row.Email || row.email;
+          if (!email) {
+            throw new Error('Email is required');
+          }
+
+          const existingLead = await storage.getLeadByEmail(email);
+          
+          if (existingLead) {
+            // For updates: only include fields that are actually provided in the spreadsheet
+            const updateData: any = { email };
+            
+            if (row['First Name'] || row.firstName) updateData.firstName = row['First Name'] || row.firstName;
+            if (row['Last Name'] || row.lastName) updateData.lastName = row['Last Name'] || row.lastName;
+            if (row.Phone || row.phone) updateData.phone = row.Phone || row.phone;
+            if (row.Persona || row.persona) updateData.persona = row.Persona || row.persona;
+            if (row['Funnel Stage'] || row.funnelStage) updateData.funnelStage = row['Funnel Stage'] || row.funnelStage;
+            if (row['Pipeline Stage'] || row.pipelineStage) updateData.pipelineStage = row['Pipeline Stage'] || row.pipelineStage;
+            if (row['Lead Source'] || row.leadSource) updateData.leadSource = row['Lead Source'] || row.leadSource;
+            if (row.Notes || row.notes) updateData.notes = row.Notes || row.notes;
+            
+            await storage.updateLead(existingLead.id, updateData);
+          } else {
+            // For new leads: apply defaults for required fields
+            const newLeadData = {
+              email,
+              firstName: row['First Name'] || row.firstName || null,
+              lastName: row['Last Name'] || row.lastName || null,
+              phone: row.Phone || row.phone || null,
+              persona: row.Persona || row.persona || 'student',
+              funnelStage: row['Funnel Stage'] || row.funnelStage || 'awareness',
+              pipelineStage: row['Pipeline Stage'] || row.pipelineStage || 'new_lead',
+              leadSource: row['Lead Source'] || row.leadSource || 'bulk_import',
+              notes: row.Notes || row.notes || null,
+            };
+
+            const validatedData = insertLeadSchema.parse(newLeadData);
+            const newLead = await storage.createLead(validatedData);
+            await createTaskForNewLead(storage, newLead);
+          }
+          
+          results.successful++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push({
+            row: i + 2,
+            email: row.Email || row.email || 'Unknown',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      }
+
+      res.json(results);
+    } catch (error) {
+      console.error("Error processing bulk import:", error);
+      res.status(500).json({ message: "Failed to process bulk import" });
     }
   });
 

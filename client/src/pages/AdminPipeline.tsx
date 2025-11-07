@@ -9,10 +9,14 @@ import { DndContext, DragOverlay, closestCenter, PointerSensor, useSensor, useSe
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Calendar, Mail, Phone, GripVertical, TrendingUp, Clock, AlertTriangle } from "lucide-react";
+import { Calendar, Mail, Phone, GripVertical, TrendingUp, Clock, AlertTriangle, Upload, Download, FileSpreadsheet } from "lucide-react";
 import type { Lead, PipelineStage } from "@shared/schema";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 
 interface BoardData {
   stages: PipelineStage[];
@@ -216,6 +220,14 @@ function StageColumn({ stage, leads }: StageColumnProps) {
 export default function AdminPipeline() {
   const { toast } = useToast();
   const [activeLeadId, setActiveLeadId] = useState<string | null>(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadResults, setUploadResults] = useState<{
+    total: number;
+    successful: number;
+    failed: number;
+    errors: { row: number; email: string; error: string }[];
+  } | null>(null);
 
   const { data: boardData, isLoading } = useQuery<BoardData>({
     queryKey: ['/api/pipeline/board'],
@@ -289,6 +301,83 @@ export default function AdminPipeline() {
       queryClient.invalidateQueries({ queryKey: ['/api/pipeline/board'] });
     },
   });
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setUploadResults(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/admin/leads/bulk-import', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload file');
+      }
+
+      const results = await response.json();
+      setUploadResults(results);
+
+      if (results.successful > 0) {
+        await queryClient.invalidateQueries({ queryKey: ['/api/pipeline/board'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/pipeline/analytics'] });
+        
+        toast({
+          title: "Import Successful",
+          description: `Imported ${results.successful} leads successfully${results.failed > 0 ? ` (${results.failed} failed)` : ''}`,
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Failed to upload file",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch('/api/admin/leads/template', {
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to download template');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'leads_import_template.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast({
+        title: "Template Downloaded",
+        description: "Use this template to format your lead data",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Download Failed",
+        description: error instanceof Error ? error.message : "Failed to download template",
+      });
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -371,6 +460,102 @@ export default function AdminPipeline() {
               Drag and drop leads between stages to update their status
             </p>
           </div>
+          
+          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button data-testid="button-bulk-import">
+                <Upload className="w-4 h-4 mr-2" />
+                Bulk Import
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Bulk Import Leads</DialogTitle>
+                <DialogDescription>
+                  Upload an Excel file to import multiple leads at once
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="excel-upload">Upload Excel File</Label>
+                  <Input
+                    id="excel-upload"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileUpload}
+                    disabled={isUploading}
+                    data-testid="input-excel-upload"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Supported formats: .xlsx, .xls
+                  </p>
+                </div>
+
+                {isUploading && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Uploading and processing...</p>
+                    <Progress value={50} className="w-full" />
+                  </div>
+                )}
+
+                {uploadResults && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Import Results</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Total Rows:</span>
+                        <span className="font-semibold">{uploadResults.total}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Successful:</span>
+                        <span className="font-semibold text-green-600 dark:text-green-400">{uploadResults.successful}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Failed:</span>
+                        <span className="font-semibold text-destructive">{uploadResults.failed}</span>
+                      </div>
+                      
+                      {uploadResults.errors.length > 0 && (
+                        <div className="mt-4 space-y-2">
+                          <p className="text-sm font-medium">Errors:</p>
+                          <div className="max-h-48 overflow-y-auto space-y-1">
+                            {uploadResults.errors.slice(0, 10).map((error, idx) => (
+                              <p key={idx} className="text-xs text-destructive">
+                                Row {error.row} ({error.email}): {error.error}
+                              </p>
+                            ))}
+                            {uploadResults.errors.length > 10 && (
+                              <p className="text-xs text-muted-foreground">
+                                ...and {uploadResults.errors.length - 10} more errors
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                <div className="flex flex-col gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={handleDownloadTemplate}
+                    className="w-full"
+                    data-testid="button-download-template"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Template
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Use the template to format your lead data correctly
+                  </p>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Pipeline Analytics */}
