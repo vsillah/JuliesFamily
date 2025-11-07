@@ -285,3 +285,106 @@ export const insertGoogleReviewSchema = createInsertSchema(googleReviews).omit({
 });
 export type InsertGoogleReview = z.infer<typeof insertGoogleReviewSchema>;
 export type GoogleReview = typeof googleReviews.$inferSelect;
+
+// Donations table for tracking all donations
+// Reference: blueprint:javascript_stripe
+export const donations = pgTable("donations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").references(() => leads.id), // Link to lead/donor
+  userId: varchar("user_id").references(() => users.id), // Link to authenticated user (optional)
+  stripePaymentIntentId: varchar("stripe_payment_intent_id").unique(), // Stripe payment ID
+  stripeCustomerId: varchar("stripe_customer_id"), // Stripe customer ID for recurring
+  amount: integer("amount").notNull(), // Amount in cents
+  currency: varchar("currency").default('usd'),
+  donationType: varchar("donation_type").notNull(), // 'one-time', 'recurring', 'wishlist'
+  frequency: varchar("frequency"), // For recurring: 'monthly', 'quarterly', 'annual'
+  status: varchar("status").notNull().default('pending'), // 'pending', 'succeeded', 'failed', 'refunded'
+  donorEmail: varchar("donor_email"),
+  donorName: varchar("donor_name"),
+  donorPhone: varchar("phone"),
+  isAnonymous: boolean("is_anonymous").default(false),
+  wishlistItemId: varchar("wishlist_item_id").references(() => wishlistItems.id), // For wishlist donations
+  receiptUrl: varchar("receipt_url"), // Stripe receipt URL
+  thankYouEmailSent: boolean("thank_you_email_sent").default(false),
+  metadata: jsonb("metadata"), // Additional data: dedication, tribute, etc
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertDonationSchema = createInsertSchema(donations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertDonation = z.infer<typeof insertDonationSchema>;
+export type Donation = typeof donations.$inferSelect;
+
+// Wishlist Items table for specific donation needs
+export const wishlistItems = pgTable("wishlist_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(), // "School Supplies for 10 Students"
+  description: text("description"), // Detailed description
+  category: varchar("category").notNull(), // 'food', 'clothes', 'equipment', 'supplies', 'other'
+  targetAmount: integer("target_amount").notNull(), // Target amount in cents
+  raisedAmount: integer("raised_amount").default(0), // Amount raised so far in cents
+  quantity: integer("quantity"), // Number of items needed (optional)
+  quantityFulfilled: integer("quantity_fulfilled").default(0), // Number fulfilled
+  imageUrl: varchar("image_url"), // Optional image
+  priority: varchar("priority").default('medium'), // 'low', 'medium', 'high', 'urgent'
+  isActive: boolean("is_active").default(true),
+  isFulfilled: boolean("is_fulfilled").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertWishlistItemSchema = createInsertSchema(wishlistItems).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertWishlistItem = z.infer<typeof insertWishlistItemSchema>;
+export type WishlistItem = typeof wishlistItems.$inferSelect;
+
+// Email Templates table for managing automated email content
+export const emailTemplates = pgTable("email_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(), // 'donation_thank_you', 'donation_receipt', 'lead_confirmation'
+  subject: varchar("subject").notNull(),
+  htmlBody: text("html_body").notNull(), // HTML template with {{placeholders}}
+  textBody: text("text_body"), // Plain text version
+  variables: jsonb("variables"), // List of available variables: ['donorName', 'amount', etc]
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+
+// Email Logs table for tracking sent emails
+export const emailLogs = pgTable("email_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").references(() => emailTemplates.id),
+  recipientEmail: varchar("recipient_email").notNull(),
+  recipientName: varchar("recipient_name"),
+  subject: varchar("subject").notNull(),
+  status: varchar("status").notNull().default('pending'), // 'pending', 'sent', 'failed', 'bounced'
+  emailProvider: varchar("email_provider"), // 'sendgrid', 'resend', etc
+  providerMessageId: varchar("provider_message_id"), // ID from email service
+  errorMessage: text("error_message"), // If failed
+  metadata: jsonb("metadata"), // Variables used, related donation ID, etc
+  sentAt: timestamp("sent_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
+export type EmailLog = typeof emailLogs.$inferSelect;
