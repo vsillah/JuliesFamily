@@ -186,13 +186,13 @@ export default function Hero() {
       </div>
 
       {/* Layer 2: Overlay Gradients (renders second, after image loads) */}
-      <div className={`absolute inset-0 z-[2] transition-opacity duration-700 ${
+      <div className={`absolute inset-x-0 top-0 bottom-24 sm:bottom-32 z-[2] transition-opacity duration-700 ${
         overlayVisible ? 'opacity-100' : 'opacity-0'
       }`}>
         {/* Vertical gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/50" />
         {/* Radial gradient for edge vignette effect */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_50%,rgba(0,0,0,0.4)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_50%,rgba(0,0,0,0.3)_100%)]" />
         {/* Horizontal shade between image and text with gradient edges */}
         <div 
           className="absolute inset-0"
