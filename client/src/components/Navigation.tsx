@@ -246,10 +246,7 @@ export default function Navigation() {
       </nav>
       {mobileMenuOpen && (
         <div 
-          className="fixed inset-0 z-40 bg-background md:hidden"
-          style={{
-            paddingTop: 'calc(max(env(safe-area-inset-top), 1rem) + 5rem)'
-          }}
+          className="fixed inset-0 z-[60] bg-background md:hidden pt-32"
         >
           <div className="flex flex-col items-center gap-6 p-8">
             {isAuthenticated && user && (
