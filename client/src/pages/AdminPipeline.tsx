@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { DndContext, DragOverlay, closestCorners, PointerSensor, useSensor, useSensors, DragStartEvent, DragEndEvent, DragOverEvent, useDroppable } from "@dnd-kit/core";
+import { DndContext, DragOverlay, closestCenter, PointerSensor, useSensor, useSensors, DragStartEvent, DragEndEvent, useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -100,7 +100,7 @@ function LeadCard({ lead, isDragging = false }: LeadCardProps) {
 // Presentation-only card for drag overlay (without sortable hooks)
 function DragOverlayCard({ lead }: { lead: Lead }) {
   return (
-    <Card className="cursor-move shadow-lg">
+    <Card className="cursor-grabbing shadow-2xl ring-2 ring-primary/50 rotate-2 scale-105 w-[280px] sm:w-[320px]">
       <CardHeader className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
@@ -155,13 +155,13 @@ function StageColumn({ stage, leads }: StageColumnProps) {
   return (
     <div 
       ref={setNodeRef}
-      className={`flex flex-col min-w-[280px] sm:min-w-[320px] flex-1 transition-colors ${
-        isOver ? 'bg-accent/50 rounded-lg' : ''
+      className={`flex flex-col min-w-[280px] sm:min-w-[320px] lg:min-w-0 flex-1 max-w-full lg:max-w-[400px] transition-all ${
+        isOver ? 'bg-accent/30' : ''
       }`}
       data-testid={`stage-column-${stage.name}`}
     >
       <div className="sticky top-0 z-10 bg-background pb-4">
-        <Card>
+        <Card className={`transition-all ${isOver ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
           <CardHeader className="p-4">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base font-semibold">
@@ -179,13 +179,17 @@ function StageColumn({ stage, leads }: StageColumnProps) {
       </div>
       
       <SortableContext items={leads.map(l => l.id)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-3 flex-1 min-h-[200px] p-2" data-testid={`stage-leads-${stage.name}`}>
+        <div className={`space-y-3 flex-1 min-h-[200px] p-2 rounded-lg transition-all ${
+          isOver ? 'bg-accent/20 border-2 border-dashed border-primary' : ''
+        }`} data-testid={`stage-leads-${stage.name}`}>
           {leads.map((lead) => (
             <LeadCard key={lead.id} lead={lead} />
           ))}
           {leads.length === 0 && (
-            <div className="text-center py-8 text-sm text-muted-foreground">
-              Drop leads here
+            <div className={`text-center py-12 text-sm transition-all ${
+              isOver ? 'text-primary font-semibold' : 'text-muted-foreground'
+            }`}>
+              {isOver ? 'Release to drop here' : 'Drop leads here'}
             </div>
           )}
         </div>
@@ -311,11 +315,11 @@ export default function AdminPipeline() {
 
         <DndContext
           sensors={sensors}
-          collisionDetection={closestCorners}
+          collisionDetection={closestCenter}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-4 overflow-x-auto pb-4">
+          <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
             {boardData.stages.map((stage) => (
               <StageColumn
                 key={stage.id}
