@@ -755,7 +755,7 @@ export default function AdminContentManager() {
       <div className="w-full">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div className="flex flex-col gap-4">
               <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <div className="px-4 sm:px-0">
                   <TabsList className="inline-flex">
@@ -776,8 +776,8 @@ export default function AdminContentManager() {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4 flex-shrink-0">
-                {activeTab !== "matrix" && activeTab !== "googleReviews" && (
+              {activeTab !== "matrix" && activeTab !== "googleReviews" && (
+                <div className="flex justify-end">
                   <Button
                     onClick={() => {
                       setNewItem({ ...newItem, type: activeTab });
@@ -788,8 +788,8 @@ export default function AdminContentManager() {
                     <Plus className="w-4 h-4 mr-2" />
                     Create New
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
