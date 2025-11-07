@@ -225,8 +225,14 @@ export default function AdminContentManager() {
   const [editItemFunnelStage, setEditItemFunnelStage] = useState<FunnelStage | "">("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  
+  // Multi-select state for lead magnet visibility
+  const [selectedLeadMagnetCombos, setSelectedLeadMagnetCombos] = useState<Set<string>>(new Set());
+  
+  // Helper to create combo key from persona and stage
+  const getComboKey = (persona: Persona, stage: FunnelStage) => `${persona}:${stage}`;
 
-  const { data: services = [], isLoading: servicesLoading } = useQuery<ContentItem[]>({
+  const { data: services = [], isLoading: servicesLoading} = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/service"],
   });
 
@@ -271,6 +277,24 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/visibility"],
     enabled: activeTab === "matrix",
   });
+  
+  // Load visibility settings when editing a lead magnet
+  useEffect(() => {
+    if (editingItem?.type === 'lead_magnet' && editingItem.id) {
+      // Find all visibility records for this lead magnet
+      const visibilityForItem = allVisibilitySettings.filter(v => v.contentItemId === editingItem.id);
+      const combos = new Set<string>();
+      visibilityForItem.forEach(v => {
+        if (v.persona && v.funnelStage) {
+          combos.add(getComboKey(v.persona as Persona, v.funnelStage as FunnelStage));
+        }
+      });
+      setSelectedLeadMagnetCombos(combos);
+    } else if (!editingItem) {
+      // Reset when closing dialog
+      setSelectedLeadMagnetCombos(new Set());
+    }
+  }, [editingItem, allVisibilitySettings]);
 
   // Fetch all A/B tests for matrix view
   const { data: allAbTests = [] } = useQuery<AbTest[]>({
@@ -458,8 +482,16 @@ export default function AdminContentManager() {
       metadata
     };
     
-    // Add persona and funnel stage assignment if selected
-    if (editItemPersona && editItemFunnelStage) {
+    // For lead magnets, send multiple visibility combinations
+    if (editingItem.type === 'lead_magnet') {
+      const combos = Array.from(selectedLeadMagnetCombos).map(key => {
+        const [persona, funnelStage] = key.split(':');
+        return { persona, funnelStage };
+      });
+      updates.visibilityCombos = combos;
+    }
+    // For other content types, add single persona and funnel stage if selected
+    else if (editItemPersona && editItemFunnelStage) {
       updates.persona = editItemPersona;
       updates.funnelStage = editItemFunnelStage;
     }
@@ -486,9 +518,18 @@ export default function AdminContentManager() {
       };
     }
     
-    // Add persona and funnel stage assignment if selected
     const payload: any = itemToCreate;
-    if (newItemPersona && newItemFunnelStage) {
+    
+    // For lead magnets, send multiple visibility combinations
+    if (newItem.type === 'lead_magnet') {
+      const combos = Array.from(selectedLeadMagnetCombos).map(key => {
+        const [persona, funnelStage] = key.split(':');
+        return { persona, funnelStage };
+      });
+      payload.visibilityCombos = combos;
+    }
+    // For other content types, add single persona and funnel stage if selected
+    else if (newItemPersona && newItemFunnelStage) {
       payload.persona = newItemPersona;
       payload.funnelStage = newItemFunnelStage;
     }
@@ -1302,21 +1343,24 @@ export default function AdminContentManager() {
                 </>
               )}
               
-              <div>
-                <Label htmlFor="edit-metadata">Metadata (JSON)</Label>
-                <Textarea
-                  id="edit-metadata"
-                  value={JSON.stringify(editingItem.metadata || {}, null, 2)}
-                  onChange={(e) => {
-                    try {
-                      setEditingItem({ ...editingItem, metadata: JSON.parse(e.target.value) });
-                    } catch {}
-                  }}
-                  rows={6}
-                  className="font-mono text-sm"
-                  data-testid="input-edit-metadata"
-                />
-              </div>
+              {/* Hide metadata field for lead magnets to avoid conflicts */}
+              {editingItem.type !== 'lead_magnet' && (
+                <div>
+                  <Label htmlFor="edit-metadata">Metadata (JSON)</Label>
+                  <Textarea
+                    id="edit-metadata"
+                    value={JSON.stringify(editingItem.metadata || {}, null, 2)}
+                    onChange={(e) => {
+                      try {
+                        setEditingItem({ ...editingItem, metadata: JSON.parse(e.target.value) });
+                      } catch {}
+                    }}
+                    rows={6}
+                    className="font-mono text-sm"
+                    data-testid="input-edit-metadata"
+                  />
+                </div>
+              )}
               <div className="flex items-center gap-2">
                 <Switch
                   checked={editingItem.isActive ?? true}
@@ -1326,60 +1370,111 @@ export default function AdminContentManager() {
                 <Label>Active (visible on website)</Label>
               </div>
               
-              {/* Persona & Journey Stage Assignment (for all content types) */}
-              <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
-                <div className="flex items-start gap-2">
-                  <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <Label className="text-sm font-semibold">Visibility Assignment (Optional)</Label>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Assign this content to a specific persona and journey stage. Leave blank to manually assign later in the Matrix Grid.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="edit-assign-persona">Persona</Label>
-                    <Select
-                      value={editItemPersona || "none"}
-                      onValueChange={(value) => setEditItemPersona(value === "none" ? "" : value as Persona)}
-                    >
-                      <SelectTrigger id="edit-assign-persona" data-testid="select-edit-assign-persona">
-                        <SelectValue placeholder="Select persona..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Not assigned</SelectItem>
-                        {PERSONAS.map((persona) => (
-                          <SelectItem key={persona} value={persona}>
-                            {PERSONA_LABELS[persona]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              {/* Multi-select for Lead Magnets, Single-select for others */}
+              {editingItem.type === 'lead_magnet' ? (
+                <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-sm font-semibold">Visibility Assignment</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Select which persona and journey stage combinations should see this lead magnet. You can select multiple combinations.
+                      </p>
+                    </div>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="edit-assign-stage">Journey Stage</Label>
-                    <Select
-                      value={editItemFunnelStage || "none"}
-                      onValueChange={(value) => setEditItemFunnelStage(value === "none" ? "" : value as FunnelStage)}
-                    >
-                      <SelectTrigger id="edit-assign-stage" data-testid="select-edit-assign-stage">
-                        <SelectValue placeholder="Select stage..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">Not assigned</SelectItem>
-                        {FUNNEL_STAGES.map((stage) => (
-                          <SelectItem key={stage} value={stage}>
-                            {FUNNEL_STAGE_LABELS[stage]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                    {PERSONAS.map((persona) => (
+                      <div key={persona} className="space-y-1">
+                        <div className="text-sm font-medium text-muted-foreground">{PERSONA_LABELS[persona]}</div>
+                        <div className="grid grid-cols-2 gap-2 pl-4">
+                          {FUNNEL_STAGES.map((stage) => {
+                            const comboKey = getComboKey(persona, stage);
+                            const isChecked = selectedLeadMagnetCombos.has(comboKey);
+                            return (
+                              <div key={comboKey} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  id={`edit-combo-${comboKey}`}
+                                  checked={isChecked}
+                                  onChange={(e) => {
+                                    const newSet = new Set(selectedLeadMagnetCombos);
+                                    if (e.target.checked) {
+                                      newSet.add(comboKey);
+                                    } else {
+                                      newSet.delete(comboKey);
+                                    }
+                                    setSelectedLeadMagnetCombos(newSet);
+                                  }}
+                                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                                  data-testid={`checkbox-edit-${comboKey}`}
+                                />
+                                <Label htmlFor={`edit-combo-${comboKey}`} className="text-sm font-normal cursor-pointer">
+                                  {FUNNEL_STAGE_LABELS[stage]}
+                                </Label>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-sm font-semibold">Visibility Assignment (Optional)</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Assign this content to a specific persona and journey stage. Leave blank to manually assign later in the Matrix Grid.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="edit-assign-persona">Persona</Label>
+                      <Select
+                        value={editItemPersona || "none"}
+                        onValueChange={(value) => setEditItemPersona(value === "none" ? "" : value as Persona)}
+                      >
+                        <SelectTrigger id="edit-assign-persona" data-testid="select-edit-assign-persona">
+                          <SelectValue placeholder="Select persona..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Not assigned</SelectItem>
+                          {PERSONAS.map((persona) => (
+                            <SelectItem key={persona} value={persona}>
+                              {PERSONA_LABELS[persona]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="edit-assign-stage">Journey Stage</Label>
+                      <Select
+                        value={editItemFunnelStage || "none"}
+                        onValueChange={(value) => setEditItemFunnelStage(value === "none" ? "" : value as FunnelStage)}
+                      >
+                        <SelectTrigger id="edit-assign-stage" data-testid="select-edit-assign-stage">
+                          <SelectValue placeholder="Select stage..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Not assigned</SelectItem>
+                          {FUNNEL_STAGES.map((stage) => (
+                            <SelectItem key={stage} value={stage}>
+                              {FUNNEL_STAGE_LABELS[stage]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <div className="flex gap-2 justify-end pt-4">
                 <Button variant="outline" onClick={() => setEditingItem(null)} data-testid="button-cancel-edit">
@@ -1690,60 +1785,111 @@ export default function AdminContentManager() {
               </>
             )}
             
-            {/* Persona & Journey Stage Assignment (for all content types) */}
-            <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
-              <div className="flex items-start gap-2">
-                <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <Label className="text-sm font-semibold">Visibility Assignment (Optional)</Label>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Assign this content to a specific persona and journey stage. Leave blank to manually assign later in the Matrix Grid.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="create-assign-persona">Persona</Label>
-                  <Select
-                    value={newItemPersona || "none"}
-                    onValueChange={(value) => setNewItemPersona(value === "none" ? "" : value as Persona)}
-                  >
-                    <SelectTrigger id="create-assign-persona" data-testid="select-create-assign-persona">
-                      <SelectValue placeholder="Select persona..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Not assigned</SelectItem>
-                      {PERSONAS.map((persona) => (
-                        <SelectItem key={persona} value={persona}>
-                          {PERSONA_LABELS[persona]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+            {/* Multi-select for Lead Magnets, Single-select for others */}
+            {activeTab === 'lead_magnet' ? (
+              <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <Label className="text-sm font-semibold">Visibility Assignment</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Select which persona and journey stage combinations should see this lead magnet. You can select multiple combinations.
+                    </p>
+                  </div>
                 </div>
                 
-                <div>
-                  <Label htmlFor="create-assign-stage">Journey Stage</Label>
-                  <Select
-                    value={newItemFunnelStage || "none"}
-                    onValueChange={(value) => setNewItemFunnelStage(value === "none" ? "" : value as FunnelStage)}
-                  >
-                    <SelectTrigger id="create-assign-stage" data-testid="select-create-assign-stage">
-                      <SelectValue placeholder="Select stage..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">Not assigned</SelectItem>
-                      {FUNNEL_STAGES.map((stage) => (
-                        <SelectItem key={stage} value={stage}>
-                          {FUNNEL_STAGE_LABELS[stage]}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-2 max-h-96 overflow-y-auto pr-2">
+                  {PERSONAS.map((persona) => (
+                    <div key={persona} className="space-y-1">
+                      <div className="text-sm font-medium text-muted-foreground">{PERSONA_LABELS[persona]}</div>
+                      <div className="grid grid-cols-2 gap-2 pl-4">
+                        {FUNNEL_STAGES.map((stage) => {
+                          const comboKey = getComboKey(persona, stage);
+                          const isChecked = selectedLeadMagnetCombos.has(comboKey);
+                          return (
+                            <div key={comboKey} className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                id={`create-combo-${comboKey}`}
+                                checked={isChecked}
+                                onChange={(e) => {
+                                  const newSet = new Set(selectedLeadMagnetCombos);
+                                  if (e.target.checked) {
+                                    newSet.add(comboKey);
+                                  } else {
+                                    newSet.delete(comboKey);
+                                  }
+                                  setSelectedLeadMagnetCombos(newSet);
+                                }}
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                                data-testid={`checkbox-create-${comboKey}`}
+                              />
+                              <Label htmlFor={`create-combo-${comboKey}`} className="text-sm font-normal cursor-pointer">
+                                {FUNNEL_STAGE_LABELS[stage]}
+                              </Label>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <Label className="text-sm font-semibold">Visibility Assignment (Optional)</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Assign this content to a specific persona and journey stage. Leave blank to manually assign later in the Matrix Grid.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="create-assign-persona">Persona</Label>
+                    <Select
+                      value={newItemPersona || "none"}
+                      onValueChange={(value) => setNewItemPersona(value === "none" ? "" : value as Persona)}
+                    >
+                      <SelectTrigger id="create-assign-persona" data-testid="select-create-assign-persona">
+                        <SelectValue placeholder="Select persona..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Not assigned</SelectItem>
+                        {PERSONAS.map((persona) => (
+                          <SelectItem key={persona} value={persona}>
+                            {PERSONA_LABELS[persona]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="create-assign-stage">Journey Stage</Label>
+                    <Select
+                      value={newItemFunnelStage || "none"}
+                      onValueChange={(value) => setNewItemFunnelStage(value === "none" ? "" : value as FunnelStage)}
+                    >
+                      <SelectTrigger id="create-assign-stage" data-testid="select-create-assign-stage">
+                        <SelectValue placeholder="Select stage..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Not assigned</SelectItem>
+                        {FUNNEL_STAGES.map((stage) => (
+                          <SelectItem key={stage} value={stage}>
+                            {FUNNEL_STAGE_LABELS[stage]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="flex gap-2 justify-end pt-4">
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} data-testid="button-cancel-create">
