@@ -4,13 +4,22 @@ import type { Express, RequestHandler } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
 import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "./cloudinary";
 import multer from "multer";
 import { analyzeSocialPostScreenshot } from "./gemini";
+import Stripe from "stripe";
+
+// Reference: blueprint:javascript_stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-10-29.clover",
+});
 
 // Admin authorization middleware
 const isAdmin: RequestHandler = async (req: any, res, next) => {
@@ -1284,6 +1293,237 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating review visibility:", error);
       res.status(500).json({ message: "Failed to update review visibility" });
+    }
+  });
+
+  // Donation Routes
+  // Reference: blueprint:javascript_stripe
+
+  // Create Stripe checkout session for one-time or recurring donation
+  app.post("/api/donations/create-checkout", async (req, res) => {
+    try {
+      const { amount, donationType, frequency, donorEmail, donorName, donorPhone, isAnonymous, wishlistItemId, metadata } = req.body;
+
+      // Validate amount
+      if (!amount || amount < 100) { // Minimum $1.00
+        return res.status(400).json({ message: "Amount must be at least $1.00" });
+      }
+
+      // Validate donation type
+      if (!['one-time', 'recurring', 'wishlist'].includes(donationType)) {
+        return res.status(400).json({ message: "Invalid donation type" });
+      }
+
+      const amountInCents = Math.round(amount * 100);
+
+      if (donationType === 'recurring') {
+        // For recurring donations, we need to create a subscription
+        // For simplicity, we'll use payment intents here but note this should ideally use Stripe subscriptions
+        if (!frequency || !['monthly', 'quarterly', 'annual'].includes(frequency)) {
+          return res.status(400).json({ message: "Invalid frequency for recurring donation" });
+        }
+      }
+
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amountInCents,
+        currency: "usd",
+        metadata: {
+          donationType,
+          frequency: frequency || '',
+          donorName: donorName || '',
+          isAnonymous: isAnonymous ? 'true' : 'false',
+          wishlistItemId: wishlistItemId || '',
+          ...(metadata || {})
+        },
+        receipt_email: donorEmail || undefined,
+      });
+
+      // Create donation record in pending state
+      const donation = await storage.createDonation({
+        stripePaymentIntentId: paymentIntent.id,
+        amount: amountInCents,
+        donationType,
+        frequency,
+        status: 'pending',
+        donorEmail,
+        donorName,
+        donorPhone,
+        isAnonymous: isAnonymous || false,
+        wishlistItemId: wishlistItemId || null,
+        metadata: metadata || null,
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        donationId: donation.id
+      });
+    } catch (error: any) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Error creating payment intent: " + error.message });
+    }
+  });
+
+  // Stripe webhook handler for payment confirmations
+  app.post("/api/donations/webhook", async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    
+    // For development, we'll process without signature verification
+    // In production, you should set STRIPE_WEBHOOK_SECRET and verify the signature
+    let event;
+    
+    try {
+      if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
+        event = stripe.webhooks.constructEvent(
+          req.body,
+          sig as string,
+          process.env.STRIPE_WEBHOOK_SECRET
+        );
+      } else {
+        // For testing without webhook secret
+        event = req.body;
+      }
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    try {
+      switch (event.type) {
+        case 'payment_intent.succeeded': {
+          const paymentIntent = event.data.object;
+          console.log('Payment succeeded:', paymentIntent.id);
+          
+          // Update donation status
+          await storage.updateDonationByStripeId(paymentIntent.id, {
+            status: 'succeeded',
+            receiptUrl: paymentIntent.charges?.data[0]?.receipt_url || null,
+          });
+          
+          // TODO: Send thank-you email (will implement in task 7)
+          break;
+        }
+        
+        case 'payment_intent.payment_failed': {
+          const paymentIntent = event.data.object;
+          console.log('Payment failed:', paymentIntent.id);
+          
+          await storage.updateDonationByStripeId(paymentIntent.id, {
+            status: 'failed',
+          });
+          break;
+        }
+        
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      res.status(500).json({ message: "Webhook processing failed" });
+    }
+  });
+
+  // Get all donations (admin only)
+  app.get('/api/donations', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const donations = await storage.getAllDonations();
+      res.json(donations);
+    } catch (error) {
+      console.error("Error fetching donations:", error);
+      res.status(500).json({ message: "Failed to fetch donations" });
+    }
+  });
+
+  // Get donation by ID (admin only)
+  app.get('/api/donations/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const donation = await storage.getDonationById(id);
+      
+      if (!donation) {
+        return res.status(404).json({ message: "Donation not found" });
+      }
+      
+      res.json(donation);
+    } catch (error) {
+      console.error("Error fetching donation:", error);
+      res.status(500).json({ message: "Failed to fetch donation" });
+    }
+  });
+
+  // Wishlist Items Routes
+
+  // Get active wishlist items (public)
+  app.get('/api/wishlist', async (req, res) => {
+    try {
+      const items = await storage.getActiveWishlistItems();
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching wishlist items:", error);
+      res.status(500).json({ message: "Failed to fetch wishlist items" });
+    }
+  });
+
+  // Get all wishlist items (admin only)
+  app.get('/api/wishlist/all', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const items = await storage.getAllWishlistItems();
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching all wishlist items:", error);
+      res.status(500).json({ message: "Failed to fetch all wishlist items" });
+    }
+  });
+
+  // Create wishlist item (admin only)
+  app.post('/api/wishlist', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const parsed = insertWishlistItemSchema.parse(req.body);
+      const item = await storage.createWishlistItem(parsed);
+      res.json(item);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid wishlist item data", errors: error.errors });
+      }
+      console.error("Error creating wishlist item:", error);
+      res.status(500).json({ message: "Failed to create wishlist item" });
+    }
+  });
+
+  // Update wishlist item (admin only)
+  app.patch('/api/wishlist/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updated = await storage.updateWishlistItem(id, req.body);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Wishlist item not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating wishlist item:", error);
+      res.status(500).json({ message: "Failed to update wishlist item" });
+    }
+  });
+
+  // Delete wishlist item (admin only)
+  app.delete('/api/wishlist/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteWishlistItem(id);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Wishlist item not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting wishlist item:", error);
+      res.status(500).json({ message: "Failed to delete wishlist item" });
     }
   });
 

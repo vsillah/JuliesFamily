@@ -4,7 +4,7 @@ import {
   users, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
   abTests, abTestVariants, abTestAssignments, abTestEvents,
-  googleReviews,
+  googleReviews, donations, wishlistItems,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -16,7 +16,9 @@ import {
   type AbTestVariant, type InsertAbTestVariant,
   type AbTestAssignment, type InsertAbTestAssignment,
   type AbTestEvent, type InsertAbTestEvent,
-  type GoogleReview, type InsertGoogleReview
+  type GoogleReview, type InsertGoogleReview,
+  type Donation, type InsertDonation,
+  type WishlistItem, type InsertWishlistItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -144,6 +146,20 @@ export interface IStorage {
   getGoogleReviews(): Promise<GoogleReview[]>;
   getActiveGoogleReviews(): Promise<GoogleReview[]>;
   updateGoogleReviewVisibility(id: string, isActive: boolean): Promise<GoogleReview | undefined>;
+  
+  // Donation operations
+  createDonation(donation: InsertDonation): Promise<Donation>;
+  getDonationById(id: string): Promise<Donation | undefined>;
+  updateDonationByStripeId(stripePaymentIntentId: string, updates: Partial<InsertDonation>): Promise<Donation | undefined>;
+  getAllDonations(): Promise<Donation[]>;
+  getDonationsByLeadId(leadId: string): Promise<Donation[]>;
+  
+  // Wishlist Item operations
+  createWishlistItem(item: InsertWishlistItem): Promise<WishlistItem>;
+  getActiveWishlistItems(): Promise<WishlistItem[]>;
+  getAllWishlistItems(): Promise<WishlistItem[]>;
+  updateWishlistItem(id: string, updates: Partial<InsertWishlistItem>): Promise<WishlistItem | undefined>;
+  deleteWishlistItem(id: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -860,6 +876,69 @@ export class DatabaseStorage implements IStorage {
       .where(eq(googleReviews.id, id))
       .returning();
     return updated;
+  }
+
+  // Donation operations
+  async createDonation(donationData: InsertDonation): Promise<Donation> {
+    const [donation] = await db.insert(donations).values(donationData).returning();
+    return donation;
+  }
+
+  async getDonationById(id: string): Promise<Donation | undefined> {
+    const [donation] = await db.select().from(donations).where(eq(donations.id, id));
+    return donation;
+  }
+
+  async updateDonationByStripeId(stripePaymentIntentId: string, updates: Partial<InsertDonation>): Promise<Donation | undefined> {
+    const [updated] = await db
+      .update(donations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(donations.stripePaymentIntentId, stripePaymentIntentId))
+      .returning();
+    return updated;
+  }
+
+  async getAllDonations(): Promise<Donation[]> {
+    return await db.select().from(donations).orderBy(desc(donations.createdAt));
+  }
+
+  async getDonationsByLeadId(leadId: string): Promise<Donation[]> {
+    return await db.select().from(donations).where(eq(donations.leadId, leadId)).orderBy(desc(donations.createdAt));
+  }
+
+  // Wishlist Item operations
+  async createWishlistItem(itemData: InsertWishlistItem): Promise<WishlistItem> {
+    const [item] = await db.insert(wishlistItems).values(itemData).returning();
+    return item;
+  }
+
+  async getActiveWishlistItems(): Promise<WishlistItem[]> {
+    return await db
+      .select()
+      .from(wishlistItems)
+      .where(and(
+        eq(wishlistItems.isActive, true),
+        eq(wishlistItems.isFulfilled, false)
+      ))
+      .orderBy(desc(wishlistItems.priority), desc(wishlistItems.createdAt));
+  }
+
+  async getAllWishlistItems(): Promise<WishlistItem[]> {
+    return await db.select().from(wishlistItems).orderBy(desc(wishlistItems.createdAt));
+  }
+
+  async updateWishlistItem(id: string, updates: Partial<InsertWishlistItem>): Promise<WishlistItem | undefined> {
+    const [updated] = await db
+      .update(wishlistItems)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(wishlistItems.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteWishlistItem(id: string): Promise<boolean> {
+    const result = await db.delete(wishlistItems).where(eq(wishlistItems.id, id));
+    return result.rowCount !== null && result.rowCount > 0;
   }
 }
 

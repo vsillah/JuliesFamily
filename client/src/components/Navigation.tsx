@@ -148,6 +148,11 @@ export default function Navigation() {
 
             {/* Right: Utilities */}
             <div className="hidden md:flex items-center gap-3">
+              <Link href="/donate">
+                <Button variant="default" size="sm" data-testid="button-donate">
+                  Donate
+                </Button>
+              </Link>
               {currentPersonaConfig && (
                 <button
                   onClick={() => setShowPersonaModal(true)}
@@ -310,9 +315,11 @@ export default function Navigation() {
             >
               Virtual Tour
             </Link>
-            <Button variant="default" size="lg" data-testid="button-donate-mobile">
-              Donate Now
-            </Button>
+            <Link href="/donate" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="default" size="lg" className="w-full" data-testid="button-donate-mobile">
+                Donate Now
+              </Button>
+            </Link>
             {currentPersonaConfig && (
               <Button 
                 variant="outline" 
