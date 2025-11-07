@@ -186,7 +186,7 @@ export default function Hero() {
       </div>
 
       {/* Layer 2: Overlay Gradients (renders second, after image loads) */}
-      <div className={`absolute inset-0 z-[2] transition-opacity duration-700 ${
+      <div className={`absolute inset-x-0 top-0 bottom-24 sm:bottom-32 z-[2] transition-opacity duration-700 ${
         overlayVisible ? 'opacity-100' : 'opacity-0'
       }`}>
         {/* Main gradient: transparent top/bottom, dark around content */}
