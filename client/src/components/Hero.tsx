@@ -190,7 +190,7 @@ export default function Hero() {
         overlayVisible ? 'opacity-100' : 'opacity-0'
       }`}>
         {/* Vertical gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/50" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-transparent" />
         {/* Radial gradient for edge vignette effect */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,transparent_50%,rgba(0,0,0,0.3)_100%)]" />
         {/* Horizontal shade between image and text with gradient edges */}
