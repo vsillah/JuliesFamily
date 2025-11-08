@@ -484,15 +484,48 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllContentItems(): Promise<ContentItem[]> {
-    return await db.select().from(contentItems).orderBy(contentItems.order);
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+      })
+      .from(contentItems)
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
+      .orderBy(contentItems.order);
+    
+    return results as unknown as ContentItem[];
   }
 
   async getContentItemsByType(type: string): Promise<ContentItem[]> {
-    return await db
-      .select()
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+      })
       .from(contentItems)
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
       .where(eq(contentItems.type, type))
       .orderBy(contentItems.order);
+    
+    return results as unknown as ContentItem[];
   }
 
   async updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined> {
