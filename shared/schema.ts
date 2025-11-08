@@ -122,6 +122,7 @@ export const leads = pgTable("leads", {
   lastInteractionDate: timestamp("last_interaction_date"),
   convertedAt: timestamp("converted_at"),
   notes: text("notes"),
+  passions: jsonb("passions"), // Array of passion tags for donor targeting: ['literacy', 'stem', 'arts', 'nutrition', 'community']
   metadata: jsonb("metadata"), // Additional data like quiz answers, form submissions
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -487,11 +488,12 @@ export const donations = pgTable("donations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   leadId: varchar("lead_id").references(() => leads.id), // Link to lead/donor
   userId: varchar("user_id").references(() => users.id), // Link to authenticated user (optional)
+  campaignId: varchar("campaign_id").references(() => donationCampaigns.id), // Link to donation campaign (if from campaign)
   stripePaymentIntentId: varchar("stripe_payment_intent_id").unique(), // Stripe payment ID
   stripeCustomerId: varchar("stripe_customer_id"), // Stripe customer ID for recurring
   amount: integer("amount").notNull(), // Amount in cents
   currency: varchar("currency").default('usd'),
-  donationType: varchar("donation_type").notNull(), // 'one-time', 'recurring', 'wishlist'
+  donationType: varchar("donation_type").notNull(), // 'one-time', 'recurring', 'wishlist', 'campaign'
   frequency: varchar("frequency"), // For recurring: 'monthly', 'quarterly', 'annual'
   status: varchar("status").notNull().default('pending'), // 'pending', 'succeeded', 'failed', 'refunded'
   donorEmail: varchar("donor_email"),
@@ -769,3 +771,127 @@ export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
 });
 export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
 export type EmailLog = typeof emailLogs.$inferSelect;
+
+// SMS Logs table for tracking sent SMS messages
+export const smsLogs = pgTable("sms_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").references(() => smsTemplates.id),
+  leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  campaignId: varchar("campaign_id").references(() => donationCampaigns.id, { onDelete: "set null" }),
+  recipientPhone: varchar("recipient_phone").notNull(),
+  recipientName: varchar("recipient_name"),
+  messageContent: text("message_content").notNull(), // The actual SMS sent
+  status: varchar("status").notNull().default('pending'), // 'pending', 'sent', 'failed', 'delivered'
+  smsProvider: varchar("sms_provider").default('twilio'), // 'twilio', etc
+  providerMessageId: varchar("provider_message_id"), // SID from Twilio
+  errorMessage: text("error_message"), // If failed
+  metadata: jsonb("metadata"), // Variables used, related donation/campaign ID, etc
+  sentAt: timestamp("sent_at"),
+  deliveredAt: timestamp("delivered_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertSmsLogSchema = createInsertSchema(smsLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSmsLog = z.infer<typeof insertSmsLogSchema>;
+export type SmsLog = typeof smsLogs.$inferSelect;
+
+// Donation Campaigns table for passion-based fundraising campaigns
+export const donationCampaigns = pgTable("donation_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  slug: varchar("slug").notNull().unique(), // URL-friendly identifier
+  description: text("description").notNull(),
+  story: text("story"), // Long-form storytelling content
+  goalAmount: integer("goal_amount").notNull(), // Target amount in cents
+  raisedAmount: integer("raised_amount").default(0), // Amount raised so far in cents
+  
+  // Passion-based targeting
+  passionTags: jsonb("passion_tags").notNull(), // Array of passion tags: ['literacy', 'stem', 'arts', 'nutrition', 'community']
+  
+  // Multi-channel communication settings
+  sendEmail: boolean("send_email").default(true),
+  sendSms: boolean("send_sms").default(false),
+  emailTemplateId: varchar("email_template_id").references(() => emailTemplates.id),
+  smsTemplateId: varchar("sms_template_id").references(() => smsTemplates.id),
+  
+  // Campaign timing
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  
+  // Campaign status
+  status: varchar("status").notNull().default('draft'), // 'draft', 'scheduled', 'active', 'paused', 'completed', 'cancelled'
+  
+  // Visual assets
+  imageUrl: varchar("image_url"), // Campaign hero image
+  thumbnailUrl: varchar("thumbnail_url"), // Smaller image for cards
+  
+  // Related content
+  relatedTestimonialIds: jsonb("related_testimonial_ids"), // Array of content_items IDs to promote
+  
+  // Tracking
+  totalDonations: integer("total_donations").default(0), // Count of donations
+  uniqueDonors: integer("unique_donors").default(0), // Count of unique donors
+  emailsSent: integer("emails_sent").default(0),
+  smsSent: integer("sms_sent").default(0),
+  clickThroughRate: integer("click_through_rate").default(0), // Percentage
+  conversionRate: integer("conversion_rate").default(0), // Percentage
+  
+  // Metadata
+  metadata: jsonb("metadata"), // Additional data: impact metrics, milestone updates, etc
+  
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("donation_campaigns_status_idx").on(table.status),
+  index("donation_campaigns_passion_tags_idx").on(table.passionTags),
+]);
+
+export const insertDonationCampaignSchema = createInsertSchema(donationCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertDonationCampaign = z.infer<typeof insertDonationCampaignSchema>;
+export type DonationCampaign = typeof donationCampaigns.$inferSelect;
+
+// Campaign Communications - tracks what was sent for each campaign
+export const campaignCommunications = pgTable("campaign_communications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => donationCampaigns.id, { onDelete: "cascade" }),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  
+  // What was sent
+  channel: varchar("channel").notNull(), // 'email', 'sms'
+  emailLogId: varchar("email_log_id").references(() => emailLogs.id),
+  smsLogId: varchar("sms_log_id").references(() => smsLogs.id),
+  
+  // Engagement tracking
+  wasSent: boolean("was_sent").default(false),
+  wasOpened: boolean("was_opened").default(false),
+  wasClicked: boolean("was_clicked").default(false),
+  wasDonated: boolean("was_donated").default(false), // Did they donate after this communication?
+  
+  // Matching info
+  matchedPassions: jsonb("matched_passions"), // Which passions matched for this send
+  
+  sentAt: timestamp("sent_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  donatedAt: timestamp("donated_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("campaign_comms_campaign_idx").on(table.campaignId),
+  index("campaign_comms_lead_idx").on(table.leadId),
+  uniqueIndex("campaign_comms_unique_idx").on(table.campaignId, table.leadId, table.channel),
+]);
+
+export const insertCampaignCommunicationSchema = createInsertSchema(campaignCommunications).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCampaignCommunication = z.infer<typeof insertCampaignCommunicationSchema>;
+export type CampaignCommunication = typeof campaignCommunications.$inferSelect;
