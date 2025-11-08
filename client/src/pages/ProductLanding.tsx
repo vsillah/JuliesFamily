@@ -25,6 +25,9 @@ import {
 import Footer from "@/components/Footer";
 import heroImage from "@assets/generated_images/Kinflo_hero_kinship_workflows_af05fdad.png";
 import logoImage from "@assets/generated_images/Kinflo_full_logo_aff28780.png";
+import laptopDashboard from "@assets/generated_images/Laptop_showing_CRM_dashboard_9926f587.png";
+import phoneCampaign from "@assets/generated_images/Phone_showing_campaign_app_1bfd93e5.png";
+import devicesTogether from "@assets/generated_images/Laptop_and_phone_together_b8fedbcb.png";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 
@@ -199,6 +202,48 @@ export default function ProductLanding() {
         </div>
       </section>
 
+      {/* Dashboard Screenshot Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div>
+              <Badge className="mb-4" data-testid="badge-feature-dashboard">
+                Powerful Analytics
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                Your complete nonprofit command center
+              </h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                Track every campaign, donor, and interaction in one beautiful dashboard. Real-time analytics, AI-powered insights, and automated workflows—all optimized for any screen size.
+              </p>
+              <div className="space-y-3">
+                {[
+                  { icon: BarChart3, text: "Live donation tracking & goal progress" },
+                  { icon: Users, text: "Complete donor relationship history" },
+                  { icon: Target, text: "Persona-based performance metrics" },
+                  { icon: Zap, text: "One-click AI campaign generation" },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <item.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-sm sm:text-base">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="relative" data-testid="screenshot-dashboard">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 blur-3xl opacity-30 rounded-3xl"></div>
+              <img 
+                src={laptopDashboard} 
+                alt="Kinflo dashboard showing donation campaigns, analytics, and donor management on laptop" 
+                className="relative w-full h-auto rounded-lg shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Demo Video Section */}
       <section id="demo-section" className="py-12 sm:py-16 md:py-20 px-4">
         <div className="container mx-auto max-w-5xl">
@@ -300,6 +345,50 @@ export default function ProductLanding() {
             <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
               Every feature you need is included. No hidden costs, no premium tiers, no per-user fees. Just one powerful platform built specifically for nonprofits.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Mobile Screenshot Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="relative order-2 md:order-1 flex justify-center" data-testid="screenshot-mobile">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 blur-3xl opacity-30 rounded-3xl"></div>
+              <div className="relative max-w-xs">
+                <img 
+                  src={phoneCampaign} 
+                  alt="Mobile campaign tracking showing donation progress, goals, and notifications on smartphone" 
+                  className="w-full h-auto drop-shadow-2xl"
+                />
+              </div>
+            </div>
+            <div className="order-1 md:order-2">
+              <Badge className="mb-4" data-testid="badge-feature-mobile">
+                Mobile-First Design
+              </Badge>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                Track campaigns anywhere, anytime
+              </h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                Campaign beneficiaries and donors get real-time updates on their phones. Watch donations roll in, submit thank-you testimonials, and celebrate milestones—all from the palm of their hand.
+              </p>
+              <div className="space-y-3">
+                {[
+                  { icon: Heart, text: "Real-time donation notifications" },
+                  { icon: Target, text: "Live goal progress tracking" },
+                  { icon: MessageSquare, text: "One-tap testimonial submissions" },
+                  { icon: Calendar, text: "Event reminders & updates" },
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <item.icon className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-sm sm:text-base">{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -581,6 +670,49 @@ export default function ProductLanding() {
               </div>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* Cross-Platform Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-br from-muted/30 to-transparent">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-8 sm:mb-12">
+            <Badge className="mb-4" data-testid="badge-feature-responsive">
+              Works Everywhere
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              One platform. Every device.
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Whether your team is in the office on laptops or parents are checking progress on their phones, Kinflo delivers a seamless experience across every screen size.
+            </p>
+          </div>
+          
+          <div className="relative" data-testid="screenshot-devices">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 blur-3xl opacity-40 rounded-3xl"></div>
+            <img 
+              src={devicesTogether} 
+              alt="Kinflo platform displayed on laptop and smartphone showing synchronized campaign management and donor tracking" 
+              className="relative w-full h-auto rounded-lg shadow-2xl"
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
+            {[
+              { icon: Globe, title: "Cloud-Based", desc: "Access from anywhere with internet" },
+              { icon: Zap, title: "Lightning Fast", desc: "Optimized for speed on any device" },
+              { icon: Users, title: "Multi-User", desc: "Unlimited admins & beneficiaries" },
+              { icon: CheckCircle2, title: "Auto-Sync", desc: "Changes update everywhere instantly" },
+            ].map((item, idx) => (
+              <div key={idx} className="text-center">
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                  <item.icon className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-1 text-sm">{item.title}</h3>
+                <p className="text-xs text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
