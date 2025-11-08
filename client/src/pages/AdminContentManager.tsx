@@ -463,21 +463,16 @@ export default function AdminContentManager() {
     },
   });
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingItem) return;
     
-    // Check if there's a pending screenshot that hasn't been uploaded
-    const hasScreenshot = screenshotFile && screenshotPreview;
+    // Check if there's a screenshot and the toggle is enabled
+    const hasScreenshot = screenshotFile && screenshotPreview && useScreenshotAsImage;
     
     if (hasScreenshot) {
-      // Show confirmation to upload screenshot (even if there's already an image)
-      isShowingConfirmationRef.current = true;
-      pendingScreenshotActionRef.current = 'edit'; // Remember which action to retry
-      setShowScreenshotConfirm(true);
-      toast({
-        title: "Screenshot Pending",
-        description: "Please confirm whether to use the screenshot as the image.",
-      });
+      // Upload screenshot first, then proceed with save
+      handleUploadScreenshot();
+      // The upload mutation's onSuccess will handle continuing with the save
       return;
     }
     
@@ -514,19 +509,14 @@ export default function AdminContentManager() {
     });
   };
 
-  const handleCreate = () => {
-    // Check if there's a pending screenshot that hasn't been uploaded
-    const hasScreenshot = screenshotFile && screenshotPreview;
+  const handleCreate = async () => {
+    // Check if there's a screenshot and the toggle is enabled
+    const hasScreenshot = screenshotFile && screenshotPreview && useScreenshotAsImage;
     
     if (hasScreenshot) {
-      // Show confirmation to upload screenshot first
-      isShowingConfirmationRef.current = true;
-      pendingScreenshotActionRef.current = 'create'; // Remember which action to retry
-      setShowScreenshotConfirm(true);
-      toast({
-        title: "Screenshot Pending",
-        description: "Please confirm whether to use the screenshot as the image.",
-      });
+      // Upload screenshot first, then proceed with create
+      handleUploadScreenshot();
+      // The upload mutation's onSuccess will handle continuing with the create
       return;
     }
     
@@ -700,6 +690,7 @@ export default function AdminContentManager() {
   const clearScreenshot = () => {
     setScreenshotPreview(null);
     setScreenshotFile(null);
+    setUseScreenshotAsImage(false);
   };
 
   const handleScreenshotConfirmAccept = () => {
@@ -747,13 +738,12 @@ export default function AdminContentManager() {
       // Clear screenshot state after successful upload
       clearScreenshot();
       
-      // If there's a pending save, retry it now that we have an image
-      if (pendingScreenshotActionRef.current === 'edit') {
-        pendingScreenshotActionRef.current = null;
+      // If upload was triggered from screenshot toggle, retry the save now that we have an image
+      // Check if we're in edit mode or create mode
+      if (editingItem) {
         // Small delay to ensure state updates
         setTimeout(() => handleSaveEdit(), 100);
-      } else if (pendingScreenshotActionRef.current === 'create') {
-        pendingScreenshotActionRef.current = null;
+      } else if (isCreateDialogOpen) {
         setTimeout(() => handleCreate(), 100);
       }
     },
