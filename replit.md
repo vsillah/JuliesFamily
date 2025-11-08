@@ -17,14 +17,14 @@ The frontend is a single-page application using `wouter` for routing, TanStack Q
 - **Admin Preview Mode**: Allows administrators to view the site from different persona and funnel stage perspectives.
 - **Universal Multi-Select Visibility System**: A responsive interface in the admin panel for assigning all content types to multiple persona and journey stage combinations.
 - **CRM Components**: Lead capture forms, an Admin Dashboard for lead management, and a unified Communication Timeline.
-- **Content Management System (CMS)**: Full-featured CMS with image management via Cloudinary and universal content visibility controls.
+- **Content Management System (CMS)**: Full-featured CMS with hybrid image management supporting both Cloudinary (legacy) and Object Storage with AI-powered file naming. Universal content visibility controls across all content types.
 - **Persona×Journey Matrix Grid**: Visual interface for configuring content visibility across 120 permutations.
 - **A/B Testing System**: Comprehensive platform for testing content, layouts, and messaging with weighted variant assignment and session-based tracking.
 - **User Management System**: Admin interface for managing user accounts, roles, and privileges, including a three-tier RBAC system (client, admin, super_admin) with audit logging.
 - **Admin Preferences System**: Per-user preference management for admins covering notifications, workflow, interface, and communication settings.
 - **Google Reviews & Social Media Integration**: Automated display of Google reviews and a carousel for curated social media posts.
 - **AI-Powered Analysis**: Uses Google Gemini AI for social media screenshot analysis and YouTube video thumbnail analysis with automated metadata extraction.
-- **AI-Powered File Naming**: Intelligent file naming system that analyzes uploaded images with Google Gemini AI to generate descriptive, SEO-friendly filenames categorized by content type (program, event, facility, testimonial, marketing, general). Includes user-editable confirmation dialog, validation, and automatic file renaming in object storage with ACL preservation.
+- **AI-Powered File Naming**: Intelligent file naming system that analyzes uploaded images with Google Gemini AI to generate descriptive, SEO-friendly filenames categorized by content type (program, event, facility, testimonial, marketing, general). Includes user-editable confirmation dialog, validation, and automatic file renaming in object storage with ACL preservation. Fully integrated into Content Manager with "AI Upload" buttons in all content type edit and create dialogs, supporting hybrid storage (Object Storage + Cloudinary) with automatic fallback for backward compatibility.
 - **YouTube Video Integration**: Zero-cost video hosting via YouTube embeds.
 - **Expandable Program Detail Dialogs**: Full-screen modals for detailed program information.
 - **Stripe Donation System**: Secure payment processing for one-time donations.
