@@ -11,7 +11,7 @@ import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
 import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "./cloudinary";
 import multer from "multer";
-import { analyzeSocialPostScreenshot } from "./gemini";
+import { analyzeSocialPostScreenshot, analyzeYouTubeVideoThumbnail } from "./gemini";
 import { sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
 import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps, syncTaskToCalendar } from "./taskAutomation";
@@ -1662,6 +1662,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error analyzing social post:", error);
       res.status(500).json({ 
         message: "Failed to analyze screenshot",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // AI-Powered YouTube Video Analysis (admin only)
+  app.post('/api/analyze-youtube-video', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { youtubeUrl } = req.body;
+
+      if (!youtubeUrl) {
+        return res.status(400).json({ message: "youtubeUrl is required" });
+      }
+
+      // Extract video ID from various YouTube URL formats
+      const extractVideoId = (input: string): string => {
+        // If it's already just an ID (no slashes or special chars), return as-is
+        if (!/[/:?&]/.test(input)) {
+          return input;
+        }
+
+        try {
+          const url = new URL(input);
+          
+          // youtube.com/watch?v=VIDEO_ID
+          if (url.hostname.includes('youtube.com') && url.searchParams.has('v')) {
+            return url.searchParams.get('v') || input;
+          }
+          
+          // youtu.be/VIDEO_ID
+          if (url.hostname === 'youtu.be') {
+            return url.pathname.slice(1).split('?')[0];
+          }
+          
+          // youtube.com/shorts/VIDEO_ID or youtube.com/embed/VIDEO_ID
+          if (url.pathname.includes('/shorts/') || url.pathname.includes('/embed/')) {
+            const parts = url.pathname.split('/');
+            return parts[parts.length - 1].split('?')[0];
+          }
+        } catch (e) {
+          console.error('Failed to parse video URL:', input, e);
+        }
+        
+        return input;
+      };
+
+      const videoId = extractVideoId(youtubeUrl);
+
+      // Fetch video metadata using YouTube oEmbed API (no API key required)
+      const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+      const oEmbedResponse = await fetch(oEmbedUrl);
+      
+      if (!oEmbedResponse.ok) {
+        return res.status(400).json({ 
+          message: "Invalid YouTube URL or video not found" 
+        });
+      }
+
+      const oEmbedData = await oEmbedResponse.json();
+      
+      // Get high-quality thumbnail URL
+      const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+      
+      // Use AI to analyze the thumbnail and enhance metadata
+      const aiAnalysis = await analyzeYouTubeVideoThumbnail(
+        thumbnailUrl,
+        oEmbedData.title,
+        undefined // YouTube oEmbed doesn't return description
+      );
+
+      res.json({
+        videoId,
+        originalTitle: oEmbedData.title,
+        suggestedTitle: aiAnalysis.suggestedTitle,
+        suggestedDescription: aiAnalysis.suggestedDescription,
+        category: aiAnalysis.category,
+        tags: aiAnalysis.tags,
+        thumbnailUrl,
+        authorName: oEmbedData.author_name,
+        authorUrl: oEmbedData.author_url,
+      });
+    } catch (error) {
+      console.error("Error analyzing YouTube video:", error);
+      res.status(500).json({ 
+        message: "Failed to analyze YouTube video",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }

@@ -99,3 +99,96 @@ If you cannot determine a field with confidence, use these defaults:
     throw new Error("Failed to analyze screenshot - invalid response format");
   }
 }
+
+export async function analyzeYouTubeVideoThumbnail(
+  thumbnailUrl: string,
+  videoTitle?: string,
+  videoDescription?: string
+): Promise<{
+  suggestedTitle: string;
+  suggestedDescription: string;
+  category: string;
+  tags: string[];
+}> {
+  // Fetch the thumbnail image
+  const response = await fetch(thumbnailUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const base64Image = buffer.toString('base64');
+
+  const prompt = `You are analyzing a thumbnail from a YouTube video${videoTitle ? ` titled "${videoTitle}"` : ''}${videoDescription ? ` with description: "${videoDescription}"` : ''}. 
+
+Based on the thumbnail image${videoTitle ? ', title,' : ''}${videoDescription ? ' and description,' : ''} extract or suggest the following:
+
+1. **Suggested Title**: ${videoTitle ? `Refine or improve the existing title "${videoTitle}" to be more engaging and descriptive (max 80 characters)` : 'Create a compelling, descriptive title (max 80 characters) that captures what this video is about'}
+2. **Suggested Description**: Create a detailed description (2-3 sentences) that would work well for a nonprofit educational program website, highlighting the value and content
+3. **Category**: Classify this video into ONE of these categories: virtual_tour, program_overview, testimonial, educational_content, event_coverage, community_impact
+4. **Tags**: Suggest 3-5 relevant tags/keywords that describe this video's content (e.g., "early learning", "family programs", "community", "education")
+
+Visual analysis cues:
+- Look for people (staff, families, children) to identify testimonials or program activities
+- Identify facilities, classrooms, or spaces to categorize as virtual_tour
+- Look for text overlays, graphics, or presentation elements to identify educational_content
+- Identify group activities or gatherings to categorize as event_coverage or community_impact
+
+Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
+{
+  "suggestedTitle": "Engaging video title here",
+  "suggestedDescription": "Detailed 2-3 sentence description highlighting educational value and impact for families",
+  "category": "virtual_tour",
+  "tags": ["tag1", "tag2", "tag3"]
+}
+
+If you cannot determine a field with confidence, use these defaults:
+- suggestedTitle: "${videoTitle || 'Educational Video'}"
+- suggestedDescription: "Discover more about our programs and community impact"
+- category: "program_overview"
+- tags: ["education", "community", "families"]`;
+
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType: 'image/jpeg',
+              data: base64Image,
+            },
+          },
+        ],
+      },
+    ],
+  });
+
+  const responseText = result.response?.text() || result.text || "";
+  
+  // Clean up the response to ensure it's valid JSON
+  let cleanedResponse = responseText.trim();
+  cleanedResponse = cleanedResponse.replace(/```json\n?/g, '');
+  cleanedResponse = cleanedResponse.replace(/```\n?/g, '');
+  cleanedResponse = cleanedResponse.trim();
+
+  try {
+    const parsed = JSON.parse(cleanedResponse);
+    
+    // Validate category
+    const validCategories = ['virtual_tour', 'program_overview', 'testimonial', 'educational_content', 'event_coverage', 'community_impact'];
+    let category = 'program_overview';
+    if (validCategories.includes(parsed.category)) {
+      category = parsed.category;
+    }
+    
+    return {
+      suggestedTitle: parsed.suggestedTitle || videoTitle || "Educational Video",
+      suggestedDescription: parsed.suggestedDescription || "Discover more about our programs and community impact",
+      category,
+      tags: Array.isArray(parsed.tags) ? parsed.tags : ["education", "community", "families"],
+    };
+  } catch (error) {
+    console.error("Failed to parse Gemini response:", cleanedResponse);
+    throw new Error("Failed to analyze video thumbnail - invalid response format");
+  }
+}

@@ -648,6 +648,57 @@ export default function AdminContentManager() {
     }
   };
 
+  const handleVideoAnalysis = async (youtubeUrl: string, isEdit: boolean = false) => {
+    setIsAnalyzing(true);
+    try {
+      // apiRequest throws on non-2xx responses, so we can safely await the JSON
+      const analysis = await (await apiRequest("POST", "/api/analyze-youtube-video", {
+        youtubeUrl,
+      })).json();
+
+      // Auto-populate fields based on AI analysis
+      if (isEdit && editingItem) {
+        setEditingItem({
+          ...editingItem,
+          title: analysis.suggestedTitle || editingItem.title,
+          description: analysis.suggestedDescription || editingItem.description,
+          metadata: {
+            ...(editingItem.metadata || {}),
+            videoId: analysis.videoId,
+            category: analysis.category || (editingItem.metadata as any)?.category || 'program_overview',
+            tags: analysis.tags || (editingItem.metadata as any)?.tags || [],
+          },
+        });
+      } else {
+        setNewItem({
+          ...newItem,
+          title: analysis.suggestedTitle || newItem.title,
+          description: analysis.suggestedDescription || newItem.description,
+          metadata: {
+            ...(newItem.metadata || {}),
+            videoId: analysis.videoId,
+            category: analysis.category || (newItem.metadata as any)?.category || 'program_overview',
+            tags: analysis.tags || (newItem.metadata as any)?.tags || [],
+          },
+        });
+      }
+
+      toast({
+        title: "Video Analyzed",
+        description: "Video details have been extracted using AI. Please review and adjust as needed.",
+      });
+    } catch (error) {
+      console.error("Video analysis error:", error);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not analyze the video. Please fill in the details manually.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const handleUploadScreenshot = async () => {
     if (!screenshotFile) return;
     
@@ -1369,6 +1420,36 @@ export default function AdminContentManager() {
                         <span><strong>Note:</strong> YouTube Shorts often have embedding restrictions and may not display properly. For best results, use regular YouTube videos (not /shorts/ URLs).</span>
                       </p>
                     </div>
+                    
+                    {/* AI Analysis Button */}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      onClick={() => {
+                        const videoId = (editingItem.metadata as any)?.videoId;
+                        if (!videoId) {
+                          toast({
+                            title: "No Video URL",
+                            description: "Please enter a YouTube URL first",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        // Construct full URL for analysis
+                        const fullUrl = videoId.includes('http') ? videoId : `https://www.youtube.com/watch?v=${videoId}`;
+                        handleVideoAnalysis(fullUrl, true);
+                      }}
+                      disabled={isAnalyzing || !(editingItem.metadata as any)?.videoId}
+                      data-testid="button-analyze-video-edit"
+                    >
+                      <VideoIcon className="w-4 h-4 mr-2" />
+                      {isAnalyzing ? 'Analyzing...' : 'Analyze Video with AI'}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Use AI to automatically extract title, description, and category from the video thumbnail
+                    </p>
                   </div>
 
                   <div>
@@ -1769,6 +1850,36 @@ export default function AdminContentManager() {
                       <span><strong>Note:</strong> YouTube Shorts often have embedding restrictions and may not display properly. For best results, use regular YouTube videos (not /shorts/ URLs).</span>
                     </p>
                   </div>
+                  
+                  {/* AI Analysis Button */}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => {
+                      const videoId = (newItem.metadata as any)?.videoId;
+                      if (!videoId) {
+                        toast({
+                          title: "No Video URL",
+                          description: "Please enter a YouTube URL first",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      // Construct full URL for analysis
+                      const fullUrl = videoId.includes('http') ? videoId : `https://www.youtube.com/watch?v=${videoId}`;
+                      handleVideoAnalysis(fullUrl, false);
+                    }}
+                    disabled={isAnalyzing || !(newItem.metadata as any)?.videoId}
+                    data-testid="button-analyze-video-create"
+                  >
+                    <VideoIcon className="w-4 h-4 mr-2" />
+                    {isAnalyzing ? 'Analyzing...' : 'Analyze Video with AI'}
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Use AI to automatically extract title, description, and category from the video thumbnail
+                  </p>
                 </div>
 
                 <div>
