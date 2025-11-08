@@ -7,18 +7,19 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-**November 8, 2025**: Fixed hero section navigation overlap and screenshot confirmation dialog workflow
+**November 8, 2025**: Simplified screenshot workflow with toggle-based approach
+- **Screenshot Upload Toggle System**: Replaced complex confirmation dialog workflow with simple checkbox toggle
+  - Added "Use screenshot as image" checkbox below screenshot preview in create/edit dialogs
+  - Toggle appears automatically when screenshot is analyzed by AI
+  - When enabled and Save is clicked, screenshot uploads first, then save completes with uploaded image
+  - Extracted save logic into `performSaveEdit(uploadedImageName?)` and `performCreate(uploadedImageName?)` to avoid recursion
+  - Screenshot uploads detected by "screenshot_" name prefix to prevent manual uploads from triggering auto-saves
+  - Fresh image name passed as parameter to avoid stale closure issues
+  - Simple, user-friendly workflow: upload → analyze → toggle → save ✓
 - **Hero Layout Fix**: Added dynamic top padding using `--nav-height` CSS variable to prevent headline text from overlapping with navigation bar
   - Verified across desktop (252px gap), tablet (236px gap), and mobile (68px gap) viewports
   - Headlines now appear cleanly below navigation on all screen sizes
   - Hero gradient fades to transparent at 75% to reveal background image and curved wave
-- **Screenshot Confirmation Dialog - FIXED**: Complete workflow fix for screenshot upload confirmation
-  - Pre-save check: `handleCreate` and `handleSaveEdit` now block save when screenshot is pending, showing confirmation dialog
-  - Works for ALL scenarios: new content, editing with/without existing images, replacing images
-  - Confirmation triggers for ANY pending screenshot, regardless of existing image
-  - Auto-retry: After screenshot uploads, save automatically retries with new image
-  - Mutation handlers use `finalizeDialogClose` for proper state cleanup
-  - AlertDialog remains at root level to stay mounted during confirmation flow
 - **Badge Component**: Added `React.forwardRef` for proper ref forwarding with TooltipTrigger
 
 ## System Architecture
