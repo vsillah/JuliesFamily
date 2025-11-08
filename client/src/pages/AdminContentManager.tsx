@@ -1037,7 +1037,12 @@ export default function AdminContentManager() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingItem} onOpenChange={(open) => !open && setEditingItem(null)}>
+      <Dialog open={!!editingItem} onOpenChange={(open) => {
+        if (!open) {
+          setEditingItem(null);
+          setScreenshotPreview(null);
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-content">
           <DialogHeader>
             <DialogTitle>Edit Content</DialogTitle>
@@ -1388,7 +1393,10 @@ export default function AdminContentManager() {
               </div>
               
               <div className="flex gap-2 justify-end pt-4">
-                <Button variant="outline" onClick={() => setEditingItem(null)} data-testid="button-cancel-edit">
+                <Button variant="outline" onClick={() => {
+                  setEditingItem(null);
+                  setScreenshotPreview(null);
+                }} data-testid="button-cancel-edit">
                   Cancel
                 </Button>
                 <Button onClick={handleSaveEdit} disabled={updateMutation.isPending} data-testid="button-save-edit">
@@ -1401,7 +1409,12 @@ export default function AdminContentManager() {
       </Dialog>
 
       {/* Create Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+        setIsCreateDialogOpen(open);
+        if (!open) {
+          setScreenshotPreview(null);
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-content">
           <DialogHeader>
             <DialogTitle>Create New Content</DialogTitle>
@@ -1745,7 +1758,10 @@ export default function AdminContentManager() {
             </div>
             
             <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} data-testid="button-cancel-create">
+              <Button variant="outline" onClick={() => {
+                setIsCreateDialogOpen(false);
+                setScreenshotPreview(null);
+              }} data-testid="button-cancel-create">
                 Cancel
               </Button>
               <Button onClick={handleCreate} disabled={createMutation.isPending || !newItem.title} data-testid="button-submit-create">
