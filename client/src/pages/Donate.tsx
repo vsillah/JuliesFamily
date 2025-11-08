@@ -19,11 +19,19 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const PRESET_AMOUNTS = [25, 50, 100, 250, 500, 1000];
 
+const PASSION_OPTIONS = [
+  { id: 'literacy', label: 'Literacy & Reading', description: 'Support reading programs and library resources' },
+  { id: 'stem', label: 'STEM & Technology', description: 'Enable science, technology, engineering & math education' },
+  { id: 'arts', label: 'Arts & Creativity', description: 'Fund art supplies and creative expression programs' },
+  { id: 'nutrition', label: 'Nutrition & Health', description: 'Provide healthy meals and wellness education' },
+  { id: 'community', label: 'Community Building', description: 'Support family events and community connections' },
+];
+
 function DonationForm({ amount, donationType, frequency, donorInfo, onAmountChange, onTypeChange, onFrequencyChange, onDonorInfoChange }: {
   amount: number;
   donationType: 'one-time' | 'recurring';
   frequency: 'monthly' | 'quarterly' | 'annual';
-  donorInfo: { email: string; name: string; phone: string; isAnonymous: boolean };
+  donorInfo: { email: string; name: string; phone: string; isAnonymous: boolean; passions: string[] };
   onAmountChange: (amount: number) => void;
   onTypeChange: (type: 'one-time' | 'recurring') => void;
   onFrequencyChange: (freq: 'monthly' | 'quarterly' | 'annual') => void;
@@ -160,6 +168,44 @@ function DonationForm({ amount, donationType, frequency, donorInfo, onAmountChan
           </Label>
         </div>
       </div>
+
+      <div className="space-y-3">
+        <div>
+          <Label className="text-base font-semibold block">What Are You Passionate About?</Label>
+          <p className="text-sm text-muted-foreground mt-1 mb-3">
+            Help us send you updates about programs that matter most to you (optional)
+          </p>
+        </div>
+        <div className="space-y-3">
+          {PASSION_OPTIONS.map((passion) => {
+            const isChecked = donorInfo.passions?.includes(passion.id) || false;
+            return (
+              <div key={passion.id} className="flex items-start space-x-3 p-3 rounded-md border hover-elevate">
+                <Checkbox
+                  id={`passion-${passion.id}`}
+                  checked={isChecked}
+                  onCheckedChange={(checked) => {
+                    const currentPassions = donorInfo.passions || [];
+                    const newPassions = checked
+                      ? [...currentPassions, passion.id]
+                      : currentPassions.filter(p => p !== passion.id);
+                    onDonorInfoChange({ ...donorInfo, passions: newPassions });
+                  }}
+                  data-testid={`checkbox-passion-${passion.id}`}
+                />
+                <div className="flex-1">
+                  <Label htmlFor={`passion-${passion.id}`} className="text-sm font-medium cursor-pointer">
+                    {passion.label}
+                  </Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {passion.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
@@ -231,6 +277,7 @@ export default function Donate() {
     name: '',
     phone: '',
     isAnonymous: false,
+    passions: [] as string[],
   });
   const [clientSecret, setClientSecret] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -266,6 +313,7 @@ export default function Donate() {
         donorName: donorInfo.name,
         donorPhone: donorInfo.phone,
         isAnonymous: donorInfo.isAnonymous,
+        passions: donorInfo.passions,
       });
 
       const data = await response.json();

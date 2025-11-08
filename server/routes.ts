@@ -3094,7 +3094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create Stripe checkout session for one-time or recurring donation
   app.post("/api/donations/create-checkout", async (req, res) => {
     try {
-      const { amount, donationType, frequency, donorEmail, donorName, donorPhone, isAnonymous, wishlistItemId, metadata } = req.body;
+      const { amount, donationType, frequency, donorEmail, donorName, donorPhone, isAnonymous, passions, wishlistItemId, metadata } = req.body;
 
       // Validate amount
       if (!amount || amount < 100) { // Minimum $1.00
@@ -3117,6 +3117,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Create or update donor lead record with passions
+      let lead;
+      if (donorEmail) {
+        const existingLead = await storage.getLeadByEmail(donorEmail);
+        
+        if (existingLead) {
+          // Update existing lead with new passions (merge with existing)
+          const existingPassions = (existingLead.passions as string[] || []);
+          const newPassions = passions || [];
+          const mergedPassions = Array.from(new Set([...existingPassions, ...newPassions]));
+          
+          lead = await storage.updateLead(existingLead.id, {
+            firstName: donorName?.split(' ')[0] || existingLead.firstName,
+            lastName: donorName?.split(' ').slice(1).join(' ') || existingLead.lastName,
+            phone: donorPhone || existingLead.phone,
+            passions: mergedPassions,
+            lastInteractionDate: new Date(),
+          });
+        } else {
+          // Create new donor lead
+          lead = await storage.createLead({
+            email: donorEmail,
+            firstName: donorName?.split(' ')[0] || '',
+            lastName: donorName?.split(' ').slice(1).join(' ') || '',
+            phone: donorPhone,
+            persona: 'donor',
+            funnelStage: 'awareness',
+            pipelineStage: 'new_lead',
+            leadSource: 'website_donation',
+            passions: passions || [],
+            metadata: {
+              firstDonationDate: new Date().toISOString(),
+            },
+          });
+        }
+      }
+
       // Create Stripe payment intent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
@@ -3127,6 +3164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           donorName: donorName || '',
           isAnonymous: isAnonymous ? 'true' : 'false',
           wishlistItemId: wishlistItemId || '',
+          leadId: lead?.id || '',
           ...(metadata || {})
         },
         receipt_email: donorEmail || undefined,
@@ -3134,6 +3172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create donation record in pending state
       const donation = await storage.createDonation({
+        leadId: lead?.id || null,
         stripePaymentIntentId: paymentIntent.id,
         amount: amountInCents,
         donationType,
