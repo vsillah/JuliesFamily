@@ -83,7 +83,7 @@ export default function ProductLanding() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Full-Width Hero with Background Image */}
-      <section className="relative w-full min-h-[600px] sm:min-h-[700px] md:min-h-[800px] bg-background">
+      <section className="relative w-full min-h-[600px] sm:min-h-[700px] md:min-h-[800px] bg-background pb-16 sm:pb-20">
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img 
@@ -94,11 +94,16 @@ export default function ProductLanding() {
           />
         </div>
         
-        {/* Dark overlay for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 z-10"></div>
+        {/* Dark overlay for text readability - darker at top, fading to transparent at bottom */}
+        <div 
+          className="absolute inset-0 z-10" 
+          style={{
+            background: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.3) 70%, transparent 85%)'
+          }}
+        ></div>
         
         {/* Header with Logo - Overlaid on hero */}
-        <header className="relative z-20 border-b border-white/10">
+        <header className="relative z-20">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
             <div className="flex items-center justify-between">
               <img 
@@ -168,6 +173,21 @@ export default function ProductLanding() {
               Free 14-day trial • No credit card required • Setup in minutes
             </p>
           </div>
+        </div>
+
+        {/* Artistic Wavy Bottom Border */}
+        <div className="absolute bottom-0 left-0 w-full z-30 pointer-events-none">
+          <svg 
+            viewBox="0 0 1200 120" 
+            preserveAspectRatio="none" 
+            className="w-full h-16 sm:h-20"
+            data-testid="svg-wave-border"
+          >
+            <path 
+              d="M0,0 C150,80 350,0 600,50 C850,100 1050,20 1200,60 L1200,120 L0,120 Z" 
+              fill="hsl(var(--background))"
+            />
+          </svg>
         </div>
       </section>
 
