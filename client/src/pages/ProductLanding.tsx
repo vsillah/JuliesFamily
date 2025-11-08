@@ -25,6 +25,8 @@ import {
 import Footer from "@/components/Footer";
 import heroImage from "@assets/generated_images/Kinflo_hero_kinship_workflows_af05fdad.png";
 import logoImage from "@assets/generated_images/Kinflo_full_logo_aff28780.png";
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 
 export default function ProductLanding() {
   const { toast } = useToast();
@@ -77,56 +79,59 @@ export default function ProductLanding() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header with Logo */}
-      <header className="border-b border-card-border bg-background sticky top-0 z-50">
-        <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <img 
-              src={logoImage} 
-              alt="Kinflo" 
-              className="h-8 sm:h-10 w-auto"
-              data-testid="img-logo"
-            />
-            <div className="flex gap-3">
-              <Button variant="ghost" className="hidden sm:inline-flex" data-testid="button-nav-signin">
-                Sign In
-              </Button>
-              <Button data-testid="button-nav-cta">
-                Get Started Free
-              </Button>
+      {/* Hero Image at Top */}
+      <section className="relative w-full bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent z-10"></div>
+        
+        {/* Header with Logo - Overlaid on hero */}
+        <header className="relative z-20 border-b border-white/10">
+          <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div className="flex items-center justify-between">
+              <img 
+                src={logoImage} 
+                alt="Kinflo" 
+                className="h-12 sm:h-16 md:h-20 w-auto drop-shadow-lg"
+                data-testid="img-logo"
+              />
+              <div className="flex gap-3">
+                <Button variant="ghost" className="hidden sm:inline-flex bg-white/10 hover:bg-white/20 text-white border-white/30" data-testid="button-nav-signin">
+                  Sign In
+                </Button>
+                <Button className="bg-white text-primary hover:bg-white/90" data-testid="button-nav-cta">
+                  Get Started Free
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-12 sm:py-16 md:py-20 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div>
-              <Badge className="mb-4" data-testid="badge-platform-type">
+        {/* Hero Content */}
+        <div className="relative z-20 container mx-auto max-w-6xl px-4 py-12 sm:py-16 md:py-20">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <div className="order-2 md:order-1">
+              <Badge className="mb-4 bg-white/90 text-primary hover:bg-white" data-testid="badge-platform-type">
                 Introducing Kinflo
               </Badge>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6" data-testid="text-hero-title">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-white drop-shadow-lg" data-testid="text-hero-title">
                 All inflows lead to Kinflo
               </h1>
-              <p className="text-lg sm:text-xl text-muted-foreground mb-6 sm:mb-8" data-testid="text-hero-subtitle">
+              <p className="text-lg sm:text-xl text-white/95 mb-6 sm:mb-8 drop-shadow-md" data-testid="text-hero-subtitle">
                 The relationship-first CRM for nonprofits. Launch passion-based donation campaigns, engage donors with AI-powered personalization across 120 unique journeys, and grow giving by 28% in your first year
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="text-lg" data-testid="button-cta-primary">
+                <Button size="lg" className="text-lg bg-white text-primary hover:bg-white/90" data-testid="button-cta-primary">
                   Start Free Trial
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg" data-testid="button-cta-secondary">
+                <Button size="lg" variant="outline" className="text-lg bg-white/10 text-white border-white/30 hover:bg-white/20" data-testid="button-cta-secondary">
                   Watch Demo
                 </Button>
               </div>
-              <p className="text-sm text-muted-foreground mt-4" data-testid="text-trial-info">
+              <p className="text-sm text-white/90 mt-4 drop-shadow" data-testid="text-trial-info">
                 Free 14-day trial • No credit card required • Setup in minutes
               </p>
             </div>
-            <div className="relative">
+            <div className="relative order-1 md:order-2">
               <img 
                 src={heroImage} 
                 alt="All inflows lead to Kinflo - Interconnected workflows converging" 
@@ -166,6 +171,54 @@ export default function ProductLanding() {
               </div>
               <div className="text-xs sm:text-sm text-muted-foreground">Website + CRM + Automation</div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Video Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-4">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-demo-title">
+              See Kinflo in action
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Watch a 3-minute demo showing how Julie's Family Learning Program uses Kinflo to run passion-based donation campaigns, personalize content for 5 different personas, and automate donor communication
+            </p>
+          </div>
+
+          <div className="bg-card border rounded-lg overflow-hidden shadow-lg">
+            <div className="aspect-video bg-muted/50 flex items-center justify-center">
+              <div className="text-center p-8">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <ArrowRight className="h-8 w-8 text-primary rotate-[-45deg]" />
+                </div>
+                <p className="text-lg font-semibold mb-2">Full Platform Demo Coming Soon</p>
+                <p className="text-sm text-muted-foreground">
+                  Our comprehensive video demo is currently in production
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Feature Highlights */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-8 sm:mt-12">
+            {[
+              { icon: Heart, title: "Donation Campaigns", desc: "Launch passion-based campaigns in minutes" },
+              { icon: Users, title: "Member Dashboards", desc: "Parents track donations & submit testimonials" },
+              { icon: Sparkles, title: "AI Copywriting", desc: "Generate email/SMS with one click" },
+              { icon: BarChart3, title: "Real-time Analytics", desc: "Track every donation, open, and click" },
+            ].map((item, index) => (
+              <Card key={index} className="hover-elevate" data-testid={`demo-feature-${index}`}>
+                <CardContent className="p-6 text-center">
+                  <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <item.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <h3 className="font-semibold mb-2 text-sm">{item.title}</h3>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
