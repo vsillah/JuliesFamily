@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -644,38 +643,6 @@ export default function AdminContentManager() {
     uploadImageMutation.mutate(formData);
   };
 
-  const requestDialogClose = (dialogType: 'edit' | 'create') => {
-    // If screenshot confirmation is already showing, just keep the dialog open
-    if (isShowingConfirmationRef.current) {
-      // Just keep the dialog open and return
-      if (dialogType === 'edit') {
-        setIsEditDialogOpen(true);
-      } else {
-        setIsCreateDialogOpen(true);
-      }
-      return;
-    }
-    
-    // Check if we have a screenshot that needs confirmation
-    const hasScreenshot = screenshotFile && screenshotPreview;
-    
-    if (hasScreenshot) {
-      // Show confirmation and KEEP dialog open by re-asserting the open state
-      isShowingConfirmationRef.current = true;
-      pendingScreenshotActionRef.current = dialogType; // Remember which action to retry
-      setShowScreenshotConfirm(true);
-      // Re-assert the dialog should stay open while confirmation is shown
-      if (dialogType === 'edit') {
-        setIsEditDialogOpen(true);
-      } else {
-        setIsCreateDialogOpen(true);
-      }
-    } else {
-      // No screenshot to worry about - close normally
-      finalizeDialogClose(dialogType);
-    }
-  };
-
   const finalizeDialogClose = (dialogType: 'edit' | 'create') => {
     clearScreenshot();
     setSelectedLeadMagnetCombos(new Set());
@@ -691,28 +658,6 @@ export default function AdminContentManager() {
     setScreenshotPreview(null);
     setScreenshotFile(null);
     setUseScreenshotAsImage(false);
-  };
-
-  const handleScreenshotConfirmAccept = () => {
-    if (screenshotFile) {
-      handleUploadScreenshot();
-      // After upload completes, the mutation's onSuccess will retry the action
-      // using pendingScreenshotActionRef to determine which handler to call
-    }
-    // Close the confirmation dialog but KEEP the edit/create dialog open
-    isShowingConfirmationRef.current = false;
-    setShowScreenshotConfirm(false);
-  };
-
-  const handleScreenshotConfirmReject = () => {
-    isShowingConfirmationRef.current = false;
-    setShowScreenshotConfirm(false);
-    const dialogType = pendingScreenshotActionRef.current;
-    pendingScreenshotActionRef.current = null;
-    
-    if (dialogType) {
-      finalizeDialogClose(dialogType);
-    }
   };
 
   const uploadImageMutation = useMutation<ImageAsset, Error, FormData>({
@@ -1163,7 +1108,7 @@ export default function AdminContentManager() {
         open={isEditDialogOpen} 
         onOpenChange={(open) => {
           if (!open) {
-            requestDialogClose('edit');
+            finalizeDialogClose('edit');
           }
         }}
       >
@@ -1544,7 +1489,7 @@ export default function AdminContentManager() {
               </div>
               
               <div className="flex gap-2 justify-end pt-4">
-                <Button variant="outline" onClick={() => requestDialogClose('edit')} data-testid="button-cancel-edit">
+                <Button variant="outline" onClick={() => finalizeDialogClose('edit')} data-testid="button-cancel-edit">
                   Cancel
                 </Button>
                 <Button onClick={handleSaveEdit} disabled={updateMutation.isPending} data-testid="button-save-edit">
@@ -1561,7 +1506,7 @@ export default function AdminContentManager() {
         open={isCreateDialogOpen} 
         onOpenChange={(open) => {
           if (!open) {
-            requestDialogClose('create');
+            finalizeDialogClose('create');
           }
         }}
       >
@@ -1935,7 +1880,7 @@ export default function AdminContentManager() {
             </div>
             
             <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" onClick={() => requestDialogClose('create')} data-testid="button-cancel-create">
+              <Button variant="outline" onClick={() => finalizeDialogClose('create')} data-testid="button-cancel-create">
                 Cancel
               </Button>
               <Button onClick={handleCreate} disabled={createMutation.isPending || !newItem.title} data-testid="button-submit-create">
@@ -1946,34 +1891,6 @@ export default function AdminContentManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Screenshot Confirmation AlertDialog */}
-      <AlertDialog open={showScreenshotConfirm} onOpenChange={setShowScreenshotConfirm}>
-        <AlertDialogContent data-testid="alert-screenshot-confirm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Use Screenshot as Image?</AlertDialogTitle>
-            <AlertDialogDescription>
-              You uploaded a screenshot for analysis. Would you like to use this screenshot as the image for this content item?
-              {screenshotPreview && (
-                <div className="mt-4">
-                  <img 
-                    src={screenshotPreview} 
-                    alt="Screenshot preview"
-                    className="w-full max-w-sm h-auto object-cover rounded border border-border mx-auto"
-                  />
-                </div>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleScreenshotConfirmReject} data-testid="button-screenshot-reject">
-              No, Discard It
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleScreenshotConfirmAccept} data-testid="button-screenshot-accept">
-              Yes, Use as Image
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
