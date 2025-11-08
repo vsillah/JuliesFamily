@@ -191,11 +191,11 @@ export default function Hero() {
       <div className={`absolute inset-0 z-[2] transition-opacity duration-700 ${
         overlayVisible ? 'opacity-100' : 'opacity-0'
       }`}>
-        {/* Main gradient: dark top for nav contrast, dark middle for content, transparent bottom for wave */}
+        {/* Main gradient: dark top for nav contrast, dark middle for content, fade to transparent before wave */}
         <div 
           className="absolute inset-0"
           style={{
-            backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 30%, rgba(0,0,0,0.60) 60%, rgba(0,0,0,0.40) 80%, transparent 95%)'
+            backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 30%, rgba(0,0,0,0.60) 50%, rgba(0,0,0,0.30) 65%, transparent 75%)'
           }}
         />
       </div>
