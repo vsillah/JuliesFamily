@@ -3424,6 +3424,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Donation Campaign Routes
+
+  // Get all donation campaigns (admin only)
+  app.get('/api/donation-campaigns', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const campaigns = await storage.getAllDonationCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching donation campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch donation campaigns" });
+    }
+  });
+
+  // Get active donation campaigns (admin only)
+  app.get('/api/donation-campaigns/active', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const campaigns = await storage.getActiveDonationCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching active donation campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch active donation campaigns" });
+    }
+  });
+
+  // Get single donation campaign (admin only)
+  app.get('/api/donation-campaigns/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const campaign = await storage.getDonationCampaign(id);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error fetching donation campaign:", error);
+      res.status(500).json({ message: "Failed to fetch donation campaign" });
+    }
+  });
+
+  // Create donation campaign (admin only)
+  app.post('/api/donation-campaigns', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const parsed = insertDonationCampaignSchema.parse(req.body);
+      const campaign = await storage.createDonationCampaign(parsed);
+      res.json(campaign);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid campaign data", errors: error.errors });
+      }
+      console.error("Error creating donation campaign:", error);
+      res.status(500).json({ message: "Failed to create donation campaign" });
+    }
+  });
+
+  // Update donation campaign (admin only)
+  app.patch('/api/donation-campaigns/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Validate partial updates using the insert schema
+      const partialSchema = insertDonationCampaignSchema.partial();
+      const validated = partialSchema.parse(req.body);
+      
+      const campaign = await storage.updateDonationCampaign(id, validated);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json(campaign);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid campaign data", errors: error.errors });
+      }
+      console.error("Error updating donation campaign:", error);
+      res.status(500).json({ message: "Failed to update donation campaign" });
+    }
+  });
+
   // Wishlist Items Routes
 
   // Get active wishlist items (public)

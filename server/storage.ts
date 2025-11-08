@@ -191,6 +191,13 @@ export interface IStorage {
   getAllDonations(): Promise<Donation[]>;
   getDonationsByLeadId(leadId: string): Promise<Donation[]>;
   
+  // Donation Campaign operations
+  createDonationCampaign(campaign: InsertDonationCampaign): Promise<DonationCampaign>;
+  getDonationCampaign(id: string): Promise<DonationCampaign | undefined>;
+  getAllDonationCampaigns(): Promise<DonationCampaign[]>;
+  getActiveDonationCampaigns(): Promise<DonationCampaign[]>;
+  updateDonationCampaign(id: string, updates: Partial<InsertDonationCampaign>): Promise<DonationCampaign | undefined>;
+  
   // Wishlist Item operations
   createWishlistItem(item: InsertWishlistItem): Promise<WishlistItem>;
   getActiveWishlistItems(): Promise<WishlistItem[]>;
@@ -1261,6 +1268,34 @@ export class DatabaseStorage implements IStorage {
 
   async getDonationsByLeadId(leadId: string): Promise<Donation[]> {
     return await db.select().from(donations).where(eq(donations.leadId, leadId)).orderBy(desc(donations.createdAt));
+  }
+
+  // Donation Campaign operations
+  async createDonationCampaign(campaignData: InsertDonationCampaign): Promise<DonationCampaign> {
+    const [campaign] = await db.insert(donationCampaigns).values(campaignData).returning();
+    return campaign;
+  }
+
+  async getDonationCampaign(id: string): Promise<DonationCampaign | undefined> {
+    const [campaign] = await db.select().from(donationCampaigns).where(eq(donationCampaigns.id, id));
+    return campaign;
+  }
+
+  async getAllDonationCampaigns(): Promise<DonationCampaign[]> {
+    return await db.select().from(donationCampaigns).orderBy(desc(donationCampaigns.createdAt));
+  }
+
+  async getActiveDonationCampaigns(): Promise<DonationCampaign[]> {
+    return await db.select().from(donationCampaigns).where(eq(donationCampaigns.status, 'active')).orderBy(desc(donationCampaigns.createdAt));
+  }
+
+  async updateDonationCampaign(id: string, updates: Partial<InsertDonationCampaign>): Promise<DonationCampaign | undefined> {
+    const [updated] = await db
+      .update(donationCampaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(donationCampaigns.id, id))
+      .returning();
+    return updated;
   }
 
   // Wishlist Item operations
