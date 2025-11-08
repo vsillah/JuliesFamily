@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";

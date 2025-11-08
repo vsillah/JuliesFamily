@@ -857,6 +857,10 @@ export const insertDonationCampaignSchema = createInsertSchema(donationCampaigns
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Accept ISO strings and coerce to Date objects for timestamp fields
+  startDate: z.union([z.date(), z.string().transform((val) => new Date(val))]),
+  endDate: z.union([z.date(), z.string().transform((val) => new Date(val))]),
 });
 export type InsertDonationCampaign = z.infer<typeof insertDonationCampaignSchema>;
 export type DonationCampaign = typeof donationCampaigns.$inferSelect;

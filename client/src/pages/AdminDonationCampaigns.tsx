@@ -125,15 +125,6 @@ export default function AdminDonationCampaigns() {
   });
 
   const handleCreateCampaign = form.handleSubmit((data) => {
-    if (!data.emailTemplateId && !data.smsTemplateId) {
-      toast({
-        variant: "destructive",
-        title: "Missing Information",
-        description: "Please select at least one communication channel (email or SMS)",
-      });
-      return;
-    }
-    
     createCampaignMutation.mutate(data);
   });
 
