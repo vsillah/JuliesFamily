@@ -230,6 +230,45 @@ export class ObjectStorageService {
       requestedPermission: requestedPermission ?? ObjectPermission.READ,
     });
   }
+
+  async renameObjectEntity(
+    originalPath: string,
+    newFilename: string
+  ): Promise<string> {
+    // Get the original file
+    const originalFile = await this.getObjectEntityFile(originalPath);
+    
+    // Parse the original path to get directory structure
+    const parts = originalPath.slice(1).split("/");
+    const entityId = parts.slice(1).join("/");
+    const directory = entityId.substring(0, entityId.lastIndexOf('/') + 1);
+    
+    // Construct new path with the same directory but new filename
+    let entityDir = this.getPrivateObjectDir();
+    if (!entityDir.endsWith("/")) {
+      entityDir = `${entityDir}/`;
+    }
+    const newObjectPath = `${entityDir}${directory}${newFilename}`;
+    const { bucketName, objectName } = parseObjectPath(newObjectPath);
+    
+    // Copy to new location
+    const bucket = objectStorageClient.bucket(bucketName);
+    const newFile = bucket.file(objectName);
+    
+    await originalFile.copy(newFile);
+    
+    // Copy ACL policy from original to new file
+    const aclPolicy = await getObjectAclPolicy(originalFile);
+    if (aclPolicy) {
+      await setObjectAclPolicy(newFile, aclPolicy);
+    }
+    
+    // Delete the original file
+    await originalFile.delete();
+    
+    // Return the new path in /objects/ format
+    return `/objects/${directory}${newFilename}`;
+  }
 }
 
 function parseObjectPath(path: string): {

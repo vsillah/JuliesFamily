@@ -100,6 +100,124 @@ If you cannot determine a field with confidence, use these defaults:
   }
 }
 
+export async function analyzeImageForNaming(
+  imageBase64: string,
+  mimeType: string = 'image/jpeg',
+  originalFilename?: string
+): Promise<{
+  category: 'program' | 'event' | 'facility' | 'testimonial' | 'marketing' | 'general';
+  description: string;
+  suggestedFilename: string;
+}> {
+  const prompt = `You are analyzing an image to generate a descriptive, SEO-friendly filename for a nonprofit educational program's media library.
+
+${originalFilename ? `Original filename: "${originalFilename}"` : ''}
+
+Analyze the image and provide:
+
+1. **Category**: Classify this image into ONE of these categories:
+   - program: Program activities (children learning, reading circles, classroom activities)
+   - event: Special events (fundraisers, family fun days, community gatherings)
+   - facility: Building/space photos (classrooms, library, playground, empty rooms)
+   - testimonial: People-focused photos (parents, staff, volunteers, close-ups for quotes)
+   - marketing: Promotional materials (banners, flyers, graphics, hero images)
+   - general: Everything else that doesn't fit above
+
+2. **Description**: Create a brief, descriptive phrase (2-5 words, lowercase, underscore-separated) that captures the main visual elements. Focus on:
+   - Key subjects (children, families, staff)
+   - Primary activity (reading, playing, learning, speaking)
+   - Setting/location if relevant (outdoor, library, classroom)
+   - Visual composition (closeup, wide_angle, group)
+   
+   Examples:
+   - "children_reading_circle"
+   - "outdoor_playground_activities"
+   - "parent_testimonial_closeup"
+   - "library_wide_angle_empty"
+   - "staff_volunteer_group_photo"
+
+3. **Suggested Filename**: Combine category and description in format: {category}_{description}
+   - Use only lowercase letters, numbers, and underscores
+   - Keep it concise but descriptive (max 50 characters)
+   - Do NOT include file extension
+   - Do NOT include dates/timestamps (we'll add those)
+
+Visual analysis tips:
+- Look for people, their age groups, and what they're doing
+- Identify the setting (indoor/outdoor, specific rooms)
+- Note the composition (wide shot, close-up, group photo)
+- Determine the purpose (documentation, marketing, testimonial)
+
+Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
+{
+  "category": "program",
+  "description": "children_reading_circle",
+  "suggestedFilename": "program_children_reading_circle"
+}
+
+If you cannot determine with confidence, use these defaults:
+- category: "general"
+- description: "image"
+- suggestedFilename: "general_image"`;
+
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType: mimeType,
+              data: imageBase64,
+            },
+          },
+        ],
+      },
+    ],
+  });
+
+  const responseText = result.response?.text() || result.text || "";
+  
+  // Clean up the response to ensure it's valid JSON
+  let cleanedResponse = responseText.trim();
+  cleanedResponse = cleanedResponse.replace(/```json\n?/g, '');
+  cleanedResponse = cleanedResponse.replace(/```\n?/g, '');
+  cleanedResponse = cleanedResponse.trim();
+
+  try {
+    const parsed = JSON.parse(cleanedResponse);
+    
+    // Validate category
+    const validCategories = ['program', 'event', 'facility', 'testimonial', 'marketing', 'general'];
+    let category: 'program' | 'event' | 'facility' | 'testimonial' | 'marketing' | 'general' = 'general';
+    if (validCategories.includes(parsed.category)) {
+      category = parsed.category;
+    }
+    
+    // Sanitize description and filename to ensure they're filesystem-safe
+    const sanitize = (str: string) => str
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_|_$/g, '')
+      .substring(0, 50);
+    
+    const description = sanitize(parsed.description || 'image');
+    const suggestedFilename = sanitize(parsed.suggestedFilename || `${category}_${description}`);
+    
+    return {
+      category,
+      description,
+      suggestedFilename,
+    };
+  } catch (error) {
+    console.error("Failed to parse Gemini response:", cleanedResponse);
+    throw new Error("Failed to analyze image for naming - invalid response format");
+  }
+}
+
 export async function analyzeYouTubeVideoThumbnail(
   thumbnailUrl: string,
   videoTitle?: string,

@@ -66,7 +66,7 @@ export default function Navigation() {
     return () => observer.disconnect();
   }, []);
   
-  const handlePhotoUpload = async (uploadToken: string) => {
+  const handlePhotoUpload = async (uploadToken: string, objectPath?: string) => {
     try {
       const response = await apiRequest("PUT", "/api/profile-photo", {
         uploadToken: uploadToken,
@@ -545,6 +545,7 @@ export default function Navigation() {
           acceptedFileTypes={["image/*"]}
           maxFileSize={10 * 1024 * 1024}
           maxNumberOfFiles={1}
+          enableAiNaming={false}
         />
       )}
     </>

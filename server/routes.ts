@@ -11,7 +11,7 @@ import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
 import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "./cloudinary";
 import multer from "multer";
-import { analyzeSocialPostScreenshot, analyzeYouTubeVideoThumbnail } from "./gemini";
+import { analyzeSocialPostScreenshot, analyzeYouTubeVideoThumbnail, analyzeImageForNaming } from "./gemini";
 import { sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
 import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps, syncTaskToCalendar } from "./taskAutomation";
@@ -482,6 +482,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating upload URL:", error);
       res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  });
+
+  // Finalize upload with AI-generated filename (admin only)
+  app.post("/api/objects/finalize-upload", isAuthenticated, isAdmin, async (req: any, res) => {
+    const { uploadToken, finalFilename } = req.body;
+
+    if (!uploadToken || !finalFilename) {
+      return res.status(400).json({ error: "uploadToken and finalFilename are required" });
+    }
+
+    const userId = req.user?.claims?.sub;
+
+    try {
+      // Validate upload token
+      const tokenData = uploadTokenCache.get(uploadToken);
+      if (!tokenData || tokenData.userId !== userId || tokenData.expiresAt < Date.now()) {
+        return res.status(403).json({ error: "Invalid or expired upload token" });
+      }
+
+      // Validate filename format - must have extension and be filesystem-safe
+      if (!/^[a-z0-9_-]+\.[a-z0-9]+$/i.test(finalFilename)) {
+        return res.status(400).json({ 
+          error: "Invalid filename format. Use only letters, numbers, hyphens, underscores, and a valid extension." 
+        });
+      }
+
+      // Remove from cache after validation
+      uploadTokenCache.delete(uploadToken);
+
+      const objectStorageService = new ObjectStorageService();
+      
+      // Rename the file in object storage
+      const newPath = await objectStorageService.renameObjectEntity(
+        tokenData.objectPath,
+        finalFilename
+      );
+
+      // Set ACL policy for the renamed file
+      const finalPath = await objectStorageService.setObjectEntityAclPolicy(
+        newPath,
+        {
+          owner: userId,
+          visibility: "public",
+        }
+      );
+
+      res.json({
+        objectPath: finalPath,
+        filename: finalFilename,
+      });
+    } catch (error) {
+      console.error("Error finalizing upload:", error);
+      res.status(500).json({ error: "Failed to finalize upload" });
     }
   });
 
@@ -1747,6 +1801,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error analyzing YouTube video:", error);
       res.status(500).json({ 
         message: "Failed to analyze YouTube video",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // AI-Powered Image Naming Analysis (admin only)
+  app.post('/api/analyze-image-for-naming', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { uploadToken, originalFilename } = req.body;
+
+      if (!uploadToken) {
+        return res.status(400).json({ message: "uploadToken is required" });
+      }
+
+      // Get the uploaded file path from cache
+      const tokenData = uploadTokenCache.get(uploadToken);
+      if (!tokenData) {
+        return res.status(400).json({ 
+          message: "Invalid or expired upload token" 
+        });
+      }
+
+      // Download the image from object storage
+      const objectStorageService = new ObjectStorageService();
+      const objectFile = await objectStorageService.getObjectEntityFile(tokenData.objectPath);
+      
+      // Read the file into a buffer
+      const chunks: Buffer[] = [];
+      const stream = objectFile.createReadStream();
+      
+      await new Promise<void>((resolve, reject) => {
+        stream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+        stream.on('end', () => resolve());
+        stream.on('error', (error) => reject(error));
+      });
+      
+      const buffer = Buffer.concat(chunks);
+      const base64Image = buffer.toString('base64');
+      
+      // Get MIME type from file metadata
+      const [metadata] = await objectFile.getMetadata();
+      const mimeType = metadata.contentType || 'image/jpeg';
+      
+      // Use AI to analyze the image and generate a descriptive filename
+      const analysis = await analyzeImageForNaming(
+        base64Image,
+        mimeType,
+        originalFilename
+      );
+
+      // Generate final filename with timestamp and short hash for uniqueness
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const shortHash = uploadToken.substring(uploadToken.length - 4);
+      const extension = originalFilename?.split('.').pop()?.toLowerCase() || 'jpg';
+      const finalFilename = `${analysis.suggestedFilename}_${timestamp}_${shortHash}.${extension}`;
+
+      res.json({
+        category: analysis.category,
+        description: analysis.description,
+        suggestedFilename: analysis.suggestedFilename,
+        finalFilename,
+        originalFilename,
+      });
+    } catch (error) {
+      console.error("Error analyzing image for naming:", error);
+      res.status(500).json({ 
+        message: "Failed to analyze image for naming",
         error: error instanceof Error ? error.message : "Unknown error"
       });
     }
