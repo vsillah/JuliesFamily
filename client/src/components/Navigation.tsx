@@ -86,7 +86,22 @@ export default function Navigation() {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+      // Get the navigation height from CSS variable
+      const navHeight = parseInt(
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--nav-height')
+          .replace('px', '')
+      ) || 0;
+      
+      // Calculate position with offset for fixed navbar
+      const elementPosition = element.getBoundingClientRect().top + window.scrollY;
+      const offsetPosition = elementPosition - navHeight - 20; // 20px extra padding
+      
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+      
       setMobileMenuOpen(false);
     }
   };
