@@ -272,10 +272,10 @@ export default function Navigation() {
             ? "bg-background/95 backdrop-blur-md border-b" 
             : "bg-transparent"
         }`}>
-          <div className="flex items-center justify-between w-full px-2 py-2">
+          <div className="flex items-center justify-evenly w-full px-1 py-2 gap-0.5">
             <button
               onClick={() => scrollToSection("services")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
                 isScrolled ? "text-foreground" : "text-white/95"
               }`}
               data-testid="link-services-mobile-quick"
@@ -284,7 +284,7 @@ export default function Navigation() {
             </button>
             <button
               onClick={() => scrollToSection("impact")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
                 isScrolled ? "text-foreground" : "text-white/95"
               }`}
               data-testid="link-impact-mobile-quick"
@@ -293,7 +293,7 @@ export default function Navigation() {
             </button>
             <button
               onClick={() => scrollToSection("testimonials")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
                 isScrolled ? "text-foreground" : "text-white/95"
               }`}
               data-testid="link-testimonials-mobile-quick"
@@ -302,33 +302,31 @@ export default function Navigation() {
             </button>
             <button
               onClick={() => scrollToSection("events")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 ${
+              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
                 isScrolled ? "text-foreground" : "text-white/95"
               }`}
               data-testid="link-events-mobile-quick"
             >
               Events
             </button>
-            <Link href="/virtual-tour">
-              <button
-                className={`flex-1 text-xs font-medium transition-colors duration-300 ${
-                  isScrolled ? "text-foreground" : "text-white/95"
-                }`}
-                data-testid="link-virtual-tour-mobile-quick"
-              >
-                Tour
-              </button>
-            </Link>
-            <Link href="/donate">
-              <button
-                className={`flex-1 text-xs font-medium transition-colors duration-300 ${
-                  isScrolled ? "text-primary" : "text-white"
-                }`}
-                data-testid="button-donate-mobile-quick"
-              >
-                Donate
-              </button>
-            </Link>
+            <button
+              onClick={() => window.location.href = "/virtual-tour"}
+              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
+                isScrolled ? "text-foreground" : "text-white/95"
+              }`}
+              data-testid="link-virtual-tour-mobile-quick"
+            >
+              Tour
+            </button>
+            <button
+              onClick={() => window.location.href = "/donate"}
+              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
+                isScrolled ? "text-primary" : "text-white"
+              }`}
+              data-testid="button-donate-mobile-quick"
+            >
+              Donate
+            </button>
           </div>
         </div>
       </nav>
