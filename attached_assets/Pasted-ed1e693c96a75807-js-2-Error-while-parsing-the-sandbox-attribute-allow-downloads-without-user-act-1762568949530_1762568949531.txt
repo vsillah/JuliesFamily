@@ -1,0 +1,203 @@
+ed1e693c96a75807.js:2 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+z @ ed1e693c96a75807.js:2
+(anonymous) @ ed1e693c96a75807.js:2
+iA @ ed1e693c96a75807.js:2
+iV @ ed1e693c96a75807.js:2
+iU @ ed1e693c96a75807.js:2
+i_ @ ed1e693c96a75807.js:2
+C @ ed1e693c96a75807.js:2
+M @ ed1e693c96a75807.js:2
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar2sv%3A:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+injected.js:27 Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `Primitive.button.SlotClone`.
+    at Badge (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/badge.tsx:36:18)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=34f2517a:79:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=34f2517a:56:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=34f2517a:42:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=34f2517a:79:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=34f2517a:56:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=34f2517a:42:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-G2DSZ377.js?v=34f2517a:1929:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=34f2517a:199:13
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=34f2517a:38:15)
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=34f2517a:38:15)
+    at Popper (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-G2DSZ377.js?v=34f2517a:1921:11)
+    at Tooltip (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=34f2517a:108:5)
+    at div
+    at ContentUsageIndicator (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ContentUsageIndicator.tsx:35:49)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at _c9 (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/card.tsx:20:11)
+    at SortableContentCard (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminContentManager.tsx:57:3)
+    at div
+    at SortableContext (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@dnd-kit_sortable.js?v=34f2517a:261:5)
+    at DndContext2 (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-AW7FROCU.js?v=34f2517a:2521:5)
+    at div
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=34f2517a:42:13
+    at Presence (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-LUE5KDWX.js?v=34f2517a:24:11)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=34f2517a:176:13
+    at _c5 (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/tabs.tsx:72:12)
+    at div
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=34f2517a:42:13
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=34f2517a:38:15)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=34f2517a:54:7
+    at div
+    at div
+    at AdminContentManager (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminContentManager.tsx:405:21)
+    at Route (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=34f2517a:323:16)
+    at Switch (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=34f2517a:379:17)
+    at Router
+    at PersonaProvider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/contexts/PersonaContext.tsx:58:35)
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=34f2517a:38:15)
+    at TooltipProvider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=34f2517a:64:5)
+    at QueryClientProvider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=34f2517a:2805:3)
+    at App
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+printWarning @ chunk-RPCDYKBN.js?v=34f2517a:521
+error @ chunk-RPCDYKBN.js?v=34f2517a:505
+validateFunctionComponentInDev @ chunk-RPCDYKBN.js?v=34f2517a:15013
+mountIndeterminateComponent @ chunk-RPCDYKBN.js?v=34f2517a:14988
+beginWork @ chunk-RPCDYKBN.js?v=34f2517a:15914
+beginWork$1 @ chunk-RPCDYKBN.js?v=34f2517a:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=34f2517a:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=34f2517a:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=34f2517a:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=34f2517a:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=34f2517a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=34f2517a:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=34f2517a:555
+flush @ @tanstack_react-query.js?v=34f2517a:569
+batch @ @tanstack_react-query.js?v=34f2517a:587
+dispatch_fn @ @tanstack_react-query.js?v=34f2517a:996
+setData @ @tanstack_react-query.js?v=34f2517a:696
+onSuccess @ @tanstack_react-query.js?v=34f2517a:897
+resolve @ @tanstack_react-query.js?v=34f2517a:456
+Promise.then
+run @ @tanstack_react-query.js?v=34f2517a:498
+start @ @tanstack_react-query.js?v=34f2517a:536
+fetch @ @tanstack_react-query.js?v=34f2517a:926
+executeFetch_fn @ @tanstack_react-query.js?v=34f2517a:2211
+onSubscribe @ @tanstack_react-query.js?v=34f2517a:1898
+subscribe @ @tanstack_react-query.js?v=34f2517a:24
+(anonymous) @ @tanstack_react-query.js?v=34f2517a:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=34f2517a:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=34f2517a:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=34f2517a:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=34f2517a:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=34f2517a:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=34f2517a:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=34f2517a:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=34f2517a:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=34f2517a:19416
+commitRoot @ chunk-RPCDYKBN.js?v=34f2517a:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=34f2517a:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=34f2517a:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=34f2517a:18627
+72b0659f280b5395.js:2 Uncaught (in promise) Error: Cannot notify while not connected
+    at e.value (72b0659f280b5395.js:2:393821)
+    at e.<anonymous> (72b0659f280b5395.js:2:380894)
+    at Object.next (4206b4cada407286.js:2:7302)
+    at t (4206b4cada407286.js:2:14552)
+    at s (4206b4cada407286.js:2:14749)
+value @ 72b0659f280b5395.js:2
+(anonymous) @ 72b0659f280b5395.js:2
+(anonymous) @ 4206b4cada407286.js:2
+t @ 4206b4cada407286.js:2
+s @ 4206b4cada407286.js:2
+Promise.then
+t @ 4206b4cada407286.js:2
+s @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+(anonymous) @ 72b0659f280b5395.js:2
+(anonymous) @ 72b0659f280b5395.js:2
+(anonymous) @ 4206b4cada407286.js:2
+t @ 4206b4cada407286.js:2
+s @ 4206b4cada407286.js:2
+Promise.then
+t @ 4206b4cada407286.js:2
+s @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+value @ 72b0659f280b5395.js:2
+value @ 72b0659f280b5395.js:2
+(anonymous) @ 397875ea75dca643.js:2
+(anonymous) @ 4206b4cada407286.js:2
+t @ 4206b4cada407286.js:2
+s @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+(anonymous) @ 397875ea75dca643.js:2
+(anonymous) @ 397875ea75dca643.js:2
+(anonymous) @ 397875ea75dca643.js:2
+(anonymous) @ 4206b4cada407286.js:2
+t @ 4206b4cada407286.js:2
+s @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+(anonymous) @ 4206b4cada407286.js:2
+(anonymous) @ 397875ea75dca643.js:2
+(anonymous) @ 397875ea75dca643.js:2
+(anonymous) @ 397875ea75dca643.js:2
+keydown @ 397875ea75dca643.js:2
+(anonymous) @ fa82eb0d68e09b4b.js:2
+value @ fa82eb0d68e09b4b.js:2
+value @ fa82eb0d68e09b4b.js:2
+o @ 66007671b7aaec6e.js:2
