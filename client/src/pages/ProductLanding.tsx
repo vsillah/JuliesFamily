@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Footer from "@/components/Footer";
 import heroImage from "@assets/generated_images/Kinflo_hero_kinship_workflows_af05fdad.png";
+import logoImage from "@assets/generated_images/Kinflo_full_logo_aff28780.png";
 
 export default function ProductLanding() {
   const { toast } = useToast();
@@ -76,18 +77,40 @@ export default function ProductLanding() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Header with Logo */}
+      <header className="border-b border-card-border bg-background sticky top-0 z-50">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <img 
+              src={logoImage} 
+              alt="Kinflo" 
+              className="h-8 sm:h-10 w-auto"
+              data-testid="img-logo"
+            />
+            <div className="flex gap-3">
+              <Button variant="ghost" className="hidden sm:inline-flex" data-testid="button-nav-signin">
+                Sign In
+              </Button>
+              <Button data-testid="button-nav-cta">
+                Get Started Free
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-20 px-4">
+      <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-12 sm:py-16 md:py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <Badge className="mb-4" data-testid="badge-platform-type">
                 Introducing Kinflo
               </Badge>
-              <h1 className="text-5xl font-bold mb-6" data-testid="text-hero-title">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6" data-testid="text-hero-title">
                 All inflows lead to Kinflo
               </h1>
-              <p className="text-xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
+              <p className="text-lg sm:text-xl text-muted-foreground mb-6 sm:mb-8" data-testid="text-hero-subtitle">
                 The relationship-first CRM for nonprofits. Launch passion-based donation campaigns, engage donors with AI-powered personalization across 120 unique journeys, and grow giving by 28% in your first year
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -118,40 +141,97 @@ export default function ProductLanding() {
       {/* Stats Section */}
       <section className="py-12 bg-muted/30">
         <div className="container mx-auto max-w-6xl px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 text-center">
             <div>
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="stat-success-rate">
+              <div className="text-3xl sm:text-4xl font-bold text-primary mb-2" data-testid="stat-success-rate">
                 28%
               </div>
-              <div className="text-sm text-muted-foreground">Average donation increase</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Average donation increase</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="stat-time-saved">
+              <div className="text-3xl sm:text-4xl font-bold text-primary mb-2" data-testid="stat-time-saved">
                 15hrs
               </div>
-              <div className="text-sm text-muted-foreground">Saved per week</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Saved per week</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="stat-personas">
+              <div className="text-3xl sm:text-4xl font-bold text-primary mb-2" data-testid="stat-personas">
                 5×4
               </div>
-              <div className="text-sm text-muted-foreground">Persona × journey stages</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Persona × journey stages</div>
             </div>
             <div>
-              <div className="text-4xl font-bold text-primary mb-2" data-testid="stat-integrations">
+              <div className="text-3xl sm:text-4xl font-bold text-primary mb-2" data-testid="stat-integrations">
                 All-in-One
               </div>
-              <div className="text-sm text-muted-foreground">Website + CRM + Automation</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Website + CRM + Automation</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Key Differentiators */}
-      <section className="py-20 px-4">
+      {/* Cost Savings Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4" data-testid="text-differentiators-title">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-savings-title">
+              Stop paying for 8 different tools
+            </h2>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
+              Most nonprofits cobble together multiple platforms at a total cost of $2,000+/month. Kinflo gives you everything in one place.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+            {[
+              { tool: "CRM Platform", cost: "$125/mo", example: "Bloomerang, DonorPerfect" },
+              { tool: "Fundraising Module", cost: "$500/yr", example: "Campaign management" },
+              { tool: "Email Marketing", cost: "$50/mo", example: "Mailchimp Pro" },
+              { tool: "SMS Platform", cost: "$45/mo", example: "Twilio + automation" },
+              { tool: "A/B Testing Tool", cost: "$200/mo", example: "Optimizely, VWO" },
+              { tool: "AI Copywriting", cost: "$50/mo", example: "Copy.ai, Jasper" },
+              { tool: "Website Builder", cost: "$300/yr", example: "Squarespace, Wix" },
+              { tool: "Calendar Scheduling", cost: "$15/mo", example: "Calendly" },
+            ].map((item, index) => (
+              <Card key={index} className="hover-elevate" data-testid={`savings-card-${index}`}>
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-sm sm:text-base">{item.tool}</h3>
+                    <Badge variant="outline" className="text-xs sm:text-sm">{item.cost}</Badge>
+                  </div>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{item.example}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="bg-card border-2 border-primary/20 rounded-lg p-6 sm:p-8 md:p-12 text-center">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mb-6">
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">Typical Monthly Cost</div>
+                <div className="text-3xl sm:text-4xl font-bold line-through text-muted-foreground">$2,010</div>
+              </div>
+              <ArrowRight className="h-8 w-8 text-primary rotate-90 sm:rotate-0" />
+              <div>
+                <div className="text-sm text-muted-foreground mb-2">Kinflo All-Inclusive</div>
+                <div className="text-4xl sm:text-5xl font-bold text-green-600">FREE</div>
+              </div>
+            </div>
+            <p className="text-lg sm:text-xl font-semibold text-primary mb-2" data-testid="text-annual-savings">
+              Save $24,120 per year
+            </p>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+              Every feature you need is included. No hidden costs, no premium tiers, no per-user fees. Just one powerful platform built specifically for nonprofits.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Key Differentiators */}
+      <section className="py-12 sm:py-16 md:py-20 px-4">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-differentiators-title">
               Why nonprofits choose Kinflo over the competition
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -304,14 +384,14 @@ export default function ProductLanding() {
       </section>
 
       {/* Comparison Table */}
-      <section className="py-20 px-4 bg-muted/30">
+      <section className="py-12 sm:py-16 md:py-20 px-4 bg-muted/30">
         <div className="container mx-auto max-w-5xl">
-          <h2 className="text-4xl font-bold mb-12 text-center" data-testid="text-comparison-title">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12 text-center" data-testid="text-comparison-title">
             How Kinflo compares to traditional nonprofit CRMs
           </h2>
 
-          <div className="bg-card rounded-lg border overflow-hidden">
-            <table className="w-full">
+          <div className="bg-card rounded-lg border overflow-x-auto">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-muted">
                 <tr>
                   <th className="p-4 text-left font-semibold">Feature</th>
