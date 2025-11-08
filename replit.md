@@ -7,7 +7,14 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-**November 8, 2025**: Mobile navigation refactoring, persona×journey deep-linking, screenshot workflow, and image loading optimization
+**November 8, 2025**: Dynamic navigation, mobile navigation refactoring, persona×journey deep-linking, screenshot workflow, and image loading optimization
+- **Dynamic Content-Aware Navigation**: Navigation automatically adapts based on available content for current persona/journey combination
+  - Created `useContentAvailability` hook querying `/api/content/visible-sections` endpoint
+  - Navigation conditionally renders links only when content exists for that section
+  - Falls back to showing all links while data loads (prevents navigation flicker)
+  - Desktop, mobile inline, and hamburger menu all respect content availability
+  - 5-minute cache reduces redundant API calls
+  - Events component returns null when no active events, preventing empty sections ✓
 - **Mobile Navigation Simplification**: Consolidated two-row mobile navigation into single-row layout
   - Removed secondary quick links row for cleaner visual hierarchy
   - Added inline priority links: Services, Events, Donate (directly visible on nav bar)
