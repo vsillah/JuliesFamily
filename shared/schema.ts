@@ -211,7 +211,9 @@ export const imageAssets = pgTable("image_assets", {
   uploadedBy: varchar("uploaded_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("image_assets_name_idx").on(table.name), // Index for content_items join performance
+]);
 
 export const insertImageAssetSchema = createInsertSchema(imageAssets).omit({
   id: true,
@@ -242,6 +244,11 @@ export const insertContentItemSchema = createInsertSchema(contentItems).omit({
 });
 export type InsertContentItem = z.infer<typeof insertContentItemSchema>;
 export type ContentItem = typeof contentItems.$inferSelect;
+
+// Extended ContentItem type with resolved image URL from image_assets join
+export type ContentItemWithResolvedImage = ContentItem & {
+  resolvedImageUrl?: string | null;
+};
 
 // Persona-specific visibility and ordering for content items
 export const contentVisibility = pgTable("content_visibility", {

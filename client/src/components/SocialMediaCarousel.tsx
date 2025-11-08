@@ -3,10 +3,10 @@ import { useQuery } from "@tanstack/react-query";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Instagram, Facebook, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ContentItem } from "@shared/schema";
+import type { ContentItemWithResolvedImage } from "@shared/schema";
 
 export default function SocialMediaCarousel() {
-  const { data: allPosts = [], isLoading } = useQuery<ContentItem[]>({
+  const { data: allPosts = [], isLoading } = useQuery<ContentItemWithResolvedImage[]>({
     queryKey: ["/api/content/type/socialMedia"],
   });
 
@@ -99,7 +99,7 @@ export default function SocialMediaCarousel() {
                     {post.imageName ? (
                       <div className="relative flex-1 flex flex-col">
                         <img
-                          src={(post as any).resolvedImageUrl || `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${post.imageName}`}
+                          src={post.resolvedImageUrl || `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${post.imageName}`}
                           alt={post.title}
                           className="w-full h-full object-cover"
                           loading="lazy"

@@ -13,7 +13,7 @@ import {
   type Interaction, type InsertInteraction,
   type LeadMagnet, type InsertLeadMagnet,
   type ImageAsset, type InsertImageAsset,
-  type ContentItem, type InsertContentItem,
+  type ContentItem, type InsertContentItem, type ContentItemWithResolvedImage,
   type ContentVisibility, type InsertContentVisibility,
   type AbTest, type InsertAbTest,
   type AbTestTarget, type InsertAbTestTarget,
@@ -83,8 +83,8 @@ export interface IStorage {
   // Content Item operations
   createContentItem(item: InsertContentItem): Promise<ContentItem>;
   getContentItem(id: string): Promise<ContentItem | undefined>;
-  getAllContentItems(): Promise<ContentItem[]>;
-  getContentItemsByType(type: string): Promise<ContentItem[]>;
+  getAllContentItems(): Promise<ContentItemWithResolvedImage[]>;
+  getContentItemsByType(type: string): Promise<ContentItemWithResolvedImage[]>;
   updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined>;
   deleteContentItem(id: string): Promise<void>;
   updateContentItemOrder(id: string, newOrder: number): Promise<ContentItem | undefined>;
@@ -483,7 +483,7 @@ export class DatabaseStorage implements IStorage {
     return item;
   }
 
-  async getAllContentItems(): Promise<ContentItem[]> {
+  async getAllContentItems(): Promise<ContentItemWithResolvedImage[]> {
     const results = await db
       .select({
         id: contentItems.id,
@@ -502,10 +502,10 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
       .orderBy(contentItems.order);
     
-    return results as unknown as ContentItem[];
+    return results as unknown as ContentItemWithResolvedImage[];
   }
 
-  async getContentItemsByType(type: string): Promise<ContentItem[]> {
+  async getContentItemsByType(type: string): Promise<ContentItemWithResolvedImage[]> {
     const results = await db
       .select({
         id: contentItems.id,
@@ -525,7 +525,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contentItems.type, type))
       .orderBy(contentItems.order);
     
-    return results as unknown as ContentItem[];
+    return results as unknown as ContentItemWithResolvedImage[];
   }
 
   async updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined> {
