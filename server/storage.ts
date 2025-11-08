@@ -8,7 +8,7 @@ import {
   emailTemplates, emailLogs, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
-  adminPreferences,
+  adminPreferences, auditLogs,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -36,7 +36,8 @@ import {
   type LeadAssignment, type InsertLeadAssignment,
   type Task, type InsertTask,
   type PipelineHistory, type InsertPipelineHistory,
-  type AdminPreferences, type InsertAdminPreferences
+  type AdminPreferences, type InsertAdminPreferences,
+  type AuditLog, type InsertAuditLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -57,6 +58,10 @@ export interface IStorage {
   upsertAdminPreferences(userId: string, preferences: Partial<InsertAdminPreferences>): Promise<AdminPreferences>;
   updateAdminPreferences(userId: string, updates: Partial<InsertAdminPreferences>): Promise<AdminPreferences | undefined>;
   deleteAdminPreferences(userId: string): Promise<void>;
+  
+  // Audit Log operations
+  createAuditLog(auditLog: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(filters?: { userId?: string; actorId?: string; action?: string; limit?: number }): Promise<AuditLog[]>;
   
   // CRM Lead operations
   createLead(lead: InsertLead): Promise<Lead>;
@@ -397,6 +402,39 @@ export class DatabaseStorage implements IStorage {
 
   async deleteAdminPreferences(userId: string): Promise<void> {
     await db.delete(adminPreferences).where(eq(adminPreferences.userId, userId));
+  }
+
+  // Audit Log operations
+  async createAuditLog(auditLogData: InsertAuditLog): Promise<AuditLog> {
+    const [auditLog] = await db.insert(auditLogs).values(auditLogData).returning();
+    return auditLog;
+  }
+
+  async getAuditLogs(filters?: { userId?: string; actorId?: string; action?: string; limit?: number }): Promise<AuditLog[]> {
+    let query = db.select().from(auditLogs);
+    
+    const conditions = [];
+    if (filters?.userId) {
+      conditions.push(eq(auditLogs.userId, filters.userId));
+    }
+    if (filters?.actorId) {
+      conditions.push(eq(auditLogs.actorId, filters.actorId));
+    }
+    if (filters?.action) {
+      conditions.push(eq(auditLogs.action, filters.action));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    query = query.orderBy(desc(auditLogs.createdAt)) as any;
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit) as any;
+    }
+    
+    return await query;
   }
 
   // Lead operations

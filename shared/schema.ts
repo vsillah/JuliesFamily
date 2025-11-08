@@ -83,6 +83,30 @@ export const insertAdminPreferencesSchema = createInsertSchema(adminPreferences)
 export type InsertAdminPreferences = z.infer<typeof insertAdminPreferencesSchema>;
 export type AdminPreferences = typeof adminPreferences.$inferSelect;
 
+// Audit Logs - tracks role changes and permission modifications
+// IMPORTANT: Foreign keys use SET NULL to preserve audit trail even after user deletion
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id, { onDelete: "set null" }), // User who was affected (nullable to preserve audit trail)
+  actorId: varchar("actor_id").references(() => users.id, { onDelete: "set null" }), // User who performed the action (nullable to preserve audit trail)
+  action: varchar("action").notNull(), // role_changed, user_created, user_deleted
+  previousRole: varchar("previous_role"), // For role changes
+  newRole: varchar("new_role"), // For role changes
+  metadata: jsonb("metadata"), // Additional context (emails, names, timestamps - preserved even after user deletion)
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("audit_logs_user_id_idx").on(table.userId),
+  index("audit_logs_actor_id_idx").on(table.actorId),
+  index("audit_logs_created_at_idx").on(table.createdAt),
+]);
+
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type AuditLog = typeof auditLogs.$inferSelect;
+
 // CRM Leads table
 export const leads = pgTable("leads", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

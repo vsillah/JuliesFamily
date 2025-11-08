@@ -141,7 +141,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Store previous role for audit log
+      const previousRole = userToUpdate.role;
+      
       const updatedUser = await storage.updateUser(userId, { role: newRole });
+      
+      // Create audit log entry
+      if (currentUser) {
+        await storage.createAuditLog({
+          userId: userId,
+          actorId: currentUser.id,
+          action: 'role_changed',
+          previousRole: previousRole,
+          newRole: newRole,
+          metadata: {
+            userEmail: userToUpdate.email,
+            actorEmail: currentUser.email,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+      
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user role:", error);
@@ -149,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/users', isAuthenticated, requireSuperAdmin, async (req, res) => {
+  app.post('/api/admin/users', isAuthenticated, requireSuperAdmin, async (req: any, res) => {
     try {
       const { email, firstName, lastName, role } = req.body;
       
@@ -179,12 +199,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(409).json({ message: "A user with this email already exists" });
       }
       
+      // Get current user for audit log
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
       const newUser = await storage.createUser({
         email: email.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         role: userRole,
       });
+      
+      // Create audit log entry
+      if (currentUser) {
+        await storage.createAuditLog({
+          userId: newUser.id,
+          actorId: currentUser.id,
+          action: 'user_created',
+          newRole: userRole,
+          metadata: {
+            userEmail: newUser.email,
+            actorEmail: currentUser.email,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
       
       res.json(newUser);
     } catch (error: any) {
@@ -219,11 +258,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
+      // Create audit log entry before deletion
+      if (currentUser) {
+        await storage.createAuditLog({
+          userId: userToDelete.id,
+          actorId: currentUser.id,
+          action: 'user_deleted',
+          previousRole: userToDelete.role,
+          metadata: {
+            userEmail: userToDelete.email,
+            userName: `${userToDelete.firstName} ${userToDelete.lastName}`,
+            actorEmail: currentUser.email,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+      
       await storage.deleteUser(userId);
       res.json({ message: "User deleted successfully" });
     } catch (error) {
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Audit Log Routes
+  app.get('/api/admin/audit-logs', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId, actorId, action, limit } = req.query;
+      
+      const filters: any = {};
+      if (userId) filters.userId = userId as string;
+      if (actorId) filters.actorId = actorId as string;
+      if (action) filters.action = action as string;
+      if (limit) filters.limit = parseInt(limit as string, 10);
+      
+      const auditLogs = await storage.getAuditLogs(filters);
+      res.json(auditLogs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ message: "Failed to fetch audit logs" });
     }
   });
 
