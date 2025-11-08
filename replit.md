@@ -7,7 +7,14 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-**November 8, 2025**: Simplified screenshot workflow with toggle-based approach
+**November 8, 2025**: Added persona×journey deep-linking and simplified screenshot workflow
+- **Persona×Journey Deep-Link Feature**: Made persona×journey pills clickable for instant preview access
+  - Pills in ConsolidatedVisibilityBadge (Hero, CTA, Services tabs) now open preview mode in new tab
+  - Click any pill (e.g., "Parent × Awareness") to instantly view site from that perspective
+  - Hover shows ExternalLink icon and tooltip "Click to preview this combination"
+  - Uses sessionStorage ('admin-persona-override', 'admin-funnel-override') for preview mode
+  - One-time page reload applies preview settings, then stabilizes
+  - Eliminates manual preview mode switching for quick content verification ✓
 - **Screenshot Upload Toggle System**: Replaced complex confirmation dialog workflow with simple checkbox toggle
   - Added "Use screenshot as image" checkbox below screenshot preview in create/edit dialogs
   - Toggle appears automatically when screenshot is analyzed by AI
