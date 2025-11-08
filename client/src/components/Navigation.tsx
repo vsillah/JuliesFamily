@@ -269,10 +269,10 @@ export default function Navigation() {
             </div>
 
             {/* Mobile: Inline Priority Links */}
-            <div className="md:hidden flex items-center gap-2 flex-1 justify-end mr-2">
+            <div className="md:hidden flex items-center gap-1 flex-1 justify-end mr-1">
               <button
                 onClick={() => scrollToSection("services")}
-                className={`text-xs font-medium transition-colors duration-300 px-1.5 ${
+                className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-services-mobile-inline"
@@ -281,7 +281,7 @@ export default function Navigation() {
               </button>
               <button
                 onClick={() => scrollToSection("events")}
-                className={`text-xs font-medium transition-colors duration-300 px-1.5 ${
+                className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-events-mobile-inline"
@@ -290,7 +290,7 @@ export default function Navigation() {
               </button>
               <Link href="/donate">
                 <button
-                  className={`text-xs font-semibold transition-colors duration-300 px-1.5 ${
+                  className={`text-xs font-semibold transition-colors duration-300 px-2 py-3 min-h-[44px] ${
                     isScrolled ? "text-primary hover:text-primary/80" : "text-white hover:text-white/80"
                   }`}
                   data-testid="button-donate-mobile-inline"
@@ -302,7 +302,7 @@ export default function Navigation() {
 
             {/* Mobile Menu Button */}
             <button
-              className={`md:hidden transition-colors duration-300 ${
+              className={`md:hidden transition-colors duration-300 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center ${
                 isScrolled ? "text-foreground" : "text-white"
               }`}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
