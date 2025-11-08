@@ -45,7 +45,7 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
   onToggleActive: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  getImageUrl: (name: string | null) => string | null;
+  getImageUrl: (item: { imageName?: string | null; imageUrl?: string | null }) => string | null;
 }) {
   const {
     attributes,
