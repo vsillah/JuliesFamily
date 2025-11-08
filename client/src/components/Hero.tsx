@@ -189,21 +189,21 @@ export default function Hero() {
       </div>
 
       {/* Layer 2: Overlay Gradient (renders second, after image loads) */}
-      <div className={`absolute inset-x-0 top-0 bottom-24 sm:bottom-32 z-[2] transition-opacity duration-700 ${
+      <div className={`absolute inset-0 z-[2] transition-opacity duration-700 ${
         overlayVisible ? 'opacity-100' : 'opacity-0'
       }`}>
         {/* Main gradient: dark top for nav contrast, dark middle for content, transparent bottom for wave */}
         <div 
           className="absolute inset-0"
           style={{
-            backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 35%, rgba(0,0,0,0.60) 65%, transparent 85%, transparent 100%)'
+            backgroundImage: 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.70) 30%, rgba(0,0,0,0.60) 60%, rgba(0,0,0,0.40) 80%, transparent 95%)'
           }}
         />
       </div>
 
       {/* Layer 3: Content (renders last, after overlay) */}
       <div 
-        className={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-opacity duration-700 ${
+        className={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 sm:pb-40 text-center transition-opacity duration-700 ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
       >
