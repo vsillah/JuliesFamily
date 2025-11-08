@@ -94,11 +94,20 @@ export default function ProductLanding() {
                 data-testid="img-logo"
               />
               <div className="flex gap-3">
-                <Button variant="ghost" className="hidden sm:inline-flex bg-white/10 hover:bg-white/20 text-white border-white/30" data-testid="button-nav-signin">
-                  Sign In
+                <Button 
+                  variant="ghost" 
+                  className="hidden sm:inline-flex bg-white/10 hover:bg-white/20 text-white border-white/30" 
+                  data-testid="button-nav-signin"
+                  asChild
+                >
+                  <a href="/api/login?returnTo=/my-campaigns">Sign In</a>
                 </Button>
-                <Button className="bg-white text-primary hover:bg-white/90" data-testid="button-nav-cta">
-                  Get Started Free
+                <Button 
+                  className="bg-white text-primary hover:bg-white/90" 
+                  data-testid="button-nav-cta"
+                  asChild
+                >
+                  <a href="/api/login?returnTo=/my-campaigns">Get Started Free</a>
                 </Button>
               </div>
             </div>
@@ -119,11 +128,26 @@ export default function ProductLanding() {
                 The relationship-first CRM for nonprofits. Launch passion-based donation campaigns, engage donors with AI-powered personalization across 120 unique journeys, and grow giving by 28% in your first year
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="text-lg bg-white text-primary hover:bg-white/90" data-testid="button-cta-primary">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                <Button 
+                  size="lg" 
+                  className="text-lg bg-white text-primary hover:bg-white/90" 
+                  data-testid="button-cta-primary"
+                  asChild
+                >
+                  <a href="/api/login?returnTo=/my-campaigns">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </a>
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg bg-white/10 text-white border-white/30 hover:bg-white/20" data-testid="button-cta-secondary">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="text-lg bg-white/10 text-white border-white/30 hover:bg-white/20" 
+                  data-testid="button-cta-secondary"
+                  onClick={() => {
+                    document.getElementById('demo-section')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
                   Watch Demo
                 </Button>
               </div>
@@ -176,7 +200,7 @@ export default function ProductLanding() {
       </section>
 
       {/* Demo Video Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-4">
+      <section id="demo-section" className="py-12 sm:py-16 md:py-20 px-4">
         <div className="container mx-auto max-w-5xl">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4" data-testid="text-demo-title">
