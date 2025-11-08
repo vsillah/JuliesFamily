@@ -7,14 +7,16 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-**November 8, 2025**: Fixed screenshot confirmation dialog in AdminContentManager
-- Implemented proper controlled dialog pattern for screenshot upload confirmation
-- Dialog now stays open when user tries to close with pending screenshot
-- AlertDialog shows "Use Screenshot as Image?" confirmation  
-- Visibility assignments now properly cleared between edit/create sessions
-- Pattern: **REASSERT dialog open state** by calling `setIsEditDialogOpen(true)` when blocking close
-- Root cause: Radix Dialog fires `onOpenChange(false)` before unmounting; must force state back to true to prevent dialog from closing during the render cycle
-- Fixed Badge component to use `React.forwardRef` for proper ref forwarding with TooltipTrigger
+**November 8, 2025**: Fixed hero section navigation overlap and screenshot confirmation dialog
+- **Hero Layout Fix**: Added dynamic top padding using `--nav-height` CSS variable to prevent headline text from overlapping with navigation bar
+  - Verified across desktop (252px gap), tablet (236px gap), and mobile (68px gap) viewports
+  - Headlines now appear cleanly below navigation on all screen sizes
+- **Screenshot Confirmation Dialog**: Implemented proper controlled dialog pattern
+  - Dialog stays open when user tries to close with pending screenshot
+  - AlertDialog shows "Use Screenshot as Image?" confirmation  
+  - Visibility assignments properly cleared between edit/create sessions
+  - Pattern: **REASSERT dialog open state** by calling `setIsEditDialogOpen(true)` when blocking close
+- **Badge Component**: Added `React.forwardRef` for proper ref forwarding with TooltipTrigger
 
 ## System Architecture
 
