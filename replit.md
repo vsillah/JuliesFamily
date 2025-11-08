@@ -24,6 +24,7 @@ The frontend is a single-page application using `wouter` for routing, TanStack Q
 - **Admin Preferences System**: Per-user preference management for admins covering notifications, workflow, interface, and communication settings.
 - **Google Reviews & Social Media Integration**: Automated display of Google reviews and a carousel for curated social media posts.
 - **AI-Powered Analysis**: Uses Google Gemini AI for social media screenshot analysis and YouTube video thumbnail analysis with automated metadata extraction.
+- **AI-Powered File Naming**: Intelligent file naming system that analyzes uploaded images with Google Gemini AI to generate descriptive, SEO-friendly filenames categorized by content type (program, event, facility, testimonial, marketing, general). Includes user-editable confirmation dialog, validation, and automatic file renaming in object storage with ACL preservation.
 - **YouTube Video Integration**: Zero-cost video hosting via YouTube embeds.
 - **Expandable Program Detail Dialogs**: Full-screen modals for detailed program information.
 - **Stripe Donation System**: Secure payment processing for one-time donations.
