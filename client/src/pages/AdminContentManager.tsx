@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -226,6 +227,9 @@ export default function AdminContentManager() {
   const [editItemFunnelStage, setEditItemFunnelStage] = useState<FunnelStage | "">("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
+  const [showScreenshotConfirm, setShowScreenshotConfirm] = useState(false);
+  const [pendingDialogClose, setPendingDialogClose] = useState<'edit' | 'create' | null>(null);
   
   // Multi-select state for lead magnet visibility
   const [selectedLeadMagnetCombos, setSelectedLeadMagnetCombos] = useState<Set<string>>(new Set());
@@ -548,7 +552,8 @@ export default function AdminContentManager() {
   const handleScreenshotAnalysis = async (file: File, isEdit: boolean = false) => {
     setIsAnalyzing(true);
     try {
-      // Create preview
+      // Store both the preview URL and the File object
+      setScreenshotFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setScreenshotPreview(reader.result as string);
@@ -606,6 +611,69 @@ export default function AdminContentManager() {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleUploadScreenshot = async () => {
+    if (!screenshotFile) return;
+    
+    const formData = new FormData();
+    formData.append("image", screenshotFile);
+    formData.append("name", `screenshot_${Date.now()}`);
+    formData.append("usage", editingItem ? editingItem.type : newItem.type);
+    
+    setUploadingImage(true);
+    uploadImageMutation.mutate(formData);
+  };
+
+  const handleDialogClose = (dialogType: 'edit' | 'create') => {
+    // Check if we have a screenshot and no image has been selected yet
+    const hasScreenshot = screenshotFile && screenshotPreview;
+    const hasExistingImage = dialogType === 'edit' ? editingItem?.imageName : newItem.imageName;
+    
+    if (hasScreenshot && !hasExistingImage) {
+      // Show confirmation before closing
+      setPendingDialogClose(dialogType);
+      setShowScreenshotConfirm(true);
+    } else {
+      // Clear screenshot and close immediately
+      clearScreenshot();
+      if (dialogType === 'edit') {
+        setEditingItem(null);
+      } else {
+        setIsCreateDialogOpen(false);
+      }
+    }
+  };
+
+  const clearScreenshot = () => {
+    setScreenshotPreview(null);
+    setScreenshotFile(null);
+  };
+
+  const handleScreenshotConfirmAccept = async () => {
+    if (screenshotFile) {
+      await handleUploadScreenshot();
+    }
+    // The upload mutation onSuccess will clear the screenshot and close dialog
+    setShowScreenshotConfirm(false);
+    if (pendingDialogClose === 'edit') {
+      setEditingItem(null);
+    } else {
+      setIsCreateDialogOpen(false);
+    }
+    clearScreenshot();
+    setPendingDialogClose(null);
+  };
+
+  const handleScreenshotConfirmReject = () => {
+    clearScreenshot();
+    setShowScreenshotConfirm(false);
+    if (pendingDialogClose === 'edit') {
+      setEditingItem(null);
+    } else {
+      setIsCreateDialogOpen(false);
+    }
+    setPendingDialogClose(null);
   };
 
   const uploadImageMutation = useMutation<ImageAsset, Error, FormData>({
@@ -1039,8 +1107,7 @@ export default function AdminContentManager() {
       {/* Edit Dialog */}
       <Dialog open={!!editingItem} onOpenChange={(open) => {
         if (!open) {
-          setEditingItem(null);
-          setScreenshotPreview(null);
+          handleDialogClose('edit');
         }
       }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-content">
@@ -1393,10 +1460,7 @@ export default function AdminContentManager() {
               </div>
               
               <div className="flex gap-2 justify-end pt-4">
-                <Button variant="outline" onClick={() => {
-                  setEditingItem(null);
-                  setScreenshotPreview(null);
-                }} data-testid="button-cancel-edit">
+                <Button variant="outline" onClick={() => handleDialogClose('edit')} data-testid="button-cancel-edit">
                   Cancel
                 </Button>
                 <Button onClick={handleSaveEdit} disabled={updateMutation.isPending} data-testid="button-save-edit">
@@ -1410,9 +1474,10 @@ export default function AdminContentManager() {
 
       {/* Create Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
-        setIsCreateDialogOpen(open);
         if (!open) {
-          setScreenshotPreview(null);
+          handleDialogClose('create');
+        } else {
+          setIsCreateDialogOpen(true);
         }
       }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-content">
@@ -1758,10 +1823,7 @@ export default function AdminContentManager() {
             </div>
             
             <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" onClick={() => {
-                setIsCreateDialogOpen(false);
-                setScreenshotPreview(null);
-              }} data-testid="button-cancel-create">
+              <Button variant="outline" onClick={() => handleDialogClose('create')} data-testid="button-cancel-create">
                 Cancel
               </Button>
               <Button onClick={handleCreate} disabled={createMutation.isPending || !newItem.title} data-testid="button-submit-create">
@@ -1771,6 +1833,35 @@ export default function AdminContentManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Screenshot Confirmation AlertDialog */}
+      <AlertDialog open={showScreenshotConfirm} onOpenChange={setShowScreenshotConfirm}>
+        <AlertDialogContent data-testid="alert-screenshot-confirm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Use Screenshot as Image?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You uploaded a screenshot for analysis. Would you like to use this screenshot as the image for this content item?
+              {screenshotPreview && (
+                <div className="mt-4">
+                  <img 
+                    src={screenshotPreview} 
+                    alt="Screenshot preview"
+                    className="w-full max-w-sm h-auto object-cover rounded border border-border mx-auto"
+                  />
+                </div>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleScreenshotConfirmReject} data-testid="button-screenshot-reject">
+              No, Discard It
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleScreenshotConfirmAccept} data-testid="button-screenshot-accept">
+              Yes, Use as Image
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
