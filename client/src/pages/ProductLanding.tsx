@@ -22,8 +22,8 @@ import {
   Globe,
   ArrowRight,
 } from "lucide-react";
-import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import heroImage from "@assets/generated_images/Kinflo_hero_kinship_workflows_af05fdad.png";
 
 export default function ProductLanding() {
   const { toast } = useToast();
@@ -76,8 +76,6 @@ export default function ProductLanding() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navigation />
-
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary/10 via-background to-secondary/10 py-20 px-4">
         <div className="container mx-auto max-w-6xl">
@@ -87,10 +85,10 @@ export default function ProductLanding() {
                 Introducing Kinflo
               </Badge>
               <h1 className="text-5xl font-bold mb-6" data-testid="text-hero-title">
-                The relationship-first CRM for nonprofits
+                All inflows lead to Kinflo
               </h1>
               <p className="text-xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
-                Launch passion-based donation campaigns, engage donors with AI-powered personalization across 120 unique journeys, and grow giving by 28% in your first year
+                The relationship-first CRM for nonprofits. Launch passion-based donation campaigns, engage donors with AI-powered personalization across 120 unique journeys, and grow giving by 28% in your first year
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="text-lg" data-testid="button-cta-primary">
@@ -106,37 +104,12 @@ export default function ProductLanding() {
               </p>
             </div>
             <div className="relative">
-              <div className="bg-card border rounded-lg shadow-2xl p-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Sparkles className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">AI-Powered Personalization</p>
-                      <p className="text-sm text-muted-foreground">120 unique donor journeys</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
-                      <Target className="h-5 w-5 text-secondary" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">Built-in A/B Testing</p>
-                      <p className="text-sm text-muted-foreground">Optimize every campaign</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                      <Heart className="h-5 w-5 text-accent" />
-                    </div>
-                    <div>
-                      <p className="font-semibold">Donation Campaigns</p>
-                      <p className="text-sm text-muted-foreground">Member dashboards & testimonials</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <img 
+                src={heroImage} 
+                alt="All inflows lead to Kinflo - Interconnected workflows converging" 
+                className="w-full h-auto rounded-lg shadow-2xl"
+                data-testid="img-hero"
+              />
             </div>
           </div>
         </div>
