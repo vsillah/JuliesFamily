@@ -45,7 +45,7 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
   onToggleActive: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  getImageUrl: (item: { imageName?: string | null; imageUrl?: string | null }) => string | null;
+  getImageUrl: (item: ContentItem | null) => string | null;
 }) {
   const {
     attributes,
@@ -2095,23 +2095,13 @@ export default function AdminContentManager() {
         </DialogContent>
       </Dialog>
 
-      {/* ObjectUploader Dialog for AI-powered file naming */}
-      {showObjectUploader && (
-        <Dialog open={showObjectUploader} onOpenChange={setShowObjectUploader}>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Upload Image with AI Naming</DialogTitle>
-              <DialogDescription>
-                Upload an image and AI will generate a descriptive, SEO-friendly filename
-              </DialogDescription>
-            </DialogHeader>
-            <ObjectUploader
-              onUploadComplete={handleObjectUploadComplete}
-              enableAiNaming={true}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+      {/* ObjectUploader with AI-powered file naming */}
+      <ObjectUploader
+        open={showObjectUploader}
+        onClose={() => setShowObjectUploader(false)}
+        onUploadComplete={handleObjectUploadComplete}
+        enableAiNaming={true}
+      />
 
     </div>
   );
