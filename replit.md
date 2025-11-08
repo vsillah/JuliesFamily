@@ -7,7 +7,13 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-**November 8, 2025**: Added persona×journey deep-linking, simplified screenshot workflow, and optimized image loading
+**November 8, 2025**: Mobile navigation refactoring, persona×journey deep-linking, screenshot workflow, and image loading optimization
+- **Mobile Navigation Simplification**: Consolidated two-row mobile navigation into single-row layout
+  - Removed secondary quick links row for cleaner visual hierarchy
+  - Added inline priority links: Services, Events, Donate (directly visible on nav bar)
+  - Secondary links (Impact, Testimonials, Virtual Tour) accessible via hamburger menu
+  - All tap targets meet WCAG 2.1 Level AAA guidelines (44×44px minimum)
+  - Improved mobile usability while maintaining full navigation access ✓
 - **Cloudinary Image Resolution Pattern**: Implemented server-side image URL resolution across all list-based content
   - Added `ContentItemWithResolvedImage` type extending ContentItem with optional `resolvedImageUrl` field
   - Modified storage layer to join `content_items` with `image_assets` table on the `imageName` field
