@@ -657,8 +657,8 @@ export default function AdminContentManager() {
   };
 
   const requestDialogClose = (dialogType: 'edit' | 'create') => {
-    // If screenshot confirmation is already showing, don't show it again (check ref for synchronous check)
-    if (isShowingConfirmationRef.current) {
+    // If screenshot confirmation is already showing OR already pending for this dialog, don't show it again
+    if (isShowingConfirmationRef.current || pendingDialogClose === dialogType) {
       // Just keep the dialog open and return
       if (dialogType === 'edit') {
         setIsEditDialogOpen(true);
