@@ -20,6 +20,7 @@ import AdminABTestAnalytics from "@/pages/AdminABTestAnalytics";
 import AdminEmailCampaigns from "@/pages/AdminEmailCampaigns";
 import AdminSmsNotifications from "@/pages/AdminSmsNotifications";
 import AdminHormoziEmails from "@/pages/AdminHormoziEmails";
+import AdminHormoziSms from "@/pages/AdminHormoziSms";
 import AdminTasks from "@/pages/AdminTasks";
 import AdminPipeline from "@/pages/AdminPipeline";
 import AdminPreferences from "@/pages/AdminPreferences";
@@ -46,6 +47,7 @@ function Router() {
       <Route path="/admin/email-campaigns" component={AdminEmailCampaigns} />
       <Route path="/admin/sms-notifications" component={AdminSmsNotifications} />
       <Route path="/admin/hormozi-emails" component={AdminHormoziEmails} />
+      <Route path="/admin/hormozi-sms" component={AdminHormoziSms} />
       <Route path="/admin/tasks" component={AdminTasks} />
       <Route path="/admin/pipeline" component={AdminPipeline} />
       <Route path="/admin/preferences" component={AdminPreferences} />
