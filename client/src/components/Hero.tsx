@@ -163,10 +163,9 @@ export default function Hero() {
 
   return (
     <section 
-      className="relative flex items-center justify-center overflow-hidden md:min-h-[75vh] md:pt-0"
+      className="relative flex items-center justify-center overflow-hidden md:min-h-[75vh]"
       style={{
-        paddingTop: 'var(--nav-height, 0px)',
-        minHeight: 'max(100vh, 600px)' // Mobile: full viewport, Desktop: 75vh
+        minHeight: 'calc(100vh - var(--nav-height, 0px))' // Mobile: viewport minus navbar, Desktop: 75vh
       }}
     >
       {/* Layer 1: Background Image (renders first) */}
