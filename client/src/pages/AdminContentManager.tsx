@@ -277,10 +277,9 @@ export default function AdminContentManager() {
     queryKey: ["/api/admin/images"],
   });
 
-  // Fetch all visibility settings for matrix view
+  // Fetch all visibility settings (needed for editing content from any tab)
   const { data: allVisibilitySettings = [] } = useQuery<ContentVisibility[]>({
     queryKey: ["/api/content/visibility"],
-    enabled: activeTab === "matrix",
   });
   
   // Load visibility settings when editing any content item
@@ -654,13 +653,9 @@ export default function AdminContentManager() {
     if (screenshotFile) {
       await handleUploadScreenshot();
     }
-    // The upload mutation onSuccess will clear the screenshot and close dialog
+    // Close the confirmation dialog and clear screenshot state
+    // but KEEP the edit/create dialog open so user can see the image and click "Save Changes"
     setShowScreenshotConfirm(false);
-    if (pendingDialogClose === 'edit') {
-      setEditingItem(null);
-    } else {
-      setIsCreateDialogOpen(false);
-    }
     clearScreenshot();
     setPendingDialogClose(null);
   };
