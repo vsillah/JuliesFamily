@@ -1129,10 +1129,10 @@ export default function AdminContentManager() {
             const hasScreenshot = screenshotFile && screenshotPreview;
             const hasImage = editingItem?.imageName;
             if (hasScreenshot && !hasImage) {
-              // Show confirmation but DON'T change dialog state - it stays open
+              // Show confirmation and REASSERT dialog open state to keep it mounted
               setPendingDialogClose('edit');
               setShowScreenshotConfirm(true);
-              // Return without calling setIsEditDialogOpen(false) - dialog stays open
+              setIsEditDialogOpen(true); // Force dialog to stay open
               return;
             }
             // No screenshot - allow normal close
@@ -1520,10 +1520,10 @@ export default function AdminContentManager() {
             const hasScreenshot = screenshotFile && screenshotPreview;
             const hasImage = newItem.imageName;
             if (hasScreenshot && !hasImage) {
-              // Show confirmation but DON'T change dialog state - it stays open
+              // Show confirmation and REASSERT dialog open state to keep it mounted
               setPendingDialogClose('create');
               setShowScreenshotConfirm(true);
-              // Return without calling setIsCreateDialogOpen(false) - dialog stays open
+              setIsCreateDialogOpen(true); // Force dialog to stay open
               return;
             }
             // No screenshot - allow normal close
