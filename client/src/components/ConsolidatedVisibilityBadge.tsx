@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ExternalLink } from "lucide-react";
 import { PERSONA_LABELS, FUNNEL_STAGE_LABELS } from "@shared/defaults/personas";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface UsageData {
   visibilityAssignments: { persona: string | null; funnelStage: string | null; }[];
@@ -21,6 +22,22 @@ export default function ConsolidatedVisibilityBadge({
     queryKey: [`/api/content/${contentId}/usage`],
     staleTime: 30000,
   });
+
+  // Function to open preview in new tab with specific persona and funnel stage
+  const openPreview = (persona: string | null, funnelStage: string | null) => {
+    // Open new window
+    const previewWindow = window.open('/', '_blank');
+    
+    if (previewWindow) {
+      // Wait for window to load, then set sessionStorage
+      previewWindow.addEventListener('load', () => {
+        previewWindow.sessionStorage.setItem('admin-persona-override', persona || 'none');
+        previewWindow.sessionStorage.setItem('admin-funnel-override', funnelStage || 'none');
+        // Reload to apply the preview mode
+        previewWindow.location.reload();
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -82,14 +99,25 @@ export default function ConsolidatedVisibilityBadge({
       {hasPersonaAssignments && (
         <div className="flex flex-wrap gap-1.5 mt-0.5">
           {usage?.visibilityAssignments.map((assignment, index) => (
-            <Badge 
-              key={index}
-              variant="outline" 
-              className="text-xs bg-accent/50 font-normal"
-              data-testid={`badge-assignment-${contentId}-${index}`}
-            >
-              {PERSONA_LABELS[assignment.persona as keyof typeof PERSONA_LABELS] || assignment.persona || 'All'} × {FUNNEL_STAGE_LABELS[assignment.funnelStage as keyof typeof FUNNEL_STAGE_LABELS] || assignment.funnelStage || 'All'}
-            </Badge>
+            <Tooltip key={index}>
+              <TooltipTrigger asChild>
+                <Badge 
+                  variant="outline" 
+                  className="text-xs bg-accent/50 font-normal cursor-pointer hover-elevate transition-all group"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openPreview(assignment.persona, assignment.funnelStage);
+                  }}
+                  data-testid={`badge-assignment-${contentId}-${index}`}
+                >
+                  {PERSONA_LABELS[assignment.persona as keyof typeof PERSONA_LABELS] || assignment.persona || 'All'} × {FUNNEL_STAGE_LABELS[assignment.funnelStage as keyof typeof FUNNEL_STAGE_LABELS] || assignment.funnelStage || 'All'}
+                  <ExternalLink className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Click to preview this combination</p>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       )}
