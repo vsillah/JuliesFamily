@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, pipelineHistory, type User } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, pipelineHistory, type User, type UserRole, userRoleEnum } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -33,32 +33,50 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-10-29.clover",
 });
 
-// Admin authorization middleware
-const isAdmin: RequestHandler = async (req: any, res, next) => {
-  try {
-    const oidcSub = req.user?.claims?.sub;
-    console.log("[isAdmin] Checking admin access for oidcSub:", oidcSub);
-    
-    if (!oidcSub) {
-      console.log("[isAdmin] No oidcSub found - returning 401");
-      return res.status(401).json({ message: "Unauthorized" });
+// Role-based authorization middleware
+// Generic role checker - checks if user has any of the specified roles
+const requireRole = (...allowedRoles: UserRole[]): RequestHandler => {
+  return async (req: any, res, next) => {
+    try {
+      const oidcSub = req.user?.claims?.sub;
+      console.log("[requireRole] Checking role access for oidcSub:", oidcSub, "allowed roles:", allowedRoles);
+      
+      if (!oidcSub) {
+        console.log("[requireRole] No oidcSub found - returning 401");
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const user = await storage.getUserByOidcSub(oidcSub);
+      console.log("[requireRole] Found user:", user ? { id: user.id, email: user.email, role: user.role } : null);
+      
+      if (!user) {
+        console.log("[requireRole] User not found - returning 401");
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // Check if user's role is in the allowed roles
+      if (!allowedRoles.includes(user.role as UserRole)) {
+        console.log("[requireRole] User role not allowed - returning 403");
+        return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+      }
+      
+      console.log("[requireRole] Role check passed");
+      next();
+    } catch (error) {
+      console.error("Role auth error:", error);
+      res.status(500).json({ message: "Authorization check failed" });
     }
-    
-    const user = await storage.getUserByOidcSub(oidcSub);
-    console.log("[isAdmin] Found user:", user ? { id: user.id, email: user.email, isAdmin: user.isAdmin } : null);
-    
-    if (!user?.isAdmin) {
-      console.log("[isAdmin] User not admin - returning 403");
-      return res.status(403).json({ message: "Forbidden: Admin access required" });
-    }
-    
-    console.log("[isAdmin] Admin check passed");
-    next();
-  } catch (error) {
-    console.error("Admin auth error:", error);
-    res.status(500).json({ message: "Authorization check failed" });
-  }
+  };
 };
+
+// Admin middleware - allows both admin and super_admin
+const requireAdmin: RequestHandler = requireRole('admin', 'super_admin');
+
+// Super admin middleware - only allows super_admin
+const requireSuperAdmin: RequestHandler = requireRole('super_admin');
+
+// DEPRECATED: Use requireAdmin instead. Kept for backward compatibility.
+const isAdmin: RequestHandler = requireAdmin;
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
@@ -87,38 +105,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/admin/users/:userId/admin-status', isAuthenticated, isAdmin, async (req: any, res) => {
+  // Update user role - only super admins can change roles
+  app.patch('/api/admin/users/:userId/role', isAuthenticated, requireSuperAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
-      const { isAdmin: newAdminStatus } = req.body;
+      const { role: newRole } = req.body;
       
-      // Prevent admins from removing their own admin access
+      // Validate role value
+      const validationResult = userRoleEnum.safeParse(newRole);
+      if (!validationResult.success) {
+        return res.status(400).json({ message: "Invalid role value. Must be 'client', 'admin', or 'super_admin'" });
+      }
+      
+      // Get current user
       const oidcSub = req.user.claims.sub;
       const currentUser = await storage.getUserByOidcSub(oidcSub);
-      if (currentUser && userId === currentUser.id && newAdminStatus === false) {
-        return res.status(400).json({ message: "You cannot remove your own admin privileges" });
+      
+      // Prevent super admins from demoting themselves
+      if (currentUser && userId === currentUser.id && newRole !== 'super_admin') {
+        return res.status(400).json({ message: "You cannot change your own role" });
       }
       
-      // Validate input
-      if (typeof newAdminStatus !== 'boolean') {
-        return res.status(400).json({ message: "isAdmin must be a boolean value" });
-      }
-      
-      const updatedUser = await storage.updateUser(userId, { isAdmin: newAdminStatus });
-      if (!updatedUser) {
+      // Get the user to update
+      const userToUpdate = await storage.getUser(userId);
+      if (!userToUpdate) {
         return res.status(404).json({ message: "User not found" });
       }
       
+      // Prevent demoting the last super_admin
+      if (userToUpdate.role === 'super_admin' && newRole !== 'super_admin') {
+        const allUsers = await storage.getAllUsers();
+        const superAdminCount = allUsers.filter(u => u.role === 'super_admin').length;
+        if (superAdminCount <= 1) {
+          return res.status(400).json({ message: "Cannot demote the last super admin" });
+        }
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { role: newRole });
       res.json(updatedUser);
     } catch (error) {
-      console.error("Error updating user admin status:", error);
-      res.status(500).json({ message: "Failed to update admin status" });
+      console.error("Error updating user role:", error);
+      res.status(500).json({ message: "Failed to update user role" });
     }
   });
 
-  app.post('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
+  app.post('/api/admin/users', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
-      const { email, firstName, lastName, isAdmin } = req.body;
+      const { email, firstName, lastName, role } = req.body;
       
       // Validate required fields
       if (!email || !email.trim()) {
@@ -133,6 +166,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Last name is required" });
       }
       
+      // Validate role if provided
+      const userRole = role || 'client';
+      const validationResult = userRoleEnum.safeParse(userRole);
+      if (!validationResult.success) {
+        return res.status(400).json({ message: "Invalid role value. Must be 'client', 'admin', or 'super_admin'" });
+      }
+      
       // Check for duplicate email before creating
       const existingUser = await storage.getUserByEmail(email.trim());
       if (existingUser) {
@@ -143,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         email: email.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        isAdmin: isAdmin ?? false,
+        role: userRole,
       });
       
       res.json(newUser);
@@ -153,11 +193,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/users/:userId', isAuthenticated, isAdmin, async (req: any, res) => {
+  app.delete('/api/admin/users/:userId', isAuthenticated, requireSuperAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
       
-      // Prevent admins from deleting their own account
+      // Prevent super admins from deleting their own account
       const oidcSub = req.user.claims.sub;
       const currentUser = await storage.getUserByOidcSub(oidcSub);
       if (currentUser && userId === currentUser.id) {
@@ -168,6 +208,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userToDelete = await storage.getUser(userId);
       if (!userToDelete) {
         return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Prevent deleting the last super_admin
+      if (userToDelete.role === 'super_admin') {
+        const allUsers = await storage.getAllUsers();
+        const superAdminCount = allUsers.filter(u => u.role === 'super_admin').length;
+        if (superAdminCount <= 1) {
+          return res.status(400).json({ message: "Cannot delete the last super admin" });
+        }
       }
       
       await storage.deleteUser(userId);

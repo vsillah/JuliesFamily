@@ -15,6 +15,10 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
+// User role enum for RBAC
+export const userRoleEnum = z.enum(['client', 'admin', 'super_admin']);
+export type UserRole = z.infer<typeof userRoleEnum>;
+
 // User storage table for Replit Auth
 // Reference: blueprint:javascript_log_in_with_replit
 export const users = pgTable("users", {
@@ -25,7 +29,8 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   persona: varchar("persona"), // Stored persona preference: student, provider, parent, donor, volunteer
-  isAdmin: boolean("is_admin").default(false),
+  role: varchar("role").notNull().default('client'), // client, admin, super_admin
+  isAdmin: boolean("is_admin").default(false), // DEPRECATED: Use role instead. Kept for backward compatibility during migration.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
