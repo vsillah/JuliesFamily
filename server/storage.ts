@@ -226,6 +226,15 @@ export interface IStorage {
   updateSmsTemplate(id: string, updates: Partial<InsertSmsTemplate>): Promise<SmsTemplate | undefined>;
   deleteSmsTemplate(id: string): Promise<void>;
   
+  // Hormozi SMS Template operations
+  getHormoziSmsTemplates(filters?: {
+    persona?: string;
+    funnelStage?: string;
+    outreachType?: string;
+    templateCategory?: string;
+  }): Promise<SmsTemplate[]>;
+  getHormoziSmsTemplate(id: string): Promise<SmsTemplate | undefined>;
+  
   // SMS Send operations
   createSmsSend(send: InsertSmsSend): Promise<SmsSend>;
   getSmsSendsByLead(leadId: string): Promise<SmsSend[]>;
@@ -1418,6 +1427,52 @@ export class DatabaseStorage implements IStorage {
 
   async deleteSmsTemplate(id: string): Promise<void> {
     await db.delete(smsTemplates).where(eq(smsTemplates.id, id));
+  }
+
+  // Hormozi SMS Template operations
+  async getHormoziSmsTemplates(filters?: {
+    persona?: string;
+    funnelStage?: string;
+    outreachType?: string;
+    templateCategory?: string;
+  }): Promise<SmsTemplate[]> {
+    const conditions = [eq(smsTemplates.isActive, true)];
+    
+    if (filters?.persona) {
+      conditions.push(or(
+        eq(smsTemplates.persona, filters.persona),
+        sql`${smsTemplates.persona} IS NULL`
+      )!);
+    }
+    
+    if (filters?.funnelStage) {
+      conditions.push(or(
+        eq(smsTemplates.funnelStage, filters.funnelStage),
+        sql`${smsTemplates.funnelStage} IS NULL`
+      )!);
+    }
+    
+    if (filters?.outreachType) {
+      conditions.push(eq(smsTemplates.outreachType, filters.outreachType));
+    }
+    
+    if (filters?.templateCategory) {
+      conditions.push(eq(smsTemplates.templateCategory, filters.templateCategory));
+    }
+    
+    return await db
+      .select()
+      .from(smsTemplates)
+      .where(and(...conditions))
+      .orderBy(smsTemplates.persona, smsTemplates.funnelStage, smsTemplates.name);
+  }
+
+  async getHormoziSmsTemplate(id: string): Promise<SmsTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(smsTemplates)
+      .where(eq(smsTemplates.id, id));
+    return template;
   }
 
   // SMS Send operations

@@ -2492,6 +2492,142 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hormozi SMS Template Routes (Alex Hormozi's $100M Leads Framework for SMS)
+  
+  // Get all Hormozi SMS templates with filtering
+  app.get('/api/hormozi-sms-templates', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { persona, funnelStage, outreachType, templateCategory } = req.query;
+      const templates = await storage.getHormoziSmsTemplates({
+        persona: persona as string | undefined,
+        funnelStage: funnelStage as string | undefined,
+        outreachType: outreachType as string | undefined,
+        templateCategory: templateCategory as string | undefined,
+      });
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching Hormozi SMS templates:", error);
+      res.status(500).json({ message: "Failed to fetch SMS templates" });
+    }
+  });
+
+  // Get single Hormozi SMS template by ID
+  app.get('/api/hormozi-sms-templates/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const template = await storage.getHormoziSmsTemplate(id);
+      
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching Hormozi SMS template:", error);
+      res.status(500).json({ message: "Failed to fetch SMS template" });
+    }
+  });
+
+  // Personalize SMS template using AI for a specific lead
+  app.post('/api/hormozi-sms-templates/personalize', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { templateId, leadId } = req.body;
+      
+      if (!templateId || !leadId) {
+        return res.status(400).json({ message: "templateId and leadId are required" });
+      }
+      
+      // Fetch template and lead data
+      const [template, lead, recentInteractions] = await Promise.all([
+        storage.getHormoziSmsTemplate(templateId),
+        storage.getLead(leadId),
+        storage.getLeadInteractions(leadId, 5) // Get last 5 interactions
+      ]);
+      
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      // Use AI to personalize the SMS
+      const { personalizeSmsTemplate } = await import('./smsPersonalizer');
+      const personalizedSms = await personalizeSmsTemplate({
+        lead,
+        recentInteractions,
+        template
+      });
+      
+      res.json(personalizedSms);
+    } catch (error: any) {
+      console.error("Error personalizing SMS:", error);
+      res.status(500).json({ message: error.message || "Failed to personalize SMS" });
+    }
+  });
+
+  // Send personalized Hormozi SMS to a lead
+  app.post('/api/hormozi-sms-templates/send', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId, messageContent } = req.body;
+      
+      if (!leadId || !messageContent) {
+        return res.status(400).json({ message: "leadId and messageContent are required" });
+      }
+      
+      // Fetch lead
+      const lead = await storage.getLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      if (!lead.phone) {
+        return res.status(400).json({ message: "Lead does not have a phone number" });
+      }
+      
+      // Send SMS via Twilio
+      const { sendSMS } = await import('./twilio');
+      const result = await sendSMS(lead.phone, messageContent);
+      
+      if (!result.success) {
+        return res.status(500).json({ message: result.error || "Failed to send SMS" });
+      }
+      
+      // Create SMS send record
+      await storage.createSmsSend({
+        leadId,
+        recipientPhone: lead.phone,
+        recipientName: `${lead.firstName || ''} ${lead.lastName || ''}`.trim(),
+        messageContent,
+        status: 'sent',
+        smsProvider: 'twilio',
+        providerMessageId: result.messageId,
+        sentAt: new Date(),
+        metadata: { sentBy: 'hormozi_sms_system' }
+      });
+      
+      // Create interaction record
+      await storage.createInteraction({
+        leadId,
+        interactionType: 'sms_sent',
+        contentEngaged: `Personalized SMS: ${messageContent.substring(0, 50)}...`,
+        notes: `Sent Hormozi-style personalized SMS`,
+        data: { messageContent, sentAt: new Date().toISOString() }
+      });
+      
+      // Update lead's last interaction date
+      await storage.updateLead(leadId, {
+        lastInteractionDate: new Date()
+      });
+      
+      res.json({ success: true, message: "SMS sent successfully" });
+    } catch (error: any) {
+      console.error("Error sending personalized SMS:", error);
+      res.status(500).json({ message: error.message || "Failed to send SMS" });
+    }
+  });
+
   // Get communication timeline for a lead
   app.get('/api/leads/:leadId/timeline', isAuthenticated, isAdmin, async (req, res) => {
     try {
