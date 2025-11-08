@@ -462,18 +462,10 @@ export default function AdminContentManager() {
     },
   });
 
-  const handleSaveEdit = async () => {
+  // Extracted save logic (without screenshot check) for direct invocation after upload
+  // Accepts optional uploadedImageName to use fresh image name instead of stale state
+  const performSaveEdit = (uploadedImageName?: string) => {
     if (!editingItem) return;
-    
-    // Check if there's a screenshot and the toggle is enabled
-    const hasScreenshot = screenshotFile && screenshotPreview && useScreenshotAsImage;
-    
-    if (hasScreenshot) {
-      // Upload screenshot first, then proceed with save
-      handleUploadScreenshot();
-      // The upload mutation's onSuccess will handle continuing with the save
-      return;
-    }
     
     let metadata = editingItem.metadata;
     
@@ -490,7 +482,7 @@ export default function AdminContentManager() {
     const updates: any = {
       title: editingItem.title,
       description: editingItem.description,
-      imageName: editingItem.imageName,
+      imageName: uploadedImageName || editingItem.imageName,  // Use fresh name if provided
       isActive: editingItem.isActive,
       metadata
     };
@@ -508,28 +500,38 @@ export default function AdminContentManager() {
     });
   };
 
-  const handleCreate = async () => {
+  const handleSaveEdit = async () => {
     // Check if there's a screenshot and the toggle is enabled
     const hasScreenshot = screenshotFile && screenshotPreview && useScreenshotAsImage;
     
     if (hasScreenshot) {
-      // Upload screenshot first, then proceed with create
+      // Upload screenshot first, then proceed with save
+      // Screenshot uploads use names starting with "screenshot_", which onSuccess will detect
       handleUploadScreenshot();
-      // The upload mutation's onSuccess will handle continuing with the create
       return;
     }
     
-    let itemToCreate = newItem;
+    // No screenshot upload needed, proceed with save directly
+    performSaveEdit();
+  };
+
+  // Extracted create logic (without screenshot check) for direct invocation after upload
+  // Accepts optional uploadedImageName to use fresh image name instead of stale state
+  const performCreate = (uploadedImageName?: string) => {
+    let itemToCreate = {
+      ...newItem,
+      imageName: uploadedImageName || newItem.imageName  // Use fresh name if provided
+    };
     
     if (newItem.type === 'socialMedia') {
-      itemToCreate = { ...newItem, metadata: { ...newItem.metadata, platform: (newItem.metadata as any)?.platform || 'instagram' } };
+      itemToCreate = { ...itemToCreate, metadata: { ...itemToCreate.metadata, platform: (itemToCreate.metadata as any)?.platform || 'instagram' } };
     } else if (newItem.type === 'video') {
       itemToCreate = { 
-        ...newItem, 
+        ...itemToCreate, 
         metadata: { 
-          ...newItem.metadata, 
-          videoId: (newItem.metadata as any)?.videoId || '',
-          category: (newItem.metadata as any)?.category || 'student_story'
+          ...itemToCreate.metadata, 
+          videoId: (itemToCreate.metadata as any)?.videoId || '',
+          category: (itemToCreate.metadata as any)?.category || 'student_story'
         } 
       };
     }
@@ -544,6 +546,21 @@ export default function AdminContentManager() {
     payload.visibilityCombos = combos;
     
     createMutation.mutate(payload);
+  };
+
+  const handleCreate = async () => {
+    // Check if there's a screenshot and the toggle is enabled
+    const hasScreenshot = screenshotFile && screenshotPreview && useScreenshotAsImage;
+    
+    if (hasScreenshot) {
+      // Upload screenshot first, then proceed with create
+      // Screenshot uploads use names starting with "screenshot_", which onSuccess will detect
+      handleUploadScreenshot();
+      return;
+    }
+    
+    // No screenshot upload needed, proceed with create directly
+    performCreate();
   };
 
   const handleCreateFromMatrix = (contentType: string, persona: Persona, stage: FunnelStage) => {
@@ -683,13 +700,17 @@ export default function AdminContentManager() {
       // Clear screenshot state after successful upload
       clearScreenshot();
       
-      // If upload was triggered from screenshot toggle, retry the save now that we have an image
-      // Check if we're in edit mode or create mode
-      if (editingItem) {
-        // Small delay to ensure state updates
-        setTimeout(() => handleSaveEdit(), 100);
-      } else if (isCreateDialogOpen) {
-        setTimeout(() => handleCreate(), 100);
+      // Only retry save if this was a screenshot upload (name starts with "screenshot_")
+      // This prevents manual/quick uploads from triggering unintended auto-saves
+      if (data.name.startsWith('screenshot_')) {
+        // Call the extracted save/create logic directly with fresh uploaded image name
+        // This avoids stale state closure issues and ensures the new image is included
+        if (editingItem) {
+          // Small delay to ensure state updates
+          setTimeout(() => performSaveEdit(data.name), 100);
+        } else if (isCreateDialogOpen) {
+          setTimeout(() => performCreate(data.name), 100);
+        }
       }
     },
     onError: (error: any) => {
