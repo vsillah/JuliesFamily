@@ -23,7 +23,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import Footer from "@/components/Footer";
-import heroImage from "@assets/generated_images/Kinflo_hero_kinship_workflows_af05fdad.png";
+import heroImage from "@assets/generated_images/Families_using_nonprofit_platform_together_fed7c053.png";
 import logoImage from "@assets/generated_images/Kinflo_full_logo_aff28780.png";
 import laptopDashboard from "@assets/generated_images/Laptop_showing_CRM_dashboard_9926f587.png";
 import phoneCampaign from "@assets/generated_images/Phone_showing_campaign_app_1bfd93e5.png";
@@ -82,9 +82,20 @@ export default function ProductLanding() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Hero Image at Top */}
-      <section className="relative w-full bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/20">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent z-10"></div>
+      {/* Full-Width Hero with Background Image */}
+      <section className="relative w-full min-h-[600px] sm:min-h-[700px] md:min-h-[800px] bg-background">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src={heroImage} 
+            alt="Diverse families and community members using Kinflo platform together in learning space" 
+            className="w-full h-full object-cover"
+            data-testid="img-hero"
+          />
+        </div>
+        
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70 z-10"></div>
         
         {/* Header with Logo - Overlaid on hero */}
         <header className="relative z-20 border-b border-white/10">
@@ -117,55 +128,45 @@ export default function ProductLanding() {
           </div>
         </header>
 
-        {/* Hero Content */}
-        <div className="relative z-20 container mx-auto max-w-6xl px-4 py-12 sm:py-16 md:py-20">
-          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-            <div className="order-2 md:order-1">
-              <Badge className="mb-4 bg-white/90 text-primary hover:bg-white" data-testid="badge-platform-type">
-                Introducing Kinflo
-              </Badge>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-white drop-shadow-lg" data-testid="text-hero-title">
-                All inflows lead to Kinflo
-              </h1>
-              <p className="text-lg sm:text-xl text-white/95 mb-6 sm:mb-8 drop-shadow-md" data-testid="text-hero-subtitle">
-                The relationship-first CRM for nonprofits. Launch passion-based donation campaigns, engage donors with AI-powered personalization across 120 unique journeys, and grow giving by 28% in your first year
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  className="text-lg bg-white text-primary hover:bg-white/90" 
-                  data-testid="button-cta-primary"
-                  asChild
-                >
-                  <a href="/api/login?returnTo=/my-campaigns">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </a>
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="text-lg bg-white/10 text-white border-white/30 hover:bg-white/20" 
-                  data-testid="button-cta-secondary"
-                  onClick={() => {
-                    document.getElementById('demo-section')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Watch Demo
-                </Button>
-              </div>
-              <p className="text-sm text-white/90 mt-4 drop-shadow" data-testid="text-trial-info">
-                Free 14-day trial • No credit card required • Setup in minutes
-              </p>
+        {/* Hero Content - Centered */}
+        <div className="relative z-20 container mx-auto max-w-6xl px-4 flex items-center justify-center" style={{ minHeight: 'calc(100% - 120px)' }}>
+          <div className="max-w-3xl text-center py-12 sm:py-16 md:py-20">
+            <Badge className="mb-4 bg-white/90 text-primary hover:bg-white" data-testid="badge-platform-type">
+              Introducing Kinflo
+            </Badge>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 text-white drop-shadow-2xl" data-testid="text-hero-title">
+              Empowering communities,<br />one connection at a time
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl text-white/95 mb-6 sm:mb-8 drop-shadow-xl leading-relaxed" data-testid="text-hero-subtitle">
+              The relationship-first CRM built for nonprofits serving families and communities. Launch passion-based donation campaigns, engage donors with AI-powered personalization, and grow giving by 28% in your first year
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                size="lg" 
+                className="text-lg bg-white text-primary hover:bg-white/90" 
+                data-testid="button-cta-primary"
+                asChild
+              >
+                <a href="/api/login?returnTo=/my-campaigns">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </a>
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="text-lg bg-white/10 text-white border-white/30 hover:bg-white/20 backdrop-blur-sm" 
+                data-testid="button-cta-secondary"
+                onClick={() => {
+                  document.getElementById('demo-section')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                Watch Demo
+              </Button>
             </div>
-            <div className="relative order-1 md:order-2">
-              <img 
-                src={heroImage} 
-                alt="All inflows lead to Kinflo - Interconnected workflows converging" 
-                className="w-full h-auto rounded-lg shadow-2xl"
-                data-testid="img-hero"
-              />
-            </div>
+            <p className="text-sm text-white/90 mt-6 drop-shadow-lg" data-testid="text-trial-info">
+              Free 14-day trial • No credit card required • Setup in minutes
+            </p>
           </div>
         </div>
       </section>
