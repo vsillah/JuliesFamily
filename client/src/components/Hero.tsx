@@ -205,6 +205,9 @@ export default function Hero() {
         className={`relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-32 sm:pb-40 text-center transition-opacity duration-700 ${
           textVisible ? 'opacity-100' : 'opacity-0'
         }`}
+        style={{
+          paddingTop: 'calc(var(--nav-height, 80px) + 2rem)'
+        }}
       >
         <p className="text-sm sm:text-base uppercase tracking-wider text-white/90 mb-4 font-sans">
           {(currentHero?.metadata as any)?.subtitle || "– Julie's Mission –"}
