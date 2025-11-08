@@ -27,6 +27,6 @@ export function useContentAvailability() {
       return response.json();
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    enabled: !!persona && !!funnelStage,
+    enabled: !!persona, // Only require persona - funnel stage is optional
   });
 }

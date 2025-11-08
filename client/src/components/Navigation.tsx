@@ -22,7 +22,17 @@ export default function Navigation() {
   const [showUploader, setShowUploader] = useState(false);
   const { toast } = useToast();
   const navRef = useState<HTMLElement | null>(null)[0];
-  const { data: visibleSections } = useContentAvailability();
+  const { data: visibleSections, isLoading: isLoadingVisibility } = useContentAvailability();
+  
+  // Default to showing all sections while loading to avoid flickering nav
+  const sections = visibleSections || {
+    services: true,
+    events: true,
+    testimonials: true,
+    impact: true,
+    donation: true,
+    "lead-magnet": true
+  };
   
   const currentPersonaConfig = personaConfigs.find(p => p.id === persona);
   
@@ -143,7 +153,7 @@ export default function Navigation() {
 
             {/* Center: Primary Navigation */}
             <nav className="hidden md:flex items-center gap-6 flex-1 justify-center">
-              {visibleSections?.services && (
+              {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
                   className={`text-sm font-medium transition-colors duration-300 ${
@@ -154,7 +164,7 @@ export default function Navigation() {
                   Services
                 </button>
               )}
-              {visibleSections?.impact && (
+              {sections.impact && (
                 <button
                   onClick={() => scrollToSection("impact")}
                   className={`text-sm font-medium transition-colors duration-300 ${
@@ -165,7 +175,7 @@ export default function Navigation() {
                   Impact
                 </button>
               )}
-              {visibleSections?.testimonials && (
+              {sections.testimonials && (
                 <button
                   onClick={() => scrollToSection("testimonials")}
                   className={`text-sm font-medium transition-colors duration-300 ${
@@ -176,7 +186,7 @@ export default function Navigation() {
                   Testimonials
                 </button>
               )}
-              {visibleSections?.events && (
+              {sections.events && (
                 <button
                   onClick={() => scrollToSection("events")}
                   className={`text-sm font-medium transition-colors duration-300 ${
@@ -280,7 +290,7 @@ export default function Navigation() {
 
             {/* Mobile: Inline Priority Links */}
             <div className="md:hidden flex items-center gap-1 flex-1 justify-end mr-1">
-              {visibleSections?.services && (
+              {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
                   className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
@@ -291,7 +301,7 @@ export default function Navigation() {
                   Services
                 </button>
               )}
-              {visibleSections?.events && (
+              {sections.events && (
                 <button
                   onClick={() => scrollToSection("events")}
                   className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
@@ -378,7 +388,7 @@ export default function Navigation() {
                 Viewing as: {currentPersonaConfig.label}
               </Badge>
             )}
-            {visibleSections?.services && (
+            {sections.services && (
               <button
                 onClick={() => scrollToSection("services")}
                 className="text-lg text-foreground hover:text-primary transition-colors"
@@ -387,7 +397,7 @@ export default function Navigation() {
                 Our Services
               </button>
             )}
-            {visibleSections?.impact && (
+            {sections.impact && (
               <button
                 onClick={() => scrollToSection("impact")}
                 className="text-lg text-foreground hover:text-primary transition-colors"
@@ -396,7 +406,7 @@ export default function Navigation() {
                 Our Impact
               </button>
             )}
-            {visibleSections?.testimonials && (
+            {sections.testimonials && (
               <button
                 onClick={() => scrollToSection("testimonials")}
                 className="text-lg text-foreground hover:text-primary transition-colors"

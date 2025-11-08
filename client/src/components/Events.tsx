@@ -46,6 +46,11 @@ export default function Events() {
     );
   }
 
+  // Don't render section if there are no events
+  if (events.length === 0) {
+    return null;
+  }
+
   return (
     <section id="events" className="py-12 sm:py-16 bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
