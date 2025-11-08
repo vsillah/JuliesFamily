@@ -649,14 +649,13 @@ export default function AdminContentManager() {
     setScreenshotFile(null);
   };
 
-  const handleScreenshotConfirmAccept = async () => {
+  const handleScreenshotConfirmAccept = () => {
     if (screenshotFile) {
-      await handleUploadScreenshot();
+      handleUploadScreenshot();
     }
-    // Close the confirmation dialog and clear screenshot state
-    // but KEEP the edit/create dialog open so user can see the image and click "Save Changes"
+    // Close the confirmation dialog but KEEP the edit/create dialog open
+    // The mutation's onSuccess will clear screenshot state and update the image
     setShowScreenshotConfirm(false);
-    clearScreenshot();
     setPendingDialogClose(null);
   };
 
@@ -690,6 +689,9 @@ export default function AdminContentManager() {
       setSelectedImageFile(null);
       setImagePreviewUrl(null);
       setUploadingImage(false);
+      
+      // Clear screenshot state after successful upload
+      clearScreenshot();
     },
     onError: (error: any) => {
       toast({
