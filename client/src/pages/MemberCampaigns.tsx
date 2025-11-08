@@ -53,14 +53,41 @@ export default function MemberCampaigns() {
     return (
       <div className="container mx-auto p-6 max-w-4xl" data-testid="container-empty">
         <Card>
-          <CardHeader>
-            <CardTitle>My Campaigns</CardTitle>
-            <CardDescription>You are not currently associated with any campaigns</CardDescription>
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <Heart className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Welcome to Your Campaign Dashboard</CardTitle>
+            <CardDescription className="text-base mt-2">
+              This is where you'll track donations and share updates for campaigns you're part of
+            </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              When you are added as a beneficiary or participant to a fundraising campaign, it will appear here.
-            </p>
+          <CardContent className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-6 space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <Target className="h-5 w-5 text-primary" />
+                What are campaigns?
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Donation campaigns are fundraising efforts organized by Julie's Family Learning Program. 
+                When you're added as a beneficiary or participant, you'll be able to:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-2 ml-6 list-disc">
+                <li>Track real-time donation progress toward campaign goals</li>
+                <li>See who's supporting you and your family</li>
+                <li>Submit thank-you testimonials to share with donors</li>
+                <li>Opt in to receive notifications when new donations arrive</li>
+              </ul>
+            </div>
+            
+            <div className="text-center pt-4">
+              <p className="text-sm text-muted-foreground mb-4">
+                No campaigns yet? That's okay! Your campaigns will appear here once you're added to one by the program administrators.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Questions? Contact us at <a href="mailto:support@juliesfamilylearning.org" className="text-primary hover:underline">support@juliesfamilylearning.org</a>
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
