@@ -37,9 +37,10 @@ The frontend is a single-page application using `wouter` for routing, TanStack Q
 - **Google Calendar Integration**: OAuth-authenticated integration for appointment scheduling, event registration, and task synchronization.
 - **Kinflo Product Landing Page**: Marketing page showcasing Kinflo's features.
 - **Dynamic Navigation**: Navigation automatically adapts based on available content for current persona/journey.
+- **Passion-Based Donation Campaigns**: Comprehensive AI-powered campaign system using Alex Hormozi's "$100M Leads" frameworks with passion-based donor targeting, multi-channel distribution (email + SMS via SendGrid/Twilio), real-time goal tracking, and filtered testimonial promotion matching donor interests.
 
 ### System Design Choices
-The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage. Role-based access control is implemented with a three-tier system (client, admin, super_admin) and comprehensive audit logging.
+The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage. Authentication entry point: `/api/login` (initiates OIDC flow), callback: `/api/callback`, logout: `/api/logout`. Role-based access control is implemented with a three-tier system (client, admin, super_admin) and comprehensive audit logging.
 
 ## External Dependencies
 
