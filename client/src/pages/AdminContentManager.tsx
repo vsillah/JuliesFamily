@@ -1176,18 +1176,7 @@ export default function AdminContentManager() {
         open={isEditDialogOpen} 
         onOpenChange={(open) => {
           if (!open) {
-            // Check if we have a screenshot before allowing close
-            const hasScreenshot = screenshotFile && screenshotPreview;
-            const hasImage = editingItem?.imageName;
-            if (hasScreenshot && !hasImage) {
-              // Show confirmation and REASSERT dialog open state to keep it mounted
-              setPendingDialogClose('edit');
-              setShowScreenshotConfirm(true);
-              setIsEditDialogOpen(true); // Force dialog to stay open
-              return;
-            }
-            // No screenshot - allow normal close
-            finalizeDialogClose('edit');
+            requestDialogClose('edit');
           }
         }}
       >
@@ -1567,18 +1556,7 @@ export default function AdminContentManager() {
         open={isCreateDialogOpen} 
         onOpenChange={(open) => {
           if (!open) {
-            // Check if we have a screenshot before allowing close
-            const hasScreenshot = screenshotFile && screenshotPreview;
-            const hasImage = newItem.imageName;
-            if (hasScreenshot && !hasImage) {
-              // Show confirmation and REASSERT dialog open state to keep it mounted
-              setPendingDialogClose('create');
-              setShowScreenshotConfirm(true);
-              setIsCreateDialogOpen(true); // Force dialog to stay open
-              return;
-            }
-            // No screenshot - allow normal close
-            finalizeDialogClose('create');
+            requestDialogClose('create');
           }
         }}
       >
