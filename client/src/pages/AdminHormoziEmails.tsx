@@ -24,24 +24,30 @@ export default function AdminHormoziEmails() {
   const [personalizedEmail, setPersonalizedEmail] = useState<any>(null);
   
   // Filters
-  const [personaFilter, setPersonaFilter] = useState<string>("");
-  const [funnelStageFilter, setFunnelStageFilter] = useState<string>("");
-  const [outreachTypeFilter, setOutreachTypeFilter] = useState<string>("");
-  const [templateCategoryFilter, setTemplateCategoryFilter] = useState<string>("");
+  const [personaFilter, setPersonaFilter] = useState<string>("all");
+  const [funnelStageFilter, setFunnelStageFilter] = useState<string>("all");
+  const [outreachTypeFilter, setOutreachTypeFilter] = useState<string>("all");
+  const [templateCategoryFilter, setTemplateCategoryFilter] = useState<string>("all");
+
+  // Build query string for template filters
+  const buildTemplateQueryKey = () => {
+    const params = new URLSearchParams();
+    if (personaFilter !== "all") params.append("persona", personaFilter);
+    if (funnelStageFilter !== "all") params.append("funnelStage", funnelStageFilter);
+    if (outreachTypeFilter !== "all") params.append("outreachType", outreachTypeFilter);
+    if (templateCategoryFilter !== "all") params.append("templateCategory", templateCategoryFilter);
+    const queryString = params.toString();
+    return queryString ? `/api/hormozi-templates?${queryString}` : '/api/hormozi-templates';
+  };
 
   // Fetch Hormozi email templates with filters
   const { data: templates = [], isLoading: templatesLoading } = useQuery<EmailTemplate[]>({
-    queryKey: ['/api/hormozi-templates', { 
-      persona: personaFilter || undefined,
-      funnelStage: funnelStageFilter || undefined,
-      outreachType: outreachTypeFilter || undefined,
-      templateCategory: templateCategoryFilter || undefined,
-    }],
+    queryKey: [buildTemplateQueryKey()],
   });
 
   // Fetch all leads for selection
   const { data: leads = [], isLoading: leadsLoading } = useQuery<Lead[]>({
-    queryKey: ['/api/leads'],
+    queryKey: ['/api/admin/leads'],
   });
 
   // Personalize email mutation
@@ -125,13 +131,13 @@ export default function AdminHormoziEmails() {
   };
 
   const clearFilters = () => {
-    setPersonaFilter("");
-    setFunnelStageFilter("");
-    setOutreachTypeFilter("");
-    setTemplateCategoryFilter("");
+    setPersonaFilter("all");
+    setFunnelStageFilter("all");
+    setOutreachTypeFilter("all");
+    setTemplateCategoryFilter("all");
   };
 
-  const activeFiltersCount = [personaFilter, funnelStageFilter, outreachTypeFilter, templateCategoryFilter].filter(Boolean).length;
+  const activeFiltersCount = [personaFilter, funnelStageFilter, outreachTypeFilter, templateCategoryFilter].filter(f => f !== "all").length;
 
   return (
     <div className="min-h-screen p-6 bg-background">
@@ -192,7 +198,7 @@ export default function AdminHormoziEmails() {
                         <SelectValue placeholder="All Personas" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Personas</SelectItem>
+                        <SelectItem value="all">All Personas</SelectItem>
                         <SelectItem value="student">Adult Student</SelectItem>
                         <SelectItem value="provider">Service Provider</SelectItem>
                         <SelectItem value="parent">Parent</SelectItem>
@@ -209,7 +215,7 @@ export default function AdminHormoziEmails() {
                         <SelectValue placeholder="All Stages" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Stages</SelectItem>
+                        <SelectItem value="all">All Stages</SelectItem>
                         <SelectItem value="awareness">Awareness</SelectItem>
                         <SelectItem value="consideration">Consideration</SelectItem>
                         <SelectItem value="decision">Decision</SelectItem>
@@ -225,7 +231,7 @@ export default function AdminHormoziEmails() {
                         <SelectValue placeholder="All Types" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Types</SelectItem>
+                        <SelectItem value="all">All Types</SelectItem>
                         <SelectItem value="warm_outreach">Warm Outreach</SelectItem>
                         <SelectItem value="cold_outreach">Cold Outreach</SelectItem>
                         <SelectItem value="warm_broadcast">Warm Broadcast</SelectItem>
@@ -241,7 +247,7 @@ export default function AdminHormoziEmails() {
                         <SelectValue placeholder="All Frameworks" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Frameworks</SelectItem>
+                        <SelectItem value="all">All Frameworks</SelectItem>
                         <SelectItem value="a_c_a">A-C-A Framework</SelectItem>
                         <SelectItem value="value_first">Value First</SelectItem>
                         <SelectItem value="social_proof">Social Proof</SelectItem>
@@ -341,9 +347,9 @@ export default function AdminHormoziEmails() {
             <div>
               <Label>Select Lead</Label>
               <Select 
-                value={selectedLead?.id || ""} 
+                value={selectedLead?.id?.toString() || ""} 
                 onValueChange={(value) => {
-                  const lead = leads.find(l => l.id === value);
+                  const lead = leads.find(l => l.id?.toString() === value);
                   setSelectedLead(lead || null);
                   setPersonalizedEmail(null); // Reset personalization when lead changes
                 }}
@@ -352,11 +358,17 @@ export default function AdminHormoziEmails() {
                   <SelectValue placeholder="Choose a lead..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {leads.map((lead) => (
-                    <SelectItem key={lead.id} value={lead.id}>
-                      {lead.firstName} {lead.lastName} ({lead.email}) - {PERSONA_LABELS[lead.persona as Persona]} - {FUNNEL_STAGE_LABELS[lead.funnelStage as FunnelStage]}
-                    </SelectItem>
-                  ))}
+                  {leadsLoading ? (
+                    <div className="p-2 text-center text-sm text-muted-foreground">Loading leads...</div>
+                  ) : leads.length === 0 ? (
+                    <div className="p-2 text-center text-sm text-muted-foreground">No leads available</div>
+                  ) : (
+                    leads.map((lead) => (
+                      <SelectItem key={lead.id} value={lead.id?.toString() || ""}>
+                        {lead.firstName} {lead.lastName} ({lead.email}) - {PERSONA_LABELS[lead.persona as Persona]} - {FUNNEL_STAGE_LABELS[lead.funnelStage as FunnelStage]}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
