@@ -136,6 +136,16 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     ensureStrategy(req.hostname);
+    
+    // Capture and sanitize returnTo parameter
+    const returnTo = req.query.returnTo as string;
+    if (returnTo) {
+      // Security: Only allow same-origin paths (must start with / and not be a protocol)
+      if (returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('://')) {
+        req.session.returnTo = returnTo;
+      }
+    }
+    
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
