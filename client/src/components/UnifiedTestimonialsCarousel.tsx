@@ -191,7 +191,7 @@ export default function UnifiedTestimonialsCarousel({
             <Button
               variant="outline"
               size="icon"
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 hidden sm:flex"
+              className="absolute left-4 top-1/2 -translate-y-1/2 hidden sm:flex z-10"
               onClick={scrollPrev}
               disabled={!canScrollPrev}
               data-testid="carousel-prev-button"
@@ -201,7 +201,7 @@ export default function UnifiedTestimonialsCarousel({
             <Button
               variant="outline"
               size="icon"
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 hidden sm:flex"
+              className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex z-10"
               onClick={scrollNext}
               disabled={!canScrollNext}
               data-testid="carousel-next-button"
