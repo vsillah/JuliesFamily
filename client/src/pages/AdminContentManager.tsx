@@ -39,6 +39,15 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+// Passion options for testimonial targeting
+const PASSION_OPTIONS = [
+  { id: 'literacy', label: 'Literacy & Reading' },
+  { id: 'stem', label: 'STEM & Technology' },
+  { id: 'arts', label: 'Arts & Creativity' },
+  { id: 'nutrition', label: 'Nutrition & Health' },
+  { id: 'community', label: 'Community Building' },
+];
+
 // Sortable Item Component
 function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageUrl }: {
   item: ContentItem;
@@ -1589,6 +1598,43 @@ export default function AdminContentManager() {
                 </>
               )}
               
+              {/* Testimonial specific fields */}
+              {editingItem.type === 'testimonial' && (
+                <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-sm font-semibold">Passion Tags (Optional)</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Tag this testimonial with relevant passions to show it to donors with matching interests.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {PASSION_OPTIONS.map((passion) => (
+                      <div key={passion.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`edit-passion-${passion.id}`}
+                          checked={(editingItem.passionTags as string[] || []).includes(passion.id)}
+                          onCheckedChange={(checked) => {
+                            const currentPassions = (editingItem.passionTags as string[] || []);
+                            const newPassions = checked
+                              ? [...currentPassions, passion.id]
+                              : currentPassions.filter(p => p !== passion.id);
+                            setEditingItem({ ...editingItem, passionTags: newPassions });
+                          }}
+                          data-testid={`checkbox-edit-passion-${passion.id}`}
+                        />
+                        <Label htmlFor={`edit-passion-${passion.id}`} className="text-sm font-normal cursor-pointer">
+                          {passion.label}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center gap-2">
                 <Switch
                   checked={editingItem.isActive ?? true}
@@ -2033,6 +2079,43 @@ export default function AdminContentManager() {
                   />
                 </div>
               </>
+            )}
+            
+            {/* Testimonial specific fields for create */}
+            {activeTab === 'testimonial' && (
+              <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                <div className="flex items-start gap-2">
+                  <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <Label className="text-sm font-semibold">Passion Tags (Optional)</Label>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Tag this testimonial with relevant passions to show it to donors with matching interests.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  {PASSION_OPTIONS.map((passion) => (
+                    <div key={passion.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`create-passion-${passion.id}`}
+                        checked={(newItem.passionTags as string[] || []).includes(passion.id)}
+                        onCheckedChange={(checked) => {
+                          const currentPassions = (newItem.passionTags as string[] || []);
+                          const newPassions = checked
+                            ? [...currentPassions, passion.id]
+                            : currentPassions.filter(p => p !== passion.id);
+                          setNewItem({ ...newItem, passionTags: newPassions });
+                        }}
+                        data-testid={`checkbox-create-passion-${passion.id}`}
+                      />
+                      <Label htmlFor={`create-passion-${passion.id}`} className="text-sm font-normal cursor-pointer">
+                        {passion.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
             
             {/* Multi-select visibility assignment for all content types */}

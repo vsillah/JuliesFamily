@@ -1134,6 +1134,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get testimonials filtered by passion tags (public - for donor targeting)
+  app.get('/api/content/testimonials/by-passions', async (req, res) => {
+    try {
+      const { passions, persona, funnelStage } = req.query;
+      
+      // Get all testimonials (with visibility filtering if persona/funnel provided)
+      let testimonials = await storage.getVisibleContentItems(
+        'testimonial',
+        persona as string | undefined,
+        funnelStage as string | undefined
+      );
+      
+      // Filter by passion tags if provided
+      if (passions) {
+        const passionArray = Array.isArray(passions) ? passions : [passions];
+        testimonials = testimonials.filter(testimonial => {
+          if (!testimonial.passionTags || (testimonial.passionTags as string[]).length === 0) {
+            return false; // Exclude testimonials without passion tags
+          }
+          // Return true if ANY of the requested passions match the testimonial's passion tags
+          return passionArray.some(passion => 
+            (testimonial.passionTags as string[]).includes(passion as string)
+          );
+        });
+      }
+      
+      res.json(testimonials);
+    } catch (error) {
+      console.error("Error fetching filtered testimonials:", error);
+      res.status(500).json({ message: "Failed to fetch filtered testimonials" });
+    }
+  });
+
   // Get visible sections for navigation (public, filtered by persona/funnel)
   app.get('/api/content/visible-sections', async (req, res) => {
     try {

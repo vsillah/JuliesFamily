@@ -308,10 +308,13 @@ export const contentItems = pgTable("content_items", {
   imageUrl: varchar("image_url"), // Object Storage path (new AI-powered naming)
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
+  passionTags: text("passion_tags").array(), // Array of passion tags for targeting (e.g., ['literacy', 'stem', 'arts'])
   metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, etc
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  passionTagsIdx: index("content_items_passion_tags_idx").using("gin", table.passionTags),
+}));
 
 export const insertContentItemSchema = createInsertSchema(contentItems).omit({
   id: true,
