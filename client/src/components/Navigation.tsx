@@ -11,9 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogIn, LogOut, Shield, Camera, Settings } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut, Shield, Camera, Settings, Users } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { AdminPersonaSwitcher } from "@/components/AdminPersonaSwitcher";
 import { useToast } from "@/hooks/use-toast";
@@ -25,6 +26,7 @@ import { useContentAvailability } from "@/hooks/useContentAvailability";
 export default function Navigation() {
   const { persona, setShowPersonaModal } = usePersona();
   const { isAuthenticated, user } = useAuth();
+  const { isAdmin, isSuperAdmin } = useUserRole();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
@@ -236,7 +238,7 @@ export default function Navigation() {
                 </button>
               )}
               
-              {user?.isAdmin && (
+              {isAdmin && (
                 <>
                   <AdminPersonaSwitcher isScrolled={isScrolled} />
                   <Link href="/admin">
@@ -281,7 +283,15 @@ export default function Navigation() {
                       <Camera className="w-4 h-4 mr-2" />
                       Update Photo
                     </DropdownMenuItem>
-                    {user.isAdmin && (
+                    {isSuperAdmin && (
+                      <Link href="/admin/users">
+                        <DropdownMenuItem className="cursor-pointer" data-testid="menu-user-management">
+                          <Users className="w-4 h-4 mr-2" />
+                          User Management
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
+                    {isAdmin && (
                       <Link href="/admin/preferences">
                         <DropdownMenuItem className="cursor-pointer" data-testid="menu-preferences">
                           <Settings className="w-4 h-4 mr-2" />
@@ -476,7 +486,7 @@ export default function Navigation() {
                 Change Experience
               </Button>
             )}
-            {user?.isAdmin && (
+            {isAdmin && (
               <>
                 <div className="w-full flex justify-center">
                   <AdminPersonaSwitcher 
@@ -490,6 +500,14 @@ export default function Navigation() {
                     Admin
                   </Button>
                 </Link>
+                {isSuperAdmin && (
+                  <Link href="/admin/users" onClick={() => setMobileMenuOpen(false)}>
+                    <Button variant="outline" size="lg" data-testid="button-user-management-mobile">
+                      <Users className="w-4 h-4 mr-2" />
+                      User Management
+                    </Button>
+                  </Link>
+                )}
               </>
             )}
             {isAuthenticated ? (
