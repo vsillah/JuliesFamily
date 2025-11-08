@@ -334,9 +334,22 @@ export default function Navigation() {
       </nav>
       {mobileMenuOpen && createPortal(
         <div 
-          className="fixed inset-0 z-[1000] bg-background/95 backdrop-blur-sm md:hidden pt-32"
+          className="fixed inset-0 z-[1000] bg-background/95 backdrop-blur-sm md:hidden"
+          style={{
+            paddingTop: 'max(env(safe-area-inset-top), 1rem)'
+          }}
         >
-          <div className="flex flex-col items-center gap-6 p-8">
+          {/* Close Button - Fixed to top right */}
+          <button
+            onClick={() => setMobileMenuOpen(false)}
+            className="absolute top-4 right-4 p-2 text-foreground hover:text-primary transition-colors z-10"
+            data-testid="button-mobile-menu-close"
+            aria-label="Close menu"
+          >
+            <X size={28} />
+          </button>
+          
+          <div className="flex flex-col items-center gap-6 p-8 pt-16">
             {isAuthenticated && user && (
               <div className="flex flex-col items-center gap-3 mb-4">
                 <span className="text-sm text-foreground">
