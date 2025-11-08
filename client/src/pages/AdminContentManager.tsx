@@ -469,10 +469,9 @@ export default function AdminContentManager() {
     
     // Check if there's a pending screenshot that hasn't been uploaded
     const hasScreenshot = screenshotFile && screenshotPreview;
-    const hasImage = editingItem.imageName;
     
-    if (hasScreenshot && !hasImage) {
-      // Show confirmation to upload screenshot first
+    if (hasScreenshot) {
+      // Show confirmation to upload screenshot (even if there's already an image)
       setPendingDialogClose('edit');
       setShowScreenshotConfirm(true);
       toast({
@@ -518,9 +517,8 @@ export default function AdminContentManager() {
   const handleCreate = () => {
     // Check if there's a pending screenshot that hasn't been uploaded
     const hasScreenshot = screenshotFile && screenshotPreview;
-    const hasImage = newItem.imageName;
     
-    if (hasScreenshot && !hasImage) {
+    if (hasScreenshot) {
       // Show confirmation to upload screenshot first
       setPendingDialogClose('create');
       setShowScreenshotConfirm(true);
@@ -656,11 +654,10 @@ export default function AdminContentManager() {
   };
 
   const requestDialogClose = (dialogType: 'edit' | 'create') => {
-    // Check if we have a screenshot and no image has been selected yet
+    // Check if we have a screenshot that needs confirmation
     const hasScreenshot = screenshotFile && screenshotPreview;
-    const hasExistingImage = dialogType === 'edit' ? editingItem?.imageName : newItem.imageName;
     
-    if (hasScreenshot && !hasExistingImage) {
+    if (hasScreenshot) {
       // Show confirmation and KEEP dialog open by re-asserting the open state
       setPendingDialogClose(dialogType);
       setShowScreenshotConfirm(true);
