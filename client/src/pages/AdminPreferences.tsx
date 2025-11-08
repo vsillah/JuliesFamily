@@ -54,11 +54,8 @@ export default function AdminPreferences() {
   // Update preferences mutation
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<AdminPreferences>) => {
-      return await apiRequest("/api/admin/preferences", {
-        method: "PATCH",
-        body: JSON.stringify(updates),
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await apiRequest("PATCH", "/api/admin/preferences", updates);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/preferences"] });

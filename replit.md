@@ -7,6 +7,30 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
+**November 8, 2025**: Three-tier role-based access control (RBAC) system, comprehensive audit logging, and frontend feature toggles
+- **RBAC Core Implementation**: Migrated from boolean `isAdmin` field to three-tier role system (client, admin, super_admin)
+  - Created `role` enum field in users table with migration from isAdmin to role values
+  - Built security middleware (requireRole, requireAdmin, requireSuperAdmin) for API route protection
+  - Implemented role-based API endpoints: PATCH /api/admin/users/:userId/role (change roles), POST /api/admin/users (create users), DELETE /api/admin/users/:userId (delete users)
+  - Added comprehensive security safeguards: prevent self-demotion, protect last super_admin, validate role values with Zod
+  - **Critical Security Fix**: Removed role acceptance from OIDC claims to prevent privilege escalation - all role assignments now require super_admin approval via User Management interface
+- **User Management Interface**: Full-featured admin page for managing users and roles (super_admin only)
+  - Built AdminUserManagement page at /admin/users with role selector dropdowns, visual badges (Crown/Shield/User icons), confirmation dialogs
+  - Read-only view for regular admins (can view users but not modify roles or delete)
+  - Full access for super_admins (create users, change roles, delete users)
+  - Added "User Management" menu item in navigation dropdown for super_admins only ✓
+- **Comprehensive Audit Logging**: Permanent, tamper-resistant audit trail for all RBAC operations
+  - Created `audit_logs` table with userId, actorId, action (role_changed, user_created, user_deleted), previousRole, newRole, metadata (JSONB)
+  - Foreign keys use SET NULL to preserve audit logs even after user deletion (user emails/names stored in metadata)
+  - Storage methods (createAuditLog, getAuditLogs) with flexible filtering (userId, actorId, action, limit)
+  - GET /api/admin/audit-logs endpoint (admin+ access) for viewing audit history
+  - Automatic audit log creation for all role changes, user creation, and deletion operations ✓
+- **Frontend Role-Based Feature Toggles**: Centralized role checking for conditional UI rendering
+  - Created `useUserRole` hook providing isClient, isAdmin, isSuperAdmin flags plus hasRole() and canAccess() utilities
+  - Updated Navigation component to use role-based checks instead of deprecated isAdmin field
+  - Conditional rendering: AdminPersonaSwitcher (admin+), Admin Dashboard (admin+), User Management (super_admin only), Preferences (admin+)
+  - Consistent behavior across desktop navigation, user dropdown menu, and mobile menu ✓
+
 **November 8, 2025**: Admin preferences system, dynamic navigation, mobile navigation refactoring, persona×journey deep-linking, screenshot workflow, and image loading optimization
 - **Admin Preferences System**: Comprehensive preference management for admin users with granular control over notifications, workflow automation, interface settings, and communication preferences
   - Created `admin_preferences` table with 22 fields covering all preference categories, linked to users table with cascade deletion
