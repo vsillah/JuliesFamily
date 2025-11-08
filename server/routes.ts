@@ -20,6 +20,7 @@ import Stripe from "stripe";
 import * as XLSX from "xlsx";
 import { CalendarService } from "./calendarService";
 import { fromZonedTime } from "date-fns-tz";
+import { seedDemoData } from "./demo-data";
 
 // Extend Express Request to properly type authenticated user
 interface AuthenticatedRequest extends Request {
@@ -4421,6 +4422,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error deleting calendar event:", error);
       res.status(500).json({ 
         message: error.message || "Failed to delete calendar event" 
+      });
+    }
+  });
+
+  // Demo Data Seeding - Generate sample data for demonstration
+  app.post('/api/demo/seed', async (req, res) => {
+    try {
+      const result = await seedDemoData();
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error seeding demo data:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to seed demo data",
+        error: error.toString(),
       });
     }
   });
