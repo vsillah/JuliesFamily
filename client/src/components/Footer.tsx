@@ -38,6 +38,11 @@ export default function Footer() {
                   Events
                 </a>
               </li>
+              <li>
+                <a href="/kinflo" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-kinflo">
+                  Powered by Kinflo
+                </a>
+              </li>
             </ul>
           </div>
 
