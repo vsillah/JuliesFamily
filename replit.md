@@ -6,84 +6,6 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
-## Recent Changes
-**November 8, 2025**: Three-tier role-based access control (RBAC) system, comprehensive audit logging, and frontend feature toggles
-- **RBAC Core Implementation**: Migrated from boolean `isAdmin` field to three-tier role system (client, admin, super_admin)
-  - Created `role` enum field in users table with migration from isAdmin to role values
-  - Built security middleware (requireRole, requireAdmin, requireSuperAdmin) for API route protection
-  - Implemented role-based API endpoints: PATCH /api/admin/users/:userId/role (change roles), POST /api/admin/users (create users), DELETE /api/admin/users/:userId (delete users)
-  - Added comprehensive security safeguards: prevent self-demotion, protect last super_admin, validate role values with Zod
-  - **Critical Security Fix**: Removed role acceptance from OIDC claims to prevent privilege escalation - all role assignments now require super_admin approval via User Management interface
-- **User Management Interface**: Full-featured admin page for managing users and roles (super_admin only)
-  - Built AdminUserManagement page at /admin/users with role selector dropdowns, visual badges (Crown/Shield/User icons), confirmation dialogs
-  - Read-only view for regular admins (can view users but not modify roles or delete)
-  - Full access for super_admins (create users, change roles, delete users)
-  - Added "User Management" menu item in navigation dropdown for super_admins only ✓
-- **Comprehensive Audit Logging**: Permanent, tamper-resistant audit trail for all RBAC operations
-  - Created `audit_logs` table with userId, actorId, action (role_changed, user_created, user_deleted), previousRole, newRole, metadata (JSONB)
-  - Foreign keys use SET NULL to preserve audit logs even after user deletion (user emails/names stored in metadata)
-  - Storage methods (createAuditLog, getAuditLogs) with flexible filtering (userId, actorId, action, limit)
-  - GET /api/admin/audit-logs endpoint (admin+ access) for viewing audit history
-  - Automatic audit log creation for all role changes, user creation, and deletion operations ✓
-- **Frontend Role-Based Feature Toggles**: Centralized role checking for conditional UI rendering
-  - Created `useUserRole` hook providing isClient, isAdmin, isSuperAdmin flags plus hasRole() and canAccess() utilities
-  - Updated Navigation component to use role-based checks instead of deprecated isAdmin field
-  - Conditional rendering: AdminPersonaSwitcher (admin+), Admin Dashboard (admin+), User Management (super_admin only), Preferences (admin+)
-  - Consistent behavior across desktop navigation, user dropdown menu, and mobile menu ✓
-
-**November 8, 2025**: Admin preferences system, dynamic navigation, mobile navigation refactoring, persona×journey deep-linking, screenshot workflow, and image loading optimization
-- **Admin Preferences System**: Comprehensive preference management for admin users with granular control over notifications, workflow automation, interface settings, and communication preferences
-  - Created `admin_preferences` table with 22 fields covering all preference categories, linked to users table with cascade deletion
-  - Implemented full CRUD API endpoints (GET, PATCH) with Zod validation for secure preference updates
-  - Built tabbed AdminPreferences page (`/admin/preferences`) with 4 sections: Notifications, Workflow, Interface, Communication
-  - Added dropdown menu to user avatar in navigation with "Preferences" link for admin users (using shadcn DropdownMenu)
-  - Implemented change detection system - Save button only appears when preferences are modified
-  - Toast notifications for save success/error with automatic preference persistence to database
-  - All interactive elements include data-testid attributes for comprehensive testing coverage
-  - Save and Reset buttons properly disabled during mutation to prevent duplicate submissions ✓
-- **Dynamic Content-Aware Navigation**: Navigation automatically adapts based on available content for current persona/journey combination
-  - Created `useContentAvailability` hook querying `/api/content/visible-sections` endpoint
-  - Navigation conditionally renders links only when content exists for that section
-  - Falls back to showing all links while data loads (prevents navigation flicker)
-  - Desktop, mobile inline, and hamburger menu all respect content availability
-  - 5-minute cache reduces redundant API calls
-  - Events component returns null when no active events, preventing empty sections ✓
-- **Mobile Navigation Simplification**: Consolidated two-row mobile navigation into single-row layout
-  - Removed secondary quick links row for cleaner visual hierarchy
-  - Added inline priority links: Services, Events, Donate (directly visible on nav bar)
-  - Secondary links (Impact, Testimonials, Virtual Tour) accessible via hamburger menu
-  - All tap targets meet WCAG 2.1 Level AAA guidelines (44×44px minimum)
-  - Improved mobile usability while maintaining full navigation access ✓
-- **Cloudinary Image Resolution Pattern**: Implemented server-side image URL resolution across all list-based content
-  - Added `ContentItemWithResolvedImage` type extending ContentItem with optional `resolvedImageUrl` field
-  - Modified storage layer to join `content_items` with `image_assets` table on the `imageName` field
-  - Returns fully-qualified Cloudinary URLs (`cloudinarySecureUrl`) from joined image asset records
-  - Added database index on `image_assets.name` for optimized join performance
-  - Extended pattern to Events, Testimonials, and Social Media carousels
-  - Eliminates N+1 image API queries for list-based content - images arrive pre-resolved with content data
-  - Individual components (Hero, Navigation, CTAs) continue using lazy-loaded pattern for optimal performance
-  - Type-safe implementation with graceful fallback to legacy `useCloudinaryImage` hook when needed ✓
-- **Persona×Journey Deep-Link Feature**: Made persona×journey pills clickable for instant preview access
-  - Pills in ConsolidatedVisibilityBadge (Hero, CTA, Services tabs) now open preview mode in new tab
-  - Click any pill (e.g., "Parent × Awareness") to instantly view site from that perspective
-  - Hover shows ExternalLink icon and tooltip "Click to preview this combination"
-  - Uses sessionStorage ('admin-persona-override', 'admin-funnel-override') for preview mode
-  - One-time page reload applies preview settings, then stabilizes
-  - Eliminates manual preview mode switching for quick content verification ✓
-- **Screenshot Upload Toggle System**: Replaced complex confirmation dialog workflow with simple checkbox toggle
-  - Added "Use screenshot as image" checkbox below screenshot preview in create/edit dialogs
-  - Toggle appears automatically when screenshot is analyzed by AI
-  - When enabled and Save is clicked, screenshot uploads first, then save completes with uploaded image
-  - Extracted save logic into `performSaveEdit(uploadedImageName?)` and `performCreate(uploadedImageName?)` to avoid recursion
-  - Screenshot uploads detected by "screenshot_" name prefix to prevent manual uploads from triggering auto-saves
-  - Fresh image name passed as parameter to avoid stale closure issues
-  - Simple, user-friendly workflow: upload → analyze → toggle → save ✓
-- **Hero Layout Fix**: Added dynamic top padding using `--nav-height` CSS variable to prevent headline text from overlapping with navigation bar
-  - Verified across desktop (252px gap), tablet (236px gap), and mobile (68px gap) viewports
-  - Headlines now appear cleanly below navigation on all screen sizes
-  - Hero gradient fades to transparent at 75% to reveal background image and curved wave
-- **Badge Component**: Added `React.forwardRef` for proper ref forwarding with TooltipTrigger
-
 ## System Architecture
 
 ### UI/UX Decisions
@@ -98,24 +20,25 @@ The frontend is a single-page application using `wouter` for routing, TanStack Q
 - **Content Management System (CMS)**: Full-featured CMS with image management via Cloudinary and universal content visibility controls.
 - **Persona×Journey Matrix Grid**: Visual interface for configuring content visibility across 120 permutations.
 - **A/B Testing System**: Comprehensive platform for testing content, layouts, and messaging with weighted variant assignment and session-based tracking.
-- **User Management System**: Admin interface for managing user accounts and privileges, including creation, deletion, and access control.
-- **Admin Preferences System**: Per-user preference management for admins with notification toggles (leads, tasks, donations, campaigns, events), workflow automation (auto-assign leads, default task due dates, pipeline views), interface customization (landing page, theme, pagination, data density, content filters), and communication settings (daily digest, weekly reports, critical alerts). Accessible via user dropdown menu in navigation.
+- **User Management System**: Admin interface for managing user accounts, roles, and privileges, including a three-tier RBAC system (client, admin, super_admin) with audit logging.
+- **Admin Preferences System**: Per-user preference management for admins covering notifications, workflow, interface, and communication settings.
 - **Google Reviews & Social Media Integration**: Automated display of Google reviews and a carousel for curated social media posts.
-- **AI-Powered Social Media Analysis**: Uses Google Gemini AI to extract metadata from social media screenshots for CMS pre-population.
-- **YouTube Video Integration**: Zero-cost video hosting via YouTube embeds, integrated with content visibility.
+- **AI-Powered Analysis**: Uses Google Gemini AI for social media screenshot analysis and YouTube video thumbnail analysis with automated metadata extraction.
+- **YouTube Video Integration**: Zero-cost video hosting via YouTube embeds.
 - **Expandable Program Detail Dialogs**: Full-screen modals for detailed program information.
 - **Stripe Donation System**: Secure payment processing for one-time donations.
-- **Email Automation System**: Transactional email delivery via SendGrid with template management, webhooks, and AI-powered copywriting.
-- **SMS Notification System**: Twilio-based template SMS messaging with CRUD capabilities, persona targeting, delivery tracking, and AI-powered copywriting.
-- **Task Management System**: Comprehensive task tracking and assignment integrated into the CRM, with a global dashboard and lead-specific views.
-- **Pipeline Management & Analytics**: Kanban board for lead management with drag-and-drop, optimistic updates, and an analytics dashboard for conversion rates and bottlenecks.
-- **AI-Powered Copy Generation System**: Assists in creating high-converting copy using Alex Hormozi's Value Equation framework and Google Gemini AI, with persona-specific templates and A/B testing integration.
-- **Bulk Lead Import System**: Excel-based import for lead data with validation, error reporting, and automated task creation.
-- **Google Calendar Integration**: OAuth-authenticated integration for appointment scheduling, event registration, and task synchronization, with real-time availability and timezone awareness.
-- **Kinflo Product Landing Page**: Marketing page showcasing Kinflo's features as a modular CRM solution for nonprofits.
+- **Email Automation System**: Transactional email delivery via SendGrid with template management and AI-powered copywriting.
+- **SMS Notification System**: Twilio-based template SMS messaging with persona targeting and AI-powered copywriting.
+- **Task Management System**: Comprehensive task tracking and assignment integrated into the CRM.
+- **Pipeline Management & Analytics**: Kanban board for lead management with analytics dashboard.
+- **AI-Powered Copy Generation System**: Assists in creating high-converting copy using Alex Hormozi's Value Equation framework and Google Gemini AI.
+- **Bulk Lead Import System**: Excel-based import for lead data.
+- **Google Calendar Integration**: OAuth-authenticated integration for appointment scheduling, event registration, and task synchronization.
+- **Kinflo Product Landing Page**: Marketing page showcasing Kinflo's features.
+- **Dynamic Navigation**: Navigation automatically adapts based on available content for current persona/journey.
 
 ### System Design Choices
-The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage.
+The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage. Role-based access control is implemented with a three-tier system (client, admin, super_admin) and comprehensive audit logging.
 
 ## External Dependencies
 
@@ -154,3 +77,4 @@ The backend uses Express.js on Node.js with TypeScript, providing RESTful API en
 - Google Gemini AI API
 - Stripe
 - SendGrid
+- Twilio
