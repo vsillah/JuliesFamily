@@ -6,6 +6,14 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+**November 8, 2025**: Fixed screenshot confirmation dialog in AdminContentManager
+- Implemented proper controlled dialog pattern for screenshot upload confirmation
+- Dialog now stays open when user tries to close with pending screenshot
+- AlertDialog shows "Use Screenshot as Image?" confirmation
+- Visibility assignments now properly cleared between edit/create sessions
+- Pattern: Return early from `onOpenChange` without changing state when screenshot exists
+
 ## System Architecture
 
 ### UI/UX Decisions

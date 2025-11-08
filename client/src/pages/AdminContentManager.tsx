@@ -1125,7 +1125,18 @@ export default function AdminContentManager() {
         open={isEditDialogOpen} 
         onOpenChange={(open) => {
           if (!open) {
-            requestDialogClose('edit');
+            // Check if we have a screenshot before allowing close
+            const hasScreenshot = screenshotFile && screenshotPreview;
+            const hasImage = editingItem?.imageName;
+            if (hasScreenshot && !hasImage) {
+              // Show confirmation but DON'T change dialog state - it stays open
+              setPendingDialogClose('edit');
+              setShowScreenshotConfirm(true);
+              // Return without calling setIsEditDialogOpen(false) - dialog stays open
+              return;
+            }
+            // No screenshot - allow normal close
+            finalizeDialogClose('edit');
           }
         }}
       >
@@ -1133,22 +1144,10 @@ export default function AdminContentManager() {
           className="max-w-2xl max-h-[90vh] overflow-y-auto" 
           data-testid="dialog-edit-content"
           onInteractOutside={(e) => {
-            // Prevent closing on outside click if we have a screenshot
-            const hasScreenshot = screenshotFile && screenshotPreview;
-            const hasImage = editingItem?.imageName;
-            if (hasScreenshot && !hasImage) {
-              e.preventDefault();
-              requestDialogClose('edit');
-            }
+            e.preventDefault();
           }}
           onEscapeKeyDown={(e) => {
-            // Prevent closing on escape if we have a screenshot
-            const hasScreenshot = screenshotFile && screenshotPreview;
-            const hasImage = editingItem?.imageName;
-            if (hasScreenshot && !hasImage) {
-              e.preventDefault();
-              requestDialogClose('edit');
-            }
+            e.preventDefault();
           }}
         >
           <DialogHeader>
@@ -1517,9 +1516,18 @@ export default function AdminContentManager() {
         open={isCreateDialogOpen} 
         onOpenChange={(open) => {
           if (!open) {
-            requestDialogClose('create');
-          } else {
-            setIsCreateDialogOpen(true);
+            // Check if we have a screenshot before allowing close
+            const hasScreenshot = screenshotFile && screenshotPreview;
+            const hasImage = newItem.imageName;
+            if (hasScreenshot && !hasImage) {
+              // Show confirmation but DON'T change dialog state - it stays open
+              setPendingDialogClose('create');
+              setShowScreenshotConfirm(true);
+              // Return without calling setIsCreateDialogOpen(false) - dialog stays open
+              return;
+            }
+            // No screenshot - allow normal close
+            finalizeDialogClose('create');
           }
         }}
       >
@@ -1527,22 +1535,10 @@ export default function AdminContentManager() {
           className="max-w-2xl max-h-[90vh] overflow-y-auto" 
           data-testid="dialog-create-content"
           onInteractOutside={(e) => {
-            // Prevent closing on outside click if we have a screenshot
-            const hasScreenshot = screenshotFile && screenshotPreview;
-            const hasImage = newItem.imageName;
-            if (hasScreenshot && !hasImage) {
-              e.preventDefault();
-              requestDialogClose('create');
-            }
+            e.preventDefault();
           }}
           onEscapeKeyDown={(e) => {
-            // Prevent closing on escape if we have a screenshot
-            const hasScreenshot = screenshotFile && screenshotPreview;
-            const hasImage = newItem.imageName;
-            if (hasScreenshot && !hasImage) {
-              e.preventDefault();
-              requestDialogClose('create');
-            }
+            e.preventDefault();
           }}
         >
           <DialogHeader>
