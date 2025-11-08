@@ -399,6 +399,7 @@ export default function AdminContentManager() {
         description: "Content created successfully",
       });
       clearScreenshot();
+      setSelectedLeadMagnetCombos(new Set());
       setIsCreateDialogOpen(false);
       setNewItem({
         type: "service",
@@ -634,10 +635,15 @@ export default function AdminContentManager() {
     const hasExistingImage = dialogType === 'edit' ? editingItem?.imageName : newItem.imageName;
     
     if (hasScreenshot && !hasExistingImage) {
-      // Show confirmation but KEEP dialog open
+      // Show confirmation and KEEP dialog open by re-asserting the open state
       setPendingDialogClose(dialogType);
       setShowScreenshotConfirm(true);
-      // Don't actually close the dialog yet
+      // Re-assert the dialog should stay open while confirmation is shown
+      if (dialogType === 'edit') {
+        setIsEditDialogOpen(true);
+      } else {
+        setIsCreateDialogOpen(true);
+      }
     } else {
       // No screenshot to worry about - close normally
       finalizeDialogClose(dialogType);
@@ -646,6 +652,7 @@ export default function AdminContentManager() {
 
   const finalizeDialogClose = (dialogType: 'edit' | 'create') => {
     clearScreenshot();
+    setSelectedLeadMagnetCombos(new Set());
     if (dialogType === 'edit') {
       setEditingItem(null);
       setIsEditDialogOpen(false);
