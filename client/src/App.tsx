@@ -61,6 +61,7 @@ function Router() {
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />
+      <Route path="/kinflo" component={ProductLanding} />
       <Route path="/comparison" component={ImageComparison} />
       <Route component={NotFound} />
     </Switch>
