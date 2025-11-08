@@ -303,7 +303,8 @@ export const contentItems = pgTable("content_items", {
   type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review'
   title: text("title").notNull(),
   description: text("description"),
-  imageName: varchar("image_name"), // Cloudinary image name
+  imageName: varchar("image_name"), // Cloudinary image name (legacy)
+  imageUrl: varchar("image_url"), // Object Storage path (new AI-powered naming)
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
   metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, etc

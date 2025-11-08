@@ -19,6 +19,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
 import ConsolidatedVisibilityBadge from "@/components/ConsolidatedVisibilityBadge";
+import { ObjectUploader } from "@/components/ObjectUploader";
 import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS, type Persona, type FunnelStage } from "@shared/defaults/personas";
 import {
   DndContext,
@@ -78,10 +79,10 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
             <GripVertical className="w-5 h-5 text-muted-foreground" />
           </div>
 
-          {getImageUrl(item.imageName) && (
+          {getImageUrl(item) && (
             <div className="flex-shrink-0">
               <img
-                src={getImageUrl(item.imageName)!}
+                src={getImageUrl(item)!}
                 alt={item.title}
                 className={`w-24 h-24 object-cover rounded border border-border ${!item.isActive ? "opacity-50" : ""}`}
               />
@@ -308,6 +309,8 @@ export default function AdminContentManager() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [showObjectUploader, setShowObjectUploader] = useState(false);
+  const [currentUploadContext, setCurrentUploadContext] = useState<'new' | 'edit'>('new');
 
   // Load existing persona×journey assignments when editing
   useEffect(() => {
@@ -786,10 +789,47 @@ export default function AdminContentManager() {
     uploadImageMutation.mutate(formData);
   };
 
-  const getImageUrl = (imageName: string | null) => {
-    if (!imageName) return null;
-    const image = images.find(img => img.name === imageName);
-    return image?.cloudinarySecureUrl || null;
+  // Handle Object Storage upload completion (with AI naming)
+  const handleObjectUploadComplete = (uploadToken: string, objectPath?: string) => {
+    if (!objectPath) {
+      toast({
+        title: "Upload failed",
+        description: "No file path returned from upload",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Update the appropriate item with the object storage path
+    if (currentUploadContext === 'edit' && editingItem) {
+      setEditingItem({ ...editingItem, imageUrl: objectPath });
+    } else {
+      setNewItem({ ...newItem, imageUrl: objectPath });
+    }
+
+    setShowObjectUploader(false);
+    
+    toast({
+      title: "Image uploaded",
+      description: "Image has been uploaded with AI-generated filename",
+    });
+  };
+
+  const getImageUrl = (item: ContentItem | null) => {
+    if (!item) return null;
+    
+    // Prefer Object Storage URL (new AI naming system)
+    if (item.imageUrl) {
+      return item.imageUrl;
+    }
+    
+    // Fallback to Cloudinary (legacy)
+    if (item.imageName) {
+      const image = images.find(img => img.name === item.imageName);
+      return image?.cloudinarySecureUrl || null;
+    }
+    
+    return null;
   };
 
   // Drag and drop sensors
@@ -1223,10 +1263,10 @@ export default function AdminContentManager() {
                 <Label>Image</Label>
                 
                 {/* Image Preview */}
-                {getImageUrl(editingItem.imageName) && (
+                {getImageUrl(editingItem) && (
                   <div className="relative inline-block">
                     <img 
-                      src={getImageUrl(editingItem.imageName)!} 
+                      src={getImageUrl(editingItem)!} 
                       alt="Preview"
                       className="w-full max-w-sm h-48 object-cover rounded border border-border"
                     />
@@ -1234,7 +1274,7 @@ export default function AdminContentManager() {
                       size="sm"
                       variant="destructive"
                       className="absolute top-2 right-2"
-                      onClick={() => setEditingItem({ ...editingItem, imageName: null })}
+                      onClick={() => setEditingItem({ ...editingItem, imageName: null, imageUrl: null })}
                     >
                       <X className="w-4 h-4" />
                     </Button>
@@ -1262,7 +1302,7 @@ export default function AdminContentManager() {
                     </Select>
                   </div>
                   
-                  {/* Quick Upload */}
+                  {/* Quick Upload - Legacy Cloudinary */}
                   <div>
                     <Input
                       type="file"
@@ -1280,16 +1320,32 @@ export default function AdminContentManager() {
                       variant="outline"
                       onClick={() => document.getElementById('quick-upload-edit')?.click()}
                       disabled={uploadingImage}
-                      data-testid="button-upload-image-edit"
+                      data-testid="button-upload-image-edit-cloudinary"
                     >
                       {uploadingImage ? (
                         "Uploading..."
                       ) : (
                         <>
                           <Upload className="w-4 h-4 mr-2" />
-                          Upload
+                          Legacy
                         </>
                       )}
+                    </Button>
+                  </div>
+                  
+                  {/* AI-Powered Upload */}
+                  <div>
+                    <Button
+                      type="button"
+                      variant="default"
+                      onClick={() => {
+                        setCurrentUploadContext('edit');
+                        setShowObjectUploader(true);
+                      }}
+                      data-testid="button-upload-image-edit-ai"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-2" />
+                      AI Upload
                     </Button>
                   </div>
                 </div>
@@ -1652,10 +1708,10 @@ export default function AdminContentManager() {
               <Label>Image</Label>
               
               {/* Image Preview */}
-              {getImageUrl(newItem.imageName) && (
+              {getImageUrl(newItem) && (
                 <div className="relative inline-block">
                   <img 
-                    src={getImageUrl(newItem.imageName)!} 
+                    src={getImageUrl(newItem)!} 
                     alt="Preview"
                     className="w-full max-w-sm h-48 object-cover rounded border border-border"
                   />
@@ -1663,7 +1719,7 @@ export default function AdminContentManager() {
                     size="sm"
                     variant="destructive"
                     className="absolute top-2 right-2"
-                    onClick={() => setNewItem({ ...newItem, imageName: "" })}
+                    onClick={() => setNewItem({ ...newItem, imageName: "", imageUrl: "" })}
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -1691,7 +1747,7 @@ export default function AdminContentManager() {
                   </Select>
                 </div>
                 
-                {/* Quick Upload */}
+                {/* Quick Upload - Legacy Cloudinary */}
                 <div>
                   <Input
                     type="file"
@@ -1709,16 +1765,32 @@ export default function AdminContentManager() {
                     variant="outline"
                     onClick={() => document.getElementById('quick-upload-create')?.click()}
                     disabled={uploadingImage}
-                    data-testid="button-upload-image-create"
+                    data-testid="button-upload-image-create-cloudinary"
                   >
                     {uploadingImage ? (
                       "Uploading..."
                     ) : (
                       <>
                         <Upload className="w-4 h-4 mr-2" />
-                        Upload
+                        Legacy
                       </>
                     )}
+                  </Button>
+                </div>
+                
+                {/* AI-Powered Upload */}
+                <div>
+                  <Button
+                    type="button"
+                    variant="default"
+                    onClick={() => {
+                      setCurrentUploadContext('new');
+                      setShowObjectUploader(true);
+                    }}
+                    data-testid="button-upload-image-create-ai"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-2" />
+                    AI Upload
                   </Button>
                 </div>
               </div>
@@ -2022,6 +2094,24 @@ export default function AdminContentManager() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* ObjectUploader Dialog for AI-powered file naming */}
+      {showObjectUploader && (
+        <Dialog open={showObjectUploader} onOpenChange={setShowObjectUploader}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Upload Image with AI Naming</DialogTitle>
+              <DialogDescription>
+                Upload an image and AI will generate a descriptive, SEO-friendly filename
+              </DialogDescription>
+            </DialogHeader>
+            <ObjectUploader
+              onUploadComplete={handleObjectUploadComplete}
+              enableAiNaming={true}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
 
     </div>
   );
