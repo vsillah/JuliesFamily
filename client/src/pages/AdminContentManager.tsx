@@ -654,6 +654,17 @@ export default function AdminContentManager() {
   };
 
   const requestDialogClose = (dialogType: 'edit' | 'create') => {
+    // If screenshot confirmation is already showing, don't show it again
+    if (showScreenshotConfirm) {
+      // Just keep the dialog open and return
+      if (dialogType === 'edit') {
+        setIsEditDialogOpen(true);
+      } else {
+        setIsCreateDialogOpen(true);
+      }
+      return;
+    }
+    
     // Check if we have a screenshot that needs confirmation
     const hasScreenshot = screenshotFile && screenshotPreview;
     
