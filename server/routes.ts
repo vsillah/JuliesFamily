@@ -4429,7 +4429,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Demo Data Seeding - Generate sample data for demonstration
   app.post('/api/demo/seed', async (req, res) => {
     try {
-      const result = await seedDemoData();
+      const { clearExisting = true } = req.body; // Default to clearing existing demo data
+      const result = await seedDemoData(clearExisting);
       res.json(result);
     } catch (error: any) {
       console.error("Error seeding demo data:", error);

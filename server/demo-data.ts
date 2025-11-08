@@ -8,10 +8,23 @@ import {
 } from "../shared/schema";
 import { sql } from "drizzle-orm";
 
-export async function seedDemoData() {
+export async function seedDemoData(clearExisting = false) {
   console.log("🌱 Starting demo data seeding...");
 
   try {
+    // Optionally clear existing demo data
+    if (clearExisting) {
+      console.log("🗑️ Clearing existing demo data...");
+      // Clear in correct order to respect foreign key constraints
+      // Note: We don't delete users because they might have other dependencies (image uploads, etc.)
+      // Instead we'll use onConflictDoNothing() when inserting
+      await db.delete(campaignMembers); // Delete all campaign members
+      await db.delete(donationCampaigns).where(sql`slug LIKE 'demo-%'`);
+      await db.delete(leads).where(sql`email LIKE '%@example.com'`);
+      await db.delete(contentItems).where(sql`type IN ('event', 'testimonial') AND metadata IS NOT NULL`);
+      console.log("✅ Existing demo data cleared");
+    }
+
     // 1. Create sample leads with various personas and passions
     console.log("📝 Creating sample leads...");
     const sampleLeads = [
@@ -98,7 +111,7 @@ export async function seedDemoData() {
     const sampleCampaigns = [
       {
         name: "STEM Summer Program 2025",
-        slug: "stem-summer-2025",
+        slug: "demo-stem-summer-2025",
         description: "Fund hands-on science, technology, engineering, and math activities for 50 students this summer",
         story: "Our STEM Summer Program provides underserved youth with access to cutting-edge technology, robotics workshops, and mentorship from local engineers. Last year, 92% of participants reported increased interest in STEM careers. Your donation directly funds lab materials, field trips to tech companies, and expert instructors.",
         goalAmount: 1500000, // $15,000
@@ -112,7 +125,7 @@ export async function seedDemoData() {
       },
       {
         name: "Literacy Champions Fund",
-        slug: "literacy-champions",
+        slug: "demo-literacy-champions",
         description: "Provide books and reading tutors to help 100 children improve their reading skills",
         story: "Every child deserves the gift of literacy. Our Literacy Champions program pairs struggling readers with trained tutors and provides age-appropriate books to take home. We've helped 200+ children increase reading proficiency by an average of 2 grade levels in just 6 months.",
         goalAmount: 1000000, // $10,000
@@ -126,7 +139,7 @@ export async function seedDemoData() {
       },
       {
         name: "Arts & Creativity Workshop",
-        slug: "arts-creativity-2025",
+        slug: "demo-arts-creativity-2025",
         description: "Bring professional artists to lead painting, music, and theater workshops for our students",
         story: "Art transforms lives. Our Arts & Creativity Workshop introduces children to painting, sculpture, music composition, and theater performance. Many students discover hidden talents and build confidence through creative expression. Professional artists donate their time - we need your help covering materials and space rental.",
         goalAmount: 800000, // $8,000
@@ -140,7 +153,7 @@ export async function seedDemoData() {
       },
       {
         name: "Healthy Meals Initiative",
-        slug: "healthy-meals-2025",
+        slug: "demo-healthy-meals-2025",
         description: "Ensure every child receives nutritious breakfast and lunch during our programs",
         story: "No child should learn on an empty stomach. Our Healthy Meals Initiative provides fresh, nutritious breakfast and lunch to program participants. We work with local farms and nutritionists to create balanced menus that fuel growing bodies and minds. 100% of donations go directly to food costs.",
         goalAmount: 1200000, // $12,000
@@ -230,33 +243,62 @@ export async function seedDemoData() {
     await db.insert(contentItems).values(sampleContent).onConflictDoNothing();
     console.log(`✅ Created ${sampleContent.length} content items`);
 
-    // 4. Link parent leads to campaigns as members
-    console.log("👥 Creating campaign members...");
+    // 4. Create demo users from parent leads and link them to campaigns as members
+    console.log("👥 Creating users and campaign members...");
     const parentLeads = await db.select().from(leads).where(sql`persona = 'parent'`);
-    const campaignMembers_data = [];
+    
+    // First, create or get users for the parent leads
+    const demoUsers = [];
+    for (const parent of parentLeads) {
+      // Try to get existing user
+      const existingUsers = await db.select().from(users).where(sql`email = ${parent.email}`);
+      if (existingUsers.length > 0) {
+        demoUsers.push(existingUsers[0]);
+      } else {
+        // Create new user
+        try {
+          const [newUser] = await db.insert(users).values({
+            email: parent.email,
+            firstName: parent.firstName || "Member",
+            lastName: parent.lastName || "",
+            persona: "parent",
+            role: "client",
+          }).returning();
+          demoUsers.push(newUser);
+        } catch (error) {
+          // If insert fails (e.g., unique constraint), try to get the user again
+          const retryUsers = await db.select().from(users).where(sql`email = ${parent.email}`);
+          if (retryUsers.length > 0) {
+            demoUsers.push(retryUsers[0]);
+          }
+        }
+      }
+    }
 
+    // Now link users to campaigns as members
+    const campaignMembers_data = [];
     for (const campaign of insertedCampaigns) {
-      // Add 1-2 parents as members of each campaign
-      const membersToAdd = parentLeads.slice(0, Math.floor(Math.random() * 2) + 1);
+      // Add 1-2 users as members (beneficiaries) of each campaign
+      const membersToAdd = demoUsers.slice(0, Math.floor(Math.random() * 2) + 1);
       
-      for (const parent of membersToAdd) {
+      for (const user of membersToAdd) {
         campaignMembers_data.push({
           campaignId: campaign.id,
-          email: parent.email,
-          firstName: parent.firstName || "Member",
-          lastName: parent.lastName || "",
-          phone: parent.phone || null,
-          memberType: "parent",
-          receiveEmailNotifications: true,
-          receiveSmsNotifications: parent.phone ? true : false,
-          donorNameVisibility: "first_name_only" as const,
+          userId: user.id,
+          role: "beneficiary", // Parents are beneficiaries whose children benefit from the campaign
+          notifyOnDonation: true,
+          notificationChannels: ["email"],
+          metadata: {
+            relationship: "parent",
+            childName: "Demo Student",
+          },
         });
       }
     }
 
     if (campaignMembers_data.length > 0) {
       await db.insert(campaignMembers).values(campaignMembers_data).onConflictDoNothing();
-      console.log(`✅ Created ${campaignMembers_data.length} campaign member relationships`);
+      console.log(`✅ Created ${demoUsers.length} users and ${campaignMembers_data.length} campaign member relationships`);
     }
 
     console.log("✨ Demo data seeding complete!");
@@ -267,6 +309,7 @@ export async function seedDemoData() {
         leads: sampleLeads.length,
         campaigns: insertedCampaigns.length,
         contentItems: sampleContent.length,
+        users: demoUsers.length,
         campaignMembers: campaignMembers_data.length,
       },
     };
