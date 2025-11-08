@@ -90,7 +90,7 @@ export default function ProductLanding() {
                 The relationship-first CRM for nonprofits
               </h1>
               <p className="text-xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
-                Kinflo personalizes every touchpoint with AI-powered insights, automates your outreach, and helps grow donations by 28% in your first year
+                Launch passion-based donation campaigns, engage donors with AI-powered personalization across 120 unique journeys, and grow giving by 28% in your first year
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button size="lg" className="text-lg" data-testid="button-cta-primary">
@@ -128,11 +128,11 @@ export default function ProductLanding() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                      <TrendingUp className="h-5 w-5 text-accent" />
+                      <Heart className="h-5 w-5 text-accent" />
                     </div>
                     <div>
-                      <p className="font-semibold">Pipeline Analytics</p>
-                      <p className="text-sm text-muted-foreground">Identify bottlenecks instantly</p>
+                      <p className="font-semibold">Donation Campaigns</p>
+                      <p className="text-sm text-muted-foreground">Member dashboards & testimonials</p>
                     </div>
                   </div>
                 </div>
