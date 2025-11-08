@@ -268,6 +268,38 @@ export default function Navigation() {
               )}
             </div>
 
+            {/* Mobile: Inline Priority Links */}
+            <div className="md:hidden flex items-center gap-2 flex-1 justify-end mr-2">
+              <button
+                onClick={() => scrollToSection("services")}
+                className={`text-xs font-medium transition-colors duration-300 px-1.5 ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
+                data-testid="link-services-mobile-inline"
+              >
+                Services
+              </button>
+              <button
+                onClick={() => scrollToSection("events")}
+                className={`text-xs font-medium transition-colors duration-300 px-1.5 ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
+                data-testid="link-events-mobile-inline"
+              >
+                Events
+              </button>
+              <Link href="/donate">
+                <button
+                  className={`text-xs font-semibold transition-colors duration-300 px-1.5 ${
+                    isScrolled ? "text-primary hover:text-primary/80" : "text-white hover:text-white/80"
+                  }`}
+                  data-testid="button-donate-mobile-inline"
+                >
+                  Donate
+                </button>
+              </Link>
+            </div>
+
             {/* Mobile Menu Button */}
             <button
               className={`md:hidden transition-colors duration-300 ${
@@ -277,70 +309,6 @@ export default function Navigation() {
               data-testid="button-mobile-menu"
             >
               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Quick Links Bar - No Scrolling, Evenly Distributed */}
-        <div className={`md:hidden transition-all duration-300 ${
-          isScrolled 
-            ? "bg-background/95 backdrop-blur-md border-b" 
-            : "bg-transparent"
-        }`}>
-          <div className="flex items-center justify-evenly w-full px-1 py-2 gap-0.5">
-            <button
-              onClick={() => scrollToSection("services")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
-                isScrolled ? "text-foreground" : "text-white/95"
-              }`}
-              data-testid="link-services-mobile-quick"
-            >
-              Services
-            </button>
-            <button
-              onClick={() => scrollToSection("impact")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
-                isScrolled ? "text-foreground" : "text-white/95"
-              }`}
-              data-testid="link-impact-mobile-quick"
-            >
-              Impact
-            </button>
-            <button
-              onClick={() => scrollToSection("testimonials")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
-                isScrolled ? "text-foreground" : "text-white/95"
-              }`}
-              data-testid="link-testimonials-mobile-quick"
-            >
-              Testimonials
-            </button>
-            <button
-              onClick={() => scrollToSection("events")}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
-                isScrolled ? "text-foreground" : "text-white/95"
-              }`}
-              data-testid="link-events-mobile-quick"
-            >
-              Events
-            </button>
-            <button
-              onClick={() => window.location.href = "/virtual-tour"}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
-                isScrolled ? "text-foreground" : "text-white/95"
-              }`}
-              data-testid="link-virtual-tour-mobile-quick"
-            >
-              Tour
-            </button>
-            <button
-              onClick={() => window.location.href = "/donate"}
-              className={`flex-1 text-xs font-medium transition-colors duration-300 text-center ${
-                isScrolled ? "text-primary" : "text-white"
-              }`}
-              data-testid="button-donate-mobile-quick"
-            >
-              Donate
             </button>
           </div>
         </div>
