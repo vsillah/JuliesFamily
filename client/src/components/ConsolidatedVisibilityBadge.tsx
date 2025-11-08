@@ -29,13 +29,13 @@ export default function ConsolidatedVisibilityBadge({
     const previewWindow = window.open('/', '_blank');
     
     if (previewWindow) {
-      // Wait for window to load, then set sessionStorage
+      // Wait for window to load, then set sessionStorage (once only to prevent infinite reload)
       previewWindow.addEventListener('load', () => {
         previewWindow.sessionStorage.setItem('admin-persona-override', persona || 'none');
         previewWindow.sessionStorage.setItem('admin-funnel-override', funnelStage || 'none');
         // Reload to apply the preview mode
         previewWindow.location.reload();
-      });
+      }, { once: true });
     }
   };
 
