@@ -14,6 +14,7 @@ interface EventCardProps {
   location?: string;
   description: string;
   imageName: string;
+  resolvedImageUrl?: string | null;
   startTime?: string;
   endTime?: string;
   allowRegistration?: boolean;
@@ -26,19 +27,25 @@ export default function EventCard({
   location, 
   description, 
   imageName, 
+  resolvedImageUrl,
   startTime, 
   endTime,
   allowRegistration = false,
 }: EventCardProps) {
-  const { data: imageAsset, isLoading } = useCloudinaryImage(imageName);
+  const { data: imageAsset, isLoading } = useCloudinaryImage(resolvedImageUrl ? null : imageName);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
-  const imageUrl = imageAsset 
-    ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, {
+  const imageUrl = resolvedImageUrl
+    ? getOptimizedUrl(resolvedImageUrl, {
         width: 800,
         quality: "auto:good",
       })
-    : "";
+    : imageAsset
+      ? getOptimizedUrl(imageAsset.cloudinarySecureUrl, {
+          width: 800,
+          quality: "auto:good",
+        })
+      : "";
 
   // Validate and format date for calendar button (YYYY-MM-DD)
   const parseEventDate = (): string | null => {

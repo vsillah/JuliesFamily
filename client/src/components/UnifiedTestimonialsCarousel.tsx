@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import CloudinaryImage from "./CloudinaryImage";
-import type { ContentItem, GoogleReview } from "@shared/schema";
+import { getOptimizedUrl } from "@/hooks/useCloudinaryImage";
+import type { ContentItemWithResolvedImage, GoogleReview } from "@shared/schema";
 
 interface UnifiedTestimonial {
   id: string;
@@ -14,13 +15,14 @@ interface UnifiedTestimonial {
   name: string;
   imageSrc?: string;
   imageUrl?: string;
+  resolvedImageUrl?: string | null;
   rating: number;
   source: 'cms' | 'google';
   timeDescription?: string;
 }
 
 interface UnifiedTestimonialsCarouselProps {
-  cmsTestimonials: ContentItem[];
+  cmsTestimonials: ContentItemWithResolvedImage[];
   googleReviews: GoogleReview[];
 }
 
@@ -34,6 +36,7 @@ export default function UnifiedTestimonialsCarousel({
     quote: t.description || "",
     name: t.title,
     imageSrc: t.imageName || "",
+    resolvedImageUrl: t.resolvedImageUrl,
     rating: (t.metadata as any)?.rating || 5,
     source: 'cms' as const,
   }));
@@ -135,7 +138,17 @@ export default function UnifiedTestimonialsCarousel({
 
                   {/* Author Info */}
                   <div className="flex items-center gap-4">
-                    {testimonial.source === 'cms' && testimonial.imageSrc ? (
+                    {testimonial.source === 'cms' && testimonial.resolvedImageUrl ? (
+                      <img
+                        src={getOptimizedUrl(testimonial.resolvedImageUrl, {
+                          width: 64,
+                          height: 64,
+                          quality: "auto:good",
+                        })}
+                        alt={testimonial.name}
+                        className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : testimonial.source === 'cms' && testimonial.imageSrc ? (
                       <CloudinaryImage
                         name={testimonial.imageSrc}
                         alt={testimonial.name}

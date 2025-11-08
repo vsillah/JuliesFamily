@@ -1,7 +1,7 @@
 import EventCard from "./EventCard";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useQuery } from "@tanstack/react-query";
-import type { ContentItem } from "@shared/schema";
+import type { ContentItemWithResolvedImage } from "@shared/schema";
 
 const headlineContent: Record<string, { title: string; description: string }> = {
   student: {
@@ -30,7 +30,7 @@ export default function Events() {
   const { persona } = usePersona();
   const headline = headlineContent[persona || "donor"];
   
-  const { data: allEvents = [], isLoading } = useQuery<ContentItem[]>({
+  const { data: allEvents = [], isLoading } = useQuery<ContentItemWithResolvedImage[]>({
     queryKey: ["/api/content/type/event"],
   });
 
@@ -83,6 +83,7 @@ export default function Events() {
               location={(event.metadata as any)?.location}
               description={event.description || ""}
               imageName={event.imageName || ""}
+              resolvedImageUrl={event.resolvedImageUrl}
               startTime={(event.metadata as any)?.startTime}
               endTime={(event.metadata as any)?.endTime}
               allowRegistration={(event.metadata as any)?.allowRegistration || false}

@@ -1,9 +1,9 @@
 import UnifiedTestimonialsCarousel from "./UnifiedTestimonialsCarousel";
 import { useQuery } from "@tanstack/react-query";
-import type { ContentItem, GoogleReview } from "@shared/schema";
+import type { ContentItemWithResolvedImage, GoogleReview } from "@shared/schema";
 
 export default function Testimonials() {
-  const { data: allTestimonials = [], isLoading: loadingCms } = useQuery<ContentItem[]>({
+  const { data: allTestimonials = [], isLoading: loadingCms } = useQuery<ContentItemWithResolvedImage[]>({
     queryKey: ["/api/content/type/testimonial"],
   });
 
