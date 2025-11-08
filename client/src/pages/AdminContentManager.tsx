@@ -369,9 +369,7 @@ export default function AdminContentManager() {
         title: "Success",
         description: "Content updated successfully",
       });
-      clearScreenshot();
-      setEditingItem(null);
-      setIsEditDialogOpen(false);
+      finalizeDialogClose('edit');
     },
     onError: () => {
       toast({
@@ -398,9 +396,7 @@ export default function AdminContentManager() {
         title: "Success",
         description: "Content created successfully",
       });
-      clearScreenshot();
-      setSelectedLeadMagnetCombos(new Set());
-      setIsCreateDialogOpen(false);
+      finalizeDialogClose('create');
       setNewItem({
         type: "service",
         title: "",
@@ -471,6 +467,21 @@ export default function AdminContentManager() {
   const handleSaveEdit = () => {
     if (!editingItem) return;
     
+    // Check if there's a pending screenshot that hasn't been uploaded
+    const hasScreenshot = screenshotFile && screenshotPreview;
+    const hasImage = editingItem.imageName;
+    
+    if (hasScreenshot && !hasImage) {
+      // Show confirmation to upload screenshot first
+      setPendingDialogClose('edit');
+      setShowScreenshotConfirm(true);
+      toast({
+        title: "Screenshot Pending",
+        description: "Please confirm whether to use the screenshot as the image.",
+      });
+      return;
+    }
+    
     let metadata = editingItem.metadata;
     
     if (editingItem.type === 'socialMedia') {
@@ -505,6 +516,21 @@ export default function AdminContentManager() {
   };
 
   const handleCreate = () => {
+    // Check if there's a pending screenshot that hasn't been uploaded
+    const hasScreenshot = screenshotFile && screenshotPreview;
+    const hasImage = newItem.imageName;
+    
+    if (hasScreenshot && !hasImage) {
+      // Show confirmation to upload screenshot first
+      setPendingDialogClose('create');
+      setShowScreenshotConfirm(true);
+      toast({
+        title: "Screenshot Pending",
+        description: "Please confirm whether to use the screenshot as the image.",
+      });
+      return;
+    }
+    
     let itemToCreate = newItem;
     
     if (newItem.type === 'socialMedia') {
@@ -669,11 +695,12 @@ export default function AdminContentManager() {
   const handleScreenshotConfirmAccept = () => {
     if (screenshotFile) {
       handleUploadScreenshot();
+      // After upload completes, the mutation's onSuccess will set the image
+      // Then we can retry the save
     }
     // Close the confirmation dialog but KEEP the edit/create dialog open
-    // The mutation's onSuccess will clear screenshot state and update the image
     setShowScreenshotConfirm(false);
-    setPendingDialogClose(null);
+    // Keep pendingDialogClose so we know to retry save after upload completes
   };
 
   const handleScreenshotConfirmReject = () => {
@@ -708,6 +735,16 @@ export default function AdminContentManager() {
       
       // Clear screenshot state after successful upload
       clearScreenshot();
+      
+      // If there's a pending save, retry it now that we have an image
+      if (pendingDialogClose === 'edit') {
+        setPendingDialogClose(null);
+        // Small delay to ensure state updates
+        setTimeout(() => handleSaveEdit(), 100);
+      } else if (pendingDialogClose === 'create') {
+        setPendingDialogClose(null);
+        setTimeout(() => handleCreate(), 100);
+      }
     },
     onError: (error: any) => {
       toast({
