@@ -4,7 +4,7 @@ import {
   users, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
-  googleReviews, donations, wishlistItems,
+  googleReviews, donations, wishlistItems, donationCampaigns,
   emailTemplates, emailLogs, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
@@ -23,6 +23,7 @@ import {
   type AbTestEvent, type InsertAbTestEvent,
   type GoogleReview, type InsertGoogleReview,
   type Donation, type InsertDonation,
+  type DonationCampaign, type InsertDonationCampaign,
   type WishlistItem, type InsertWishlistItem,
   type EmailTemplate, type InsertEmailTemplate,
   type EmailLog, type InsertEmailLog,
@@ -190,6 +191,7 @@ export interface IStorage {
   updateDonationByStripeId(stripePaymentIntentId: string, updates: Partial<InsertDonation>): Promise<Donation | undefined>;
   getAllDonations(): Promise<Donation[]>;
   getDonationsByLeadId(leadId: string): Promise<Donation[]>;
+  getCampaignDonations(campaignId: string): Promise<Donation[]>;
   
   // Donation Campaign operations
   createDonationCampaign(campaign: InsertDonationCampaign): Promise<DonationCampaign>;
@@ -1268,6 +1270,10 @@ export class DatabaseStorage implements IStorage {
 
   async getDonationsByLeadId(leadId: string): Promise<Donation[]> {
     return await db.select().from(donations).where(eq(donations.leadId, leadId)).orderBy(desc(donations.createdAt));
+  }
+
+  async getCampaignDonations(campaignId: string): Promise<Donation[]> {
+    return await db.select().from(donations).where(eq(donations.campaignId, campaignId)).orderBy(desc(donations.createdAt));
   }
 
   // Donation Campaign operations

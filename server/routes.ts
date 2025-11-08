@@ -3465,6 +3465,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get campaign donations (admin only)
+  app.get('/api/donation-campaigns/:id/donations', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const donations = await storage.getCampaignDonations(id);
+      res.json(donations);
+    } catch (error) {
+      console.error("Error fetching campaign donations:", error);
+      res.status(500).json({ message: "Failed to fetch campaign donations" });
+    }
+  });
+
   // Create donation campaign (admin only)
   app.post('/api/donation-campaigns', isAuthenticated, isAdmin, async (req, res) => {
     try {

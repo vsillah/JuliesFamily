@@ -526,6 +526,16 @@ function CampaignCard({ campaign }: { campaign: DonationCampaign }) {
             </div>
           )}
         </div>
+
+        {/* Dashboard Link */}
+        <div className="pt-2">
+          <Button asChild variant="outline" className="w-full" data-testid={`button-view-dashboard-${campaign.id}`}>
+            <Link href={`/admin/campaigns/${campaign.id}`}>
+              <Target className="w-4 h-4 mr-2" />
+              View Dashboard
+            </Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
