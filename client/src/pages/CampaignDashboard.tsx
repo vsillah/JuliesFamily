@@ -1,16 +1,31 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
-import { ArrowLeft, Target, DollarSign, Users, TrendingUp, Calendar } from "lucide-react";
+import { ArrowLeft, Target, DollarSign, Users, TrendingUp, Calendar, Send } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { useState } from "react";
+import { apiRequest } from "@/lib/queryClient";
 import type { DonationCampaign, Donation } from "@shared/schema";
 
 export default function CampaignDashboard() {
   const [, params] = useRoute("/admin/campaigns/:id");
   const campaignId = params?.id;
+  const { toast } = useToast();
+  const [showSendDialog, setShowSendDialog] = useState(false);
 
   const { data: campaign, isLoading: campaignLoading } = useQuery<DonationCampaign>({
     queryKey: ['/api/donation-campaigns', campaignId],
@@ -30,6 +45,27 @@ export default function CampaignDashboard() {
       return res.json();
     },
     enabled: !!campaignId,
+  });
+
+  const sendCampaignMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest('POST', `/api/donation-campaigns/${campaignId}/send`);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setShowSendDialog(false);
+      toast({
+        title: "Campaign Sent!",
+        description: `Sent to ${data.results.totalMatched} matched donors. Emails: ${data.results.emailsSent} sent, ${data.results.emailsFailed} failed. SMS: ${data.results.smsSent} sent, ${data.results.smsFailed} failed.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Send Failed",
+        description: error.message || "Failed to send campaign",
+      });
+    },
   });
 
   if (campaignLoading || donationsLoading) {
@@ -96,12 +132,24 @@ export default function CampaignDashboard() {
             <p className="text-muted-foreground">{campaign.description}</p>
           </div>
         </div>
-        <Badge 
-          variant={campaign.status === 'active' ? 'default' : 'secondary'}
-          data-testid={`badge-status-${campaign.status}`}
-        >
-          {campaign.status}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge 
+            variant={campaign.status === 'active' ? 'default' : 'secondary'}
+            data-testid={`badge-status-${campaign.status}`}
+          >
+            {campaign.status}
+          </Badge>
+          {campaign.status === 'active' && (
+            <Button 
+              onClick={() => setShowSendDialog(true)}
+              disabled={sendCampaignMutation.isPending}
+              data-testid="button-send-campaign"
+            >
+              <Send className="h-4 w-4 mr-2" />
+              {sendCampaignMutation.isPending ? "Sending..." : "Send Campaign"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Campaign Dates */}
@@ -294,6 +342,34 @@ export default function CampaignDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Send Campaign Confirmation Dialog */}
+      <AlertDialog open={showSendDialog} onOpenChange={setShowSendDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Send Campaign to Matched Donors?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will send personalized {campaign.emailTemplateId ? 'emails' : ''}{campaign.emailTemplateId && campaign.smsTemplateId ? ' and ' : ''}{campaign.smsTemplateId ? 'SMS messages' : ''} to all donors whose passions match this campaign's target passions.
+              <br /><br />
+              <strong>Target Passions:</strong> {campaign.passionTags && campaign.passionTags.length > 0 
+                ? (campaign.passionTags as string[]).join(', ').replace(/_/g, ' ')
+                : 'All donors'}
+              <br /><br />
+              This action cannot be undone. Are you sure you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-send">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => sendCampaignMutation.mutate()}
+              disabled={sendCampaignMutation.isPending}
+              data-testid="button-confirm-send"
+            >
+              {sendCampaignMutation.isPending ? 'Sending...' : 'Send Campaign'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -3517,6 +3517,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send donation campaign (admin only)
+  app.post('/api/donation-campaigns/:id/send', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const campaign = await storage.getDonationCampaign(id);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      if (!campaign.emailTemplateId && !campaign.smsTemplateId) {
+        return res.status(400).json({ message: "Campaign must have at least one communication channel" });
+      }
+      
+      // Find leads with matching passions using array overlap
+      const allLeads = await storage.getAllLeads();
+      const matchedLeads = allLeads.filter(lead => {
+        if (!lead.passions || lead.passions.length === 0) return false;
+        if (!campaign.passionTags || campaign.passionTags.length === 0) return true; // Target all if no passions specified
+        return (lead.passions as string[]).some(passion => 
+          (campaign.passionTags as string[]).includes(passion)
+        );
+      });
+      
+      if (matchedLeads.length === 0) {
+        return res.status(400).json({ message: "No leads match the campaign's target passions" });
+      }
+      
+      // Import personalizers and send functions
+      const { personalizeEmailTemplate } = await import('./emailPersonalizer');
+      const { personalizeSmsTemplate } = await import('./smsPersonalizer');
+      const { sendEmail } = await import('./email');
+      const { sendSMS } = await import('./twilio');
+      
+      const results = {
+        emailsSent: 0,
+        emailsFailed: 0,
+        smsSent: 0,
+        smsFailed: 0,
+        totalMatched: matchedLeads.length
+      };
+      
+      // Send to each matched lead
+      for (const lead of matchedLeads) {
+        // Send email if template specified
+        if (campaign.emailTemplateId && lead.email) {
+          try {
+            const emailTemplate = await storage.getEmailTemplate(campaign.emailTemplateId);
+            if (emailTemplate) {
+              const personalized = await personalizeEmailTemplate({
+                lead,
+                recentInteractions: [],
+                template: emailTemplate,
+                campaignContext: {
+                  campaignName: campaign.name,
+                  campaignDescription: campaign.description,
+                  campaignStory: campaign.story,
+                  goalAmount: campaign.goalAmount / 100,
+                }
+              });
+              
+              const result = await sendEmail(storage, {
+                to: lead.email,
+                toName: lead.name,
+                subject: personalized.subject,
+                html: personalized.body,
+                templateId: emailTemplate.id,
+                metadata: { campaignId: campaign.id, leadId: lead.id }
+              });
+              
+              if (result.success) {
+                results.emailsSent++;
+              } else {
+                results.emailsFailed++;
+              }
+            }
+          } catch (error) {
+            console.error(`Failed to send email to ${lead.email}:`, error);
+            results.emailsFailed++;
+          }
+        }
+        
+        // Send SMS if template specified
+        if (campaign.smsTemplateId && lead.phone) {
+          try {
+            const smsTemplate = await storage.getSmsTemplate(campaign.smsTemplateId);
+            if (smsTemplate) {
+              const personalized = await personalizeSmsTemplate({
+                lead,
+                recentInteractions: [],
+                template: smsTemplate,
+                campaignContext: {
+                  campaignName: campaign.name,
+                  campaignDescription: campaign.description,
+                }
+              });
+              
+              const result = await sendSMS({
+                to: lead.phone,
+                message: personalized.message,
+                templateId: smsTemplate.id,
+                leadId: lead.id,
+                metadata: { campaignId: campaign.id }
+              }, storage);
+              
+              if (result.success) {
+                results.smsSent++;
+              } else {
+                results.smsFailed++;
+              }
+            }
+          } catch (error) {
+            console.error(`Failed to send SMS to ${lead.phone}:`, error);
+            results.smsFailed++;
+          }
+        }
+      }
+      
+      res.json({
+        message: "Campaign sent successfully",
+        results
+      });
+    } catch (error) {
+      console.error("Error sending donation campaign:", error);
+      res.status(500).json({ message: "Failed to send donation campaign" });
+    }
+  });
+
   // Wishlist Items Routes
 
   // Get active wishlist items (public)
