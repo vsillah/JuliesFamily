@@ -213,6 +213,7 @@ export default function AdminContentManager() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("matrix");
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newItem, setNewItem] = useState({
     type: "service",
@@ -368,7 +369,9 @@ export default function AdminContentManager() {
         title: "Success",
         description: "Content updated successfully",
       });
+      clearScreenshot();
       setEditingItem(null);
+      setIsEditDialogOpen(false);
     },
     onError: () => {
       toast({
@@ -395,6 +398,7 @@ export default function AdminContentManager() {
         title: "Success",
         description: "Content created successfully",
       });
+      clearScreenshot();
       setIsCreateDialogOpen(false);
       setNewItem({
         type: "service",
@@ -624,23 +628,29 @@ export default function AdminContentManager() {
     uploadImageMutation.mutate(formData);
   };
 
-  const handleDialogClose = (dialogType: 'edit' | 'create') => {
+  const requestDialogClose = (dialogType: 'edit' | 'create') => {
     // Check if we have a screenshot and no image has been selected yet
     const hasScreenshot = screenshotFile && screenshotPreview;
     const hasExistingImage = dialogType === 'edit' ? editingItem?.imageName : newItem.imageName;
     
     if (hasScreenshot && !hasExistingImage) {
-      // Show confirmation before closing
+      // Show confirmation but KEEP dialog open
       setPendingDialogClose(dialogType);
       setShowScreenshotConfirm(true);
+      // Don't actually close the dialog yet
     } else {
-      // Clear screenshot and close immediately
-      clearScreenshot();
-      if (dialogType === 'edit') {
-        setEditingItem(null);
-      } else {
-        setIsCreateDialogOpen(false);
-      }
+      // No screenshot to worry about - close normally
+      finalizeDialogClose(dialogType);
+    }
+  };
+
+  const finalizeDialogClose = (dialogType: 'edit' | 'create') => {
+    clearScreenshot();
+    if (dialogType === 'edit') {
+      setEditingItem(null);
+      setIsEditDialogOpen(false);
+    } else {
+      setIsCreateDialogOpen(false);
     }
   };
 
@@ -660,14 +670,13 @@ export default function AdminContentManager() {
   };
 
   const handleScreenshotConfirmReject = () => {
-    clearScreenshot();
     setShowScreenshotConfirm(false);
-    if (pendingDialogClose === 'edit') {
-      setEditingItem(null);
-    } else {
-      setIsCreateDialogOpen(false);
-    }
+    const dialogType = pendingDialogClose;
     setPendingDialogClose(null);
+    
+    if (dialogType) {
+      finalizeDialogClose(dialogType);
+    }
   };
 
   const uploadImageMutation = useMutation<ImageAsset, Error, FormData>({
@@ -790,7 +799,10 @@ export default function AdminContentManager() {
                 key={item.id}
                 item={item}
                 onToggleActive={() => toggleActiveMutation.mutate({ id: item.id, isActive: !item.isActive })}
-                onEdit={() => setEditingItem(item)}
+                onEdit={() => {
+                  setEditingItem(item);
+                  setIsEditDialogOpen(true);
+                }}
                 onDelete={() => {
                   if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
                     deleteMutation.mutate(item.id);
@@ -1102,12 +1114,36 @@ export default function AdminContentManager() {
       </div>
 
       {/* Edit Dialog */}
-      <Dialog open={!!editingItem} onOpenChange={(open) => {
-        if (!open) {
-          handleDialogClose('edit');
-        }
-      }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-content">
+      <Dialog 
+        open={isEditDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            requestDialogClose('edit');
+          }
+        }}
+      >
+        <DialogContent 
+          className="max-w-2xl max-h-[90vh] overflow-y-auto" 
+          data-testid="dialog-edit-content"
+          onInteractOutside={(e) => {
+            // Prevent closing on outside click if we have a screenshot
+            const hasScreenshot = screenshotFile && screenshotPreview;
+            const hasImage = editingItem?.imageName;
+            if (hasScreenshot && !hasImage) {
+              e.preventDefault();
+              requestDialogClose('edit');
+            }
+          }}
+          onEscapeKeyDown={(e) => {
+            // Prevent closing on escape if we have a screenshot
+            const hasScreenshot = screenshotFile && screenshotPreview;
+            const hasImage = editingItem?.imageName;
+            if (hasScreenshot && !hasImage) {
+              e.preventDefault();
+              requestDialogClose('edit');
+            }
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Edit Content</DialogTitle>
             <DialogDescription>Make changes to the content item</DialogDescription>
@@ -1457,7 +1493,7 @@ export default function AdminContentManager() {
               </div>
               
               <div className="flex gap-2 justify-end pt-4">
-                <Button variant="outline" onClick={() => handleDialogClose('edit')} data-testid="button-cancel-edit">
+                <Button variant="outline" onClick={() => requestDialogClose('edit')} data-testid="button-cancel-edit">
                   Cancel
                 </Button>
                 <Button onClick={handleSaveEdit} disabled={updateMutation.isPending} data-testid="button-save-edit">
@@ -1470,14 +1506,38 @@ export default function AdminContentManager() {
       </Dialog>
 
       {/* Create Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
-        if (!open) {
-          handleDialogClose('create');
-        } else {
-          setIsCreateDialogOpen(true);
-        }
-      }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-create-content">
+      <Dialog 
+        open={isCreateDialogOpen} 
+        onOpenChange={(open) => {
+          if (!open) {
+            requestDialogClose('create');
+          } else {
+            setIsCreateDialogOpen(true);
+          }
+        }}
+      >
+        <DialogContent 
+          className="max-w-2xl max-h-[90vh] overflow-y-auto" 
+          data-testid="dialog-create-content"
+          onInteractOutside={(e) => {
+            // Prevent closing on outside click if we have a screenshot
+            const hasScreenshot = screenshotFile && screenshotPreview;
+            const hasImage = newItem.imageName;
+            if (hasScreenshot && !hasImage) {
+              e.preventDefault();
+              requestDialogClose('create');
+            }
+          }}
+          onEscapeKeyDown={(e) => {
+            // Prevent closing on escape if we have a screenshot
+            const hasScreenshot = screenshotFile && screenshotPreview;
+            const hasImage = newItem.imageName;
+            if (hasScreenshot && !hasImage) {
+              e.preventDefault();
+              requestDialogClose('create');
+            }
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Create New Content</DialogTitle>
             <DialogDescription>Add a new {activeTab.replace("_", " ")} to your website</DialogDescription>
@@ -1820,7 +1880,7 @@ export default function AdminContentManager() {
             </div>
             
             <div className="flex gap-2 justify-end pt-4">
-              <Button variant="outline" onClick={() => handleDialogClose('create')} data-testid="button-cancel-create">
+              <Button variant="outline" onClick={() => requestDialogClose('create')} data-testid="button-cancel-create">
                 Cancel
               </Button>
               <Button onClick={handleCreate} disabled={createMutation.isPending || !newItem.title} data-testid="button-submit-create">
