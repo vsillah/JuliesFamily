@@ -1,4 +1,7 @@
+import { db } from "./db";
+import { smsTemplates } from "@shared/schema";
 import type { InsertSmsTemplate } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 /**
  * Hormozi SMS Templates - Optimized for SMS brevity and immediacy
@@ -28,7 +31,7 @@ import type { InsertSmsTemplate } from "@shared/schema";
  * - clear_cta: Single, clear action
  */
 
-export const hormoziSmsTemplates: InsertSmsTemplate[] = [
+const hormoziSmsTemplates: InsertSmsTemplate[] = [
   // COLD OUTREACH - A-C-A Framework
   {
     name: "Cold: A-C-A Introduction",
@@ -355,3 +358,53 @@ export const hormoziSmsTemplates: InsertSmsTemplate[] = [
     isActive: true,
   },
 ];
+
+export async function seedHormoziSmsTemplates() {
+  console.log("Starting Hormozi SMS templates seeding...");
+  
+  let insertedCount = 0;
+  let skippedCount = 0;
+  
+  for (const template of hormoziSmsTemplates) {
+    try {
+      // Check if template already exists
+      const [existing] = await db
+        .select()
+        .from(smsTemplates)
+        .where(eq(smsTemplates.name, template.name));
+      
+      if (existing) {
+        console.log(`Template "${template.name}" already exists, skipping...`);
+        skippedCount++;
+        continue;
+      }
+      
+      // Insert the template
+      await db.insert(smsTemplates).values(template);
+      
+      console.log(`✓ Inserted template: ${template.name}`);
+      insertedCount++;
+    } catch (error) {
+      console.error(`Error inserting template "${template.name}":`, error);
+    }
+  }
+  
+  console.log(`\nSeeding complete!`);
+  console.log(`- Inserted: ${insertedCount} templates`);
+  console.log(`- Skipped: ${skippedCount} templates (already exist)`);
+  console.log(`- Total in library: ${hormoziSmsTemplates.length} templates`);
+}
+
+// Allow running this script directly
+const isMainModule = import.meta.url === `file://${process.argv[1]}`;
+if (isMainModule) {
+  seedHormoziSmsTemplates()
+    .then(() => {
+      console.log("\nDone!");
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error("Error seeding templates:", error);
+      process.exit(1);
+    });
+}
