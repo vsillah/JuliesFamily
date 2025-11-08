@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
 import CloudinaryImage from "@/components/CloudinaryImage";
+import { useContentAvailability } from "@/hooks/useContentAvailability";
 
 export default function Navigation() {
   const { persona, setShowPersonaModal } = usePersona();
@@ -21,6 +22,7 @@ export default function Navigation() {
   const [showUploader, setShowUploader] = useState(false);
   const { toast } = useToast();
   const navRef = useState<HTMLElement | null>(null)[0];
+  const { data: visibleSections } = useContentAvailability();
   
   const currentPersonaConfig = personaConfigs.find(p => p.id === persona);
   
@@ -141,42 +143,50 @@ export default function Navigation() {
 
             {/* Center: Primary Navigation */}
             <nav className="hidden md:flex items-center gap-6 flex-1 justify-center">
-              <button
-                onClick={() => scrollToSection("services")}
-                className={`text-sm font-medium transition-colors duration-300 ${
-                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                }`}
-                data-testid="link-services"
-              >
-                Services
-              </button>
-              <button
-                onClick={() => scrollToSection("impact")}
-                className={`text-sm font-medium transition-colors duration-300 ${
-                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                }`}
-                data-testid="link-impact"
-              >
-                Impact
-              </button>
-              <button
-                onClick={() => scrollToSection("testimonials")}
-                className={`text-sm font-medium transition-colors duration-300 ${
-                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                }`}
-                data-testid="link-testimonials"
-              >
-                Testimonials
-              </button>
-              <button
-                onClick={() => scrollToSection("events")}
-                className={`text-sm font-medium transition-colors duration-300 ${
-                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                }`}
-                data-testid="link-events"
-              >
-                Events
-              </button>
+              {visibleSections?.services && (
+                <button
+                  onClick={() => scrollToSection("services")}
+                  className={`text-sm font-medium transition-colors duration-300 ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-services"
+                >
+                  Services
+                </button>
+              )}
+              {visibleSections?.impact && (
+                <button
+                  onClick={() => scrollToSection("impact")}
+                  className={`text-sm font-medium transition-colors duration-300 ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-impact"
+                >
+                  Impact
+                </button>
+              )}
+              {visibleSections?.testimonials && (
+                <button
+                  onClick={() => scrollToSection("testimonials")}
+                  className={`text-sm font-medium transition-colors duration-300 ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-testimonials"
+                >
+                  Testimonials
+                </button>
+              )}
+              {visibleSections?.events && (
+                <button
+                  onClick={() => scrollToSection("events")}
+                  className={`text-sm font-medium transition-colors duration-300 ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-events"
+                >
+                  Events
+                </button>
+              )}
               <Link 
                 href="/virtual-tour"
                 className={`text-sm font-medium transition-colors duration-300 ${
@@ -270,24 +280,28 @@ export default function Navigation() {
 
             {/* Mobile: Inline Priority Links */}
             <div className="md:hidden flex items-center gap-1 flex-1 justify-end mr-1">
-              <button
-                onClick={() => scrollToSection("services")}
-                className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
-                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                }`}
-                data-testid="link-services-mobile-inline"
-              >
-                Services
-              </button>
-              <button
-                onClick={() => scrollToSection("events")}
-                className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
-                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
-                }`}
-                data-testid="link-events-mobile-inline"
-              >
-                Events
-              </button>
+              {visibleSections?.services && (
+                <button
+                  onClick={() => scrollToSection("services")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-services-mobile-inline"
+                >
+                  Services
+                </button>
+              )}
+              {visibleSections?.events && (
+                <button
+                  onClick={() => scrollToSection("events")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-events-mobile-inline"
+                >
+                  Events
+                </button>
+              )}
               <Link href="/donate">
                 <button
                   className={`text-xs font-semibold transition-colors duration-300 px-2 py-3 min-h-[44px] ${
@@ -364,34 +378,42 @@ export default function Navigation() {
                 Viewing as: {currentPersonaConfig.label}
               </Badge>
             )}
-            <button
-              onClick={() => scrollToSection("services")}
-              className="text-lg text-foreground hover:text-primary transition-colors"
-              data-testid="link-services-mobile"
-            >
-              Our Services
-            </button>
-            <button
-              onClick={() => scrollToSection("impact")}
-              className="text-lg text-foreground hover:text-primary transition-colors"
-              data-testid="link-impact-mobile"
-            >
-              Our Impact
-            </button>
-            <button
-              onClick={() => scrollToSection("testimonials")}
-              className="text-lg text-foreground hover:text-primary transition-colors"
-              data-testid="link-testimonials-mobile"
-            >
-              Testimonials
-            </button>
-            <button
-              onClick={() => scrollToSection("events")}
-              className="text-lg text-foreground hover:text-primary transition-colors"
-              data-testid="link-events-mobile"
-            >
-              Events
-            </button>
+            {visibleSections?.services && (
+              <button
+                onClick={() => scrollToSection("services")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-services-mobile"
+              >
+                Our Services
+              </button>
+            )}
+            {visibleSections?.impact && (
+              <button
+                onClick={() => scrollToSection("impact")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-impact-mobile"
+              >
+                Our Impact
+              </button>
+            )}
+            {visibleSections?.testimonials && (
+              <button
+                onClick={() => scrollToSection("testimonials")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-testimonials-mobile"
+              >
+                Testimonials
+              </button>
+            )}
+            {visibleSections?.events && (
+              <button
+                onClick={() => scrollToSection("events")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-events-mobile"
+              >
+                Events
+              </button>
+            )}
             <Link 
               href="/virtual-tour"
               onClick={() => setMobileMenuOpen(false)}
