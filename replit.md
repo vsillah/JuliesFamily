@@ -7,7 +7,14 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-**November 8, 2025**: Added persona×journey deep-linking and simplified screenshot workflow
+**November 8, 2025**: Added persona×journey deep-linking, simplified screenshot workflow, and fixed image loading
+- **Cloudinary Image Resolution Pattern**: Implemented server-side image URL resolution to fix broken social media carousel images
+  - Added `ContentItemWithResolvedImage` type extending ContentItem with optional `resolvedImageUrl` field
+  - Modified storage layer to join `content_items` with `image_assets` table on the `imageName` field
+  - Returns fully-qualified Cloudinary URLs (`cloudinarySecureUrl`) from joined image asset records
+  - Added database index on `image_assets.name` for optimized join performance
+  - Updated SocialMediaCarousel to use type-safe `resolvedImageUrl` with fallback to manual URL construction
+  - Eliminates client-side guessing of image paths/extensions and prevents 404 errors ✓
 - **Persona×Journey Deep-Link Feature**: Made persona×journey pills clickable for instant preview access
   - Pills in ConsolidatedVisibilityBadge (Hero, CTA, Services tabs) now open preview mode in new tab
   - Click any pill (e.g., "Parent × Awareness") to instantly view site from that perspective
