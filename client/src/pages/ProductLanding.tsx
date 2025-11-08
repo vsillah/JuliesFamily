@@ -186,7 +186,7 @@ export default function ProductLanding() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
             <Card className="hover-elevate">
               <CardHeader>
                 <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
@@ -232,7 +232,28 @@ export default function ProductLanding() {
             <Card className="hover-elevate">
               <CardHeader>
                 <div className="h-12 w-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4">
-                  <Target className="h-6 w-6 text-accent" />
+                  <Heart className="h-6 w-6 text-accent" />
+                </div>
+                <CardTitle>Passion-Based Donation Campaigns</CardTitle>
+                <CardDescription>
+                  Multi-channel fundraising with member dashboards
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Create targeted campaigns by passion tags, notify members (parents, students) of donations in real-time, track progress, and enable beneficiaries to submit thank-you testimonials to donors.
+                </p>
+                <div className="mt-4 flex items-center text-sm text-primary">
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Most CRMs charge $500+/year for fundraising
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="hover-elevate">
+              <CardHeader>
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                  <Target className="h-6 w-6 text-primary" />
                 </div>
                 <CardTitle>Built-in A/B Testing</CardTitle>
                 <CardDescription>
@@ -254,6 +275,16 @@ export default function ProductLanding() {
           {/* All Features Grid */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
+              {
+                icon: Heart,
+                title: "Donation Campaign Management",
+                description: "Passion-based targeting, goal tracking, real-time progress updates",
+              },
+              {
+                icon: Users,
+                title: "Campaign Member Dashboards",
+                description: "Parents & students track donations, opt-in to notifications, submit testimonials",
+              },
               {
                 icon: Calendar,
                 title: "Google Calendar Integration",
@@ -320,6 +351,9 @@ export default function ProductLanding() {
               <tbody>
                 {[
                   { feature: "Website Builder Included", us: true, b: false, n: true, d: false },
+                  { feature: "Donation Campaign Management", us: true, b: true, n: true, d: true },
+                  { feature: "Campaign Member Dashboards", us: true, b: false, n: false, d: false },
+                  { feature: "Passion-Based Donor Targeting", us: true, b: false, n: false, d: false },
                   { feature: "Persona-Based Personalization", us: true, b: false, n: false, d: false },
                   { feature: "Built-in A/B Testing", us: true, b: false, n: false, d: false },
                   { feature: "AI Copy Generation", us: true, b: true, n: false, d: false },
