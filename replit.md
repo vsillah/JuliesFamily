@@ -7,7 +7,16 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
-**November 8, 2025**: Dynamic navigation, mobile navigation refactoring, persona×journey deep-linking, screenshot workflow, and image loading optimization
+**November 8, 2025**: Admin preferences system, dynamic navigation, mobile navigation refactoring, persona×journey deep-linking, screenshot workflow, and image loading optimization
+- **Admin Preferences System**: Comprehensive preference management for admin users with granular control over notifications, workflow automation, interface settings, and communication preferences
+  - Created `admin_preferences` table with 22 fields covering all preference categories, linked to users table with cascade deletion
+  - Implemented full CRUD API endpoints (GET, PATCH) with Zod validation for secure preference updates
+  - Built tabbed AdminPreferences page (`/admin/preferences`) with 4 sections: Notifications, Workflow, Interface, Communication
+  - Added dropdown menu to user avatar in navigation with "Preferences" link for admin users (using shadcn DropdownMenu)
+  - Implemented change detection system - Save button only appears when preferences are modified
+  - Toast notifications for save success/error with automatic preference persistence to database
+  - All interactive elements include data-testid attributes for comprehensive testing coverage
+  - Save and Reset buttons properly disabled during mutation to prevent duplicate submissions ✓
 - **Dynamic Content-Aware Navigation**: Navigation automatically adapts based on available content for current persona/journey combination
   - Created `useContentAvailability` hook querying `/api/content/visible-sections` endpoint
   - Navigation conditionally renders links only when content exists for that section
@@ -66,6 +75,7 @@ The frontend is a single-page application using `wouter` for routing, TanStack Q
 - **Persona×Journey Matrix Grid**: Visual interface for configuring content visibility across 120 permutations.
 - **A/B Testing System**: Comprehensive platform for testing content, layouts, and messaging with weighted variant assignment and session-based tracking.
 - **User Management System**: Admin interface for managing user accounts and privileges, including creation, deletion, and access control.
+- **Admin Preferences System**: Per-user preference management for admins with notification toggles (leads, tasks, donations, campaigns, events), workflow automation (auto-assign leads, default task due dates, pipeline views), interface customization (landing page, theme, pagination, data density, content filters), and communication settings (daily digest, weekly reports, critical alerts). Accessible via user dropdown menu in navigation.
 - **Google Reviews & Social Media Integration**: Automated display of Google reviews and a carousel for curated social media posts.
 - **AI-Powered Social Media Analysis**: Uses Google Gemini AI to extract metadata from social media screenshots for CMS pre-population.
 - **YouTube Video Integration**: Zero-cost video hosting via YouTube embeds, integrated with content visibility.

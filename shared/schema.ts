@@ -33,6 +33,51 @@ export const users = pgTable("users", {
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Admin Preferences - stores admin user preferences for notifications, workflow, interface, and communication
+export const adminPreferences = pgTable("admin_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  
+  // Notification Preferences
+  newLeadAlerts: boolean("new_lead_alerts").default(true),
+  taskAssignmentAlerts: boolean("task_assignment_alerts").default(true),
+  taskCompletionAlerts: boolean("task_completion_alerts").default(true),
+  donationAlerts: boolean("donation_alerts").default(true),
+  emailCampaignAlerts: boolean("email_campaign_alerts").default(false),
+  calendarEventReminders: boolean("calendar_event_reminders").default(true),
+  notificationChannels: jsonb("notification_channels").default(['email']), // email, sms, in-app
+  
+  // Workflow Preferences
+  autoAssignNewLeads: boolean("auto_assign_new_leads").default(false),
+  defaultTaskDueDateOffset: integer("default_task_due_date_offset").default(3), // days
+  defaultLeadSource: varchar("default_lead_source"),
+  defaultLeadStatus: varchar("default_lead_status").default('new_lead'),
+  preferredPipelineView: varchar("preferred_pipeline_view").default('kanban'), // kanban, list, table
+  
+  // Interface Preferences
+  defaultLandingPage: varchar("default_landing_page").default('/admin'),
+  theme: varchar("theme").default('system'), // light, dark, system
+  itemsPerPage: integer("items_per_page").default(25),
+  dataDensity: varchar("data_density").default('comfortable'), // compact, comfortable, spacious
+  defaultContentFilter: varchar("default_content_filter").default('all'), // all, or specific persona
+  
+  // Communication Preferences
+  dailyDigestEnabled: boolean("daily_digest_enabled").default(false),
+  weeklyReportEnabled: boolean("weekly_report_enabled").default(true),
+  criticalAlertsOnly: boolean("critical_alerts_only").default(false),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAdminPreferencesSchema = createInsertSchema(adminPreferences).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAdminPreferences = z.infer<typeof insertAdminPreferencesSchema>;
+export type AdminPreferences = typeof adminPreferences.$inferSelect;
+
 // CRM Leads table
 export const leads = pgTable("leads", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

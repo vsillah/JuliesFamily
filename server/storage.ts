@@ -8,6 +8,7 @@ import {
   emailTemplates, emailLogs, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
+  adminPreferences,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -34,7 +35,8 @@ import {
   type PipelineStage, type InsertPipelineStage,
   type LeadAssignment, type InsertLeadAssignment,
   type Task, type InsertTask,
-  type PipelineHistory, type InsertPipelineHistory
+  type PipelineHistory, type InsertPipelineHistory,
+  type AdminPreferences, type InsertAdminPreferences
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -49,6 +51,12 @@ export interface IStorage {
   updateUser(id: string, updates: Partial<UpsertUser>): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
   deleteUser(id: string): Promise<void>;
+  
+  // Admin Preferences operations
+  getAdminPreferences(userId: string): Promise<AdminPreferences | undefined>;
+  upsertAdminPreferences(userId: string, preferences: Partial<InsertAdminPreferences>): Promise<AdminPreferences>;
+  updateAdminPreferences(userId: string, updates: Partial<InsertAdminPreferences>): Promise<AdminPreferences | undefined>;
+  deleteAdminPreferences(userId: string): Promise<void>;
   
   // CRM Lead operations
   createLead(lead: InsertLead): Promise<Lead>;
@@ -333,6 +341,49 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: string): Promise<void> {
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  // Admin Preferences operations
+  async getAdminPreferences(userId: string): Promise<AdminPreferences | undefined> {
+    const [preferences] = await db
+      .select()
+      .from(adminPreferences)
+      .where(eq(adminPreferences.userId, userId));
+    return preferences;
+  }
+
+  async upsertAdminPreferences(userId: string, preferencesData: Partial<InsertAdminPreferences>): Promise<AdminPreferences> {
+    const existing = await this.getAdminPreferences(userId);
+    
+    if (existing) {
+      // Update existing preferences
+      const [updated] = await db
+        .update(adminPreferences)
+        .set({ ...preferencesData, updatedAt: new Date() })
+        .where(eq(adminPreferences.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      // Create new preferences with defaults
+      const [created] = await db
+        .insert(adminPreferences)
+        .values({ userId, ...preferencesData })
+        .returning();
+      return created;
+    }
+  }
+
+  async updateAdminPreferences(userId: string, updates: Partial<InsertAdminPreferences>): Promise<AdminPreferences | undefined> {
+    const [preferences] = await db
+      .update(adminPreferences)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(adminPreferences.userId, userId))
+      .returning();
+    return preferences;
+  }
+
+  async deleteAdminPreferences(userId: string): Promise<void> {
+    await db.delete(adminPreferences).where(eq(adminPreferences.userId, userId));
   }
 
   // Lead operations

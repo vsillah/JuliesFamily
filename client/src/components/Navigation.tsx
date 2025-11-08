@@ -3,7 +3,15 @@ import { createPortal } from "react-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Menu, X, User, LogIn, LogOut, Shield, Camera } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, X, User, LogIn, LogOut, Shield, Camera, Settings } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
 import { ObjectUploader } from "@/components/ObjectUploader";
@@ -245,35 +253,53 @@ export default function Navigation() {
               )}
               
               {isAuthenticated && user ? (
-                <>
-                  <div className="relative group">
-                    <Avatar 
-                      className="cursor-pointer h-9 w-9 border-2 border-transparent group-hover:border-primary transition-colors"
-                      onClick={() => setShowUploader(true)}
-                      data-testid="button-profile-photo"
-                      title={`${user.firstName || "User"} - Click to update photo`}
-                    >
-                      {user.profileImageUrl ? (
-                        <AvatarImage src={user.profileImageUrl} alt={`${user.firstName} ${user.lastName}`} />
-                      ) : null}
-                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                        {getUserInitials()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Camera className="w-3 h-3 text-primary" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div className="relative group cursor-pointer">
+                      <Avatar 
+                        className="h-9 w-9 border-2 border-transparent group-hover:border-primary transition-colors"
+                        data-testid="button-profile-menu"
+                      >
+                        {user.profileImageUrl ? (
+                          <AvatarImage src={user.profileImageUrl} alt={`${user.firstName} ${user.lastName}`} />
+                        ) : null}
+                        <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                          {getUserInitials()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="absolute -bottom-1 -right-1 bg-background rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <User className="w-3 h-3 text-primary" />
+                      </div>
                     </div>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => window.location.href = '/api/logout'}
-                    data-testid="button-logout"
-                    className={isScrolled ? "" : "text-white hover:bg-white/10"}
-                  >
-                    <LogOut className="w-4 h-4" />
-                  </Button>
-                </>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      {user.firstName} {user.lastName}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => setShowUploader(true)} data-testid="menu-update-photo">
+                      <Camera className="w-4 h-4 mr-2" />
+                      Update Photo
+                    </DropdownMenuItem>
+                    {user.isAdmin && (
+                      <Link href="/admin/preferences">
+                        <DropdownMenuItem className="cursor-pointer" data-testid="menu-preferences">
+                          <Settings className="w-4 h-4 mr-2" />
+                          Preferences
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => window.location.href = '/api/logout'}
+                      data-testid="menu-logout"
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Log Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               ) : (
                 <Button 
                   variant="outline" 

@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, pipelineHistory, type User } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, pipelineHistory, type User } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -175,6 +175,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting user:", error);
       res.status(500).json({ message: "Failed to delete user" });
+    }
+  });
+
+  // Admin Preferences Routes
+  app.get('/api/admin/preferences', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      let preferences = await storage.getAdminPreferences(currentUser.id);
+      
+      // If no preferences exist, create defaults
+      if (!preferences) {
+        preferences = await storage.upsertAdminPreferences(currentUser.id, {});
+      }
+      
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error fetching admin preferences:", error);
+      res.status(500).json({ message: "Failed to fetch admin preferences" });
+    }
+  });
+
+  app.patch('/api/admin/preferences', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Validate request body using Zod schema
+      const validationResult = insertAdminPreferencesSchema.partial().safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid preference data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const updates = validationResult.data;
+      const updatedPreferences = await storage.upsertAdminPreferences(currentUser.id, updates);
+      
+      res.json(updatedPreferences);
+    } catch (error) {
+      console.error("Error updating admin preferences:", error);
+      res.status(500).json({ message: "Failed to update admin preferences" });
+    }
+  });
+
+  app.get('/api/admin/preferences/defaults', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      // Return the default preference structure for reference
+      const defaults = {
+        // Notification Preferences
+        newLeadAlerts: true,
+        taskAssignmentAlerts: true,
+        taskCompletionAlerts: true,
+        donationAlerts: true,
+        emailCampaignAlerts: false,
+        calendarEventReminders: true,
+        notificationChannels: ['email'],
+        
+        // Workflow Preferences
+        autoAssignNewLeads: false,
+        defaultTaskDueDateOffset: 3,
+        defaultLeadSource: null,
+        defaultLeadStatus: 'new_lead',
+        preferredPipelineView: 'kanban',
+        
+        // Interface Preferences
+        defaultLandingPage: '/admin',
+        theme: 'system',
+        itemsPerPage: 25,
+        dataDensity: 'comfortable',
+        defaultContentFilter: 'all',
+        
+        // Communication Preferences
+        dailyDigestEnabled: false,
+        weeklyReportEnabled: true,
+        criticalAlertsOnly: false,
+      };
+      
+      res.json(defaults);
+    } catch (error) {
+      console.error("Error fetching default preferences:", error);
+      res.status(500).json({ message: "Failed to fetch default preferences" });
     }
   });
 
