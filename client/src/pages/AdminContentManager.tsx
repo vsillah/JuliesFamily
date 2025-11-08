@@ -232,6 +232,7 @@ export default function AdminContentManager() {
   const [showScreenshotConfirm, setShowScreenshotConfirm] = useState(false);
   const [pendingDialogClose, setPendingDialogClose] = useState<'edit' | 'create' | null>(null);
   const isShowingConfirmationRef = useRef(false);
+  const pendingScreenshotActionRef = useRef<'create' | 'edit' | null>(null);
   
   // Multi-select state for lead magnet visibility
   const [selectedLeadMagnetCombos, setSelectedLeadMagnetCombos] = useState<Set<string>>(new Set());
@@ -474,7 +475,7 @@ export default function AdminContentManager() {
     if (hasScreenshot) {
       // Show confirmation to upload screenshot (even if there's already an image)
       isShowingConfirmationRef.current = true;
-      setPendingDialogClose('edit');
+      pendingScreenshotActionRef.current = 'edit'; // Remember which action to retry
       setShowScreenshotConfirm(true);
       toast({
         title: "Screenshot Pending",
@@ -523,7 +524,7 @@ export default function AdminContentManager() {
     if (hasScreenshot) {
       // Show confirmation to upload screenshot first
       isShowingConfirmationRef.current = true;
-      setPendingDialogClose('create');
+      pendingScreenshotActionRef.current = 'create'; // Remember which action to retry
       setShowScreenshotConfirm(true);
       toast({
         title: "Screenshot Pending",
@@ -657,8 +658,8 @@ export default function AdminContentManager() {
   };
 
   const requestDialogClose = (dialogType: 'edit' | 'create') => {
-    // If screenshot confirmation is already showing OR already pending for this dialog, don't show it again
-    if (isShowingConfirmationRef.current || pendingDialogClose === dialogType) {
+    // If screenshot confirmation is already showing, just keep the dialog open
+    if (isShowingConfirmationRef.current) {
       // Just keep the dialog open and return
       if (dialogType === 'edit') {
         setIsEditDialogOpen(true);
@@ -674,7 +675,7 @@ export default function AdminContentManager() {
     if (hasScreenshot) {
       // Show confirmation and KEEP dialog open by re-asserting the open state
       isShowingConfirmationRef.current = true;
-      setPendingDialogClose(dialogType);
+      pendingScreenshotActionRef.current = dialogType; // Remember which action to retry
       setShowScreenshotConfirm(true);
       // Re-assert the dialog should stay open while confirmation is shown
       if (dialogType === 'edit') {
@@ -707,20 +708,19 @@ export default function AdminContentManager() {
   const handleScreenshotConfirmAccept = () => {
     if (screenshotFile) {
       handleUploadScreenshot();
-      // After upload completes, the mutation's onSuccess will set the image
-      // Then we can retry the save
+      // After upload completes, the mutation's onSuccess will retry the action
+      // using pendingScreenshotActionRef to determine which handler to call
     }
     // Close the confirmation dialog but KEEP the edit/create dialog open
     isShowingConfirmationRef.current = false;
     setShowScreenshotConfirm(false);
-    // Keep pendingDialogClose so we know to retry save after upload completes
   };
 
   const handleScreenshotConfirmReject = () => {
     isShowingConfirmationRef.current = false;
     setShowScreenshotConfirm(false);
-    const dialogType = pendingDialogClose;
-    setPendingDialogClose(null);
+    const dialogType = pendingScreenshotActionRef.current;
+    pendingScreenshotActionRef.current = null;
     
     if (dialogType) {
       finalizeDialogClose(dialogType);
@@ -751,12 +751,12 @@ export default function AdminContentManager() {
       clearScreenshot();
       
       // If there's a pending save, retry it now that we have an image
-      if (pendingDialogClose === 'edit') {
-        setPendingDialogClose(null);
+      if (pendingScreenshotActionRef.current === 'edit') {
+        pendingScreenshotActionRef.current = null;
         // Small delay to ensure state updates
         setTimeout(() => handleSaveEdit(), 100);
-      } else if (pendingDialogClose === 'create') {
-        setPendingDialogClose(null);
+      } else if (pendingScreenshotActionRef.current === 'create') {
+        pendingScreenshotActionRef.current = null;
         setTimeout(() => handleCreate(), 100);
       }
     },
