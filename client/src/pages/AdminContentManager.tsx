@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { ContentItem, ImageAsset, ContentVisibility, AbTest, GoogleReview } from "@shared/schema";
@@ -231,6 +231,7 @@ export default function AdminContentManager() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [showScreenshotConfirm, setShowScreenshotConfirm] = useState(false);
   const [pendingDialogClose, setPendingDialogClose] = useState<'edit' | 'create' | null>(null);
+  const isShowingConfirmationRef = useRef(false);
   
   // Multi-select state for lead magnet visibility
   const [selectedLeadMagnetCombos, setSelectedLeadMagnetCombos] = useState<Set<string>>(new Set());
@@ -472,6 +473,7 @@ export default function AdminContentManager() {
     
     if (hasScreenshot) {
       // Show confirmation to upload screenshot (even if there's already an image)
+      isShowingConfirmationRef.current = true;
       setPendingDialogClose('edit');
       setShowScreenshotConfirm(true);
       toast({
@@ -520,6 +522,7 @@ export default function AdminContentManager() {
     
     if (hasScreenshot) {
       // Show confirmation to upload screenshot first
+      isShowingConfirmationRef.current = true;
       setPendingDialogClose('create');
       setShowScreenshotConfirm(true);
       toast({
@@ -654,8 +657,8 @@ export default function AdminContentManager() {
   };
 
   const requestDialogClose = (dialogType: 'edit' | 'create') => {
-    // If screenshot confirmation is already showing, don't show it again
-    if (showScreenshotConfirm) {
+    // If screenshot confirmation is already showing, don't show it again (check ref for synchronous check)
+    if (isShowingConfirmationRef.current) {
       // Just keep the dialog open and return
       if (dialogType === 'edit') {
         setIsEditDialogOpen(true);
@@ -670,6 +673,7 @@ export default function AdminContentManager() {
     
     if (hasScreenshot) {
       // Show confirmation and KEEP dialog open by re-asserting the open state
+      isShowingConfirmationRef.current = true;
       setPendingDialogClose(dialogType);
       setShowScreenshotConfirm(true);
       // Re-assert the dialog should stay open while confirmation is shown
@@ -707,11 +711,13 @@ export default function AdminContentManager() {
       // Then we can retry the save
     }
     // Close the confirmation dialog but KEEP the edit/create dialog open
+    isShowingConfirmationRef.current = false;
     setShowScreenshotConfirm(false);
     // Keep pendingDialogClose so we know to retry save after upload completes
   };
 
   const handleScreenshotConfirmReject = () => {
+    isShowingConfirmationRef.current = false;
     setShowScreenshotConfirm(false);
     const dialogType = pendingDialogClose;
     setPendingDialogClose(null);
