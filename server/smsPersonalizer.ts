@@ -108,10 +108,12 @@ function basicPersonalization(
   lead: Lead,
   template: SmsTemplate
 ): PersonalizedSms {
-  const variables = template.variables as string[] || [];
+  // Extract variables from template by finding {variable} placeholders
+  const variableMatches = template.messageTemplate.match(/\{([^}]+)\}/g) || [];
+  const variables = variableMatches.map(match => match.replace(/[{}]/g, ''));
   const variableValues = generateVariablesSuggestionsSync(lead, variables);
   
-  let messageContent = template.messageContent;
+  let messageContent = template.messageTemplate;
 
   // Replace all template variables with actual values
   Object.entries(variableValues).forEach(([key, value]) => {
@@ -253,7 +255,7 @@ function buildPersonalizationPrompt(
 - Template Category: ${template.templateCategory || 'N/A'}
 - Description: ${template.description || 'N/A'}
 - Example Context: ${template.exampleContext || 'N/A'}
-- Target Character Count: ${template.characterCount || 160}
+- Target Character Count: 160
 
 **Recipient CRM Data**:
 - Name: ${lead.firstName || 'Unknown'} ${lead.lastName || ''}
@@ -271,9 +273,9 @@ function buildPersonalizationPrompt(
 ${interactionSummary}
 
 **Original Template Message**:
-${template.messageContent}
+${template.messageTemplate}
 
-**Available Variables**: ${templateVars.join(', ')}
+**Available Variables**: Extract from {variable} placeholders in the template
 
 **Personalization Instructions**:
 

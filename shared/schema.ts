@@ -669,17 +669,18 @@ export const insertEmailCampaignEnrollmentSchema = createInsertSchema(emailCampa
 export type InsertEmailCampaignEnrollment = z.infer<typeof insertEmailCampaignEnrollmentSchema>;
 export type EmailCampaignEnrollment = typeof emailCampaignEnrollments.$inferSelect;
 
-// SMS Templates table for reusable SMS messages
+// SMS Templates table for Hormozi-style SMS messages
 export const smsTemplates = pgTable("sms_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
   description: text("description"),
-  messageContent: text("message_content").notNull(), // SMS body with {{variables}}
-  category: varchar("category"), // 'reminder', 'confirmation', 'notification', 'marketing'
+  messageTemplate: text("message_template").notNull(), // SMS template with {variable} placeholders (≤160 chars)
+  exampleContext: text("example_context"), // Example scenario for this template
   persona: varchar("persona"), // Target persona or null for all
-  variables: jsonb("variables"), // Available variables: ['firstName', 'appointmentTime', etc]
+  funnelStage: varchar("funnel_stage"), // awareness, consideration, decision, retention (null = all)
+  outreachType: varchar("outreach_type"), // cold_outreach, warm_outreach, cold_broadcast, warm_broadcast
+  templateCategory: varchar("template_category"), // a_c_a, value_first, social_proof, problem_solution, etc.
   isActive: boolean("is_active").default(true),
-  createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
