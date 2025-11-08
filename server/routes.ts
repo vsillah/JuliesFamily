@@ -5,7 +5,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, pipelineHistory, type User, type UserRole, userRoleEnum } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -3398,6 +3399,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
           
+          // Notify campaign members if this donation is for a campaign
+          if (updatedDonation.campaignId) {
+            try {
+              const campaignMembers = await storage.getCampaignMembers(updatedDonation.campaignId);
+              const campaign = await storage.getDonationCampaign(updatedDonation.campaignId);
+              
+              if (campaign && campaignMembers.length > 0) {
+                const membersToNotify = campaignMembers.filter(m => m.notifyOnDonation && m.isActive);
+                
+                for (const member of membersToNotify) {
+                  const user = await storage.getUser(member.userId);
+                  if (!user || !user.email) continue;
+                  
+                  const channels = (member.notificationChannels as string[]) || ['email'];
+                  const donorDisplayName = updatedDonation.isAnonymous 
+                    ? 'An anonymous supporter' 
+                    : (updatedDonation.donorName || 'A generous supporter');
+                  const amountDollars = (updatedDonation.amount / 100).toFixed(2);
+                  
+                  // Send email notification via SendGrid (if available)
+                  if (channels.includes('email')) {
+                    const emailSubject = `New donation to ${campaign.name}!`;
+                    const emailBody = `Great News!\n\n${donorDisplayName} just donated $${amountDollars} to ${campaign.name}!\n\nCampaign Progress: $${((campaign.raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised\n\nYou're receiving this notification because you're a member of this campaign. You can manage your notification preferences from your campaign dashboard.`;
+                    const emailHtml = `
+                      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2 style="color: #333;">Great News! 🎉</h2>
+                        <p style="color: #666; font-size: 16px;">
+                          ${donorDisplayName} just donated <strong>$${amountDollars}</strong> to <strong>${campaign.name}</strong>!
+                        </p>
+                        <div style="margin: 20px 0; padding: 20px; background-color: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;">
+                          <p style="margin: 0; color: #333; font-size: 18px; font-weight: bold;">
+                            Campaign Progress
+                          </p>
+                          <p style="margin: 10px 0 0 0; color: #666;">
+                            $${((campaign.raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised
+                          </p>
+                        </div>
+                        <p style="color: #666; font-size: 14px;">
+                          You're receiving this notification because you're a member of this campaign. 
+                          You can manage your notification preferences from your campaign dashboard.
+                        </p>
+                      </div>
+                    `;
+                    
+                    // Atomic idempotency: Try to create pending log entry first
+                    // If unique constraint fails, notification was already sent by concurrent webhook
+                    try {
+                      await storage.createEmailLog({
+                        recipientEmail: user.email,
+                        subject: emailSubject,
+                        htmlBody: emailHtml,
+                        status: 'pending',
+                        emailProvider: 'sendgrid',
+                        metadata: {
+                          campaignId: campaign.id,
+                          donationId: updatedDonation.id,
+                          memberId: member.id,
+                          type: 'campaign_donation_notification',
+                        },
+                      });
+                    } catch (logError: any) {
+                      // If insertion failed due to unique constraint, skip (already being processed)
+                      if (logError.code === '23505' || logError.message?.includes('duplicate key')) {
+                        console.log(`Campaign member ${user.email} already being notified about donation ${updatedDonation.id}, skipping`);
+                        continue;
+                      }
+                      // Other errors - re-throw
+                      throw logError;
+                    }
+                    
+                    // Now send the actual email and update the log
+                    let emailStatus: 'sent' | 'failed' = 'sent';
+                    let emailError: string | null = null;
+                    
+                    if (process.env.SENDGRID_API_KEY) {
+                      try {
+                        const sgMail = await import('@sendgrid/mail');
+                        sgMail.default.setApiKey(process.env.SENDGRID_API_KEY);
+                        
+                        await sgMail.default.send({
+                          to: user.email,
+                          from: process.env.SENDGRID_FROM_EMAIL || 'notifications@example.com',
+                          subject: emailSubject,
+                          text: emailBody,
+                          html: emailHtml,
+                        });
+                        
+                        console.log(`Sent donation notification email to campaign member: ${user.email}`);
+                      } catch (sendError) {
+                        console.error(`Failed to send notification email to ${user.email}:`, sendError);
+                        emailStatus = 'failed';
+                        emailError = sendError instanceof Error ? sendError.message : 'Unknown error';
+                      }
+                    } else {
+                      console.log(`SendGrid not configured, logging notification for ${user.email} (would send in production)`);
+                    }
+                    
+                    // Update the log entry with final status
+                    const existingLogs = await storage.getEmailLogsByRecipient(user.email);
+                    const pendingLog = existingLogs.find(log => {
+                      const meta = log.metadata as any;
+                      return log.status === 'pending' &&
+                             meta?.donationId === updatedDonation.id &&
+                             meta?.memberId === member.id &&
+                             meta?.type === 'campaign_donation_notification';
+                    });
+                    
+                    if (pendingLog) {
+                      await db.update(emailLogs)
+                        .set({ 
+                          status: emailStatus,
+                          errorMessage: emailError,
+                          sentAt: emailStatus === 'sent' ? new Date() : null 
+                        })
+                        .where(eq(emailLogs.id, pendingLog.id));
+                    }
+                  }
+                }
+                
+                console.log(`Processed notifications for ${membersToNotify.length} campaign members (donation: ${updatedDonation.id})`);
+              }
+            } catch (error) {
+              console.error('Error notifying campaign members:', error);
+              // Don't fail the whole webhook if notifications fail
+            }
+          }
+          
           break;
         }
         
@@ -3675,6 +3803,315 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending donation campaign:", error);
       res.status(500).json({ message: "Failed to send donation campaign" });
+    }
+  });
+
+  // Campaign Member Routes
+  
+  // Get user's campaigns (authenticated users only)
+  app.get('/api/my-campaigns', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const campaigns = await storage.getUserCampaigns(userId);
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching user campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch campaigns" });
+    }
+  });
+
+  // Get specific campaign for member view (member access only)
+  app.get('/api/my-campaigns/:campaignId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { campaignId } = req.params;
+      
+      const isMember = await storage.isCampaignMember(campaignId, userId);
+      if (!isMember) {
+        return res.status(403).json({ message: "Not authorized to view this campaign" });
+      }
+      
+      const campaign = await storage.getDonationCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error fetching campaign:", error);
+      res.status(500).json({ message: "Failed to fetch campaign" });
+    }
+  });
+
+  // Get campaign donations for member view (member access only)
+  app.get('/api/my-campaigns/:campaignId/donations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { campaignId } = req.params;
+      
+      const isMember = await storage.isCampaignMember(campaignId, userId);
+      if (!isMember) {
+        return res.status(403).json({ message: "Not authorized to view this campaign" });
+      }
+      
+      const donations = await storage.getCampaignDonations(campaignId);
+      res.json(donations);
+    } catch (error) {
+      console.error("Error fetching campaign donations:", error);
+      res.status(500).json({ message: "Failed to fetch donations" });
+    }
+  });
+
+  // Update member notification preferences
+  app.patch('/api/campaign-members/:memberId/preferences', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { memberId } = req.params;
+      
+      const member = await storage.getCampaignMember(memberId);
+      if (!member || member.userId !== userId) {
+        return res.status(403).json({ message: "Not authorized to update these preferences" });
+      }
+      
+      const { notifyOnDonation, notificationChannels } = req.body;
+      const updated = await storage.updateCampaignMember(memberId, {
+        notifyOnDonation,
+        notificationChannels,
+      });
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating member preferences:", error);
+      res.status(500).json({ message: "Failed to update preferences" });
+    }
+  });
+
+  // Submit testimonial (member access only)
+  app.post('/api/my-campaigns/:campaignId/testimonials', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { campaignId } = req.params;
+      
+      const isMember = await storage.isCampaignMember(campaignId, userId);
+      if (!isMember) {
+        return res.status(403).json({ message: "Not authorized to submit testimonial for this campaign" });
+      }
+      
+      // Find the member record
+      const members = await storage.getCampaignMembers(campaignId);
+      const member = members.find(m => m.userId === userId);
+      
+      if (!member) {
+        return res.status(404).json({ message: "Member record not found" });
+      }
+      
+      const { title, message, authorName, authorRole, wasAiEnhanced, originalMessage } = req.body;
+      
+      if (!message || !authorName) {
+        return res.status(400).json({ message: "Message and author name are required" });
+      }
+      
+      const testimonial = await storage.createCampaignTestimonial({
+        campaignId,
+        memberId: member.id,
+        title,
+        message,
+        authorName,
+        authorRole,
+        wasAiEnhanced: wasAiEnhanced || false,
+        originalMessage: wasAiEnhanced ? originalMessage : null,
+        status: 'pending',
+      });
+      
+      res.json(testimonial);
+    } catch (error) {
+      console.error("Error submitting testimonial:", error);
+      res.status(500).json({ message: "Failed to submit testimonial" });
+    }
+  });
+
+  // Get member's testimonials
+  app.get('/api/my-testimonials', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get all campaigns for this user
+      const campaigns = await storage.getUserCampaigns(userId);
+      const memberIds = campaigns.map(c => c.id);
+      
+      // Get testimonials for all member records
+      const allTestimonials = [];
+      for (const memberId of memberIds) {
+        const testimonials = await storage.getMemberTestimonials(memberId);
+        allTestimonials.push(...testimonials);
+      }
+      
+      res.json(allTestimonials);
+    } catch (error) {
+      console.error("Error fetching testimonials:", error);
+      res.status(500).json({ message: "Failed to fetch testimonials" });
+    }
+  });
+
+  // Admin routes for campaign members
+  
+  // Add member to campaign (admin only)
+  app.post('/api/donation-campaigns/:campaignId/members', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const { userId, role, notifyOnDonation, notificationChannels, metadata } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const member = await storage.createCampaignMember({
+        campaignId,
+        userId,
+        role: role || 'beneficiary',
+        notifyOnDonation: notifyOnDonation !== undefined ? notifyOnDonation : true,
+        notificationChannels: notificationChannels || ['email'],
+        metadata,
+      });
+      
+      res.json(member);
+    } catch (error) {
+      console.error("Error adding campaign member:", error);
+      res.status(500).json({ message: "Failed to add campaign member" });
+    }
+  });
+
+  // Get campaign members (admin only)
+  app.get('/api/donation-campaigns/:campaignId/members', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const members = await storage.getCampaignMembers(campaignId);
+      res.json(members);
+    } catch (error) {
+      console.error("Error fetching campaign members:", error);
+      res.status(500).json({ message: "Failed to fetch campaign members" });
+    }
+  });
+
+  // Get campaign testimonials (admin only)
+  app.get('/api/donation-campaigns/:campaignId/testimonials', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const { status } = req.query;
+      const testimonials = await storage.getCampaignTestimonials(campaignId, status as string);
+      res.json(testimonials);
+    } catch (error) {
+      console.error("Error fetching testimonials:", error);
+      res.status(500).json({ message: "Failed to fetch testimonials" });
+    }
+  });
+
+  // Approve testimonial (admin only)
+  app.patch('/api/campaign-testimonials/:id/approve', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const adminId = req.user.claims.sub;
+      
+      const updated = await storage.updateCampaignTestimonial(id, {
+        status: 'approved',
+        approvedBy: adminId,
+        approvedAt: new Date(),
+      });
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Testimonial not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Error approving testimonial:", error);
+      res.status(500).json({ message: "Failed to approve testimonial" });
+    }
+  });
+
+  // Send testimonial to donors (admin only)
+  app.post('/api/campaign-testimonials/:id/send', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const testimonial = await storage.getCampaignTestimonial(id);
+      if (!testimonial) {
+        return res.status(404).json({ message: "Testimonial not found" });
+      }
+      
+      if (testimonial.status !== 'approved') {
+        return res.status(400).json({ message: "Testimonial must be approved before sending" });
+      }
+      
+      const campaign = await storage.getDonationCampaign(testimonial.campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Get all donors for this campaign
+      const donations = await storage.getCampaignDonations(testimonial.campaignId);
+      const donors = donations.filter(d => d.status === 'succeeded' && d.amount && d.amount > 0);
+      
+      // Get unique donor emails
+      const uniqueDonorEmails = new Set<string>();
+      donors.forEach(d => {
+        if (d.donorEmail) uniqueDonorEmails.add(d.donorEmail);
+      });
+      
+      let sentCount = 0;
+      
+      // Send email to each donor
+      for (const donorEmail of uniqueDonorEmails) {
+        try {
+          const emailSubject = `Thank you from ${testimonial.authorName} - ${campaign.name}`;
+          const emailHtml = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #333;">${testimonial.title || 'A Message of Thanks'}</h2>
+              <p style="color: #666; font-size: 14px;">From ${testimonial.authorName}${testimonial.authorRole ? `, ${testimonial.authorRole}` : ''}</p>
+              <div style="margin: 20px 0; padding: 20px; background-color: #f9f9f9; border-left: 4px solid #4CAF50;">
+                <p style="color: #333; line-height: 1.6; white-space: pre-wrap;">${testimonial.message}</p>
+              </div>
+              <p style="color: #666; font-size: 14px;">Thank you for your generous support of <strong>${campaign.name}</strong>. Your donation has made a real difference!</p>
+            </div>
+          `;
+          
+          // Log the email
+          await storage.createEmailLog({
+            recipientEmail: donorEmail,
+            subject: emailSubject,
+            htmlBody: emailHtml,
+            status: 'sent',
+            emailProvider: 'sendgrid',
+            metadata: {
+              campaignId: campaign.id,
+              testimonialId: testimonial.id,
+              type: 'testimonial_to_donor',
+            },
+            sentAt: new Date(),
+          });
+          
+          sentCount++;
+        } catch (error) {
+          console.error(`Failed to send testimonial email to ${donorEmail}:`, error);
+        }
+      }
+      
+      // Update testimonial as sent
+      await storage.updateCampaignTestimonial(id, {
+        wasSentToDonors: true,
+        sentToDonorsAt: new Date(),
+        recipientCount: sentCount,
+        status: 'sent',
+      });
+      
+      res.json({ 
+        success: true, 
+        recipientCount: sentCount,
+        message: `Testimonial sent to ${sentCount} donor${sentCount !== 1 ? 's' : ''}` 
+      });
+    } catch (error) {
+      console.error("Error sending testimonial to donors:", error);
+      res.status(500).json({ message: "Failed to send testimonial to donors" });
     }
   });
 

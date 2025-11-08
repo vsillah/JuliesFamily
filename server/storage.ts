@@ -5,6 +5,7 @@ import {
   contentItems, contentVisibility,
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems, donationCampaigns,
+  campaignMembers, campaignTestimonials,
   emailTemplates, emailLogs, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
@@ -24,6 +25,8 @@ import {
   type GoogleReview, type InsertGoogleReview,
   type Donation, type InsertDonation,
   type DonationCampaign, type InsertDonationCampaign,
+  type CampaignMember, type InsertCampaignMember,
+  type CampaignTestimonial, type InsertCampaignTestimonial,
   type WishlistItem, type InsertWishlistItem,
   type EmailTemplate, type InsertEmailTemplate,
   type EmailLog, type InsertEmailLog,
@@ -199,6 +202,23 @@ export interface IStorage {
   getAllDonationCampaigns(): Promise<DonationCampaign[]>;
   getActiveDonationCampaigns(): Promise<DonationCampaign[]>;
   updateDonationCampaign(id: string, updates: Partial<InsertDonationCampaign>): Promise<DonationCampaign | undefined>;
+  
+  // Campaign Member operations
+  createCampaignMember(member: InsertCampaignMember): Promise<CampaignMember>;
+  getCampaignMember(id: string): Promise<CampaignMember | undefined>;
+  getCampaignMembers(campaignId: string): Promise<CampaignMember[]>;
+  getUserCampaigns(userId: string): Promise<(CampaignMember & { campaign: DonationCampaign })[]>;
+  updateCampaignMember(id: string, updates: Partial<InsertCampaignMember>): Promise<CampaignMember | undefined>;
+  deleteCampaignMember(id: string): Promise<void>;
+  isCampaignMember(campaignId: string, userId: string): Promise<boolean>;
+  
+  // Campaign Testimonial operations
+  createCampaignTestimonial(testimonial: InsertCampaignTestimonial): Promise<CampaignTestimonial>;
+  getCampaignTestimonial(id: string): Promise<CampaignTestimonial | undefined>;
+  getCampaignTestimonials(campaignId: string, status?: string): Promise<CampaignTestimonial[]>;
+  getMemberTestimonials(memberId: string): Promise<CampaignTestimonial[]>;
+  updateCampaignTestimonial(id: string, updates: Partial<InsertCampaignTestimonial>): Promise<CampaignTestimonial | undefined>;
+  deleteCampaignTestimonial(id: string): Promise<void>;
   
   // Wishlist Item operations
   createWishlistItem(item: InsertWishlistItem): Promise<WishlistItem>;
@@ -1302,6 +1322,122 @@ export class DatabaseStorage implements IStorage {
       .where(eq(donationCampaigns.id, id))
       .returning();
     return updated;
+  }
+
+  // Campaign Member operations
+  async createCampaignMember(memberData: InsertCampaignMember): Promise<CampaignMember> {
+    const [member] = await db.insert(campaignMembers).values(memberData).returning();
+    return member;
+  }
+
+  async getCampaignMember(id: string): Promise<CampaignMember | undefined> {
+    const [member] = await db.select().from(campaignMembers).where(eq(campaignMembers.id, id));
+    return member;
+  }
+
+  async getCampaignMembers(campaignId: string): Promise<CampaignMember[]> {
+    return await db.select().from(campaignMembers).where(eq(campaignMembers.campaignId, campaignId));
+  }
+
+  async getUserCampaigns(userId: string): Promise<(CampaignMember & { campaign: DonationCampaign })[]> {
+    const result = await db
+      .select({
+        id: campaignMembers.id,
+        campaignId: campaignMembers.campaignId,
+        userId: campaignMembers.userId,
+        role: campaignMembers.role,
+        notifyOnDonation: campaignMembers.notifyOnDonation,
+        notificationChannels: campaignMembers.notificationChannels,
+        isActive: campaignMembers.isActive,
+        metadata: campaignMembers.metadata,
+        joinedAt: campaignMembers.joinedAt,
+        createdAt: campaignMembers.createdAt,
+        updatedAt: campaignMembers.updatedAt,
+        campaign: donationCampaigns,
+      })
+      .from(campaignMembers)
+      .innerJoin(donationCampaigns, eq(campaignMembers.campaignId, donationCampaigns.id))
+      .where(and(
+        eq(campaignMembers.userId, userId),
+        eq(campaignMembers.isActive, true)
+      ));
+    
+    return result as (CampaignMember & { campaign: DonationCampaign })[];
+  }
+
+  async updateCampaignMember(id: string, updates: Partial<InsertCampaignMember>): Promise<CampaignMember | undefined> {
+    const [updated] = await db
+      .update(campaignMembers)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(campaignMembers.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCampaignMember(id: string): Promise<void> {
+    await db.delete(campaignMembers).where(eq(campaignMembers.id, id));
+  }
+
+  async isCampaignMember(campaignId: string, userId: string): Promise<boolean> {
+    const [result] = await db
+      .select()
+      .from(campaignMembers)
+      .where(and(
+        eq(campaignMembers.campaignId, campaignId),
+        eq(campaignMembers.userId, userId),
+        eq(campaignMembers.isActive, true)
+      ));
+    return !!result;
+  }
+
+  // Campaign Testimonial operations
+  async createCampaignTestimonial(testimonialData: InsertCampaignTestimonial): Promise<CampaignTestimonial> {
+    const [testimonial] = await db.insert(campaignTestimonials).values(testimonialData).returning();
+    return testimonial;
+  }
+
+  async getCampaignTestimonial(id: string): Promise<CampaignTestimonial | undefined> {
+    const [testimonial] = await db.select().from(campaignTestimonials).where(eq(campaignTestimonials.id, id));
+    return testimonial;
+  }
+
+  async getCampaignTestimonials(campaignId: string, status?: string): Promise<CampaignTestimonial[]> {
+    if (status) {
+      return await db
+        .select()
+        .from(campaignTestimonials)
+        .where(and(
+          eq(campaignTestimonials.campaignId, campaignId),
+          eq(campaignTestimonials.status, status)
+        ))
+        .orderBy(desc(campaignTestimonials.createdAt));
+    }
+    return await db
+      .select()
+      .from(campaignTestimonials)
+      .where(eq(campaignTestimonials.campaignId, campaignId))
+      .orderBy(desc(campaignTestimonials.createdAt));
+  }
+
+  async getMemberTestimonials(memberId: string): Promise<CampaignTestimonial[]> {
+    return await db
+      .select()
+      .from(campaignTestimonials)
+      .where(eq(campaignTestimonials.memberId, memberId))
+      .orderBy(desc(campaignTestimonials.createdAt));
+  }
+
+  async updateCampaignTestimonial(id: string, updates: Partial<InsertCampaignTestimonial>): Promise<CampaignTestimonial | undefined> {
+    const [updated] = await db
+      .update(campaignTestimonials)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(campaignTestimonials.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteCampaignTestimonial(id: string): Promise<void> {
+    await db.delete(campaignTestimonials).where(eq(campaignTestimonials.id, id));
   }
 
   // Wishlist Item operations

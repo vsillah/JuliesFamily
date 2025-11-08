@@ -898,3 +898,81 @@ export const insertCampaignCommunicationSchema = createInsertSchema(campaignComm
 });
 export type InsertCampaignCommunication = z.infer<typeof insertCampaignCommunicationSchema>;
 export type CampaignCommunication = typeof campaignCommunications.$inferSelect;
+
+// Campaign Members - links users (parents, students, etc) to campaigns they can view/manage
+export const campaignMembers = pgTable("campaign_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => donationCampaigns.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Member role: 'beneficiary' (student/parent receiving funds), 'supporter' (helping promote), 'organizer' (can edit campaign)
+  role: varchar("role").notNull().default('beneficiary'), 
+  
+  // Notification preferences
+  notifyOnDonation: boolean("notify_on_donation").default(true), // Get notified when someone donates
+  notificationChannels: jsonb("notification_channels").default(['email']), // 'email', 'sms'
+  
+  // Member status
+  isActive: boolean("is_active").default(true),
+  
+  // Metadata
+  metadata: jsonb("metadata"), // Additional context: student info, parent relationship, etc
+  
+  joinedAt: timestamp("joined_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("campaign_members_campaign_idx").on(table.campaignId),
+  index("campaign_members_user_idx").on(table.userId),
+  uniqueIndex("campaign_members_unique_idx").on(table.campaignId, table.userId),
+]);
+
+export const insertCampaignMemberSchema = createInsertSchema(campaignMembers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCampaignMember = z.infer<typeof insertCampaignMemberSchema>;
+export type CampaignMember = typeof campaignMembers.$inferSelect;
+
+// Campaign Testimonials - testimonials submitted by campaign members to thank donors
+export const campaignTestimonials = pgTable("campaign_testimonials", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  campaignId: varchar("campaign_id").notNull().references(() => donationCampaigns.id, { onDelete: "cascade" }),
+  memberId: varchar("member_id").notNull().references(() => campaignMembers.id, { onDelete: "cascade" }),
+  
+  // Testimonial content
+  title: varchar("title"), // Optional headline
+  message: text("message").notNull(), // The testimonial message
+  authorName: varchar("author_name").notNull(), // Display name (can be different from user name)
+  authorRole: varchar("author_role"), // "Student", "Parent", "Participant"
+  
+  // Status tracking
+  status: varchar("status").notNull().default('pending'), // 'pending', 'approved', 'sent', 'rejected'
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  
+  // Distribution tracking
+  wasSentToDonors: boolean("was_sent_to_donors").default(false),
+  sentToDonorsAt: timestamp("sent_to_donors_at"),
+  recipientCount: integer("recipient_count").default(0), // How many donors received this
+  
+  // AI enhancement
+  wasAiEnhanced: boolean("was_ai_enhanced").default(false), // Was it enhanced by AI?
+  originalMessage: text("original_message"), // Store original if AI-enhanced
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("campaign_testimonials_campaign_idx").on(table.campaignId),
+  index("campaign_testimonials_member_idx").on(table.memberId),
+  index("campaign_testimonials_status_idx").on(table.status),
+]);
+
+export const insertCampaignTestimonialSchema = createInsertSchema(campaignTestimonials).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCampaignTestimonial = z.infer<typeof insertCampaignTestimonialSchema>;
+export type CampaignTestimonial = typeof campaignTestimonials.$inferSelect;
