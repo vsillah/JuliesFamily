@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { User } from "@shared/schema";
+import type { User, UserRole } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Shield, ShieldOff, User as UserIcon, UserPlus, Trash2 } from "lucide-react";
+import { Search, Shield, ShieldCheck, User as UserIcon, UserPlus, Trash2, Crown } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import {
   AlertDialog,
@@ -43,7 +50,8 @@ export default function AdminUserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmAction, setConfirmAction] = useState<{
     userId: string;
-    currentStatus: boolean;
+    currentRole: UserRole;
+    newRole: UserRole;
     userName: string;
   } | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{
@@ -55,7 +63,7 @@ export default function AdminUserManagement() {
     email: "",
     firstName: "",
     lastName: "",
-    isAdmin: false,
+    role: "client" as UserRole,
   });
 
   const { data: users = [], isLoading } = useQuery<User[]>({
@@ -66,24 +74,53 @@ export default function AdminUserManagement() {
     queryKey: ["/api/auth/user"],
   });
 
-  const updateAdminStatusMutation = useMutation({
-    mutationFn: async ({ userId, isAdmin }: { userId: string; isAdmin: boolean }) => {
-      return apiRequest("PATCH", `/api/admin/users/${userId}/admin-status`, { isAdmin });
+  // Helper function to get role label
+  const getRoleLabel = (role: UserRole): string => {
+    switch (role) {
+      case "super_admin": return "Super Admin";
+      case "admin": return "Admin";
+      case "client": return "Client";
+      default: return "Unknown";
+    }
+  };
+
+  // Helper function to get role badge variant
+  const getRoleBadgeVariant = (role: UserRole): "default" | "secondary" | "outline" => {
+    switch (role) {
+      case "super_admin": return "default";
+      case "admin": return "outline";
+      case "client": return "secondary";
+      default: return "secondary";
+    }
+  };
+
+  // Helper function to get role icon
+  const getRoleIcon = (role: UserRole) => {
+    switch (role) {
+      case "super_admin": return Crown;
+      case "admin": return Shield;
+      case "client": return UserIcon;
+      default: return UserIcon;
+    }
+  };
+
+  const updateRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: string; role: UserRole }) => {
+      return apiRequest("PATCH", `/api/admin/users/${userId}/role`, { role });
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Success",
-        description: variables.isAdmin 
-          ? "Admin privileges granted successfully" 
-          : "Admin privileges revoked successfully",
+        description: `User role updated to ${getRoleLabel(variables.role)} successfully`,
       });
       setConfirmAction(null);
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to update admin status",
+        description: error.message || "Failed to update user role",
         variant: "destructive",
       });
       setConfirmAction(null);
@@ -101,7 +138,7 @@ export default function AdminUserManagement() {
         description: "User created successfully",
       });
       setCreateDialogOpen(false);
-      setNewUser({ email: "", firstName: "", lastName: "", isAdmin: false });
+      setNewUser({ email: "", firstName: "", lastName: "", role: "client" });
     },
     onError: (error: any) => {
       toast({
@@ -144,22 +181,26 @@ export default function AdminUserManagement() {
     );
   });
 
-  const handleToggleAdmin = (user: User) => {
+  const handleRoleChange = (user: User, newRole: UserRole) => {
+    if (newRole === user.role) return; // No change
+    
     setConfirmAction({
       userId: user.id,
-      currentStatus: user.isAdmin ?? false,
+      currentRole: user.role,
+      newRole,
       userName: `${user.firstName} ${user.lastName}`,
     });
   };
 
   const isCurrentUser = (userId: string) => userId === currentUser?.id;
+  const isSuperAdmin = currentUser?.role === "super_admin";
 
-  const confirmToggleAdmin = () => {
+  const confirmRoleChange = () => {
     if (!confirmAction) return;
     
-    updateAdminStatusMutation.mutate({
+    updateRoleMutation.mutate({
       userId: confirmAction.userId,
-      isAdmin: !confirmAction.currentStatus,
+      role: confirmAction.newRole,
     });
   };
 
@@ -206,17 +247,21 @@ export default function AdminUserManagement() {
                   User Management
                 </CardTitle>
                 <CardDescription>
-                  Manage user accounts and admin privileges
+                  {isSuperAdmin 
+                    ? "Manage user accounts and assign roles (Client, Admin, Super Admin)" 
+                    : "View user accounts and their roles"}
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => setCreateDialogOpen(true)}
-                className="w-full sm:w-auto"
-                data-testid="button-create-user"
-              >
-                <UserPlus className="h-4 w-4 mr-2" />
-                Create User
-              </Button>
+              {isSuperAdmin && (
+                <Button
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="w-full sm:w-auto"
+                  data-testid="button-create-user"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Create User
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent>
@@ -248,79 +293,90 @@ export default function AdminUserManagement() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead>Role</TableHead>
+                      {isSuperAdmin && <TableHead className="text-right">Actions</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
-                        <TableCell className="font-medium">
-                          {user.firstName} {user.lastName}
-                          {user.id === currentUser?.id && (
-                            <Badge variant="outline" className="ml-2">
-                              You
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          {user.isAdmin ? (
-                            <Badge variant="default" className="gap-1" data-testid={`badge-admin-${user.id}`}>
-                              <Shield className="h-3 w-3" />
-                              Admin
-                            </Badge>
-                          ) : (
-                            <Badge variant="secondary" data-testid={`badge-user-${user.id}`}>
-                              User
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {user.isAdmin ? (
-                              <>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleToggleAdmin(user)}
-                                  disabled={updateAdminStatusMutation.isPending || isCurrentUser(user.id)}
-                                  data-testid={`button-revoke-admin-${user.id}`}
-                                >
-                                  <ShieldOff className="h-4 w-4 mr-2" />
-                                  Revoke Admin
-                                </Button>
-                                {isCurrentUser(user.id) && (
-                                  <span className="text-xs text-muted-foreground">
-                                    (Cannot remove own access)
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              <Button
-                                variant="default"
-                                size="sm"
-                                onClick={() => handleToggleAdmin(user)}
-                                disabled={updateAdminStatusMutation.isPending}
-                                data-testid={`button-grant-admin-${user.id}`}
-                              >
-                                <Shield className="h-4 w-4 mr-2" />
-                                Grant Admin
-                              </Button>
+                    {filteredUsers.map((user) => {
+                      const RoleIcon = getRoleIcon(user.role);
+                      return (
+                        <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
+                          <TableCell className="font-medium">
+                            {user.firstName} {user.lastName}
+                            {user.id === currentUser?.id && (
+                              <Badge variant="outline" className="ml-2">
+                                You
+                              </Badge>
                             )}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteUser(user)}
-                              disabled={deleteUserMutation.isPending || isCurrentUser(user.id)}
-                              data-testid={`button-delete-${user.id}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                          </TableCell>
+                          <TableCell>{user.email}</TableCell>
+                          <TableCell>
+                            {isSuperAdmin && !isCurrentUser(user.id) ? (
+                              <Select
+                                value={user.role}
+                                onValueChange={(value) => handleRoleChange(user, value as UserRole)}
+                                disabled={updateRoleMutation.isPending}
+                              >
+                                <SelectTrigger 
+                                  className="w-[160px]" 
+                                  data-testid={`select-role-${user.id}`}
+                                >
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="client" data-testid={`option-client-${user.id}`}>
+                                    <div className="flex items-center gap-2">
+                                      <UserIcon className="h-3 w-3" />
+                                      <span>Client</span>
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="admin" data-testid={`option-admin-${user.id}`}>
+                                    <div className="flex items-center gap-2">
+                                      <Shield className="h-3 w-3" />
+                                      <span>Admin</span>
+                                    </div>
+                                  </SelectItem>
+                                  <SelectItem value="super_admin" data-testid={`option-super-admin-${user.id}`}>
+                                    <div className="flex items-center gap-2">
+                                      <Crown className="h-3 w-3" />
+                                      <span>Super Admin</span>
+                                    </div>
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <Badge 
+                                variant={getRoleBadgeVariant(user.role)} 
+                                className="gap-1" 
+                                data-testid={`badge-role-${user.id}`}
+                              >
+                                <RoleIcon className="h-3 w-3" />
+                                {getRoleLabel(user.role)}
+                              </Badge>
+                            )}
+                            {isCurrentUser(user.id) && isSuperAdmin && (
+                              <span className="text-xs text-muted-foreground ml-2">
+                                (Cannot change own role)
+                              </span>
+                            )}
+                          </TableCell>
+                          {isSuperAdmin && (
+                            <TableCell className="text-right">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteUser(user)}
+                                disabled={deleteUserMutation.isPending || isCurrentUser(user.id)}
+                                data-testid={`button-delete-${user.id}`}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TableCell>
+                          )}
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -338,31 +394,27 @@ export default function AdminUserManagement() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmAction?.currentStatus ? "Revoke Admin Privileges?" : "Grant Admin Privileges?"}
+              Change User Role?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmAction?.currentStatus ? (
-                <>
-                  Are you sure you want to revoke admin privileges from{" "}
-                  <strong>{confirmAction.userName}</strong>? They will no longer be able to access
-                  admin features.
-                </>
-              ) : (
-                <>
-                  Are you sure you want to grant admin privileges to{" "}
-                  <strong>{confirmAction?.userName}</strong>? They will have full access to all
-                  admin features including user management, content management, and analytics.
-                </>
+              Are you sure you want to change <strong>{confirmAction?.userName}</strong>'s role from{" "}
+              <strong>{confirmAction && getRoleLabel(confirmAction.currentRole)}</strong> to{" "}
+              <strong>{confirmAction && getRoleLabel(confirmAction.newRole)}</strong>?
+              {confirmAction?.newRole === "super_admin" && (
+                <div className="mt-2 p-3 bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm">
+                  <strong>Warning:</strong> Super Admins have complete control over the system,
+                  including the ability to manage all users and roles.
+                </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel data-testid="button-cancel-confirm">Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmToggleAdmin}
+              onClick={confirmRoleChange}
               data-testid="button-confirm-action"
             >
-              {confirmAction?.currentStatus ? "Revoke Admin" : "Grant Admin"}
+              Change Role
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -408,22 +460,46 @@ export default function AdminUserManagement() {
                 data-testid="input-lastname"
               />
             </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="isAdmin">Admin Privileges</Label>
-              <Switch
-                id="isAdmin"
-                checked={newUser.isAdmin}
-                onCheckedChange={(checked) => setNewUser({ ...newUser, isAdmin: checked })}
-                data-testid="switch-admin"
-              />
-            </div>
+            {isSuperAdmin && (
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Select
+                  value={newUser.role}
+                  onValueChange={(value) => setNewUser({ ...newUser, role: value as UserRole })}
+                >
+                  <SelectTrigger id="role" data-testid="select-new-user-role">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="client" data-testid="option-new-client">
+                      <div className="flex items-center gap-2">
+                        <UserIcon className="h-3 w-3" />
+                        <span>Client</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="admin" data-testid="option-new-admin">
+                      <div className="flex items-center gap-2">
+                        <Shield className="h-3 w-3" />
+                        <span>Admin</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="super_admin" data-testid="option-new-super-admin">
+                      <div className="flex items-center gap-2">
+                        <Crown className="h-3 w-3" />
+                        <span>Super Admin</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button
               variant="outline"
               onClick={() => {
                 setCreateDialogOpen(false);
-                setNewUser({ email: "", firstName: "", lastName: "", isAdmin: false });
+                setNewUser({ email: "", firstName: "", lastName: "", role: "client" });
               }}
               data-testid="button-cancel-create"
             >

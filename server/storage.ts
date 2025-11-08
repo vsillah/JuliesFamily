@@ -301,25 +301,38 @@ export class DatabaseStorage implements IStorage {
 
     if (existingUser) {
       // Update existing user - ID never changes, preserving FK relationships
+      const updateData: any = {
+        oidcSub: userData.oidcSub,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: userData.profileImageUrl,
+        updatedAt: new Date(),
+      };
+      
+      // Only update role if explicitly provided (used by super_admin via API, not from OIDC)
+      if (userData.role !== undefined) {
+        updateData.role = userData.role;
+      }
+      // SECURITY: Never accept role from untrusted sources - preserve existing user's role
+      
       const [user] = await db
         .update(users)
-        .set({
-          oidcSub: userData.oidcSub,
-          email: userData.email,
-          firstName: userData.firstName,
-          lastName: userData.lastName,
-          profileImageUrl: userData.profileImageUrl,
-          isAdmin: userData.isAdmin !== undefined ? userData.isAdmin : existingUser.isAdmin,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(users.id, existingUser.id))
         .returning();
       return user;
     } else {
-      // Create new user
+      // Create new user with default 'client' role
+      // SECURITY: Only super_admins can create users with elevated roles via API
+      const insertData: any = {
+        ...userData,
+        role: userData.role || "client",  // Default to safe 'client' role
+      };
+      
       const [user] = await db
         .insert(users)
-        .values(userData)
+        .values(insertData)
         .returning();
       return user;
     }

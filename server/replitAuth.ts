@@ -71,26 +71,24 @@ async function upsertUser(
   const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(' ')[0];
   const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(' ')[1];
   
-  // Handle isAdmin flag from claims (both camelCase and snake_case)
-  const isAdmin = claims["isAdmin"] !== undefined ? claims["isAdmin"] : claims["is_admin"];
-  
   console.log("[OIDC Claims] Extracted data:", {
     sub: claims["sub"],
     email,
     firstName,
     lastName,
     profileImageUrl: claims["profile_image_url"] || claims["picture"],
-    isAdmin
   });
   
+  // SECURITY: Never accept role from OIDC claims - this would allow privilege escalation!
+  // Roles are only assigned via super_admin users through the User Management interface
+  // New users default to 'client' role (safe default)
   await storage.upsertUser({
     oidcSub: claims["sub"],
     email: email,
     firstName: firstName,
     lastName: lastName,
     profileImageUrl: claims["profile_image_url"] || claims["picture"],
-    // Only set isAdmin if explicitly provided in claims, otherwise preserve existing value
-    ...(isAdmin !== undefined && { isAdmin: isAdmin }),
+    // Don't pass role from claims - preserve existing user's role or use database default ('client')
   });
 }
 
