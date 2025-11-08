@@ -184,32 +184,6 @@ export default function UnifiedTestimonialsCarousel({
             ))}
           </div>
         </div>
-
-        {/* Navigation Arrows - Hidden on mobile */}
-        {allTestimonials.length > 1 && (
-          <>
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute left-4 top-1/2 -translate-y-1/2 hidden sm:flex z-10"
-              onClick={scrollPrev}
-              disabled={!canScrollPrev}
-              data-testid="carousel-prev-button"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="absolute right-4 top-1/2 -translate-y-1/2 hidden sm:flex z-10"
-              onClick={scrollNext}
-              disabled={!canScrollNext}
-              data-testid="carousel-next-button"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </>
-        )}
       </div>
 
       {/* Dots Navigation - Visible on all screens */}
