@@ -2355,6 +2355,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hormozi Email Template Routes (Alex Hormozi's $100M Leads Framework)
+  
+  // Get all Hormozi email templates with filtering
+  app.get('/api/hormozi-templates', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { persona, funnelStage, outreachType, templateCategory } = req.query;
+      const templates = await storage.getHormoziEmailTemplates({
+        persona: persona as string | undefined,
+        funnelStage: funnelStage as string | undefined,
+        outreachType: outreachType as string | undefined,
+        templateCategory: templateCategory as string | undefined,
+      });
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching Hormozi email templates:", error);
+      res.status(500).json({ message: "Failed to fetch email templates" });
+    }
+  });
+
+  // Get single Hormozi email template by ID
+  app.get('/api/hormozi-templates/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const template = await storage.getHormoziEmailTemplate(id);
+      
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching Hormozi email template:", error);
+      res.status(500).json({ message: "Failed to fetch email template" });
+    }
+  });
+
+  // Personalize email template using AI for a specific lead
+  app.post('/api/hormozi-templates/personalize', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { templateId, leadId } = req.body;
+      
+      if (!templateId || !leadId) {
+        return res.status(400).json({ message: "templateId and leadId are required" });
+      }
+      
+      // Fetch template and lead data
+      const [template, lead, recentInteractions] = await Promise.all([
+        storage.getHormoziEmailTemplate(templateId),
+        storage.getLead(leadId),
+        storage.getLeadInteractions(leadId, 5) // Get last 5 interactions
+      ]);
+      
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      // Use AI to personalize the email
+      const { personalizeEmailTemplate } = await import('./emailPersonalizer');
+      const personalizedEmail = await personalizeEmailTemplate({
+        lead,
+        recentInteractions,
+        template: {
+          name: template.name,
+          subject: template.subject,
+          htmlBody: template.htmlBody,
+          textBody: template.textBody || '',
+          outreachType: template.outreachType as any,
+          templateCategory: template.templateCategory as any,
+          persona: template.persona as any,
+          funnelStage: template.funnelStage as any,
+          description: template.description || '',
+          exampleContext: template.exampleContext || '',
+          variables: (template.variables as any) || []
+        }
+      });
+      
+      res.json(personalizedEmail);
+    } catch (error: any) {
+      console.error("Error personalizing email:", error);
+      res.status(500).json({ message: error.message || "Failed to personalize email" });
+    }
+  });
+
+  // Send personalized Hormozi email to a lead
+  app.post('/api/hormozi-templates/send', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId, subject, htmlBody, textBody } = req.body;
+      
+      if (!leadId || !subject || !htmlBody) {
+        return res.status(400).json({ message: "leadId, subject, and htmlBody are required" });
+      }
+      
+      // Fetch lead
+      const lead = await storage.getLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      if (!lead.email) {
+        return res.status(400).json({ message: "Lead does not have an email address" });
+      }
+      
+      // Send email via SendGrid
+      await sendTemplatedEmail({
+        to: lead.email,
+        subject,
+        html: htmlBody,
+        text: textBody || undefined,
+        templateName: 'hormozi_personalized',
+        variables: {}
+      });
+      
+      // Create interaction record
+      await storage.createInteraction({
+        leadId,
+        interactionType: 'email_sent',
+        contentEngaged: `Personalized email: ${subject}`,
+        notes: `Sent Hormozi-style personalized email`,
+        data: { subject, sentAt: new Date().toISOString() }
+      });
+      
+      // Update lead's last interaction date
+      await storage.updateLead(leadId, {
+        lastInteractionDate: new Date()
+      });
+      
+      res.json({ success: true, message: "Email sent successfully" });
+    } catch (error: any) {
+      console.error("Error sending personalized email:", error);
+      res.status(500).json({ message: error.message || "Failed to send email" });
+    }
+  });
+
   // Get communication timeline for a lead
   app.get('/api/leads/:leadId/timeline', isAuthenticated, isAdmin, async (req, res) => {
     try {

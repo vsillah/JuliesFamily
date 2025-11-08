@@ -541,13 +541,23 @@ export type InsertWishlistItem = z.infer<typeof insertWishlistItemSchema>;
 export type WishlistItem = typeof wishlistItems.$inferSelect;
 
 // Email Templates table for managing automated email content
+// Extended to support Alex Hormozi's $100M Leads communication strategies
 export const emailTemplates = pgTable("email_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull().unique(), // 'donation_thank_you', 'donation_receipt', 'lead_confirmation'
+  name: varchar("name").notNull().unique(), // 'donation_thank_you', 'warm_reconnect_parent_awareness', etc
   subject: varchar("subject").notNull(),
   htmlBody: text("html_body").notNull(), // HTML template with {{placeholders}}
   textBody: text("text_body"), // Plain text version
-  variables: jsonb("variables"), // List of available variables: ['donorName', 'amount', etc]
+  variables: jsonb("variables"), // List of available variables: ['firstName', 'lastName', 'lastInteraction', etc]
+  
+  // Hormozi $100M Leads Framework Fields
+  outreachType: varchar("outreach_type"), // 'warm_outreach', 'cold_outreach', 'warm_broadcast', 'cold_broadcast'
+  templateCategory: varchar("template_category"), // 'a_c_a', 'value_first', 'social_proof', 'problem_solution', 'lead_magnet_offer', 'reengagement', 'follow_up'
+  persona: varchar("persona"), // Target persona: student, provider, parent, donor, volunteer, or null for all
+  funnelStage: varchar("funnel_stage"), // Target funnel stage: awareness, consideration, decision, retention, or null for all
+  description: text("description"), // Admin-facing description of when to use this template
+  exampleContext: text("example_context"), // Example scenario for using this template
+  
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

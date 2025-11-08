@@ -75,7 +75,7 @@ export interface IStorage {
   
   // Interaction operations
   createInteraction(interaction: InsertInteraction): Promise<Interaction>;
-  getLeadInteractions(leadId: string): Promise<Interaction[]>;
+  getLeadInteractions(leadId: string, limit?: number): Promise<Interaction[]>;
   
   // Lead Magnet operations
   createLeadMagnet(magnet: InsertLeadMagnet): Promise<LeadMagnet>;
@@ -203,6 +203,15 @@ export interface IStorage {
   getAllEmailTemplates(): Promise<EmailTemplate[]>;
   createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
   updateEmailTemplate(id: string, updates: Partial<InsertEmailTemplate>): Promise<EmailTemplate | undefined>;
+  
+  // Hormozi Email Template operations (Alex Hormozi's $100M Leads Framework)
+  getHormoziEmailTemplates(filters?: {
+    persona?: string;
+    funnelStage?: string;
+    outreachType?: string;
+    templateCategory?: string;
+  }): Promise<EmailTemplate[]>;
+  getHormoziEmailTemplate(id: string): Promise<EmailTemplate | undefined>;
   
   // Email Log operations
   createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
@@ -494,12 +503,18 @@ export class DatabaseStorage implements IStorage {
     return interaction;
   }
 
-  async getLeadInteractions(leadId: string): Promise<Interaction[]> {
-    return await db
+  async getLeadInteractions(leadId: string, limit?: number): Promise<Interaction[]> {
+    const query = db
       .select()
       .from(interactions)
       .where(eq(interactions.leadId, leadId))
       .orderBy(desc(interactions.createdAt));
+    
+    if (limit) {
+      return await query.limit(limit);
+    }
+    
+    return await query;
   }
 
   // Lead Magnet operations
@@ -1299,6 +1314,52 @@ export class DatabaseStorage implements IStorage {
       .where(eq(emailTemplates.id, id))
       .returning();
     return updated;
+  }
+
+  // Hormozi Email Template operations (Alex Hormozi's $100M Leads Framework)
+  async getHormoziEmailTemplates(filters?: {
+    persona?: string;
+    funnelStage?: string;
+    outreachType?: string;
+    templateCategory?: string;
+  }): Promise<EmailTemplate[]> {
+    const conditions = [eq(emailTemplates.isActive, true)];
+    
+    if (filters?.persona) {
+      conditions.push(or(
+        eq(emailTemplates.persona, filters.persona),
+        sql`${emailTemplates.persona} IS NULL`
+      )!);
+    }
+    
+    if (filters?.funnelStage) {
+      conditions.push(or(
+        eq(emailTemplates.funnelStage, filters.funnelStage),
+        sql`${emailTemplates.funnelStage} IS NULL`
+      )!);
+    }
+    
+    if (filters?.outreachType) {
+      conditions.push(eq(emailTemplates.outreachType, filters.outreachType));
+    }
+    
+    if (filters?.templateCategory) {
+      conditions.push(eq(emailTemplates.templateCategory, filters.templateCategory));
+    }
+    
+    return await db
+      .select()
+      .from(emailTemplates)
+      .where(and(...conditions))
+      .orderBy(emailTemplates.persona, emailTemplates.funnelStage, emailTemplates.name);
+  }
+
+  async getHormoziEmailTemplate(id: string): Promise<EmailTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.id, id));
+    return template;
   }
 
   // Email Log operations
