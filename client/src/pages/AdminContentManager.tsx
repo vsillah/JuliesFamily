@@ -229,10 +229,7 @@ export default function AdminContentManager() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [showScreenshotConfirm, setShowScreenshotConfirm] = useState(false);
-  const [pendingDialogClose, setPendingDialogClose] = useState<'edit' | 'create' | null>(null);
-  const isShowingConfirmationRef = useRef(false);
-  const pendingScreenshotActionRef = useRef<'create' | 'edit' | null>(null);
+  const [useScreenshotAsImage, setUseScreenshotAsImage] = useState(false);
   
   // Multi-select state for lead magnet visibility
   const [selectedLeadMagnetCombos, setSelectedLeadMagnetCombos] = useState<Set<string>>(new Set());
@@ -1305,41 +1302,59 @@ export default function AdminContentManager() {
                       </div>
                     </div>
                     
-                    <div className="flex gap-2 items-start">
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleScreenshotAnalysis(file, true);
-                        }}
-                        className="hidden"
-                        id="screenshot-upload-edit"
-                        disabled={isAnalyzing}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => document.getElementById('screenshot-upload-edit')?.click()}
-                        disabled={isAnalyzing}
-                        data-testid="button-analyze-screenshot-edit"
-                        className="flex-shrink-0"
-                      >
-                        {isAnalyzing ? (
-                          "Analyzing..."
-                        ) : (
-                          <>
-                            <ImageIcon className="w-4 h-4 mr-2" />
-                            Analyze Screenshot
-                          </>
-                        )}
-                      </Button>
-                      {screenshotPreview && (
-                        <img 
-                          src={screenshotPreview} 
-                          alt="Screenshot preview"
-                          className="w-20 h-20 object-cover rounded border border-border"
+                    <div className="space-y-2">
+                      <div className="flex gap-2 items-start">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleScreenshotAnalysis(file, true);
+                          }}
+                          className="hidden"
+                          id="screenshot-upload-edit"
+                          disabled={isAnalyzing}
                         />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => document.getElementById('screenshot-upload-edit')?.click()}
+                          disabled={isAnalyzing}
+                          data-testid="button-analyze-screenshot-edit"
+                          className="flex-shrink-0"
+                        >
+                          {isAnalyzing ? (
+                            "Analyzing..."
+                          ) : (
+                            <>
+                              <ImageIcon className="w-4 h-4 mr-2" />
+                              Analyze Screenshot
+                            </>
+                          )}
+                        </Button>
+                        {screenshotPreview && (
+                          <img 
+                            src={screenshotPreview} 
+                            alt="Screenshot preview"
+                            className="w-20 h-20 object-cover rounded border border-border"
+                          />
+                        )}
+                      </div>
+                      {screenshotPreview && (
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="use-screenshot-edit"
+                            checked={useScreenshotAsImage}
+                            onCheckedChange={(checked) => setUseScreenshotAsImage(!!checked)}
+                            data-testid="checkbox-use-screenshot-edit"
+                          />
+                          <label
+                            htmlFor="use-screenshot-edit"
+                            className="text-sm text-muted-foreground cursor-pointer"
+                          >
+                            Use screenshot as image
+                          </label>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -1687,41 +1702,59 @@ export default function AdminContentManager() {
                     </div>
                   </div>
                   
-                  <div className="flex gap-2 items-start">
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleScreenshotAnalysis(file, false);
-                      }}
-                      className="hidden"
-                      id="screenshot-upload-create"
-                      disabled={isAnalyzing}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => document.getElementById('screenshot-upload-create')?.click()}
-                      disabled={isAnalyzing}
-                      data-testid="button-analyze-screenshot-create"
-                      className="flex-shrink-0"
-                    >
-                      {isAnalyzing ? (
-                        "Analyzing..."
-                      ) : (
-                        <>
-                          <ImageIcon className="w-4 h-4 mr-2" />
-                          Analyze Screenshot
-                        </>
-                      )}
-                    </Button>
-                    {screenshotPreview && (
-                      <img 
-                        src={screenshotPreview} 
-                        alt="Screenshot preview"
-                        className="w-20 h-20 object-cover rounded border border-border"
+                  <div className="space-y-2">
+                    <div className="flex gap-2 items-start">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleScreenshotAnalysis(file, false);
+                        }}
+                        className="hidden"
+                        id="screenshot-upload-create"
+                        disabled={isAnalyzing}
                       />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('screenshot-upload-create')?.click()}
+                        disabled={isAnalyzing}
+                        data-testid="button-analyze-screenshot-create"
+                        className="flex-shrink-0"
+                      >
+                        {isAnalyzing ? (
+                          "Analyzing..."
+                        ) : (
+                          <>
+                            <ImageIcon className="w-4 h-4 mr-2" />
+                            Analyze Screenshot
+                          </>
+                        )}
+                      </Button>
+                      {screenshotPreview && (
+                        <img 
+                          src={screenshotPreview} 
+                          alt="Screenshot preview"
+                          className="w-20 h-20 object-cover rounded border border-border"
+                        />
+                      )}
+                    </div>
+                    {screenshotPreview && (
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="use-screenshot-create"
+                          checked={useScreenshotAsImage}
+                          onCheckedChange={(checked) => setUseScreenshotAsImage(!!checked)}
+                          data-testid="checkbox-use-screenshot-create"
+                        />
+                        <label
+                          htmlFor="use-screenshot-create"
+                          className="text-sm text-muted-foreground cursor-pointer"
+                        >
+                          Use screenshot as image
+                        </label>
+                      </div>
                     )}
                   </div>
                 </div>
