@@ -99,7 +99,7 @@ export default function SocialMediaCarousel() {
                     {post.imageName ? (
                       <div className="relative flex-1 flex flex-col">
                         <img
-                          src={`https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${post.imageName}`}
+                          src={(post as any).resolvedImageUrl || `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload/${post.imageName}`}
                           alt={post.title}
                           className="w-full h-full object-cover"
                           loading="lazy"
