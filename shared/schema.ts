@@ -1155,3 +1155,34 @@ export const insertChatbotIssueSchema = createInsertSchema(chatbotIssues).omit({
 });
 export type InsertChatbotIssue = z.infer<typeof insertChatbotIssueSchema>;
 export type ChatbotIssue = typeof chatbotIssues.$inferSelect;
+
+// Database Backup Snapshots - tracks table-level backups for surgical restore capability
+export const backupSnapshots = pgTable("backup_snapshots", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Backup metadata
+  tableName: varchar("table_name").notNull(), // Original table name (e.g., 'users', 'leads')
+  backupTableName: varchar("backup_table_name").notNull().unique(), // Actual backup table name (e.g., 'backup_users_20250109_143022')
+  backupName: varchar("backup_name"), // Optional user-friendly name
+  rowCount: integer("row_count").notNull(), // Number of rows backed up
+  sizeBytes: integer("size_bytes"), // Approximate backup size
+  
+  // Creation tracking
+  createdBy: varchar("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  
+  // Optional metadata
+  description: text("description"), // Purpose or notes about this backup
+  tags: jsonb("tags"), // Optional tags for organization
+}, (table) => [
+  index("backup_snapshots_table_name_idx").on(table.tableName),
+  index("backup_snapshots_created_by_idx").on(table.createdBy),
+  index("backup_snapshots_created_at_idx").on(table.createdAt),
+]);
+
+export const insertBackupSnapshotSchema = createInsertSchema(backupSnapshots).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertBackupSnapshot = z.infer<typeof insertBackupSnapshotSchema>;
+export type BackupSnapshot = typeof backupSnapshots.$inferSelect;

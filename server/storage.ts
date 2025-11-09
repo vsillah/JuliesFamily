@@ -12,6 +12,7 @@ import {
   adminPreferences, auditLogs,
   outreachEmails, icpCriteria,
   chatbotConversations, chatbotIssues,
+  backupSnapshots,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -47,7 +48,8 @@ import {
   type OutreachEmail, type InsertOutreachEmail,
   type IcpCriteria, type InsertIcpCriteria,
   type ChatbotConversation, type InsertChatbotConversation,
-  type ChatbotIssue, type InsertChatbotIssue
+  type ChatbotIssue, type InsertChatbotIssue,
+  type BackupSnapshot, type InsertBackupSnapshot
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -435,6 +437,22 @@ export interface IStorage {
       active: number;
     };
   }>;
+  
+  // Database Backup operations
+  createTableBackup(tableName: string, userId: string, backupName?: string, description?: string): Promise<{
+    backupTableName: string;
+    rowCount: number;
+    snapshotId: string;
+  }>;
+  getAllBackupSnapshots(): Promise<any[]>;
+  getBackupSnapshotsByTable(tableName: string): Promise<any[]>;
+  getBackupSnapshot(id: string): Promise<any | undefined>;
+  restoreFromBackup(backupId: string, mode: 'replace' | 'merge'): Promise<{
+    tableName: string;
+    rowsRestored: number;
+  }>;
+  deleteBackup(backupId: string): Promise<void>;
+  getAvailableTables(): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2503,6 +2521,219 @@ export class DatabaseStorage implements IStorage {
         active: activeCampaigns
       }
     };
+  }
+
+  // Database Backup operations
+  
+  // Helper method to validate table names against allow-list
+  private validateTableName(tableName: string): void {
+    // Allow-list of valid table names that can be backed up
+    const VALID_TABLES = [
+      'users', 'leads', 'interactions', 'lead_magnets', 'image_assets',
+      'content_items', 'content_visibility', 'ab_tests', 'ab_test_targets',
+      'ab_test_variants', 'ab_test_assignments', 'ab_test_events',
+      'google_reviews', 'donations', 'wishlist_items', 'donation_campaigns',
+      'campaign_members', 'campaign_testimonials', 'email_templates',
+      'email_logs', 'sms_templates', 'sms_sends', 'communication_logs',
+      'email_campaigns', 'email_sequence_steps', 'email_campaign_enrollments',
+      'pipeline_stages', 'lead_assignments', 'tasks', 'pipeline_history',
+      'admin_preferences', 'audit_logs', 'outreach_emails', 'icp_criteria',
+      'chatbot_conversations', 'chatbot_issues'
+    ];
+
+    if (!VALID_TABLES.includes(tableName)) {
+      throw new Error(`Invalid table name: ${tableName}. Table not eligible for backup.`);
+    }
+  }
+
+  // Helper method to safely quote SQL identifiers
+  private quoteIdentifier(identifier: string): string {
+    // PostgreSQL identifier quoting: double quotes and escape internal quotes
+    return `"${identifier.replace(/"/g, '""')}"`;
+  }
+
+  async createTableBackup(tableName: string, userId: string, backupName?: string, description?: string): Promise<{
+    backupTableName: string;
+    rowCount: number;
+    snapshotId: string;
+  }> {
+    // Validate table name against allow-list
+    this.validateTableName(tableName);
+
+    // Generate unique backup table name with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').split('Z')[0];
+    const backupTableName = `backup_${tableName}_${timestamp}`;
+
+    try {
+      // Use properly quoted identifiers to prevent SQL injection
+      const quotedBackupTable = this.quoteIdentifier(backupTableName);
+      const quotedOriginalTable = this.quoteIdentifier(tableName);
+
+      // Create backup table using CREATE TABLE AS SELECT
+      await db.execute(sql.raw(`CREATE TABLE ${quotedBackupTable} AS SELECT * FROM ${quotedOriginalTable}`));
+
+      // Get row count from backup table
+      const countResult = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${quotedBackupTable}`));
+      const rowCount = parseInt(countResult.rows[0]?.count || '0');
+
+      // Create snapshot metadata record
+      const [snapshot] = await db.insert(backupSnapshots).values({
+        tableName,
+        backupTableName,
+        backupName: backupName || `${tableName} backup ${timestamp}`,
+        rowCount,
+        createdBy: userId,
+        description
+      }).returning();
+
+      return {
+        backupTableName: snapshot.backupTableName,
+        rowCount: snapshot.rowCount,
+        snapshotId: snapshot.id
+      };
+    } catch (error) {
+      // Clean up backup table if metadata insert failed
+      try {
+        await db.execute(sql.raw(`DROP TABLE IF EXISTS ${this.quoteIdentifier(backupTableName)}`));
+      } catch (cleanupError) {
+        console.error('Failed to cleanup backup table after error:', cleanupError);
+      }
+      
+      throw new Error(`Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getAllBackupSnapshots(): Promise<BackupSnapshot[]> {
+    return await db
+      .select()
+      .from(backupSnapshots)
+      .orderBy(desc(backupSnapshots.createdAt));
+  }
+
+  async getBackupSnapshotsByTable(tableName: string): Promise<BackupSnapshot[]> {
+    return await db
+      .select()
+      .from(backupSnapshots)
+      .where(eq(backupSnapshots.tableName, tableName))
+      .orderBy(desc(backupSnapshots.createdAt));
+  }
+
+  async getBackupSnapshot(id: string): Promise<BackupSnapshot | undefined> {
+    const [snapshot] = await db
+      .select()
+      .from(backupSnapshots)
+      .where(eq(backupSnapshots.id, id));
+    return snapshot;
+  }
+
+  async restoreFromBackup(backupId: string, mode: 'replace' | 'merge'): Promise<{
+    tableName: string;
+    rowsRestored: number;
+  }> {
+    // Get backup snapshot metadata
+    const snapshot = await this.getBackupSnapshot(backupId);
+    if (!snapshot) {
+      throw new Error('Backup snapshot not found');
+    }
+
+    const { tableName, backupTableName } = snapshot;
+
+    // Validate table name against allow-list
+    this.validateTableName(tableName);
+
+    const quotedTable = this.quoteIdentifier(tableName);
+    const quotedBackupTable = this.quoteIdentifier(backupTableName);
+
+    try {
+      // Use transaction for atomicity - rollback on failure
+      await db.execute(sql.raw(`BEGIN`));
+
+      if (mode === 'replace') {
+        // Replace mode: Delete all rows from original table, then insert from backup
+        await db.execute(sql.raw(`DELETE FROM ${quotedTable}`));
+        await db.execute(sql.raw(`INSERT INTO ${quotedTable} SELECT * FROM ${quotedBackupTable}`));
+      } else {
+        // Merge mode: Insert rows from backup that don't exist in original table
+        // This assumes the table has an 'id' column as primary key
+        await db.execute(sql.raw(`
+          INSERT INTO ${quotedTable} 
+          SELECT * FROM ${quotedBackupTable} 
+          WHERE id NOT IN (SELECT id FROM ${quotedTable})
+          ON CONFLICT (id) DO NOTHING
+        `));
+      }
+
+      // Get count of rows in restored table
+      const countResult = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${quotedTable}`));
+      const rowsRestored = parseInt(countResult.rows[0]?.count || '0');
+
+      // Commit transaction
+      await db.execute(sql.raw(`COMMIT`));
+
+      return {
+        tableName,
+        rowsRestored
+      };
+    } catch (error) {
+      // Rollback transaction on error
+      try {
+        await db.execute(sql.raw(`ROLLBACK`));
+      } catch (rollbackError) {
+        console.error('Failed to rollback transaction:', rollbackError);
+      }
+
+      throw new Error(`Failed to restore from backup: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteBackup(backupId: string): Promise<void> {
+    // Get backup snapshot metadata
+    const snapshot = await this.getBackupSnapshot(backupId);
+    if (!snapshot) {
+      throw new Error('Backup snapshot not found');
+    }
+
+    const quotedBackupTable = this.quoteIdentifier(snapshot.backupTableName);
+
+    try {
+      // Use transaction for atomicity
+      await db.execute(sql.raw(`BEGIN`));
+
+      // Drop the backup table
+      await db.execute(sql.raw(`DROP TABLE IF EXISTS ${quotedBackupTable}`));
+
+      // Delete snapshot metadata
+      await db.delete(backupSnapshots).where(eq(backupSnapshots.id, backupId));
+
+      // Commit transaction
+      await db.execute(sql.raw(`COMMIT`));
+    } catch (error) {
+      // Rollback transaction on error
+      try {
+        await db.execute(sql.raw(`ROLLBACK`));
+      } catch (rollbackError) {
+        console.error('Failed to rollback transaction:', rollbackError);
+      }
+
+      throw new Error(`Failed to delete backup: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getAvailableTables(): Promise<string[]> {
+    // Return the allow-list of valid tables (same list used for validation)
+    // This ensures consistency and prevents information disclosure
+    return [
+      'users', 'leads', 'interactions', 'lead_magnets', 'image_assets',
+      'content_items', 'content_visibility', 'ab_tests', 'ab_test_targets',
+      'ab_test_variants', 'ab_test_assignments', 'ab_test_events',
+      'google_reviews', 'donations', 'wishlist_items', 'donation_campaigns',
+      'campaign_members', 'campaign_testimonials', 'email_templates',
+      'email_logs', 'sms_templates', 'sms_sends', 'communication_logs',
+      'email_campaigns', 'email_sequence_steps', 'email_campaign_enrollments',
+      'pipeline_stages', 'lead_assignments', 'tasks', 'pipeline_history',
+      'admin_preferences', 'audit_logs', 'outreach_emails', 'icp_criteria',
+      'chatbot_conversations', 'chatbot_issues'
+    ].sort();
   }
 }
 
