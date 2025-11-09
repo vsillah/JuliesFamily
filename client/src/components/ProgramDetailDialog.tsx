@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -51,7 +51,7 @@ export default function ProgramDetailDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0 gap-0"
+        className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0 gap-0 [&>button]:bg-white/90 [&>button]:text-black [&>button]:hover:bg-white [&>button]:rounded-full [&>button]:h-8 [&>button]:w-8 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-lg [&>button]:z-50"
         data-testid={`dialog-program-detail-${program.id}`}
       >
         <ScrollArea className="flex-1 overflow-y-auto">
@@ -69,6 +69,9 @@ export default function ProgramDetailDialog({
                   <DialogTitle className="text-3xl sm:text-4xl font-serif font-bold text-white">
                     {program.title}
                   </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    {program.description}
+                  </DialogDescription>
                 </DialogHeader>
               </div>
             </div>
@@ -80,6 +83,9 @@ export default function ProgramDetailDialog({
                 <DialogTitle className="text-3xl sm:text-4xl font-serif font-bold">
                   {program.title}
                 </DialogTitle>
+                <DialogDescription className="sr-only">
+                  {program.description}
+                </DialogDescription>
               </DialogHeader>
             </div>
           )}
