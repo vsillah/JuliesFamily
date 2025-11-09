@@ -54,8 +54,9 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
+import { createCacLtgpStorage, type ICacLtgpStorage } from "./storage/cacLtgpStorage";
 
-export interface IStorage {
+export interface IStorage extends ICacLtgpStorage {
   // User operations for Replit Auth
   getUser(id: string): Promise<User | undefined>;
   getUserByOidcSub(oidcSub: string): Promise<User | undefined>;
@@ -484,9 +485,140 @@ export interface IStorage {
       estimatedBackupBytes: number;
     }>;
   }>;
+  
+  // CAC:LTGP Tracking operations (Alex Hormozi's $100M Leads Framework)
+  
+  // Acquisition Channels
+  createAcquisitionChannel(channel: InsertAcquisitionChannel): Promise<AcquisitionChannel>;
+  getAcquisitionChannel(id: string): Promise<AcquisitionChannel | undefined>;
+  getAllAcquisitionChannels(): Promise<AcquisitionChannel[]>;
+  getActiveAcquisitionChannels(): Promise<AcquisitionChannel[]>;
+  updateAcquisitionChannel(id: string, updates: Partial<InsertAcquisitionChannel>): Promise<AcquisitionChannel | undefined>;
+  deleteAcquisitionChannel(id: string): Promise<void>;
+  
+  // Marketing Campaigns
+  createMarketingCampaign(campaign: InsertMarketingCampaign): Promise<MarketingCampaign>;
+  getMarketingCampaign(id: string): Promise<MarketingCampaign | undefined>;
+  getAllMarketingCampaigns(): Promise<MarketingCampaign[]>;
+  getActiveMarketingCampaigns(): Promise<MarketingCampaign[]>;
+  getCampaignsByChannel(channelId: string): Promise<MarketingCampaign[]>;
+  updateMarketingCampaign(id: string, updates: Partial<InsertMarketingCampaign>): Promise<MarketingCampaign | undefined>;
+  deleteMarketingCampaign(id: string): Promise<void>;
+  
+  // Channel Spend Ledger
+  createSpendEntry(entry: InsertChannelSpendLedger): Promise<ChannelSpendLedger>;
+  getSpendEntriesByChannel(channelId: string): Promise<ChannelSpendLedger[]>;
+  getSpendEntriesByCampaign(campaignId: string): Promise<ChannelSpendLedger[]>;
+  getSpendEntriesByPeriod(periodKey: string): Promise<ChannelSpendLedger[]>;
+  updateSpendEntry(id: string, updates: Partial<InsertChannelSpendLedger>): Promise<ChannelSpendLedger | undefined>;
+  deleteSpendEntry(id: string): Promise<void>;
+  
+  // Lead Attribution
+  createLeadAttribution(attribution: InsertLeadAttribution): Promise<LeadAttribution>;
+  getLeadAttribution(leadId: string): Promise<LeadAttribution | undefined>;
+  getAttributionsByChannel(channelId: string): Promise<LeadAttribution[]>;
+  getAttributionsByCampaign(campaignId: string): Promise<LeadAttribution[]>;
+  updateLeadAttribution(leadId: string, updates: Partial<InsertLeadAttribution>): Promise<LeadAttribution | undefined>;
+  
+  // Donor Lifecycle Stages
+  createDonorLifecycleStage(stage: InsertDonorLifecycleStage): Promise<DonorLifecycleStage>;
+  getDonorLifecycleStage(leadId: string): Promise<DonorLifecycleStage | undefined>;
+  getAllDonorLifecycleStages(): Promise<DonorLifecycleStage[]>;
+  getDonorsByStage(stage: string): Promise<DonorLifecycleStage[]>;
+  updateDonorLifecycleStage(leadId: string, updates: Partial<InsertDonorLifecycleStage>): Promise<DonorLifecycleStage | undefined>;
+  
+  // Donor Economics
+  createDonorEconomics(economics: InsertDonorEconomics): Promise<DonorEconomics>;
+  getDonorEconomics(leadId: string): Promise<DonorEconomics | undefined>;
+  updateDonorEconomics(leadId: string, updates: Partial<InsertDonorEconomics>): Promise<DonorEconomics | undefined>;
+  calculateDonorLTGP(leadId: string): Promise<number>;
+  
+  // Economics Settings
+  getEconomicsSettings(): Promise<EconomicsSettings | undefined>;
+  updateEconomicsSettings(updates: Partial<InsertEconomicsSettings>): Promise<EconomicsSettings>;
 }
 
 export class DatabaseStorage implements IStorage {
+  // CAC/LTGP storage module composition
+  private cacLtgpStorage: ICacLtgpStorage;
+  
+  // CAC/LTGP method delegation (initialized in constructor)
+  createAcquisitionChannel!: ICacLtgpStorage['createAcquisitionChannel'];
+  getAcquisitionChannel!: ICacLtgpStorage['getAcquisitionChannel'];
+  getAllAcquisitionChannels!: ICacLtgpStorage['getAllAcquisitionChannels'];
+  getActiveAcquisitionChannels!: ICacLtgpStorage['getActiveAcquisitionChannels'];
+  updateAcquisitionChannel!: ICacLtgpStorage['updateAcquisitionChannel'];
+  deleteAcquisitionChannel!: ICacLtgpStorage['deleteAcquisitionChannel'];
+  createMarketingCampaign!: ICacLtgpStorage['createMarketingCampaign'];
+  getMarketingCampaign!: ICacLtgpStorage['getMarketingCampaign'];
+  getAllMarketingCampaigns!: ICacLtgpStorage['getAllMarketingCampaigns'];
+  getActiveMarketingCampaigns!: ICacLtgpStorage['getActiveMarketingCampaigns'];
+  getCampaignsByChannel!: ICacLtgpStorage['getCampaignsByChannel'];
+  updateMarketingCampaign!: ICacLtgpStorage['updateMarketingCampaign'];
+  deleteMarketingCampaign!: ICacLtgpStorage['deleteMarketingCampaign'];
+  createSpendEntry!: ICacLtgpStorage['createSpendEntry'];
+  getSpendEntriesByChannel!: ICacLtgpStorage['getSpendEntriesByChannel'];
+  getSpendEntriesByCampaign!: ICacLtgpStorage['getSpendEntriesByCampaign'];
+  getSpendEntriesByPeriod!: ICacLtgpStorage['getSpendEntriesByPeriod'];
+  updateSpendEntry!: ICacLtgpStorage['updateSpendEntry'];
+  deleteSpendEntry!: ICacLtgpStorage['deleteSpendEntry'];
+  createLeadAttribution!: ICacLtgpStorage['createLeadAttribution'];
+  getLeadAttribution!: ICacLtgpStorage['getLeadAttribution'];
+  getAttributionsByChannel!: ICacLtgpStorage['getAttributionsByChannel'];
+  getAttributionsByCampaign!: ICacLtgpStorage['getAttributionsByCampaign'];
+  updateLeadAttribution!: ICacLtgpStorage['updateLeadAttribution'];
+  createDonorLifecycleStage!: ICacLtgpStorage['createDonorLifecycleStage'];
+  getDonorLifecycleStage!: ICacLtgpStorage['getDonorLifecycleStage'];
+  getAllDonorLifecycleStages!: ICacLtgpStorage['getAllDonorLifecycleStages'];
+  getDonorsByStage!: ICacLtgpStorage['getDonorsByStage'];
+  updateDonorLifecycleStage!: ICacLtgpStorage['updateDonorLifecycleStage'];
+  createDonorEconomics!: ICacLtgpStorage['createDonorEconomics'];
+  getDonorEconomics!: ICacLtgpStorage['getDonorEconomics'];
+  updateDonorEconomics!: ICacLtgpStorage['updateDonorEconomics'];
+  getEconomicsSettings!: ICacLtgpStorage['getEconomicsSettings'];
+  updateEconomicsSettings!: ICacLtgpStorage['updateEconomicsSettings'];
+  
+  constructor() {
+    // Initialize CAC/LTGP storage module
+    this.cacLtgpStorage = createCacLtgpStorage();
+    
+    // Bind all CAC/LTGP methods
+    this.createAcquisitionChannel = this.cacLtgpStorage.createAcquisitionChannel.bind(this.cacLtgpStorage);
+    this.getAcquisitionChannel = this.cacLtgpStorage.getAcquisitionChannel.bind(this.cacLtgpStorage);
+    this.getAllAcquisitionChannels = this.cacLtgpStorage.getAllAcquisitionChannels.bind(this.cacLtgpStorage);
+    this.getActiveAcquisitionChannels = this.cacLtgpStorage.getActiveAcquisitionChannels.bind(this.cacLtgpStorage);
+    this.updateAcquisitionChannel = this.cacLtgpStorage.updateAcquisitionChannel.bind(this.cacLtgpStorage);
+    this.deleteAcquisitionChannel = this.cacLtgpStorage.deleteAcquisitionChannel.bind(this.cacLtgpStorage);
+    this.createMarketingCampaign = this.cacLtgpStorage.createMarketingCampaign.bind(this.cacLtgpStorage);
+    this.getMarketingCampaign = this.cacLtgpStorage.getMarketingCampaign.bind(this.cacLtgpStorage);
+    this.getAllMarketingCampaigns = this.cacLtgpStorage.getAllMarketingCampaigns.bind(this.cacLtgpStorage);
+    this.getActiveMarketingCampaigns = this.cacLtgpStorage.getActiveMarketingCampaigns.bind(this.cacLtgpStorage);
+    this.getCampaignsByChannel = this.cacLtgpStorage.getCampaignsByChannel.bind(this.cacLtgpStorage);
+    this.updateMarketingCampaign = this.cacLtgpStorage.updateMarketingCampaign.bind(this.cacLtgpStorage);
+    this.deleteMarketingCampaign = this.cacLtgpStorage.deleteMarketingCampaign.bind(this.cacLtgpStorage);
+    this.createSpendEntry = this.cacLtgpStorage.createSpendEntry.bind(this.cacLtgpStorage);
+    this.getSpendEntriesByChannel = this.cacLtgpStorage.getSpendEntriesByChannel.bind(this.cacLtgpStorage);
+    this.getSpendEntriesByCampaign = this.cacLtgpStorage.getSpendEntriesByCampaign.bind(this.cacLtgpStorage);
+    this.getSpendEntriesByPeriod = this.cacLtgpStorage.getSpendEntriesByPeriod.bind(this.cacLtgpStorage);
+    this.updateSpendEntry = this.cacLtgpStorage.updateSpendEntry.bind(this.cacLtgpStorage);
+    this.deleteSpendEntry = this.cacLtgpStorage.deleteSpendEntry.bind(this.cacLtgpStorage);
+    this.createLeadAttribution = this.cacLtgpStorage.createLeadAttribution.bind(this.cacLtgpStorage);
+    this.getLeadAttribution = this.cacLtgpStorage.getLeadAttribution.bind(this.cacLtgpStorage);
+    this.getAttributionsByChannel = this.cacLtgpStorage.getAttributionsByChannel.bind(this.cacLtgpStorage);
+    this.getAttributionsByCampaign = this.cacLtgpStorage.getAttributionsByCampaign.bind(this.cacLtgpStorage);
+    this.updateLeadAttribution = this.cacLtgpStorage.updateLeadAttribution.bind(this.cacLtgpStorage);
+    this.createDonorLifecycleStage = this.cacLtgpStorage.createDonorLifecycleStage.bind(this.cacLtgpStorage);
+    this.getDonorLifecycleStage = this.cacLtgpStorage.getDonorLifecycleStage.bind(this.cacLtgpStorage);
+    this.getAllDonorLifecycleStages = this.cacLtgpStorage.getAllDonorLifecycleStages.bind(this.cacLtgpStorage);
+    this.getDonorsByStage = this.cacLtgpStorage.getDonorsByStage.bind(this.cacLtgpStorage);
+    this.updateDonorLifecycleStage = this.cacLtgpStorage.updateDonorLifecycleStage.bind(this.cacLtgpStorage);
+    this.createDonorEconomics = this.cacLtgpStorage.createDonorEconomics.bind(this.cacLtgpStorage);
+    this.getDonorEconomics = this.cacLtgpStorage.getDonorEconomics.bind(this.cacLtgpStorage);
+    this.updateDonorEconomics = this.cacLtgpStorage.updateDonorEconomics.bind(this.cacLtgpStorage);
+    this.getEconomicsSettings = this.cacLtgpStorage.getEconomicsSettings.bind(this.cacLtgpStorage);
+    this.updateEconomicsSettings = this.cacLtgpStorage.updateEconomicsSettings.bind(this.cacLtgpStorage);
+  }
+  
   // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));

@@ -5,7 +5,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema } from "@shared/schema";
+import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter } from "./security";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
@@ -1708,6 +1709,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // CAC:LTGP Analytics (Alex Hormozi's $100M Leads Framework)
+  const cacAnalytics = createCacLtgpAnalyticsService(storage);
+
+  // CAC:LTGP Overview
+  app.get('/api/admin/cac-ltgp/overview', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const overview = await cacAnalytics.getCACLTGPOverview();
+      res.json(overview);
+    } catch (error) {
+      console.error("Error fetching CAC:LTGP overview:", error);
+      res.status(500).json({ message: "Failed to fetch CAC:LTGP overview" });
+    }
+  });
+
+  // Channel Performance
+  app.get('/api/admin/cac-ltgp/channels', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const channels = await cacAnalytics.getChannelPerformance();
+      res.json(channels);
+    } catch (error) {
+      console.error("Error fetching channel performance:", error);
+      res.status(500).json({ message: "Failed to fetch channel performance" });
+    }
+  });
+
+  // Campaign Performance
+  app.get('/api/admin/cac-ltgp/campaigns', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const campaigns = await cacAnalytics.getCampaignPerformance();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching campaign performance:", error);
+      res.status(500).json({ message: "Failed to fetch campaign performance" });
+    }
+  });
+
+  // Cohort Analysis
+  app.get('/api/admin/cac-ltgp/cohorts', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const periodType = (req.query.periodType as 'week' | 'month') || 'month';
+      const cohorts = await cacAnalytics.getCohortAnalysis(periodType);
+      res.json(cohorts);
+    } catch (error) {
+      console.error("Error fetching cohort analysis:", error);
+      res.status(500).json({ message: "Failed to fetch cohort analysis" });
+    }
+  });
+
+  // Acquisition Channels Management
+  app.get('/api/admin/acquisition-channels', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const channels = await storage.getAllAcquisitionChannels();
+      res.json(channels);
+    } catch (error) {
+      console.error("Error fetching acquisition channels:", error);
+      res.status(500).json({ message: "Failed to fetch acquisition channels" });
+    }
+  });
+
+  app.post('/api/admin/acquisition-channels', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validated = insertAcquisitionChannelSchema.parse(req.body);
+      const channel = await storage.createAcquisitionChannel(validated);
+      res.json(channel);
+    } catch (error) {
+      console.error("Error creating acquisition channel:", error);
+      res.status(500).json({ message: "Failed to create acquisition channel" });
+    }
+  });
+
+  app.patch('/api/admin/acquisition-channels/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validated = insertAcquisitionChannelSchema.partial().parse(req.body);
+      const channel = await storage.updateAcquisitionChannel(req.params.id, validated);
+      if (!channel) {
+        return res.status(404).json({ message: "Channel not found" });
+      }
+      res.json(channel);
+    } catch (error) {
+      console.error("Error updating acquisition channel:", error);
+      res.status(500).json({ message: "Failed to update acquisition channel" });
+    }
+  });
+
+  // Marketing Campaigns Management
+  app.get('/api/admin/marketing-campaigns', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const campaigns = await storage.getAllMarketingCampaigns();
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching marketing campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch marketing campaigns" });
+    }
+  });
+
+  app.post('/api/admin/marketing-campaigns', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validated = insertMarketingCampaignSchema.parse(req.body);
+      const campaign = await storage.createMarketingCampaign(validated);
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error creating marketing campaign:", error);
+      res.status(500).json({ message: "Failed to create marketing campaign" });
+    }
+  });
+
+  app.patch('/api/admin/marketing-campaigns/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validated = insertMarketingCampaignSchema.partial().parse(req.body);
+      const campaign = await storage.updateMarketingCampaign(req.params.id, validated);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error updating marketing campaign:", error);
+      res.status(500).json({ message: "Failed to update marketing campaign" });
+    }
+  });
+
+  // Channel Spend Tracking
+  app.post('/api/admin/channel-spend', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validated = insertChannelSpendLedgerSchema.parse(req.body);
+      const entry = await storage.createSpendEntry(validated);
+      res.json(entry);
+    } catch (error) {
+      console.error("Error creating spend entry:", error);
+      res.status(500).json({ message: "Failed to create spend entry" });
+    }
+  });
+
+  // Economics Settings
+  app.get('/api/admin/economics-settings', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const settings = await storage.getEconomicsSettings();
+      res.json(settings || {});
+    } catch (error) {
+      console.error("Error fetching economics settings:", error);
+      res.status(500).json({ message: "Failed to fetch economics settings" });
+    }
+  });
+
+  app.patch('/api/admin/economics-settings', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validated = insertEconomicsSettingsSchema.partial().parse(req.body);
+      const settings = await storage.updateEconomicsSettings(validated);
+      res.json(settings);
+    } catch (error) {
+      console.error("Error updating economics settings:", error);
+      res.status(500).json({ message: "Failed to update economics settings" });
     }
   });
 
