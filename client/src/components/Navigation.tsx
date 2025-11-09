@@ -132,6 +132,14 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
     }
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+    setMobileMenuOpen(false);
+  };
+
   return (
     <>
       <nav
@@ -150,14 +158,21 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
           <div className="flex items-center justify-between h-14 md:h-20 gap-2 md:gap-4">
             {/* Left: Brand */}
             <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
-              <CloudinaryImage 
-                name="site-logo"
-                alt="Julie's Family Learning Program Logo" 
-                className="h-9 md:h-12 w-auto"
-                width={120}
-                quality="auto:best"
-                loading="eager"
-              />
+              <button
+                onClick={scrollToTop}
+                className="cursor-pointer transition-opacity hover:opacity-80"
+                aria-label="Scroll to top"
+                data-testid="button-logo-scroll-top"
+              >
+                <CloudinaryImage 
+                  name="site-logo"
+                  alt="Julie's Family Learning Program Logo" 
+                  className="h-9 md:h-12 w-auto"
+                  width={120}
+                  quality="auto:best"
+                  loading="eager"
+                />
+              </button>
               <div className="hidden xl:block">
                 <h1 className={`text-sm font-serif font-semibold transition-colors duration-300 leading-tight whitespace-nowrap ${
                   isScrolled ? "text-primary" : "text-white"
