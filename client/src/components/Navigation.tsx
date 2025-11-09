@@ -300,6 +300,12 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                       {user.firstName} {user.lastName}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    <Link href="/profile">
+                      <DropdownMenuItem className="cursor-pointer" data-testid="menu-profile-settings">
+                        <User className="w-4 h-4 mr-2" />
+                        Profile Settings
+                      </DropdownMenuItem>
+                    </Link>
                     <DropdownMenuItem onClick={() => setShowUploader(true)} data-testid="menu-update-photo">
                       <Camera className="w-4 h-4 mr-2" />
                       Update Photo

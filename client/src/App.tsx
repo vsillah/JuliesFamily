@@ -11,6 +11,7 @@ import HowItWorks from "@/pages/HowItWorks";
 import VirtualTour from "@/pages/VirtualTour";
 import Donate from "@/pages/Donate";
 import DonateSuccess from "@/pages/DonateSuccess";
+import Profile from "@/pages/Profile";
 import AdminDashboard from "@/pages/AdminDashboard";
 import AdminGuide from "@/pages/AdminGuide";
 import AdminImages from "@/pages/AdminImages";
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/virtual-tour" component={VirtualTour} />
       <Route path="/donate" component={Donate} />
       <Route path="/donate/success" component={DonateSuccess} />
+      <Route path="/profile" component={Profile} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/guide" component={AdminGuide} />
       <Route path="/admin/images" component={AdminImages} />
