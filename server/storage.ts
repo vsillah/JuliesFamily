@@ -358,6 +358,83 @@ export interface IStorage {
   createChatbotIssue(issue: InsertChatbotIssue): Promise<ChatbotIssue>;
   getChatbotIssues(filters?: { status?: string; severity?: string; reportedBy?: string; limit?: number }): Promise<ChatbotIssue[]>;
   updateChatbotIssue(id: string, updates: Partial<InsertChatbotIssue>): Promise<ChatbotIssue | undefined>;
+  
+  // Analytics operations for chatbot
+  getPlatformStats(): Promise<{
+    generatedAt: string;
+    totals: {
+      leads: number;
+      users: number;
+      donations: number;
+      activeContent: number;
+    };
+    recentActivity: {
+      leadsThisWeek: number;
+      donationsThisWeek: number;
+      tasksThisWeek: number;
+    };
+  }>;
+  
+  getLeadAnalytics(filters?: {
+    persona?: string;
+    funnelStage?: string;
+    pipelineStage?: string;
+    daysBack?: number;
+  }): Promise<{
+    generatedAt: string;
+    appliedFilters: {
+      persona: string | null;
+      funnelStage: string | null;
+      pipelineStage: string | null;
+      daysBack: number;
+    };
+    totals: {
+      total: number;
+      byPersona: { persona: string; count: number }[];
+      byFunnelStage: { stage: string; count: number }[];
+      byPipelineStage: { stage: string; count: number }[];
+    };
+    recentLeads: { count: number; period: 'last7Days' | 'last30Days' | 'custom' };
+    avgEngagementScore: number; // Rounded to 1 decimal place
+  }>;
+  
+  getContentSummary(filters?: { type?: string }): Promise<{
+    generatedAt: string;
+    appliedFilters: {
+      type: string | null;
+    };
+    totals: {
+      total: number;
+      active: number;
+      inactive: number;
+      byType: { type: string; count: number; active: number }[];
+    };
+    abTests: {
+      total: number;
+      active: number;
+      paused: number;
+      completed: number;
+    };
+  }>;
+  
+  getDonationStats(filters?: { daysBack?: number }): Promise<{
+    generatedAt: string;
+    appliedFilters: {
+      daysBack: number;
+    };
+    totals: {
+      totalDonations: number;
+      totalAmount: number; // In cents
+      avgDonation: number; // In cents, rounded to nearest cent
+      byType: { type: string; count: number; amount: number }[];
+      byStatus: { status: string; count: number }[];
+    };
+    recentDonations: { count: number; amount: number; period: 'last7Days' | 'last30Days' | 'custom' };
+    campaigns: {
+      total: number;
+      active: number;
+    };
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2168,6 +2245,264 @@ export class DatabaseStorage implements IStorage {
       .where(eq(chatbotIssues.id, id))
       .returning();
     return updated;
+  }
+
+  // Analytics operations for chatbot
+  async getPlatformStats() {
+    const now = new Date();
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalLeads,
+      totalUsers,
+      totalDonations,
+      activeContent,
+      leadsThisWeek,
+      donationsThisWeek,
+      tasksThisWeek
+    ] = await Promise.all([
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(leads).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(users).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(donations).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(contentItems).where(eq(contentItems.isActive, true)).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(leads).where(sql`${leads.createdAt} >= ${weekAgo}`).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(donations).where(sql`${donations.createdAt} >= ${weekAgo}`).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(tasks).where(sql`${tasks.createdAt} >= ${weekAgo}`).then(r => r[0]?.count || 0)
+    ]);
+
+    return {
+      generatedAt: now.toISOString(),
+      totals: {
+        leads: totalLeads,
+        users: totalUsers,
+        donations: totalDonations,
+        activeContent
+      },
+      recentActivity: {
+        leadsThisWeek,
+        donationsThisWeek,
+        tasksThisWeek
+      }
+    };
+  }
+
+  async getLeadAnalytics(filters?: {
+    persona?: string;
+    funnelStage?: string;
+    pipelineStage?: string;
+    daysBack?: number;
+  }) {
+    const now = new Date();
+    const daysBack = filters?.daysBack || 30;
+    const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
+
+    // Build conditions
+    const conditions = [];
+    if (filters?.persona) {
+      conditions.push(eq(leads.persona, filters.persona));
+    }
+    if (filters?.funnelStage) {
+      conditions.push(eq(leads.funnelStage, filters.funnelStage));
+    }
+    if (filters?.pipelineStage) {
+      conditions.push(eq(leads.pipelineStage, filters.pipelineStage));
+    }
+
+    // Get total count with filters
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+    const totalCount = await db.select({ count: sql<number>`cast(count(*) as int)` })
+      .from(leads)
+      .where(whereClause)
+      .then(r => r[0]?.count || 0);
+
+    // Get breakdown by persona
+    const byPersona = await db.select({
+      persona: leads.persona,
+      count: sql<number>`cast(count(*) as int)`
+    })
+      .from(leads)
+      .where(whereClause)
+      .groupBy(leads.persona);
+
+    // Get breakdown by funnel stage
+    const byFunnelStage = await db.select({
+      stage: leads.funnelStage,
+      count: sql<number>`cast(count(*) as int)`
+    })
+      .from(leads)
+      .where(whereClause)
+      .groupBy(leads.funnelStage);
+
+    // Get breakdown by pipeline stage
+    const byPipelineStage = await db.select({
+      stage: leads.pipelineStage,
+      count: sql<number>`cast(count(*) as int)`
+    })
+      .from(leads)
+      .where(whereClause)
+      .groupBy(leads.pipelineStage);
+
+    // Get recent leads count
+    const recentCount = await db.select({ count: sql<number>`cast(count(*) as int)` })
+      .from(leads)
+      .where(and(whereClause, sql`${leads.createdAt} >= ${cutoffDate}`))
+      .then(r => r[0]?.count || 0);
+
+    // Get average engagement score
+    const avgScore = await db.select({ avg: sql<number>`cast(avg(${leads.engagementScore}) as float)` })
+      .from(leads)
+      .where(whereClause)
+      .then(r => Math.round((r[0]?.avg || 0) * 10) / 10);
+
+    return {
+      generatedAt: now.toISOString(),
+      appliedFilters: {
+        persona: filters?.persona || null,
+        funnelStage: filters?.funnelStage || null,
+        pipelineStage: filters?.pipelineStage || null,
+        daysBack
+      },
+      totals: {
+        total: totalCount,
+        byPersona: byPersona.map(p => ({ persona: p.persona || 'unknown', count: p.count })),
+        byFunnelStage: byFunnelStage.map(f => ({ stage: f.stage || 'unknown', count: f.count })),
+        byPipelineStage: byPipelineStage.map(p => ({ stage: p.stage || 'unknown', count: p.count }))
+      },
+      recentLeads: {
+        count: recentCount,
+        period: (daysBack === 7 ? 'last7Days' : daysBack === 30 ? 'last30Days' : 'custom') as 'last7Days' | 'last30Days' | 'custom'
+      },
+      avgEngagementScore: avgScore
+    };
+  }
+
+  async getContentSummary(filters?: { type?: string }) {
+    const now = new Date();
+
+    const whereClause = filters?.type ? eq(contentItems.type, filters.type) : undefined;
+
+    // Get total counts
+    const [totalCount, activeCount, inactiveCount] = await Promise.all([
+      db.select({ count: sql<number>`cast(count(*) as int)` })
+        .from(contentItems)
+        .where(whereClause)
+        .then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` })
+        .from(contentItems)
+        .where(and(whereClause, eq(contentItems.isActive, true)))
+        .then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` })
+        .from(contentItems)
+        .where(and(whereClause, eq(contentItems.isActive, false)))
+        .then(r => r[0]?.count || 0)
+    ]);
+
+    // Get breakdown by type
+    const byType = await db.select({
+      type: contentItems.type,
+      count: sql<number>`cast(count(*) as int)`,
+      active: sql<number>`cast(sum(case when ${contentItems.isActive} then 1 else 0 end) as int)`
+    })
+      .from(contentItems)
+      .where(whereClause)
+      .groupBy(contentItems.type);
+
+    // Get A/B test stats
+    const [totalTests, activeTests, pausedTests, completedTests] = await Promise.all([
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(abTests).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(abTests).where(eq(abTests.status, 'active')).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(abTests).where(eq(abTests.status, 'paused')).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(abTests).where(eq(abTests.status, 'completed')).then(r => r[0]?.count || 0)
+    ]);
+
+    return {
+      generatedAt: now.toISOString(),
+      appliedFilters: {
+        type: filters?.type || null
+      },
+      totals: {
+        total: totalCount,
+        active: activeCount,
+        inactive: inactiveCount,
+        byType: byType.map(t => ({ type: t.type, count: t.count, active: t.active }))
+      },
+      abTests: {
+        total: totalTests,
+        active: activeTests,
+        paused: pausedTests,
+        completed: completedTests
+      }
+    };
+  }
+
+  async getDonationStats(filters?: { daysBack?: number }) {
+    const now = new Date();
+    const daysBack = filters?.daysBack || 30;
+    const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
+
+    // Get total donation stats
+    const totals = await db.select({
+      count: sql<number>`cast(count(*) as int)`,
+      sum: sql<number>`cast(sum(${donations.amount}) as int)`,
+      avg: sql<number>`cast(avg(${donations.amount}) as int)`
+    })
+      .from(donations)
+      .then(r => r[0] || { count: 0, sum: 0, avg: 0 });
+
+    // Get breakdown by type
+    const byType = await db.select({
+      type: donations.donationType,
+      count: sql<number>`cast(count(*) as int)`,
+      amount: sql<number>`cast(sum(${donations.amount}) as int)`
+    })
+      .from(donations)
+      .groupBy(donations.donationType);
+
+    // Get breakdown by status
+    const byStatus = await db.select({
+      status: donations.status,
+      count: sql<number>`cast(count(*) as int)`
+    })
+      .from(donations)
+      .groupBy(donations.status);
+
+    // Get recent donations
+    const recentDonations = await db.select({
+      count: sql<number>`cast(count(*) as int)`,
+      amount: sql<number>`cast(sum(${donations.amount}) as int)`
+    })
+      .from(donations)
+      .where(sql`${donations.createdAt} >= ${cutoffDate}`)
+      .then(r => r[0] || { count: 0, amount: 0 });
+
+    // Get campaign stats
+    const [totalCampaigns, activeCampaigns] = await Promise.all([
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(donationCampaigns).then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` }).from(donationCampaigns).where(eq(donationCampaigns.status, 'active')).then(r => r[0]?.count || 0)
+    ]);
+
+    return {
+      generatedAt: now.toISOString(),
+      appliedFilters: {
+        daysBack
+      },
+      totals: {
+        totalDonations: totals.count,
+        totalAmount: totals.sum,
+        avgDonation: Math.round(totals.avg),
+        byType: byType.map(t => ({ type: t.type, count: t.count, amount: t.amount })),
+        byStatus: byStatus.map(s => ({ status: s.status, count: s.count }))
+      },
+      recentDonations: {
+        count: recentDonations.count,
+        amount: recentDonations.amount,
+        period: (daysBack === 7 ? 'last7Days' : daysBack === 30 ? 'last30Days' : 'custom') as 'last7Days' | 'last30Days' | 'custom'
+      },
+      campaigns: {
+        total: totalCampaigns,
+        active: activeCampaigns
+      }
+    };
   }
 }
 

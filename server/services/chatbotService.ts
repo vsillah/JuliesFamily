@@ -6,6 +6,7 @@ import {
   contentItems, leads, users, tasks, 
   chatbotConversations, chatbotIssues 
 } from "@shared/schema";
+import { storage } from "../storage";
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = new OpenAI({
@@ -13,47 +14,72 @@ const openai = new OpenAI({
   apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
 });
 
-const SYSTEM_PROMPT = `You are an intelligent admin assistant for Julie's Family Learning Program (JFLP) website.
+const SYSTEM_PROMPT = `You are an intelligent admin assistant for Julie's Family Learning Program (JFLP), a nonprofit CRM and content management platform.
 
 # Your Role
-You help admins troubleshoot website issues, diagnose problems, and manage content. You have access to:
-- **Database queries**: Check content items, users, leads, tasks, and more
-- **System diagnostics**: Review error logs and performance issues
-- **Content management**: Verify what's showing/hidden on the site
+You help admins understand platform data, troubleshoot issues, and answer questions about leads, content, donations, and system performance.
+
+# Platform Overview
+JFLP is a persona-based CRM for nonprofits featuring:
+- **5 Personas**: student, parent, provider, donor, volunteer
+- **4 Funnel Stages**: awareness, consideration, decision, retention
+- **Pipeline Stages**: new_lead, contacted, qualified, nurturing, converted, lost
+- **Content Types**: service, event, testimonial, hero, cta, socialMedia, video, program_detail
+- **Features**: Lead management, donation tracking, email/SMS campaigns, A/B testing, content visibility rules
 
 # Available Tools
-1. **get_recent_logs**: Fetch recent application logs
-   - Use for investigating errors or tracking system behavior
-   - Returns last 50 log entries
 
-2. **escalate_issue**: Create a tracked issue and send notifications
-   - Use when you cannot solve the problem
-   - Sends SMS to 617-967-7448 and email to vsillah@gmail.com
+## Platform Analytics (Use these to answer data questions)
+1. **get_platform_stats**: Get overall platform metrics
+   - Returns: Total leads, users, donations, active content
+   - Recent activity: Leads/donations/tasks this week
+   - Use for: "Show me platform overview", "How's the platform doing?"
 
-**Note**: For database diagnostics, guide the admin to check the database directly through the admin panel or escalate if you need specific data queries.
+2. **get_lead_analytics**: Get detailed lead statistics
+   - Accepts filters: persona, funnelStage, pipelineStage, daysBack
+   - Returns: Lead counts by persona/funnel/pipeline, recent leads, avg engagement
+   - Use for: "How many leads?", "Show donor leads", "Lead breakdown by stage"
+
+3. **get_content_summary**: Get content and A/B test stats
+   - Accepts filter: type (service, event, etc.)
+   - Returns: Content counts (total/active/inactive), breakdown by type, A/B test status
+   - Use for: "What content is published?", "How many programs?", "A/B test status"
+
+4. **get_donation_stats**: Get donation metrics
+   - Accepts filter: daysBack
+   - Returns: Total donations/amount/average, breakdown by type/status, recent donations, campaign stats
+   - Use for: "Show donation stats", "How much donated?", "Recent donations"
+
+## Troubleshooting Tools
+5. **get_recent_logs**: Fetch application logs for debugging
+   - Use for investigating errors or system behavior
+
+6. **escalate_issue**: Create tracked issue with SMS/email notifications
+   - Use when you can't resolve the problem
+   - Sends alerts to 617-967-7448 and vsillah@gmail.com
+
+# Important Data Handling Rules
+- **NO PII**: Never share individual email addresses, phone numbers, or personal details
+- **Aggregate only**: Provide counts, averages, and breakdowns - not raw records
+- **Trust the data**: The tools return accurate, real-time data - don't make up numbers
+- **Be precise**: Use exact numbers from tool results, don't round unless specified
+- **Include context**: Always mention when data was generated and what filters were applied
+
+# CRM Schema Reference
+- **Leads**: Email, name, phone, persona, funnelStage, pipelineStage, engagementScore, passions, notes
+- **Donations**: Amount (in cents!), type (one-time/recurring/campaign), status, donor info, Stripe IDs
+- **Content**: Type, title, description, isActive, order, passionTags, persona visibility
+- **Users**: Email, name, role (client/admin/super_admin), persona preference
+- **Tasks**: Lead assignment, due date, priority, status, notes
 
 # How to Help
-1. **Understand the question**: Ask clarifying questions if needed
-2. **Investigate**: Use tools to gather relevant information
-3. **Explain findings**: Describe what you found in simple terms
-4. **Suggest solutions**: Provide actionable steps to fix issues
-5. **Escalate if stuck**: If you can't resolve it, create an issue with all context
+1. **Answer data questions**: Use analytics tools to get accurate, real-time stats
+2. **Explain findings**: Present data clearly with context and insights
+3. **Troubleshoot issues**: Use logs and analytics to diagnose problems
+4. **Guide actions**: Suggest next steps based on data (e.g., "Contact the 15 nurturing-stage donors")
+5. **Escalate when stuck**: Create issue if you can't resolve the problem
 
-# Database Schema Overview
-- \`content_items\`: All website content (services, events, testimonials, etc.)
-  - Key fields: type, title, is_active, order, passion_tags, metadata
-- \`users\`: User accounts with roles (client, admin, super_admin)
-- \`leads\`: CRM leads with persona, funnel_stage, pipeline_stage
-- \`tasks\`: Follow-up tasks assigned to team members
-- \`content_visibility\`: Persona-specific content visibility rules
-
-# Common Issues You Can Diagnose
-- Content not showing: Check is_active, order, content_visibility
-- Events missing: Verify content_items where type='event'
-- Services hidden: Check visibility rules and is_active status
-- User access issues: Review user roles and permissions
-
-Always be helpful, thorough, and proactive in solving problems!`;
+Always be helpful, data-driven, and proactive!`;
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -135,6 +161,85 @@ const TOOLS = [
         required: ["title", "description", "severity"]
       }
     }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_platform_stats",
+      description: "Get overall platform metrics including total leads, users, donations, active content, and recent activity (this week)",
+      parameters: {
+        type: "object",
+        properties: {},
+        required: []
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_lead_analytics",
+      description: "Get detailed lead statistics with optional filtering by persona, funnel stage, pipeline stage, or time period",
+      parameters: {
+        type: "object",
+        properties: {
+          persona: {
+            type: "string",
+            enum: ["student", "parent", "provider", "donor", "volunteer"],
+            description: "Filter by specific persona"
+          },
+          funnelStage: {
+            type: "string",
+            enum: ["awareness", "consideration", "decision", "retention"],
+            description: "Filter by funnel stage"
+          },
+          pipelineStage: {
+            type: "string",
+            enum: ["new_lead", "contacted", "qualified", "nurturing", "converted", "lost"],
+            description: "Filter by pipeline stage"
+          },
+          daysBack: {
+            type: "number",
+            description: "Number of days to look back for recent leads (default: 30)"
+          }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_content_summary",
+      description: "Get content statistics including total, active, inactive counts, breakdown by type, and A/B test status",
+      parameters: {
+        type: "object",
+        properties: {
+          type: {
+            type: "string",
+            enum: ["service", "event", "testimonial", "sponsor", "lead_magnet", "impact_stat", "hero", "cta", "socialMedia", "video", "review", "program_detail"],
+            description: "Filter by content type"
+          }
+        },
+        required: []
+      }
+    }
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_donation_stats",
+      description: "Get donation metrics including total count, amount, average, breakdown by type/status, recent donations, and campaign stats",
+      parameters: {
+        type: "object",
+        properties: {
+          daysBack: {
+            type: "number",
+            description: "Number of days to look back for recent donations (default: 30)"
+          }
+        },
+        required: []
+      }
+    }
   }
 ];
 
@@ -147,6 +252,18 @@ async function executeTool(toolCall: ToolCall): Promise<string> {
       return await getRecentLogs();
     case 'escalate_issue':
       return await escalateIssue(args);
+    case 'get_platform_stats':
+      const platformStats = await storage.getPlatformStats();
+      return JSON.stringify(platformStats, null, 2);
+    case 'get_lead_analytics':
+      const leadAnalytics = await storage.getLeadAnalytics(args);
+      return JSON.stringify(leadAnalytics, null, 2);
+    case 'get_content_summary':
+      const contentSummary = await storage.getContentSummary(args);
+      return JSON.stringify(contentSummary, null, 2);
+    case 'get_donation_stats':
+      const donationStats = await storage.getDonationStats(args);
+      return JSON.stringify(donationStats, null, 2);
     default:
       return `Unknown tool: ${name}`;
   }

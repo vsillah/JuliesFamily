@@ -16,10 +16,10 @@ interface Message {
 }
 
 const CONVERSATION_STARTERS = [
-  "Check recent system logs",
-  "Show me any error messages",
-  "What issues have been reported?",
-  "Help me troubleshoot a problem"
+  "Show me platform statistics",
+  "How many leads do we have?",
+  "What content is currently published?",
+  "Show me recent donation stats"
 ];
 
 export function ChatbotWidget() {
