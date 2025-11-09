@@ -215,17 +215,38 @@ function computeNextRun(schedule: BackupSchedule, currentTime: Date): Date {
         // Run monthly on specified day of month at hour:minute
         const targetDayOfMonth = config.dayOfMonth || 1;
         
+        // Start with current month
         nextZonedRun = set(zonedNow, {
-          date: Math.min(targetDayOfMonth, 28), // Clamp to safe value
+          date: 1, // Start at first of month
           hours: config.hour || 0,
           minutes: config.minute || 0,
           seconds: 0,
           milliseconds: 0,
         });
         
-        // If we've already passed this month's date, move to next month
+        // Get the last day of the current month
+        const lastDayOfMonth = new Date(
+          nextZonedRun.getFullYear(),
+          nextZonedRun.getMonth() + 1,
+          0
+        ).getDate();
+        
+        // Use the target day or last day of month, whichever is smaller
+        const actualDay = Math.min(targetDayOfMonth, lastDayOfMonth);
+        nextZonedRun.setDate(actualDay);
+        
+        // If we've already passed this month's date/time, move to next month
         if (nextZonedRun <= zonedNow) {
           nextZonedRun = add(nextZonedRun, { months: 1 });
+          
+          // Recalculate for the new month (handles varying month lengths)
+          const newLastDay = new Date(
+            nextZonedRun.getFullYear(),
+            nextZonedRun.getMonth() + 1,
+            0
+          ).getDate();
+          const newActualDay = Math.min(targetDayOfMonth, newLastDay);
+          nextZonedRun.setDate(newActualDay);
         }
         break;
       

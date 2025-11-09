@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -668,6 +668,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ 
         message: "Failed to delete backup. Please try again or contact support if the problem persists." 
       });
+    }
+  });
+
+  // Backup Schedule Routes
+  
+  // Get all backup schedules
+  app.get('/api/admin/backup-schedules', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const schedules = await storage.getAllBackupSchedules();
+      res.json(schedules);
+    } catch (error) {
+      console.error("Error fetching backup schedules:", error);
+      res.status(500).json({ message: "Failed to fetch backup schedules" });
+    }
+  });
+
+  // Create a backup schedule
+  app.post('/api/admin/backup-schedules', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      // Validate request body using shared schema
+      const validationResult = insertBackupScheduleSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid schedule data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const schedule = await storage.createBackupSchedule({
+        ...validationResult.data,
+        createdBy: currentUser.id,
+      });
+
+      res.status(201).json(schedule);
+    } catch (error) {
+      console.error("Error creating backup schedule:", error);
+      res.status(500).json({ message: "Failed to create backup schedule" });
+    }
+  });
+
+  // Update a backup schedule
+  app.patch('/api/admin/backup-schedules/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Partial update schema
+      const updateSchema = insertBackupScheduleSchema.partial();
+      const validationResult = updateSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid update data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const updated = await storage.updateBackupSchedule(id, validationResult.data);
+      if (!updated) {
+        return res.status(404).json({ message: "Schedule not found" });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating backup schedule:", error);
+      res.status(500).json({ message: "Failed to update backup schedule" });
+    }
+  });
+
+  // Delete a backup schedule
+  app.delete('/api/admin/backup-schedules/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verify schedule exists
+      const schedule = await storage.getBackupSchedule(id);
+      if (!schedule) {
+        return res.status(404).json({ message: "Schedule not found" });
+      }
+
+      await storage.deleteBackupSchedule(id);
+      res.json({ message: "Schedule deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting backup schedule:", error);
+      res.status(500).json({ message: "Failed to delete backup schedule" });
     }
   });
 
