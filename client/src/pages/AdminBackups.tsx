@@ -113,18 +113,23 @@ function StorageGauge() {
 
   // Determine color based on usage
   let statusColor = "text-green-600";
-  let progressColor = "bg-green-600";
   let statusText = "Healthy";
   
   if (usagePercent >= 90) {
     statusColor = "text-red-600";
-    progressColor = "bg-red-600";
     statusText = "Critical";
   } else if (usagePercent >= 70) {
     statusColor = "text-yellow-600";
-    progressColor = "bg-yellow-600";
     statusText = "Warning";
   }
+
+  // Helper to format percentages with appropriate precision
+  const formatPercent = (percent: number): string => {
+    if (percent < 0.1 && percent > 0) {
+      return percent.toFixed(2);
+    }
+    return percent.toFixed(1);
+  };
 
   return (
     <Card data-testid="card-storage-gauge">
@@ -150,7 +155,7 @@ function StorageGauge() {
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Total Projected Usage</span>
             <span className={`font-medium ${statusColor}`} data-testid="text-usage-percent">
-              {usagePercent.toFixed(1)}% of 10 GiB
+              {formatPercent(usagePercent)}% of {formatBytes(metrics.limitBytes)}
             </span>
           </div>
           <Progress 
@@ -167,7 +172,7 @@ function StorageGauge() {
               {formatBytes(metrics.currentUsageBytes)}
             </div>
             <div className="text-xs text-muted-foreground">
-              {metrics.currentUsagePercent.toFixed(1)}%
+              {formatPercent(metrics.currentUsagePercent)}%
             </div>
           </div>
 
@@ -177,7 +182,7 @@ function StorageGauge() {
               {formatBytes(metrics.projectedBackupBytes)}
             </div>
             <div className="text-xs text-muted-foreground">
-              {((metrics.projectedBackupBytes / metrics.limitBytes) * 100).toFixed(1)}%
+              {formatPercent((metrics.projectedBackupBytes / metrics.limitBytes) * 100)}%
             </div>
           </div>
 
@@ -187,7 +192,7 @@ function StorageGauge() {
               {formatBytes(Math.max(0, availableBytes))}
             </div>
             <div className="text-xs text-muted-foreground">
-              {((Math.max(0, availableBytes) / metrics.limitBytes) * 100).toFixed(1)}%
+              {formatPercent((Math.max(0, availableBytes) / metrics.limitBytes) * 100)}%
             </div>
           </div>
         </div>
