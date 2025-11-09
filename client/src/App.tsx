@@ -33,6 +33,7 @@ import AdminPipeline from "@/pages/AdminPipeline";
 import AdminPreferences from "@/pages/AdminPreferences";
 import AdminLeadSourcing from "@/pages/AdminLeadSourcing";
 import AdminCacLtgpDashboard from "@/pages/AdminCacLtgpDashboard";
+import AdminCohortAnalysis from "@/pages/AdminCohortAnalysis";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import ImageComparison from "@/pages/ImageComparison";
@@ -67,6 +68,7 @@ function Router() {
       <Route path="/admin/pipeline" component={AdminPipeline} />
       <Route path="/admin/lead-sourcing" component={AdminLeadSourcing} />
       <Route path="/admin/cac-ltgp" component={AdminCacLtgpDashboard} />
+      <Route path="/admin/cohort-analysis" component={AdminCohortAnalysis} />
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />

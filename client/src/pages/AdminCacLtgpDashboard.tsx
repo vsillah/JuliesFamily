@@ -4,9 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  TrendingUp, DollarSign, Users, Target, BarChart3, ArrowUpRight, ArrowDownRight
+  TrendingUp, DollarSign, Users, Target, BarChart3, ArrowUpRight, ArrowDownRight, Calendar
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from "recharts";
 
@@ -119,13 +119,21 @@ export default function AdminCacLtgpDashboard() {
             { label: "CAC:LTGP Analytics" }
           ]} />
           <div className="flex flex-col gap-6 mt-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-serif font-bold" data-testid="page-title">
-                CAC:LTGP Analytics Dashboard
-              </h1>
-              <p className="text-muted-foreground text-base sm:text-lg mt-2">
-                Track donor acquisition economics and lifetime value metrics
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-serif font-bold" data-testid="page-title">
+                  CAC:LTGP Analytics Dashboard
+                </h1>
+                <p className="text-muted-foreground text-base sm:text-lg mt-2">
+                  Track donor acquisition economics and lifetime value metrics
+                </p>
+              </div>
+              <Link href="/admin/cohort-analysis">
+                <Button variant="outline" size="sm" data-testid="button-cohort-analysis">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Cohort Analysis
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
