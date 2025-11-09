@@ -506,8 +506,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
               <>
                 <div className="w-full flex justify-center">
                   <AdminPersonaSwitcher 
-                    isScrolled={true} 
-                    onOpenDialog={() => setMobileMenuOpen(false)}
+                    isScrolled={true}
                   />
                 </div>
                 <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>

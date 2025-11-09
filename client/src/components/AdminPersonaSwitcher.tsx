@@ -129,7 +129,7 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
       </div>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
-        <DialogContent className="sm:max-w-[600px]" data-testid="dialog-admin-persona-switcher">
+        <DialogContent className="sm:max-w-[600px] z-[100]" data-testid="dialog-admin-persona-switcher">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Eye className="w-5 h-5 text-primary" />
