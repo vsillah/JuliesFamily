@@ -489,11 +489,6 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             >
               Virtual Tour
             </Link>
-            <Link href="/donate" onClick={() => setMobileMenuOpen(false)}>
-              <Button variant="default" size="lg" className="w-full" data-testid="button-donate-mobile">
-                Donate Now
-              </Button>
-            </Link>
             {currentPersonaConfig && (
               <Button 
                 variant="outline" 
@@ -521,14 +516,6 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                     Admin
                   </Button>
                 </Link>
-                {isSuperAdmin && (
-                  <Link href="/admin/users" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="outline" size="lg" data-testid="button-user-management-mobile">
-                      <Users className="w-4 h-4 mr-2" />
-                      User Management
-                    </Button>
-                  </Link>
-                )}
               </>
             )}
             {isAuthenticated ? (
