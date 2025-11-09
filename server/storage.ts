@@ -11,6 +11,7 @@ import {
   pipelineStages, leadAssignments, tasks, pipelineHistory,
   adminPreferences, auditLogs,
   outreachEmails, icpCriteria,
+  chatbotConversations, chatbotIssues,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -44,7 +45,9 @@ import {
   type AdminPreferences, type InsertAdminPreferences,
   type AuditLog, type InsertAuditLog,
   type OutreachEmail, type InsertOutreachEmail,
-  type IcpCriteria, type InsertIcpCriteria
+  type IcpCriteria, type InsertIcpCriteria,
+  type ChatbotConversation, type InsertChatbotConversation,
+  type ChatbotIssue, type InsertChatbotIssue
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -345,6 +348,16 @@ export interface IStorage {
   
   // Helper method used by routes
   getLeadById(id: string): Promise<Lead | undefined>;
+  
+  // Chatbot Conversation operations
+  createChatbotConversation(conversation: InsertChatbotConversation): Promise<ChatbotConversation>;
+  getChatbotConversationsBySession(sessionId: string, limit?: number): Promise<ChatbotConversation[]>;
+  deleteChatbotSession(sessionId: string): Promise<void>;
+  
+  // Chatbot Issue operations
+  createChatbotIssue(issue: InsertChatbotIssue): Promise<ChatbotIssue>;
+  getChatbotIssues(filters?: { status?: string; severity?: string; reportedBy?: string; limit?: number }): Promise<ChatbotIssue[]>;
+  updateChatbotIssue(id: string, updates: Partial<InsertChatbotIssue>): Promise<ChatbotIssue | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2096,6 +2109,65 @@ export class DatabaseStorage implements IStorage {
   // Helper method used by routes
   async getLeadById(id: string): Promise<Lead | undefined> {
     return this.getLead(id);
+  }
+  
+  // Chatbot Conversation operations
+  async createChatbotConversation(conversation: InsertChatbotConversation): Promise<ChatbotConversation> {
+    const [created] = await db.insert(chatbotConversations).values(conversation).returning();
+    return created!;
+  }
+
+  async getChatbotConversationsBySession(sessionId: string, limit: number = 50): Promise<ChatbotConversation[]> {
+    return await db.select().from(chatbotConversations)
+      .where(eq(chatbotConversations.sessionId, sessionId))
+      .orderBy(chatbotConversations.createdAt)
+      .limit(limit);
+  }
+
+  async deleteChatbotSession(sessionId: string): Promise<void> {
+    await db.delete(chatbotConversations)
+      .where(eq(chatbotConversations.sessionId, sessionId));
+  }
+  
+  // Chatbot Issue operations
+  async createChatbotIssue(issue: InsertChatbotIssue): Promise<ChatbotIssue> {
+    const [created] = await db.insert(chatbotIssues).values(issue).returning();
+    return created!;
+  }
+
+  async getChatbotIssues(filters?: { status?: string; severity?: string; reportedBy?: string; limit?: number }): Promise<ChatbotIssue[]> {
+    let query = db.select().from(chatbotIssues);
+    const conditions = [];
+    
+    if (filters?.status) {
+      conditions.push(eq(chatbotIssues.status, filters.status));
+    }
+    if (filters?.severity) {
+      conditions.push(eq(chatbotIssues.severity, filters.severity));
+    }
+    if (filters?.reportedBy) {
+      conditions.push(eq(chatbotIssues.reportedBy, filters.reportedBy));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    query = query.orderBy(desc(chatbotIssues.createdAt)) as any;
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit) as any;
+    }
+    
+    return await query;
+  }
+
+  async updateChatbotIssue(id: string, updates: Partial<InsertChatbotIssue>): Promise<ChatbotIssue | undefined> {
+    const [updated] = await db.update(chatbotIssues)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(chatbotIssues.id, id))
+      .returning();
+    return updated;
   }
 }
 

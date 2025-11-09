@@ -395,6 +395,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Chatbot Routes
+  app.post('/api/admin/chatbot/message', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const { message, sessionId } = req.body;
+      
+      if (!message || !sessionId) {
+        return res.status(400).json({ message: "Message and sessionId are required" });
+      }
+      
+      const conversationHistory = await storage.getChatbotConversationsBySession(sessionId);
+      
+      const { processChatMessage } = await import('./services/chatbotService');
+      const result = await processChatMessage(
+        currentUser.id,
+        sessionId,
+        message,
+        conversationHistory
+      );
+      
+      await storage.createChatbotConversation({
+        userId: currentUser.id,
+        sessionId,
+        role: 'user',
+        content: message
+      });
+      
+      await storage.createChatbotConversation({
+        userId: currentUser.id,
+        sessionId,
+        role: 'assistant',
+        content: result.response,
+        toolCalls: result.toolCalls,
+        toolResults: result.toolResults
+      });
+      
+      if (result.shouldEscalate && result.escalationData) {
+        const fullContext = [
+          ...conversationHistory.slice(-5),
+          { role: 'user', content: message },
+          { role: 'assistant', content: result.response }
+        ];
+        
+        const issue = await storage.createChatbotIssue({
+          title: result.escalationData.title,
+          description: result.escalationData.description,
+          severity: result.escalationData.severity,
+          category: result.escalationData.category || 'other',
+          reportedBy: currentUser.id,
+          conversationContext: fullContext,
+          diagnosticData: result.escalationData.diagnosticData
+        });
+        
+        const { notifyIssue } = await import('./services/notificationService');
+        const notificationResult = await notifyIssue(issue);
+        
+        await storage.updateChatbotIssue(issue.id, {
+          notificationSent: notificationResult.sms.success,
+          notificationSentAt: notificationResult.sms.success ? new Date() : undefined
+        });
+      }
+      
+      res.json({
+        response: result.response,
+        sessionId
+      });
+    } catch (error) {
+      console.error("Error processing chatbot message:", error);
+      res.status(500).json({ message: "Failed to process message" });
+    }
+  });
+
+  app.get('/api/admin/chatbot/history/:sessionId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      const history = await storage.getChatbotConversationsBySession(sessionId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching chatbot history:", error);
+      res.status(500).json({ message: "Failed to fetch conversation history" });
+    }
+  });
+
+  app.delete('/api/admin/chatbot/session/:sessionId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { sessionId } = req.params;
+      await storage.deleteChatbotSession(sessionId);
+      res.json({ message: "Session cleared successfully" });
+    } catch (error) {
+      console.error("Error deleting chatbot session:", error);
+      res.status(500).json({ message: "Failed to clear session" });
+    }
+  });
+
+  app.get('/api/admin/chatbot/issues', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, severity, limit } = req.query;
+      const issues = await storage.getChatbotIssues({
+        status: status as string,
+        severity: severity as string,
+        limit: limit ? parseInt(limit as string) : undefined
+      });
+      res.json(issues);
+    } catch (error) {
+      console.error("Error fetching chatbot issues:", error);
+      res.status(500).json({ message: "Failed to fetch issues" });
+    }
+  });
+
+  app.patch('/api/admin/chatbot/issues/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const updates = req.body;
+      
+      if (updates.status === 'resolved' && !updates.resolvedBy) {
+        updates.resolvedBy = currentUser.id;
+        updates.resolvedAt = new Date();
+      }
+      
+      const updated = await storage.updateChatbotIssue(id, updates);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Issue not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating chatbot issue:", error);
+      res.status(500).json({ message: "Failed to update issue" });
+    }
+  });
+
   // User Persona Preference Route
   app.patch('/api/user/persona', isAuthenticated, async (req: any, res) => {
     try {

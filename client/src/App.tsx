@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PersonaProvider } from "@/contexts/PersonaContext";
 import PersonaSelectionModal from "@/components/PersonaSelectionModal";
+import { ChatbotWidget } from "@/components/ChatbotWidget";
 import Home from "@/pages/Home";
 import HowItWorks from "@/pages/HowItWorks";
 import VirtualTour from "@/pages/VirtualTour";
@@ -77,6 +78,7 @@ function App() {
         <PersonaProvider>
           <Toaster />
           <PersonaSelectionModal />
+          <ChatbotWidget />
           <Router />
         </PersonaProvider>
       </TooltipProvider>

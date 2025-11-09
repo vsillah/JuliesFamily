@@ -1084,3 +1084,74 @@ export const insertIcpCriteriaSchema = createInsertSchema(icpCriteria).omit({
 });
 export type InsertIcpCriteria = z.infer<typeof insertIcpCriteriaSchema>;
 export type IcpCriteria = typeof icpCriteria.$inferSelect;
+
+// Admin Chatbot Conversations - stores chat message history for AI assistant
+export const chatbotConversations = pgTable("chatbot_conversations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Message content
+  role: varchar("role").notNull(), // 'user' or 'assistant'
+  content: text("content").notNull(),
+  
+  // Tool calls (if assistant made function calls)
+  toolCalls: jsonb("tool_calls"), // Array of tool calls made by assistant
+  toolResults: jsonb("tool_results"), // Results from tool executions
+  
+  // Session tracking
+  sessionId: varchar("session_id").notNull(), // Groups messages in same chat session
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("chatbot_conversations_user_idx").on(table.userId),
+  index("chatbot_conversations_session_idx").on(table.sessionId),
+]);
+
+export const insertChatbotConversationSchema = createInsertSchema(chatbotConversations).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertChatbotConversation = z.infer<typeof insertChatbotConversationSchema>;
+export type ChatbotConversation = typeof chatbotConversations.$inferSelect;
+
+// Admin Chatbot Issues - tracks escalated issues that need manual attention
+export const chatbotIssues = pgTable("chatbot_issues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Issue details
+  title: varchar("title").notNull(),
+  description: text("description").notNull(),
+  severity: varchar("severity").notNull().default('medium'), // 'low', 'medium', 'high', 'critical'
+  status: varchar("status").notNull().default('open'), // 'open', 'in_progress', 'resolved', 'closed'
+  category: varchar("category"), // 'content', 'technical', 'user_account', 'performance', 'other'
+  
+  // Context
+  conversationContext: jsonb("conversation_context"), // Last few messages from chat
+  diagnosticData: jsonb("diagnostic_data"), // Query results, log snippets, etc.
+  
+  // Resolution tracking
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolutionNotes: text("resolution_notes"),
+  
+  // Notification tracking
+  notificationSent: boolean("notification_sent").default(false),
+  notificationSentAt: timestamp("notification_sent_at"),
+  
+  // Created by
+  reportedBy: varchar("reported_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("chatbot_issues_status_idx").on(table.status),
+  index("chatbot_issues_severity_idx").on(table.severity),
+  index("chatbot_issues_reported_by_idx").on(table.reportedBy),
+]);
+
+export const insertChatbotIssueSchema = createInsertSchema(chatbotIssues).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertChatbotIssue = z.infer<typeof insertChatbotIssueSchema>;
+export type ChatbotIssue = typeof chatbotIssues.$inferSelect;
