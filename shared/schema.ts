@@ -1186,3 +1186,51 @@ export const insertBackupSnapshotSchema = createInsertSchema(backupSnapshots).om
 });
 export type InsertBackupSnapshot = z.infer<typeof insertBackupSnapshotSchema>;
 export type BackupSnapshot = typeof backupSnapshots.$inferSelect;
+
+// Database Backup Schedules - automatic scheduled table backups with retention
+export const backupSchedules = pgTable("backup_schedules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Schedule target
+  tableName: varchar("table_name").notNull(), // Table to backup (e.g., 'users', 'leads')
+  scheduleName: varchar("schedule_name"), // Optional user-friendly name
+  
+  // Schedule configuration
+  scheduleType: varchar("schedule_type").notNull(), // 'daily', 'weekly', 'monthly', 'custom'
+  scheduleConfig: jsonb("schedule_config").notNull(), // { hour: 2, minute: 0, dayOfWeek: 0, dayOfMonth: 1, timezone: 'America/New_York', cron?: '0 2 * * *' }
+  
+  // Retention policy
+  retentionCount: integer("retention_count").default(7), // Keep last N backups, null = keep all
+  
+  // Status and execution tracking
+  isActive: boolean("is_active").default(true),
+  isRunning: boolean("is_running").default(false), // Concurrency guard
+  startedAt: timestamp("started_at"), // When current execution started (for stuck job detection)
+  nextRun: timestamp("next_run").notNull(), // Next scheduled execution (UTC)
+  lastRun: timestamp("last_run"), // Last successful execution
+  lastRunStatus: varchar("last_run_status"), // 'success', 'error'
+  lastRunError: text("last_run_error"), // Error message if failed
+  
+  // Creation tracking
+  createdBy: varchar("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("backup_schedules_table_name_idx").on(table.tableName),
+  index("backup_schedules_next_run_idx").on(table.nextRun),
+  index("backup_schedules_is_active_idx").on(table.isActive),
+  index("backup_schedules_created_by_idx").on(table.createdBy),
+]);
+
+export const insertBackupScheduleSchema = createInsertSchema(backupSchedules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  isRunning: true,
+  startedAt: true,
+  lastRun: true,
+  lastRunStatus: true,
+  lastRunError: true,
+});
+export type InsertBackupSchedule = z.infer<typeof insertBackupScheduleSchema>;
+export type BackupSchedule = typeof backupSchedules.$inferSelect;

@@ -12,7 +12,7 @@ import {
   adminPreferences, auditLogs,
   outreachEmails, icpCriteria,
   chatbotConversations, chatbotIssues,
-  backupSnapshots,
+  backupSnapshots, backupSchedules,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -49,7 +49,8 @@ import {
   type IcpCriteria, type InsertIcpCriteria,
   type ChatbotConversation, type InsertChatbotConversation,
   type ChatbotIssue, type InsertChatbotIssue,
-  type BackupSnapshot, type InsertBackupSnapshot
+  type BackupSnapshot, type InsertBackupSnapshot,
+  type BackupSchedule, type InsertBackupSchedule
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -453,6 +454,21 @@ export interface IStorage {
   }>;
   deleteBackup(backupId: string): Promise<void>;
   getAvailableTables(): Promise<string[]>;
+  
+  // Backup Schedule operations
+  createBackupSchedule(schedule: InsertBackupSchedule): Promise<BackupSchedule>;
+  getAllBackupSchedules(): Promise<BackupSchedule[]>;
+  getBackupSchedule(id: string): Promise<BackupSchedule | undefined>;
+  updateBackupSchedule(id: string, updates: Partial<InsertBackupSchedule>): Promise<BackupSchedule | undefined>;
+  deleteBackupSchedule(id: string): Promise<void>;
+  getDueBackupSchedules(now: Date, lookaheadMinutes?: number): Promise<BackupSchedule[]>;
+  markScheduleRunning(id: string): Promise<void>;
+  completeSchedule(id: string, runInfo: {
+    success: boolean;
+    error?: string;
+    nextRun: Date;
+  }): Promise<void>;
+  cleanupOldBackupsBySchedule(tableName: string, retentionCount: number): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2734,6 +2750,115 @@ export class DatabaseStorage implements IStorage {
       'admin_preferences', 'audit_logs', 'outreach_emails', 'icp_criteria',
       'chatbot_conversations', 'chatbot_issues'
     ].sort();
+  }
+
+  async createBackupSchedule(schedule: InsertBackupSchedule): Promise<BackupSchedule> {
+    const [created] = await db
+      .insert(backupSchedules)
+      .values(schedule)
+      .returning();
+    return created;
+  }
+
+  async getAllBackupSchedules(): Promise<BackupSchedule[]> {
+    return await db
+      .select()
+      .from(backupSchedules)
+      .orderBy(desc(backupSchedules.createdAt));
+  }
+
+  async getBackupSchedule(id: string): Promise<BackupSchedule | undefined> {
+    const [schedule] = await db
+      .select()
+      .from(backupSchedules)
+      .where(eq(backupSchedules.id, id));
+    return schedule;
+  }
+
+  async updateBackupSchedule(id: string, updates: Partial<InsertBackupSchedule>): Promise<BackupSchedule | undefined> {
+    const [updated] = await db
+      .update(backupSchedules)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(backupSchedules.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteBackupSchedule(id: string): Promise<void> {
+    await db.delete(backupSchedules).where(eq(backupSchedules.id, id));
+  }
+
+  async getDueBackupSchedules(now: Date, lookaheadMinutes: number = 1): Promise<BackupSchedule[]> {
+    const lookahead = new Date(now.getTime() + lookaheadMinutes * 60 * 1000);
+    
+    return await db
+      .select()
+      .from(backupSchedules)
+      .where(
+        and(
+          eq(backupSchedules.isActive, true),
+          eq(backupSchedules.isRunning, false),
+          sql`${backupSchedules.nextRun} <= ${lookahead}`
+        )
+      )
+      .orderBy(backupSchedules.nextRun);
+  }
+
+  async markScheduleRunning(id: string): Promise<void> {
+    await db
+      .update(backupSchedules)
+      .set({
+        isRunning: true,
+        startedAt: new Date(),
+      })
+      .where(eq(backupSchedules.id, id));
+  }
+
+  async completeSchedule(id: string, runInfo: {
+    success: boolean;
+    error?: string;
+    nextRun: Date;
+  }): Promise<void> {
+    await db
+      .update(backupSchedules)
+      .set({
+        isRunning: false,
+        startedAt: null,
+        lastRun: new Date(),
+        lastRunStatus: runInfo.success ? 'success' : 'error',
+        lastRunError: runInfo.error || null,
+        nextRun: runInfo.nextRun,
+        updatedAt: new Date(),
+      })
+      .where(eq(backupSchedules.id, id));
+  }
+
+  async cleanupOldBackupsBySchedule(tableName: string, retentionCount: number): Promise<number> {
+    // Get all backups for this table, ordered by creation date (newest first)
+    const allBackups = await db
+      .select()
+      .from(backupSnapshots)
+      .where(eq(backupSnapshots.tableName, tableName))
+      .orderBy(desc(backupSnapshots.createdAt));
+
+    // If we have more backups than retention allows, delete the oldest ones
+    if (allBackups.length <= retentionCount) {
+      return 0;
+    }
+
+    const backupsToDelete = allBackups.slice(retentionCount);
+    let deletedCount = 0;
+
+    for (const backup of backupsToDelete) {
+      try {
+        await this.deleteBackup(backup.id);
+        deletedCount++;
+      } catch (error) {
+        console.error(`Failed to delete old backup ${backup.id}:`, error);
+      }
+    }
+
+    return deletedCount;
   }
 }
 
