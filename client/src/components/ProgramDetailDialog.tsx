@@ -86,7 +86,7 @@ export default function ProgramDetailDialog({
 
           {/* Quick Stats */}
           <div className="px-6 py-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               {program.ageRange && (
                 <Card>
                   <CardContent className="p-4 flex flex-col items-center text-center gap-2">
