@@ -15,6 +15,13 @@ interface Message {
   timestamp: Date;
 }
 
+const CONVERSATION_STARTERS = [
+  "Check recent system logs",
+  "Show me any error messages",
+  "What issues have been reported?",
+  "Help me troubleshoot a problem"
+];
+
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -62,14 +69,12 @@ export function ChatbotWidget() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!input.trim() || isLoading) return;
+  const sendMessage = async (messageContent: string) => {
+    if (!messageContent.trim() || isLoading) return;
 
     const userMessage: Message = {
       role: 'user',
-      content: input.trim(),
+      content: messageContent.trim(),
       timestamp: new Date()
     };
 
@@ -105,6 +110,15 @@ export function ChatbotWidget() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendMessage(input);
+  };
+
+  const handleStarterClick = (starter: string) => {
+    sendMessage(starter);
   };
 
   const handleClearChat = async () => {
@@ -174,14 +188,30 @@ export function ChatbotWidget() {
         <CardContent className="p-0">
           <ScrollArea className="h-[60vh] sm:h-96 px-4">
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                <Bot className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-semibold mb-2">
-                  Hi{user?.firstName ? ` ${user.firstName}` : ''}! How can I help?
-                </h3>
-                <p className="text-sm text-muted-foreground">
-                  I can help you troubleshoot issues, check database content, review logs, and more!
-                </p>
+              <div className="flex flex-col items-center justify-center h-full text-center p-8 gap-4">
+                <Bot className="h-12 w-12 text-muted-foreground mb-2" />
+                <div>
+                  <h3 className="font-semibold mb-2">
+                    Hi{user?.firstName ? ` ${user.firstName}` : ''}! How can I help?
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    I can help you troubleshoot issues, check database content, review logs, and more!
+                  </p>
+                </div>
+                <div className="flex flex-col gap-2 w-full max-w-xs">
+                  {CONVERSATION_STARTERS.map((starter, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleStarterClick(starter)}
+                      className="text-left justify-start hover-elevate"
+                      data-testid={`button-starter-${index}`}
+                    >
+                      {starter}
+                    </Button>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="space-y-4 py-4">
