@@ -137,6 +137,12 @@ export default function AdminDashboard() {
                   Tasks
                 </Button>
               </Link>
+              <Link href="/admin/cac-ltgp">
+                <Button variant="default" size="sm" data-testid="button-cac-ltgp">
+                  <TrendingUp className="w-4 h-4 mr-2" />
+                  CAC:LTGP Analytics
+                </Button>
+              </Link>
               
               {/* Communication Menu */}
               <DropdownMenu>
