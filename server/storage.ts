@@ -470,6 +470,20 @@ export interface IStorage {
     nextRun: Date;
   }): Promise<void>;
   cleanupOldBackupsBySchedule(tableName: string, retentionCount: number): Promise<number>;
+  getDatabaseStorageMetrics(): Promise<{
+    currentUsageBytes: number;
+    projectedBackupBytes: number;
+    totalProjectedBytes: number;
+    limitBytes: number;
+    currentUsagePercent: number;
+    projectedUsagePercent: number;
+    tableBreakdown: Array<{
+      tableName: string;
+      sizeBytes: number;
+      scheduledBackupCount: number;
+      estimatedBackupBytes: number;
+    }>;
+  }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2895,6 +2909,108 @@ export class DatabaseStorage implements IStorage {
     }
 
     return deletedCount;
+  }
+
+  async getDatabaseStorageMetrics(): Promise<{
+    currentUsageBytes: number;
+    projectedBackupBytes: number;
+    totalProjectedBytes: number;
+    limitBytes: number;
+    currentUsagePercent: number;
+    projectedUsagePercent: number;
+    tableBreakdown: Array<{
+      tableName: string;
+      sizeBytes: number;
+      scheduledBackupCount: number;
+      estimatedBackupBytes: number;
+    }>;
+  }> {
+    const LIMIT_BYTES = 10 * 1024 * 1024 * 1024; // 10 GiB
+
+    // Query PostgreSQL system catalogs to get table sizes
+    // pg_total_relation_size includes table data, indexes, and TOAST data
+    const tableSizesResult = await db.execute(sql`
+      SELECT 
+        schemaname,
+        tablename,
+        pg_total_relation_size(schemaname || '.' || tablename) as size_bytes
+      FROM pg_tables
+      WHERE schemaname = 'public'
+      ORDER BY size_bytes DESC
+    `);
+
+    // Calculate total current database size
+    const currentUsageBytes = tableSizesResult.rows.reduce(
+      (sum, row: any) => sum + parseInt(row.size_bytes || '0', 10),
+      0
+    );
+
+    // Get all active backup schedules
+    const activeSchedules = await db
+      .select()
+      .from(backupSchedules)
+      .where(eq(backupSchedules.isActive, true));
+
+    // Create a map of table names to their sizes
+    const tableSizeMap = new Map<string, number>();
+    for (const row of tableSizesResult.rows) {
+      const record = row as any;
+      tableSizeMap.set(record.tablename, parseInt(record.size_bytes || '0', 10));
+    }
+
+    // Count schedules per table
+    const scheduleCountMap = new Map<string, number>();
+    for (const schedule of activeSchedules) {
+      const count = scheduleCountMap.get(schedule.tableName) || 0;
+      scheduleCountMap.set(schedule.tableName, count + 1);
+    }
+
+    // Calculate projected backup storage
+    const tableBreakdown: Array<{
+      tableName: string;
+      sizeBytes: number;
+      scheduledBackupCount: number;
+      estimatedBackupBytes: number;
+    }> = [];
+
+    let projectedBackupBytes = 0;
+
+    for (const schedule of activeSchedules) {
+      const tableSize = tableSizeMap.get(schedule.tableName) || 0;
+      const retentionCount = schedule.retentionCount || 7;
+      
+      // Each schedule will create retentionCount backups of the table
+      const estimatedBytes = tableSize * retentionCount;
+      projectedBackupBytes += estimatedBytes;
+
+      // Check if we already have this table in breakdown
+      const existing = tableBreakdown.find(t => t.tableName === schedule.tableName);
+      if (existing) {
+        existing.scheduledBackupCount++;
+        existing.estimatedBackupBytes += estimatedBytes;
+      } else {
+        tableBreakdown.push({
+          tableName: schedule.tableName,
+          sizeBytes: tableSize,
+          scheduledBackupCount: 1,
+          estimatedBackupBytes: estimatedBytes,
+        });
+      }
+    }
+
+    const totalProjectedBytes = currentUsageBytes + projectedBackupBytes;
+    const currentUsagePercent = (currentUsageBytes / LIMIT_BYTES) * 100;
+    const projectedUsagePercent = (totalProjectedBytes / LIMIT_BYTES) * 100;
+
+    return {
+      currentUsageBytes,
+      projectedBackupBytes,
+      totalProjectedBytes,
+      limitBytes: LIMIT_BYTES,
+      currentUsagePercent,
+      projectedUsagePercent,
+      tableBreakdown: tableBreakdown.sort((a, b) => b.estimatedBackupBytes - a.estimatedBackupBytes),
+    };
   }
 }
 

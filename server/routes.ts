@@ -762,6 +762,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get database storage metrics
+  app.get('/api/admin/backup-storage-metrics', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const metrics = await storage.getDatabaseStorageMetrics();
+      res.json(metrics);
+    } catch (error) {
+      console.error("Error fetching storage metrics:", error);
+      res.status(500).json({ message: "Failed to fetch storage metrics" });
+    }
+  });
+
   // User Persona Preference Route
   app.patch('/api/user/persona', isAuthenticated, async (req: any, res) => {
     try {
