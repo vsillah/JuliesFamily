@@ -159,6 +159,34 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
 
+// Update schema for leads - whitelisted fields only
+export const updateLeadSchema = z.object({
+  email: z.string().email().optional(),
+  firstName: z.string().trim().optional(),
+  lastName: z.string().trim().optional(),
+  phone: z.string().optional(),
+  persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional(),
+  funnelStage: z.enum(['awareness', 'consideration', 'decision', 'retention']).optional(),
+  pipelineStage: z.string().optional(),
+  leadSource: z.string().optional(),
+  engagementScore: z.number().int().min(0).optional(),
+  lastInteractionDate: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
+  convertedAt: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
+  notes: z.string().optional(),
+  passions: z.any().optional(), // JSONB
+  metadata: z.any().optional(), // JSONB
+  company: z.string().optional(),
+  jobTitle: z.string().optional(),
+  linkedinUrl: z.string().url().optional(),
+  qualificationScore: z.number().int().min(0).max(100).optional(),
+  qualificationStatus: z.enum(['pending', 'qualified', 'disqualified', 'review_needed']).optional(),
+  qualificationInsights: z.string().optional(),
+  enrichmentData: z.any().optional(), // JSONB
+  outreachStatus: z.enum(['pending', 'draft_ready', 'sent', 'opened', 'replied', 'bounced', 'unsubscribed']).optional(),
+  lastOutreachAt: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
+}).strict();
+export type UpdateLead = z.infer<typeof updateLeadSchema>;
+
 // Interactions table for tracking all lead activities
 export const interactions = pgTable("interactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -346,6 +374,20 @@ export const insertContentItemSchema = createInsertSchema(contentItems).omit({
 });
 export type InsertContentItem = z.infer<typeof insertContentItemSchema>;
 export type ContentItem = typeof contentItems.$inferSelect;
+
+// Update schema for content items - whitelisted fields only
+export const updateContentItemSchema = z.object({
+  type: z.enum(['service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review']).optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  imageName: z.string().optional(),
+  imageUrl: z.string().optional(),
+  order: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+  passionTags: z.array(z.string()).optional(),
+  metadata: z.any().optional(), // JSONB
+}).strict();
+export type UpdateContentItem = z.infer<typeof updateContentItemSchema>;
 
 // Extended ContentItem type with resolved image URL from image_assets join
 export type ContentItemWithResolvedImage = ContentItem & {
@@ -885,6 +927,20 @@ export const insertDonationCampaignSchema = createInsertSchema(donationCampaigns
   startDate: z.union([z.date(), z.string().transform((val) => new Date(val))]),
   endDate: z.union([z.date(), z.string().transform((val) => new Date(val))]),
 });
+
+// Update schema for donation campaigns - whitelisted fields only
+export const updateDonationCampaignSchema = z.object({
+  name: z.string().optional(),
+  description: z.string().optional(),
+  passion: z.string().optional(),
+  goalAmount: z.number().positive().optional(),
+  startDate: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
+  endDate: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
+  status: z.enum(['draft', 'active', 'completed', 'cancelled']).optional(),
+  visibility: z.enum(['public', 'donors_only', 'internal']).optional(),
+  metadata: z.any().optional(), // JSONB
+}).strict();
+export type UpdateDonationCampaign = z.infer<typeof updateDonationCampaignSchema>;
 export type InsertDonationCampaign = z.infer<typeof insertDonationCampaignSchema>;
 export type DonationCampaign = typeof donationCampaigns.$inferSelect;
 

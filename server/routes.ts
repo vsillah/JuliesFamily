@@ -5,7 +5,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema } from "@shared/schema";
+import { authLimiter, adminLimiter, paymentLimiter, leadLimiter } from "./security";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -1001,7 +1002,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Public Lead Capture Endpoint (no auth required)
-  app.post('/api/leads', async (req, res) => {
+  // Rate limited to prevent spam/abuse
+  app.post('/api/leads', leadLimiter, async (req, res) => {
     try {
       const validatedData = insertLeadSchema.parse(req.body);
       
@@ -3941,7 +3943,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reference: blueprint:javascript_stripe
 
   // Create Stripe checkout session for one-time or recurring donation
-  app.post("/api/donations/create-checkout", async (req, res) => {
+  // Rate limited to prevent payment abuse
+  app.post("/api/donations/create-checkout", paymentLimiter, async (req, res) => {
     try {
       const { amount, donationType, frequency, donorEmail, donorName, donorPhone, isAnonymous, passions, wishlistItemId, metadata } = req.body;
 

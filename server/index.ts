@@ -1,9 +1,9 @@
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initBackupScheduler, shutdownBackupScheduler } from "./services/backupScheduler";
+import { helmetConfig, globalLimiter } from "./security";
 
 const app = express();
 
@@ -14,63 +14,10 @@ declare module 'http' {
 }
 
 // Configure helmet for security headers
-// CSP disabled to work with Replit infrastructure and third-party services (Google Fonts, Cloudinary, etc.)
-app.use(helmet({
-  contentSecurityPolicy: false, // Disabled to work with Replit infrastructure
-  crossOriginEmbedderPolicy: false, // Allow embedding third-party resources
-  hsts: {
-    maxAge: 31536000, // 1 year
-    includeSubDomains: true,
-    preload: true
-  }
-}));
+app.use(helmet(helmetConfig));
 
-// Global rate limiter - general protection against abuse
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 requests per window
-  message: 'Too many requests from this IP, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Apply global rate limiter
 app.use(globalLimiter);
-
-// Strict rate limiter for authentication endpoints
-export const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit each IP to 10 login attempts per window
-  message: 'Too many login attempts, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true, // Don't count successful requests
-});
-
-// Rate limiter for admin/sensitive operations
-export const adminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes  
-  max: 100, // Limit admin operations
-  message: 'Too many requests to admin endpoints, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Rate limiter for donation/payment endpoints
-export const paymentLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 20, // Limit payment attempts
-  message: 'Too many payment attempts, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Rate limiter for lead creation/contact forms
-export const leadLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit lead submissions per hour
-  message: 'Too many submissions, please try again later.',
-  standardHeaders: true,
-  legacyHeaders: false,
-});
 
 app.use(express.json({
   limit: '50mb',

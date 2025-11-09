@@ -9,6 +9,7 @@ import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import { authLimiter } from "./security";
 
 const getOidcConfig = memoize(
   async () => {
@@ -134,7 +135,8 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req, res, next) => {
+  // Apply rate limiting to authentication endpoints to prevent brute force attacks
+  app.get("/api/login", authLimiter, (req, res, next) => {
     ensureStrategy(req.hostname);
     
     // Capture and sanitize returnTo parameter
@@ -152,7 +154,7 @@ export async function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.get("/api/callback", (req, res, next) => {
+  app.get("/api/callback", authLimiter, (req, res, next) => {
     ensureStrategy(req.hostname);
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
