@@ -162,17 +162,11 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">Default (No persona)</SelectItem>
-                    {personaConfigs.map((config) => {
-                      const IconComponent = iconComponents[config.iconName];
-                      return (
-                        <SelectItem key={config.id} value={config.id!}>
-                          <div className="flex items-center gap-2">
-                            <IconComponent className="w-4 h-4" />
-                            {config.label}
-                          </div>
-                        </SelectItem>
-                      );
-                    })}
+                    {personaConfigs.map((config) => (
+                      <SelectItem key={config.id} value={config.id}>
+                        {config.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 {selectedPersona && (
