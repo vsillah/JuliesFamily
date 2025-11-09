@@ -237,6 +237,15 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
               >
                 Virtual Tour
               </Link>
+              <button
+                onClick={() => scrollToSection("contact")}
+                className={`text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
+                  isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                }`}
+                data-testid="link-contact"
+              >
+                Contact
+              </button>
             </nav>
 
             {/* Right: Utilities */}
