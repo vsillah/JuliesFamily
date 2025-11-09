@@ -524,11 +524,24 @@ export class DatabaseStorage implements IStorage {
       const updateData: any = {
         oidcSub: userData.oidcSub,
         email: userData.email,
-        firstName: userData.firstName,
-        lastName: userData.lastName,
-        profileImageUrl: userData.profileImageUrl,
         updatedAt: new Date(),
       };
+      
+      // DATA INTEGRITY: Only update firstName/lastName if:
+      // 1. They're explicitly being set (not undefined/null)
+      // 2. AND the existing user doesn't have them set (empty fields only)
+      // This prevents OIDC login from overwriting user-set names
+      if (userData.firstName && !existingUser.firstName) {
+        updateData.firstName = userData.firstName;
+      }
+      if (userData.lastName && !existingUser.lastName) {
+        updateData.lastName = userData.lastName;
+      }
+      
+      // Always update profile image if provided
+      if (userData.profileImageUrl !== undefined) {
+        updateData.profileImageUrl = userData.profileImageUrl;
+      }
       
       // Only update role if explicitly provided (used by super_admin via API, not from OIDC)
       if (userData.role !== undefined) {
@@ -558,12 +571,52 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateUser(id: string, updates: Partial<UpsertUser>): Promise<User | undefined> {
+  async updateUser(id: string, updates: Partial<UpsertUser>, actorId?: string): Promise<User | undefined> {
+    // Get current user for audit logging
+    const currentUser = await this.getUser(id);
+    if (!currentUser) {
+      return undefined;
+    }
+
+    // Build update data with allowed fields only
+    const updateData: any = {
+      updatedAt: new Date(),
+    };
+
+    // Allow these fields to be updated via profile updates
+    if (updates.firstName !== undefined) updateData.firstName = updates.firstName;
+    if (updates.lastName !== undefined) updateData.lastName = updates.lastName;
+    if (updates.profileImageUrl !== undefined) updateData.profileImageUrl = updates.profileImageUrl;
+    if (updates.persona !== undefined) updateData.persona = updates.persona;
+    
+    // Sensitive fields - only allow if explicitly set (admin operations)
+    if (updates.role !== undefined) updateData.role = updates.role;
+    if (updates.email !== undefined) updateData.email = updates.email;
+    if (updates.oidcSub !== undefined) updateData.oidcSub = updates.oidcSub;
+
     const [user] = await db
       .update(users)
-      .set({ ...updates, updatedAt: new Date() })
+      .set(updateData)
       .where(eq(users.id, id))
       .returning();
+
+    // Create audit log for profile updates
+    if (user && actorId) {
+      const changedFields = Object.keys(updates).filter(key => updates[key as keyof typeof updates] !== currentUser[key as keyof typeof currentUser]);
+      if (changedFields.length > 0) {
+        await this.createAuditLog({
+          userId: id,
+          actorId: actorId,
+          action: 'profile_updated',
+          metadata: {
+            changedFields,
+            previousValues: Object.fromEntries(changedFields.map(key => [key, currentUser[key as keyof typeof currentUser]])),
+            newValues: Object.fromEntries(changedFields.map(key => [key, updates[key as keyof typeof updates]])),
+          },
+        });
+      }
+    }
+
     return user;
   }
 

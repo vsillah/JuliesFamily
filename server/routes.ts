@@ -96,6 +96,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update current user's profile
+  app.patch('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const user = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Validate request body
+      const { updateUserProfileSchema } = await import("@shared/schema");
+      const validation = updateUserProfileSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid profile data",
+          errors: validation.error.errors 
+        });
+      }
+
+      // Update user profile with audit logging
+      const updatedUser = await storage.updateUser(user.id, validation.data, user.id);
+      
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update profile" });
+      }
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Admin User Management Routes
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -146,7 +181,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store previous role for audit log
       const previousRole = userToUpdate.role;
       
-      const updatedUser = await storage.updateUser(userId, { role: newRole });
+      const updatedUser = await storage.updateUser(userId, { role: newRole }, currentUser!.id);
       
       // Create audit log entry
       if (currentUser) {
@@ -790,7 +825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const updatedUser = await storage.updateUser(currentUser.id, { persona });
+      const updatedUser = await storage.updateUser(currentUser.id, { persona }, currentUser.id);
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user persona:", error);
@@ -954,7 +989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       // Update user profile in database with UUID
-      await storage.updateUser(currentUser.id, { profileImageUrl: objectPath });
+      await storage.updateUser(currentUser.id, { profileImageUrl: objectPath }, currentUser.id);
 
       res.status(200).json({
         objectPath: objectPath,

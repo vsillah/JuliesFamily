@@ -38,6 +38,17 @@ export const users = pgTable("users", {
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
+// Profile update schema - for authenticated users updating their own profile
+// Restricted to safe fields only (no role, email, or id changes)
+export const updateUserProfileSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").max(100).optional(),
+  lastName: z.string().trim().min(1, "Last name is required").max(100).optional(),
+  profileImageUrl: z.string().url().optional().nullable(),
+  persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional().nullable(),
+}).strict(); // Reject unknown fields
+
+export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
+
 // Admin Preferences - stores admin user preferences for notifications, workflow, interface, and communication
 export const adminPreferences = pgTable("admin_preferences", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
