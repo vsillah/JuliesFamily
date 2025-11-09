@@ -141,19 +141,19 @@ export default function Navigation() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-[1fr_auto_1fr] md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center h-14 md:h-20 gap-4">
+          <div className="grid grid-cols-[1fr_auto_1fr] md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center h-14 md:h-20 gap-2 md:gap-4">
             {/* Left: Brand */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 md:gap-3 min-w-0">
               <CloudinaryImage 
                 name="site-logo"
                 alt="Julie's Family Learning Program Logo" 
-                className="h-9 md:h-12 w-auto"
+                className="h-9 md:h-12 w-auto flex-shrink-0"
                 width={120}
                 quality="auto:best"
                 loading="eager"
               />
-              <div className="hidden lg:block">
-                <h1 className={`text-lg font-serif font-semibold transition-colors duration-300 leading-tight ${
+              <div className="hidden xl:block min-w-0">
+                <h1 className={`text-base font-serif font-semibold transition-colors duration-300 leading-tight whitespace-nowrap ${
                   isScrolled ? "text-primary" : "text-white"
                 }`}>
                   Julie's Family<br />Learning Program
@@ -162,11 +162,11 @@ export default function Navigation() {
             </div>
 
             {/* Center: Primary Navigation */}
-            <nav className="hidden md:flex items-center gap-6 flex-1 justify-center">
+            <nav className="hidden md:flex items-center gap-3 lg:gap-4 flex-1 justify-center min-w-0">
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
-                  className={`text-base font-medium transition-colors duration-300 ${
+                  className={`text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-services"
@@ -177,7 +177,7 @@ export default function Navigation() {
               {sections.impact && (
                 <button
                   onClick={() => scrollToSection("impact")}
-                  className={`text-base font-medium transition-colors duration-300 ${
+                  className={`text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-impact"
@@ -188,7 +188,7 @@ export default function Navigation() {
               {sections.testimonials && (
                 <button
                   onClick={() => scrollToSection("testimonials")}
-                  className={`text-base font-medium transition-colors duration-300 ${
+                  className={`text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-testimonials"
@@ -199,7 +199,7 @@ export default function Navigation() {
               {sections.events && (
                 <button
                   onClick={() => scrollToSection("events")}
-                  className={`text-base font-medium transition-colors duration-300 ${
+                  className={`text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-events"
@@ -209,7 +209,7 @@ export default function Navigation() {
               )}
               <Link 
                 href="/virtual-tour"
-                className={`text-base font-medium transition-colors duration-300 ${
+                className={`text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-virtual-tour"
@@ -219,7 +219,7 @@ export default function Navigation() {
             </nav>
 
             {/* Right: Utilities */}
-            <div className="hidden md:flex items-center gap-3 justify-end">
+            <div className="hidden md:flex items-center gap-2 justify-end min-w-0">
               <Link href="/donate">
                 <Button variant="default" size="sm" data-testid="button-donate">
                   Donate
