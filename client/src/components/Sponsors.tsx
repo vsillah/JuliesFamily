@@ -18,7 +18,7 @@ export default function Sponsors() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card className="p-8 text-center">
-            <div className="flex items-center justify-center h-40 w-40 mx-auto mb-4">
+            <div className="flex items-center justify-center h-32 w-48 mx-auto mb-4">
               <img 
                 src={cummingsLogo} 
                 alt="Cummings Foundation $100k for 100 logo"
