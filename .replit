@@ -104,4 +104,4 @@ waitForPort = 5000
 defaultBucketID = "replit-objstore-be2c0cad-ba5c-42a2-95cd-fae295239b69"
 
 [agent]
-integrations = ["javascript_database:1.0.0", "javascript_log_in_with_replit:1.0.0", "javascript_object_storage:1.0.0", "javascript_gemini_ai_integrations:1.0.0", "javascript_stripe:1.0.0", "twilio:1.0.0", "google-calendar:1.0.0"]
+integrations = ["javascript_database:1.0.0", "javascript_log_in_with_replit:1.0.0", "javascript_object_storage:1.0.0", "javascript_gemini_ai_integrations:1.0.0", "javascript_stripe:1.0.0", "twilio:1.0.0", "google-calendar:1.0.0", "javascript_openai_ai_integrations:1.0.0"]
