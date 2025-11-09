@@ -162,7 +162,7 @@ export default function Navigation() {
             </div>
 
             {/* Center: Primary Navigation */}
-            <nav className="hidden md:flex items-center gap-2 lg:gap-3 flex-1 justify-center overflow-hidden">
+            <nav className="hidden md:flex items-center gap-4 flex-1 justify-evenly px-4 md:px-6 lg:px-8 overflow-hidden">
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
