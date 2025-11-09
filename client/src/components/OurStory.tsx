@@ -163,13 +163,13 @@ export default function OurStory() {
                     <img 
                       src={building1927} 
                       alt="Historic photo of Julie's building from 1927 when it was a public health center"
-                      className="w-full h-auto rounded-md border border-border"
+                      className="w-full h-64 object-cover rounded-md border border-border"
                       data-testid="img-building-1927"
                     />
                     <img 
                       src={buildingExterior} 
                       alt="Current exterior of Julie's Family Learning Program historic building"
-                      className="w-full h-auto rounded-md border border-border"
+                      className="w-full h-64 object-cover rounded-md border border-border"
                       data-testid="img-building-current"
                     />
                   </div>
