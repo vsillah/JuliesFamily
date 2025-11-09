@@ -117,7 +117,7 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
         )}
         <Button
           variant="outline"
-          size="sm"
+          size="lg"
           onClick={() => {
             setShowDialog(true);
             // Small delay before closing mobile menu to allow dialog to open
