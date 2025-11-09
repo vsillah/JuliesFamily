@@ -41,9 +41,9 @@ export type User = typeof users.$inferSelect;
 // Profile update schema - for authenticated users updating their own profile
 // Restricted to safe fields only (no role, email, or id changes)
 export const updateUserProfileSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required").max(100).optional(),
-  lastName: z.string().trim().min(1, "Last name is required").max(100).optional(),
-  profileImageUrl: z.string().url().optional().nullable(),
+  firstName: z.string().trim().min(1, "First name is required").max(100),
+  lastName: z.string().trim().min(1, "Last name is required").max(100),
+  profileImageUrl: z.union([z.string().url(), z.literal("")]).optional().nullable(),
   persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional().nullable(),
 }).strict(); // Reject unknown fields
 
