@@ -489,7 +489,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             >
               Virtual Tour
             </Link>
-            {currentPersonaConfig && (
+            {currentPersonaConfig && !isAdmin && (
               <Button 
                 variant="outline" 
                 size="sm" 
