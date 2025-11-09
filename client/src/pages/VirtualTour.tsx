@@ -1,8 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import type { ContentItem } from '@shared/schema';
 import { VideoEmbed } from '@/components/VideoEmbed';
-import { Building2, Heart, Users, BookOpen, Video as VideoIcon } from 'lucide-react';
+import { Building2, Heart, Users, BookOpen, Video as VideoIcon, Home } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Link } from 'wouter';
 
 export default function VirtualTour() {
   const { data: videos, isLoading } = useQuery<ContentItem[]>({
@@ -61,6 +63,14 @@ export default function VirtualTour() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary/10 via-secondary/10 to-primary/5 py-16 px-4">
         <div className="container mx-auto max-w-7xl">
+          <div className="mb-6">
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-home">
+                <Home className="w-4 h-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
           <div className="text-center mb-8">
             <div className="flex items-center justify-center gap-3 mb-4">
               <VideoIcon className="w-10 h-10 text-primary" />
