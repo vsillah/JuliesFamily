@@ -1,5 +1,7 @@
 import { Card } from "@/components/ui/card";
-import { Award } from "lucide-react";
+import cummingsLogo from "@assets/CumminsFoundationlogo_1762691811373.webp";
+import pierceLogo from "@assets/Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp";
+import candidLogo from "@assets/CandidAwardImg.jpg_1762691811371.webp";
 
 export default function Sponsors() {
   return (
@@ -16,7 +18,14 @@ export default function Sponsors() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <Card className="p-8 text-center">
-            <Award className="w-12 h-12 text-primary mx-auto mb-4" />
+            <div className="flex items-center justify-center h-24 mb-4">
+              <img 
+                src={cummingsLogo} 
+                alt="Cummings Foundation $100k for 100 logo"
+                className="max-h-full max-w-full object-contain"
+                data-testid="img-cummings-logo"
+              />
+            </div>
             <h3 className="font-semibold text-lg mb-2">Cummings Foundation</h3>
             <p className="text-sm text-muted-foreground">
               Proud recipient of a $100k for 100 grant supporting our mission.
@@ -24,7 +33,14 @@ export default function Sponsors() {
           </Card>
 
           <Card className="p-8 text-center">
-            <Award className="w-12 h-12 text-primary mx-auto mb-4" />
+            <div className="flex items-center justify-center h-24 mb-4">
+              <img 
+                src={pierceLogo} 
+                alt="Pierce Property Services logo"
+                className="max-h-full max-w-full object-contain"
+                data-testid="img-pierce-logo"
+              />
+            </div>
             <h3 className="font-semibold text-lg mb-2">Pierce Property Services</h3>
             <p className="text-sm text-muted-foreground">
               Providing invaluable in-kind services to support our programs.
@@ -32,7 +48,14 @@ export default function Sponsors() {
           </Card>
 
           <Card className="p-8 text-center">
-            <Award className="w-12 h-12 text-primary mx-auto mb-4" />
+            <div className="flex items-center justify-center h-24 mb-4">
+              <img 
+                src={candidLogo} 
+                alt="Candid Platinum Transparency 2024 Seal"
+                className="max-h-full max-w-full object-contain"
+                data-testid="img-candid-logo"
+              />
+            </div>
             <h3 className="font-semibold text-lg mb-2">GuideStar Platinum Seal</h3>
             <p className="text-sm text-muted-foreground">
               2024 Platinum Seal of Transparency in recognition of our financial integrity.
