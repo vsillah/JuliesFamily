@@ -166,7 +166,7 @@ export default function Navigation() {
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
-                  className={`text-sm font-medium transition-colors duration-300 ${
+                  className={`text-base font-medium transition-colors duration-300 ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-services"
@@ -177,7 +177,7 @@ export default function Navigation() {
               {sections.impact && (
                 <button
                   onClick={() => scrollToSection("impact")}
-                  className={`text-sm font-medium transition-colors duration-300 ${
+                  className={`text-base font-medium transition-colors duration-300 ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-impact"
@@ -188,7 +188,7 @@ export default function Navigation() {
               {sections.testimonials && (
                 <button
                   onClick={() => scrollToSection("testimonials")}
-                  className={`text-sm font-medium transition-colors duration-300 ${
+                  className={`text-base font-medium transition-colors duration-300 ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-testimonials"
@@ -199,7 +199,7 @@ export default function Navigation() {
               {sections.events && (
                 <button
                   onClick={() => scrollToSection("events")}
-                  className={`text-sm font-medium transition-colors duration-300 ${
+                  className={`text-base font-medium transition-colors duration-300 ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-events"
@@ -209,7 +209,7 @@ export default function Navigation() {
               )}
               <Link 
                 href="/virtual-tour"
-                className={`text-sm font-medium transition-colors duration-300 ${
+                className={`text-base font-medium transition-colors duration-300 ${
                   isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                 }`}
                 data-testid="link-virtual-tour"
