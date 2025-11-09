@@ -22,7 +22,7 @@ export default function Sponsors() {
               <img 
                 src={cummingsLogo} 
                 alt="Cummings Foundation $100k for 100 logo"
-                className="max-h-full max-w-full object-contain"
+                className="max-h-full max-w-full object-contain mix-blend-multiply"
                 data-testid="img-cummings-logo"
               />
             </div>
@@ -37,7 +37,7 @@ export default function Sponsors() {
               <img 
                 src={pierceLogo} 
                 alt="Pierce Property Services logo"
-                className="max-h-full max-w-full object-contain"
+                className="max-h-full max-w-full object-contain mix-blend-multiply"
                 data-testid="img-pierce-logo"
               />
             </div>
