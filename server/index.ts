@@ -1,4 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initBackupScheduler, shutdownBackupScheduler } from "./services/backupScheduler";
@@ -10,6 +12,66 @@ declare module 'http' {
     rawBody: unknown
   }
 }
+
+// Configure helmet for security headers
+// CSP disabled to work with Replit infrastructure and third-party services (Google Fonts, Cloudinary, etc.)
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabled to work with Replit infrastructure
+  crossOriginEmbedderPolicy: false, // Allow embedding third-party resources
+  hsts: {
+    maxAge: 31536000, // 1 year
+    includeSubDomains: true,
+    preload: true
+  }
+}));
+
+// Global rate limiter - general protection against abuse
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 requests per window
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
+
+// Strict rate limiter for authentication endpoints
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 login attempts per window
+  message: 'Too many login attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true, // Don't count successful requests
+});
+
+// Rate limiter for admin/sensitive operations
+export const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes  
+  max: 100, // Limit admin operations
+  message: 'Too many requests to admin endpoints, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiter for donation/payment endpoints
+export const paymentLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 20, // Limit payment attempts
+  message: 'Too many payment attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiter for lead creation/contact forms
+export const leadLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit lead submissions per hour
+  message: 'Too many submissions, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use(express.json({
   limit: '50mb',
   verify: (req, _res, buf) => {
@@ -17,23 +79,6 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
-
-// Security headers middleware
-app.use((req, res, next) => {
-  // Remove CSP headers injected by Replit's infrastructure that block legitimate resources
-  // (Google Fonts, Cloudinary CDN, etc.). In production, rely on Replit's platform-level
-  // security controls rather than implementing a custom CSP that may conflict with
-  // infrastructure headers.
-  res.removeHeader('Content-Security-Policy');
-  res.removeHeader('X-Content-Security-Policy');
-  
-  // Set standard security headers
-  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
-  next();
-});
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -68,12 +113,29 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Log full error details for debugging (server-side only)
+    console.error('Error occurred:', {
+      path: req.path,
+      method: req.method,
+      status,
+      message: err.message,
+      stack: err.stack,
+    });
+
+    // In production, sanitize error messages to prevent information leakage
+    const isProduction = process.env.NODE_ENV === 'production';
+    const clientMessage = isProduction && status === 500 
+      ? 'Internal Server Error' 
+      : message;
+
+    res.status(status).json({ 
+      message: clientMessage,
+      ...(isProduction ? {} : { error: err.message }) // Include error details in dev only
+    });
   });
 
   // importantly only setup vite in development and after
