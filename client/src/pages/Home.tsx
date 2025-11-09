@@ -3,6 +3,7 @@ import Hero from "@/components/Hero";
 import Services from "@/components/Services";
 import PersonalizedLeadMagnet from "@/components/PersonalizedLeadMagnet";
 import ImpactStats from "@/components/ImpactStats";
+import OurStory from "@/components/OurStory";
 import Testimonials from "@/components/Testimonials";
 import { StudentStoriesCarousel } from "@/components/StudentStoriesCarousel";
 import SocialMediaCarousel from "@/components/SocialMediaCarousel";
@@ -95,6 +96,7 @@ export default function Home() {
       </section>
 
       <ImpactStats />
+      <OurStory />
       <Testimonials />
       <StudentStoriesCarousel />
       <SocialMediaCarousel />
