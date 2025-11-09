@@ -1,8 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Calendar, Building, Heart, GraduationCap, Home, Users, ArrowRight } from "lucide-react";
-import { Link } from "wouter";
+import { Calendar, Building, Heart, GraduationCap, Home, Users } from "lucide-react";
 import buildingExterior from "@assets/Building080711smaller_1762689139944.jpg";
 import whiteFundPlaque from "@assets/Building080711smallerWhiteplaqueforweb_1762689139949.jpg";
 import foundersPhoto from "@assets/Juliesfounders-541x180.jpg_1762689139950.webp";
@@ -127,196 +125,139 @@ export default function OurStory() {
                 </div>
               </div>
             </div>
-
-            {/* CTA after timeline */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 pt-8 border-t border-border">
-              <Link href="/programs">
-                <Button size="lg" data-testid="button-explore-programs">
-                  Explore Our Programs <ArrowRight className="ml-2" size={16} />
-                </Button>
-              </Link>
-              <Link href="/get-involved">
-                <Button size="lg" variant="outline" data-testid="button-get-involved">
-                  Get Involved
-                </Button>
-              </Link>
-            </div>
           </TabsContent>
 
           {/* Historic Building Tab */}
           <TabsContent value="building" className="mt-6">
             <div className="max-w-4xl mx-auto space-y-6">
-              <div 
-                className="relative rounded-xl overflow-hidden border border-border"
-                data-testid="card-building-legacy"
-              >
-                <img 
-                  src={buildingExterior} 
-                  alt="Current exterior of Julie's Family Learning Program historic building"
-                  className="w-full h-[400px] md:h-[500px] object-cover"
-                  data-testid="img-building-current"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Building className="w-5 h-5 text-white" />
-                    <h3 className="text-2xl font-serif font-bold text-white" data-testid="heading-public-health-legacy">
-                      A Public Health Legacy
-                    </h3>
+              <Card data-testid="card-building-legacy">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2" data-testid="heading-public-health-legacy">
+                    <Building className="w-5 h-5 text-primary" />
+                    A Public Health Legacy
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <img 
+                      src={building1927} 
+                      alt="Historic photo of Julie's building from 1927 when it was a public health center"
+                      className="w-full h-auto rounded-md border border-border"
+                      data-testid="img-building-1927"
+                    />
+                    <img 
+                      src={buildingExterior} 
+                      alt="Current exterior of Julie's Family Learning Program historic building"
+                      className="w-full h-auto rounded-md border border-border"
+                      data-testid="img-building-current"
+                    />
                   </div>
-                  <p className="text-white/90 leading-relaxed max-w-3xl">
+                  <p className="text-muted-foreground leading-relaxed">
                     Julie's is housed in an historic building that began its life as a public health center. With funding from the George Robert White Fund, the facility was built as part of a campaign to provide the city with beautiful buildings to benefit the public. It was presented to the City of Boston on June 28th, 1927. The solarium on the rooftop floor was used for treating patients with tuberculosis.
                   </p>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
-              <div 
-                className="relative rounded-xl overflow-hidden border border-border"
-                data-testid="card-building-renovation"
-              >
-                <img 
-                  src={building1927} 
-                  alt="Historic photo of Julie's building from 1927 when it was a public health center"
-                  className="w-full h-[400px] md:h-[500px] object-cover"
-                  data-testid="img-building-1927"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Home className="w-5 h-5 text-white" />
-                    <h3 className="text-2xl font-serif font-bold text-white" data-testid="heading-transformation">
-                      Transformation & Renovation
-                    </h3>
-                  </div>
-                  <div className="space-y-3 max-w-3xl">
-                    <p className="text-white/90 leading-relaxed">
-                      The period from 2003 through 2005 was a very important time of expansion and transition for Julie's. It was during these years that we became a 501(c)(3) non-profit organization and established our first Board of Directors. It was also when we moved into our very own building – the first time that Julie's had its own facility.
+              <Card data-testid="card-building-renovation">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2" data-testid="heading-transformation">
+                    <Home className="w-5 h-5 text-primary" />
+                    Transformation & Renovation
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground leading-relaxed">
+                    The period from 2003 through 2005 was a very important time of expansion and transition for Julie's. It was during these years that we became a 501(c)(3) non-profit organization and established our first Board of Directors. It was also when we moved into our very own building – the first time that Julie's had its own facility.
+                  </p>
+                  <p className="text-muted-foreground leading-relaxed">
+                    After having completed a $3.7 million capital campaign, the building was renovated with the help of the architectural firm, John Catlin Associates & Architects. The architects worked closely with the staff to ensure that the design and space would best suit the needs of the women and children who would be using the building on a daily basis for years to come.
+                  </p>
+                  <img 
+                    src={whiteFundPlaque} 
+                    alt="George Robert White Fund plaque on the historic building"
+                    className="w-full h-auto rounded-md border border-border"
+                    data-testid="img-white-fund-plaque"
+                  />
+                  <div className="bg-muted/30 p-4 rounded-md border border-border">
+                    <p className="text-sm text-muted-foreground italic" data-testid="text-building-ownership">
+                      This building is owned by the George Robert White Fund, a trust managed by the City of Boston.
                     </p>
-                    <p className="text-white/90 leading-relaxed">
-                      After having completed a $3.7 million capital campaign, the building was renovated with the help of the architectural firm, John Catlin Associates & Architects. The architects worked closely with the staff to ensure that the design and space would best suit the needs of the women and children who would be using the building on a daily basis for years to come.
-                    </p>
-                    <div className="bg-white/10 backdrop-blur-sm p-4 rounded-md border border-white/20">
-                      <p className="text-sm text-white/80 italic" data-testid="text-building-ownership">
-                        This building is owned by the George Robert White Fund, a trust managed by the City of Boston.
-                      </p>
-                    </div>
                   </div>
-                </div>
-              </div>
-
-              {/* CTA after building content */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 pt-8 border-t border-border">
-                <Link href="/programs">
-                  <Button size="lg" data-testid="button-building-explore-programs">
-                    Explore Our Programs <ArrowRight className="ml-2" size={16} />
-                  </Button>
-                </Link>
-                <Link href="/get-involved">
-                  <Button size="lg" variant="outline" data-testid="button-building-get-involved">
-                    Get Involved
-                  </Button>
-                </Link>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 
           {/* Founders Tab */}
           <TabsContent value="founders" className="mt-6">
             <div className="max-w-6xl mx-auto space-y-6">
-              <div className="relative rounded-xl overflow-hidden border border-border mb-8">
+              <div className="flex justify-center mb-8">
                 <img 
                   src={foundersPhoto} 
                   alt="Sister Louise Kearns and Sister Jean Sullivan, co-founders of Julie's Family Learning Program"
-                  className="w-full h-[300px] md:h-[400px] object-cover"
+                  className="w-full max-w-2xl h-auto rounded-md border border-border shadow-sm"
                   data-testid="img-founders-photo"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-                  <h3 className="text-3xl md:text-4xl font-serif font-bold text-white mb-2">
-                    Our Founders
-                  </h3>
-                  <p className="text-white/90 text-lg">
-                    Sister Louise Kearns and Sister Jean Sullivan
-                  </p>
-                </div>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Sister Louise Kearns */}
-                <div 
-                  className="relative rounded-xl overflow-hidden border border-border min-h-[500px] md:min-h-[600px]"
-                  data-testid="card-founder-louise"
-                >
-                  <img 
-                    src={foundersPhoto} 
-                    alt="Sister Louise Kearns, co-founder of Julie's Family Learning Program"
-                    className="absolute inset-0 w-full h-full object-cover object-left"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-black/40" />
-                  <div className="relative h-full flex flex-col justify-end p-6 md:p-8">
-                    <h3 className="text-2xl md:text-3xl font-serif font-bold text-white mb-4" data-testid="heading-louise-kearns">
-                      Sister Louise Kearns, SND
-                    </h3>
-                    <div className="space-y-3 text-white/90 leading-relaxed text-sm md:text-base">
-                      <p>
-                        Sister Louise Kearns, SND, joined the Sisters of Notre Dame de Namur in 1959.
-                      </p>
-                      <p>
-                        She received a B.A. in Education and Biology from Emmanuel College and later earned a Master's in education and counseling from Antioch College.
-                      </p>
-                      <p>
-                        In 1969, Sr. Louise moved into the D Street Housing Project in South Boston, where she taught junior high school students, and began a summer youth program.
-                      </p>
-                      <p>
-                        While working in the projects, she became increasingly aware of the immense challenges facing poor families headed by single mothers.
-                      </p>
-                      <p className="font-medium text-white">
-                        Her experiences lead her to finally establish an Adult Learning Program in 1979 in the community. The program provided the mothers with educational services and peer support, while their young children received quality day care.
-                      </p>
-                      <p>
-                        The following year, Sister Louise joined hands with Sr. Jean Sullivan to create Julie's Family Learning Program.
-                      </p>
-                    </div>
+                <Card data-testid="card-founder-louise">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-serif" data-testid="heading-louise-kearns">Sister Louise Kearns, SND</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3 text-muted-foreground leading-relaxed">
+                    <p>
+                      Sister Louise Kearns, SND, joined the Sisters of Notre Dame de Namur in 1959.
+                    </p>
+                    <p>
+                      She received a B.A. in Education and Biology from Emmanuel College and later earned a Master's in education and counseling from Antioch College.
+                    </p>
+                    <p>
+                      In 1969, Sr. Louise moved into the D Street Housing Project in South Boston, where she taught junior high school students, and began a summer youth program.
+                    </p>
+                    <p>
+                      While working in the projects, she became increasingly aware of the immense challenges facing poor families headed by single mothers.
+                    </p>
+                    <p className="font-medium text-foreground">
+                      Her experiences lead her to finally establish an Adult Learning Program in 1979 in the community. The program provided the mothers with educational services and peer support, while their young children received quality day care.
+                    </p>
+                    <p>
+                      The following year, Sister Louise joined hands with Sr. Jean Sullivan to create Julie's Family Learning Program.
+                    </p>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                {/* Sister Jean Sullivan */}
-                <div 
-                  className="relative rounded-xl overflow-hidden border border-border min-h-[500px] md:min-h-[600px]"
-                  data-testid="card-founder-jean"
-                >
-                  <img 
-                    src={foundersPhoto} 
-                    alt="Sister Jean Sullivan, co-founder of Julie's Family Learning Program"
-                    className="absolute inset-0 w-full h-full object-cover object-right"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-black/40" />
-                  <div className="relative h-full flex flex-col justify-end p-6 md:p-8">
-                    <h3 className="text-2xl md:text-3xl font-serif font-bold text-white mb-4" data-testid="heading-jean-sullivan">
-                      Sister Jean Sullivan, SND
-                    </h3>
-                    <div className="space-y-3 text-white/90 leading-relaxed text-sm md:text-base">
-                      <p>
-                        Sister Jean Sullivan, SND, joined the Sisters of Notre Dame de Namur in 1957.
-                      </p>
-                      <p>
-                        Upon completing her Bachelor of Arts degree at Emmanuel College, she began teaching first grade in communities throughout Massachusetts. During her summer months, she worked with migrants in New Jersey and Delaware.
-                      </p>
-                      <p>
-                        While working with migrant families, she encountered many children who had poor self-esteem and little self-confidence. Sr. Jean began searching for educational approaches that would best help these young children, and ultimately settled on the Montessori method as the most effective.
-                      </p>
-                      <p>
-                        She earned her certification as a Montessori teacher from Cornell University, specifically choosing the Montessori method for creating and encouraging self-esteem building among lower income children.
-                      </p>
-                      <p className="font-medium text-white">
-                        In 1974 Sr. Jean joined with Sr. Pat O'Malley to establish Julie's Children's House. The program was unique in that it not only offered a Montessori education to low-income children, it also provided their mothers with monthly home visits and educational sessions on parenting.
-                      </p>
-                      <p>
-                        In 1980 Sister Jean and Sr. Louise Kearns decided to jointly create what is now Julie's Family Learning Program.
-                      </p>
-                    </div>
+              {/* Sister Jean Sullivan */}
+              <Card data-testid="card-founder-jean">
+                <CardHeader>
+                  <CardTitle className="text-2xl font-serif" data-testid="heading-jean-sullivan">Sister Jean Sullivan, SND</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3 text-muted-foreground leading-relaxed">
+                    <p>
+                      Sister Jean Sullivan, SND, joined the Sisters of Notre Dame de Namur in 1957.
+                    </p>
+                    <p>
+                      Upon completing her Bachelor of Arts degree at Emmanuel College, she began teaching first grade in communities throughout Massachusetts. During her summer months, she worked with migrants in New Jersey and Delaware.
+                    </p>
+                    <p>
+                      While working with migrant families, she encountered many children who had poor self-esteem and little self-confidence. Sr. Jean began searching for educational approaches that would best help these young children, and ultimately settled on the Montessori method as the most effective.
+                    </p>
+                    <p>
+                      She earned her certification as a Montessori teacher from Cornell University, specifically choosing the Montessori method for creating and encouraging self-esteem building among lower income children.
+                    </p>
+                    <p className="font-medium text-foreground">
+                      In 1974 Sr. Jean joined with Sr. Pat O'Malley to establish Julie's Children's House. The program was unique in that it not only offered a Montessori education to low-income children, it also provided their mothers with monthly home visits and educational sessions on parenting.
+                    </p>
+                    <p>
+                      In 1980 Sister Jean and Sr. Louise Kearns decided to jointly create what is now Julie's Family Learning Program.
+                    </p>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
                 {/* Legacy note spanning both columns */}
                 <Card className="lg:col-span-2 bg-primary/5 border-primary/20" data-testid="card-legacy-note">
@@ -326,20 +267,6 @@ export default function OurStory() {
                     </p>
                   </CardContent>
                 </Card>
-              </div>
-
-              {/* CTA after founders content */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 pt-8 border-t border-border">
-                <Link href="/programs">
-                  <Button size="lg" data-testid="button-founders-explore-programs">
-                    Explore Our Programs <ArrowRight className="ml-2" size={16} />
-                  </Button>
-                </Link>
-                <Link href="/get-involved">
-                  <Button size="lg" variant="outline" data-testid="button-founders-get-involved">
-                    Get Involved
-                  </Button>
-                </Link>
               </div>
             </div>
           </TabsContent>
