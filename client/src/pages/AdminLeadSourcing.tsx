@@ -77,10 +77,7 @@ export default function AdminLeadSourcing() {
 
   const qualifyLeadsMutation = useMutation({
     mutationFn: async (leadIds: string[]) => {
-      return await apiRequest('/api/admin/leads/qualify', {
-        method: 'POST',
-        body: { leadIds },
-      });
+      return await apiRequest('POST', '/api/admin/leads/qualify', { leadIds });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/leads'] });
@@ -101,9 +98,7 @@ export default function AdminLeadSourcing() {
 
   const generateOutreachMutation = useMutation({
     mutationFn: async (leadId: string) => {
-      return await apiRequest(`/api/admin/leads/${leadId}/generate-outreach`, {
-        method: 'POST',
-      });
+      return await apiRequest('POST', `/api/admin/leads/${leadId}/generate-outreach`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/leads'] });
@@ -124,7 +119,7 @@ export default function AdminLeadSourcing() {
   const bulkGenerateOutreachMutation = useMutation({
     mutationFn: async (leadIds: string[]) => {
       const promises = leadIds.map(id =>
-        apiRequest(`/api/admin/leads/${id}/generate-outreach`, { method: 'POST' })
+        apiRequest('POST', `/api/admin/leads/${id}/generate-outreach`)
       );
       return await Promise.all(promises);
     },
@@ -147,10 +142,7 @@ export default function AdminLeadSourcing() {
 
   const createICPMutation = useMutation({
     mutationFn: async (data: typeof newICPCriterion) => {
-      return await apiRequest('/api/admin/icp-criteria', {
-        method: 'POST',
-        body: data,
-      });
+      return await apiRequest('POST', '/api/admin/icp-criteria', data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/icp-criteria'] });
@@ -172,9 +164,7 @@ export default function AdminLeadSourcing() {
 
   const deleteICPMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/admin/icp-criteria/${id}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest('DELETE', `/api/admin/icp-criteria/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/icp-criteria'] });
@@ -187,10 +177,7 @@ export default function AdminLeadSourcing() {
 
   const updateOutreachStatusMutation = useMutation({
     mutationFn: async ({ leadId, status }: { leadId: string; status: string }) => {
-      return await apiRequest(`/api/admin/leads/${leadId}/outreach-status`, {
-        method: 'PATCH',
-        body: { status },
-      });
+      return await apiRequest('PATCH', `/api/admin/leads/${leadId}/outreach-status`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/leads'] });
@@ -210,10 +197,7 @@ export default function AdminLeadSourcing() {
 
   const bulkUpdateOutreachStatusMutation = useMutation({
     mutationFn: async ({ leadIds, status }: { leadIds: string[]; status: string }) => {
-      return await apiRequest('/api/admin/leads/bulk-outreach-status', {
-        method: 'PATCH',
-        body: { leadIds, status },
-      });
+      return await apiRequest('PATCH', '/api/admin/leads/bulk-outreach-status', { leadIds, status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/leads'] });
