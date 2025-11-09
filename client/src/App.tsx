@@ -18,6 +18,7 @@ import AdminContentManager from "@/pages/AdminContentManager";
 import AdminUserManagement from "@/pages/AdminUserManagement";
 import AdminABTesting from "@/pages/AdminABTesting";
 import AdminABTestAnalytics from "@/pages/AdminABTestAnalytics";
+import AdminBackups from "@/pages/AdminBackups";
 import AdminEmailCampaigns from "@/pages/AdminEmailCampaigns";
 import AdminSmsNotifications from "@/pages/AdminSmsNotifications";
 import AdminHormoziEmails from "@/pages/AdminHormoziEmails";
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/admin/images" component={AdminImages} />
       <Route path="/admin/content" component={AdminContentManager} />
       <Route path="/admin/users" component={AdminUserManagement} />
+      <Route path="/admin/backups" component={AdminBackups} />
       <Route path="/admin/ab-testing" component={AdminABTesting} />
       <Route path="/admin/ab-testing/:id" component={AdminABTestAnalytics} />
       <Route path="/admin/email-campaigns" component={AdminEmailCampaigns} />

@@ -14,7 +14,7 @@ import {
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
   BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
-  Shield, BookOpen, Star, RefreshCw, MessageSquare, Kanban, Settings, ChevronDown
+  Shield, BookOpen, Star, RefreshCw, MessageSquare, Kanban, Settings, ChevronDown, Database
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -195,6 +195,12 @@ export default function AdminDashboard() {
                     <Link href="/admin/users" className="flex items-center cursor-pointer">
                       <Shield className="w-4 h-4 mr-2" />
                       Manage Users
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/backups" className="flex items-center cursor-pointer">
+                      <Database className="w-4 h-4 mr-2" />
+                      Database Backups
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

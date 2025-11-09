@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -537,6 +537,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating chatbot issue:", error);
       res.status(500).json({ message: "Failed to update issue" });
+    }
+  });
+
+  // Database Backup Management Routes
+  // Get list of available tables for backup
+  app.get('/api/admin/backups/tables', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const tables = await storage.getAvailableTables();
+      res.json(tables);
+    } catch (error) {
+      console.error("Error fetching available tables:", error);
+      res.status(500).json({ message: "Failed to fetch available tables" });
+    }
+  });
+
+  // Create a new backup
+  app.post('/api/admin/backups/create', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Validate request body using shared schema
+      const backupCreateSchema = insertBackupSnapshotSchema.pick({
+        tableName: true,
+        backupName: true,
+        description: true,
+      });
+
+      const validationResult = backupCreateSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const { tableName, backupName, description } = validationResult.data;
+
+      const result = await storage.createTableBackup(
+        tableName,
+        currentUser.id,
+        backupName,
+        description
+      );
+
+      res.status(201).json(result);
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      res.status(500).json({ 
+        message: "Failed to create backup. Please try again or contact support if the problem persists." 
+      });
+    }
+  });
+
+  // List all backups
+  app.get('/api/admin/backups', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const backups = await storage.getAllBackupSnapshots();
+      res.json(backups);
+    } catch (error) {
+      console.error("Error fetching backups:", error);
+      res.status(500).json({ message: "Failed to fetch backups" });
+    }
+  });
+
+  // List backups for a specific table
+  app.get('/api/admin/backups/table/:tableName', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { tableName } = req.params;
+      const backups = await storage.getBackupSnapshotsByTable(tableName);
+      res.json(backups);
+    } catch (error) {
+      console.error("Error fetching backups for table:", error);
+      res.status(500).json({ message: "Failed to fetch backups for table" });
+    }
+  });
+
+  // Restore from backup
+  app.post('/api/admin/backups/:id/restore', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+
+      // Validate request body
+      const bodySchema = z.object({
+        mode: z.enum(['replace', 'merge'], { 
+          errorMap: () => ({ message: "Restore mode must be either 'replace' or 'merge'" }) 
+        }),
+      });
+
+      const validationResult = bodySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: validationResult.error.errors 
+        });
+      }
+
+      const { mode } = validationResult.data;
+
+      const result = await storage.restoreFromBackup(id, mode);
+      res.json(result);
+    } catch (error) {
+      console.error("Error restoring from backup:", error);
+      res.status(500).json({ 
+        message: "Failed to restore from backup. Please try again or contact support if the problem persists." 
+      });
+    }
+  });
+
+  // Delete a backup
+  app.delete('/api/admin/backups/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verify backup exists before attempting deletion
+      const backup = await storage.getBackupSnapshot(id);
+      if (!backup) {
+        return res.status(404).json({ message: "Backup not found" });
+      }
+
+      await storage.deleteBackup(id);
+      res.json({ message: "Backup deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting backup:", error);
+      res.status(500).json({ 
+        message: "Failed to delete backup. Please try again or contact support if the problem persists." 
+      });
     }
   });
 
