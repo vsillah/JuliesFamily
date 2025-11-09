@@ -1,6 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Building, Heart, GraduationCap, Home, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Building, Heart, GraduationCap, Home, Users, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 import buildingExterior from "@assets/Building080711smaller_1762689139944.jpg";
 import whiteFundPlaque from "@assets/Building080711smallerWhiteplaqueforweb_1762689139949.jpg";
 import foundersPhoto from "@assets/Juliesfounders-541x180.jpg_1762689139950.webp";
@@ -125,6 +127,20 @@ export default function OurStory() {
                 </div>
               </div>
             </div>
+
+            {/* CTA after timeline */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 pt-8 border-t border-border">
+              <Link href="/programs">
+                <Button size="lg" data-testid="button-explore-programs">
+                  Explore Our Programs <ArrowRight className="ml-2" size={16} />
+                </Button>
+              </Link>
+              <Link href="/get-involved">
+                <Button size="lg" variant="outline" data-testid="button-get-involved">
+                  Get Involved
+                </Button>
+              </Link>
+            </div>
           </TabsContent>
 
           {/* Historic Building Tab */}
@@ -187,6 +203,20 @@ export default function OurStory() {
                   </div>
                 </div>
               </div>
+
+              {/* CTA after building content */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 pt-8 border-t border-border">
+                <Link href="/programs">
+                  <Button size="lg" data-testid="button-building-explore-programs">
+                    Explore Our Programs <ArrowRight className="ml-2" size={16} />
+                  </Button>
+                </Link>
+                <Link href="/get-involved">
+                  <Button size="lg" variant="outline" data-testid="button-building-get-involved">
+                    Get Involved
+                  </Button>
+                </Link>
+              </div>
             </div>
           </TabsContent>
 
@@ -213,62 +243,80 @@ export default function OurStory() {
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Sister Louise Kearns */}
-                <Card data-testid="card-founder-louise">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-serif" data-testid="heading-louise-kearns">Sister Louise Kearns, SND</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3 text-muted-foreground leading-relaxed">
-                    <p>
-                      Sister Louise Kearns, SND, joined the Sisters of Notre Dame de Namur in 1959.
-                    </p>
-                    <p>
-                      She received a B.A. in Education and Biology from Emmanuel College and later earned a Master's in education and counseling from Antioch College.
-                    </p>
-                    <p>
-                      In 1969, Sr. Louise moved into the D Street Housing Project in South Boston, where she taught junior high school students, and began a summer youth program.
-                    </p>
-                    <p>
-                      While working in the projects, she became increasingly aware of the immense challenges facing poor families headed by single mothers.
-                    </p>
-                    <p className="font-medium text-foreground">
-                      Her experiences lead her to finally establish an Adult Learning Program in 1979 in the community. The program provided the mothers with educational services and peer support, while their young children received quality day care.
-                    </p>
-                    <p>
-                      The following year, Sister Louise joined hands with Sr. Jean Sullivan to create Julie's Family Learning Program.
-                    </p>
+                <div 
+                  className="relative rounded-xl overflow-hidden border border-border min-h-[500px] md:min-h-[600px]"
+                  data-testid="card-founder-louise"
+                >
+                  <img 
+                    src={foundersPhoto} 
+                    alt="Sister Louise Kearns, co-founder of Julie's Family Learning Program"
+                    className="absolute inset-0 w-full h-full object-cover object-left"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-black/40" />
+                  <div className="relative h-full flex flex-col justify-end p-6 md:p-8">
+                    <h3 className="text-2xl md:text-3xl font-serif font-bold text-white mb-4" data-testid="heading-louise-kearns">
+                      Sister Louise Kearns, SND
+                    </h3>
+                    <div className="space-y-3 text-white/90 leading-relaxed text-sm md:text-base">
+                      <p>
+                        Sister Louise Kearns, SND, joined the Sisters of Notre Dame de Namur in 1959.
+                      </p>
+                      <p>
+                        She received a B.A. in Education and Biology from Emmanuel College and later earned a Master's in education and counseling from Antioch College.
+                      </p>
+                      <p>
+                        In 1969, Sr. Louise moved into the D Street Housing Project in South Boston, where she taught junior high school students, and began a summer youth program.
+                      </p>
+                      <p>
+                        While working in the projects, she became increasingly aware of the immense challenges facing poor families headed by single mothers.
+                      </p>
+                      <p className="font-medium text-white">
+                        Her experiences lead her to finally establish an Adult Learning Program in 1979 in the community. The program provided the mothers with educational services and peer support, while their young children received quality day care.
+                      </p>
+                      <p>
+                        The following year, Sister Louise joined hands with Sr. Jean Sullivan to create Julie's Family Learning Program.
+                      </p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Sister Jean Sullivan */}
-              <Card data-testid="card-founder-jean">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-serif" data-testid="heading-jean-sullivan">Sister Jean Sullivan, SND</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3 text-muted-foreground leading-relaxed">
-                    <p>
-                      Sister Jean Sullivan, SND, joined the Sisters of Notre Dame de Namur in 1957.
-                    </p>
-                    <p>
-                      Upon completing her Bachelor of Arts degree at Emmanuel College, she began teaching first grade in communities throughout Massachusetts. During her summer months, she worked with migrants in New Jersey and Delaware.
-                    </p>
-                    <p>
-                      While working with migrant families, she encountered many children who had poor self-esteem and little self-confidence. Sr. Jean began searching for educational approaches that would best help these young children, and ultimately settled on the Montessori method as the most effective.
-                    </p>
-                    <p>
-                      She earned her certification as a Montessori teacher from Cornell University, specifically choosing the Montessori method for creating and encouraging self-esteem building among lower income children.
-                    </p>
-                    <p className="font-medium text-foreground">
-                      In 1974 Sr. Jean joined with Sr. Pat O'Malley to establish Julie's Children's House. The program was unique in that it not only offered a Montessori education to low-income children, it also provided their mothers with monthly home visits and educational sessions on parenting.
-                    </p>
-                    <p>
-                      In 1980 Sister Jean and Sr. Louise Kearns decided to jointly create what is now Julie's Family Learning Program.
-                    </p>
+                {/* Sister Jean Sullivan */}
+                <div 
+                  className="relative rounded-xl overflow-hidden border border-border min-h-[500px] md:min-h-[600px]"
+                  data-testid="card-founder-jean"
+                >
+                  <img 
+                    src={foundersPhoto} 
+                    alt="Sister Jean Sullivan, co-founder of Julie's Family Learning Program"
+                    className="absolute inset-0 w-full h-full object-cover object-right"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/70 to-black/40" />
+                  <div className="relative h-full flex flex-col justify-end p-6 md:p-8">
+                    <h3 className="text-2xl md:text-3xl font-serif font-bold text-white mb-4" data-testid="heading-jean-sullivan">
+                      Sister Jean Sullivan, SND
+                    </h3>
+                    <div className="space-y-3 text-white/90 leading-relaxed text-sm md:text-base">
+                      <p>
+                        Sister Jean Sullivan, SND, joined the Sisters of Notre Dame de Namur in 1957.
+                      </p>
+                      <p>
+                        Upon completing her Bachelor of Arts degree at Emmanuel College, she began teaching first grade in communities throughout Massachusetts. During her summer months, she worked with migrants in New Jersey and Delaware.
+                      </p>
+                      <p>
+                        While working with migrant families, she encountered many children who had poor self-esteem and little self-confidence. Sr. Jean began searching for educational approaches that would best help these young children, and ultimately settled on the Montessori method as the most effective.
+                      </p>
+                      <p>
+                        She earned her certification as a Montessori teacher from Cornell University, specifically choosing the Montessori method for creating and encouraging self-esteem building among lower income children.
+                      </p>
+                      <p className="font-medium text-white">
+                        In 1974 Sr. Jean joined with Sr. Pat O'Malley to establish Julie's Children's House. The program was unique in that it not only offered a Montessori education to low-income children, it also provided their mothers with monthly home visits and educational sessions on parenting.
+                      </p>
+                      <p>
+                        In 1980 Sister Jean and Sr. Louise Kearns decided to jointly create what is now Julie's Family Learning Program.
+                      </p>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
 
                 {/* Legacy note spanning both columns */}
                 <Card className="lg:col-span-2 bg-primary/5 border-primary/20" data-testid="card-legacy-note">
@@ -278,6 +326,20 @@ export default function OurStory() {
                     </p>
                   </CardContent>
                 </Card>
+              </div>
+
+              {/* CTA after founders content */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12 pt-8 border-t border-border">
+                <Link href="/programs">
+                  <Button size="lg" data-testid="button-founders-explore-programs">
+                    Explore Our Programs <ArrowRight className="ml-2" size={16} />
+                  </Button>
+                </Link>
+                <Link href="/get-involved">
+                  <Button size="lg" variant="outline" data-testid="button-founders-get-involved">
+                    Get Involved
+                  </Button>
+                </Link>
               </div>
             </div>
           </TabsContent>
