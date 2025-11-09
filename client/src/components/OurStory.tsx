@@ -198,20 +198,6 @@ export default function OurStory() {
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                              <img 
-                                src={building1927} 
-                                alt="Historic photo of Julie's building from 1927 when it was a public health center"
-                                className="w-full h-auto rounded-md border border-border"
-                                data-testid="img-building-1927"
-                              />
-                              <img 
-                                src={buildingExterior} 
-                                alt="Current exterior of Julie's Family Learning Program historic building"
-                                className="w-full h-auto rounded-md border border-border"
-                                data-testid="img-building-current"
-                              />
-                            </div>
                             <p className="text-muted-foreground leading-relaxed">
                               Julie's is housed in an historic building that began its life as a public health center. With funding from the George Robert White Fund, the facility was built as part of a campaign to provide the city with beautiful buildings to benefit the public. It was presented to the City of Boston on June 28th, 1927. The solarium on the rooftop floor was used for treating patients with tuberculosis.
                             </p>
@@ -283,15 +269,6 @@ export default function OurStory() {
                     
                     <CollapsibleContent className="mt-6">
                       <div className="space-y-6">
-                        <div className="flex justify-center mb-8">
-                          <img 
-                            src={foundersPhoto} 
-                            alt="Sister Louise Kearns and Sister Jean Sullivan, co-founders of Julie's Family Learning Program"
-                            className="w-full max-w-2xl h-auto rounded-md border border-border shadow-sm"
-                            data-testid="img-founders-photo"
-                          />
-                        </div>
-                        
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           {/* Sister Louise Kearns */}
                           <Card data-testid="card-founder-louise">
