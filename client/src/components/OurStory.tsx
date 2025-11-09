@@ -130,74 +130,85 @@ export default function OurStory() {
           {/* Historic Building Tab */}
           <TabsContent value="building" className="mt-6">
             <div className="max-w-4xl mx-auto space-y-6">
-              <Card data-testid="card-building-legacy">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2" data-testid="heading-public-health-legacy">
-                    <Building className="w-5 h-5 text-primary" />
-                    A Public Health Legacy
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <img 
-                      src={building1927} 
-                      alt="Historic photo of Julie's building from 1927 when it was a public health center"
-                      className="w-full h-auto rounded-md border border-border"
-                      data-testid="img-building-1927"
-                    />
-                    <img 
-                      src={buildingExterior} 
-                      alt="Current exterior of Julie's Family Learning Program historic building"
-                      className="w-full h-auto rounded-md border border-border"
-                      data-testid="img-building-current"
-                    />
+              <div 
+                className="relative rounded-xl overflow-hidden border border-border"
+                data-testid="card-building-legacy"
+              >
+                <img 
+                  src={buildingExterior} 
+                  alt="Current exterior of Julie's Family Learning Program historic building"
+                  className="w-full h-[400px] md:h-[500px] object-cover"
+                  data-testid="img-building-current"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Building className="w-5 h-5 text-white" />
+                    <h3 className="text-2xl font-serif font-bold text-white" data-testid="heading-public-health-legacy">
+                      A Public Health Legacy
+                    </h3>
                   </div>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <p className="text-white/90 leading-relaxed max-w-3xl">
                     Julie's is housed in an historic building that began its life as a public health center. With funding from the George Robert White Fund, the facility was built as part of a campaign to provide the city with beautiful buildings to benefit the public. It was presented to the City of Boston on June 28th, 1927. The solarium on the rooftop floor was used for treating patients with tuberculosis.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
-              <Card data-testid="card-building-renovation">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2" data-testid="heading-transformation">
-                    <Home className="w-5 h-5 text-primary" />
-                    Transformation & Renovation
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-muted-foreground leading-relaxed">
-                    The period from 2003 through 2005 was a very important time of expansion and transition for Julie's. It was during these years that we became a 501(c)(3) non-profit organization and established our first Board of Directors. It was also when we moved into our very own building – the first time that Julie's had its own facility.
-                  </p>
-                  <p className="text-muted-foreground leading-relaxed">
-                    After having completed a $3.7 million capital campaign, the building was renovated with the help of the architectural firm, John Catlin Associates & Architects. The architects worked closely with the staff to ensure that the design and space would best suit the needs of the women and children who would be using the building on a daily basis for years to come.
-                  </p>
-                  <img 
-                    src={whiteFundPlaque} 
-                    alt="George Robert White Fund plaque on the historic building"
-                    className="w-full h-auto rounded-md border border-border"
-                    data-testid="img-white-fund-plaque"
-                  />
-                  <div className="bg-muted/30 p-4 rounded-md border border-border">
-                    <p className="text-sm text-muted-foreground italic" data-testid="text-building-ownership">
-                      This building is owned by the George Robert White Fund, a trust managed by the City of Boston.
-                    </p>
+              <div 
+                className="relative rounded-xl overflow-hidden border border-border"
+                data-testid="card-building-renovation"
+              >
+                <img 
+                  src={building1927} 
+                  alt="Historic photo of Julie's building from 1927 when it was a public health center"
+                  className="w-full h-[400px] md:h-[500px] object-cover"
+                  data-testid="img-building-1927"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-black/30" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Home className="w-5 h-5 text-white" />
+                    <h3 className="text-2xl font-serif font-bold text-white" data-testid="heading-transformation">
+                      Transformation & Renovation
+                    </h3>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="space-y-3 max-w-3xl">
+                    <p className="text-white/90 leading-relaxed">
+                      The period from 2003 through 2005 was a very important time of expansion and transition for Julie's. It was during these years that we became a 501(c)(3) non-profit organization and established our first Board of Directors. It was also when we moved into our very own building – the first time that Julie's had its own facility.
+                    </p>
+                    <p className="text-white/90 leading-relaxed">
+                      After having completed a $3.7 million capital campaign, the building was renovated with the help of the architectural firm, John Catlin Associates & Architects. The architects worked closely with the staff to ensure that the design and space would best suit the needs of the women and children who would be using the building on a daily basis for years to come.
+                    </p>
+                    <div className="bg-white/10 backdrop-blur-sm p-4 rounded-md border border-white/20">
+                      <p className="text-sm text-white/80 italic" data-testid="text-building-ownership">
+                        This building is owned by the George Robert White Fund, a trust managed by the City of Boston.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </TabsContent>
 
           {/* Founders Tab */}
           <TabsContent value="founders" className="mt-6">
             <div className="max-w-6xl mx-auto space-y-6">
-              <div className="flex justify-center mb-8">
+              <div className="relative rounded-xl overflow-hidden border border-border mb-8">
                 <img 
                   src={foundersPhoto} 
                   alt="Sister Louise Kearns and Sister Jean Sullivan, co-founders of Julie's Family Learning Program"
-                  className="w-full max-w-2xl h-auto rounded-md border border-border shadow-sm"
+                  className="w-full h-[300px] md:h-[400px] object-cover"
                   data-testid="img-founders-photo"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+                  <h3 className="text-3xl md:text-4xl font-serif font-bold text-white mb-2">
+                    Our Founders
+                  </h3>
+                  <p className="text-white/90 text-lg">
+                    Sister Louise Kearns and Sister Jean Sullivan
+                  </p>
+                </div>
               </div>
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
