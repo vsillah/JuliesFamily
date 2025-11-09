@@ -120,7 +120,7 @@ export function ChatbotWidget() {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
           size="icon"
@@ -134,7 +134,7 @@ export function ChatbotWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-96">
+    <div className="fixed bottom-4 right-4 left-4 sm:bottom-6 sm:right-6 sm:left-auto sm:w-96 z-50">
       <Card className="shadow-2xl">
         <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-4">
           <div className="flex items-center gap-2">
@@ -166,7 +166,7 @@ export function ChatbotWidget() {
         </CardHeader>
         
         <CardContent className="p-0">
-          <ScrollArea className="h-96 px-4">
+          <ScrollArea className="h-[60vh] sm:h-96 px-4">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center p-8">
                 <Bot className="h-12 w-12 text-muted-foreground mb-4" />
