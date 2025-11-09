@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { BackupSnapshot } from "@shared/schema";
+import type { BackupSnapshot, BackupSchedule } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Database, 
   Download, 
@@ -15,7 +16,10 @@ import {
   Plus,
   AlertTriangle,
   CheckCircle2,
-  Clock
+  Clock,
+  Calendar,
+  Play,
+  Pause
 } from "lucide-react";
 import {
   Select,
@@ -57,6 +61,465 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui/radio-group";
+
+// Scheduled Backups Tab Component
+function ScheduledBackupsTab({ availableTables }: { availableTables: string[] }) {
+  const { toast } = useToast();
+  const [createScheduleOpen, setCreateScheduleOpen] = useState(false);
+  const [editSchedule, setEditSchedule] = useState<BackupSchedule | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    scheduleId: string;
+    tableName: string;
+  } | null>(null);
+
+  const [newSchedule, setNewSchedule] = useState({
+    tableName: "",
+    scheduleType: "daily" as "daily" | "weekly" | "monthly" | "custom",
+    scheduleConfig: { hour: 2, minute: 0, timezone: "America/New_York" } as any,
+    retentionCount: 7,
+    isActive: true,
+  });
+
+  // Fetch all schedules
+  const { data: schedules = [], isLoading } = useQuery<BackupSchedule[]>({
+    queryKey: ["/api/admin/backup-schedules"],
+  });
+
+  // Create schedule mutation
+  const createScheduleMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return apiRequest("POST", "/api/admin/backup-schedules", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/backup-schedules"] });
+      toast({
+        title: "Success",
+        description: "Schedule created successfully",
+      });
+      setCreateScheduleOpen(false);
+      resetForm();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Update schedule mutation
+  const updateScheduleMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return apiRequest("PATCH", `/api/admin/backup-schedules/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/backup-schedules"] });
+      toast({
+        title: "Success",
+        description: "Schedule updated successfully",
+      });
+      setEditSchedule(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete schedule mutation
+  const deleteScheduleMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return apiRequest("DELETE", `/api/admin/backup-schedules/${id}`, undefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/backup-schedules"] });
+      toast({
+        title: "Success",
+        description: "Schedule deleted successfully",
+      });
+      setDeleteConfirm(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete schedule",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetForm = () => {
+    setNewSchedule({
+      tableName: "",
+      scheduleType: "daily",
+      scheduleConfig: { hour: 2, minute: 0, timezone: "America/New_York" },
+      retentionCount: 7,
+      isActive: true,
+    });
+  };
+
+  const handleCreateSchedule = () => {
+    if (!newSchedule.tableName) {
+      toast({
+        title: "Error",
+        description: "Please select a table",
+        variant: "destructive",
+      });
+      return;
+    }
+    createScheduleMutation.mutate(newSchedule);
+  };
+
+  const formatDate = (date: string | Date | null) => {
+    if (!date) return "N/A";
+    return new Date(date).toLocaleString();
+  };
+
+  const formatTableName = (tableName: string) => {
+    return tableName
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
+  const formatScheduleType = (type: string) => {
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  };
+
+  const formatScheduleDetails = (schedule: BackupSchedule) => {
+    const config = schedule.scheduleConfig as any;
+    const hour = String(config.hour || 0).padStart(2, '0');
+    const minute = String(config.minute || 0).padStart(2, '0');
+    
+    let details = `${hour}:${minute}`;
+    
+    if (schedule.scheduleType === 'weekly' && config.dayOfWeek !== undefined) {
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      details += ` on ${days[config.dayOfWeek]}`;
+    } else if (schedule.scheduleType === 'monthly' && config.dayOfMonth) {
+      details += ` on day ${config.dayOfMonth}`;
+    }
+    
+    return details;
+  };
+
+  return (
+    <>
+      <div className="flex justify-end">
+        <Button 
+          onClick={() => setCreateScheduleOpen(true)}
+          data-testid="button-create-schedule"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Create Schedule
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Scheduled Backups</CardTitle>
+          <CardDescription>
+            Automated backups that run on a recurring schedule with retention policies
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8 text-muted-foreground">Loading schedules...</div>
+          ) : schedules.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No scheduled backups configured
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Table</TableHead>
+                    <TableHead>Schedule</TableHead>
+                    <TableHead>Details</TableHead>
+                    <TableHead>Retention</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Next Run</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {schedules.map((schedule) => (
+                    <TableRow key={schedule.id}>
+                      <TableCell>
+                        <Badge variant="outline" data-testid={`badge-schedule-table-${schedule.tableName}`}>
+                          {formatTableName(schedule.tableName)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell data-testid={`text-schedule-type-${schedule.id}`}>
+                        {formatScheduleType(schedule.scheduleType)}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground" data-testid={`text-schedule-details-${schedule.id}`}>
+                        {formatScheduleDetails(schedule)}
+                      </TableCell>
+                      <TableCell data-testid={`text-schedule-retention-${schedule.id}`}>
+                        Keep {schedule.retentionCount}
+                      </TableCell>
+                      <TableCell>
+                        {schedule.isActive ? (
+                          <Badge variant="default" data-testid={`badge-schedule-active-${schedule.id}`}>
+                            <Play className="w-3 h-3 mr-1" />
+                            Active
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" data-testid={`badge-schedule-inactive-${schedule.id}`}>
+                            <Pause className="w-3 h-3 mr-1" />
+                            Paused
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground" data-testid={`text-schedule-next-run-${schedule.id}`}>
+                          <Clock className="w-3 h-3" />
+                          {formatDate(schedule.nextRun)}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateScheduleMutation.mutate({
+                              id: schedule.id,
+                              data: { isActive: !schedule.isActive }
+                            })}
+                            data-testid={`button-toggle-schedule-${schedule.id}`}
+                          >
+                            {schedule.isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setDeleteConfirm({ 
+                              scheduleId: schedule.id, 
+                              tableName: schedule.tableName 
+                            })}
+                            data-testid={`button-delete-schedule-${schedule.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Create Schedule Dialog */}
+      <Dialog open={createScheduleOpen} onOpenChange={setCreateScheduleOpen}>
+        <DialogContent data-testid="dialog-create-schedule">
+          <DialogHeader>
+            <DialogTitle>Create Backup Schedule</DialogTitle>
+            <DialogDescription>
+              Configure a recurring backup schedule with retention policy
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="schedule-table">Table *</Label>
+              <Select
+                value={newSchedule.tableName}
+                onValueChange={(value) => setNewSchedule({ ...newSchedule, tableName: value })}
+              >
+                <SelectTrigger id="schedule-table" data-testid="select-schedule-table">
+                  <SelectValue placeholder="Select a table" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableTables.map((table) => (
+                    <SelectItem key={table} value={table} data-testid={`select-item-schedule-table-${table}`}>
+                      {formatTableName(table)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="schedule-type">Schedule Type *</Label>
+              <Select
+                value={newSchedule.scheduleType}
+                onValueChange={(value: any) => {
+                  const baseConfig = { 
+                    hour: newSchedule.scheduleConfig.hour || 2, 
+                    minute: newSchedule.scheduleConfig.minute || 0,
+                    timezone: newSchedule.scheduleConfig.timezone || "America/New_York"
+                  };
+                  
+                  let config = { ...baseConfig };
+                  if (value === 'weekly') config = { ...baseConfig, dayOfWeek: 0 };
+                  if (value === 'monthly') config = { ...baseConfig, dayOfMonth: 1 };
+                  
+                  setNewSchedule({ ...newSchedule, scheduleType: value, scheduleConfig: config });
+                }}
+              >
+                <SelectTrigger id="schedule-type" data-testid="select-schedule-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily" data-testid="select-item-type-daily">Daily</SelectItem>
+                  <SelectItem value="weekly" data-testid="select-item-type-weekly">Weekly</SelectItem>
+                  <SelectItem value="monthly" data-testid="select-item-type-monthly">Monthly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="schedule-hour">Hour (0-23) *</Label>
+                <Input
+                  id="schedule-hour"
+                  type="number"
+                  min="0"
+                  max="23"
+                  value={newSchedule.scheduleConfig.hour || 2}
+                  onChange={(e) => setNewSchedule({ 
+                    ...newSchedule, 
+                    scheduleConfig: { ...newSchedule.scheduleConfig, hour: parseInt(e.target.value) || 0 }
+                  })}
+                  data-testid="input-schedule-hour"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="schedule-minute">Minute (0-59) *</Label>
+                <Input
+                  id="schedule-minute"
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={newSchedule.scheduleConfig.minute || 0}
+                  onChange={(e) => setNewSchedule({ 
+                    ...newSchedule, 
+                    scheduleConfig: { ...newSchedule.scheduleConfig, minute: parseInt(e.target.value) || 0 }
+                  })}
+                  data-testid="input-schedule-minute"
+                />
+              </div>
+            </div>
+
+            {newSchedule.scheduleType === 'weekly' && (
+              <div className="space-y-2">
+                <Label htmlFor="schedule-day-of-week">Day of Week *</Label>
+                <Select
+                  value={String(newSchedule.scheduleConfig.dayOfWeek ?? 0)}
+                  onValueChange={(value) => setNewSchedule({ 
+                    ...newSchedule, 
+                    scheduleConfig: { ...newSchedule.scheduleConfig, dayOfWeek: parseInt(value) }
+                  })}
+                >
+                  <SelectTrigger id="schedule-day-of-week" data-testid="select-schedule-day-of-week">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0" data-testid="select-item-dow-sunday">Sunday</SelectItem>
+                    <SelectItem value="1" data-testid="select-item-dow-monday">Monday</SelectItem>
+                    <SelectItem value="2" data-testid="select-item-dow-tuesday">Tuesday</SelectItem>
+                    <SelectItem value="3" data-testid="select-item-dow-wednesday">Wednesday</SelectItem>
+                    <SelectItem value="4" data-testid="select-item-dow-thursday">Thursday</SelectItem>
+                    <SelectItem value="5" data-testid="select-item-dow-friday">Friday</SelectItem>
+                    <SelectItem value="6" data-testid="select-item-dow-saturday">Saturday</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {newSchedule.scheduleType === 'monthly' && (
+              <div className="space-y-2">
+                <Label htmlFor="schedule-day-of-month">Day of Month (1-31) *</Label>
+                <Input
+                  id="schedule-day-of-month"
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={newSchedule.scheduleConfig.dayOfMonth || 1}
+                  onChange={(e) => setNewSchedule({ 
+                    ...newSchedule, 
+                    scheduleConfig: { ...newSchedule.scheduleConfig, dayOfMonth: parseInt(e.target.value) || 1 }
+                  })}
+                  data-testid="input-schedule-day-of-month"
+                />
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="schedule-retention">Retention Count *</Label>
+              <Input
+                id="schedule-retention"
+                type="number"
+                min="1"
+                max="100"
+                value={newSchedule.retentionCount}
+                onChange={(e) => setNewSchedule({ ...newSchedule, retentionCount: parseInt(e.target.value) || 7 })}
+                data-testid="input-schedule-retention"
+              />
+              <p className="text-xs text-muted-foreground">
+                Number of recent backups to keep for this schedule
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setCreateScheduleOpen(false)}
+              data-testid="button-cancel-create-schedule"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateSchedule} 
+              disabled={createScheduleMutation.isPending}
+              data-testid="button-confirm-create-schedule"
+            >
+              {createScheduleMutation.isPending ? "Creating..." : "Create Schedule"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <AlertDialog open={!!deleteConfirm} onOpenChange={() => setDeleteConfirm(null)}>
+          <AlertDialogContent data-testid="dialog-delete-schedule">
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                Delete Schedule
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete the backup schedule for{" "}
+                <strong>{formatTableName(deleteConfirm.tableName)}</strong>?
+                <br />
+                <br />
+                This will not delete existing backups, only the recurring schedule.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel data-testid="button-cancel-delete-schedule">Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => deleteScheduleMutation.mutate(deleteConfirm.scheduleId)}
+                data-testid="button-confirm-delete-schedule"
+              >
+                {deleteScheduleMutation.isPending ? "Deleting..." : "Delete"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
+    </>
+  );
+}
 
 export default function AdminBackups() {
   const { toast } = useToast();
@@ -207,14 +670,32 @@ export default function AdminBackups() {
               Surgical table-level backup and restore capabilities
             </p>
           </div>
-          <Button 
-            onClick={() => setCreateDialogOpen(true)}
-            data-testid="button-create-backup"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Backup
-          </Button>
         </div>
+
+        {/* Tabs for Manual and Scheduled Backups */}
+        <Tabs defaultValue="manual" className="w-full">
+          <TabsList data-testid="tabs-backup-list">
+            <TabsTrigger value="manual" data-testid="tab-manual-backups">
+              <Database className="w-4 h-4 mr-2" />
+              Manual Backups
+            </TabsTrigger>
+            <TabsTrigger value="scheduled" data-testid="tab-scheduled-backups">
+              <Calendar className="w-4 h-4 mr-2" />
+              Scheduled Backups
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Manual Backups Tab */}
+          <TabsContent value="manual" className="space-y-6 mt-6">
+            <div className="flex justify-end">
+              <Button 
+                onClick={() => setCreateDialogOpen(true)}
+                data-testid="button-create-backup"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Backup
+              </Button>
+            </div>
 
         {/* Info Card */}
         <Card>
@@ -349,6 +830,13 @@ export default function AdminBackups() {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* Scheduled Backups Tab */}
+          <TabsContent value="scheduled" className="space-y-6 mt-6">
+            <ScheduledBackupsTab availableTables={availableTables} />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Create Backup Dialog */}
