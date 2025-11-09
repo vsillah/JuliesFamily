@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import Footer from "@/components/Footer";
 import heroImage from "@assets/generated_images/Families_using_nonprofit_platform_together_fed7c053.png";
-import logoImage from "@assets/generated_images/Kinflo_full_logo_aff28780.png";
+import logoImage from "@assets/generated_images/Kinflo_transparent_professional_logo_3695ae19.png";
 import laptopDashboard from "@assets/generated_images/Laptop_showing_CRM_dashboard_9926f587.png";
 import phoneCampaign from "@assets/generated_images/Phone_showing_campaign_app_1bfd93e5.png";
 import devicesTogether from "@assets/generated_images/Laptop_and_phone_together_b8fedbcb.png";
@@ -109,7 +109,7 @@ export default function ProductLanding() {
               <img 
                 src={logoImage} 
                 alt="Kinflo" 
-                className="h-12 sm:h-16 md:h-20 w-auto drop-shadow-lg"
+                className="h-20 sm:h-28 md:h-36 w-auto"
                 data-testid="img-logo"
               />
               <div className="flex gap-3">
