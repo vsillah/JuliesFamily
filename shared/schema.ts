@@ -1305,3 +1305,308 @@ export const insertBackupScheduleSchema = createInsertSchema(backupSchedules).om
 });
 export type InsertBackupSchedule = z.infer<typeof insertBackupScheduleSchema>;
 export type BackupSchedule = typeof backupSchedules.$inferSelect;
+
+// CAC:LTGP Tracking System
+// Based on Alex Hormozi's $100M Leads framework for maximizing donor acquisition efficiency
+
+// Acquisition Channels - tracks sources of donor/lead acquisition
+export const acquisitionChannels = pgTable("acquisition_channels", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(), // 'Google Ads', 'Facebook Ads', 'Organic Search', 'Referral', 'Event: Spring Gala', etc
+  slug: varchar("slug").notNull().unique(), // 'google_ads', 'facebook_ads', 'organic_search', 'referral', etc
+  channelType: varchar("channel_type").notNull(), // 'paid_ads', 'organic', 'referral', 'event', 'email', 'social', 'direct', 'partnership'
+  description: text("description"),
+  
+  // Cost tracking
+  monthlyBudget: integer("monthly_budget"), // Budget in cents (if applicable)
+  totalSpent: integer("total_spent").default(0), // Total amount spent in cents
+  
+  // Performance metrics (calculated from leads/donations)
+  totalLeads: integer("total_leads").default(0),
+  totalDonors: integer("total_donors").default(0),
+  totalDonationAmount: integer("total_donation_amount").default(0), // In cents
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("acquisition_channels_type_idx").on(table.channelType),
+  index("acquisition_channels_active_idx").on(table.isActive),
+]);
+
+export const insertAcquisitionChannelSchema = createInsertSchema(acquisitionChannels).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAcquisitionChannel = z.infer<typeof insertAcquisitionChannelSchema>;
+export type AcquisitionChannel = typeof acquisitionChannels.$inferSelect;
+
+// Marketing Campaigns - specific marketing initiatives with budgets
+export const marketingCampaigns = pgTable("marketing_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // 'Q1 2024 Parent Outreach', 'Back to School Drive', etc
+  channelId: varchar("channel_id").references(() => acquisitionChannels.id, { onDelete: "set null" }),
+  description: text("description"),
+  
+  // Budget and spend tracking
+  budget: integer("budget").notNull(), // Total budget in cents
+  spent: integer("spent").default(0), // Amount spent so far in cents
+  
+  // Date range
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  
+  // Performance metrics (calculated)
+  leadsGenerated: integer("leads_generated").default(0),
+  donorsAcquired: integer("donors_acquired").default(0),
+  totalDonations: integer("total_donations").default(0), // In cents
+  
+  // Status
+  status: varchar("status").notNull().default('draft'), // 'draft', 'active', 'paused', 'completed'
+  
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("marketing_campaigns_channel_idx").on(table.channelId),
+  index("marketing_campaigns_status_idx").on(table.status),
+  index("marketing_campaigns_dates_idx").on(table.startDate, table.endDate),
+]);
+
+export const insertMarketingCampaignSchema = createInsertSchema(marketingCampaigns).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMarketingCampaign = z.infer<typeof insertMarketingCampaignSchema>;
+export type MarketingCampaign = typeof marketingCampaigns.$inferSelect;
+
+// Lead Attribution - links leads to their acquisition source with costs
+export const leadAttribution = pgTable("lead_attribution", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }).unique(), // One attribution per lead
+  
+  // Attribution details
+  channelId: varchar("channel_id").references(() => acquisitionChannels.id, { onDelete: "set null" }),
+  campaignId: varchar("campaign_id").references(() => marketingCampaigns.id, { onDelete: "set null" }),
+  
+  // Cost tracking
+  acquisitionCost: integer("acquisition_cost").default(0), // CAC in cents for this specific lead
+  
+  // Attribution metadata
+  utmSource: varchar("utm_source"), // UTM tracking parameters
+  utmMedium: varchar("utm_medium"),
+  utmCampaign: varchar("utm_campaign"),
+  utmContent: varchar("utm_content"),
+  utmTerm: varchar("utm_term"),
+  referrerUrl: text("referrer_url"),
+  landingPage: varchar("landing_page"),
+  
+  // Conversion tracking
+  becameDonor: boolean("became_donor").default(false),
+  firstDonationDate: timestamp("first_donation_date"),
+  firstDonationAmount: integer("first_donation_amount"), // In cents
+  
+  // Lifetime value tracking (calculated from donations)
+  lifetimeDonationValue: integer("lifetime_donation_value").default(0), // Total donated in cents
+  donationCount: integer("donation_count").default(0),
+  lastDonationDate: timestamp("last_donation_date"),
+  
+  // Cohort tracking
+  acquisitionMonth: varchar("acquisition_month"), // 'YYYY-MM' for cohort analysis
+  acquisitionQuarter: varchar("acquisition_quarter"), // 'YYYY-Q#' for cohort analysis
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("lead_attribution_channel_idx").on(table.channelId),
+  index("lead_attribution_campaign_idx").on(table.campaignId),
+  index("lead_attribution_month_idx").on(table.acquisitionMonth),
+  index("lead_attribution_quarter_idx").on(table.acquisitionQuarter),
+  index("lead_attribution_became_donor_idx").on(table.becameDonor),
+]);
+
+export const insertLeadAttributionSchema = createInsertSchema(leadAttribution).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertLeadAttribution = z.infer<typeof insertLeadAttributionSchema>;
+export type LeadAttribution = typeof leadAttribution.$inferSelect;
+
+// Donor Lifecycle Stages - tracks donor progression through giving stages
+export const donorLifecycleStages = pgTable("donor_lifecycle_stages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }).unique(), // One lifecycle per lead
+  
+  // Link to acquisition source for per-channel lifecycle analysis
+  acquisitionChannelId: varchar("acquisition_channel_id").references(() => acquisitionChannels.id, { onDelete: "set null" }),
+  acquisitionCampaignId: varchar("acquisition_campaign_id").references(() => marketingCampaigns.id, { onDelete: "set null" }),
+  
+  // Current stage
+  currentStage: varchar("current_stage").notNull().default('prospect'), // 'prospect', 'first_time', 'recurring', 'major_donor', 'legacy', 'lapsed'
+  
+  // Stage history with timestamps
+  becameFirstTimeDonor: timestamp("became_first_time_donor"),
+  becameRecurringDonor: timestamp("became_recurring_donor"),
+  becameMajorDonor: timestamp("became_major_donor"), // Crossed major donor threshold
+  becameLegacyDonor: timestamp("became_legacy_donor"), // Joined legacy/planned giving
+  becameLapsed: timestamp("became_lapsed"), // No donation in X months
+  
+  // Economics at each lifecycle stage (for stage-specific CAC:LTGP analysis)
+  prospectCAC: integer("prospect_cac").default(0), // CAC when acquired as prospect
+  firstDonorLTGP: integer("first_donor_ltgp"), // LTGP when became first-time donor
+  recurringDonorLTGP: integer("recurring_donor_ltgp"), // LTGP when became recurring
+  majorDonorLTGP: integer("major_donor_ltgp"), // LTGP when became major donor
+  currentLTGP: integer("current_ltgp").default(0), // Current LTGP
+  currentLTGPtoCAC: integer("current_ltgp_to_cac"), // Current ratio * 100
+  
+  // Thresholds and metrics
+  majorDonorThreshold: integer("major_donor_threshold").default(100000), // $1,000 in cents (configurable)
+  monthsSinceLastDonation: integer("months_since_last_donation"),
+  consecutiveMonthsDonating: integer("consecutive_months_donating").default(0),
+  
+  // Engagement metrics
+  totalLifetimeDonations: integer("total_lifetime_donations").default(0), // In cents
+  averageDonationAmount: integer("average_donation_amount").default(0), // In cents
+  donationFrequency: varchar("donation_frequency"), // 'one_time', 'monthly', 'quarterly', 'annual', 'sporadic'
+  
+  // Retention risk
+  retentionRiskScore: integer("retention_risk_score"), // 0-100, higher = more at risk of lapsing
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("donor_lifecycle_current_stage_idx").on(table.currentStage),
+  index("donor_lifecycle_risk_idx").on(table.retentionRiskScore),
+  index("donor_lifecycle_channel_idx").on(table.acquisitionChannelId),
+  index("donor_lifecycle_campaign_idx").on(table.acquisitionCampaignId),
+]);
+
+export const insertDonorLifecycleStageSchema = createInsertSchema(donorLifecycleStages).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertDonorLifecycleStage = z.infer<typeof insertDonorLifecycleStageSchema>;
+export type DonorLifecycleStage = typeof donorLifecycleStages.$inferSelect;
+
+// Channel Spend Ledger - time-series tracking of marketing spend by channel/campaign
+// Critical for calculating CAC over time and cohort analysis
+export const channelSpendLedger = pgTable("channel_spend_ledger", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  channelId: varchar("channel_id").references(() => acquisitionChannels.id, { onDelete: "cascade" }),
+  campaignId: varchar("campaign_id").references(() => marketingCampaigns.id, { onDelete: "cascade" }),
+  
+  // Time period (week or month)
+  periodType: varchar("period_type").notNull(), // 'week', 'month'
+  periodStart: timestamp("period_start").notNull(), // Start of period
+  periodEnd: timestamp("period_end").notNull(), // End of period
+  periodKey: varchar("period_key").notNull(), // 'YYYY-MM' or 'YYYY-WW' for easy grouping
+  
+  // Spend tracking
+  amountSpent: integer("amount_spent").notNull().default(0), // Amount spent in cents
+  
+  // Attribution metrics for this period
+  leadsAcquired: integer("leads_acquired").default(0),
+  donorsAcquired: integer("donors_acquired").default(0),
+  
+  // Notes
+  notes: text("notes"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("channel_spend_ledger_channel_idx").on(table.channelId),
+  index("channel_spend_ledger_campaign_idx").on(table.campaignId),
+  index("channel_spend_ledger_period_idx").on(table.periodKey),
+  index("channel_spend_ledger_period_range_idx").on(table.periodStart, table.periodEnd),
+]);
+
+export const insertChannelSpendLedgerSchema = createInsertSchema(channelSpendLedger).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertChannelSpendLedger = z.infer<typeof insertChannelSpendLedgerSchema>;
+export type ChannelSpendLedger = typeof channelSpendLedger.$inferSelect;
+
+// Donor Economics - tracks gross profit and delivery costs per donor
+// Essential for calculating true LTGP (not just revenue)
+export const donorEconomics = pgTable("donor_economics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }).unique(),
+  
+  // Lifetime value tracking
+  lifetimeRevenue: integer("lifetime_revenue").default(0), // Total donations in cents
+  
+  // Gross profit calculation
+  // Delivery costs = cost to steward this donor (mailings, events, staff time, etc.)
+  estimatedDeliveryCosts: integer("estimated_delivery_costs").default(0), // In cents
+  actualDeliveryCosts: integer("actual_delivery_costs").default(0), // In cents (if tracked)
+  
+  // LTGP = Lifetime Revenue - Delivery Costs
+  lifetimeGrossProfit: integer("lifetime_gross_profit").default(0), // In cents (calculated)
+  
+  // Margins
+  grossMarginPercent: integer("gross_margin_percent"), // Percentage (0-100)
+  
+  // CAC for this donor (from lead_attribution)
+  customerAcquisitionCost: integer("customer_acquisition_cost").default(0), // In cents
+  
+  // LTGP:CAC ratio for this donor
+  ltgpToCacRatio: integer("ltgp_to_cac_ratio"), // Ratio * 100 (e.g., 500 = 5:1 ratio)
+  
+  // Payback period (days to recover CAC)
+  paybackPeriodDays: integer("payback_period_days"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("donor_economics_lead_idx").on(table.leadId),
+  index("donor_economics_ratio_idx").on(table.ltgpToCacRatio),
+]);
+
+export const insertDonorEconomicsSchema = createInsertSchema(donorEconomics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertDonorEconomics = z.infer<typeof insertDonorEconomicsSchema>;
+export type DonorEconomics = typeof donorEconomics.$inferSelect;
+
+// Organization-wide economics settings for calculating gross profit
+export const economicsSettings = pgTable("economics_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Default delivery cost as percentage of donation (if not tracked per-donor)
+  defaultDeliveryCostPercent: integer("default_delivery_cost_percent").default(20), // Default 20% of donation goes to stewardship
+  
+  // Fixed costs per donor per year (mailings, events, etc.)
+  annualDonorStewardshipCost: integer("annual_donor_stewardship_cost").default(5000), // $50 in cents
+  
+  // Major donor threshold (when a donor becomes "major")
+  majorDonorThreshold: integer("major_donor_threshold").default(100000), // $1,000 in cents
+  
+  // Lapsed donor definition (months without donation)
+  lapsedMonthsThreshold: integer("lapsed_months_threshold").default(12), // 12 months
+  
+  // Target ratios
+  targetLtgpToCacRatio: integer("target_ltgp_to_cac_ratio").default(500), // 5:1 ratio (500 = 5.0x)
+  minimumLtgpToCacRatio: integer("minimum_ltgp_to_cac_ratio").default(300), // 3:1 minimum (300 = 3.0x)
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertEconomicsSettingsSchema = createInsertSchema(economicsSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEconomicsSettings = z.infer<typeof insertEconomicsSettingsSchema>;
+export type EconomicsSettings = typeof economicsSettings.$inferSelect;
