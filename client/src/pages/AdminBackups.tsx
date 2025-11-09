@@ -19,7 +19,8 @@ import {
   Clock,
   Calendar,
   Play,
-  Pause
+  Pause,
+  HardDrive
 } from "lucide-react";
 import {
   Select,
@@ -61,6 +62,165 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@/components/ui/radio-group";
+import { Progress } from "@/components/ui/progress";
+
+// Utility function to format bytes
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+}
+
+// Storage Gauge Component
+function StorageGauge() {
+  const { data: metrics, isLoading } = useQuery<{
+    currentUsageBytes: number;
+    projectedBackupBytes: number;
+    totalProjectedBytes: number;
+    limitBytes: number;
+    currentUsagePercent: number;
+    projectedUsagePercent: number;
+    tableBreakdown: Array<{
+      tableName: string;
+      sizeBytes: number;
+      scheduledBackupCount: number;
+      estimatedBackupBytes: number;
+    }>;
+  }>({
+    queryKey: ["/api/admin/backup-storage-metrics"],
+  });
+
+  if (isLoading || !metrics) {
+    return (
+      <Card data-testid="card-storage-gauge">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <HardDrive className="w-5 h-5" />
+            Database Storage
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">Loading storage metrics...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const availableBytes = metrics.limitBytes - metrics.totalProjectedBytes;
+  const usagePercent = metrics.projectedUsagePercent;
+
+  // Determine color based on usage
+  let statusColor = "text-green-600";
+  let progressColor = "bg-green-600";
+  let statusText = "Healthy";
+  
+  if (usagePercent >= 90) {
+    statusColor = "text-red-600";
+    progressColor = "bg-red-600";
+    statusText = "Critical";
+  } else if (usagePercent >= 70) {
+    statusColor = "text-yellow-600";
+    progressColor = "bg-yellow-600";
+    statusText = "Warning";
+  }
+
+  return (
+    <Card data-testid="card-storage-gauge">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <HardDrive className="w-5 h-5" />
+            Database Storage
+          </CardTitle>
+          <Badge 
+            variant={usagePercent >= 90 ? "destructive" : usagePercent >= 70 ? "default" : "secondary"}
+            data-testid="badge-storage-status"
+          >
+            {statusText}
+          </Badge>
+        </div>
+        <CardDescription>
+          Projected usage including all scheduled backups
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Total Projected Usage</span>
+            <span className={`font-medium ${statusColor}`} data-testid="text-usage-percent">
+              {usagePercent.toFixed(1)}% of 10 GiB
+            </span>
+          </div>
+          <Progress 
+            value={usagePercent} 
+            className="h-3"
+            data-testid="progress-storage"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Current Usage</div>
+            <div className="text-lg font-semibold" data-testid="text-current-usage">
+              {formatBytes(metrics.currentUsageBytes)}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {metrics.currentUsagePercent.toFixed(1)}%
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Projected Backups</div>
+            <div className="text-lg font-semibold" data-testid="text-projected-backups">
+              {formatBytes(metrics.projectedBackupBytes)}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {((metrics.projectedBackupBytes / metrics.limitBytes) * 100).toFixed(1)}%
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-xs text-muted-foreground">Available Space</div>
+            <div className={`text-lg font-semibold ${availableBytes < 0 ? 'text-red-600' : ''}`} data-testid="text-available-space">
+              {formatBytes(Math.max(0, availableBytes))}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              {((Math.max(0, availableBytes) / metrics.limitBytes) * 100).toFixed(1)}%
+            </div>
+          </div>
+        </div>
+
+        {metrics.tableBreakdown.length > 0 && (
+          <div className="pt-4 border-t">
+            <div className="text-sm font-medium mb-2">Backup Storage by Table</div>
+            <div className="space-y-2">
+              {metrics.tableBreakdown.slice(0, 5).map((table) => (
+                <div key={table.tableName} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    {table.tableName}
+                    <span className="text-xs ml-2">
+                      ({table.scheduledBackupCount} {table.scheduledBackupCount === 1 ? 'schedule' : 'schedules'})
+                    </span>
+                  </span>
+                  <span className="font-medium">
+                    {formatBytes(table.estimatedBackupBytes)}
+                  </span>
+                </div>
+              ))}
+              {metrics.tableBreakdown.length > 5 && (
+                <div className="text-xs text-muted-foreground text-center">
+                  + {metrics.tableBreakdown.length - 5} more tables
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 // Scheduled Backups Tab Component
 function ScheduledBackupsTab({ availableTables }: { availableTables: string[] }) {
@@ -671,6 +831,9 @@ export default function AdminBackups() {
             </p>
           </div>
         </div>
+
+        {/* Storage Monitoring */}
+        <StorageGauge />
 
         {/* Tabs for Manual and Scheduled Backups */}
         <Tabs defaultValue="manual" className="w-full">
