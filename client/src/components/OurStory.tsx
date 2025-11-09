@@ -159,6 +159,21 @@ export default function OurStory() {
             <div className="max-w-4xl mx-auto">
               <Card>
                 <CardContent className="pt-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <img 
+                      src={building1927} 
+                      alt="Historic photo of Julie's building from 1927 when it was a public health center"
+                      className="w-full h-auto rounded-md border border-border"
+                      data-testid="img-building-1927"
+                    />
+                    <img 
+                      src={buildingExterior} 
+                      alt="Current exterior of Julie's Family Learning Program historic building"
+                      className="w-full h-auto rounded-md border border-border"
+                      data-testid="img-building-current"
+                    />
+                  </div>
+                  
                   <p className="text-muted-foreground leading-relaxed mb-6">
                     Julie's is housed in a beautifully preserved historic building that was originally built in 1927 as a public health center. Funded by the George Robert White Fund, this architectural gem was part of a citywide initiative to provide beautiful, functional buildings for the benefit of Boston's residents. After a $3.7 million renovation, the building now serves as a warm, welcoming home for our two-generation learning program.
                   </p>
@@ -243,6 +258,15 @@ export default function OurStory() {
             <div className="max-w-6xl mx-auto">
               <Card>
                 <CardContent className="pt-6">
+                  <div className="flex justify-center mb-6">
+                    <img 
+                      src={foundersPhoto} 
+                      alt="Sister Louise Kearns and Sister Jean Sullivan, co-founders of Julie's Family Learning Program"
+                      className="w-full max-w-2xl h-auto rounded-md border border-border shadow-sm"
+                      data-testid="img-founders-photo"
+                    />
+                  </div>
+                  
                   <p className="text-muted-foreground leading-relaxed mb-6">
                     Julie's Family Learning Program was founded by two extraordinary educators, Sister Louise Kearns and Sister Jean Sullivan, both members of the Sisters of Notre Dame de Namur. These visionary women combined their expertise in adult education and early childhood development to create a pioneering two-generation learning program. They named the organization after St. Julie Billiart, foundress of their order, whose mission was serving those who are poor and marginalized.
                   </p>
