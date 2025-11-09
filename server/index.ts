@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { initBackupScheduler, shutdownBackupScheduler } from "./services/backupScheduler";
 
 const app = express();
 
@@ -84,6 +85,9 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
+  // Initialize backup scheduler after routes are registered
+  initBackupScheduler();
+
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
@@ -96,4 +100,27 @@ app.use((req, res, next) => {
   }, () => {
     log(`serving on port ${port}`);
   });
+
+  // Graceful shutdown handlers
+  const shutdown = async (signal: string) => {
+    log(`${signal} received, shutting down gracefully...`);
+    
+    // Shutdown the backup scheduler
+    await shutdownBackupScheduler();
+    
+    // Close the server
+    server.close(() => {
+      log('Server closed');
+      process.exit(0);
+    });
+    
+    // Force exit after 10 seconds if graceful shutdown fails
+    setTimeout(() => {
+      log('Forced shutdown after timeout');
+      process.exit(1);
+    }, 10000);
+  };
+
+  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
 })();

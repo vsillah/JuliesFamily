@@ -462,7 +462,8 @@ export interface IStorage {
   updateBackupSchedule(id: string, updates: Partial<InsertBackupSchedule>): Promise<BackupSchedule | undefined>;
   deleteBackupSchedule(id: string): Promise<void>;
   getDueBackupSchedules(now: Date, lookaheadMinutes?: number): Promise<BackupSchedule[]>;
-  markScheduleRunning(id: string): Promise<void>;
+  markScheduleRunning(id: string, lockedUntil: Date): Promise<boolean>;
+  releaseStuckSchedule(id: string): Promise<void>;
   completeSchedule(id: string, runInfo: {
     success: boolean;
     error?: string;
@@ -2804,12 +2805,37 @@ export class DatabaseStorage implements IStorage {
       .orderBy(backupSchedules.nextRun);
   }
 
-  async markScheduleRunning(id: string): Promise<void> {
+  async markScheduleRunning(id: string, lockedUntil: Date): Promise<boolean> {
+    try {
+      const [updated] = await db
+        .update(backupSchedules)
+        .set({
+          isRunning: true,
+          startedAt: new Date(),
+          lockedUntil,
+        })
+        .where(
+          and(
+            eq(backupSchedules.id, id),
+            eq(backupSchedules.isRunning, false)
+          )
+        )
+        .returning();
+      
+      return !!updated;
+    } catch (error) {
+      console.error(`Failed to mark schedule ${id} as running:`, error);
+      return false;
+    }
+  }
+
+  async releaseStuckSchedule(id: string): Promise<void> {
     await db
       .update(backupSchedules)
       .set({
-        isRunning: true,
-        startedAt: new Date(),
+        isRunning: false,
+        startedAt: null,
+        lockedUntil: null,
       })
       .where(eq(backupSchedules.id, id));
   }
@@ -2819,15 +2845,25 @@ export class DatabaseStorage implements IStorage {
     error?: string;
     nextRun: Date;
   }): Promise<void> {
+    // Get current schedule to access consecutiveFailures
+    const schedule = await this.getBackupSchedule(id);
+    if (!schedule) return;
+
+    const consecutiveFailures = runInfo.success 
+      ? 0 
+      : (schedule.consecutiveFailures || 0) + 1;
+
     await db
       .update(backupSchedules)
       .set({
         isRunning: false,
         startedAt: null,
+        lockedUntil: null,
         lastRun: new Date(),
         lastRunStatus: runInfo.success ? 'success' : 'error',
         lastRunError: runInfo.error || null,
         nextRun: runInfo.nextRun,
+        consecutiveFailures,
         updatedAt: new Date(),
       })
       .where(eq(backupSchedules.id, id));

@@ -1206,10 +1206,12 @@ export const backupSchedules = pgTable("backup_schedules", {
   isActive: boolean("is_active").default(true),
   isRunning: boolean("is_running").default(false), // Concurrency guard
   startedAt: timestamp("started_at"), // When current execution started (for stuck job detection)
+  lockedUntil: timestamp("locked_until"), // Execution timeout - if current time > lockedUntil, job is stuck
   nextRun: timestamp("next_run").notNull(), // Next scheduled execution (UTC)
   lastRun: timestamp("last_run"), // Last successful execution
   lastRunStatus: varchar("last_run_status"), // 'success', 'error'
   lastRunError: text("last_run_error"), // Error message if failed
+  consecutiveFailures: integer("consecutive_failures").default(0), // Track repeated failures
   
   // Creation tracking
   createdBy: varchar("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -1228,9 +1230,11 @@ export const insertBackupScheduleSchema = createInsertSchema(backupSchedules).om
   updatedAt: true,
   isRunning: true,
   startedAt: true,
+  lockedUntil: true,
   lastRun: true,
   lastRunStatus: true,
   lastRunError: true,
+  consecutiveFailures: true,
 });
 export type InsertBackupSchedule = z.infer<typeof insertBackupScheduleSchema>;
 export type BackupSchedule = typeof backupSchedules.$inferSelect;
