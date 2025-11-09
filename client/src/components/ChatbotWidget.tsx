@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, X, Send, Loader2, Bot, User } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { MessageSquare, X, Send, Loader2, Bot, RotateCcw } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
+import type { User } from '@shared/schema';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,11 +23,14 @@ export function ChatbotWidget() {
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substring(2)}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data: user } = useQuery<{ role: string }>({ 
+  const { data: user } = useQuery<User>({ 
     queryKey: ['/api/auth/user'] 
   });
 
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
+  const userInitials = user?.firstName && user?.lastName 
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : user?.email?.[0]?.toUpperCase() || 'U';
 
   useEffect(() => {
     if (isAdmin && sessionId) {
@@ -145,12 +150,13 @@ export function ChatbotWidget() {
             {messages.length > 0 && (
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={handleClearChat}
-                className="h-8 w-8"
+                className="gap-1"
                 data-testid="button-clear-chat"
               >
-                <X className="h-4 w-4" />
+                <RotateCcw className="h-3.5 w-3.5" />
+                <span className="text-xs">New Chat</span>
               </Button>
             )}
             <Button
@@ -170,7 +176,9 @@ export function ChatbotWidget() {
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center p-8">
                 <Bot className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="font-semibold mb-2">How can I help?</h3>
+                <h3 className="font-semibold mb-2">
+                  Hi{user?.firstName ? ` ${user.firstName}` : ''}! How can I help?
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   I can help you troubleshoot issues, check database content, review logs, and more!
                 </p>
@@ -201,11 +209,12 @@ export function ChatbotWidget() {
                     </div>
                     
                     {message.role === 'user' && (
-                      <div className="flex-shrink-0">
-                        <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                          <User className="h-4 w-4 text-primary-foreground" />
-                        </div>
-                      </div>
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage src={user?.profileImageUrl || undefined} alt={user?.firstName || 'User'} />
+                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                          {userInitials}
+                        </AvatarFallback>
+                      </Avatar>
                     )}
                   </div>
                 ))}
