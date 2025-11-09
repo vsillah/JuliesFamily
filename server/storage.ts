@@ -10,6 +10,7 @@ import {
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
   adminPreferences, auditLogs,
+  outreachEmails, icpCriteria,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -41,7 +42,9 @@ import {
   type Task, type InsertTask,
   type PipelineHistory, type InsertPipelineHistory,
   type AdminPreferences, type InsertAdminPreferences,
-  type AuditLog, type InsertAuditLog
+  type AuditLog, type InsertAuditLog,
+  type OutreachEmail, type InsertOutreachEmail,
+  type IcpCriteria, type InsertIcpCriteria
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -313,6 +316,32 @@ export interface IStorage {
   // Pipeline History operations
   createPipelineHistory(history: InsertPipelineHistory): Promise<PipelineHistory>;
   getPipelineHistory(leadId: string): Promise<PipelineHistory[]>;
+  
+  // Outreach Email operations
+  createOutreachEmail(email: InsertOutreachEmail): Promise<OutreachEmail>;
+  getOutreachEmail(id: string): Promise<OutreachEmail | undefined>;
+  getLeadOutreachEmails(leadId: string): Promise<OutreachEmail[]>;
+  getAllOutreachEmails(filters?: { status?: string; limit?: number }): Promise<OutreachEmail[]>;
+  updateOutreachEmail(id: string, updates: Partial<InsertOutreachEmail>): Promise<OutreachEmail | undefined>;
+  deleteOutreachEmail(id: string): Promise<void>;
+  markOutreachEmailOpened(id: string): Promise<OutreachEmail | undefined>;
+  markOutreachEmailClicked(id: string): Promise<OutreachEmail | undefined>;
+  markOutreachEmailReplied(id: string): Promise<OutreachEmail | undefined>;
+  
+  // ICP Criteria operations
+  createIcpCriteria(criteria: InsertIcpCriteria): Promise<IcpCriteria>;
+  getIcpCriteria(id: string): Promise<IcpCriteria | undefined>;
+  getAllIcpCriteria(): Promise<IcpCriteria[]>;
+  getActiveIcpCriteria(): Promise<IcpCriteria[]>;
+  getDefaultIcpCriteria(): Promise<IcpCriteria | undefined>;
+  updateIcpCriteria(id: string, updates: Partial<InsertIcpCriteria>): Promise<IcpCriteria | undefined>;
+  deleteIcpCriteria(id: string): Promise<void>;
+  
+  // Lead Sourcing operations
+  getLeadsForQualification(limit?: number): Promise<Lead[]>; // Get leads with qualificationStatus='pending'
+  getQualifiedLeads(minScore?: number): Promise<Lead[]>; // Get qualified leads above score threshold
+  getLeadsForOutreach(limit?: number): Promise<Lead[]>; // Get qualified leads with outreachStatus='pending' or 'draft_ready'
+  bulkCreateLeads(leads: InsertLead[]): Promise<Lead[]>; // For CSV import
   
   // Helper method used by routes
   getLeadById(id: string): Promise<Lead | undefined>;
@@ -1891,6 +1920,177 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(pipelineHistory)
       .where(eq(pipelineHistory.leadId, leadId))
       .orderBy(desc(pipelineHistory.createdAt));
+  }
+
+  // Outreach Email operations
+  async createOutreachEmail(emailData: InsertOutreachEmail): Promise<OutreachEmail> {
+    const [email] = await db.insert(outreachEmails).values(emailData).returning();
+    return email;
+  }
+
+  async getOutreachEmail(id: string): Promise<OutreachEmail | undefined> {
+    const [email] = await db.select().from(outreachEmails).where(eq(outreachEmails.id, id));
+    return email;
+  }
+
+  async getLeadOutreachEmails(leadId: string): Promise<OutreachEmail[]> {
+    return await db.select().from(outreachEmails)
+      .where(eq(outreachEmails.leadId, leadId))
+      .orderBy(desc(outreachEmails.createdAt));
+  }
+
+  async getAllOutreachEmails(filters?: { status?: string; limit?: number }): Promise<OutreachEmail[]> {
+    let query = db.select().from(outreachEmails);
+    
+    if (filters?.status) {
+      query = query.where(eq(outreachEmails.status, filters.status)) as any;
+    }
+    
+    query = query.orderBy(desc(outreachEmails.createdAt)) as any;
+    
+    if (filters?.limit) {
+      query = query.limit(filters.limit) as any;
+    }
+    
+    return await query;
+  }
+
+  async updateOutreachEmail(id: string, updates: Partial<InsertOutreachEmail>): Promise<OutreachEmail | undefined> {
+    const [email] = await db
+      .update(outreachEmails)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(outreachEmails.id, id))
+      .returning();
+    return email;
+  }
+
+  async deleteOutreachEmail(id: string): Promise<void> {
+    await db.delete(outreachEmails).where(eq(outreachEmails.id, id));
+  }
+
+  async markOutreachEmailOpened(id: string): Promise<OutreachEmail | undefined> {
+    const [email] = await db
+      .update(outreachEmails)
+      .set({ 
+        wasOpened: true, 
+        openedAt: new Date(),
+        openCount: sql`${outreachEmails.openCount} + 1`,
+        updatedAt: new Date() 
+      })
+      .where(eq(outreachEmails.id, id))
+      .returning();
+    return email;
+  }
+
+  async markOutreachEmailClicked(id: string): Promise<OutreachEmail | undefined> {
+    const [email] = await db
+      .update(outreachEmails)
+      .set({ 
+        wasClicked: true, 
+        clickedAt: new Date(),
+        clickCount: sql`${outreachEmails.clickCount} + 1`,
+        updatedAt: new Date() 
+      })
+      .where(eq(outreachEmails.id, id))
+      .returning();
+    return email;
+  }
+
+  async markOutreachEmailReplied(id: string): Promise<OutreachEmail | undefined> {
+    const [email] = await db
+      .update(outreachEmails)
+      .set({ 
+        wasReplied: true, 
+        repliedAt: new Date(),
+        updatedAt: new Date() 
+      })
+      .where(eq(outreachEmails.id, id))
+      .returning();
+    return email;
+  }
+
+  // ICP Criteria operations
+  async createIcpCriteria(criteriaData: InsertIcpCriteria): Promise<IcpCriteria> {
+    const [criteria] = await db.insert(icpCriteria).values(criteriaData).returning();
+    return criteria;
+  }
+
+  async getIcpCriteria(id: string): Promise<IcpCriteria | undefined> {
+    const [criteria] = await db.select().from(icpCriteria).where(eq(icpCriteria.id, id));
+    return criteria;
+  }
+
+  async getAllIcpCriteria(): Promise<IcpCriteria[]> {
+    return await db.select().from(icpCriteria).orderBy(desc(icpCriteria.createdAt));
+  }
+
+  async getActiveIcpCriteria(): Promise<IcpCriteria[]> {
+    return await db.select().from(icpCriteria)
+      .where(eq(icpCriteria.isActive, true))
+      .orderBy(desc(icpCriteria.createdAt));
+  }
+
+  async getDefaultIcpCriteria(): Promise<IcpCriteria | undefined> {
+    const [criteria] = await db.select().from(icpCriteria)
+      .where(and(eq(icpCriteria.isDefault, true), eq(icpCriteria.isActive, true)))
+      .limit(1);
+    return criteria;
+  }
+
+  async updateIcpCriteria(id: string, updates: Partial<InsertIcpCriteria>): Promise<IcpCriteria | undefined> {
+    const [criteria] = await db
+      .update(icpCriteria)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(icpCriteria.id, id))
+      .returning();
+    return criteria;
+  }
+
+  async deleteIcpCriteria(id: string): Promise<void> {
+    await db.delete(icpCriteria).where(eq(icpCriteria.id, id));
+  }
+
+  // Lead Sourcing operations
+  async getLeadsForQualification(limit: number = 50): Promise<Lead[]> {
+    return await db.select().from(leads)
+      .where(eq(leads.qualificationStatus, 'pending'))
+      .orderBy(desc(leads.createdAt))
+      .limit(limit);
+  }
+
+  async getQualifiedLeads(minScore: number = 70): Promise<Lead[]> {
+    return await db.select().from(leads)
+      .where(
+        and(
+          eq(leads.qualificationStatus, 'qualified'),
+          sql`${leads.qualificationScore} >= ${minScore}`
+        )
+      )
+      .orderBy(desc(leads.qualificationScore));
+  }
+
+  async getLeadsForOutreach(limit: number = 50): Promise<Lead[]> {
+    return await db.select().from(leads)
+      .where(
+        and(
+          eq(leads.qualificationStatus, 'qualified'),
+          or(
+            eq(leads.outreachStatus, 'pending'),
+            eq(leads.outreachStatus, 'draft_ready')
+          )
+        )
+      )
+      .orderBy(desc(leads.qualificationScore))
+      .limit(limit);
+  }
+
+  async bulkCreateLeads(leadsData: InsertLead[]): Promise<Lead[]> {
+    if (leadsData.length === 0) {
+      return [];
+    }
+    
+    const createdLeads = await db.insert(leads).values(leadsData).returning();
+    return createdLeads;
   }
 
   // Helper method used by routes

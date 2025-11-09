@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
@@ -801,6 +801,317 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Lead Sourcing: Webhook endpoint for external lead ingestion
+  app.post('/api/admin/leads/webhook', async (req, res) => {
+    try {
+      // Validate webhook secret - MANDATORY for security
+      const webhookSecret = process.env.LEAD_WEBHOOK_SECRET;
+      if (!webhookSecret) {
+        console.error("LEAD_WEBHOOK_SECRET not configured - webhook disabled");
+        return res.status(503).json({ message: "Webhook not configured" });
+      }
+      
+      const providedSecret = req.headers['x-webhook-secret'] || req.query.secret;
+      if (providedSecret !== webhookSecret) {
+        return res.status(401).json({ message: "Unauthorized: Invalid webhook secret" });
+      }
+
+      const leadData = req.body;
+      
+      // Minimal validation - only email is required
+      if (!leadData.email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Check for duplicate by email
+      const existingLead = await storage.getLeadByEmail(leadData.email);
+      if (existingLead) {
+        return res.status(200).json({ 
+          message: "Lead already exists", 
+          leadId: existingLead.id,
+          duplicate: true 
+        });
+      }
+
+      // Create lead with sane defaults for webhook-sourced leads
+      const validatedData = insertLeadSchema.parse({
+        email: leadData.email,
+        firstName: leadData.firstName || leadData.first_name || null,
+        lastName: leadData.lastName || leadData.last_name || null,
+        phone: leadData.phone || null,
+        company: leadData.company || leadData.organization || null,
+        jobTitle: leadData.jobTitle || leadData.job_title || leadData.title || null,
+        linkedinUrl: leadData.linkedinUrl || leadData.linkedin_url || leadData.linkedin || null,
+        persona: leadData.persona || 'donor', // Default persona for B2B leads
+        funnelStage: leadData.funnelStage || 'awareness', // Default stage
+        leadSource: 'webhook',
+        qualificationStatus: 'pending',
+        outreachStatus: 'pending',
+        notes: leadData.notes || null,
+        enrichmentData: leadData.enrichmentData || leadData.metadata || null,
+      });
+      
+      const newLead = await storage.createLead(validatedData);
+      await createTaskForNewLead(storage, newLead);
+
+      res.status(201).json({ 
+        message: "Lead created successfully", 
+        leadId: newLead.id,
+        duplicate: false
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid lead data", errors: error.errors });
+      }
+      console.error("Error processing webhook lead:", error);
+      res.status(500).json({ message: "Failed to process webhook lead" });
+    }
+  });
+
+  // Lead Sourcing: Qualify leads using AI
+  app.post('/api/admin/leads/qualify', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadIds, icpCriteriaId } = req.body;
+      
+      if (!leadIds || !Array.isArray(leadIds) || leadIds.length === 0) {
+        return res.status(400).json({ message: "leadIds array is required" });
+      }
+
+      // Get ICP criteria (use default if not specified)
+      let icp;
+      if (icpCriteriaId) {
+        icp = await storage.getIcpCriteria(icpCriteriaId);
+      } else {
+        icp = await storage.getDefaultIcpCriteria();
+      }
+
+      if (!icp) {
+        return res.status(404).json({ message: "ICP criteria not found. Please create one first." });
+      }
+
+      // Get leads to qualify
+      const leadsToQualify = await Promise.all(
+        leadIds.map(id => storage.getLead(id))
+      );
+      
+      const validLeads = leadsToQualify.filter(l => l !== undefined) as any[];
+      
+      if (validLeads.length === 0) {
+        return res.status(404).json({ message: "No valid leads found" });
+      }
+
+      // Import qualification function
+      const { batchQualifyLeads } = await import('./leadQualifier');
+      
+      // Qualify all leads
+      const results = await batchQualifyLeads(validLeads, icp);
+      
+      // Update leads with qualification results
+      const updatedLeads = [];
+      for (const [leadId, result] of results.entries()) {
+        const updated = await storage.updateLead(leadId, {
+          qualificationScore: result.score,
+          qualificationStatus: result.status,
+          qualificationInsights: result.insights,
+          metadata: {
+            matchedCriteria: result.matchedCriteria,
+            redFlags: result.redFlags,
+            recommendations: result.recommendations,
+          },
+        });
+        if (updated) {
+          updatedLeads.push(updated);
+        }
+      }
+
+      res.json({
+        message: `Qualified ${updatedLeads.length} leads`,
+        results: updatedLeads.map(l => ({
+          id: l.id,
+          name: `${l.firstName} ${l.lastName}`,
+          email: l.email,
+          score: l.qualificationScore,
+          status: l.qualificationStatus,
+        })),
+      });
+    } catch (error) {
+      console.error("Error qualifying leads:", error);
+      res.status(500).json({ message: "Failed to qualify leads" });
+    }
+  });
+
+  // Lead Sourcing: Generate outreach email for a lead
+  app.post('/api/admin/leads/:id/generate-outreach', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const lead = await storage.getLead(req.params.id);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+
+      const { generateOutreachEmail } = await import('./leadQualifier');
+      
+      const qualificationResult = lead.qualificationInsights ? {
+        score: lead.qualificationScore || 0,
+        status: lead.qualificationStatus as any,
+        insights: lead.qualificationInsights,
+        matchedCriteria: (lead.metadata as any)?.matchedCriteria || [],
+        redFlags: (lead.metadata as any)?.redFlags || [],
+        recommendations: (lead.metadata as any)?.recommendations || '',
+      } : undefined;
+
+      const email = await generateOutreachEmail(lead, qualificationResult);
+      
+      // Create draft outreach email record
+      const outreachEmail = await storage.createOutreachEmail({
+        leadId: lead.id,
+        subject: email.subject,
+        bodyHtml: email.bodyHtml,
+        bodyText: email.bodyText,
+        wasAiGenerated: true,
+        generatedBy: (req as any).user?.id,
+        status: 'draft',
+      });
+
+      // Update lead outreach status
+      await storage.updateLead(lead.id, {
+        outreachStatus: 'draft_ready',
+      });
+
+      res.json({
+        message: "Outreach email generated successfully",
+        email: outreachEmail,
+      });
+    } catch (error) {
+      console.error("Error generating outreach email:", error);
+      res.status(500).json({ message: "Failed to generate outreach email" });
+    }
+  });
+
+  // Lead Sourcing: Update outreach status
+  app.patch('/api/admin/leads/:id/outreach-status', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!['pending', 'draft_ready', 'sent', 'bounced', 'replied'].includes(status)) {
+        return res.status(400).json({ message: "Invalid outreach status" });
+      }
+      
+      const lead = await storage.getLeadById(id);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+      
+      await storage.updateLead(id, { outreachStatus: status });
+      
+      res.json({ message: "Outreach status updated successfully" });
+    } catch (error) {
+      console.error("Error updating outreach status:", error);
+      res.status(500).json({ message: "Failed to update outreach status" });
+    }
+  });
+
+  // Lead Sourcing: Bulk update outreach status
+  app.patch('/api/admin/leads/bulk-outreach-status', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadIds, status } = req.body;
+      
+      if (!Array.isArray(leadIds) || leadIds.length === 0) {
+        return res.status(400).json({ message: "leadIds must be a non-empty array" });
+      }
+      
+      if (!['pending', 'draft_ready', 'sent', 'bounced', 'replied'].includes(status)) {
+        return res.status(400).json({ message: "Invalid outreach status" });
+      }
+      
+      for (const id of leadIds) {
+        await storage.updateLead(id, { outreachStatus: status });
+      }
+      
+      res.json({ message: `Updated ${leadIds.length} leads to ${status}` });
+    } catch (error) {
+      console.error("Error bulk updating outreach status:", error);
+      res.status(500).json({ message: "Failed to bulk update outreach status" });
+    }
+  });
+
+  // Lead Sourcing: Send outreach email
+  app.post('/api/admin/leads/:id/send-outreach', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { outreachEmailId } = req.body;
+      
+      if (!outreachEmailId) {
+        return res.status(400).json({ message: "outreachEmailId is required" });
+      }
+
+      const lead = await storage.getLead(req.params.id);
+      if (!lead) {
+        return res.status(404).json({ message: "Lead not found" });
+      }
+
+      const outreachEmail = await storage.getOutreachEmail(outreachEmailId);
+      if (!outreachEmail) {
+        return res.status(404).json({ message: "Outreach email not found" });
+      }
+
+      if (outreachEmail.leadId !== lead.id) {
+        return res.status(400).json({ message: "Email does not belong to this lead" });
+      }
+
+      // Send email using existing SendGrid integration
+      const { sendEmail } = await import('./email');
+      
+      const sendResult = await sendEmail(storage, {
+        to: lead.email,
+        toName: `${lead.firstName} ${lead.lastName}`,
+        subject: outreachEmail.subject,
+        html: outreachEmail.bodyHtml,
+        text: outreachEmail.bodyText,
+        metadata: {
+          leadId: lead.id,
+          outreachEmailId: outreachEmail.id,
+          type: 'outreach',
+        },
+      });
+
+      if (sendResult.success) {
+        // Update outreach email status
+        await storage.updateOutreachEmail(outreachEmail.id, {
+          status: 'sent',
+          sentAt: new Date(),
+          sentBy: (req as any).user?.id,
+          providerMessageId: sendResult.messageId,
+        });
+
+        // Update lead outreach status
+        await storage.updateLead(lead.id, {
+          outreachStatus: 'sent',
+          lastOutreachAt: new Date(),
+        });
+
+        res.json({
+          message: "Outreach email sent successfully",
+          messageId: sendResult.messageId,
+        });
+      } else {
+        // Update with error
+        await storage.updateOutreachEmail(outreachEmail.id, {
+          status: 'failed',
+          errorMessage: sendResult.error,
+          retryCount: (outreachEmail.retryCount || 0) + 1,
+        });
+
+        res.status(500).json({
+          message: "Failed to send outreach email",
+          error: sendResult.error,
+        });
+      }
+    } catch (error) {
+      console.error("Error sending outreach email:", error);
+      res.status(500).json({ message: "Failed to send outreach email" });
+    }
+  });
+
   // Lead Interactions
   app.get('/api/admin/leads/:id/interactions', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -860,6 +1171,96 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting lead magnet:", error);
       res.status(500).json({ message: "Failed to delete lead magnet" });
+    }
+  });
+
+  // ICP Criteria Management
+  app.get('/api/admin/icp-criteria', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const criteria = await storage.getAllIcpCriteria();
+      res.json(criteria);
+    } catch (error) {
+      console.error("Error fetching ICP criteria:", error);
+      res.status(500).json({ message: "Failed to fetch ICP criteria" });
+    }
+  });
+
+  app.get('/api/admin/icp-criteria/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const criteria = await storage.getIcpCriteria(req.params.id);
+      if (!criteria) {
+        return res.status(404).json({ message: "ICP criteria not found" });
+      }
+      res.json(criteria);
+    } catch (error) {
+      console.error("Error fetching ICP criteria:", error);
+      res.status(500).json({ message: "Failed to fetch ICP criteria" });
+    }
+  });
+
+  app.post('/api/admin/icp-criteria', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertIcpCriteriaSchema.parse({
+        ...req.body,
+        createdBy: (req as any).user?.id,
+      });
+      
+      const criteria = await storage.createIcpCriteria(validatedData);
+      res.status(201).json(criteria);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid ICP criteria data", errors: error.errors });
+      }
+      console.error("Error creating ICP criteria:", error);
+      res.status(500).json({ message: "Failed to create ICP criteria" });
+    }
+  });
+
+  app.patch('/api/admin/icp-criteria/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const criteria = await storage.updateIcpCriteria(req.params.id, req.body);
+      if (!criteria) {
+        return res.status(404).json({ message: "ICP criteria not found" });
+      }
+      res.json(criteria);
+    } catch (error) {
+      console.error("Error updating ICP criteria:", error);
+      res.status(500).json({ message: "Failed to update ICP criteria" });
+    }
+  });
+
+  app.delete('/api/admin/icp-criteria/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteIcpCriteria(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting ICP criteria:", error);
+      res.status(500).json({ message: "Failed to delete ICP criteria" });
+    }
+  });
+
+  // Outreach Emails
+  app.get('/api/admin/outreach-emails', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { status, limit } = req.query;
+      const emails = await storage.getAllOutreachEmails({
+        status: status as string,
+        limit: limit ? parseInt(limit as string) : undefined,
+      });
+      res.json(emails);
+    } catch (error) {
+      console.error("Error fetching outreach emails:", error);
+      res.status(500).json({ message: "Failed to fetch outreach emails" });
+    }
+  });
+
+  app.get('/api/admin/leads/:leadId/outreach-emails', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const emails = await storage.getLeadOutreachEmails(req.params.leadId);
+      res.json(emails);
+    } catch (error) {
+      console.error("Error fetching lead outreach emails:", error);
+      res.status(500).json({ message: "Failed to fetch lead outreach emails" });
     }
   });
 

@@ -124,6 +124,18 @@ export const leads = pgTable("leads", {
   notes: text("notes"),
   passions: jsonb("passions"), // Array of passion tags for donor targeting: ['literacy', 'stem', 'arts', 'nutrition', 'community']
   metadata: jsonb("metadata"), // Additional data like quiz answers, form submissions
+  
+  // Lead Sourcing & Qualification Fields
+  company: varchar("company"), // Company/organization name
+  jobTitle: varchar("job_title"), // Job title/role
+  linkedinUrl: varchar("linkedin_url"), // LinkedIn profile URL
+  qualificationScore: integer("qualification_score"), // AI-generated score 0-100
+  qualificationStatus: varchar("qualification_status").default('pending'), // pending, qualified, disqualified, review_needed
+  qualificationInsights: text("qualification_insights"), // AI-generated analysis of ICP fit
+  enrichmentData: jsonb("enrichment_data"), // Company info, news, context, about, website, etc.
+  outreachStatus: varchar("outreach_status").default('pending'), // pending, draft_ready, sent, opened, replied, bounced, unsubscribed
+  lastOutreachAt: timestamp("last_outreach_at"), // Last time outreach was sent
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -980,3 +992,95 @@ export const insertCampaignTestimonialSchema = createInsertSchema(campaignTestim
 });
 export type InsertCampaignTestimonial = z.infer<typeof insertCampaignTestimonialSchema>;
 export type CampaignTestimonial = typeof campaignTestimonials.$inferSelect;
+
+// Outreach Emails - tracks all outbound prospecting emails sent to leads
+export const outreachEmails = pgTable("outreach_emails", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  
+  // Email content
+  subject: varchar("subject").notNull(),
+  bodyHtml: text("body_html").notNull(),
+  bodyText: text("body_text"),
+  
+  // Generation metadata
+  wasAiGenerated: boolean("was_ai_generated").default(false),
+  aiPrompt: text("ai_prompt"), // The prompt used to generate the email
+  generatedBy: varchar("generated_by").references(() => users.id), // Admin who triggered generation
+  
+  // Sending metadata
+  status: varchar("status").notNull().default('draft'), // draft, queued, sent, failed, bounced
+  sentBy: varchar("sent_by").references(() => users.id), // Admin who sent it
+  sentAt: timestamp("sent_at"),
+  
+  // Engagement tracking
+  wasOpened: boolean("was_opened").default(false),
+  openedAt: timestamp("opened_at"),
+  openCount: integer("open_count").default(0),
+  
+  wasClicked: boolean("was_clicked").default(false),
+  clickedAt: timestamp("clicked_at"),
+  clickCount: integer("click_count").default(0),
+  
+  wasReplied: boolean("was_replied").default(false),
+  repliedAt: timestamp("replied_at"),
+  
+  // Provider tracking
+  emailProvider: varchar("email_provider").default('sendgrid'), // sendgrid, mailgun, etc
+  providerMessageId: varchar("provider_message_id"), // External provider's message ID
+  
+  // Error handling
+  errorMessage: text("error_message"), // If sending failed
+  retryCount: integer("retry_count").default(0),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("outreach_emails_lead_idx").on(table.leadId),
+  index("outreach_emails_status_idx").on(table.status),
+  index("outreach_emails_sent_at_idx").on(table.sentAt),
+]);
+
+export const insertOutreachEmailSchema = createInsertSchema(outreachEmails).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertOutreachEmail = z.infer<typeof insertOutreachEmailSchema>;
+export type OutreachEmail = typeof outreachEmails.$inferSelect;
+
+// ICP Criteria - stores the Ideal Customer Profile criteria for AI qualification
+export const icpCriteria = pgTable("icp_criteria", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(), // "MRI Decision Maker", "Education Director", etc
+  description: text("description"), // Human-readable description of this ICP
+  
+  // Qualification criteria
+  criteria: jsonb("criteria").notNull(), // Structured criteria: job titles, company types, signals, red flags, etc
+  
+  // Scoring weights
+  scoringWeights: jsonb("scoring_weights"), // How to weight different factors in qualification score
+  
+  // AI prompt template
+  qualificationPrompt: text("qualification_prompt").notNull(), // Template for Gemini to use when qualifying
+  
+  // Active status
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false), // Default ICP to use if none specified
+  
+  // Usage stats
+  leadsQualified: integer("leads_qualified").default(0),
+  averageScore: integer("average_score"), // Average qualification score for this ICP
+  
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertIcpCriteriaSchema = createInsertSchema(icpCriteria).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertIcpCriteria = z.infer<typeof insertIcpCriteriaSchema>;
+export type IcpCriteria = typeof icpCriteria.$inferSelect;
