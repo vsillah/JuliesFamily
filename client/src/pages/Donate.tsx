@@ -10,7 +10,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Heart, CreditCard, Loader2 } from 'lucide-react';
+import { Heart, CreditCard, Loader2, Home } from 'lucide-react';
+import { Link } from 'wouter';
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
@@ -333,6 +334,14 @@ export default function Donate() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4">
       <div className="max-w-2xl mx-auto">
+        <div className="mb-6">
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-home-donate">
+              <Home className="w-4 h-4" />
+              Back to Home
+            </Button>
+          </Link>
+        </div>
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <Heart className="w-8 h-8 text-primary" fill="currentColor" />
