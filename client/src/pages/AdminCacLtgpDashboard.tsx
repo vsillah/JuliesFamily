@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
-  TrendingUp, DollarSign, Users, Target, BarChart3, ArrowUpRight, ArrowDownRight, Calendar
+  TrendingUp, DollarSign, Users, Target, BarChart3, ArrowUpRight, ArrowDownRight, Calendar, Settings
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -128,12 +128,20 @@ export default function AdminCacLtgpDashboard() {
                   Track donor acquisition economics and lifetime value metrics
                 </p>
               </div>
-              <Link href="/admin/cohort-analysis">
-                <Button variant="outline" size="sm" data-testid="button-cohort-analysis">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Cohort Analysis
-                </Button>
-              </Link>
+              <div className="flex gap-2">
+                <Link href="/admin/cohort-analysis">
+                  <Button variant="outline" size="sm" data-testid="button-cohort-analysis">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    Cohort Analysis
+                  </Button>
+                </Link>
+                <Link href="/admin/channel-management">
+                  <Button variant="outline" size="sm" data-testid="button-channel-management">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Manage Channels
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
