@@ -6,7 +6,11 @@ import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage"
 import { useABTest } from "@/hooks/useABTest";
 import type { ContentItem } from "@shared/schema";
 
-export default function Hero() {
+interface HeroProps {
+  onImageLoaded: (loaded: boolean) => void;
+}
+
+export default function Hero({ onImageLoaded }: HeroProps) {
   const { persona, funnelStage } = usePersona();
   const [scrollScale, setScrollScale] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -58,7 +62,8 @@ export default function Hero() {
     setOverlayVisible(false);
     setTextVisible(false);
     setImageError(false);
-  }, [imageName]);
+    onImageLoaded(false);
+  }, [imageName, onImageLoaded]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,11 +99,12 @@ export default function Hero() {
     const fallbackTimer = setTimeout(() => {
       if (!imageLoaded && !imageError) {
         setImageError(true);
+        onImageLoaded(true); // Show navigation even if image fails
       }
     }, 5000); // 5 second timeout
     
     return () => clearTimeout(fallbackTimer);
-  }, [imageLoaded, imageError]);
+  }, [imageLoaded, imageError, onImageLoaded]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -179,8 +185,14 @@ export default function Hero() {
             }`}
             style={{ transform: `scale(${scrollScale})` }}
             loading="eager"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
+            onLoad={() => {
+              setImageLoaded(true);
+              onImageLoaded(true);
+            }}
+            onError={() => {
+              setImageError(true);
+              onImageLoaded(true); // Show navigation even if image fails
+            }}
           />
         ) : (
           <div className="w-full h-full bg-muted animate-pulse" />

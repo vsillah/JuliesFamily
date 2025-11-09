@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
@@ -69,6 +70,7 @@ const leadMagnetTitles: Record<string, Record<string, { title: string; descripti
 
 export default function Home() {
   const { persona, funnelStage } = usePersona();
+  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
 
   const personaKey = persona || "student";
   const funnelKey = funnelStage || "awareness";
@@ -77,8 +79,8 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <SchemaMarkup />
-      <Navigation />
-      <Hero />
+      <Navigation heroImageLoaded={heroImageLoaded} />
+      <Hero onImageLoaded={setHeroImageLoaded} />
       <Services />
       
       <section className="py-12 sm:py-16 bg-muted/30" id="lead-magnet">

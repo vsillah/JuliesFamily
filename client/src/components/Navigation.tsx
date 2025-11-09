@@ -23,7 +23,11 @@ import { Link } from "wouter";
 import CloudinaryImage from "@/components/CloudinaryImage";
 import { useContentAvailability } from "@/hooks/useContentAvailability";
 
-export default function Navigation() {
+interface NavigationProps {
+  heroImageLoaded?: boolean;
+}
+
+export default function Navigation({ heroImageLoaded = true }: NavigationProps) {
   const { persona, setShowPersonaModal } = usePersona();
   const { isAuthenticated, user } = useAuth();
   const { isAdmin, isSuperAdmin } = useUserRole();
@@ -131,10 +135,12 @@ export default function Navigation() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled 
             ? "bg-background/95 backdrop-blur-md shadow-sm" 
             : "bg-transparent"
+        } ${
+          heroImageLoaded ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         style={{
           paddingTop: 'max(env(safe-area-inset-top), 1rem)'
