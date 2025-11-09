@@ -141,9 +141,9 @@ export default function Navigation() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 md:h-20 gap-8">
+          <div className="grid grid-cols-[1fr_auto_1fr] md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center h-14 md:h-20 gap-4">
             {/* Left: Brand */}
-            <div className="flex-shrink-0 flex items-center gap-3">
+            <div className="flex items-center gap-3">
               <CloudinaryImage 
                 name="site-logo"
                 alt="Julie's Family Learning Program Logo" 
@@ -219,7 +219,7 @@ export default function Navigation() {
             </nav>
 
             {/* Right: Utilities */}
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-3 justify-end">
               <Link href="/donate">
                 <Button variant="default" size="sm" data-testid="button-donate">
                   Donate
@@ -325,7 +325,7 @@ export default function Navigation() {
             </div>
 
             {/* Mobile: Inline Priority Links */}
-            <div className="md:hidden flex items-center gap-1 flex-1 justify-end mr-1">
+            <div className="md:hidden flex items-center gap-1 justify-end">
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
