@@ -102,33 +102,18 @@ export default function ProductLanding() {
           }}
         ></div>
         
-        {/* Header with Logo - Overlaid on hero */}
+        {/* Header - Overlaid on hero */}
         <header className="relative z-20">
           <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-            <div className="flex items-center justify-between">
-              <img 
-                src={logoImage} 
-                alt="Kinflo" 
-                className="h-20 sm:h-28 md:h-36 w-auto"
-                data-testid="img-logo"
-              />
-              <div className="flex gap-3">
-                <Button 
-                  variant="ghost" 
-                  className="hidden sm:inline-flex bg-white/10 hover:bg-white/20 text-white border-white/30" 
-                  data-testid="button-nav-signin"
-                  asChild
-                >
-                  <a href="/api/login?returnTo=/my-campaigns">Sign In</a>
-                </Button>
-                <Button 
-                  className="bg-white text-primary hover:bg-white/90" 
-                  data-testid="button-nav-cta"
-                  asChild
-                >
-                  <a href="/api/login?returnTo=/my-campaigns">Get Started Free</a>
-                </Button>
-              </div>
+            <div className="flex items-center justify-end">
+              <Button 
+                variant="ghost" 
+                className="bg-white/10 hover:bg-white/20 text-white border-white/30" 
+                data-testid="button-nav-signin"
+                asChild
+              >
+                <a href="/api/login?returnTo=/my-campaigns">Sign In</a>
+              </Button>
             </div>
           </div>
         </header>
