@@ -1,6 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Building, Heart, GraduationCap, Home, Users } from "lucide-react";
+import buildingExterior from "@assets/Building080711smaller_1762689139944.jpg";
+import whiteFundPlaque from "@assets/Building080711smallerWhiteplaqueforweb_1762689139949.jpg";
+import foundersPhoto from "@assets/Juliesfounders-541x180.jpg_1762689139950.webp";
+import building1927 from "@assets/PictureofWhiteBuilding1927smallforweb_001_1762689139951.jpg";
 
 export default function OurStory() {
   return (
@@ -134,6 +138,20 @@ export default function OurStory() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <img 
+                      src={building1927} 
+                      alt="Historic photo of Julie's building from 1927 when it was a public health center"
+                      className="w-full h-auto rounded-md border border-border"
+                      data-testid="img-building-1927"
+                    />
+                    <img 
+                      src={buildingExterior} 
+                      alt="Current exterior of Julie's Family Learning Program historic building"
+                      className="w-full h-auto rounded-md border border-border"
+                      data-testid="img-building-current"
+                    />
+                  </div>
                   <p className="text-muted-foreground leading-relaxed">
                     Julie's is housed in an historic building that began its life as a public health center. With funding from the George Robert White Fund, the facility was built as part of a campaign to provide the city with beautiful buildings to benefit the public. It was presented to the City of Boston on June 28th, 1927. The solarium on the rooftop floor was used for treating patients with tuberculosis.
                   </p>
@@ -154,6 +172,12 @@ export default function OurStory() {
                   <p className="text-muted-foreground leading-relaxed">
                     After having completed a $3.7 million capital campaign, the building was renovated with the help of the architectural firm, John Catlin Associates & Architects. The architects worked closely with the staff to ensure that the design and space would best suit the needs of the women and children who would be using the building on a daily basis for years to come.
                   </p>
+                  <img 
+                    src={whiteFundPlaque} 
+                    alt="George Robert White Fund plaque on the historic building"
+                    className="w-full h-auto rounded-md border border-border"
+                    data-testid="img-white-fund-plaque"
+                  />
                   <div className="bg-muted/30 p-4 rounded-md border border-border">
                     <p className="text-sm text-muted-foreground italic" data-testid="text-building-ownership">
                       This building is owned by the George Robert White Fund, a trust managed by the City of Boston.
@@ -166,9 +190,19 @@ export default function OurStory() {
 
           {/* Founders Tab */}
           <TabsContent value="founders" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
-              {/* Sister Louise Kearns */}
-              <Card data-testid="card-founder-louise">
+            <div className="max-w-6xl mx-auto space-y-6">
+              <div className="flex justify-center mb-8">
+                <img 
+                  src={foundersPhoto} 
+                  alt="Sister Louise Kearns and Sister Jean Sullivan, co-founders of Julie's Family Learning Program"
+                  className="w-full max-w-2xl h-auto rounded-md border border-border shadow-sm"
+                  data-testid="img-founders-photo"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Sister Louise Kearns */}
+                <Card data-testid="card-founder-louise">
                 <CardHeader>
                   <CardTitle className="text-2xl font-serif" data-testid="heading-louise-kearns">Sister Louise Kearns, SND</CardTitle>
                 </CardHeader>
@@ -225,14 +259,15 @@ export default function OurStory() {
                 </CardContent>
               </Card>
 
-              {/* Legacy note spanning both columns */}
-              <Card className="lg:col-span-2 bg-primary/5 border-primary/20" data-testid="card-legacy-note">
-                <CardContent className="pt-6">
-                  <p className="text-muted-foreground leading-relaxed text-center" data-testid="text-st-julie">
-                    Sisters Jean and Louise named Julie's after <span className="font-semibold text-foreground">St. Julie Billiart</span>, foundress of their order, The Sisters of Notre Dame de Namur. St. Julie's vision was the development of a community of women who through simple and prayerful lives commit themselves to educating and serving others, especially those who are poor and marginalized.
-                  </p>
-                </CardContent>
-              </Card>
+                {/* Legacy note spanning both columns */}
+                <Card className="lg:col-span-2 bg-primary/5 border-primary/20" data-testid="card-legacy-note">
+                  <CardContent className="pt-6">
+                    <p className="text-muted-foreground leading-relaxed text-center" data-testid="text-st-julie">
+                      Sisters Jean and Louise named Julie's after <span className="font-semibold text-foreground">St. Julie Billiart</span>, foundress of their order, The Sisters of Notre Dame de Namur. St. Julie's vision was the development of a community of women who through simple and prayerful lives commit themselves to educating and serving others, especially those who are poor and marginalized.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
