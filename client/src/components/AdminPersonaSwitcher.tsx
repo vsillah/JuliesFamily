@@ -160,7 +160,7 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
                   <SelectTrigger data-testid="select-persona">
                     <SelectValue placeholder="Select a persona" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[1200]">
                     <SelectItem value="none">Default (No persona)</SelectItem>
                     {personaConfigs.map((config) => (
                       <SelectItem key={config.id} value={config.id}>
@@ -188,7 +188,7 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
                   <SelectTrigger data-testid="select-funnel">
                     <SelectValue placeholder="Select a funnel stage" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[1200]">
                     <SelectItem value="none">None selected</SelectItem>
                     {funnelStageConfigs.map((config) => (
                       <SelectItem key={config.id} value={config.id}>
