@@ -73,7 +73,13 @@ export default function AdminChannelManagement() {
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
 
   // Form states
-  const [channelForm, setChannelForm] = useState({ name: "", description: "", isActive: true });
+  const [channelForm, setChannelForm] = useState({ 
+    name: "", 
+    slug: "", 
+    channelType: "paid_ads" as const, 
+    description: "", 
+    isActive: true 
+  });
   const [campaignForm, setCampaignForm] = useState({ 
     name: "", channelId: "", description: "", budget: "", 
     startDate: "", endDate: "", isActive: true 
@@ -212,20 +218,56 @@ export default function AdminChannelManagement() {
     const data = {
       ...campaignForm,
       budget: campaignForm.budget ? parseFloat(campaignForm.budget) : null,
-      startDate: campaignForm.startDate || null,
-      endDate: campaignForm.endDate || null,
+      startDate: campaignForm.startDate ? new Date(campaignForm.startDate) : null,
+      endDate: campaignForm.endDate ? new Date(campaignForm.endDate) : null,
     };
     campaignMutation.mutate(data);
+  };
+
+  // Calculate period dates from period key
+  const calculatePeriodDates = (periodType: "week" | "month", periodKey: string) => {
+    if (periodType === "month") {
+      // Format: YYYY-MM
+      const [year, month] = periodKey.split('-').map(Number);
+      const periodStart = new Date(year, month - 1, 1); // Month is 0-indexed
+      const periodEnd = new Date(year, month, 0); // Last day of month
+      return { periodStart, periodEnd };
+    } else {
+      // Format: YYYY-Www (ISO week)
+      const match = periodKey.match(/^(\d{4})-W(\d{2})$/);
+      if (!match) {
+        throw new Error(`Invalid week format: ${periodKey}. Expected YYYY-Www`);
+      }
+      const [_, yearStr, weekStr] = match;
+      const year = parseInt(yearStr);
+      const week = parseInt(weekStr);
+      
+      // Calculate ISO week dates
+      const jan4 = new Date(year, 0, 4);
+      const startOfWeek1 = new Date(jan4);
+      startOfWeek1.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1);
+      
+      const periodStart = new Date(startOfWeek1);
+      periodStart.setDate(startOfWeek1.getDate() + (week - 1) * 7);
+      
+      const periodEnd = new Date(periodStart);
+      periodEnd.setDate(periodStart.getDate() + 6);
+      
+      return { periodStart, periodEnd };
+    }
   };
 
   // Handle spend submit
   const handleSpendSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const { periodStart, periodEnd } = calculatePeriodDates(spendForm.periodType, spendForm.periodKey);
     const data = {
       channelId: spendForm.channelId,
-      campaignId: spendForm.campaignId || null,
+      campaignId: spendForm.campaignId && spendForm.campaignId !== "none" ? spendForm.campaignId : null,
       periodType: spendForm.periodType,
       periodKey: spendForm.periodKey,
+      periodStart,
+      periodEnd,
       amountSpent: parseFloat(spendForm.amountSpent),
       leadsAcquired: parseInt(spendForm.leadsAcquired),
       donorsAcquired: parseInt(spendForm.donorsAcquired),
@@ -233,11 +275,21 @@ export default function AdminChannelManagement() {
     spendMutation.mutate(data);
   };
 
+  // Generate slug from name
+  const generateSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-z0-9_]/g, '');
+  };
+
   // Edit channel
-  const handleEditChannel = (channel: Channel) => {
+  const handleEditChannel = (channel: Channel & { slug?: string; channelType?: string }) => {
     setEditingChannel(channel);
     setChannelForm({
       name: channel.name,
+      slug: channel.slug || generateSlug(channel.name),
+      channelType: (channel.channelType as any) || "paid_ads",
       description: channel.description || "",
       isActive: channel.isActive,
     });
@@ -312,7 +364,7 @@ export default function AdminChannelManagement() {
                       <Button 
                         onClick={() => {
                           setEditingChannel(null);
-                          setChannelForm({ name: "", description: "", isActive: true });
+                          setChannelForm({ name: "", slug: "", channelType: "paid_ads", description: "", isActive: true });
                         }}
                         data-testid="button-add-channel"
                       >
@@ -338,11 +390,40 @@ export default function AdminChannelManagement() {
                             <Input
                               id="channel-name"
                               value={channelForm.name}
-                              onChange={(e) => setChannelForm({ ...channelForm, name: e.target.value })}
+                              onChange={(e) => {
+                                const newName = e.target.value;
+                                setChannelForm({ 
+                                  ...channelForm, 
+                                  name: newName,
+                                  slug: generateSlug(newName)
+                                });
+                              }}
                               placeholder="e.g., Google Ads, Facebook, Email"
                               required
                               data-testid="input-channel-name"
                             />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label htmlFor="channel-type">Channel Type *</Label>
+                            <Select
+                              value={channelForm.channelType}
+                              onValueChange={(value) => setChannelForm({ ...channelForm, channelType: value as any })}
+                              required
+                            >
+                              <SelectTrigger data-testid="select-channel-type">
+                                <SelectValue placeholder="Select a channel type" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="paid_ads">Paid Ads (Google, Facebook, etc.)</SelectItem>
+                                <SelectItem value="organic">Organic (SEO, Content)</SelectItem>
+                                <SelectItem value="referral">Referral</SelectItem>
+                                <SelectItem value="event">Event</SelectItem>
+                                <SelectItem value="email">Email Marketing</SelectItem>
+                                <SelectItem value="social">Social Media</SelectItem>
+                                <SelectItem value="direct">Direct</SelectItem>
+                                <SelectItem value="partnership">Partnership</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </div>
                           <div className="grid gap-2">
                             <Label htmlFor="channel-description">Description</Label>
@@ -696,10 +777,10 @@ export default function AdminChannelManagement() {
                               onValueChange={(value) => setSpendForm({ ...spendForm, campaignId: value })}
                             >
                               <SelectTrigger data-testid="select-spend-campaign">
-                                <SelectValue placeholder="Select a campaign" />
+                                <SelectValue placeholder="Select a campaign (optional)" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">None</SelectItem>
+                                <SelectItem value="none">None</SelectItem>
                                 {campaigns
                                   .filter(c => c.channelId === spendForm.channelId && c.isActive)
                                   .map((campaign) => (

@@ -1381,6 +1381,10 @@ export const insertMarketingCampaignSchema = createInsertSchema(marketingCampaig
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Accept ISO strings and coerce to Date objects for timestamp fields
+  startDate: z.union([z.date(), z.string().transform((val) => new Date(val))]),
+  endDate: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
 });
 export type InsertMarketingCampaign = z.infer<typeof insertMarketingCampaignSchema>;
 export type MarketingCampaign = typeof marketingCampaigns.$inferSelect;
@@ -1531,6 +1535,10 @@ export const insertChannelSpendLedgerSchema = createInsertSchema(channelSpendLed
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  // Accept ISO strings and coerce to Date objects for timestamp fields
+  periodStart: z.union([z.date(), z.string().transform((val) => new Date(val))]),
+  periodEnd: z.union([z.date(), z.string().transform((val) => new Date(val))]),
 });
 export type InsertChannelSpendLedger = z.infer<typeof insertChannelSpendLedgerSchema>;
 export type ChannelSpendLedger = typeof channelSpendLedger.$inferSelect;
