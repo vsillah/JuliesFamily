@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 export type Persona = 
   | "student"
@@ -69,6 +70,7 @@ const ADMIN_FUNNEL_KEY = "admin-funnel-override";
 
 export function PersonaProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
+  const [location] = useLocation();
   const [persona, setPersonaState] = useState<Persona>(null);
   const [funnelStage, setFunnelStage] = useState<FunnelStage>(null);
   const [showPersonaModal, setShowPersonaModal] = useState(false);
@@ -76,6 +78,12 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Don't do anything while auth is loading
     if (isLoading) return;
+
+    // Don't show persona modal on Kinflo product landing pages
+    // Use startsWith to handle query strings and trailing slashes
+    const isKinfloPage = location.startsWith('/kinflo') || location.startsWith('/product');
+
+    let timeoutId: NodeJS.Timeout | null = null;
 
     const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
     
@@ -95,9 +103,9 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       
       if (storedPersona && storedPersona !== "null") {
         setPersonaState(storedPersona as Persona);
-      } else if (!modalShown && !adminOverride) {
-        // Only show modal for unauthenticated users
-        setTimeout(() => {
+      } else if (!modalShown && !adminOverride && !isKinfloPage) {
+        // Only show modal for unauthenticated users on Julie's pages (not Kinflo)
+        timeoutId = setTimeout(() => {
           setShowPersonaModal(true);
           sessionStorage.setItem(PERSONA_MODAL_SHOWN_KEY, "true");
         }, 2000);
@@ -110,7 +118,14 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     } else {
       setFunnelStage("awareness");
     }
-  }, [isAuthenticated, user, isLoading]);
+
+    // Cleanup timeout if component unmounts or location changes
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isAuthenticated, user, isLoading, location]);
 
   const setPersona = async (newPersona: Persona) => {
     setPersonaState(newPersona);
