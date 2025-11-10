@@ -15,6 +15,17 @@ import Footer from "@/components/Footer";
 import SchemaMarkup from "@/components/SchemaMarkup";
 import { usePersona } from "@/contexts/PersonaContext";
 import { CampaignImpactCard } from "@/components/CampaignImpactCard";
+import { useContentAvailability, type VisibleSections } from "@/hooks/useContentAvailability";
+
+// Default all sections to visible during loading to avoid flickering
+const DEFAULT_SECTIONS: VisibleSections = {
+  services: true,
+  events: true,
+  testimonials: true,
+  impact: true,
+  donation: true,
+  "lead-magnet": true,
+};
 
 const leadMagnetTitles: Record<string, Record<string, { title: string; description: string }>> = {
   student: {
@@ -72,10 +83,18 @@ const leadMagnetTitles: Record<string, Record<string, { title: string; descripti
 export default function Home() {
   const { persona, funnelStage } = usePersona();
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+  const { data: visibleSections } = useContentAvailability();
 
   const personaKey = persona || "student";
   const funnelKey = funnelStage || "awareness";
   const leadMagnetContent = leadMagnetTitles[personaKey]?.[funnelKey] || leadMagnetTitles.student.awareness;
+  
+  // Merge with defaults to ensure all keys have values
+  // Use nullish coalescing to handle undefined during loading
+  const sections: VisibleSections = {
+    ...DEFAULT_SECTIONS,
+    ...(visibleSections ?? {}),
+  };
 
   return (
     <div className="min-h-screen">
@@ -84,7 +103,7 @@ export default function Home() {
       <Hero onImageLoaded={setHeroImageLoaded} />
       
       {/* Campaign Impact Section - Visible for donor personas */}
-      {persona === 'donor' && (
+      {persona === 'donor' && sections.impact && (
         <section className="py-16 sm:py-20 bg-gradient-to-b from-background to-muted/20" id="campaign-impact" data-testid="section-campaign-impact">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
@@ -100,29 +119,56 @@ export default function Home() {
         </section>
       )}
       
-      <Services />
+      {sections.services && (
+        <section id="services" data-testid="section-services">
+          <Services />
+        </section>
+      )}
       
-      <section className="py-12 sm:py-16 bg-muted/30" id="lead-magnet">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-serif font-bold text-primary mb-4">
-              {leadMagnetContent.title}
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {leadMagnetContent.description}
-            </p>
+      {sections["lead-magnet"] && (
+        <section className="py-12 sm:py-16 bg-muted/30" id="lead-magnet" data-testid="section-lead-magnet">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-8">
+              <h2 className="text-4xl font-serif font-bold text-primary mb-4">
+                {leadMagnetContent.title}
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                {leadMagnetContent.description}
+              </p>
+            </div>
+            <PersonalizedLeadMagnet />
           </div>
-          <PersonalizedLeadMagnet />
-        </div>
-      </section>
+        </section>
+      )}
 
-      <ImpactStats />
+      {sections.impact && (
+        <section id="impact" data-testid="section-impact">
+          <ImpactStats />
+        </section>
+      )}
+      
       <OurStory />
-      <Testimonials />
+      
+      {sections.testimonials && (
+        <section id="testimonials" data-testid="section-testimonials">
+          <Testimonials />
+        </section>
+      )}
+      
       <StudentStoriesCarousel />
       <SocialMediaCarousel />
-      <Events />
-      <DonationCTA />
+      
+      {sections.events && (
+        <section id="events" data-testid="section-events">
+          <Events />
+        </section>
+      )}
+      
+      {sections.donation && (
+        <section id="donation" data-testid="section-donation">
+          <DonationCTA />
+        </section>
+      )}
       <Sponsors />
       <Footer />
     </div>
