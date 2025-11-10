@@ -4499,6 +4499,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
           
+          // Auto-enroll in Graduation Path email campaign if this is their first donation
+          if (updatedDonation.leadId) {
+            try {
+              // Check if this is their first SUCCESSFUL donation (transactional check)
+              // Only count succeeded donations to avoid excluding leads whose first attempt failed
+              const donationCount = await db
+                .select({ count: sql<number>`cast(count(*) as integer)` })
+                .from(donations)
+                .where(
+                  and(
+                    eq(donations.leadId, updatedDonation.leadId),
+                    eq(donations.status, 'succeeded')
+                  )
+                );
+              
+              const isFirstDonation = donationCount[0]?.count === 1;
+              
+              if (isFirstDonation) {
+                console.log(`[GraduationPath] First donation detected for lead ${updatedDonation.leadId}, enrolling...`);
+                
+                // Import and enroll in graduation path
+                const { enrollInGraduationPath } = await import('./services/graduationPathCampaign');
+                await enrollInGraduationPath(updatedDonation.leadId);
+                
+                console.log(`[GraduationPath] Successfully enrolled lead ${updatedDonation.leadId} in graduation path`);
+              } else {
+                console.log(`[GraduationPath] Lead ${updatedDonation.leadId} already has ${donationCount[0]?.count} donations, skipping enrollment`);
+              }
+            } catch (enrollmentError: any) {
+              // Log error but don't fail the webhook - enrollment failure shouldn't block payment processing
+              console.error(`[GraduationPath] Failed to enroll lead ${updatedDonation.leadId} in graduation path:`, enrollmentError);
+              // Consider adding to a retry queue or alerting system in production
+            }
+          } else {
+            console.log('[GraduationPath] No leadId for donation, skipping graduation path enrollment');
+          }
+          
           break;
         }
         
