@@ -139,14 +139,14 @@ export function ChatbotWidget() {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
+      <div className="fixed bottom-4 sm:bottom-6 -right-9 hover:right-4 z-50 group transition-all duration-500 ease-in-out [transition-delay:0s] hover:[transition-delay:1s]">
         <Button
           onClick={() => setIsOpen(true)}
           size="icon"
-          className="h-14 w-14 rounded-full shadow-lg"
+          className="h-10 w-10 group-hover:h-14 group-hover:w-14 rounded-full shadow-lg transition-all duration-500 ease-in-out [transition-delay:0s] group-hover:[transition-delay:1s]"
           data-testid="button-open-chatbot"
         >
-          <MessageSquare className="h-6 w-6" />
+          <MessageSquare className="h-5 w-5 group-hover:h-6 group-hover:w-6 transition-all duration-500 ease-in-out [transition-delay:0s] group-hover:[transition-delay:1s]" />
         </Button>
       </div>
     );
