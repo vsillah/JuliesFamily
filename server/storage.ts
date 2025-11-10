@@ -1247,7 +1247,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: contentItems.updatedAt,
       })
       .from(contentItems)
-      .leftJoin(
+      .innerJoin(
         contentVisibility,
         and(
           eq(contentVisibility.contentItemId, contentItems.id),
@@ -1269,10 +1269,7 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(contentItems.type, type),
           eq(contentItems.isActive, true),
-          or(
-            sql`${contentVisibility.isVisible} IS NULL`,
-            eq(contentVisibility.isVisible, true)
-          )
+          eq(contentVisibility.isVisible, true)
         )
       );
 

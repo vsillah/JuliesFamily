@@ -2345,6 +2345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/content/visible-sections', async (req, res) => {
     try {
       const { persona, funnelStage, passions } = req.query;
+      console.log('[visible-sections] Request params:', { persona, funnelStage, passions });
       
       // Priority: user profile passions > query string passions > null
       let userPassions: string[] | null = null;
@@ -2364,7 +2365,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Query visible content for each type
       const sectionTypes = ['service', 'testimonial', 'event', 'lead_magnet', 'cta'];
-      const visibleSections: Record<string, boolean> = {};
+      const visibleSections: Record<string, boolean> = {
+        // Initialize all sections to false to prevent DEFAULT_SECTIONS fallback
+        'campaign-impact': false,
+        'services': false,
+        'lead-magnet': false,
+        'impact': true, // Always visible
+        'testimonials': false,
+        'events': false,
+        'donation': false,
+      };
       
       for (const type of sectionTypes) {
         const items = await storage.getVisibleContentItems(
@@ -2400,6 +2410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Impact stats are always visible (static component, not CMS-managed)
       visibleSections.impact = true;
       
+      console.log('[visible-sections] Returning sections:', visibleSections);
       res.json(visibleSections);
     } catch (error) {
       console.error("Error fetching visible sections:", error);

@@ -19,9 +19,9 @@ import { CampaignImpactCard } from "@/components/CampaignImpactCard";
 import { useContentAvailability, type VisibleSections } from "@/hooks/useContentAvailability";
 import type { ContentItem } from "@shared/schema";
 
-// Default all sections to visible during loading to avoid flickering
+// Default sections during loading - campaign-impact defaults to false (persona-specific)
 const DEFAULT_SECTIONS: VisibleSections = {
-  "campaign-impact": true,
+  "campaign-impact": false,  // Only visible for donor persona
   services: true,
   "lead-magnet": true,
   impact: true,
