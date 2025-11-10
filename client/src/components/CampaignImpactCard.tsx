@@ -214,6 +214,8 @@ export function CampaignImpactCard() {
                   size="lg"
                   onClick={() => {
                     const params = new URLSearchParams({
+                      amount: (monthlyAmount * 100).toString(), // Convert to cents, use slider value
+                      frequency: 'monthly',
                       campaign: campaign.slug,
                     });
                     navigate(`/donate?${params.toString()}`);
