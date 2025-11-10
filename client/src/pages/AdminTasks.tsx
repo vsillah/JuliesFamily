@@ -64,17 +64,26 @@ export default function AdminTasks() {
     if (filterAssignee && filterAssignee !== "__all__") {
       params.append("assignedTo", filterAssignee);
     }
-    if (filterStatus && filterStatus !== "__all__") {
+    // Only send status to API if it's not "overdue" (overdue is computed client-side)
+    if (filterStatus && filterStatus !== "__all__" && filterStatus !== "overdue") {
       params.append("status", filterStatus);
     }
     const queryString = params.toString();
     return queryString ? `/api/tasks?${queryString}` : "/api/tasks";
   };
 
-  const { data: tasks = [], isLoading: tasksLoading } = useQuery<any[]>({
+  const { data: rawTasks = [], isLoading: tasksLoading } = useQuery<any[]>({
     queryKey: [buildTaskQueryUrl()],
     retry: false,
   });
+
+  // Apply client-side filtering for "overdue" status
+  const tasks = filterStatus === "overdue" 
+    ? rawTasks.filter((task: any) => {
+        const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && task.status !== "completed";
+        return isOverdue;
+      })
+    : rawTasks;
 
   // Task creation mutation
   const createTaskMutation = useMutation({
@@ -446,6 +455,7 @@ export default function AdminTasks() {
               <SelectContent>
                 <SelectItem value="__all__">All statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="overdue">Overdue</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>
