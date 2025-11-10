@@ -43,7 +43,11 @@ export type User = typeof users.$inferSelect;
 export const updateUserProfileSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(100),
   lastName: z.string().trim().min(1, "Last name is required").max(100),
-  profileImageUrl: z.union([z.string().url(), z.literal("")]).optional().nullable(),
+  profileImageUrl: z.union([
+    z.string().url(), // Full URLs like https://...
+    z.string().startsWith("/"), // Relative paths like /objects/...
+    z.literal("") // Empty string
+  ]).optional().nullable(),
   persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional().nullable(),
 }).strict(); // Reject unknown fields
 

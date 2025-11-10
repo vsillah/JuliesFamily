@@ -103,10 +103,6 @@ export default function Profile() {
   });
 
   const onSubmit = async (data: ProfileFormValues) => {
-    console.log("=== Form Submission Started ===");
-    console.log("Form data:", data);
-    console.log("Form errors:", form.formState.errors);
-    console.log("Is form valid:", form.formState.isValid);
     setIsSubmitting(true);
     updateProfileMutation.mutate(data);
   };
@@ -190,10 +186,7 @@ export default function Profile() {
             </div>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit, (errors) => {
-                console.log("=== Form Validation Failed ===");
-                console.log("Validation errors:", errors);
-              })} className="space-y-4">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                   control={form.control}
                   name="firstName"
