@@ -485,7 +485,7 @@ export const abTestVariants = pgTable("ab_test_variants", {
   // Configuration contains presentation overrides applied AFTER content selection
   // Example: { title: "New Headline", description: "Test copy", ctaText: "Join Now", imageName: "hero-alt" }
   // Content is first selected by persona + journey stage + passion tags, then overrides are applied
-  configuration: jsonb("configuration").notNull(),
+  configuration: jsonb("configuration"), // Optional during migration period - will be required in v2.0
   contentItemId: varchar("content_item_id").references(() => contentItems.id, { onDelete: "set null" }), // DEPRECATED v1.5: Will be removed in v2.0. Use configuration overrides instead. Existing tests using this field will continue to work but new tests should use configuration-only approach.
   isControl: boolean("is_control").default(false), // Is this the control/baseline variant?
   createdAt: timestamp("created_at").defaultNow(),
@@ -496,6 +496,34 @@ export const insertAbTestVariantSchema = createInsertSchema(abTestVariants).omit
   id: true,
   createdAt: true,
   updatedAt: true,
+}).superRefine((data, ctx) => {
+  // During migration: at least one of configuration or contentItemId must be provided
+  if (!data.configuration && !data.contentItemId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Either configuration or contentItemId must be provided",
+      path: [],
+    });
+    return;
+  }
+  
+  // If configuration is provided, validate it and apply defaults/transforms
+  if (data.configuration) {
+    const result = abTestVariantConfigurationSchema.safeParse(data.configuration);
+    if (!result.success) {
+      // Add detailed validation errors for configuration field
+      result.error.errors.forEach((error) => {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Configuration validation failed: ${error.message}`,
+          path: ['configuration', ...error.path],
+        });
+      });
+      return;
+    }
+    // Apply parsed configuration with defaults/transforms
+    (data as any).configuration = result.data;
+  }
 });
 export type InsertAbTestVariant = z.infer<typeof insertAbTestVariantSchema>;
 export type AbTestVariant = typeof abTestVariants.$inferSelect;

@@ -1290,24 +1290,25 @@ export class DatabaseStorage implements IStorage {
   async getActiveAbTests(persona?: string | null, funnelStage?: string | null): Promise<AbTest[]> {
     const now = new Date();
     
+    // Build base active test filters
+    const baseFilters = [
+      eq(abTests.status, 'active'),
+      or(
+        sql`${abTests.startDate} IS NULL`,
+        sql`${abTests.startDate} <= ${now}`
+      ),
+      or(
+        sql`${abTests.endDate} IS NULL`,
+        sql`${abTests.endDate} >= ${now}`
+      )
+    ];
+    
     // If no persona or funnelStage provided, return all active tests
     if (!persona || !funnelStage) {
       return await db
         .select()
         .from(abTests)
-        .where(
-          and(
-            eq(abTests.status, 'active'),
-            or(
-              sql`${abTests.startDate} IS NULL`,
-              sql`${abTests.startDate} <= ${now}`
-            ),
-            or(
-              sql`${abTests.endDate} IS NULL`,
-              sql`${abTests.endDate} >= ${now}`
-            )
-          )
-        );
+        .where(and(...baseFilters));
     }
     
     // Return tests that target the specific persona:funnelStage combination
@@ -1332,15 +1333,7 @@ export class DatabaseStorage implements IStorage {
       .innerJoin(abTestTargets, eq(abTestTargets.testId, abTests.id))
       .where(
         and(
-          eq(abTests.status, 'active'),
-          or(
-            sql`${abTests.startDate} IS NULL`,
-            sql`${abTests.startDate} <= ${now}`
-          ),
-          or(
-            sql`${abTests.endDate} IS NULL`,
-            sql`${abTests.endDate} >= ${now}`
-          ),
+          ...baseFilters,
           eq(abTestTargets.persona, persona),
           eq(abTestTargets.funnelStage, funnelStage)
         )
