@@ -14,6 +14,7 @@ import Sponsors from "@/components/Sponsors";
 import Footer from "@/components/Footer";
 import SchemaMarkup from "@/components/SchemaMarkup";
 import { usePersona } from "@/contexts/PersonaContext";
+import { CampaignImpactCard } from "@/components/CampaignImpactCard";
 
 const leadMagnetTitles: Record<string, Record<string, { title: string; description: string }>> = {
   student: {
@@ -81,6 +82,24 @@ export default function Home() {
       <SchemaMarkup />
       <Navigation heroImageLoaded={heroImageLoaded} />
       <Hero onImageLoaded={setHeroImageLoaded} />
+      
+      {/* Campaign Impact Section - Visible for donor personas */}
+      {persona === 'donor' && (
+        <section className="py-16 sm:py-20 bg-gradient-to-b from-background to-muted/20" id="campaign-impact" data-testid="section-campaign-impact">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-serif font-bold text-primary mb-4">
+                See Your Impact
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Calculate how many people you can help with a monthly donation. Move the slider to see your potential impact.
+              </p>
+            </div>
+            <CampaignImpactCard />
+          </div>
+        </section>
+      )}
+      
       <Services />
       
       <section className="py-12 sm:py-16 bg-muted/30" id="lead-magnet">

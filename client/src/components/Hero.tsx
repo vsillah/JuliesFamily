@@ -123,7 +123,7 @@ export default function Hero({ onImageLoaded }: HeroProps) {
       case 'parent':
         return { primary: 'lead-magnet', secondary: 'services' };
       case 'donor':
-        return { primary: 'donation', secondary: 'impact' };
+        return { primary: 'donation', secondary: 'campaign-impact' }; // Updated to scroll to Campaign Impact section
       case 'volunteer':
         return { primary: 'services', secondary: 'testimonials' };
       default:

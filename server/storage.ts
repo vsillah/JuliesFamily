@@ -210,6 +210,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   // Donation Campaign operations
   createDonationCampaign(campaign: InsertDonationCampaign): Promise<DonationCampaign>;
   getDonationCampaign(id: string): Promise<DonationCampaign | undefined>;
+  getDonationCampaignBySlug(slug: string): Promise<DonationCampaign | undefined>;
   getAllDonationCampaigns(): Promise<DonationCampaign[]>;
   getActiveDonationCampaigns(): Promise<DonationCampaign[]>;
   updateDonationCampaign(id: string, updates: Partial<InsertDonationCampaign>): Promise<DonationCampaign | undefined>;
@@ -1690,6 +1691,11 @@ export class DatabaseStorage implements IStorage {
 
   async getDonationCampaign(id: string): Promise<DonationCampaign | undefined> {
     const [campaign] = await db.select().from(donationCampaigns).where(eq(donationCampaigns.id, id));
+    return campaign;
+  }
+
+  async getDonationCampaignBySlug(slug: string): Promise<DonationCampaign | undefined> {
+    const [campaign] = await db.select().from(donationCampaigns).where(eq(donationCampaigns.slug, slug));
     return campaign;
   }
 

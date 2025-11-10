@@ -879,6 +879,7 @@ export const donationCampaigns = pgTable("donation_campaigns", {
   story: text("story"), // Long-form storytelling content
   goalAmount: integer("goal_amount").notNull(), // Target amount in cents
   raisedAmount: integer("raised_amount").default(0), // Amount raised so far in cents
+  costPerPerson: integer("cost_per_person"), // Cost to help one person in cents (e.g., 50000 = $500/student)
   
   // Passion-based targeting
   passionTags: jsonb("passion_tags").notNull(), // Array of passion tags: ['literacy', 'stem', 'arts', 'nutrition', 'community']

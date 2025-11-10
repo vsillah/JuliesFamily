@@ -4961,6 +4961,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Donation Campaign Routes
 
+  // Get campaign by slug (public - for donation page)
+  app.get('/api/donation-campaigns/by-slug/:slug', async (req, res) => {
+    try {
+      const { slug } = req.params;
+      const campaign = await storage.getDonationCampaignBySlug(slug);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Only return active campaigns to public
+      if (campaign.status !== 'active') {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error fetching donation campaign:", error);
+      res.status(500).json({ message: "Failed to fetch donation campaign" });
+    }
+  });
+
   // Get all donation campaigns (admin only)
   app.get('/api/donation-campaigns', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -4972,8 +4994,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get active donation campaigns (admin only)
-  app.get('/api/donation-campaigns/active', isAuthenticated, isAdmin, async (req, res) => {
+  // Get active donation campaigns (public - for homepage campaign cards)
+  app.get('/api/donation-campaigns/active', async (req, res) => {
     try {
       const campaigns = await storage.getActiveDonationCampaigns();
       res.json(campaigns);

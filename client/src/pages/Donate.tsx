@@ -1,5 +1,5 @@
 // Reference: blueprint:javascript_stripe
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { Heart, CreditCard, Loader2, Home } from 'lucide-react';
 import { Link } from 'wouter';
+import { Badge } from '@/components/ui/badge';
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
@@ -270,9 +271,34 @@ function CheckoutForm({ clientSecret, amount }: { clientSecret: string; amount: 
 
 export default function Donate() {
   const [step, setStep] = useState<'form' | 'payment'>('form');
-  const [amount, setAmount] = useState(50);
-  const [donationType, setDonationType] = useState<'one-time' | 'recurring'>('one-time');
-  const [frequency, setFrequency] = useState<'monthly' | 'quarterly' | 'annual'>('monthly');
+  const [campaignSlug, setCampaignSlug] = useState<string | null>(null);
+  const [campaignName, setCampaignName] = useState<string | null>(null);
+  
+  // Initialize state from URL params
+  const [amount, setAmount] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlAmount = params.get('amount');
+    // Amount in URL is in cents, convert to dollars
+    return urlAmount ? parseInt(urlAmount) / 100 : 50;
+  });
+  
+  const [donationType, setDonationType] = useState<'one-time' | 'recurring'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlFrequency = params.get('frequency');
+    // Any valid recurring frequency should set type to recurring
+    return (urlFrequency === 'monthly' || urlFrequency === 'quarterly' || urlFrequency === 'annual') 
+      ? 'recurring' 
+      : 'one-time';
+  });
+  
+  const [frequency, setFrequency] = useState<'monthly' | 'quarterly' | 'annual'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlFrequency = params.get('frequency');
+    return (urlFrequency === 'monthly' || urlFrequency === 'quarterly' || urlFrequency === 'annual') 
+      ? urlFrequency 
+      : 'monthly';
+  });
+  
   const [donorInfo, setDonorInfo] = useState({
     email: '',
     name: '',
@@ -283,6 +309,26 @@ export default function Donate() {
   const [clientSecret, setClientSecret] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Read campaign from URL params and fetch campaign details
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('campaign');
+    if (slug) {
+      setCampaignSlug(slug);
+      // Fetch campaign details to get the name
+      fetch(`/api/donation-campaigns/by-slug/${slug}`)
+        .then(res => res.json())
+        .then(campaign => {
+          if (campaign && campaign.name) {
+            setCampaignName(campaign.name);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch campaign details:', err);
+        });
+    }
+  }, []);
 
   const handleProceedToPayment = async () => {
     if (!donorInfo.email) {
@@ -315,6 +361,7 @@ export default function Donate() {
         donorPhone: donorInfo.phone,
         isAnonymous: donorInfo.isAnonymous,
         passions: donorInfo.passions,
+        campaignSlug: campaignSlug, // Pass campaign context
       });
 
       const data = await response.json();
@@ -350,6 +397,13 @@ export default function Donate() {
           <p className="text-lg text-muted-foreground">
             Your generosity helps provide education and opportunities to families in our community.
           </p>
+          {campaignName && (
+            <div className="mt-4" data-testid="campaign-indicator">
+              <Badge variant="secondary" className="text-sm px-4 py-2">
+                Supporting: {campaignName}
+              </Badge>
+            </div>
+          )}
         </div>
 
         <Card>
