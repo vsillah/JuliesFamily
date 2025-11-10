@@ -346,9 +346,9 @@ export default function AdminPipeline() {
     }
   };
 
-  const handleDownloadTemplate = async () => {
+  const handleDownloadTemplate = async (format: 'xlsx' | 'csv' = 'xlsx') => {
     try {
-      const response = await fetch('/api/admin/leads/template', {
+      const response = await fetch(`/api/admin/leads/template?format=${format}`, {
         credentials: 'include',
       });
 
@@ -360,7 +360,7 @@ export default function AdminPipeline() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'leads_import_template.xlsx';
+      a.download = `leads_import_template.${format}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -368,7 +368,7 @@ export default function AdminPipeline() {
 
       toast({
         title: "Template Downloaded",
-        description: "Use this template to format your lead data",
+        description: `${format.toUpperCase()} template downloaded successfully`,
       });
     } catch (error) {
       toast({
@@ -472,23 +472,23 @@ export default function AdminPipeline() {
               <DialogHeader>
                 <DialogTitle>Bulk Import Leads</DialogTitle>
                 <DialogDescription>
-                  Upload an Excel file to import multiple leads at once
+                  Upload a spreadsheet file to import multiple leads at once
                 </DialogDescription>
               </DialogHeader>
               
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="excel-upload">Upload Excel File</Label>
+                  <Label htmlFor="file-upload">Upload File</Label>
                   <Input
-                    id="excel-upload"
+                    id="file-upload"
                     type="file"
-                    accept=".xlsx,.xls"
+                    accept=".xlsx,.xls,.csv"
                     onChange={handleFileUpload}
                     disabled={isUploading}
-                    data-testid="input-excel-upload"
+                    data-testid="input-file-upload"
                   />
                   <p className="text-xs text-muted-foreground">
-                    Supported formats: .xlsx, .xls
+                    Supported formats: .xlsx, .xls, .csv
                   </p>
                 </div>
 
@@ -540,15 +540,29 @@ export default function AdminPipeline() {
                 )}
 
                 <div className="flex flex-col gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={handleDownloadTemplate}
-                    className="w-full"
-                    data-testid="button-download-template"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Template
-                  </Button>
+                  <div className="space-y-2">
+                    <Label>Download Template</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDownloadTemplate('xlsx')}
+                        className="w-full"
+                        data-testid="button-download-template-excel"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Excel
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleDownloadTemplate('csv')}
+                        className="w-full"
+                        data-testid="button-download-template-csv"
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        CSV
+                      </Button>
+                    </div>
+                  </div>
                   <p className="text-xs text-muted-foreground text-center">
                     Use the template to format your lead data correctly
                   </p>

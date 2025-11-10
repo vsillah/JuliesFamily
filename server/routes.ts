@@ -1067,9 +1067,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Download Excel Template (must be before /:id route)
+  // Download Template (Excel or CSV) - must be before /:id route
   app.get('/api/admin/leads/template', isAuthenticated, isAdmin, async (req, res) => {
     try {
+      const format = req.query.format === 'csv' ? 'csv' : 'xlsx';
+      
       const templateData = [
         {
           Email: 'example@email.com',
@@ -1088,11 +1090,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Leads');
 
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
-
-      res.setHeader('Content-Disposition', 'attachment; filename=leads_import_template.xlsx');
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.send(buffer);
+      if (format === 'csv') {
+        const csv = XLSX.utils.sheet_to_csv(worksheet);
+        res.setHeader('Content-Disposition', 'attachment; filename=leads_import_template.csv');
+        res.setHeader('Content-Type', 'text/csv');
+        res.send(csv);
+      } else {
+        const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        res.setHeader('Content-Disposition', 'attachment; filename=leads_import_template.xlsx');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buffer);
+      }
     } catch (error) {
       console.error("Error generating template:", error);
       res.status(500).json({ message: "Failed to generate template" });
@@ -1135,16 +1143,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Bulk Import Leads from Excel
-  const excelUpload = multer({ storage: multer.memoryStorage() });
+  // Bulk Import Leads from Excel or CSV
+  const fileUpload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+    fileFilter: (req, file, cb) => {
+      const allowedMimes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel', 'text/csv'];
+      const allowedExts = ['.xlsx', '.xls', '.csv'];
+      const ext = file.originalname.toLowerCase().substring(file.originalname.lastIndexOf('.'));
+      
+      if (allowedMimes.includes(file.mimetype) || allowedExts.includes(ext)) {
+        cb(null, true);
+      } else {
+        cb(new Error('Invalid file type. Only .xlsx, .xls, and .csv files are allowed.'));
+      }
+    }
+  });
   
-  app.post('/api/admin/leads/bulk-import', isAuthenticated, isAdmin, excelUpload.single('file'), async (req, res) => {
+  app.post('/api/admin/leads/bulk-import', isAuthenticated, isAdmin, fileUpload.single('file'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+      // XLSX library can handle both Excel and CSV files
+      const workbook = XLSX.read(req.file.buffer, { type: 'buffer', raw: false });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const data = XLSX.utils.sheet_to_json(worksheet);
@@ -1215,6 +1238,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error processing bulk import:", error);
       res.status(500).json({ message: "Failed to process bulk import" });
     }
+  });
+
+  // Error handler for file upload middleware (must come after the route)
+  app.use('/api/admin/leads/bulk-import', (error: any, req: any, res: any, next: any) => {
+    if (error instanceof multer.MulterError) {
+      if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: "File too large. Maximum size is 10MB." });
+      }
+      return res.status(400).json({ message: error.message });
+    } else if (error) {
+      // Custom fileFilter error
+      return res.status(400).json({ message: error.message });
+    }
+    next();
   });
 
   // Lead Sourcing: Webhook endpoint for external lead ingestion
