@@ -333,7 +333,7 @@ export class CacLtgpAnalyticsService {
           AVG(de.lifetime_gross_profit) as current_ltgp,
           AVG(de.ltgp_to_cac_ratio) as current_ratio
         FROM period_spend ps
-        LEFT JOIN lead_attribution la ON la.acquisition_date >= ps.period_start AND la.acquisition_date < ps.period_end
+        LEFT JOIN lead_attribution la ON la.created_at >= ps.period_start AND la.created_at < ps.period_end
         LEFT JOIN donor_economics de ON la.lead_id = de.lead_id
         WHERE de.lifetime_gross_profit > 0
         GROUP BY ps.period_key
