@@ -55,8 +55,9 @@ import {
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
 import { createCacLtgpStorage, type ICacLtgpStorage } from "./storage/cacLtgpStorage";
+import { createTechGoesHomeStorage, type ITechGoesHomeStorage } from "./storage/tghStorage";
 
-export interface IStorage extends ICacLtgpStorage {
+export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   // User operations for Replit Auth
   getUser(id: string): Promise<User | undefined>;
   getUserByOidcSub(oidcSub: string): Promise<User | undefined>;
@@ -542,6 +543,9 @@ export class DatabaseStorage implements IStorage {
   // CAC/LTGP storage module composition
   private cacLtgpStorage: ICacLtgpStorage;
   
+  // Tech Goes Home storage module composition
+  private tghStorage: ITechGoesHomeStorage;
+  
   // CAC/LTGP method delegation (initialized in constructor)
   createAcquisitionChannel!: ICacLtgpStorage['createAcquisitionChannel'];
   getAcquisitionChannel!: ICacLtgpStorage['getAcquisitionChannel'];
@@ -578,9 +582,25 @@ export class DatabaseStorage implements IStorage {
   getEconomicsSettings!: ICacLtgpStorage['getEconomicsSettings'];
   updateEconomicsSettings!: ICacLtgpStorage['updateEconomicsSettings'];
   
+  // Tech Goes Home method delegation (initialized in constructor)
+  createTechGoesHomeEnrollment!: ITechGoesHomeStorage['createTechGoesHomeEnrollment'];
+  getTechGoesHomeEnrollment!: ITechGoesHomeStorage['getTechGoesHomeEnrollment'];
+  getTechGoesHomeEnrollmentByUserId!: ITechGoesHomeStorage['getTechGoesHomeEnrollmentByUserId'];
+  getAllTechGoesHomeEnrollments!: ITechGoesHomeStorage['getAllTechGoesHomeEnrollments'];
+  getActiveTechGoesHomeEnrollments!: ITechGoesHomeStorage['getActiveTechGoesHomeEnrollments'];
+  updateTechGoesHomeEnrollment!: ITechGoesHomeStorage['updateTechGoesHomeEnrollment'];
+  createTechGoesHomeAttendance!: ITechGoesHomeStorage['createTechGoesHomeAttendance'];
+  getTechGoesHomeAttendance!: ITechGoesHomeStorage['getTechGoesHomeAttendance'];
+  updateTechGoesHomeAttendance!: ITechGoesHomeStorage['updateTechGoesHomeAttendance'];
+  deleteTechGoesHomeAttendance!: ITechGoesHomeStorage['deleteTechGoesHomeAttendance'];
+  getStudentProgress!: ITechGoesHomeStorage['getStudentProgress'];
+  
   constructor() {
     // Initialize CAC/LTGP storage module
     this.cacLtgpStorage = createCacLtgpStorage();
+    
+    // Initialize Tech Goes Home storage module
+    this.tghStorage = createTechGoesHomeStorage();
     
     // Bind all CAC/LTGP methods
     this.createAcquisitionChannel = this.cacLtgpStorage.createAcquisitionChannel.bind(this.cacLtgpStorage);
@@ -617,6 +637,19 @@ export class DatabaseStorage implements IStorage {
     this.updateDonorEconomics = this.cacLtgpStorage.updateDonorEconomics.bind(this.cacLtgpStorage);
     this.getEconomicsSettings = this.cacLtgpStorage.getEconomicsSettings.bind(this.cacLtgpStorage);
     this.updateEconomicsSettings = this.cacLtgpStorage.updateEconomicsSettings.bind(this.cacLtgpStorage);
+    
+    // Bind all Tech Goes Home methods
+    this.createTechGoesHomeEnrollment = this.tghStorage.createTechGoesHomeEnrollment.bind(this.tghStorage);
+    this.getTechGoesHomeEnrollment = this.tghStorage.getTechGoesHomeEnrollment.bind(this.tghStorage);
+    this.getTechGoesHomeEnrollmentByUserId = this.tghStorage.getTechGoesHomeEnrollmentByUserId.bind(this.tghStorage);
+    this.getAllTechGoesHomeEnrollments = this.tghStorage.getAllTechGoesHomeEnrollments.bind(this.tghStorage);
+    this.getActiveTechGoesHomeEnrollments = this.tghStorage.getActiveTechGoesHomeEnrollments.bind(this.tghStorage);
+    this.updateTechGoesHomeEnrollment = this.tghStorage.updateTechGoesHomeEnrollment.bind(this.tghStorage);
+    this.createTechGoesHomeAttendance = this.tghStorage.createTechGoesHomeAttendance.bind(this.tghStorage);
+    this.getTechGoesHomeAttendance = this.tghStorage.getTechGoesHomeAttendance.bind(this.tghStorage);
+    this.updateTechGoesHomeAttendance = this.tghStorage.updateTechGoesHomeAttendance.bind(this.tghStorage);
+    this.deleteTechGoesHomeAttendance = this.tghStorage.deleteTechGoesHomeAttendance.bind(this.tghStorage);
+    this.getStudentProgress = this.tghStorage.getStudentProgress.bind(this.tghStorage);
   }
   
   // User operations
