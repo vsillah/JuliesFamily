@@ -273,12 +273,18 @@ export class DonorLifecycleService {
   }
   
   /**
-   * Helper: Calculate months difference between two dates
+   * Helper: Calculate months difference between two dates (day-accurate)
+   * Uses 30-day month approximation for accurate threshold comparisons
    */
   private calculateMonthsDifference(startDate: Date, endDate: Date): number {
-    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
-    const monthDiff = endDate.getMonth() - startDate.getMonth();
-    return yearDiff * 12 + monthDiff;
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    const daysPerMonth = 30; // Use 30-day month for consistent threshold
+    
+    const diffMilliseconds = endDate.getTime() - startDate.getTime();
+    const diffDays = diffMilliseconds / millisecondsPerDay;
+    const diffMonths = Math.floor(diffDays / daysPerMonth);
+    
+    return diffMonths;
   }
   
   /**

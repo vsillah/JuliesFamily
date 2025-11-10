@@ -3,6 +3,7 @@ import helmet from "helmet";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initBackupScheduler, shutdownBackupScheduler } from "./services/backupScheduler";
+import { initDonorLifecycleScheduler, shutdownDonorLifecycleScheduler } from "./services/donorLifecycleScheduler";
 import { helmetConfig, globalLimiter } from "./security";
 
 const app = express();
@@ -96,6 +97,9 @@ app.use((req, res, next) => {
 
   // Initialize backup scheduler after routes are registered
   initBackupScheduler();
+  
+  // Initialize donor lifecycle scheduler (runs daily lapsed donor detection)
+  initDonorLifecycleScheduler();
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
@@ -116,6 +120,9 @@ app.use((req, res, next) => {
     
     // Shutdown the backup scheduler
     await shutdownBackupScheduler();
+    
+    // Shutdown the donor lifecycle scheduler
+    await shutdownDonorLifecycleScheduler();
     
     // Close the server
     server.close(() => {
