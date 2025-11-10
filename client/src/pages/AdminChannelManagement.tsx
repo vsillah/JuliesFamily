@@ -119,6 +119,8 @@ export default function AdminChannelManagement() {
     amountSpent: number;
     leadsAcquired: number;
     donorsAcquired: number;
+    createdAt: string;
+    updatedAt: string;
   }
   
   const { data: spendEntries = [], isLoading: spendEntriesLoading } = useQuery<SpendEntry[]>({
@@ -928,6 +930,7 @@ export default function AdminChannelManagement() {
                     <table className="w-full" data-testid="table-spend-entries">
                       <thead>
                         <tr className="border-b">
+                          <th className="text-left py-3 px-4 font-medium">Created</th>
                           <th className="text-left py-3 px-4 font-medium">Period</th>
                           <th className="text-left py-3 px-4 font-medium">Channel</th>
                           <th className="text-left py-3 px-4 font-medium">Campaign</th>
@@ -945,8 +948,15 @@ export default function AdminChannelManagement() {
                             ? (entry.amountSpent / entry.leadsAcquired).toFixed(2)
                             : 'N/A';
                           
+                          // Format timestamp in user's local timezone
+                          const createdDate = new Date(entry.createdAt);
+                          const localDate = format(createdDate, 'MMM d, h:mm a');
+                          
                           return (
                             <tr key={entry.id} className="border-b hover-elevate" data-testid={`row-spend-${entry.id}`}>
+                              <td className="py-3 px-4 text-muted-foreground" data-testid={`text-created-${entry.id}`}>
+                                {localDate}
+                              </td>
                               <td className="py-3 px-4" data-testid={`text-period-${entry.id}`}>
                                 <div className="flex items-center gap-2">
                                   <Calendar className="w-4 h-4 text-muted-foreground" />
