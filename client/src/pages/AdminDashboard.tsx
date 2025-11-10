@@ -137,18 +137,31 @@ export default function AdminDashboard() {
                   Tasks
                 </Button>
               </Link>
-              <Link href="/admin/cac-ltgp">
-                <Button variant="default" size="sm" data-testid="button-cac-ltgp">
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  CAC:LTGP Analytics
-                </Button>
-              </Link>
-              <Link href="/admin/donor-lifecycle">
-                <Button variant="default" size="sm" data-testid="button-donor-lifecycle">
-                  <Users className="w-4 h-4 mr-2" />
-                  Donor Lifecycle
-                </Button>
-              </Link>
+
+              {/* Analytics Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="default" size="sm" data-testid="button-analytics-menu">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Analytics
+                    <ChevronDown className="w-3 h-3 ml-1" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/cac-ltgp" className="flex items-center cursor-pointer">
+                      <TrendingUp className="w-4 h-4 mr-2" />
+                      CAC:LTGP Analytics
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/donor-lifecycle" className="flex items-center cursor-pointer">
+                      <Users className="w-4 h-4 mr-2" />
+                      Donor Lifecycle
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               
               {/* Communication Menu */}
               <DropdownMenu>
