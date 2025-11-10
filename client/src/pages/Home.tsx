@@ -21,12 +21,13 @@ import type { ContentItem } from "@shared/schema";
 
 // Default all sections to visible during loading to avoid flickering
 const DEFAULT_SECTIONS: VisibleSections = {
+  "campaign-impact": true,
   services: true,
-  events: true,
-  testimonials: true,
-  impact: true,
-  donation: true,
   "lead-magnet": true,
+  impact: true,
+  testimonials: true,
+  events: true,
+  donation: true,
 };
 
 export default function Home() {
@@ -67,8 +68,8 @@ export default function Home() {
       <Navigation heroImageLoaded={heroImageLoaded} />
       <Hero onImageLoaded={setHeroImageLoaded} />
       
-      {/* Campaign Impact Section - Visible for donor personas */}
-      {persona === 'donor' && sections.impact && (
+      {/* Campaign Impact Section - Controlled by persona×journey matrix */}
+      {sections["campaign-impact"] && (
         <section className="py-16 sm:py-20 bg-gradient-to-b from-background to-muted/20" id="campaign-impact" data-testid="section-campaign-impact">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">

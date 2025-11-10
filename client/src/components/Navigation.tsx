@@ -184,6 +184,17 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
 
             {/* Center: Primary Navigation */}
             <nav className="hidden md:flex items-center gap-4 flex-1 justify-evenly px-4 md:px-6 lg:px-8 overflow-hidden">
+              {sections["campaign-impact"] && (
+                <button
+                  onClick={() => scrollToSection("campaign-impact")}
+                  className={`text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-campaign-impact"
+                >
+                  Campaign Impact
+                </button>
+              )}
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
@@ -339,6 +350,17 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
 
             {/* Mobile: Inline Priority Links */}
             <div className="md:hidden flex items-center gap-1 overflow-x-auto flex-nowrap scrollbar-hide" style={{ maxWidth: '60vw' }}>
+              {sections["campaign-impact"] && (
+                <button
+                  onClick={() => scrollToSection("campaign-impact")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-campaign-impact-mobile-inline"
+                >
+                  Campaign
+                </button>
+              )}
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
@@ -474,6 +496,15 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   </div>
                 </div>
               </div>
+            )}
+            {sections["campaign-impact"] && (
+              <button
+                onClick={() => scrollToSection("campaign-impact")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-campaign-impact-mobile"
+              >
+                Campaign Impact
+              </button>
             )}
             {sections.services && (
               <button
