@@ -1181,18 +1181,8 @@ export class DatabaseStorage implements IStorage {
     funnelStage?: string | null,
     userPassions?: string[] | null
   ): Promise<ContentItem[]> {
-    // Compute passion match score: count of matching passion tags
-    // Returns 0 if no passions or no match, positive integer for matches
-    // COALESCE ensures NULL passionTags don't crash the query
-    const passionMatchScore = userPassions && userPassions.length > 0
-      ? sql<number>`(
-          SELECT COUNT(*)
-          FROM jsonb_array_elements_text(COALESCE(${contentItems.passionTags}, '[]'::jsonb)) AS tag
-          WHERE tag = ANY(${userPassions}::text[])
-        )`
-      : sql<number>`0`;
-
-    const query = db
+    // Build base query
+    let query = db
       .select({
         id: contentItems.id,
         type: contentItems.type,
@@ -1206,7 +1196,6 @@ export class DatabaseStorage implements IStorage {
         metadata: contentItems.metadata,
         createdAt: contentItems.createdAt,
         updatedAt: contentItems.updatedAt,
-        passionMatchScore: passionMatchScore.as('passion_match_score'),
       })
       .from(contentItems)
       .leftJoin(
@@ -1236,12 +1225,27 @@ export class DatabaseStorage implements IStorage {
             eq(contentVisibility.isVisible, true)
           )
         )
-      )
-      .orderBy(
-        sql`${passionMatchScore} DESC`, // Passion matches first
+      );
+
+    // Apply ordering based on whether we have user passions
+    if (userPassions && userPassions.length > 0) {
+      // With passions: prioritize content matching user's interests
+      query = query.orderBy(
+        sql`(
+          SELECT COUNT(*)
+          FROM jsonb_array_elements_text(COALESCE(${contentItems.passionTags}, '[]'::jsonb)) AS tag
+          WHERE tag = ANY(${userPassions}::text[])
+        ) DESC`, // Passion matches first
         sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`, // Then by configured order
         contentItems.createdAt // Finally by creation date for stable ordering
       );
+    } else {
+      // Without passions: use standard ordering
+      query = query.orderBy(
+        sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
+        contentItems.createdAt
+      );
+    }
 
     return await query;
   }

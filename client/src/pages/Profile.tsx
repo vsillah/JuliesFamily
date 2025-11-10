@@ -7,9 +7,10 @@ import { useForm } from "react-hook-form";
 import { updateUserProfileSchema } from "@shared/schema";
 import type { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Save, User as UserIcon } from "lucide-react";
 import { Link } from "wouter";
@@ -35,6 +36,7 @@ export default function Profile() {
       firstName: "",
       lastName: "",
       profileImageUrl: "",
+      passions: [],
     },
   });
 
@@ -46,6 +48,7 @@ export default function Profile() {
           firstName: user.firstName || "",
           lastName: user.lastName || "",
           profileImageUrl: user.profileImageUrl || "",
+          passions: user.passions ?? [],
         },
         { keepDirtyValues: true } // Preserve user edits during refetches
       );
@@ -223,6 +226,66 @@ export default function Profile() {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="passions"
+                  render={() => {
+                    const passions = form.watch("passions") || [];
+                    const passionOptions = [
+                      { value: "literacy", label: "Literacy & Reading" },
+                      { value: "stem", label: "STEM & Technology" },
+                      { value: "arts", label: "Arts & Creativity" },
+                      { value: "nutrition", label: "Nutrition & Wellness" },
+                      { value: "community", label: "Community Building" },
+                    ];
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Your Interests</FormLabel>
+                        <FormDescription>
+                          Select topics you're passionate about to see personalized content
+                        </FormDescription>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
+                          {passionOptions.map((option) => (
+                            <div key={option.value} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`passion-${option.value}`}
+                                checked={passions.includes(option.value)}
+                                onCheckedChange={(checked) => {
+                                  const currentPassions = form.getValues("passions") || [];
+                                  if (checked) {
+                                    form.setValue("passions", [...currentPassions, option.value], {
+                                      shouldDirty: true,
+                                      shouldValidate: true,
+                                    });
+                                  } else {
+                                    form.setValue(
+                                      "passions",
+                                      currentPassions.filter((p) => p !== option.value),
+                                      {
+                                        shouldDirty: true,
+                                        shouldValidate: true,
+                                      }
+                                    );
+                                  }
+                                }}
+                                data-testid={`checkbox-passion-${option.value}`}
+                              />
+                              <label
+                                htmlFor={`passion-${option.value}`}
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                              >
+                                {option.label}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
+                />
+
                 <div className="flex flex-col gap-2">
                   {form.formState.isDirty && !isSubmitting && (
                     <p className="text-sm text-amber-600 dark:text-amber-400 text-right" data-testid="unsaved-changes-indicator">
@@ -239,6 +302,7 @@ export default function Profile() {
                             firstName: user.firstName || "",
                             lastName: user.lastName || "",
                             profileImageUrl: user.profileImageUrl || "",
+                            passions: user.passions ?? [],
                           });
                         }
                       }}
