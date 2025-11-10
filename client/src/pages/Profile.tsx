@@ -39,11 +39,14 @@ export default function Profile() {
   // Reset form when user data loads
   useEffect(() => {
     if (user) {
-      form.reset({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        profileImageUrl: user.profileImageUrl || "",
-      });
+      form.reset(
+        {
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          profileImageUrl: user.profileImageUrl || "",
+        },
+        { keepDirtyValues: true } // Preserve user edits during refetches
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
