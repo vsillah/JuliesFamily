@@ -195,6 +195,17 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   Services
                 </button>
               )}
+              {sections["lead-magnet"] && (
+                <button
+                  onClick={() => scrollToSection("lead-magnet")}
+                  className={`text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-lead-magnet"
+                >
+                  Resources
+                </button>
+              )}
               {sections.impact && (
                 <button
                   onClick={() => scrollToSection("impact")}
@@ -226,6 +237,17 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   data-testid="link-events"
                 >
                   Events
+                </button>
+              )}
+              {sections.donation && (
+                <button
+                  onClick={() => scrollToSection("donation")}
+                  className={`text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-donation"
+                >
+                  Support Us
                 </button>
               )}
               <Link 
@@ -316,11 +338,11 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             </div>
 
             {/* Mobile: Inline Priority Links */}
-            <div className="md:hidden flex items-center gap-1 justify-end">
+            <div className="md:hidden flex items-center gap-1 justify-end overflow-x-auto max-w-[60vw] scrollbar-hide">
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
-                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-services-mobile-inline"
@@ -328,10 +350,43 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   Services
                 </button>
               )}
+              {sections["lead-magnet"] && (
+                <button
+                  onClick={() => scrollToSection("lead-magnet")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-lead-magnet-mobile-inline"
+                >
+                  Resources
+                </button>
+              )}
+              {sections.impact && (
+                <button
+                  onClick={() => scrollToSection("impact")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-impact-mobile-inline"
+                >
+                  Impact
+                </button>
+              )}
+              {sections.testimonials && (
+                <button
+                  onClick={() => scrollToSection("testimonials")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-testimonials-mobile-inline"
+                >
+                  Testimonials
+                </button>
+              )}
               {sections.events && (
                 <button
                   onClick={() => scrollToSection("events")}
-                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] ${
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
                     isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
                   }`}
                   data-testid="link-events-mobile-inline"
@@ -339,10 +394,21 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   Events
                 </button>
               )}
+              {sections.donation && (
+                <button
+                  onClick={() => scrollToSection("donation")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-donation-mobile-inline"
+                >
+                  Support
+                </button>
+              )}
               <Link href="/donate">
                 <button
-                  className={`text-xs font-semibold transition-colors duration-300 px-2 py-3 min-h-[44px] ${
-                    isScrolled ? "text-primary hover:text-primary/80" : "text-white hover:text-white/80"
+                  className={`text-xs font-semibold transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap border-l pl-3 ${
+                    isScrolled ? "text-primary hover:text-primary/80 border-foreground/20" : "text-white hover:text-white/80 border-white/20"
                   }`}
                   data-testid="button-donate-mobile-inline"
                 >
@@ -418,6 +484,15 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                 Our Services
               </button>
             )}
+            {sections["lead-magnet"] && (
+              <button
+                onClick={() => scrollToSection("lead-magnet")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-lead-magnet-mobile"
+              >
+                Resources
+              </button>
+            )}
             {sections.impact && (
               <button
                 onClick={() => scrollToSection("impact")}
@@ -436,13 +511,22 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                 Testimonials
               </button>
             )}
-            {visibleSections?.events && (
+            {sections.events && (
               <button
                 onClick={() => scrollToSection("events")}
                 className="text-lg text-foreground hover:text-primary transition-colors"
                 data-testid="link-events-mobile"
               >
                 Events
+              </button>
+            )}
+            {sections.donation && (
+              <button
+                onClick={() => scrollToSection("donation")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-donation-mobile"
+              >
+                Support Us
               </button>
             )}
             <Link 
