@@ -322,30 +322,43 @@ export default function AdminEmailCampaigns() {
                     <span className="capitalize">{campaign.persona}</span>
                   </div>
                 )}
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                      const response = await fetch(`/api/email-campaigns/${campaign.id}`);
-                      const data = await response.json();
-                      setSelectedCampaign(data);
-                      setShowCampaignDialog(true);
-                    }}
-                    data-testid={`button-edit-campaign-${campaign.id}`}
-                  >
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => deleteCampaignMutation.mutate(campaign.id)}
-                    data-testid={`button-delete-campaign-${campaign.id}`}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
+                <div className="flex flex-col gap-2 mt-4">
+                  <Link href={`/admin/email-campaigns/${campaign.id}`}>
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="w-full"
+                      data-testid={`button-view-campaign-${campaign.id}`}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      View Enrollments
+                    </Button>
+                  </Link>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const response = await fetch(`/api/email-campaigns/${campaign.id}`);
+                        const data = await response.json();
+                        setSelectedCampaign(data);
+                        setShowCampaignDialog(true);
+                      }}
+                      data-testid={`button-edit-campaign-${campaign.id}`}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => deleteCampaignMutation.mutate(campaign.id)}
+                      data-testid={`button-delete-campaign-${campaign.id}`}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>

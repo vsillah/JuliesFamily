@@ -3196,6 +3196,143 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Trigger graduation path backfill
+  app.post('/api/email-enrollments/backfill-graduation-path', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { backfillGraduationPathEnrollments } = await import('./services/graduationPathCampaign');
+      const enrolledCount = await backfillGraduationPathEnrollments();
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully enrolled ${enrolledCount} leads in graduation path`,
+        enrolledCount 
+      });
+    } catch (error) {
+      console.error("Error during graduation path backfill:", error);
+      res.status(500).json({ message: "Failed to complete backfill" });
+    }
+  });
+
+  // Get enrollments with lead info for a campaign (paginated)
+  app.get('/api/email-enrollments/campaign/:campaignId/details', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      // Get ALL enrollments for this campaign to calculate aggregate stats
+      const allEnrollments = await storage.getCampaignEnrollments(campaignId);
+      
+      // Calculate aggregate stats from full dataset
+      const stats = {
+        total: allEnrollments.length,
+        active: allEnrollments.filter(e => e.status === 'active').length,
+        completed: allEnrollments.filter(e => e.status === 'completed').length,
+        paused: allEnrollments.filter(e => e.status === 'paused').length
+      };
+      
+      // Get paginated slice
+      const paginatedEnrollments = allEnrollments.slice(offset, offset + limit);
+      
+      // Batch fetch all leads for the paginated enrollments
+      const leadIds = paginatedEnrollments.map(e => e.leadId);
+      const leads = await Promise.all(leadIds.map(id => storage.getLead(id)));
+      
+      // Build a map of leadId -> lead for quick lookup
+      const leadMap = new Map(leads.filter(l => l !== undefined).map(l => [l!.id, l!]));
+      
+      // Build enriched enrollment data (without email logs - those are fetched separately)
+      const enrichedEnrollments = paginatedEnrollments.map((enrollment) => {
+        const lead = leadMap.get(enrollment.leadId);
+        return {
+          enrollment,
+          lead: lead ? {
+            id: lead.id,
+            firstName: lead.firstName,
+            lastName: lead.lastName,
+            email: lead.email
+          } : null
+        };
+      });
+      
+      res.json({
+        data: enrichedEnrollments,
+        stats,
+        limit,
+        offset
+      });
+    } catch (error) {
+      console.error("Error fetching campaign enrollment details:", error);
+      res.status(500).json({ message: "Failed to fetch enrollment details" });
+    }
+  });
+
+  // Get email logs for a campaign (independent pagination from enrollments)
+  app.get('/api/email-logs/campaign/:campaignId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { campaignId } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
+      
+      // Get all enrollments to build email -> lead mapping
+      const enrollments = await storage.getCampaignEnrollments(campaignId);
+      const leadIds = enrollments.map(e => e.leadId);
+      
+      // Batch fetch all leads
+      const leads = await Promise.all(leadIds.map(id => storage.getLead(id)));
+      const leadMap = new Map(leads.filter(l => l !== undefined).map(l => [l!.email, l!]));
+      
+      // Get all email logs for all enrolled leads' emails
+      const emails = Array.from(leadMap.keys()).filter(e => e);
+      const allLogsPromises = emails.map(email => storage.getEmailLogsByRecipient(email));
+      const allLogsArrays = await Promise.all(allLogsPromises);
+      
+      // Flatten and filter logs by campaign metadata
+      const campaignLogs = allLogsArrays
+        .flat()
+        .filter(log => {
+          const meta = log.metadata as any;
+          return meta?.campaignId === campaignId || meta?.enrollment?.campaignId === campaignId;
+        })
+        .sort((a, b) => {
+          const dateA = a.sentAt || a.createdAt || new Date(0);
+          const dateB = b.sentAt || b.createdAt || new Date(0);
+          return new Date(dateB).getTime() - new Date(dateA).getTime();
+        });
+      
+      // Paginate
+      const paginatedLogs = campaignLogs.slice(offset, offset + limit);
+      
+      // Enrich with lead info
+      const enrichedLogs = paginatedLogs.map(log => {
+        const lead = leadMap.get(log.recipientEmail);
+        return {
+          id: log.id,
+          subject: log.subject,
+          status: log.status,
+          sentAt: log.sentAt,
+          errorMessage: log.errorMessage,
+          lead: lead ? {
+            id: lead.id,
+            firstName: lead.firstName,
+            lastName: lead.lastName,
+            email: lead.email
+          } : null
+        };
+      });
+      
+      res.json({
+        data: enrichedLogs,
+        total: campaignLogs.length,
+        limit,
+        offset
+      });
+    } catch (error) {
+      console.error("Error fetching email logs for campaign:", error);
+      res.status(500).json({ message: "Failed to fetch email logs" });
+    }
+  });
+
   // SMS Template Routes
   
   // Get all SMS templates
