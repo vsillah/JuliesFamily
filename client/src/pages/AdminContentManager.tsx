@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
@@ -471,6 +471,30 @@ export default function AdminContentManager() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/google-reviews/all"] });
       queryClient.invalidateQueries({ queryKey: ["/api/google-reviews"] });
+    },
+  });
+
+  // Google Reviews sync mutation
+  const syncGoogleReviewsMutation = useMutation({
+    mutationFn: async () => {
+      const placeId = "ChIJJXlESYp444kRYe2fI3UyQsw"; // Julie's Family Learning Program Place ID
+      const response = await apiRequest("POST", "/api/google-reviews/sync", { placeId });
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/google-reviews/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/google-reviews"] });
+      toast({
+        title: "Reviews Synced Successfully",
+        description: `Synced ${data.reviews?.length || 0} reviews from Google. Rating: ${data.placeRating}/5 (${data.totalRatings} total ratings)`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Sync Failed",
+        description: error.message || "Failed to sync Google Reviews. Please try again.",
+        variant: "destructive",
+      });
     },
   });
 
@@ -1071,6 +1095,32 @@ export default function AdminContentManager() {
           </TabsContent>
 
           <TabsContent value="googleReviews" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Google Reviews Header */}
+            <div className="mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-xl font-semibold">Google Reviews</h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Sync and manage reviews from your Google Business Profile
+                  </p>
+                </div>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => syncGoogleReviewsMutation.mutate()}
+                  disabled={syncGoogleReviewsMutation.isPending}
+                  data-testid="button-sync-google-reviews"
+                >
+                  {syncGoogleReviewsMutation.isPending ? (
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Star className="w-4 h-4 mr-2" />
+                  )}
+                  Sync from Google
+                </Button>
+              </div>
+            </div>
+
             {googleReviewsLoading ? (
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : googleReviews.length === 0 ? (
@@ -1078,7 +1128,7 @@ export default function AdminContentManager() {
                 <CardContent className="text-center py-12">
                   <p className="text-muted-foreground">No Google Reviews synced yet.</p>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Sync reviews from the Dashboard to manage them here.
+                    Click "Sync from Google" above to fetch your latest reviews.
                   </p>
                 </CardContent>
               </Card>
