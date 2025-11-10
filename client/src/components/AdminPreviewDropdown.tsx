@@ -17,10 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown } from "lucide-react";
+import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown, X } from "lucide-react";
 import { personaConfigs, usePersona, type Persona } from "@/contexts/PersonaContext";
 import { useAdminPreviewState } from "@/hooks/useAdminPreviewState";
-import { useAuth } from "@/hooks/useAuth";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
@@ -94,7 +94,7 @@ interface AdminPreviewDropdownProps {
 }
 
 export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdownProps) {
-  const { user } = useAuth();
+  const { isAdmin } = useUserRole();
   const { persona: appliedPersona } = usePersona();
   const [open, setOpen] = useState(false);
   
@@ -112,7 +112,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
     handleReset,
   } = useAdminPreviewState();
 
-  if (!user?.isAdmin) {
+  if (!isAdmin) {
     return null;
   }
 
@@ -148,8 +148,22 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           <ChevronDown className="w-3 h-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 z-[99999]" data-testid="menu-admin-preview">
-        <DropdownMenuLabel className="flex items-center gap-2">
+      <DropdownMenuContent 
+        align="end" 
+        className="w-80 z-[99999] md:w-80 md:max-h-[calc(100vh-100px)] fixed md:absolute inset-0 md:inset-auto w-full h-screen md:h-auto overflow-y-auto" 
+        data-testid="menu-admin-preview"
+      >
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setOpen(false)}
+          className="absolute top-4 right-4 p-2 hover:bg-accent rounded-md transition-colors md:hidden z-10"
+          data-testid="button-close-admin-preview"
+          aria-label="Close preview menu"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        
+        <DropdownMenuLabel className="flex items-center gap-2 pt-6 md:pt-2">
           <Eye className="w-4 h-4 text-primary" />
           Admin Preview Mode
         </DropdownMenuLabel>
