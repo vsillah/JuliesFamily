@@ -76,7 +76,7 @@ function VariantSelector({ testId, testName, testType, selectedVariantId, onVari
         <SelectTrigger className="h-8 text-xs" data-testid={`select-variant-${testId}`}>
           <SelectValue placeholder="Random (50/50)" />
         </SelectTrigger>
-        <SelectContent className="z-[1200]">
+        <SelectContent className="z-[9999]">
           <SelectItem value="random">Random (50/50)</SelectItem>
           {variants.map((variant: any) => (
             <SelectItem key={variant.id} value={variant.id}>
@@ -162,10 +162,10 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             value={selectedPersona || "none"}
             onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
           >
-            <SelectTrigger className="h-8 text-sm" data-testid="select-persona-dropdown">
+            <SelectTrigger className="h-8 text-sm" data-testid="select-persona">
               <SelectValue placeholder="Select persona" />
             </SelectTrigger>
-            <SelectContent className="z-[1200]">
+            <SelectContent className="z-[9999]">
               <SelectItem value="none">Default (No persona)</SelectItem>
               {personaConfigs.map((config) => (
                 <SelectItem key={config.id} value={config.id}>
@@ -186,10 +186,10 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             value={selectedFunnel}
             onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
           >
-            <SelectTrigger className="h-8 text-sm" data-testid="select-funnel-dropdown">
+            <SelectTrigger className="h-8 text-sm" data-testid="select-funnel">
               <SelectValue placeholder="Select stage" />
             </SelectTrigger>
-            <SelectContent className="z-[1200]">
+            <SelectContent className="z-[9999]">
               <SelectItem value="none">None selected</SelectItem>
               {funnelStageConfigs.map((config) => (
                 <SelectItem key={config.id} value={config.id}>
