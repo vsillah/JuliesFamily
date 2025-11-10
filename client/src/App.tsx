@@ -40,6 +40,8 @@ import AdminDonorLifecycle from "@/pages/AdminDonorLifecycle";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import ImageComparison from "@/pages/ImageComparison";
+import TechGoesHomeLanding from "@/pages/TechGoesHomeLanding";
+import TechGoesHomeStudentDashboard from "@/pages/TechGoesHomeStudentDashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -80,6 +82,8 @@ function Router() {
       <Route path="/product" component={ProductLanding} />
       <Route path="/kinflo" component={ProductLanding} />
       <Route path="/comparison" component={ImageComparison} />
+      <Route path="/programs/tech-goes-home" component={TechGoesHomeLanding} />
+      <Route path="/student/tech-goes-home" component={TechGoesHomeStudentDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
