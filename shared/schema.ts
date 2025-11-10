@@ -29,6 +29,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   persona: varchar("persona"), // Stored persona preference: student, provider, parent, donor, volunteer
+  passions: jsonb("passions"), // Array of passion tags: ['literacy', 'stem', 'arts', 'nutrition', 'community']
   role: varchar("role").notNull().default('client'), // client, admin, super_admin
   isAdmin: boolean("is_admin").default(false), // DEPRECATED: Use role instead. Kept for backward compatibility during migration.
   stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for saved payment methods
@@ -50,6 +51,7 @@ export const updateUserProfileSchema = z.object({
     z.literal("") // Empty string
   ]).optional().nullable(),
   persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional().nullable(),
+  passions: z.array(z.enum(['literacy', 'stem', 'arts', 'nutrition', 'community'])).optional().nullable(),
 }).strict(); // Reject unknown fields
 
 export type UpdateUserProfile = z.infer<typeof updateUserProfileSchema>;
