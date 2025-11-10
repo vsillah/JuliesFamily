@@ -149,7 +149,9 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   
   // A/B Test Assignment operations
   createAbTestAssignment(assignment: InsertAbTestAssignment): Promise<AbTestAssignment>;
-  getAssignment(testId: string, sessionId: string): Promise<AbTestAssignment | undefined>;
+  getAssignment(testId: string, sessionId: string): Promise<AbTestAssignment | undefined>; // Legacy
+  getAssignmentPersistent(testId: string, userId?: string, visitorId?: string, sessionId?: string): Promise<AbTestAssignment | undefined>;
+  updateAbTestAssignment(id: string, updates: Partial<InsertAbTestAssignment>): Promise<AbTestAssignment | undefined>;
   getSessionAssignments(sessionId: string): Promise<AbTestAssignment[]>;
   
   // A/B Test Event operations
@@ -1476,6 +1478,67 @@ export class DatabaseStorage implements IStorage {
           eq(abTestAssignments.sessionId, sessionId)
         )
       );
+    return assignment;
+  }
+
+  // Persistent assignment lookup with priority: userId > visitorId > sessionId
+  async getAssignmentPersistent(
+    testId: string,
+    userId?: string,
+    visitorId?: string,
+    sessionId?: string
+  ): Promise<AbTestAssignment | undefined> {
+    // Priority 1: Look up by userId (authenticated user)
+    if (userId) {
+      const [assignment] = await db
+        .select()
+        .from(abTestAssignments)
+        .where(
+          and(
+            eq(abTestAssignments.testId, testId),
+            eq(abTestAssignments.userId, userId)
+          )
+        );
+      if (assignment) return assignment;
+    }
+
+    // Priority 2: Look up by visitorId (persistent anonymous)
+    if (visitorId) {
+      const [assignment] = await db
+        .select()
+        .from(abTestAssignments)
+        .where(
+          and(
+            eq(abTestAssignments.testId, testId),
+            eq(abTestAssignments.visitorId, visitorId)
+          )
+        );
+      if (assignment) return assignment;
+    }
+
+    // Priority 3: Look up by sessionId (legacy fallback)
+    if (sessionId) {
+      const [assignment] = await db
+        .select()
+        .from(abTestAssignments)
+        .where(
+          and(
+            eq(abTestAssignments.testId, testId),
+            eq(abTestAssignments.sessionId, sessionId)
+          )
+        );
+      if (assignment) return assignment;
+    }
+
+    return undefined;
+  }
+
+  async updateAbTestAssignment(id: string, updates: Partial<InsertAbTestAssignment>): Promise<AbTestAssignment | undefined> {
+    const [assignment] = await db
+      .update(abTestAssignments)
+      .set(updates)
+      .where(eq(abTestAssignments.id, id))
+      .returning();
     return assignment;
   }
 

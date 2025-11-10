@@ -559,12 +559,20 @@ export const abTestAssignments = pgTable("ab_test_assignments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
   variantId: varchar("variant_id").notNull().references(() => abTestVariants.id, { onDelete: "cascade" }),
-  sessionId: varchar("session_id").notNull(), // Session-based tracking (from sessionStorage)
-  userId: varchar("user_id").references(() => users.id), // Optional - for authenticated users
+  sessionId: varchar("session_id"), // Legacy session ID (from sessionStorage) - now nullable
+  visitorId: varchar("visitor_id"), // Persistent visitor ID (from localStorage) - for anonymous users
+  userId: varchar("user_id").references(() => users.id), // For authenticated users
   persona: varchar("persona"), // Persona at time of assignment
   funnelStage: varchar("funnel_stage"), // Funnel stage at time of assignment
   assignedAt: timestamp("assigned_at").defaultNow(),
-});
+}, (table) => ({
+  // Unique constraint: one assignment per user per test
+  userTestUnique: uniqueIndex("ab_assignments_user_test_unique").on(table.userId, table.testId),
+  // Unique constraint: one assignment per visitor per test
+  visitorTestUnique: uniqueIndex("ab_assignments_visitor_test_unique").on(table.visitorId, table.testId),
+  // Index on visitorId for fast lookups
+  visitorIdIdx: index("ab_assignments_visitor_id_idx").on(table.visitorId),
+}));
 
 export const insertAbTestAssignmentSchema = createInsertSchema(abTestAssignments).omit({
   id: true,

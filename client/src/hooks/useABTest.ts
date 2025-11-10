@@ -2,7 +2,23 @@ import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { AbTest, AbTestVariant, AbTestAssignment } from "@shared/schema";
 
-// Generate or retrieve session ID for A/B testing
+// Generate or retrieve persistent visitor ID for A/B testing
+// Uses localStorage to persist across sessions (browser restarts)
+const getVisitorId = (): string => {
+  const storageKey = "ab-test-visitor-id";
+  let visitorId = localStorage.getItem(storageKey);
+  
+  if (!visitorId) {
+    // Use crypto.randomUUID for cryptographically strong random ID
+    visitorId = crypto.randomUUID();
+    localStorage.setItem(storageKey, visitorId);
+  }
+  
+  return visitorId;
+};
+
+// Legacy: Get session ID for backwards compatibility
+// New assignments use visitorId instead
 const getSessionId = (): string => {
   const storageKey = "ab-test-session-id";
   let sessionId = sessionStorage.getItem(storageKey);
@@ -53,7 +69,8 @@ interface UseABTestOptions {
 
 export function useABTest(testType: string, options: UseABTestOptions = {}) {
   const { persona, funnelStage, enabled = true } = options;
-  const sessionId = getSessionId();
+  const visitorId = getVisitorId(); // Persistent across sessions
+  const sessionId = getSessionId(); // Legacy fallback
   const [assignment, setAssignment] = useState<AbTestAssignment | null>(null);
   const [variant, setVariant] = useState<AbTestVariant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -106,12 +123,14 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
           setAssignment(assignmentData);
         } else {
           // Normal assignment: request from backend
+          // Send both visitorId (persistent) and sessionId (legacy fallback)
           const response = await fetch("/api/ab-tests/assign", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               testId: test.id,
-              sessionId,
+              visitorId, // Persistent across sessions
+              sessionId, // Legacy fallback
               persona,
               funnelStage,
             }),
@@ -151,7 +170,7 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     };
 
     assignVariant();
-  }, [test?.id, sessionId, persona, funnelStage, enabled]);
+  }, [test?.id, visitorId, sessionId, persona, funnelStage, enabled]);
 
   // Helper function to track conversions
   const trackConversion = async (eventTarget?: string, eventValue?: number) => {
