@@ -107,6 +107,25 @@ export default function AdminChannelManagement() {
     retry: false,
   });
 
+  // Fetch spend entries
+  interface SpendEntry {
+    id: string;
+    channelId: string;
+    campaignId: string | null;
+    periodType: string;
+    periodKey: string;
+    periodStart: string;
+    periodEnd: string;
+    amountSpent: number;
+    leadsAcquired: number;
+    donorsAcquired: number;
+  }
+  
+  const { data: spendEntries = [], isLoading: spendEntriesLoading } = useQuery<SpendEntry[]>({
+    queryKey: ["/api/admin/channel-spend"],
+    retry: false,
+  });
+
   // Create/Update Channel mutation
   const channelMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -177,6 +196,7 @@ export default function AdminChannelManagement() {
       return response.json();
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/channel-spend"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cac-ltgp/overview"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cac-ltgp/channels"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/cac-ltgp/campaigns"] });
@@ -886,18 +906,84 @@ export default function AdminChannelManagement() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-12 space-y-4">
-                  <DollarSign className="w-16 h-16 mx-auto text-muted-foreground" />
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Track Your Marketing Spend</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Click "Add Spend Entry" to record your marketing costs, leads, and donor conversions.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      This data powers your CAC:LTGP analytics and cohort analysis.
-                    </p>
+                {spendEntriesLoading ? (
+                  <div className="text-center py-12" data-testid="loading-spend-entries">
+                    <p className="text-muted-foreground">Loading spend entries...</p>
                   </div>
-                </div>
+                ) : spendEntries.length === 0 ? (
+                  <div className="text-center py-12 space-y-4" data-testid="empty-spend-entries">
+                    <DollarSign className="w-16 h-16 mx-auto text-muted-foreground" />
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">Track Your Marketing Spend</h3>
+                      <p className="text-muted-foreground mb-4">
+                        Click "Add Spend Entry" to record your marketing costs, leads, and donor conversions.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        This data powers your CAC:LTGP analytics and cohort analysis.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full" data-testid="table-spend-entries">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-3 px-4 font-medium">Period</th>
+                          <th className="text-left py-3 px-4 font-medium">Channel</th>
+                          <th className="text-left py-3 px-4 font-medium">Campaign</th>
+                          <th className="text-right py-3 px-4 font-medium">Spend</th>
+                          <th className="text-right py-3 px-4 font-medium">Leads</th>
+                          <th className="text-right py-3 px-4 font-medium">Donors</th>
+                          <th className="text-right py-3 px-4 font-medium">CAC</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {spendEntries.map((entry) => {
+                          const channel = channels.find(c => c.id === entry.channelId);
+                          const campaign = campaigns.find(c => c.id === entry.campaignId);
+                          const cac = entry.leadsAcquired > 0 
+                            ? (entry.amountSpent / entry.leadsAcquired).toFixed(2)
+                            : 'N/A';
+                          
+                          return (
+                            <tr key={entry.id} className="border-b hover-elevate" data-testid={`row-spend-${entry.id}`}>
+                              <td className="py-3 px-4" data-testid={`text-period-${entry.id}`}>
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                                  <span className="font-medium">{entry.periodKey}</span>
+                                  <Badge variant="outline" className="text-xs">
+                                    {entry.periodType}
+                                  </Badge>
+                                </div>
+                              </td>
+                              <td className="py-3 px-4" data-testid={`text-channel-${entry.id}`}>
+                                {channel?.name || 'Unknown'}
+                              </td>
+                              <td className="py-3 px-4 text-muted-foreground" data-testid={`text-campaign-${entry.id}`}>
+                                {campaign?.name || '—'}
+                              </td>
+                              <td className="py-3 px-4 text-right font-semibold" data-testid={`text-amount-${entry.id}`}>
+                                ${entry.amountSpent.toLocaleString()}
+                              </td>
+                              <td className="py-3 px-4 text-right" data-testid={`text-leads-${entry.id}`}>
+                                {entry.leadsAcquired}
+                              </td>
+                              <td className="py-3 px-4 text-right" data-testid={`text-donors-${entry.id}`}>
+                                {entry.donorsAcquired}
+                              </td>
+                              <td className="py-3 px-4 text-right" data-testid={`text-cac-${entry.id}`}>
+                                <div className="flex items-center justify-end gap-1">
+                                  <TrendingUp className="w-4 h-4 text-muted-foreground" />
+                                  {cac === 'N/A' ? cac : `$${cac}`}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

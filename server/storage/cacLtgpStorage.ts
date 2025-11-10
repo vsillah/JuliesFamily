@@ -150,6 +150,11 @@ export function createCacLtgpStorage(): ICacLtgpStorage {
       return created;
     },
     
+    async getAllSpendEntries(): Promise<ChannelSpendLedger[]> {
+      return await db.select().from(channelSpendLedger)
+        .orderBy(desc(channelSpendLedger.periodStart));
+    },
+    
     async getSpendEntriesByChannel(channelId: string): Promise<ChannelSpendLedger[]> {
       return await db.select().from(channelSpendLedger)
         .where(eq(channelSpendLedger.channelId, channelId))

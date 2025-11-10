@@ -2012,6 +2012,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Channel Spend Tracking
+  // Get all channel spend entries
+  app.get('/api/admin/channel-spend', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const entries = await storage.getAllSpendEntries();
+      res.json(entries);
+    } catch (error) {
+      console.error("Error fetching spend entries:", error);
+      res.status(500).json({ message: "Failed to fetch spend entries" });
+    }
+  });
+
   app.post('/api/admin/channel-spend', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const validated = insertChannelSpendLedgerSchema.parse(req.body);
