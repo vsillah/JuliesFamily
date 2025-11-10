@@ -754,6 +754,7 @@ export class DatabaseStorage implements IStorage {
     if (updates.lastName !== undefined) updateData.lastName = updates.lastName;
     if (updates.profileImageUrl !== undefined) updateData.profileImageUrl = updates.profileImageUrl;
     if (updates.persona !== undefined) updateData.persona = updates.persona;
+    if (updates.passions !== undefined) updateData.passions = updates.passions;
     
     // Sensitive fields - only allow if explicitly set (admin operations)
     if (updates.role !== undefined) updateData.role = updates.role;
@@ -1177,8 +1178,19 @@ export class DatabaseStorage implements IStorage {
   async getVisibleContentItems(
     type: string,
     persona?: string | null,
-    funnelStage?: string | null
+    funnelStage?: string | null,
+    userPassions?: string[] | null
   ): Promise<ContentItem[]> {
+    // Compute passion match score: count of matching passion tags
+    // Returns 0 if no passions or no match, positive integer for matches
+    const passionMatchScore = userPassions && userPassions.length > 0
+      ? sql<number>`(
+          SELECT COUNT(*)
+          FROM jsonb_array_elements_text(${contentItems.passionTags}::jsonb) AS tag
+          WHERE tag = ANY(${userPassions}::text[])
+        )`
+      : sql<number>`0`;
+
     const query = db
       .select({
         id: contentItems.id,
@@ -1186,11 +1198,14 @@ export class DatabaseStorage implements IStorage {
         title: contentItems.title,
         description: contentItems.description,
         imageName: contentItems.imageName,
+        imageUrl: contentItems.imageUrl,
+        passionTags: contentItems.passionTags,
         order: sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`.as('order'),
         isActive: contentItems.isActive,
         metadata: contentItems.metadata,
         createdAt: contentItems.createdAt,
         updatedAt: contentItems.updatedAt,
+        passionMatchScore: passionMatchScore.as('passion_match_score'),
       })
       .from(contentItems)
       .leftJoin(
@@ -1221,7 +1236,11 @@ export class DatabaseStorage implements IStorage {
           )
         )
       )
-      .orderBy(sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`);
+      .orderBy(
+        sql`${passionMatchScore} DESC`, // Passion matches first
+        sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`, // Then by configured order
+        contentItems.createdAt // Finally by creation date for stable ordering
+      );
 
     return await query;
   }

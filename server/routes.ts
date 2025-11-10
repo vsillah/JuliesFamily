@@ -2281,14 +2281,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get visible content items (public, filtered by persona/funnel)
+  // Get visible content items (public, filtered by persona/funnel/passions)
   app.get('/api/content/visible/:type', async (req, res) => {
     try {
-      const { persona, funnelStage } = req.query;
+      const { persona, funnelStage, passions } = req.query;
+      
+      // Parse passions from query string (comma-separated or array)
+      let userPassions: string[] | null = null;
+      if (passions) {
+        userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
+      }
+      
+      // If authenticated, also consider user's profile passions
+      if (req.session?.oidcSub && !userPassions) {
+        const user = await storage.getUserByOidcSub(req.session.oidcSub);
+        if (user?.passions) {
+          userPassions = user.passions as string[];
+        }
+      }
+      
       const items = await storage.getVisibleContentItems(
         req.params.type,
         persona as string | undefined,
-        funnelStage as string | undefined
+        funnelStage as string | undefined,
+        userPassions
       );
       res.json(items);
     } catch (error) {
@@ -2302,26 +2318,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { passions, persona, funnelStage } = req.query;
       
-      // Get all testimonials (with visibility filtering if persona/funnel provided)
-      let testimonials = await storage.getVisibleContentItems(
+      // Parse passions
+      let userPassions: string[] | null = null;
+      if (passions) {
+        userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
+      }
+      
+      // Get testimonials with passion-aware filtering built-in
+      const testimonials = await storage.getVisibleContentItems(
         'testimonial',
         persona as string | undefined,
-        funnelStage as string | undefined
+        funnelStage as string | undefined,
+        userPassions
       );
-      
-      // Filter by passion tags if provided
-      if (passions) {
-        const passionArray = Array.isArray(passions) ? passions : [passions];
-        testimonials = testimonials.filter(testimonial => {
-          if (!testimonial.passionTags || (testimonial.passionTags as string[]).length === 0) {
-            return false; // Exclude testimonials without passion tags
-          }
-          // Return true if ANY of the requested passions match the testimonial's passion tags
-          return passionArray.some(passion => 
-            (testimonial.passionTags as string[]).includes(passion as string)
-          );
-        });
-      }
       
       res.json(testimonials);
     } catch (error) {
@@ -2330,10 +2339,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get visible sections for navigation (public, filtered by persona/funnel)
+  // Get visible sections for navigation (public, filtered by persona/funnel/passions)
   app.get('/api/content/visible-sections', async (req, res) => {
     try {
-      const { persona, funnelStage } = req.query;
+      const { persona, funnelStage, passions } = req.query;
+      
+      // Parse passions from query string
+      let userPassions: string[] | null = null;
+      if (passions) {
+        userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
+      }
+      
+      // If authenticated, use user's profile passions
+      if (req.session?.oidcSub && !userPassions) {
+        const user = await storage.getUserByOidcSub(req.session.oidcSub);
+        if (user?.passions) {
+          userPassions = user.passions as string[];
+        }
+      }
       
       // Query visible content for each type
       const sectionTypes = ['service', 'testimonial', 'event', 'lead_magnet', 'cta'];
@@ -2343,7 +2366,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const items = await storage.getVisibleContentItems(
           type,
           persona as string | undefined,
-          funnelStage as string | undefined
+          funnelStage as string | undefined,
+          userPassions
         );
         
         // Map types to section IDs
