@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -20,6 +20,8 @@ type ProfileFormValues = z.infer<typeof updateUserProfileSchema>;
 export default function Profile() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+  const successTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch current user data
   const { data: user, isLoading } = useQuery({
@@ -51,6 +53,15 @@ export default function Profile() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+      }
+    };
+  }, []);
+
   // Update profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormValues) => {
@@ -63,10 +74,23 @@ export default function Profile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+        title: "✓ Profile updated successfully",
+        description: "Your changes have been saved.",
+        duration: 3000,
       });
       setIsSubmitting(false);
+      setJustSaved(true);
+      
+      // Clear any existing timer
+      if (successTimerRef.current) {
+        clearTimeout(successTimerRef.current);
+      }
+      
+      // Set new timer to clear success state after 3 seconds
+      successTimerRef.current = setTimeout(() => {
+        setJustSaved(false);
+        successTimerRef.current = null;
+      }, 3000);
     },
     onError: (error: any) => {
       toast({
@@ -136,6 +160,14 @@ export default function Profile() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {justSaved && (
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-md p-4 mb-4" data-testid="success-banner">
+                <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                  <Save className="h-5 w-5" />
+                  <p className="font-medium">Changes saved successfully!</p>
+                </div>
+              </div>
+            )}
             <div className="flex items-center gap-6">
               <Avatar className="h-24 w-24 border-2 border-border">
                 {user.profileImageUrl ? (
@@ -191,41 +223,50 @@ export default function Profile() {
                   )}
                 />
 
-                <div className="flex justify-end gap-3 pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      if (user) {
-                        form.reset({
-                          firstName: user.firstName || "",
-                          lastName: user.lastName || "",
-                          profileImageUrl: user.profileImageUrl || "",
-                        });
-                      }
-                    }}
-                    disabled={isSubmitting || !form.formState.isDirty}
-                    data-testid="button-reset"
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || !form.formState.isDirty}
-                    data-testid="button-save-profile"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Saving...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save Changes
-                      </>
-                    )}
-                  </Button>
+                <div className="flex flex-col gap-2">
+                  {form.formState.isDirty && !isSubmitting && (
+                    <p className="text-sm text-amber-600 dark:text-amber-400 text-right" data-testid="unsaved-changes-indicator">
+                      You have unsaved changes
+                    </p>
+                  )}
+                  <div className="flex justify-end gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        if (user) {
+                          form.reset({
+                            firstName: user.firstName || "",
+                            lastName: user.lastName || "",
+                            profileImageUrl: user.profileImageUrl || "",
+                          });
+                        }
+                      }}
+                      disabled={isSubmitting || !form.formState.isDirty}
+                      className={isSubmitting || !form.formState.isDirty ? "opacity-50 cursor-not-allowed" : ""}
+                      data-testid="button-reset"
+                    >
+                      Reset
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting || !form.formState.isDirty}
+                      className={isSubmitting || !form.formState.isDirty ? "opacity-50 cursor-not-allowed" : ""}
+                      data-testid="button-save-profile"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="mr-2 h-4 w-4" />
+                          Save Changes
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </form>
             </Form>
