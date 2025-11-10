@@ -18,7 +18,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Admin Preview Mode**: Allows administrators to view the site from different persona and funnel stage perspectives.
 -   **Content Management System (CMS)**: Hybrid image management (Cloudinary and Object Storage with AI-powered file naming) and universal content visibility controls.
 -   **Persona×Journey Matrix Grid**: Visual interface for configuring content visibility across 120 permutations.
--   **A/B Testing System**: Comprehensive platform for testing content, layouts, and messaging.
+-   **A/B Testing System**: Configuration-based testing platform that respects persona×journey matrix personalization. A/B tests apply presentation overrides (headlines, CTAs, images, button styles) AFTER content is selected via persona + journey stage + passion tags. This ensures all users receive personalized content while testing different messaging variations. System supports universal content type testing (hero, cta, service, testimonial, event, video) with detailed analytics and conversion tracking.
 -   **User Management System**: Admin interface for managing user accounts, roles, and privileges with a three-tier RBAC system and audit logging.
 -   **User Profile Management**: Self-service profile updates with data integrity protection, validation, and audit logging.
 -   **AI-Powered Analysis**: Google Gemini AI for social media screenshot and YouTube video thumbnail analysis with metadata extraction.
