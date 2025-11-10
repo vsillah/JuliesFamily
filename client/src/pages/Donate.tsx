@@ -1,5 +1,6 @@
 // Reference: blueprint:javascript_stripe
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +11,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Heart, CreditCard, Loader2, Home, LogIn } from 'lucide-react';
+import { Heart, CreditCard, Loader2, Home, LogIn, TrendingUp } from 'lucide-react';
 import { Link } from 'wouter';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
@@ -301,9 +302,17 @@ function CheckoutForm({ clientSecret, amount }: { clientSecret: string; amount: 
 export default function Donate() {
   const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const [step, setStep] = useState<'form' | 'payment'>('form');
-  const [campaignSlug, setCampaignSlug] = useState<string | null>(null);
-  const [campaignName, setCampaignName] = useState<string | null>(null);
+  const [campaignSlug, setCampaignSlug] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('campaign');
+  });
   const [hasPrefilledProfile, setHasPrefilledProfile] = useState(false);
+  
+  // Fetch campaign details if campaign slug is present
+  const { data: campaign } = useQuery<any>({
+    queryKey: ['/api/donation-campaigns/by-slug', campaignSlug],
+    enabled: !!campaignSlug,
+  });
   
   // Initialize state from URL params
   const [amount, setAmount] = useState(() => {
@@ -367,26 +376,6 @@ export default function Donate() {
       setSavePaymentMethod(true);
     }
   }, [donationType]);
-
-  // Read campaign from URL params and fetch campaign details
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get('campaign');
-    if (slug) {
-      setCampaignSlug(slug);
-      // Fetch campaign details to get the name
-      fetch(`/api/donation-campaigns/by-slug/${slug}`)
-        .then(res => res.json())
-        .then(campaign => {
-          if (campaign && campaign.name) {
-            setCampaignName(campaign.name);
-          }
-        })
-        .catch(err => {
-          console.error('Failed to fetch campaign details:', err);
-        });
-    }
-  }, []);
 
   const handleProceedToPayment = async () => {
     if (!donorInfo.email) {
@@ -506,14 +495,106 @@ export default function Donate() {
           <p className="text-lg text-muted-foreground">
             Your generosity helps provide education and opportunities to families in our community.
           </p>
-          {campaignName && (
-            <div className="mt-4" data-testid="campaign-indicator">
-              <Badge variant="secondary" className="text-sm px-4 py-2">
-                Supporting: {campaignName}
-              </Badge>
-            </div>
-          )}
         </div>
+
+        {/* Campaign Context Card - shows goal, progress, and projected impact */}
+        {campaign && (
+          <Card className="mb-6" data-testid="campaign-context-card">
+            <CardHeader>
+              <CardTitle className="text-2xl">{campaign.name}</CardTitle>
+              {campaign.description && (
+                <CardDescription className="text-base mt-2">
+                  {campaign.description}
+                </CardDescription>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {campaign.goalAmount > 0 ? (
+                <>
+                  {/* Calculate progress */}
+                  {(() => {
+                    const currentRaised = campaign.raisedAmount || 0;
+                    const progressPercent = Math.min(100, Math.round((currentRaised / campaign.goalAmount) * 100));
+                    
+                    // Calculate projected progress with current donation amount
+                    const donationInCents = Math.round(amount * 100);
+                    const projectedRaised = currentRaised + donationInCents;
+                    const projectedPercent = Math.min(100, Math.round((projectedRaised / campaign.goalAmount) * 100));
+                    const deltaPercent = projectedPercent - progressPercent;
+                    
+                    const formatCurrency = (cents: number) => {
+                      return new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: 'USD',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      }).format(cents / 100);
+                    };
+                    
+                    return (
+                      <>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Campaign Progress</span>
+                            <span className="font-medium">{progressPercent}%</span>
+                          </div>
+                          {/* Layered progress bars */}
+                          <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                            <div 
+                              className="absolute inset-y-0 left-0 bg-primary transition-all duration-500"
+                              style={{ width: `${progressPercent}%` }}
+                              data-testid="campaign-progress-current"
+                            />
+                            {deltaPercent > 0 && (
+                              <div 
+                                className="absolute inset-y-0 left-0 bg-primary/40 transition-all duration-500"
+                                style={{ 
+                                  width: `${projectedPercent}%`,
+                                  backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 8px)'
+                                }}
+                                data-testid="campaign-progress-projected"
+                              />
+                            )}
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="font-medium text-primary">
+                              {formatCurrency(currentRaised)}
+                            </span>
+                            <span className="text-muted-foreground">
+                              of {formatCurrency(campaign.goalAmount)}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Impact message */}
+                        {deltaPercent > 0 && (
+                          <div className="flex items-center gap-2 text-sm bg-primary/5 px-4 py-3 rounded-md">
+                            <TrendingUp className="w-4 h-4 text-primary flex-shrink-0" />
+                            <span className="text-muted-foreground">
+                              Your ${amount.toFixed(2)} {donationType === 'recurring' ? `/${frequency}` : ''} donation would bring this campaign to{' '}
+                              <span className="font-semibold text-primary">{projectedPercent}%</span>
+                              {projectedPercent === 100 && " — Goal reached! 🎉"}
+                            </span>
+                          </div>
+                        )}
+                        
+                        {progressPercent >= 100 && (
+                          <div className="flex items-center gap-2 text-sm bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400 px-4 py-3 rounded-md">
+                            <span className="font-medium">🎉 Campaign goal reached! Additional donations help us expand our impact.</span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+                </>
+              ) : (
+                <div className="text-sm text-muted-foreground">
+                  Every contribution helps us make a difference in our community.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>

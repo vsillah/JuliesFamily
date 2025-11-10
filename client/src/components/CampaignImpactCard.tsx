@@ -13,7 +13,6 @@ interface CampaignImpactCardProps {
 
 export function CampaignImpactCard() {
   const [, navigate] = useLocation();
-  const [monthlyAmount, setMonthlyAmount] = useState(50);
 
   // Fetch current user to get their passions
   const { data: user } = useQuery<User>({
@@ -84,29 +83,43 @@ export function CampaignImpactCard() {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {displayCampaigns.map((campaign) => {
-        // Calculate impact
-        const annualDonation = monthlyAmount * 12 * 100; // Convert to cents
-        const peopleHelped = campaign.costPerPerson 
-          ? Math.floor(annualDonation / campaign.costPerPerson)
-          : 0;
-        
-        // Calculate progress percentage
-        const progressPercent = campaign.goalAmount > 0
-          ? Math.min(100, Math.round(((campaign.raisedAmount || 0) / campaign.goalAmount) * 100))
-          : 0;
+        // Individual slider state for each campaign card
+        const CampaignCard = () => {
+          const [monthlyAmount, setMonthlyAmount] = useState(50);
+          
+          // Calculate impact
+          const annualDonation = monthlyAmount * 12 * 100; // Convert to cents
+          const peopleHelped = campaign.costPerPerson 
+            ? Math.floor(annualDonation / campaign.costPerPerson)
+            : 0;
+          
+          // Calculate current progress percentage
+          const currentRaised = campaign.raisedAmount || 0;
+          const progressPercent = campaign.goalAmount > 0
+            ? Math.min(100, Math.round((currentRaised / campaign.goalAmount) * 100))
+            : 0;
+          
+          // Calculate projected progress (current + donation)
+          const projectedRaised = currentRaised + annualDonation;
+          const projectedPercent = campaign.goalAmount > 0
+            ? Math.min(100, Math.round((projectedRaised / campaign.goalAmount) * 100))
+            : 0;
+          
+          // Calculate the delta (how much the donation adds to progress)
+          const deltaPercent = projectedPercent - progressPercent;
 
-        // Format currency
-        const formatCurrency = (cents: number) => {
-          return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(cents / 100);
-        };
+          // Format currency
+          const formatCurrency = (cents: number) => {
+            return new Intl.NumberFormat('en-US', {
+              style: 'currency',
+              currency: 'USD',
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }).format(cents / 100);
+          };
 
-        return (
-          <Card key={campaign.id} className="hover-elevate transition-all" data-testid={`campaign-card-${campaign.slug}`}>
+          return (
+            <Card className="hover-elevate transition-all" data-testid={`campaign-card-${campaign.slug}`}>
             <CardHeader className="space-y-2">
               {campaign.thumbnailUrl && (
                 <div className="w-full h-48 rounded-md overflow-hidden mb-2">
@@ -125,26 +138,50 @@ export function CampaignImpactCard() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Campaign Progress */}
+              {/* Campaign Progress with Projected Impact */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Progress</span>
+                  <span className="text-muted-foreground">Current Progress</span>
                   <span className="font-medium">{progressPercent}%</span>
                 </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                {/* Layered progress bars: current + projected */}
+                <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                  {/* Current progress - solid color */}
                   <div 
-                    className="h-full bg-primary transition-all duration-500"
+                    className="absolute inset-y-0 left-0 bg-primary transition-all duration-500"
                     style={{ width: `${progressPercent}%` }}
+                    data-testid={`progress-current-${campaign.slug}`}
                   />
+                  {/* Projected progress - lighter/striped overlay showing donation impact */}
+                  {deltaPercent > 0 && (
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-primary/40 transition-all duration-500"
+                      style={{ 
+                        width: `${projectedPercent}%`,
+                        backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.3) 4px, rgba(255,255,255,0.3) 8px)'
+                      }}
+                      data-testid={`progress-projected-${campaign.slug}`}
+                    />
+                  )}
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-primary">
-                    {formatCurrency(campaign.raisedAmount || 0)}
+                    {formatCurrency(currentRaised)}
                   </span>
                   <span className="text-muted-foreground">
                     of {formatCurrency(campaign.goalAmount)}
                   </span>
                 </div>
+                {/* Show projected impact when slider moves */}
+                {deltaPercent > 0 && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 px-3 py-2 rounded-md">
+                    <TrendingUp className="w-3 h-3 text-primary" />
+                    <span>
+                      Your ${monthlyAmount}/month gift would bring this to <span className="font-semibold text-primary">{projectedPercent}%</span> 
+                      {projectedPercent === 100 && " — Goal reached! 🎉"}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Impact Calculator (only show if costPerPerson is set) */}
@@ -227,7 +264,10 @@ export function CampaignImpactCard() {
               )}
             </CardContent>
           </Card>
-        );
+          );
+        };
+        
+        return <CampaignCard key={campaign.id} />;
       })}
     </div>
   );
