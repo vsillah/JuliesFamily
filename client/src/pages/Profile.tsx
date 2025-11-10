@@ -45,7 +45,8 @@ export default function Profile() {
         profileImageUrl: user.profileImageUrl || "",
       });
     }
-  }, [user, form]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
