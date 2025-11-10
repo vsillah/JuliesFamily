@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import { useABTest } from "@/hooks/useABTest";
-import type { ContentItem } from "@shared/schema";
+import { applyABVariantOverrides } from "@/lib/abTestUtils";
+import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 export default function DonationCTA() {
   const { persona, funnelStage } = usePersona();
@@ -16,35 +17,23 @@ export default function DonationCTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
   
-  // Check for active A/B test (using internal type name)
-  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('cta_variation', { 
+  // Check for active A/B test for CTA content
+  const { variant: abVariant, configuration: abConfig, trackConversion } = useABTest('cta_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
   });
   
-  // Fetch CTA content for current persona
+  // Fetch visible CTA content filtered by persona + journey stage + passion tags
   const { data: ctaContent } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/cta"],
+    queryKey: ["/api/content/visible/cta", { persona, funnelStage }],
   });
   
-  // Determine content to display: A/B variant > persona/stage match > default
-  let currentCta: ContentItem | undefined;
-  
-  if (abVariant?.contentItemId) {
-    // Use content item from A/B test variant
-    currentCta = ctaContent?.find(c => c.id === abVariant.contentItemId);
-  }
-  
-  if (!currentCta) {
-    // Fallback to persona/funnel stage matching
-    currentCta = ctaContent?.find(c => {
-      const meta = c.metadata as any;
-      return meta?.persona === persona && meta?.funnelStage === funnelStage;
-    }) || ctaContent?.find(c => {
-      const meta = c.metadata as any;
-      return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
-    });
-  }
+  // Select first CTA content (already filtered by persona×journey matrix and ordered by passion tags)
+  // Then apply A/B test variant overrides if active
+  const baseCta = ctaContent?.[0];
+  const currentCta = baseCta
+    ? applyABVariantOverrides(baseCta, abConfig as AbTestVariantConfiguration | null)
+    : undefined;
   
   const imageName = currentCta?.imageName || "donation-cta";
   const { data: ctaImageAsset } = useCloudinaryImage(imageName);
