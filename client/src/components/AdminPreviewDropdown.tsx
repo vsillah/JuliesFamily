@@ -76,7 +76,7 @@ function VariantSelector({ testId, testName, testType, selectedVariantId, onVari
         <SelectTrigger className="h-8 text-xs" data-testid={`select-variant-${testId}`}>
           <SelectValue placeholder="Random (50/50)" />
         </SelectTrigger>
-        <SelectContent className="z-[9999]">
+        <SelectContent className="z-[99999]">
           <SelectItem value="random">Random (50/50)</SelectItem>
           {variants.map((variant: any) => (
             <SelectItem key={variant.id} value={variant.id}>
@@ -165,7 +165,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             <SelectTrigger className="h-8 text-sm" data-testid="select-persona">
               <SelectValue placeholder="Select persona" />
             </SelectTrigger>
-            <SelectContent className="z-[9999]">
+            <SelectContent className="z-[99999]">
               <SelectItem value="none">Default (No persona)</SelectItem>
               {personaConfigs.map((config) => (
                 <SelectItem key={config.id} value={config.id}>
@@ -189,7 +189,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             <SelectTrigger className="h-8 text-sm" data-testid="select-funnel">
               <SelectValue placeholder="Select stage" />
             </SelectTrigger>
-            <SelectContent className="z-[9999]">
+            <SelectContent className="z-[99999]">
               <SelectItem value="none">None selected</SelectItem>
               {funnelStageConfigs.map((config) => (
                 <SelectItem key={config.id} value={config.id}>
