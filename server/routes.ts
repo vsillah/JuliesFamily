@@ -4636,6 +4636,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
           
+          // Update donor lifecycle stage based on donation history
+          if (updatedDonation.leadId && updatedDonation.amount) {
+            try {
+              console.log(`[DonorLifecycle] Processing donation for lead ${updatedDonation.leadId}`);
+              
+              // Import and process lifecycle update
+              const { createDonorLifecycleService } = await import('./services/donorLifecycleService');
+              const lifecycleService = createDonorLifecycleService(storage);
+              await lifecycleService.processDonation(
+                updatedDonation.leadId,
+                updatedDonation.amount,
+                new Date(updatedDonation.createdAt!)
+              );
+              
+              console.log(`[DonorLifecycle] Successfully updated lifecycle for lead ${updatedDonation.leadId}`);
+            } catch (lifecycleError: any) {
+              // Log error but don't fail webhook - lifecycle update failure shouldn't block payment
+              console.error(`[DonorLifecycle] Failed to update lifecycle for lead ${updatedDonation.leadId}:`, lifecycleError);
+            }
+          }
+          
           // Auto-enroll in Graduation Path email campaign if this is their first donation
           if (updatedDonation.leadId) {
             try {
