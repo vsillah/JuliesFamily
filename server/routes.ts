@@ -2374,6 +2374,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'testimonials': false,
         'events': false,
         'donation': false,
+        'student-dashboard': false,
       };
       
       for (const type of sectionTypes) {
@@ -2409,6 +2410,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Impact stats are always visible (static component, not CMS-managed)
       visibleSections.impact = true;
+      
+      // Student dashboard is visible only for authenticated users enrolled in Tech Goes Home
+      if (req.session?.oidcSub) {
+        const user = await storage.getUserByOidcSub(req.session.oidcSub);
+        if (user) {
+          const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+          visibleSections['student-dashboard'] = !!enrollment;
+        }
+      }
       
       console.log('[visible-sections] Returning sections:', visibleSections);
       res.json(visibleSections);

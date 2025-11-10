@@ -45,7 +45,8 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
     testimonials: true,
     impact: true,
     donation: true,
-    "lead-magnet": true
+    "lead-magnet": true,
+    "student-dashboard": false
   };
   
   const currentPersonaConfig = personaConfigs.find(p => p.id === persona);
@@ -193,6 +194,17 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   data-testid="link-campaign-impact"
                 >
                   Campaign Impact
+                </button>
+              )}
+              {sections["student-dashboard"] && (
+                <button
+                  onClick={() => scrollToSection("student-dashboard")}
+                  className={`text-xs md:text-sm font-medium transition-colors duration-300 whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-student-dashboard"
+                >
+                  My Dashboard
                 </button>
               )}
               {sections.services && (
@@ -361,6 +373,17 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   Campaign
                 </button>
               )}
+              {sections["student-dashboard"] && (
+                <button
+                  onClick={() => scrollToSection("student-dashboard")}
+                  className={`text-xs font-medium transition-colors duration-300 px-2 py-3 min-h-[44px] whitespace-nowrap ${
+                    isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+                  }`}
+                  data-testid="link-student-dashboard-mobile-inline"
+                >
+                  Dashboard
+                </button>
+              )}
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}
@@ -504,6 +527,15 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                 data-testid="link-campaign-impact-mobile"
               >
                 Campaign Impact
+              </button>
+            )}
+            {sections["student-dashboard"] && (
+              <button
+                onClick={() => scrollToSection("student-dashboard")}
+                className="text-lg text-foreground hover:text-primary transition-colors"
+                data-testid="link-student-dashboard-mobile"
+              >
+                My Dashboard
               </button>
             )}
             {sections.services && (

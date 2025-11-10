@@ -16,6 +16,7 @@ import Footer from "@/components/Footer";
 import SchemaMarkup from "@/components/SchemaMarkup";
 import { usePersona } from "@/contexts/PersonaContext";
 import { CampaignImpactCard } from "@/components/CampaignImpactCard";
+import { StudentDashboard } from "@/components/StudentDashboard";
 import { useContentAvailability, type VisibleSections } from "@/hooks/useContentAvailability";
 import type { ContentItem } from "@shared/schema";
 
@@ -28,6 +29,7 @@ const DEFAULT_SECTIONS: VisibleSections = {
   testimonials: true,
   events: true,
   donation: true,
+  "student-dashboard": false,  // Only visible for enrolled students
 };
 
 export default function Home() {
@@ -84,6 +86,9 @@ export default function Home() {
           </div>
         </section>
       )}
+      
+      {/* Student Dashboard - Only visible for enrolled students */}
+      {sections["student-dashboard"] && <StudentDashboard />}
       
       {sections.services && (
         <section id="services" data-testid="section-services">

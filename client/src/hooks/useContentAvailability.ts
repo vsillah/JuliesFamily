@@ -9,6 +9,7 @@ export interface VisibleSections {
   testimonials: boolean;
   events: boolean;
   donation: boolean;
+  "student-dashboard": boolean;
 }
 
 export function useContentAvailability() {
