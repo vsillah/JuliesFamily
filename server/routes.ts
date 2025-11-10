@@ -2666,8 +2666,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get active tests for current session (public) - MUST come before /:id route
   app.get('/api/ab-tests/active', async (req, res) => {
     try {
-      const persona = req.query.persona as string | undefined;
-      const funnelStage = req.query.funnelStage as string | undefined;
+      // Sanitize query params: treat "undefined", "null", and "" as actual undefined
+      // This handles TanStack Query serializing undefined values as literal strings
+      const rawPersona = req.query.persona as string | undefined;
+      const rawFunnelStage = req.query.funnelStage as string | undefined;
+      
+      const persona = (rawPersona && rawPersona !== "undefined" && rawPersona !== "null") 
+        ? rawPersona 
+        : undefined;
+      const funnelStage = (rawFunnelStage && rawFunnelStage !== "undefined" && rawFunnelStage !== "null") 
+        ? rawFunnelStage 
+        : undefined;
+      
       const tests = await storage.getActiveAbTests(persona, funnelStage);
       res.json(tests);
     } catch (error) {

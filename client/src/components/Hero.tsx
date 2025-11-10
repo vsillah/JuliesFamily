@@ -20,13 +20,13 @@ export default function Hero({ onImageLoaded }: HeroProps) {
   const [imageError, setImageError] = useState(false);
   
   // Check for active A/B test for hero content
-  const { variant: abVariant, configuration: abConfig, trackConversion } = useABTest('hero_variation', { 
+  const { variant: abVariant, configuration: abConfig, trackConversion, isLoading: abTestLoading, hasTest } = useABTest('hero_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
   });
   
   // Fetch visible hero content filtered by persona + journey stage + passion tags
-  const { data: heroContent } = useQuery<ContentItem[]>({
+  const { data: heroContent, isLoading: contentLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/visible/hero", { persona, funnelStage }],
   });
   
@@ -36,11 +36,31 @@ export default function Hero({ onImageLoaded }: HeroProps) {
   });
   
   // Select first hero content (already filtered by persona×journey matrix and ordered by passion tags)
-  // Then apply A/B test variant overrides if active
   const baseHero = heroContent?.[0];
-  const currentHero = baseHero 
+  
+  // CRITICAL: Wait for A/B test assignment to complete before applying overrides
+  // This ensures we only render configured variants (control or treatment), never fallback content
+  const isReady = !contentLoading && !abTestLoading;
+  
+  // Apply A/B test variant overrides if active test exists
+  const currentHero = baseHero && isReady
     ? applyABVariantOverrides(baseHero, abConfig as AbTestVariantConfiguration | null)
     : undefined;
+  
+  // Diagnostic logging for A/B test debugging (development only)
+  useEffect(() => {
+    if (import.meta.env.DEV && isReady && baseHero) {
+      console.log('[Hero A/B Test Debug]', {
+        hasActiveTest: hasTest,
+        variant: abVariant?.name,
+        isControl: abVariant?.isControl,
+        configurationApplied: !!abConfig,
+        baseHeroTitle: baseHero.title,
+        finalHeroTitle: currentHero?.title,
+        overridesApplied: abConfig ? Object.keys(abConfig) : []
+      });
+    }
+  }, [isReady, hasTest, abVariant, abConfig, baseHero, currentHero]);
   
   const imageName = currentHero?.imageName || "hero-volunteer-student";
   const { data: heroImageAsset } = useCloudinaryImage(imageName);
