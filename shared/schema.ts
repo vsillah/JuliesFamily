@@ -1618,3 +1618,60 @@ export const insertEconomicsSettingsSchema = createInsertSchema(economicsSetting
 });
 export type InsertEconomicsSettings = z.infer<typeof insertEconomicsSettingsSchema>;
 export type EconomicsSettings = typeof economicsSettings.$inferSelect;
+
+// Tech Goes Home Program Enrollments
+export const techGoesHomeEnrollments = pgTable("tech_goes_home_enrollments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  programName: varchar("program_name").notNull().default("Tech Goes Home"),
+  enrollmentDate: timestamp("enrollment_date").notNull().defaultNow(),
+  programStartDate: timestamp("program_start_date"),
+  programEndDate: timestamp("program_end_date"),
+  status: varchar("status").notNull().default("active"), // active, completed, withdrawn
+  totalClassesRequired: integer("total_classes_required").notNull().default(15),
+  completionDate: timestamp("completion_date"),
+  certificateIssued: boolean("certificate_issued").default(false),
+  chromebookReceived: boolean("chromebook_received").default(false),
+  internetActivated: boolean("internet_activated").default(false),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("tgh_enrollments_user_idx").on(table.userId),
+  index("tgh_enrollments_status_idx").on(table.status),
+]);
+
+export const insertTechGoesHomeEnrollmentSchema = createInsertSchema(techGoesHomeEnrollments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTechGoesHomeEnrollment = z.infer<typeof insertTechGoesHomeEnrollmentSchema>;
+export type TechGoesHomeEnrollment = typeof techGoesHomeEnrollments.$inferSelect;
+
+// Tech Goes Home Class Attendance
+export const techGoesHomeAttendance = pgTable("tech_goes_home_attendance", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull().references(() => techGoesHomeEnrollments.id, { onDelete: "cascade" }),
+  classDate: timestamp("class_date").notNull(),
+  classNumber: integer("class_number").notNull(), // 1-15 (or more if including make-ups)
+  attended: boolean("attended").notNull().default(true),
+  isMakeup: boolean("is_makeup").default(false),
+  hoursCredits: integer("hours_credits").notNull().default(2), // Usually 2 hours per class
+  notes: text("notes"),
+  markedByAdminId: varchar("marked_by_admin_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("tgh_attendance_enrollment_idx").on(table.enrollmentId),
+  index("tgh_attendance_date_idx").on(table.classDate),
+  uniqueIndex("tgh_attendance_unique_idx").on(table.enrollmentId, table.classDate),
+]);
+
+export const insertTechGoesHomeAttendanceSchema = createInsertSchema(techGoesHomeAttendance).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTechGoesHomeAttendance = z.infer<typeof insertTechGoesHomeAttendanceSchema>;
+export type TechGoesHomeAttendance = typeof techGoesHomeAttendance.$inferSelect;
