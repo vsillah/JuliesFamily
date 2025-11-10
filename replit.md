@@ -14,6 +14,7 @@ The frontend uses React 18 with TypeScript and Vite, styled with Tailwind CSS, c
 ### Technical Implementations
 The frontend is a single-page application using `wouter` for routing and TanStack Query for server state. Key features include:
 -   **Persona-Based Personalization**: Tailored content delivery based on 5 user personas.
+-   **Passion-Based Content Personalization**: Users can select their interests (literacy, stem, arts, nutrition, community) in their profile, and content is automatically filtered and ranked to match their passions. Features SQL-based passion matching with COUNT() scoring, three-tier fallback hierarchy (user profile → query string → standard ordering), NULL-safe handling with COALESCE, and multi-select passion checkboxes in the Profile UI with form persistence.
 -   **Admin Preview Mode**: Allows administrators to view the site from different persona and funnel stage perspectives.
 -   **Content Management System (CMS)**: Hybrid image management (Cloudinary and Object Storage with AI-powered file naming) and universal content visibility controls.
 -   **Persona×Journey Matrix Grid**: Visual interface for configuring content visibility across 120 permutations.
