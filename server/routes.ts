@@ -5799,6 +5799,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tech Goes Home - Get authenticated student's progress
+  app.get('/api/tgh/progress', isAuthenticated, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const user = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const progress = await storage.getStudentProgress(user.id);
+      
+      if (!progress) {
+        return res.json({
+          enrolled: false,
+          message: "Not enrolled in Tech Goes Home program"
+        });
+      }
+      
+      res.json({
+        enrolled: true,
+        ...progress
+      });
+    } catch (error: any) {
+      console.error("Error fetching TGH progress:", error);
+      res.status(500).json({ message: "Failed to fetch progress" });
+    }
+  });
+  
+  // Tech Goes Home - Get demo progress for public card
+  app.get('/api/tgh/demo-progress', async (req, res) => {
+    try {
+      // Return representative demo data
+      res.json({
+        enrolled: true,
+        classesCompleted: 8,
+        classesRemaining: 7,
+        hoursCompleted: 16,
+        percentComplete: 53,
+        isEligibleForRewards: false,
+        totalClassesRequired: 15,
+        rewards: {
+          chromebook: { name: "Free Chromebook", eligible: false },
+          certificate: { name: "Certificate of Completion", eligible: false },
+          internet: { name: "1 Year Free Internet", eligible: false }
+        }
+      });
+    } catch (error: any) {
+      console.error("Error fetching TGH demo progress:", error);
+      res.status(500).json({ message: "Failed to fetch demo progress" });
+    }
+  });
+  
+  // Tech Goes Home - Create enrollment (authenticated users)
+  app.post('/api/tgh/enroll', isAuthenticated, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const user = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if already enrolled
+      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+      if (existingEnrollment) {
+        return res.status(400).json({ 
+          message: "Already enrolled in Tech Goes Home program",
+          enrollment: existingEnrollment
+        });
+      }
+      
+      // Create new enrollment
+      const { insertTechGoesHomeEnrollmentSchema } = await import("@shared/schema");
+      const enrollmentData = insertTechGoesHomeEnrollmentSchema.parse({
+        userId: user.id,
+        programName: "Tech Goes Home",
+        enrollmentDate: new Date(),
+        status: "active",
+        totalClassesRequired: 15,
+      });
+      
+      const enrollment = await storage.createTechGoesHomeEnrollment(enrollmentData);
+      
+      res.json({
+        message: "Successfully enrolled in Tech Goes Home program",
+        enrollment
+      });
+    } catch (error: any) {
+      console.error("Error creating TGH enrollment:", error);
+      res.status(500).json({ message: "Failed to enroll in program" });
+    }
+  });
+
   // Demo Data Seeding - Generate sample data for demonstration
   app.post('/api/demo/seed', async (req, res) => {
     try {
