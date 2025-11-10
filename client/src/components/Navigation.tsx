@@ -338,7 +338,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             </div>
 
             {/* Mobile: Inline Priority Links */}
-            <div className="md:hidden flex items-center gap-1 justify-end overflow-x-auto max-w-[60vw] scrollbar-hide">
+            <div className="md:hidden flex items-center gap-1 overflow-x-auto flex-nowrap scrollbar-hide" style={{ maxWidth: '60vw' }}>
               {sections.services && (
                 <button
                   onClick={() => scrollToSection("services")}

@@ -9,7 +9,7 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend uses React 18 with TypeScript and Vite, styled with Tailwind CSS, custom CSS variables, and shadcn/ui (New York style). It supports light/dark modes and WCAG AA compliant colors (orange/golden primary, olive/khaki secondary, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text. Responsive design ensures optimal display across devices, with dynamic and data-driven navigation.
+The frontend uses React 18 with TypeScript and Vite, styled with Tailwind CSS, custom CSS variables, and shadcn/ui (New York style). It supports light/dark modes and WCAG AA compliant colors (orange/golden primary, olive/khaki secondary, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text. Responsive design ensures optimal display across devices, with dynamic and data-driven navigation that matches page section order (Services → Resources → Impact → Testimonials → Events → Support Us → Virtual Tour). Navigation dynamically shows/hides links based on content visibility, with horizontally scrollable mobile inline navigation and full mobile menu overlay for complete access.
 
 ### Technical Implementations
 The frontend is a single-page application using `wouter` for routing and TanStack Query for server state. Key features include:
