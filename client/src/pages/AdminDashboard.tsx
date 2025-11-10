@@ -160,6 +160,12 @@ export default function AdminDashboard() {
                       Donor Lifecycle
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/ab-testing" className="flex items-center cursor-pointer">
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      A/B Testing
+                    </Link>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               
@@ -208,12 +214,6 @@ export default function AdminDashboard() {
                     <Link href="/admin/images" className="flex items-center cursor-pointer">
                       <ImageIcon className="w-4 h-4 mr-2" />
                       Manage Images
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/ab-testing" className="flex items-center cursor-pointer">
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      A/B Testing
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
