@@ -2374,15 +2374,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userPassions
         );
         
-        // Map types to section IDs
-        let sectionId = type;
-        if (type === 'cta') sectionId = 'donation';
-        if (type === 'lead_magnet') sectionId = 'lead-magnet';
-        if (type === 'service') sectionId = 'services';
-        if (type === 'testimonial') sectionId = 'testimonials';
-        if (type === 'event') sectionId = 'events';
-        
-        visibleSections[sectionId] = items.length > 0;
+        // Special handling for lead_magnet type - separate campaign-impact from regular lead-magnets
+        if (type === 'lead_magnet') {
+          const campaignImpactItems = items.filter((item: any) => 
+            item.metadata?.subtype === 'campaign-impact-calculator'
+          );
+          const regularLeadMagnets = items.filter((item: any) => 
+            item.metadata?.subtype !== 'campaign-impact-calculator'
+          );
+          
+          visibleSections['campaign-impact'] = campaignImpactItems.length > 0;
+          visibleSections['lead-magnet'] = regularLeadMagnets.length > 0;
+        } else {
+          // Map types to section IDs
+          let sectionId = type;
+          if (type === 'cta') sectionId = 'donation';
+          if (type === 'service') sectionId = 'services';
+          if (type === 'testimonial') sectionId = 'testimonials';
+          if (type === 'event') sectionId = 'events';
+          
+          visibleSections[sectionId] = items.length > 0;
+        }
       }
       
       // Impact stats are always visible (static component, not CMS-managed)

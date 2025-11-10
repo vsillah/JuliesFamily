@@ -2,12 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 
 export interface VisibleSections {
+  "campaign-impact": boolean;
   services: boolean;
-  events: boolean;
-  testimonials: boolean;
-  impact: boolean;
-  donation: boolean;
   "lead-magnet": boolean;
+  impact: boolean;
+  testimonials: boolean;
+  events: boolean;
+  donation: boolean;
 }
 
 export function useContentAvailability() {
