@@ -4,7 +4,7 @@
 
 import { 
   acquisitionChannels, marketingCampaigns, channelSpendLedger,
-  leadAttribution, donorLifecycleStages, donorEconomics, economicsSettings,
+  leadAttribution, donorLifecycleStages, donorEconomics, economicsSettings, leads,
   type AcquisitionChannel, type InsertAcquisitionChannel,
   type MarketingCampaign, type InsertMarketingCampaign,
   type ChannelSpendLedger, type InsertChannelSpendLedger,
@@ -14,7 +14,7 @@ import {
   type EconomicsSettings, type InsertEconomicsSettings
 } from "@shared/schema";
 import { db } from "../db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, count, sql } from "drizzle-orm";
 
 export interface ICacLtgpStorage {
   // Acquisition Channels
@@ -55,6 +55,10 @@ export interface ICacLtgpStorage {
   getAllDonorLifecycleStages(): Promise<DonorLifecycleStage[]>;
   getDonorsByStage(stage: string): Promise<DonorLifecycleStage[]>;
   updateDonorLifecycleStage(leadId: string, updates: Partial<InsertDonorLifecycleStage>): Promise<DonorLifecycleStage | undefined>;
+  
+  // Donor Lifecycle Queries (with JOINs)
+  listLifecycleWithLeads(params: { stage?: string; page: number; limit: number }): Promise<{ donors: any[]; total: number }>;
+  countLifecycleByStage(): Promise<Record<string, number>>;
   
   // Donor Economics
   createDonorEconomics(economics: InsertDonorEconomics): Promise<DonorEconomics>;
@@ -276,6 +280,94 @@ export function createCacLtgpStorage(): ICacLtgpStorage {
         const [created] = await db.insert(economicsSettings).values(updates as InsertEconomicsSettings).returning();
         return created;
       }
+    },
+    
+    // Donor Lifecycle Queries (with JOINs)
+    async listLifecycleWithLeads(params: { stage?: string; page: number; limit: number }): Promise<{ donors: any[]; total: number }> {
+      const { stage, page, limit } = params;
+      const offset = (page - 1) * limit;
+      
+      // Build WHERE clause
+      const whereClause = stage ? eq(donorLifecycleStages.currentStage, stage) : undefined;
+      
+      // Execute queries in parallel
+      const [donorsResult, totalResult] = await Promise.all([
+        // Fetch paginated donors with JOIN
+        db.select({
+          // Lead fields
+          leadId: leads.id,
+          email: leads.email,
+          firstName: leads.firstName,
+          lastName: leads.lastName,
+          phone: leads.phone,
+          leadStatus: leads.status,
+          
+          // Lifecycle fields
+          currentStage: donorLifecycleStages.currentStage,
+          totalLifetimeDonations: donorLifecycleStages.totalLifetimeDonations,
+          averageDonationAmount: donorLifecycleStages.averageDonationAmount,
+          donationFrequency: donorLifecycleStages.donationFrequency,
+          monthsSinceLastDonation: donorLifecycleStages.monthsSinceLastDonation,
+          consecutiveMonthsDonating: donorLifecycleStages.consecutiveMonthsDonating,
+          
+          // Stage timestamps
+          becameFirstTimeDonor: donorLifecycleStages.becameFirstTimeDonor,
+          becameRecurringDonor: donorLifecycleStages.becameRecurringDonor,
+          becameMajorDonor: donorLifecycleStages.becameMajorDonor,
+          becameLapsed: donorLifecycleStages.becameLapsed,
+          
+          // Economics
+          currentLTGP: donorLifecycleStages.currentLTGP,
+          currentLTGPtoCAC: donorLifecycleStages.currentLTGPtoCAC,
+          
+          // Metadata
+          lifecycleUpdatedAt: donorLifecycleStages.updatedAt,
+        })
+        .from(donorLifecycleStages)
+        .leftJoin(leads, eq(donorLifecycleStages.leadId, leads.id))
+        .where(whereClause)
+        .orderBy(desc(donorLifecycleStages.updatedAt))
+        .limit(limit)
+        .offset(offset),
+        
+        // Count total matching records
+        db.select({ total: count() })
+          .from(donorLifecycleStages)
+          .where(whereClause)
+          .then(result => result[0]?.total || 0)
+      ]);
+      
+      return {
+        donors: donorsResult,
+        total: Number(totalResult),
+      };
+    },
+    
+    async countLifecycleByStage(): Promise<Record<string, number>> {
+      const results = await db.select({
+        stage: donorLifecycleStages.currentStage,
+        count: count(),
+      })
+      .from(donorLifecycleStages)
+      .groupBy(donorLifecycleStages.currentStage);
+      
+      // Initialize with all expected stages at 0
+      const stageCounts: Record<string, number> = {
+        prospect: 0,
+        first_time: 0,
+        recurring: 0,
+        major_donor: 0,
+        lapsed: 0,
+      };
+      
+      // Fill in actual counts from database
+      for (const row of results) {
+        if (row.stage) {
+          stageCounts[row.stage] = Number(row.count);
+        }
+      }
+      
+      return stageCounts;
     },
   };
 }

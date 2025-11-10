@@ -143,6 +143,12 @@ export default function AdminDashboard() {
                   CAC:LTGP Analytics
                 </Button>
               </Link>
+              <Link href="/admin/donor-lifecycle">
+                <Button variant="default" size="sm" data-testid="button-donor-lifecycle">
+                  <Users className="w-4 h-4 mr-2" />
+                  Donor Lifecycle
+                </Button>
+              </Link>
               
               {/* Communication Menu */}
               <DropdownMenu>

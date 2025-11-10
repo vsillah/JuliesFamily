@@ -1760,6 +1760,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Donor Lifecycle Management
+  app.get('/api/admin/donors/lifecycle', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const stage = req.query.stage as string | undefined;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 25;
+      
+      const result = await storage.listLifecycleWithLeads({ stage, page, limit });
+      
+      res.json({
+        donors: result.donors,
+        pagination: {
+          page,
+          limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / limit),
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching donor lifecycle data:", error);
+      res.status(500).json({ message: "Failed to fetch donor lifecycle data" });
+    }
+  });
+
+  app.get('/api/admin/donors/lifecycle/stats', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const stageCounts = await storage.countLifecycleByStage();
+      res.json(stageCounts);
+    } catch (error) {
+      console.error("Error fetching lifecycle stats:", error);
+      res.status(500).json({ message: "Failed to fetch lifecycle stats" });
+    }
+  });
+
   // Acquisition Channels Management
   app.get('/api/admin/acquisition-channels', isAuthenticated, isAdmin, async (req, res) => {
     try {
