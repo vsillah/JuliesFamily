@@ -4037,6 +4037,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Missing required fields: leadId, assignedTo, title, taskType" });
       }
 
+      // Convert date strings to Date objects for Drizzle
+      if (taskData.dueDate && typeof taskData.dueDate === 'string') {
+        taskData.dueDate = new Date(taskData.dueDate);
+      }
+      if (taskData.completedAt && typeof taskData.completedAt === 'string') {
+        taskData.completedAt = new Date(taskData.completedAt);
+      }
+
       const task = await storage.createTask(taskData);
       
       // Sync task to Google Calendar asynchronously (fire-and-forget)
@@ -4062,7 +4070,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If marking as completed, set completedAt
       if (updates.status === 'completed' && !updates.completedAt) {
-        updates.completedAt = new Date().toISOString();
+        updates.completedAt = new Date();
+      }
+
+      // Convert date strings to Date objects for Drizzle
+      if (updates.dueDate && typeof updates.dueDate === 'string') {
+        updates.dueDate = new Date(updates.dueDate);
+      }
+      if (updates.completedAt && typeof updates.completedAt === 'string') {
+        updates.completedAt = new Date(updates.completedAt);
       }
 
       const task = await storage.updateTask(taskId, updates);
