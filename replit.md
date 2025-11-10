@@ -22,7 +22,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **User Profile Management**: Self-service profile updates with data integrity protection, validation, and audit logging.
 -   **AI-Powered Analysis**: Google Gemini AI for social media screenshot and YouTube video thumbnail analysis with metadata extraction.
 -   **AI-Powered File Naming**: Intelligent file naming system using Google Gemini AI for uploaded images, generating descriptive, SEO-friendly filenames.
--   **Stripe Donation System**: Secure payment processing for one-time donations.
+-   **Authenticated Donation System with Saved Payment Methods**: Secure payment processing requiring authentication, with Stripe Customer integration for saving payment methods. Features include automatic profile prefilling (name/email), smart opt-in checkbox (optional for one-time, required for recurring donations), and saved payment method selection for repeat donors.
 -   **Email Automation System**: Transactional email delivery via SendGrid with template management and AI-powered copywriting.
 -   **SMS Notification System**: Twilio-based template SMS messaging with persona targeting and AI-powered copywriting.
 -   **Passion-Based Donation Campaigns**: AI-powered campaign system using frameworks from Alex Hormozi's "$100M Leads" for donor targeting, multi-channel distribution, real-time goal tracking, and filtered testimonial promotion.
