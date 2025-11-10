@@ -242,7 +242,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             {/* Right: Utilities */}
             <div className="hidden md:flex items-center gap-1.5 justify-end flex-shrink-0">
               <Link href="/donate">
-                <Button variant="default" size="sm" data-testid="button-donate">
+                <Button variant="default" data-testid="button-donate">
                   Donate
                 </Button>
               </Link>
@@ -252,7 +252,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   data-testid="button-change-persona"
                   title="Change your experience"
                 >
-                  <Badge variant="secondary" className="cursor-pointer hover-elevate text-xs">
+                  <Badge variant="secondary" className="cursor-pointer hover-elevate text-xs min-h-9 flex items-center">
                     <User className="w-3 h-3 mr-1" />
                     {currentPersonaConfig.label}
                   </Badge>
