@@ -99,7 +99,7 @@ function VariantSelector({ test, selectedVariantId, onVariantChange }: VariantSe
           <SelectItem value="random">Random Assignment (50/50)</SelectItem>
           {variants.map((variant: any) => (
             <SelectItem key={variant.id} value={variant.id}>
-              {variant.isControl ? "🎯 Control" : "🧪 Treatment"} - {variant.name}
+              {variant.isControl ? "Control" : "Treatment"} - {variant.name}
             </SelectItem>
           ))}
         </SelectContent>

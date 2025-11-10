@@ -157,6 +157,19 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
   const trackConversion = async (eventTarget?: string, eventValue?: number) => {
     if (!test || !assignment) return;
     
+    // Skip tracking for admin preview to avoid polluting test results
+    const adminOverrides = sessionStorage.getItem("admin-variant-override");
+    if (adminOverrides) {
+      try {
+        const overrides = JSON.parse(adminOverrides);
+        if (overrides[test.id] && overrides[test.id] !== "random") {
+          return; // Admin is previewing specific variant, don't track
+        }
+      } catch (e) {
+        // Invalid JSON, proceed with tracking
+      }
+    }
+    
     await trackABTestEvent(
       test.id,
       assignment.variantId,
@@ -175,6 +188,19 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
   ) => {
     if (!test || !assignment) return;
     
+    // Skip tracking for admin preview to avoid polluting test results
+    const adminOverrides = sessionStorage.getItem("admin-variant-override");
+    if (adminOverrides) {
+      try {
+        const overrides = JSON.parse(adminOverrides);
+        if (overrides[test.id] && overrides[test.id] !== "random") {
+          return; // Admin is previewing specific variant, don't track
+        }
+      } catch (e) {
+        // Invalid JSON, proceed with tracking
+      }
+    }
+    
     await trackABTestEvent(
       test.id,
       assignment.variantId,
@@ -185,12 +211,25 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     );
   };
 
+  // Check if admin has variant override active
+  const isAdminPreview = (() => {
+    try {
+      const overrides = sessionStorage.getItem("admin-variant-override");
+      if (!overrides) return false;
+      const parsed = JSON.parse(overrides);
+      return test?.id && parsed[test.id] && parsed[test.id] !== "random";
+    } catch {
+      return false;
+    }
+  })();
+
   return {
     isLoading,
     hasTest: !!test,
     test,
     variant,
     configuration: variant?.configuration as Record<string, any> | null,
+    isAdminPreview, // Flag to indicate admin is previewing specific variant
     trackConversion,
     trackEvent,
   };
