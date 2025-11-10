@@ -18,9 +18,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, GraduationCap, Handshake, Baby, Heart, Hand, TrendingUp, X } from "lucide-react";
+import { Eye, GraduationCap, Handshake, Baby, Heart, Hand, TrendingUp, X, TestTube2 } from "lucide-react";
 import { usePersona, personaConfigs, type Persona } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import type { AbTest } from "@shared/schema";
 
 const iconComponents = {
   GraduationCap,
@@ -41,6 +43,77 @@ const funnelStageConfigs = [
 
 const ADMIN_PERSONA_KEY = "admin-persona-override";
 const ADMIN_FUNNEL_KEY = "admin-funnel-override";
+const ADMIN_VARIANT_KEY = "admin-variant-override";
+
+// Variant Selector Component for individual tests
+interface VariantSelectorProps {
+  test: AbTest;
+  selectedVariantId?: string;
+  onVariantChange: (variantId: string) => void;
+}
+
+function VariantSelector({ test, selectedVariantId, onVariantChange }: VariantSelectorProps) {
+  const { data: variants, isLoading } = useQuery({
+    queryKey: [`/api/ab-tests/${test.id}/variants`],
+  });
+
+  if (isLoading) {
+    return (
+      <div className="p-3 bg-background rounded border">
+        <p className="text-sm text-muted-foreground">Loading variants for {test.name}...</p>
+      </div>
+    );
+  }
+
+  if (!variants || variants.length === 0) {
+    return null;
+  }
+
+  const contentTypeLabels: Record<string, string> = {
+    hero_variation: "Hero Section",
+    cta_variation: "Call to Action",
+    service_variation: "Service Card",
+    testimonial_variation: "Testimonial",
+    event_variation: "Event Card",
+    video_variation: "Video Content",
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium">
+          {contentTypeLabels[test.type] || test.type}
+        </label>
+        <Badge variant="secondary" className="text-xs">
+          {test.name}
+        </Badge>
+      </div>
+      <Select
+        value={selectedVariantId || "random"}
+        onValueChange={onVariantChange}
+      >
+        <SelectTrigger className="h-8 text-sm" data-testid={`select-variant-${test.id}`}>
+          <SelectValue placeholder="Random (50/50 split)" />
+        </SelectTrigger>
+        <SelectContent className="z-[1200]">
+          <SelectItem value="random">Random Assignment (50/50)</SelectItem>
+          {variants.map((variant: any) => (
+            <SelectItem key={variant.id} value={variant.id}>
+              {variant.isControl ? "🎯 Control" : "🧪 Treatment"} - {variant.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      {selectedVariantId && selectedVariantId !== "random" && (
+        <p className="text-xs text-muted-foreground">
+          {variants.find((v: any) => v.id === selectedVariantId)?.isControl 
+            ? "Control: Original content without overrides" 
+            : "Treatment: Modified content with A/B configuration"}
+        </p>
+      )}
+    </div>
+  );
+}
 
 interface AdminPersonaSwitcherProps {
   isScrolled?: boolean;
@@ -55,6 +128,16 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
   const [selectedFunnel, setSelectedFunnel] = useState<FunnelStage | "none">(
     sessionStorage.getItem(ADMIN_FUNNEL_KEY) as FunnelStage || "none"
   );
+  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+
+  // Fetch active A/B tests for the selected persona×funnel combination
+  const { data: activeTests } = useQuery<AbTest[]>({
+    queryKey: ["/api/ab-tests/active", { 
+      persona: selectedPersona || undefined, 
+      funnelStage: selectedFunnel !== "none" ? selectedFunnel : undefined 
+    }],
+    enabled: showDialog, // Only fetch when dialog is open
+  });
 
   useEffect(() => {
     const adminPersonaOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
@@ -70,6 +153,16 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
     } else {
       setSelectedFunnel("none");
     }
+
+    // Load variant overrides from sessionStorage
+    const savedVariants = sessionStorage.getItem(ADMIN_VARIANT_KEY);
+    if (savedVariants) {
+      try {
+        setSelectedVariants(JSON.parse(savedVariants));
+      } catch (e) {
+        setSelectedVariants({});
+      }
+    }
   }, [persona]);
 
   if (!user?.isAdmin) {
@@ -84,6 +177,14 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
       sessionStorage.removeItem(ADMIN_FUNNEL_KEY);
     }
     sessionStorage.setItem(ADMIN_PERSONA_KEY, selectedPersona || "none");
+    
+    // Save variant overrides
+    if (Object.keys(selectedVariants).length > 0) {
+      sessionStorage.setItem(ADMIN_VARIANT_KEY, JSON.stringify(selectedVariants));
+    } else {
+      sessionStorage.removeItem(ADMIN_VARIANT_KEY);
+    }
+    
     setShowDialog(false);
     window.location.reload();
   };
@@ -92,8 +193,10 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
     await setPersona(null);
     setSelectedPersona(null);
     setSelectedFunnel("none");
+    setSelectedVariants({});
     sessionStorage.removeItem(ADMIN_FUNNEL_KEY);
     sessionStorage.removeItem(ADMIN_PERSONA_KEY);
+    sessionStorage.removeItem(ADMIN_VARIANT_KEY);
     setShowDialog(false);
     window.location.reload();
   };
@@ -204,9 +307,37 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
                 )}
               </div>
 
+              {/* A/B Test Variant Selection */}
+              {activeTests && activeTests.length > 0 && (
+                <div className="space-y-3">
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <TestTube2 className="w-4 h-4" />
+                    A/B Test Variants
+                  </label>
+                  <div className="bg-primary/5 p-4 rounded-md border border-primary/20 space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      {activeTests.length} active {activeTests.length === 1 ? 'test' : 'tests'} for this persona×journey combination. Choose which variant to preview:
+                    </p>
+                    {activeTests.map((test) => (
+                      <VariantSelector
+                        key={test.id}
+                        test={test}
+                        selectedVariantId={selectedVariants[test.id]}
+                        onVariantChange={(variantId) => {
+                          setSelectedVariants(prev => ({
+                            ...prev,
+                            [test.id]: variantId
+                          }));
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="bg-muted/50 p-4 rounded-md border">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Preview Mode</strong> lets you see how different users experience the site. Content will be personalized based on the selected persona and funnel stage.
+                  <strong>Preview Mode</strong> lets you see how different users experience the site. Content will be personalized based on the selected persona and funnel stage{activeTests && activeTests.length > 0 ? ', plus any A/B test variants you select' : ''}.
                 </p>
               </div>
             </div>

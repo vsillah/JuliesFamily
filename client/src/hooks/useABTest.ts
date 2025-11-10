@@ -76,24 +76,54 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
 
     const assignVariant = async () => {
       try {
-        // Request variant assignment
-        const response = await fetch("/api/ab-tests/assign", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            testId: test.id,
-            sessionId,
-            persona,
-            funnelStage,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to assign variant");
+        // Check for admin variant override
+        const adminVariantOverrides = sessionStorage.getItem("admin-variant-override");
+        let adminVariantId: string | null = null;
+        
+        if (adminVariantOverrides) {
+          try {
+            const overrides = JSON.parse(adminVariantOverrides);
+            adminVariantId = overrides[test.id];
+          } catch (e) {
+            // Invalid JSON, ignore
+          }
         }
 
-        const assignmentData: AbTestAssignment = await response.json();
-        setAssignment(assignmentData);
+        let assignmentData: AbTestAssignment;
+        
+        // If admin has selected a specific variant, use that
+        if (adminVariantId && adminVariantId !== "random") {
+          // Create mock assignment for admin override
+          assignmentData = {
+            id: `admin-override-${test.id}`,
+            testId: test.id,
+            variantId: adminVariantId,
+            sessionId,
+            persona: persona || null,
+            funnelStage: funnelStage || null,
+            assignedAt: new Date().toISOString(),
+          };
+          setAssignment(assignmentData);
+        } else {
+          // Normal assignment: request from backend
+          const response = await fetch("/api/ab-tests/assign", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              testId: test.id,
+              sessionId,
+              persona,
+              funnelStage,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to assign variant");
+          }
+
+          assignmentData = await response.json();
+          setAssignment(assignmentData);
+        }
 
         // Fetch variant details
         const variantsResponse = await fetch(`/api/ab-tests/${test.id}/variants`);
@@ -105,12 +135,14 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
           }
         }
 
-        // Track page view
-        await trackABTestEvent(
-          test.id,
-          assignmentData.variantId,
-          "page_view"
-        );
+        // Track page view (only if not admin override)
+        if (!adminVariantId || adminVariantId === "random") {
+          await trackABTestEvent(
+            test.id,
+            assignmentData.variantId,
+            "page_view"
+          );
+        }
       } catch (error) {
         console.error("Failed to assign A/B test variant:", error);
       } finally {
