@@ -47,7 +47,7 @@ export default function TechGoesHomeStudentDashboard() {
               <CardContent>
                 <Button 
                   variant="default" 
-                  onClick={() => window.location.href = '/api/auth/login'}
+                  onClick={() => window.location.href = '/api/login'}
                   data-testid="button-login-required"
                 >
                   Log In

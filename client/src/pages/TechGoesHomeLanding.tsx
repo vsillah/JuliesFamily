@@ -232,7 +232,7 @@ export default function TechGoesHomeLanding() {
                   </p>
                   <Button 
                     className="w-full" 
-                    onClick={() => window.location.href = '/api/auth/login'}
+                    onClick={() => window.location.href = '/api/login'}
                     data-testid="button-login-to-enroll"
                   >
                     Log In to Enroll
