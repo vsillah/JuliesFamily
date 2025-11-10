@@ -2286,18 +2286,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { persona, funnelStage, passions } = req.query;
       
-      // Parse passions from query string (comma-separated or array)
+      // Priority: user profile passions > query string passions > null
       let userPassions: string[] | null = null;
-      if (passions) {
-        userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
-      }
       
-      // If authenticated, also consider user's profile passions
-      if (req.session?.oidcSub && !userPassions) {
+      // First, try to get from authenticated user profile
+      if (req.session?.oidcSub) {
         const user = await storage.getUserByOidcSub(req.session.oidcSub);
         if (user?.passions) {
           userPassions = user.passions as string[];
         }
+      }
+      
+      // If no profile passions, fall back to query string
+      if (!userPassions && passions) {
+        userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
       }
       
       const items = await storage.getVisibleContentItems(
@@ -2344,18 +2346,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { persona, funnelStage, passions } = req.query;
       
-      // Parse passions from query string
+      // Priority: user profile passions > query string passions > null
       let userPassions: string[] | null = null;
-      if (passions) {
-        userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
-      }
       
-      // If authenticated, use user's profile passions
-      if (req.session?.oidcSub && !userPassions) {
+      // First, try to get from authenticated user profile
+      if (req.session?.oidcSub) {
         const user = await storage.getUserByOidcSub(req.session.oidcSub);
         if (user?.passions) {
           userPassions = user.passions as string[];
         }
+      }
+      
+      // If no profile passions, fall back to query string
+      if (!userPassions && passions) {
+        userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
       }
       
       // Query visible content for each type

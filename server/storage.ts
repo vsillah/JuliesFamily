@@ -1183,10 +1183,11 @@ export class DatabaseStorage implements IStorage {
   ): Promise<ContentItem[]> {
     // Compute passion match score: count of matching passion tags
     // Returns 0 if no passions or no match, positive integer for matches
+    // COALESCE ensures NULL passionTags don't crash the query
     const passionMatchScore = userPassions && userPassions.length > 0
       ? sql<number>`(
           SELECT COUNT(*)
-          FROM jsonb_array_elements_text(${contentItems.passionTags}::jsonb) AS tag
+          FROM jsonb_array_elements_text(COALESCE(${contentItems.passionTags}, '[]'::jsonb)) AS tag
           WHERE tag = ANY(${userPassions}::text[])
         )`
       : sql<number>`0`;
