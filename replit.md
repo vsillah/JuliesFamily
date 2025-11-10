@@ -29,8 +29,9 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Admin Chatbot Assistant**: AI-powered troubleshooting and analytics assistant for authenticated admin users, offering platform logs, issue escalation, and various analytics (platform stats, lead analytics, content summary, donation stats).
 -   **Database Backup Manager**: Admin-only system for surgical table-level backup and restore, including automated scheduling with configurable retention policies and timezone awareness.
 -   **Storage Monitoring Dashboard**: Real-time database storage monitoring, projecting future consumption based on backup schedules to prevent exceeding storage limits.
--   **CRM Components**: Lead capture forms, Admin Dashboard for lead management, Communication Timeline, Task Management, Pipeline Management & Analytics, AI-Powered Copy Generation, and Bulk Lead Import.
+-   **CRM Components**: Lead capture forms, Admin Dashboard for lead management, Communication Timeline, Task Management, Pipeline Management & Analytics, AI-Powered Copy Generation, and Bulk Lead Import (supporting Excel, CSV, and Google Sheets).
 -   **Google Calendar Integration**: OAuth-authenticated integration for scheduling, event registration, and task synchronization.
+-   **Bulk Lead Import System**: Multi-format import supporting Excel (.xlsx, .xls), CSV files, and Google Sheets via OAuth connection with comprehensive validation, duplicate detection, and gid-based sheet selection for multi-tab spreadsheets.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage. Role-based access control is implemented with a three-tier system (client, admin, super_admin) and comprehensive audit logging.
