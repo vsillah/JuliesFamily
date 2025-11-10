@@ -51,15 +51,14 @@ export default function PersonalizedLeadMagnet() {
   const { data: leadMagnets = [], isLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/visible/lead_magnet", { persona, funnelStage }],
     queryFn: async () => {
-      const params = new URLSearchParams({ 
-        persona: persona || '', 
-        funnelStage: funnelStage || '' 
-      });
+      const params = new URLSearchParams();
+      if (persona) params.append('persona', persona);
+      if (funnelStage) params.append('funnelStage', funnelStage);
       const res = await fetch(`/api/content/visible/lead_magnet?${params}`);
       if (!res.ok) throw new Error('Failed to fetch lead magnets');
       return res.json();
     },
-    enabled: !!persona && !!funnelStage,
+    enabled: !!persona, // Only require persona - funnel stage is optional
   });
 
   if (isLoading) {
