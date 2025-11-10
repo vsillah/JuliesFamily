@@ -16,7 +16,7 @@ import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { ObjectUploader } from "@/components/ObjectUploader";
-import { AdminPersonaSwitcher } from "@/components/AdminPersonaSwitcher";
+import { AdminPreviewDropdown } from "@/components/AdminPreviewDropdown";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -246,33 +246,9 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   Donate
                 </Button>
               </Link>
-              {currentPersonaConfig && (
-                <button
-                  onClick={() => setShowPersonaModal(true)}
-                  data-testid="button-change-persona"
-                  title="Change your experience"
-                >
-                  <Badge variant="secondary" className="cursor-pointer hover-elevate text-xs min-h-9 flex items-center">
-                    <User className="w-3 h-3 mr-1" />
-                    {currentPersonaConfig.label}
-                  </Badge>
-                </button>
-              )}
               
               {isAdmin && (
-                <>
-                  <AdminPersonaSwitcher isScrolled={isScrolled} />
-                  <Link href="/admin">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      data-testid="button-admin-dashboard"
-                      className={isScrolled ? "" : "text-white hover:bg-white/10"}
-                    >
-                      <Shield className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                </>
+                <AdminPreviewDropdown isScrolled={isScrolled} />
               )}
               
               {isAuthenticated && user ? (
@@ -445,12 +421,6 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                 </div>
               </div>
             )}
-            {currentPersonaConfig && (
-              <Badge variant="secondary" className="mb-2">
-                <User className="w-3 h-3 mr-1" />
-                Viewing as: {currentPersonaConfig.label}
-              </Badge>
-            )}
             {sections.services && (
               <button
                 onClick={() => scrollToSection("services")}
@@ -495,33 +465,10 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             >
               Virtual Tour
             </Link>
-            {currentPersonaConfig && !isAdmin && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setShowPersonaModal(true);
-                  setMobileMenuOpen(false);
-                }}
-                data-testid="button-change-persona-mobile"
-              >
-                Change Experience
-              </Button>
-            )}
             {isAdmin && (
-              <>
-                <div className="w-full flex justify-center">
-                  <AdminPersonaSwitcher 
-                    isScrolled={true}
-                  />
-                </div>
-                <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="outline" size="lg" data-testid="button-admin-dashboard-mobile">
-                    <Shield className="w-4 h-4 mr-2" />
-                    Admin
-                  </Button>
-                </Link>
-              </>
+              <div className="w-full flex justify-center">
+                <AdminPreviewDropdown isScrolled={true} />
+              </div>
             )}
             {isAuthenticated ? (
               <Button 
