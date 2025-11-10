@@ -473,14 +473,20 @@ export type InsertAbTestTarget = z.infer<typeof insertAbTestTargetSchema>;
 export type AbTestTarget = typeof abTestTargets.$inferSelect;
 
 // Test variants - different configurations being tested
+// A/B tests apply presentation overrides to content selected via persona×journey matrix
+// This allows testing different messaging/CTAs while maintaining personalization
 export const abTestVariants = pgTable("ab_test_variants", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(), // 'Control', 'Variant A', 'Variant B', etc
   description: text("description"),
+  contentType: varchar("content_type").notNull().default('hero'), // 'hero', 'cta', 'service', 'testimonial', 'event', 'video', 'social_media', 'lead_magnet'
   trafficWeight: integer("traffic_weight").default(50), // Percentage of test traffic (weights sum to 100)
-  configuration: jsonb("configuration").notNull(), // Variant-specific config (card order, layout changes, etc)
-  contentItemId: varchar("content_item_id").references(() => contentItems.id, { onDelete: "set null" }), // Optional link to Content Manager item
+  // Configuration contains presentation overrides applied AFTER content selection
+  // Example: { title: "New Headline", description: "Test copy", ctaText: "Join Now", imageName: "hero-alt" }
+  // Content is first selected by persona + journey stage + passion tags, then overrides are applied
+  configuration: jsonb("configuration").notNull(),
+  contentItemId: varchar("content_item_id").references(() => contentItems.id, { onDelete: "set null" }), // DEPRECATED v1.5: Will be removed in v2.0. Use configuration overrides instead. Existing tests using this field will continue to work but new tests should use configuration-only approach.
   isControl: boolean("is_control").default(false), // Is this the control/baseline variant?
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -493,6 +499,32 @@ export const insertAbTestVariantSchema = createInsertSchema(abTestVariants).omit
 });
 export type InsertAbTestVariant = z.infer<typeof insertAbTestVariantSchema>;
 export type AbTestVariant = typeof abTestVariants.$inferSelect;
+
+// Zod schema for A/B test variant configuration validation
+// Configuration contains presentation overrides applied to content after selection
+export const abTestVariantConfigurationSchema = z.object({
+  // Text content overrides
+  title: z.string().optional(),
+  description: z.string().optional(),
+  
+  // CTA overrides
+  ctaText: z.string().optional(),
+  ctaLink: z.string().optional(),
+  secondaryCtaText: z.string().optional(),
+  secondaryCtaLink: z.string().optional(),
+  
+  // Visual overrides
+  imageName: z.string().optional(),
+  imageUrl: z.string().optional(),
+  
+  // Style overrides
+  buttonVariant: z.enum(['default', 'secondary', 'outline', 'ghost', 'link', 'destructive']).optional(),
+  
+  // Metadata overrides (for content-type specific fields)
+  metadata: z.record(z.any()).optional(),
+}).strict(); // Strict mode prevents unknown keys
+
+export type AbTestVariantConfiguration = z.infer<typeof abTestVariantConfigurationSchema>;
 
 // Track which variant each session/user sees (ensures consistency)
 export const abTestAssignments = pgTable("ab_test_assignments", {

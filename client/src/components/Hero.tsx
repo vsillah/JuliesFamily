@@ -4,7 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import { useABTest } from "@/hooks/useABTest";
-import type { ContentItem } from "@shared/schema";
+import { applyABVariantOverrides } from "@/lib/abTestUtils";
+import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 interface HeroProps {
   onImageLoaded: (loaded: boolean) => void;
@@ -18,15 +19,15 @@ export default function Hero({ onImageLoaded }: HeroProps) {
   const [textVisible, setTextVisible] = useState(false);
   const [imageError, setImageError] = useState(false);
   
-  // Check for active A/B test (using internal type name)
-  const { variant: abVariant, isLoading: abLoading, trackConversion } = useABTest('hero_variation', { 
+  // Check for active A/B test for hero content
+  const { variant: abVariant, configuration: abConfig, trackConversion } = useABTest('hero_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
   });
   
-  // Fetch hero content for current persona
+  // Fetch visible hero content filtered by persona + journey stage + passion tags
   const { data: heroContent } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/hero"],
+    queryKey: ["/api/content/visible/hero", { persona, funnelStage }],
   });
   
   // Fetch visible sections for current persona and funnel stage
@@ -34,24 +35,12 @@ export default function Hero({ onImageLoaded }: HeroProps) {
     queryKey: ["/api/content/visible-sections", { persona, funnelStage }],
   });
   
-  // Determine content to display: A/B variant > persona/stage match > default
-  let currentHero: ContentItem | undefined;
-  
-  if (abVariant?.contentItemId) {
-    // Use content item from A/B test variant
-    currentHero = heroContent?.find(h => h.id === abVariant.contentItemId);
-  }
-  
-  if (!currentHero) {
-    // Fallback to persona/funnel stage matching
-    currentHero = heroContent?.find(h => {
-      const meta = h.metadata as any;
-      return meta?.persona === persona && meta?.funnelStage === funnelStage;
-    }) || heroContent?.find(h => {
-      const meta = h.metadata as any;
-      return meta?.persona === 'donor' && meta?.funnelStage === 'awareness';
-    });
-  }
+  // Select first hero content (already filtered by persona×journey matrix and ordered by passion tags)
+  // Then apply A/B test variant overrides if active
+  const baseHero = heroContent?.[0];
+  const currentHero = baseHero 
+    ? applyABVariantOverrides(baseHero, abConfig as AbTestVariantConfiguration | null)
+    : undefined;
   
   const imageName = currentHero?.imageName || "hero-volunteer-student";
   const { data: heroImageAsset } = useCloudinaryImage(imageName);
