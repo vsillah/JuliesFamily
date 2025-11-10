@@ -12,21 +12,65 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, Save, User as UserIcon } from "lucide-react";
+import { Loader2, Save, User as UserIcon, Shield, ChevronDown, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { ChevronLeft } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 type ProfileFormValues = z.infer<typeof updateUserProfileSchema>;
+
+interface AdminPreferences {
+  // Notification Preferences
+  newLeadAlerts: boolean;
+  taskAssignmentAlerts: boolean;
+  taskCompletionAlerts: boolean;
+  donationAlerts: boolean;
+  emailCampaignAlerts: boolean;
+  calendarEventReminders: boolean;
+  notificationChannels: string[];
+  
+  // Workflow Preferences
+  autoAssignNewLeads: boolean;
+  defaultTaskDueDateOffset: number;
+  defaultLeadSource?: string;
+  defaultLeadStatus: string;
+  preferredPipelineView: string;
+  
+  // Interface Preferences
+  defaultLandingPage: string;
+  theme: string;
+  itemsPerPage: number;
+  dataDensity: string;
+  defaultContentFilter: string;
+  
+  // Communication Preferences
+  dailyDigestEnabled: boolean;
+  weeklyReportEnabled: boolean;
+  criticalAlertsOnly: boolean;
+}
 
 export default function Profile() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const successTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const { isAdmin } = useUserRole();
+  const [adminControlsOpen, setAdminControlsOpen] = useState(false);
+  const [adminPrefs, setAdminPrefs] = useState<AdminPreferences | null>(null);
+  const [hasAdminChanges, setHasAdminChanges] = useState(false);
 
   // Fetch current user data
   const { data: user, isLoading } = useQuery({
     queryKey: ["/api/auth/user"],
+  });
+
+  // Fetch admin preferences if user is admin
+  const { data: adminPreferences, isLoading: isLoadingAdminPrefs } = useQuery<AdminPreferences>({
+    queryKey: ["/api/admin/preferences"],
+    enabled: isAdmin,
   });
 
   // Initialize form with empty defaults
@@ -64,6 +108,13 @@ export default function Profile() {
       }
     };
   }, []);
+
+  // Initialize admin prefs when data loads
+  useEffect(() => {
+    if (adminPreferences && isAdmin) {
+      setAdminPrefs(adminPreferences);
+    }
+  }, [adminPreferences, isAdmin]);
 
   // Update profile mutation
   const updateProfileMutation = useMutation({
@@ -105,9 +156,49 @@ export default function Profile() {
     },
   });
 
+  // Update admin preferences mutation
+  const updateAdminPrefsMutation = useMutation({
+    mutationFn: async (updates: Partial<AdminPreferences>) => {
+      const response = await apiRequest("PATCH", "/api/admin/preferences", updates);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/preferences"] });
+      toast({
+        title: "Admin preferences saved",
+        description: "Your admin preferences have been updated successfully.",
+        duration: 3000,
+      });
+      setHasAdminChanges(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to save admin preferences. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = async (data: ProfileFormValues) => {
     setIsSubmitting(true);
     updateProfileMutation.mutate(data);
+  };
+
+  const handleAdminPrefChange = (key: keyof AdminPreferences, value: any) => {
+    setAdminPrefs(prev => prev ? { ...prev, [key]: value } : null);
+    setHasAdminChanges(true);
+  };
+
+  const handleSaveAdminPrefs = () => {
+    if (adminPrefs) {
+      updateAdminPrefsMutation.mutate(adminPrefs);
+    }
+  };
+
+  const handleResetAdminPrefs = () => {
+    setAdminPrefs(adminPreferences || null);
+    setHasAdminChanges(false);
   };
 
   const getUserInitials = () => {
@@ -336,6 +427,116 @@ export default function Profile() {
             </Form>
           </CardContent>
         </Card>
+
+        {/* Admin Controls Section */}
+        {isAdmin && adminPrefs && (
+          <Card className="mt-6" data-testid="card-admin-controls">
+            <Collapsible open={adminControlsOpen} onOpenChange={setAdminControlsOpen}>
+              <CardHeader>
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between cursor-pointer group">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-5 h-5 text-primary" />
+                      <CardTitle>Admin Controls</CardTitle>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform group-hover:text-primary ${adminControlsOpen ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+                <CardDescription>
+                  Quick access to key admin preferences
+                </CardDescription>
+              </CardHeader>
+              <CollapsibleContent>
+                <CardContent className="space-y-6">
+                  {/* Key Notification Preferences */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold">Notifications</h3>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="admin-new-lead-alerts">New Lead Alerts</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Get notified when a new lead is created
+                        </p>
+                      </div>
+                      <Switch
+                        id="admin-new-lead-alerts"
+                        checked={adminPrefs.newLeadAlerts}
+                        onCheckedChange={(checked) => handleAdminPrefChange("newLeadAlerts", checked)}
+                        data-testid="switch-admin-new-lead-alerts"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="admin-donation-alerts">Donation Alerts</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Get notified when a donation is received
+                        </p>
+                      </div>
+                      <Switch
+                        id="admin-donation-alerts"
+                        checked={adminPrefs.donationAlerts}
+                        onCheckedChange={(checked) => handleAdminPrefChange("donationAlerts", checked)}
+                        data-testid="switch-admin-donation-alerts"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Key Communication Preferences */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-semibold">Communication</h3>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="admin-daily-digest">Daily Digest</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receive a daily summary of admin activities
+                        </p>
+                      </div>
+                      <Switch
+                        id="admin-daily-digest"
+                        checked={adminPrefs.dailyDigestEnabled}
+                        onCheckedChange={(checked) => handleAdminPrefChange("dailyDigestEnabled", checked)}
+                        data-testid="switch-admin-daily-digest"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-4 border-t">
+                    <Link href="/admin/preferences">
+                      <Button variant="ghost" size="sm" data-testid="link-view-all-admin-prefs">
+                        View all admin preferences
+                        <ExternalLink className="w-3 h-3 ml-2" />
+                      </Button>
+                    </Link>
+                    {hasAdminChanges && (
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleResetAdminPrefs}
+                          disabled={updateAdminPrefsMutation.isPending}
+                          data-testid="button-reset-admin-prefs"
+                        >
+                          Reset
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={handleSaveAdminPrefs}
+                          disabled={updateAdminPrefsMutation.isPending}
+                          data-testid="button-save-admin-prefs"
+                        >
+                          {updateAdminPrefsMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                          Save Changes
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </CollapsibleContent>
+            </Collapsible>
+          </Card>
+        )}
       </div>
     </div>
   );

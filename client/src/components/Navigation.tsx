@@ -282,23 +282,11 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                         Profile Settings
                       </DropdownMenuItem>
                     </Link>
-                    <DropdownMenuItem onClick={() => setShowUploader(true)} data-testid="menu-update-photo">
-                      <Camera className="w-4 h-4 mr-2" />
-                      Update Photo
-                    </DropdownMenuItem>
-                    {isSuperAdmin && (
-                      <Link href="/admin/users">
-                        <DropdownMenuItem className="cursor-pointer" data-testid="menu-user-management">
-                          <Users className="w-4 h-4 mr-2" />
-                          User Management
-                        </DropdownMenuItem>
-                      </Link>
-                    )}
                     {isAdmin && (
-                      <Link href="/admin/preferences">
-                        <DropdownMenuItem className="cursor-pointer" data-testid="menu-preferences">
-                          <Settings className="w-4 h-4 mr-2" />
-                          Preferences
+                      <Link href="/admin">
+                        <DropdownMenuItem className="cursor-pointer" data-testid="menu-admin-dashboard">
+                          <Shield className="w-4 h-4 mr-2" />
+                          Admin Dashboard
                         </DropdownMenuItem>
                       </Link>
                     )}
