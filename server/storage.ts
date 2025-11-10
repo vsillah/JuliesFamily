@@ -729,11 +729,58 @@ export class DatabaseStorage implements IStorage {
         role: userData.role || "client",  // Default to safe 'client' role
       };
       
-      const [user] = await db
-        .insert(users)
-        .values(insertData)
-        .returning();
-      return user;
+      try {
+        const [user] = await db
+          .insert(users)
+          .values(insertData)
+          .returning();
+        return user;
+      } catch (error: any) {
+        // Handle race condition: if unique constraint fails, retry by finding and updating existing user
+        if (error?.code === '23505' || error?.message?.includes('duplicate key') || error?.message?.includes('unique constraint')) {
+          console.log('[upsertUser] Caught unique constraint violation, retrying with update...', error.message);
+          
+          // Retry finding the user by email or oidcSub
+          if (userData.email) {
+            [existingUser] = await db.select().from(users).where(eq(users.email, userData.email));
+          }
+          if (!existingUser && userData.oidcSub) {
+            [existingUser] = await db.select().from(users).where(eq(users.oidcSub, userData.oidcSub));
+          }
+          
+          if (existingUser) {
+            // Update the existing user
+            const updateData: any = {
+              oidcSub: userData.oidcSub,
+              email: userData.email,
+              updatedAt: new Date(),
+            };
+            
+            if (userData.firstName && !existingUser.firstName) {
+              updateData.firstName = userData.firstName;
+            }
+            if (userData.lastName && !existingUser.lastName) {
+              updateData.lastName = userData.lastName;
+            }
+            if (userData.profileImageUrl !== undefined) {
+              updateData.profileImageUrl = userData.profileImageUrl;
+            }
+            if (userData.role !== undefined) {
+              updateData.role = userData.role;
+            }
+            
+            const [user] = await db
+              .update(users)
+              .set(updateData)
+              .where(eq(users.id, existingUser.id))
+              .returning();
+            return user;
+          }
+        }
+        
+        // If it's not a unique constraint error or retry failed, rethrow
+        throw error;
+      }
     }
   }
 
