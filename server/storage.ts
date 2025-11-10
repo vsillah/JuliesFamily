@@ -759,6 +759,9 @@ export class DatabaseStorage implements IStorage {
     if (updates.role !== undefined) updateData.role = updates.role;
     if (updates.email !== undefined) updateData.email = updates.email;
     if (updates.oidcSub !== undefined) updateData.oidcSub = updates.oidcSub;
+    
+    // System-managed fields (payment integration)
+    if (updates.stripeCustomerId !== undefined) updateData.stripeCustomerId = updates.stripeCustomerId;
 
     const [user] = await db
       .update(users)
