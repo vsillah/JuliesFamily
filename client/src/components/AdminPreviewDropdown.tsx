@@ -148,7 +148,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           <ChevronDown className="w-3 h-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80" data-testid="menu-admin-preview">
+      <DropdownMenuContent align="end" className="w-80 z-[99999]" data-testid="menu-admin-preview">
         <DropdownMenuLabel className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-primary" />
           Admin Preview Mode
