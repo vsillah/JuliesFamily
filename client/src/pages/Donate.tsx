@@ -10,9 +10,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { Heart, CreditCard, Loader2, Home } from 'lucide-react';
+import { Heart, CreditCard, Loader2, Home, LogIn } from 'lucide-react';
 import { Link } from 'wouter';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/useAuth';
+import { SavedPaymentMethods } from '@/components/SavedPaymentMethods';
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
@@ -29,15 +31,17 @@ const PASSION_OPTIONS = [
   { id: 'community', label: 'Community Building', description: 'Support family events and community connections' },
 ];
 
-function DonationForm({ amount, donationType, frequency, donorInfo, onAmountChange, onTypeChange, onFrequencyChange, onDonorInfoChange }: {
+function DonationForm({ amount, donationType, frequency, donorInfo, savePaymentMethod, onAmountChange, onTypeChange, onFrequencyChange, onDonorInfoChange, onSavePaymentMethodChange }: {
   amount: number;
   donationType: 'one-time' | 'recurring';
   frequency: 'monthly' | 'quarterly' | 'annual';
   donorInfo: { email: string; name: string; phone: string; isAnonymous: boolean; passions: string[] };
+  savePaymentMethod: boolean;
   onAmountChange: (amount: number) => void;
   onTypeChange: (type: 'one-time' | 'recurring') => void;
   onFrequencyChange: (freq: 'monthly' | 'quarterly' | 'annual') => void;
   onDonorInfoChange: (info: any) => void;
+  onSavePaymentMethodChange: (checked: boolean) => void;
 }) {
   const [customAmount, setCustomAmount] = useState('');
 
@@ -171,6 +175,31 @@ function DonationForm({ amount, donationType, frequency, donorInfo, onAmountChan
         </div>
       </div>
 
+      <div className="flex items-start space-x-2">
+        <Checkbox
+          id="save-payment"
+          checked={savePaymentMethod}
+          onCheckedChange={onSavePaymentMethodChange}
+          disabled={donationType === 'recurring'}
+          data-testid="checkbox-save-payment"
+        />
+        <div className="grid gap-1.5 leading-none">
+          <Label
+            htmlFor="save-payment"
+            className={`text-sm font-medium leading-none ${
+              donationType === 'recurring' ? 'text-muted-foreground' : 'cursor-pointer'
+            }`}
+          >
+            Save payment details for future donations
+          </Label>
+          {donationType === 'recurring' && (
+            <p className="text-xs text-muted-foreground">
+              Payment details are automatically saved for recurring donations
+            </p>
+          )}
+        </div>
+      </div>
+
       <div className="space-y-3">
         <div>
           <Label className="text-base font-semibold block">What Are You Passionate About?</Label>
@@ -270,9 +299,11 @@ function CheckoutForm({ clientSecret, amount }: { clientSecret: string; amount: 
 }
 
 export default function Donate() {
+  const { user, isLoading: isAuthLoading, isAuthenticated } = useAuth();
   const [step, setStep] = useState<'form' | 'payment'>('form');
   const [campaignSlug, setCampaignSlug] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState<string | null>(null);
+  const [hasPrefilledProfile, setHasPrefilledProfile] = useState(false);
   
   // Initialize state from URL params
   const [amount, setAmount] = useState(() => {
@@ -306,9 +337,36 @@ export default function Donate() {
     isAnonymous: false,
     passions: [] as string[],
   });
+  const [savePaymentMethod, setSavePaymentMethod] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlFrequency = params.get('frequency');
+    // Auto-true for recurring
+    return (urlFrequency === 'monthly' || urlFrequency === 'quarterly' || urlFrequency === 'annual');
+  });
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+
+  // Prefill donor info from user profile (only once when user data first loads)
+  useEffect(() => {
+    if (user && !hasPrefilledProfile) {
+      const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ');
+      setDonorInfo(prev => ({
+        ...prev,
+        email: user.email || prev.email,
+        name: fullName || prev.name,
+      }));
+      setHasPrefilledProfile(true);
+    }
+  }, [user, hasPrefilledProfile]);
+
+  // Auto-check savePaymentMethod for recurring donations
+  useEffect(() => {
+    if (donationType === 'recurring') {
+      setSavePaymentMethod(true);
+    }
+  }, [donationType]);
 
   // Read campaign from URL params and fetch campaign details
   useEffect(() => {
@@ -362,6 +420,7 @@ export default function Donate() {
         isAnonymous: donorInfo.isAnonymous,
         passions: donorInfo.passions,
         campaignSlug: campaignSlug, // Pass campaign context
+        savePaymentMethod: savePaymentMethod,
       });
 
       const data = await response.json();
@@ -377,6 +436,56 @@ export default function Donate() {
       setIsLoading(false);
     }
   };
+
+  // Show loading spinner while checking authentication
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Require authentication to donate
+  if (!isAuthenticated) {
+    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="mb-6">
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="gap-2" data-testid="button-back-home-donate">
+                <Home className="w-4 h-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
+          
+          <Card className="text-center p-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+              <Heart className="w-8 h-8 text-primary" fill="currentColor" />
+            </div>
+            <h1 className="text-3xl font-bold mb-3">Login Required</h1>
+            <p className="text-lg text-muted-foreground mb-6">
+              Please log in to make a donation. This helps us provide you with receipts and manage your giving history.
+            </p>
+            <a href={`/api/login?returnUrl=${returnUrl}`}>
+              <Button size="lg" className="gap-2" data-testid="button-login-to-donate">
+                <LogIn className="w-5 h-5" />
+                Log In to Donate
+              </Button>
+            </a>
+            <p className="text-sm text-muted-foreground mt-4">
+              Don't have an account? Creating one is quick and easy during the login process.
+            </p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4">
@@ -423,11 +532,21 @@ export default function Donate() {
                   donationType={donationType}
                   frequency={frequency}
                   donorInfo={donorInfo}
+                  savePaymentMethod={savePaymentMethod}
                   onAmountChange={setAmount}
                   onTypeChange={setDonationType}
                   onFrequencyChange={setFrequency}
                   onDonorInfoChange={setDonorInfo}
+                  onSavePaymentMethodChange={(checked) => setSavePaymentMethod(!!checked)}
                 />
+                
+                {isAuthenticated && (
+                  <SavedPaymentMethods
+                    value={selectedPaymentMethod}
+                    onChange={setSelectedPaymentMethod}
+                  />
+                )}
+
                 <Button
                   onClick={handleProceedToPayment}
                   disabled={isLoading}

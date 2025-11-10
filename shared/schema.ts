@@ -31,6 +31,7 @@ export const users = pgTable("users", {
   persona: varchar("persona"), // Stored persona preference: student, provider, parent, donor, volunteer
   role: varchar("role").notNull().default('client'), // client, admin, super_admin
   isAdmin: boolean("is_admin").default(false), // DEPRECATED: Use role instead. Kept for backward compatibility during migration.
+  stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for saved payment methods
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

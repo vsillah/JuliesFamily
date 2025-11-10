@@ -4444,7 +4444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Rate limited to prevent payment abuse
   app.post("/api/donations/create-checkout", paymentLimiter, async (req, res) => {
     try {
-      const { amount, donationType, frequency, donorEmail, donorName, donorPhone, isAnonymous, passions, wishlistItemId, metadata } = req.body;
+      const { amount, donationType, frequency, donorEmail, donorName, donorPhone, isAnonymous, passions, wishlistItemId, metadata, savePaymentMethod } = req.body;
 
       // Validate amount
       if (!amount || amount < 100) { // Minimum $1.00
@@ -4504,10 +4504,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      // Get authenticated user ID from session
+      const userId = (req as any).user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      // Get or create Stripe Customer for this user
+      const customerId = await getOrCreateStripeCustomer(userId);
+
       // Create Stripe payment intent
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amountInCents,
         currency: "usd",
+        customer: customerId,
+        automatic_payment_methods: { enabled: true },
         metadata: {
           donationType,
           frequency: frequency || '',
@@ -4518,6 +4529,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...(metadata || {})
         },
         receipt_email: donorEmail || undefined,
+        // Add setup_future_usage for recurring or if savePaymentMethod is true
+        ...(donationType === 'recurring' || savePaymentMethod ? { setup_future_usage: 'off_session' } : {})
       });
 
       // Create donation record in pending state
@@ -5199,6 +5212,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error sending donation campaign:", error);
       res.status(500).json({ message: "Failed to send donation campaign" });
+    }
+  });
+
+  // Stripe Customer Management Routes
+  
+  // Helper: Get or create Stripe Customer for authenticated user
+  // Returns customer ID, creates if needed, stores in user profile
+  async function getOrCreateStripeCustomer(oidcSubId: string): Promise<string> {
+    const user = await storage.getUserByOidcSub(oidcSubId);
+    if (!user) throw new Error('User not found');
+    
+    // Return existing if present
+    if (user.stripeCustomerId) return user.stripeCustomerId;
+    
+    // Search Stripe for existing customer (idempotency)
+    const existing = await stripe.customers.list({ email: user.email, limit: 1 });
+    if (existing.data.length > 0) {
+      const customerId = existing.data[0].id;
+      await storage.updateUser(user.id, { stripeCustomerId: customerId });
+      return customerId;
+    }
+    
+    // Create new customer
+    const customer = await stripe.customers.create({
+      email: user.email!,
+      name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+      metadata: { oidcSubId }
+    });
+    
+    await storage.updateUser(user.id, { stripeCustomerId: customer.id });
+    return customer.id;
+  }
+
+  // GET /api/stripe/payment-methods - List saved payment methods
+  app.get('/api/stripe/payment-methods', isAuthenticated, paymentLimiter, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get or create Stripe customer ID
+      const customerId = await getOrCreateStripeCustomer(userId);
+      
+      // Fetch payment methods from Stripe
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: customerId,
+        type: 'card'
+      });
+      
+      // Map to simplified response
+      const cards = paymentMethods.data.map(pm => ({
+        id: pm.id,
+        last4: pm.card?.last4,
+        brand: pm.card?.brand,
+        expMonth: pm.card?.exp_month,
+        expYear: pm.card?.exp_year
+      }));
+      
+      res.json(cards);
+    } catch (error: any) {
+      console.error("Error fetching payment methods:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch payment methods",
+        error: error.message 
+      });
+    }
+  });
+
+  // POST /api/stripe/setup-intent - Create SetupIntent to save a new card
+  app.post('/api/stripe/setup-intent', isAuthenticated, paymentLimiter, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get or create Stripe customer ID
+      const customerId = await getOrCreateStripeCustomer(userId);
+      
+      // Create SetupIntent
+      const setupIntent = await stripe.setupIntents.create({
+        customer: customerId,
+        payment_method_types: ['card']
+      });
+      
+      res.json({ clientSecret: setupIntent.client_secret });
+    } catch (error: any) {
+      console.error("Error creating setup intent:", error);
+      res.status(500).json({ 
+        message: "Failed to create setup intent",
+        error: error.message 
+      });
     }
   });
 
