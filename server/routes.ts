@@ -23,6 +23,7 @@ import * as XLSX from "xlsx";
 import { CalendarService } from "./calendarService";
 import { fromZonedTime } from "date-fns-tz";
 import { seedDemoData } from "./demo-data";
+import { parseGoogleSheetUrl, fetchSheetData } from "./googleSheets";
 
 // Extend Express Request to properly type authenticated user
 interface AuthenticatedRequest extends Request {
@@ -1252,6 +1253,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: error.message });
     }
     next();
+  });
+
+  // Google Sheets Import
+  const googleSheetImportSchema = z.object({
+    sheetUrl: z.string().url("Invalid Google Sheets URL"),
+  });
+
+  app.post('/api/admin/leads/google-sheets-import', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      // Validate request body
+      const validatedInput = googleSheetImportSchema.parse(req.body);
+      const { sheetUrl } = validatedInput;
+
+      // Parse the Google Sheets URL
+      const parsed = parseGoogleSheetUrl(sheetUrl);
+      if (!parsed) {
+        return res.status(400).json({ message: "Invalid Google Sheets URL" });
+      }
+
+      // Fetch data from Google Sheets
+      const data = await fetchSheetData(parsed.spreadsheetId, parsed.gid, parsed.range);
+
+      if (!data || data.length === 0) {
+        return res.status(400).json({ message: "No data found in the sheet" });
+      }
+
+      // Process the data using the same logic as file import
+      const results = {
+        total: data.length,
+        successful: 0,
+        failed: 0,
+        errors: [] as { row: number; email: string; error: string }[],
+      };
+
+      for (let i = 0; i < data.length; i++) {
+        const row: any = data[i];
+        try {
+          const email = row.Email || row.email;
+          if (!email) {
+            throw new Error('Email is required');
+          }
+
+          const existingLead = await storage.getLeadByEmail(email);
+          
+          if (existingLead) {
+            // For updates: only include fields that are actually provided in the spreadsheet
+            const updateData: any = { email };
+            
+            if (row['First Name'] || row.firstName) updateData.firstName = row['First Name'] || row.firstName;
+            if (row['Last Name'] || row.lastName) updateData.lastName = row['Last Name'] || row.lastName;
+            if (row.Phone || row.phone) updateData.phone = row.Phone || row.phone;
+            if (row.Persona || row.persona) updateData.persona = row.Persona || row.persona;
+            if (row['Funnel Stage'] || row.funnelStage) updateData.funnelStage = row['Funnel Stage'] || row.funnelStage;
+            if (row['Pipeline Stage'] || row.pipelineStage) updateData.pipelineStage = row['Pipeline Stage'] || row.pipelineStage;
+            if (row['Lead Source'] || row.leadSource) updateData.leadSource = row['Lead Source'] || row.leadSource;
+            if (row.Notes || row.notes) updateData.notes = row.Notes || row.notes;
+            
+            await storage.updateLead(existingLead.id, updateData);
+          } else {
+            // For new leads: apply defaults for required fields
+            const newLeadData = {
+              email,
+              firstName: row['First Name'] || row.firstName || null,
+              lastName: row['Last Name'] || row.lastName || null,
+              phone: row.Phone || row.phone || null,
+              persona: row.Persona || row.persona || 'student',
+              funnelStage: row['Funnel Stage'] || row.funnelStage || 'awareness',
+              pipelineStage: row['Pipeline Stage'] || row.pipelineStage || 'new_lead',
+              leadSource: row['Lead Source'] || row.leadSource || 'google_sheets',
+              notes: row.Notes || row.notes || null,
+            };
+
+            const validatedData = insertLeadSchema.parse(newLeadData);
+            const newLead = await storage.createLead(validatedData);
+            await createTaskForNewLead(storage, newLead);
+          }
+          
+          results.successful++;
+        } catch (error) {
+          results.failed++;
+          results.errors.push({
+            row: i + 2,
+            email: row.Email || row.email || 'Unknown',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      }
+
+      res.json(results);
+    } catch (error: any) {
+      console.error("Error processing Google Sheets import:", error);
+      
+      // Check for specific Google Sheets API errors
+      if (error.message?.includes('not connected')) {
+        return res.status(503).json({ message: "Google Sheets integration not set up. Please connect your Google account." });
+      }
+      
+      if (error.code === 404 || error.message?.includes('not found')) {
+        return res.status(404).json({ message: "Sheet not found. Please check the URL and ensure you have access to the sheet." });
+      }
+      
+      if (error.code === 403 || error.message?.includes('permission')) {
+        return res.status(403).json({ message: "Access denied. Please ensure the sheet is shared with your Google account." });
+      }
+      
+      res.status(500).json({ message: error.message || "Failed to import from Google Sheets" });
+    }
   });
 
   // Lead Sourcing: Webhook endpoint for external lead ingestion

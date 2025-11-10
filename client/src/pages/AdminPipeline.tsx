@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface BoardData {
   stages: PipelineStage[];
@@ -228,6 +229,7 @@ export default function AdminPipeline() {
     failed: number;
     errors: { row: number; email: string; error: string }[];
   } | null>(null);
+  const [googleSheetUrl, setGoogleSheetUrl] = useState("");
 
   const { data: boardData, isLoading } = useQuery<BoardData>({
     queryKey: ['/api/pipeline/board'],
@@ -340,6 +342,59 @@ export default function AdminPipeline() {
         variant: "destructive",
         title: "Upload Failed",
         description: error instanceof Error ? error.message : "Failed to upload file",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleGoogleSheetsImport = async () => {
+    if (!googleSheetUrl.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Missing URL",
+        description: "Please enter a Google Sheets URL",
+      });
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadResults(null);
+
+    try {
+      const response = await fetch('/api/admin/leads/google-sheets-import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sheetUrl: googleSheetUrl }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to import from Google Sheets');
+      }
+
+      const results = await response.json();
+      setUploadResults(results);
+
+      if (results.successful > 0) {
+        await queryClient.invalidateQueries({ queryKey: ['/api/pipeline/board'] });
+        await queryClient.invalidateQueries({ queryKey: ['/api/pipeline/analytics'] });
+        
+        toast({
+          title: "Import Successful",
+          description: `Imported ${results.successful} leads from Google Sheets${results.failed > 0 ? ` (${results.failed} failed)` : ''}`,
+        });
+        
+        setGoogleSheetUrl("");
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : "Failed to import from Google Sheets",
       });
     } finally {
       setIsUploading(false);
@@ -468,106 +523,154 @@ export default function AdminPipeline() {
                 Bulk Import
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="sm:max-w-2xl">
               <DialogHeader>
                 <DialogTitle>Bulk Import Leads</DialogTitle>
                 <DialogDescription>
-                  Upload a spreadsheet file to import multiple leads at once
+                  Import leads from a file or Google Sheets
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="file-upload">Upload File</Label>
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    accept=".xlsx,.xls,.csv"
-                    onChange={handleFileUpload}
-                    disabled={isUploading}
-                    data-testid="input-file-upload"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Supported formats: .xlsx, .xls, .csv
-                  </p>
-                </div>
+              <Tabs defaultValue="file" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="file" data-testid="tab-file-upload">
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload File
+                  </TabsTrigger>
+                  <TabsTrigger value="sheets" data-testid="tab-google-sheets">
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
+                    Google Sheets
+                  </TabsTrigger>
+                </TabsList>
 
-                {isUploading && (
+                <TabsContent value="file" className="space-y-6 mt-6">
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Uploading and processing...</p>
-                    <Progress value={50} className="w-full" />
+                    <Label htmlFor="file-upload">Upload File</Label>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleFileUpload}
+                      disabled={isUploading}
+                      data-testid="input-file-upload"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Supported formats: .xlsx, .xls, .csv
+                    </p>
                   </div>
-                )}
 
-                {uploadResults && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Import Results</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Total Rows:</span>
-                        <span className="font-semibold">{uploadResults.total}</span>
+                  <div className="flex flex-col gap-2">
+                    <div className="space-y-2">
+                      <Label>Download Template</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          onClick={() => handleDownloadTemplate('xlsx')}
+                          className="w-full"
+                          data-testid="button-download-template-excel"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Excel
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleDownloadTemplate('csv')}
+                          className="w-full"
+                          data-testid="button-download-template-csv"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          CSV
+                        </Button>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Successful:</span>
-                        <span className="font-semibold text-green-600 dark:text-green-400">{uploadResults.successful}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Failed:</span>
-                        <span className="font-semibold text-destructive">{uploadResults.failed}</span>
-                      </div>
-                      
-                      {uploadResults.errors.length > 0 && (
-                        <div className="mt-4 space-y-2">
-                          <p className="text-sm font-medium">Errors:</p>
-                          <div className="max-h-48 overflow-y-auto space-y-1">
-                            {uploadResults.errors.slice(0, 10).map((error, idx) => (
-                              <p key={idx} className="text-xs text-destructive">
-                                Row {error.row} ({error.email}): {error.error}
-                              </p>
-                            ))}
-                            {uploadResults.errors.length > 10 && (
-                              <p className="text-xs text-muted-foreground">
-                                ...and {uploadResults.errors.length - 10} more errors
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-
-                <div className="flex flex-col gap-2">
-                  <div className="space-y-2">
-                    <Label>Download Template</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        variant="outline"
-                        onClick={() => handleDownloadTemplate('xlsx')}
-                        className="w-full"
-                        data-testid="button-download-template-excel"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Excel
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => handleDownloadTemplate('csv')}
-                        className="w-full"
-                        data-testid="button-download-template-csv"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        CSV
-                      </Button>
                     </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Use the template to format your lead data correctly
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Use the template to format your lead data correctly
-                  </p>
+                </TabsContent>
+
+                <TabsContent value="sheets" className="space-y-6 mt-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="sheet-url">Google Sheets URL</Label>
+                    <Input
+                      id="sheet-url"
+                      type="url"
+                      placeholder="https://docs.google.com/spreadsheets/d/..."
+                      value={googleSheetUrl}
+                      onChange={(e) => setGoogleSheetUrl(e.target.value)}
+                      disabled={isUploading}
+                      data-testid="input-google-sheets-url"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Paste the full URL of your Google Sheet (including #gid= if you want a specific tab). Make sure it's shared with view access.
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleGoogleSheetsImport}
+                    disabled={isUploading || !googleSheetUrl.trim()}
+                    className="w-full"
+                    data-testid="button-import-google-sheets"
+                  >
+                    <FileSpreadsheet className="w-4 h-4 mr-2" />
+                    Import from Google Sheets
+                  </Button>
+
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Expected Format:</p>
+                    <p className="text-xs text-muted-foreground">
+                      Your sheet should have columns: Email, First Name, Last Name, Phone, Persona, Funnel Stage, Pipeline Stage, Lead Source, Notes
+                    </p>
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              {isUploading && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Processing...</p>
+                  <Progress value={50} className="w-full" />
                 </div>
-              </div>
+              )}
+
+              {uploadResults && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Import Results</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Total Rows:</span>
+                      <span className="font-semibold">{uploadResults.total}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Successful:</span>
+                      <span className="font-semibold text-green-600 dark:text-green-400">{uploadResults.successful}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Failed:</span>
+                      <span className="font-semibold text-destructive">{uploadResults.failed}</span>
+                    </div>
+                    
+                    {uploadResults.errors.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium">Errors:</p>
+                        <div className="max-h-48 overflow-y-auto space-y-1">
+                          {uploadResults.errors.slice(0, 10).map((error, idx) => (
+                            <p key={idx} className="text-xs text-destructive">
+                              Row {error.row} ({error.email}): {error.error}
+                            </p>
+                          ))}
+                          {uploadResults.errors.length > 10 && (
+                            <p className="text-xs text-muted-foreground">
+                              ...and {uploadResults.errors.length - 10} more errors
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
             </DialogContent>
           </Dialog>
         </div>
