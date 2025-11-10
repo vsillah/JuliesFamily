@@ -2824,14 +2824,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get or create variant assignment for session (public)
   app.post('/api/ab-tests/assign', async (req: any, res) => {
     try {
-      const { testId, sessionId, persona, funnelStage } = req.body;
+      const { testId, visitorId, sessionId, persona, funnelStage } = req.body;
       
       if (!testId || !sessionId) {
         return res.status(400).json({ message: "testId and sessionId are required" });
       }
 
-      // Check if assignment already exists
-      let assignment = await storage.getAssignment(testId, sessionId);
+      // Get user UUID if authenticated
+      let userId = null;
+      if (req.user?.claims?.sub) {
+        const currentUser = await storage.getUserByOidcSub(req.user.claims.sub);
+        userId = currentUser?.id || null;
+      }
+
+      // Check if assignment already exists (prioritize userId > visitorId > sessionId)
+      let assignment = await storage.getAssignmentPersistent(testId, userId, visitorId, sessionId);
       
       if (!assignment) {
         // Get test and variants
@@ -2857,22 +2864,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
             break;
           }
         }
-
-        // Create assignment - get user UUID if authenticated
-        let userId = null;
-        if (req.user?.claims?.sub) {
-          const currentUser = await storage.getUserByOidcSub(req.user.claims.sub);
-          userId = currentUser?.id || null;
-        }
         
         assignment = await storage.createAbTestAssignment({
           testId,
           variantId: selectedVariant.id,
+          visitorId,
           sessionId,
           userId,
           persona,
           funnelStage,
         });
+      } else if (userId && !assignment.userId) {
+        // Identifier promotion: User logged in, promote visitor assignment to user assignment
+        assignment = await storage.updateAbTestAssignment(assignment.id, { userId }) || assignment;
       }
 
       res.json(assignment);
