@@ -2661,6 +2661,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============ A/B TESTING ROUTES ============
   
+  // IMPORTANT: Specific routes must come before parameterized routes to avoid Express matching issues
+  
+  // Get active tests for current session (public) - MUST come before /:id route
+  app.get('/api/ab-tests/active', async (req, res) => {
+    try {
+      const persona = req.query.persona as string | undefined;
+      const funnelStage = req.query.funnelStage as string | undefined;
+      const tests = await storage.getActiveAbTests(persona, funnelStage);
+      res.json(tests);
+    } catch (error) {
+      console.error("Error fetching active A/B tests:", error);
+      res.status(500).json({ message: "Failed to fetch active A/B tests" });
+    }
+  });
+  
   // Get all A/B tests (admin)
   app.get('/api/ab-tests', isAuthenticated, isAdmin, async (req, res) => {
     try {
@@ -2793,19 +2808,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting A/B test variant:", error);
       res.status(500).json({ message: "Failed to delete A/B test variant" });
-    }
-  });
-
-  // Get active tests for current session (public)
-  app.get('/api/ab-tests/active', async (req, res) => {
-    try {
-      const persona = req.query.persona as string | undefined;
-      const funnelStage = req.query.funnelStage as string | undefined;
-      const tests = await storage.getActiveAbTests(persona, funnelStage);
-      res.json(tests);
-    } catch (error) {
-      console.error("Error fetching active A/B tests:", error);
-      res.status(500).json({ message: "Failed to fetch active A/B tests" });
     }
   });
 
