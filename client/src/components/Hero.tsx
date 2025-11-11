@@ -295,7 +295,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
         </div>
       </div>
       <svg
-        className="absolute bottom-0 left-0 w-full h-24 sm:h-32"
+        className="absolute bottom-0 left-0 w-full h-24 sm:h-32 z-[3]"
         viewBox="0 0 1200 120"
         preserveAspectRatio="none"
       >
