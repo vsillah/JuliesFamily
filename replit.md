@@ -82,3 +82,70 @@ The application incorporates:
 -   Stripe
 -   SendGrid
 -   Twilio
+
+## Development Checklists
+
+### New Card/Content Section Checklist
+When developing a new card or content section for the website, ensure all of the following requirements are met:
+
+#### 1. Mobile Responsiveness
+- [ ] **Responsive Grid Layout**: Use Tailwind responsive classes (`sm:`, `md:`, `lg:`, `xl:`) for grid columns and spacing
+- [ ] **Touch Interactions**: Ensure touch targets are minimum 44×44px for mobile accessibility
+- [ ] **Viewport Testing**: Test on mobile viewports (375px, 768px) and desktop (1024px+)
+- [ ] **Image Optimization**: Use responsive images with appropriate sizes for different breakpoints
+- [ ] **Text Readability**: Verify font sizes are readable on mobile (minimum 16px for body text)
+- [ ] **Horizontal Scroll**: Prevent horizontal scrolling on small viewports
+
+#### 2. Content Manager Integration
+- [ ] **Database Schema**: Add/update table in `shared/schema.ts` with Drizzle ORM
+  - Define insert schema using `createInsertSchema` from `drizzle-zod`
+  - Define insert type using `z.infer<typeof insertSchema>`
+  - Define select type using `typeof table.$inferSelect`
+- [ ] **API Routes**: Create endpoints in `server/routes.ts`
+  - GET for fetching content
+  - POST for creating new content
+  - PATCH for updating existing content
+  - DELETE for removing content (if applicable)
+  - Validate request bodies with Zod schemas
+- [ ] **Storage Interface**: Update `server/storage.ts` with CRUD methods
+- [ ] **Admin UI Form**: Add form to Content Manager (`client/src/pages/AdminContentManager.tsx`)
+  - Use `react-hook-form` with `zodResolver`
+  - Include persona×journey matrix visibility controls
+  - Add image upload capability (Cloudinary/Object Storage)
+- [ ] **Frontend Display Component**: Create component to render the card on the public-facing site
+- [ ] **TanStack Query Integration**: Set up queries/mutations with proper cache invalidation
+
+#### 3. Navigation Integration
+- [ ] **Dynamic Navigation**: Ensure section appears in main navigation automatically when content exists
+- [ ] **Section Visibility Logic**: Implement `useContentAvailability` hook integration
+- [ ] **Mobile Menu**: Verify section appears in mobile hamburger menu
+- [ ] **URL Routing**: Add route to `client/src/App.tsx` if creating a dedicated page
+- [ ] **Scroll Behavior**: Configure smooth scroll-to-section for anchor links
+- [ ] **Active Link Highlighting**: Update navigation to highlight active section
+
+#### 4. AI Helper Integration
+- [ ] **Copywriter Integration**: Import `generateCopy` function from `server/copywriter.ts`
+- [ ] **Free-form Text Fields**: For every textarea or long-text input field:
+  - Add "Generate with AI" button next to the field
+  - Implement onClick handler calling appropriate copywriter function
+  - Show loading state during AI generation
+  - Replace field content with AI-generated text
+  - Provide undo/revert option after AI generation
+- [ ] **AI Prompt Engineering**: Configure appropriate context and instructions for the content type
+- [ ] **Error Handling**: Display user-friendly messages if AI generation fails
+- [ ] **Rate Limiting**: Respect API rate limits for Gemini integration
+
+#### 5. Testing & Quality Assurance
+- [ ] **Data Validation**: Test form validation with invalid inputs
+- [ ] **Empty States**: Verify appropriate messaging when no content exists
+- [ ] **Loading States**: Show skeletons or spinners during data fetching
+- [ ] **Error States**: Handle and display API errors gracefully
+- [ ] **Accessibility**: Ensure `data-testid` attributes on interactive elements
+- [ ] **Dark Mode**: Verify component renders correctly in both light and dark themes
+- [ ] **Cross-browser**: Test in Chrome, Firefox, and Safari
+
+#### 6. Content Personalization (if applicable)
+- [ ] **Persona Targeting**: Configure which personas can see this content
+- [ ] **Journey Stage Targeting**: Configure which funnel stages see this content
+- [ ] **Passion Tag Filtering**: Add passion tag support if content is passion-specific
+- [ ] **A/B Test Compatibility**: Ensure content can be targeted by A/B tests if needed
