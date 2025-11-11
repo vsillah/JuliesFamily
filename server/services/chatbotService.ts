@@ -24,7 +24,7 @@ JFLP is a persona-based CRM for nonprofits featuring:
 - **5 Personas**: student, parent, provider, donor, volunteer
 - **4 Funnel Stages**: awareness, consideration, decision, retention
 - **Pipeline Stages**: new_lead, contacted, qualified, nurturing, converted, lost
-- **Content Types**: service, event, testimonial, hero, cta, socialMedia, video, program_detail
+- **Content Types**: service, event, testimonial, hero, cta, socialMedia, video, program_detail, student_dashboard_card
 - **Features**: Lead management, donation tracking, email/SMS campaigns, A/B testing, content visibility rules
 
 # Available Tools
@@ -216,7 +216,7 @@ const TOOLS = [
         properties: {
           type: {
             type: "string",
-            enum: ["service", "event", "testimonial", "sponsor", "lead_magnet", "impact_stat", "hero", "cta", "socialMedia", "video", "review", "program_detail"],
+            enum: ["service", "event", "testimonial", "sponsor", "lead_magnet", "impact_stat", "hero", "cta", "socialMedia", "video", "review", "program_detail", "student_project", "student_testimonial", "student_dashboard_card"],
             description: "Filter by content type"
           }
         },

@@ -2,7 +2,7 @@ import type { Persona, FunnelStage } from "@shared/defaults/personas";
 import type { ContentItem, ContentVisibility, ImageAsset, AbTest } from "@shared/schema";
 import MiniContentCard from "./MiniContentCard";
 
-const CONTENT_TYPES = ['hero', 'cta', 'service', 'event', 'testimonial', 'lead_magnet'] as const;
+const CONTENT_TYPES = ['hero', 'cta', 'service', 'event', 'testimonial', 'lead_magnet', 'student_dashboard_card'] as const;
 type ContentType = typeof CONTENT_TYPES[number];
 
 interface MatrixCellProps {
@@ -15,6 +15,7 @@ interface MatrixCellProps {
     event: ContentItem[];
     testimonial: ContentItem[];
     lead_magnet: ContentItem[];
+    student_dashboard_card: ContentItem[];
   };
   visibilitySettings: ContentVisibility[];
   images: ImageAsset[];
