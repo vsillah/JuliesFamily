@@ -528,6 +528,11 @@ export const insertAbTestVariantSchema = createInsertSchema(abTestVariants).omit
 export type InsertAbTestVariant = z.infer<typeof insertAbTestVariantSchema>;
 export type AbTestVariant = typeof abTestVariants.$inferSelect;
 
+// A/B Test with its variants for admin display
+export type AbTestWithVariants = AbTest & {
+  variants: AbTestVariant[];
+};
+
 // Zod schema for A/B test variant configuration validation
 // Configuration contains presentation overrides applied to content after selection
 export const abTestVariantConfigurationSchema = z.object({

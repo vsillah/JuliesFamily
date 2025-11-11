@@ -2722,7 +2722,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all A/B tests (admin)
   app.get('/api/ab-tests', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const tests = await storage.getAllAbTests();
+      const tests = await storage.getAllAbTestsWithVariants();
       res.json(tests);
     } catch (error) {
       console.error("Error fetching A/B tests:", error);

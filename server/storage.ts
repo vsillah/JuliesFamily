@@ -20,7 +20,7 @@ import {
   type ImageAsset, type InsertImageAsset,
   type ContentItem, type InsertContentItem, type ContentItemWithResolvedImage,
   type ContentVisibility, type InsertContentVisibility,
-  type AbTest, type InsertAbTest,
+  type AbTest, type InsertAbTest, type AbTestWithVariants,
   type AbTestTarget, type InsertAbTestTarget,
   type AbTestVariant, type InsertAbTestVariant,
   type AbTestAssignment, type InsertAbTestAssignment,
@@ -134,6 +134,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   createAbTest(test: InsertAbTest): Promise<AbTest>;
   getAbTest(id: string): Promise<AbTest | undefined>;
   getAllAbTests(): Promise<AbTest[]>;
+  getAllAbTestsWithVariants(): Promise<AbTestWithVariants[]>;
   getActiveAbTests(persona?: string | null, funnelStage?: string | null): Promise<AbTest[]>;
   updateAbTest(id: string, updates: Partial<InsertAbTest>): Promise<AbTest | undefined>;
   deleteAbTest(id: string): Promise<void>;
@@ -1331,6 +1332,28 @@ export class DatabaseStorage implements IStorage {
 
   async getAllAbTests(): Promise<AbTest[]> {
     return await db.select().from(abTests).orderBy(desc(abTests.createdAt));
+  }
+
+  async getAllAbTestsWithVariants(): Promise<AbTestWithVariants[]> {
+    const tests = await db.select().from(abTests).orderBy(desc(abTests.createdAt));
+    
+    // Fetch variants for all tests in parallel
+    const testsWithVariants = await Promise.all(
+      tests.map(async (test) => {
+        const variants = await db
+          .select()
+          .from(abTestVariants)
+          .where(eq(abTestVariants.testId, test.id))
+          .orderBy(desc(abTestVariants.isControl), abTestVariants.name);
+        
+        return {
+          ...test,
+          variants,
+        };
+      })
+    );
+    
+    return testsWithVariants;
   }
 
   async getActiveAbTests(persona?: string | null, funnelStage?: string | null): Promise<AbTest[]> {

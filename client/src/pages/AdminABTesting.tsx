@@ -13,10 +13,10 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { 
   FlaskConical, Plus, Play, Pause, CheckCircle2, Trash2, 
-  BarChart3, Edit, TrendingUp, Users, Target
+  BarChart3, Edit, TrendingUp, Users, Target, ChevronDown, ChevronUp
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
-import type { AbTest, AbTestVariant } from "@shared/schema";
+import type { AbTestWithVariants, AbTestVariant } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { ABTestWizard, type TestConfiguration } from "@/components/ABTestWizard";
@@ -30,7 +30,8 @@ export default function AdminABTesting() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isVariantDialogOpen, setIsVariantDialogOpen] = useState(false);
-  const [selectedTest, setSelectedTest] = useState<AbTest | null>(null);
+  const [selectedTest, setSelectedTest] = useState<AbTestWithVariants | null>(null);
+  const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set());
 
   // New test form
   const [newTest, setNewTest] = useState({
@@ -61,8 +62,8 @@ export default function AdminABTesting() {
     isControl: false,
   });
 
-  // Fetch all tests
-  const { data: tests = [], isLoading } = useQuery<AbTest[]>({
+  // Fetch all tests with variants
+  const { data: tests = [], isLoading } = useQuery<AbTestWithVariants[]>({
     queryKey: ["/api/ab-tests"],
     retry: false,
   });
@@ -341,7 +342,7 @@ export default function AdminABTesting() {
     editTestMutation.mutate({ id: selectedTest.id, data: testData });
   };
 
-  const openEditDialog = (test: AbTest) => {
+  const openEditDialog = (test: AbTestWithVariants) => {
     setSelectedTest(test);
     setEditTest({
       name: test.name,
@@ -352,6 +353,42 @@ export default function AdminABTesting() {
       trafficAllocation: test.trafficAllocation || 100,
     });
     setIsEditDialogOpen(true);
+  };
+
+  const toggleTestExpanded = (testId: string) => {
+    setExpandedTests(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(testId)) {
+        newSet.delete(testId);
+      } else {
+        newSet.add(testId);
+      }
+      return newSet;
+    });
+  };
+
+  const getVariantPreview = (variant: AbTestVariant) => {
+    let config = variant.configuration as any;
+    
+    // Handle legacy string-stored configurations by parsing them
+    if (typeof config === 'string') {
+      try {
+        config = JSON.parse(config);
+      } catch {
+        return 'Custom configuration';
+      }
+    }
+    
+    if (!config || typeof config !== 'object') return null;
+    
+    // Extract key fields based on what's in the configuration
+    const preview: string[] = [];
+    if (config.title) preview.push(`"${config.title}"`);
+    if (config.ctaText) preview.push(`CTA: "${config.ctaText}"`);
+    if (config.buttonVariant) preview.push(`Style: ${config.buttonVariant}`);
+    if (config.imageName) preview.push(`Image: ${config.imageName}`);
+    
+    return preview.length > 0 ? preview.join(' • ') : 'Custom configuration';
   };
 
   const handleCreateVariant = () => {
@@ -637,6 +674,78 @@ export default function AdminABTesting() {
                     </div>
                   </div>
                 </CardHeader>
+                
+                {/* Variants Section */}
+                {test.variants && test.variants.length > 0 && (
+                  <CardContent className="pt-0">
+                    <div className="border-t">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleTestExpanded(test.id)}
+                        className="w-full justify-between py-4 hover-elevate"
+                        data-testid={`button-toggle-variants-${test.id}`}
+                      >
+                        <span className="text-sm font-medium">
+                          {test.variants.length} {test.variants.length === 1 ? 'Variant' : 'Variants'}
+                        </span>
+                        {expandedTests.has(test.id) ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </Button>
+                      
+                      {expandedTests.has(test.id) && (
+                        <div className="space-y-2 pb-4 px-4" data-testid={`variants-list-${test.id}`}>
+                          {test.variants.map(variant => (
+                            <div
+                              key={variant.id}
+                              className="flex items-start justify-between gap-4 p-3 rounded-md bg-muted/50"
+                              data-testid={`variant-item-${variant.id}`}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-sm">{variant.name}</span>
+                                  {variant.isControl && (
+                                    <Badge variant="secondary" className="text-xs">Control</Badge>
+                                  )}
+                                  <Badge variant="outline" className="text-xs">
+                                    {variant.trafficWeight}%
+                                  </Badge>
+                                </div>
+                                {variant.description && (
+                                  <p className="text-xs text-muted-foreground mb-1">
+                                    {variant.description}
+                                  </p>
+                                )}
+                                {getVariantPreview(variant) && (
+                                  <p className="text-xs text-muted-foreground truncate">
+                                    {getVariantPreview(variant)}
+                                  </p>
+                                )}
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  // TODO: Open edit variant dialog
+                                  toast({
+                                    title: "Coming soon",
+                                    description: "Variant editing will be available shortly.",
+                                  });
+                                }}
+                                data-testid={`button-edit-variant-${variant.id}`}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                )}
               </Card>
             ))
           )}
