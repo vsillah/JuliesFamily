@@ -182,18 +182,6 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
       })
     : "";
 
-  // Debug logging for image loading issues
-  useEffect(() => {
-    if (import.meta.env.DEV && isReady) {
-      console.log('[Hero Image Debug]', {
-        imageName,
-        hasAsset: !!heroImageAsset,
-        heroImageUrl,
-        imageLoaded,
-        imageError
-      });
-    }
-  }, [isReady, imageName, heroImageAsset, heroImageUrl, imageLoaded, imageError]);
 
   // Don't render hero until persona is loaded and hero content is available
   // This prevents flash of default content without jarring placeholder
@@ -209,7 +197,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
       }}
     >
       {/* Layer 1: Background Image (renders first) */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-[1]">
         {heroImageUrl ? (
           <img
             src={heroImageUrl}
