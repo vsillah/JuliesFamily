@@ -82,6 +82,7 @@ export default function PersonalizedHero() {
   const [scrollScale, setScrollScale] = useState(1);
   const [textVisible, setTextVisible] = useState(false);
   const [shadeVisible, setShadeVisible] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const content = heroContent[persona || "default"];
   const { data: heroImageAsset } = useCloudinaryImage(content.imageName);
@@ -101,6 +102,7 @@ export default function PersonalizedHero() {
   useEffect(() => {
     setTextVisible(false);
     setShadeVisible(false);
+    setImageLoaded(false);
     
     const textTimer = setTimeout(() => {
       setTextVisible(true);
@@ -130,19 +132,33 @@ export default function PersonalizedHero() {
       })
     : "";
 
+  // Preload image when URL changes
+  useEffect(() => {
+    if (!heroImageUrl) return;
+    
+    const img = new Image();
+    img.src = heroImageUrl;
+    img.onload = () => {
+      setImageLoaded(true);
+    };
+  }, [heroImageUrl]);
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
-        {heroImageUrl ? (
+        {heroImageUrl && (
           <img
             src={heroImageUrl}
             alt="Julie's Family Learning Program"
-            className="w-full h-full object-cover transition-transform duration-200 ease-out"
+            className={`w-full h-full object-cover transition-all duration-700 ease-out ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{ transform: `scale(${scrollScale})` }}
             loading="eager"
           />
-        ) : (
-          <div className="w-full h-full bg-muted animate-pulse" />
+        )}
+        {!imageLoaded && (
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20" />
         )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
       </div>
