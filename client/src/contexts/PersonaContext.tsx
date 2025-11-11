@@ -2,16 +2,10 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { type Persona, type FunnelStage as BaseFunnelStage } from "@shared/defaults/personas";
 
-export type Persona = 
-  | "student"
-  | "provider"
-  | "parent"
-  | "donor"
-  | "volunteer"
-  | null;
-
-export type FunnelStage = "awareness" | "consideration" | "decision" | "retention" | null;
+export type { Persona };
+export type FunnelStage = BaseFunnelStage | null;
 
 export interface PersonaConfig {
   id: Persona;
