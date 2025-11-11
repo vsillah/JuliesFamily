@@ -5,6 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -69,6 +79,25 @@ export default function AdminABTesting() {
     buttonVariant: "default" as string,
     imageName: "",
     // JSON fallback for unsupported types
+    jsonConfig: "",
+  });
+
+  // Edit variant state
+  const [isEditVariantDialogOpen, setIsEditVariantDialogOpen] = useState(false);
+  const [isEditWarningDialogOpen, setIsEditWarningDialogOpen] = useState(false);
+  const [editingVariant, setEditingVariant] = useState<AbTestVariant | null>(null);
+  const [editVariant, setEditVariant] = useState({
+    name: "",
+    description: "",
+    trafficWeight: 50,
+    isControl: false,
+    title: "",
+    ctaText: "",
+    ctaLink: "",
+    secondaryCtaText: "",
+    secondaryCtaLink: "",
+    buttonVariant: "default" as string,
+    imageName: "",
     jsonConfig: "",
   });
 
@@ -406,6 +435,43 @@ export default function AdminABTesting() {
     },
   });
 
+  // Update variant mutation
+  const updateVariantMutation = useMutation({
+    mutationFn: async ({ variantId, variantData }: { variantId: string; variantData: any }) => {
+      return await apiRequest("PATCH", `/api/ab-tests/variants/${variantId}`, variantData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ab-tests"] });
+      setIsEditVariantDialogOpen(false);
+      setEditingVariant(null);
+      setEditVariant({
+        name: "",
+        description: "",
+        trafficWeight: 50,
+        isControl: false,
+        title: "",
+        ctaText: "",
+        ctaLink: "",
+        secondaryCtaText: "",
+        secondaryCtaLink: "",
+        buttonVariant: "default",
+        imageName: "",
+        jsonConfig: "",
+      });
+      toast({
+        title: "Variant updated",
+        description: "Test variant has been successfully updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update variant.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Redirect if not admin
   if (user && !user.isAdmin) {
     navigate("/");
@@ -537,6 +603,117 @@ export default function AdminABTesting() {
         trafficWeight: newVariant.trafficWeight,
         isControl: newVariant.isControl,
         configuration: config,
+      },
+    });
+  };
+
+  const handleEditVariantClick = (variant: AbTestVariant) => {
+    if (!selectedTest) return;
+    
+    setEditingVariant(variant);
+    
+    // Parse configuration from variant
+    let config = variant.configuration as any;
+    if (typeof config === 'string') {
+      try {
+        config = JSON.parse(config);
+      } catch {
+        config = {};
+      }
+    }
+    
+    // Populate edit form with variant data
+    setEditVariant({
+      name: variant.name,
+      description: variant.description || "",
+      trafficWeight: variant.trafficWeight,
+      isControl: variant.isControl,
+      title: config?.title || "",
+      ctaText: config?.ctaText || "",
+      ctaLink: config?.ctaLink || "",
+      secondaryCtaText: config?.secondaryCtaText || "",
+      secondaryCtaLink: config?.secondaryCtaLink || "",
+      buttonVariant: config?.buttonVariant || "default",
+      imageName: config?.imageName || "",
+      jsonConfig: (selectedTest.type !== 'hero' && selectedTest.type !== 'cta' && selectedTest.type !== 'messaging') 
+        ? JSON.stringify(config || {}, null, 2) 
+        : "",
+    });
+    
+    // Show warning dialog for active tests, otherwise open edit dialog directly
+    if (selectedTest.status === 'active') {
+      setIsEditWarningDialogOpen(true);
+    } else {
+      setIsEditVariantDialogOpen(true);
+    }
+  };
+
+  const handleUpdateVariant = () => {
+    if (!selectedTest || !editingVariant) return;
+
+    // VALIDATION: Check traffic allocation (excluding current variant's weight)
+    const otherVariantsWeight = selectedTest.variants
+      ?.filter(v => v.id !== editingVariant.id)
+      .reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+    const proposedTotal = otherVariantsWeight + editVariant.trafficWeight;
+    
+    if (proposedTotal > 100) {
+      toast({
+        title: "Traffic Allocation Exceeded",
+        description: `Cannot update variant. Total allocation would be ${proposedTotal}% (exceeds 100% by ${proposedTotal - 100}%).`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // VALIDATION: Prevent removing last control variant
+    if (!editVariant.isControl && editingVariant.isControl) {
+      const otherControls = selectedTest.variants?.filter(v => v.id !== editingVariant.id && v.isControl) || [];
+      if (otherControls.length === 0) {
+        toast({
+          title: "Cannot Remove Control",
+          description: "At least one variant must be marked as control. Please mark another variant as control first.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
+    let config: Record<string, any> = {};
+    
+    // Build configuration from form
+    if (selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') {
+      if (editVariant.title) config.title = editVariant.title;
+      if (editVariant.ctaText) config.ctaText = editVariant.ctaText;
+      if (editVariant.ctaLink) config.ctaLink = editVariant.ctaLink;
+      if (editVariant.secondaryCtaText) config.secondaryCtaText = editVariant.secondaryCtaText;
+      if (editVariant.secondaryCtaLink) config.secondaryCtaLink = editVariant.secondaryCtaLink;
+      if (editVariant.buttonVariant && editVariant.buttonVariant !== "default") config.buttonVariant = editVariant.buttonVariant;
+      if (editVariant.imageName) config.imageName = editVariant.imageName;
+    } else {
+      if (editVariant.jsonConfig.trim()) {
+        try {
+          config = JSON.parse(editVariant.jsonConfig);
+        } catch (error) {
+          toast({
+            title: "Invalid JSON",
+            description: "Configuration must be valid JSON.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+    }
+
+    updateVariantMutation.mutate({
+      variantId: editingVariant.id,
+      variantData: {
+        name: editVariant.name,
+        description: editVariant.description,
+        trafficWeight: editVariant.trafficWeight,
+        isControl: editVariant.isControl,
+        configuration: config,
+        requiresRebaseline: selectedTest.status === 'active', // Flag for analytics reset
       },
     });
   };
@@ -852,13 +1029,7 @@ export default function AdminABTesting() {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => {
-                                  // TODO: Open edit variant dialog
-                                  toast({
-                                    title: "Coming soon",
-                                    description: "Variant editing will be available shortly.",
-                                  });
-                                }}
+                                onClick={() => handleEditVariantClick(variant)}
                                 data-testid={`button-edit-variant-${variant.id}`}
                               >
                                 <Edit className="w-3 h-3" />
@@ -1416,6 +1587,202 @@ export default function AdminABTesting() {
                 data-testid="button-submit-variant"
               >
                 {createVariantMutation.isPending ? "Creating..." : "Add Variant"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Variant Warning Dialog - Active Tests */}
+      <AlertDialog open={isEditWarningDialogOpen} onOpenChange={setIsEditWarningDialogOpen}>
+        <AlertDialogContent data-testid="dialog-edit-warning">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Warning: Active Test</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                This test is currently <strong>active</strong> and collecting data. Editing this variant may:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Invalidate existing test results</li>
+                <li>Require restarting analytics collection</li>
+                <li>Impact statistical significance</li>
+              </ul>
+              <p className="pt-2">
+                Are you sure you want to continue?
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel data-testid="button-cancel-edit-warning">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setIsEditWarningDialogOpen(false);
+                setIsEditVariantDialogOpen(true);
+              }}
+              data-testid="button-confirm-edit-warning"
+            >
+              Continue Editing
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit Variant Dialog - Similar to Create but populated with existing data */}
+      <Dialog open={isEditVariantDialogOpen} onOpenChange={setIsEditVariantDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-variant">
+          <DialogHeader>
+            <DialogTitle>Edit Variant: {editingVariant?.name}</DialogTitle>
+            <DialogDescription>
+              Modify settings for this test variant
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Same fields as Create Variant Dialog but using editVariant state */}
+            <div>
+              <Label htmlFor="edit-variant-name">Variant Name*</Label>
+              <Input
+                id="edit-variant-name"
+                value={editVariant.name}
+                onChange={(e) => setEditVariant({ ...editVariant, name: e.target.value })}
+                placeholder="e.g., Control, Variant A"
+                data-testid="input-edit-variant-name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-variant-description">Description</Label>
+              <Textarea
+                id="edit-variant-description"
+                value={editVariant.description}
+                onChange={(e) => setEditVariant({ ...editVariant, description: e.target.value })}
+                rows={2}
+                placeholder="What's different in this variant?"
+                data-testid="input-edit-variant-description"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-variant-weight">Traffic Weight (%)</Label>
+              <Input
+                id="edit-variant-weight"
+                type="number"
+                min="0"
+                max="100"
+                value={editVariant.trafficWeight}
+                onChange={(e) => setEditVariant({ ...editVariant, trafficWeight: parseInt(e.target.value) || 50 })}
+                data-testid="input-edit-variant-weight"
+              />
+              {(() => {
+                if (!selectedTest || !editingVariant) return null;
+                const otherVariantsWeight = selectedTest.variants
+                  ?.filter(v => v.id !== editingVariant.id)
+                  .reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+                const proposedTotal = otherVariantsWeight + editVariant.trafficWeight;
+                const remainingAfterProposed = 100 - proposedTotal;
+                const isOverAllocated = proposedTotal > 100;
+                const isFullyAllocated = proposedTotal === 100;
+
+                return (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        Other Variants: <span className="font-medium text-foreground">{otherVariantsWeight}%</span>
+                      </span>
+                      <span className="text-muted-foreground">
+                        After Edit: <span className={`font-medium ${isOverAllocated ? 'text-destructive' : isFullyAllocated ? 'text-warning' : 'text-foreground'}`}>
+                          {proposedTotal}%
+                        </span>
+                      </span>
+                      {isOverAllocated ? (
+                        <span className="text-muted-foreground">
+                          Over by: <span className="font-medium text-destructive">{Math.abs(remainingAfterProposed)}%</span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Remaining: <span className={`font-medium ${isFullyAllocated ? 'text-warning' : 'text-foreground'}`}>
+                            {remainingAfterProposed}%
+                          </span>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Configuration Fields - Dynamic based on test type */}
+            {selectedTest && (
+              <div className="space-y-4 p-4 bg-muted/30 rounded-md border">
+                <h4 className="text-sm font-medium">Variant Configuration</h4>
+                
+                {(selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') && (
+                  <>
+                    <div>
+                      <Label htmlFor="edit-variant-title">
+                        {selectedTest.type === 'hero' ? 'Title/Headline' : selectedTest.type === 'cta' ? 'Headline' : 'Title'}
+                      </Label>
+                      <Input
+                        id="edit-variant-title"
+                        value={editVariant.title}
+                        onChange={(e) => setEditVariant({ ...editVariant, title: e.target.value })}
+                        placeholder="e.g., Ready to Take the First Step?"
+                        data-testid="input-edit-variant-title"
+                      />
+                    </div>
+
+                    {(selectedTest.type === 'hero' || selectedTest.type === 'cta') && (
+                      <div>
+                        <Label htmlFor="edit-variant-cta-text">Button Text</Label>
+                        <Input
+                          id="edit-variant-cta-text"
+                          value={editVariant.ctaText}
+                          onChange={(e) => setEditVariant({ ...editVariant, ctaText: e.target.value })}
+                          placeholder="e.g., Get Started"
+                          data-testid="input-edit-variant-cta-text"
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {selectedTest.type !== 'hero' && selectedTest.type !== 'cta' && selectedTest.type !== 'messaging' && (
+                  <div>
+                    <Label htmlFor="edit-variant-json">Configuration (JSON)</Label>
+                    <Textarea
+                      id="edit-variant-json"
+                      value={editVariant.jsonConfig}
+                      onChange={(e) => setEditVariant({ ...editVariant, jsonConfig: e.target.value })}
+                      rows={6}
+                      className="font-mono text-sm"
+                      data-testid="input-edit-variant-json"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={editVariant.isControl}
+                onCheckedChange={(checked) => setEditVariant({ ...editVariant, isControl: checked })}
+                data-testid="switch-edit-variant-control"
+              />
+              <Label>Mark as Control (baseline) variant</Label>
+            </div>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditVariantDialogOpen(false)}
+                data-testid="button-cancel-edit-variant"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateVariant}
+                disabled={updateVariantMutation.isPending || !editVariant.name}
+                data-testid="button-submit-edit-variant"
+              >
+                {updateVariantMutation.isPending ? "Updating..." : "Save Changes"}
               </Button>
             </div>
           </div>
