@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -179,6 +180,16 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
     handleReset,
   } = useAdminPreviewState();
 
+  // Lock body scroll when mobile overlay is open
+  useEffect(() => {
+    if (showMobileOverlay) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [showMobileOverlay]);
+
   if (!isAdmin) {
     return null;
   }
@@ -197,10 +208,10 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
     }
   };
 
-  // Mobile full-screen overlay
-  const mobileOverlay = showMobileOverlay && (
+  // Mobile full-screen overlay - portaled to document.body to escape stacking context
+  const mobileOverlay = showMobileOverlay && typeof document !== 'undefined' && createPortal(
     <div 
-      className="fixed inset-0 bg-background z-[99999] overflow-y-auto pb-6"
+      className="fixed inset-0 w-screen h-screen bg-background z-[99999] overflow-y-auto"
       data-testid="menu-admin-preview"
     >
       {/* Close button */}
@@ -213,7 +224,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         <X className="w-5 h-5" />
       </button>
       
-      <div className="px-3 pt-14 pb-4">
+      <div className="px-3 pt-14 pb-6">
         <div className="flex items-center gap-2 mb-3">
           <Eye className="w-4 h-4 text-primary" />
           <h2 className="font-semibold text-sm">Admin Preview Mode</h2>
@@ -343,7 +354,8 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           </Button>
         </Link>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 
   // Desktop dropdown and combined render
