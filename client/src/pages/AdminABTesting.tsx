@@ -243,7 +243,7 @@ export default function AdminABTesting() {
           name: variant.name,
           description: variant.description,
           trafficWeight: variant.trafficWeight,
-          configuration: JSON.stringify(variant.configuration || {}),
+          configuration: variant.configuration || {},
           isControl: variant.isControl,
           contentItemId: variant.contentItemId || undefined,
         };
