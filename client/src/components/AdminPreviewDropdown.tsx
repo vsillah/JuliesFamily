@@ -17,7 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown, X } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown, X, CheckCircle2 } from "lucide-react";
 import { personaConfigs, usePersona, type Persona } from "@/contexts/PersonaContext";
 import { useAdminPreviewState } from "@/hooks/useAdminPreviewState";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -64,27 +66,91 @@ function VariantSelector({ testId, testName, testType, selectedVariantId, onVari
     video_variation: "Video",
   };
 
+  // Calculate total traffic for auto-assign display
+  const totalTraffic = variants.reduce((sum: number, v: any) => sum + (v.trafficWeight || 0), 0);
+  const trafficDisplay = variants
+    .map((v: any) => `${v.trafficWeight || 0}%`)
+    .join(' / ');
+
+  // Sort variants to show control first
+  const sortedVariants = [...variants].sort((a: any, b: any) => {
+    if (a.isControl && !b.isControl) return -1;
+    if (!a.isControl && b.isControl) return 1;
+    return 0;
+  });
+
   return (
-    <div className="space-y-2">
-      <label className="text-xs font-medium">
-        {contentTypeLabels[testType] || testType}
-      </label>
-      <Select
-        value={selectedVariantId || "random"}
+    <div className="space-y-2 border rounded-md p-3 bg-card/50">
+      <div className="flex items-center justify-between">
+        <label className="text-xs font-medium">
+          {contentTypeLabels[testType] || testType}
+        </label>
+        <Badge variant="secondary" className="text-xs">
+          Preview Override
+        </Badge>
+      </div>
+      
+      <RadioGroup
+        value={selectedVariantId || "auto"}
         onValueChange={onVariantChange}
+        className="space-y-2"
       >
-        <SelectTrigger className="h-8 text-xs" data-testid={`select-variant-${testId}`}>
-          <SelectValue placeholder="Random (50/50)" />
-        </SelectTrigger>
-        <SelectContent className="z-[99999]">
-          <SelectItem value="random">Random (50/50)</SelectItem>
-          {variants.map((variant: any) => (
-            <SelectItem key={variant.id} value={variant.id}>
-              {variant.isControl ? "Control" : "Treatment"}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Auto-assign option */}
+        <div
+          className={cn(
+            "flex items-start space-x-2 p-2 rounded-md border cursor-pointer hover-elevate",
+            (!selectedVariantId || selectedVariantId === "auto") && "border-primary bg-primary/5"
+          )}
+          onClick={() => onVariantChange("auto")}
+          data-testid={`radio-variant-auto-${testId}`}
+        >
+          <RadioGroupItem value="auto" id={`auto-${testId}`} className="mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <Label
+              htmlFor={`auto-${testId}`}
+              className="text-xs font-medium cursor-pointer flex items-center gap-2"
+            >
+              Auto-assign
+              <span className="text-muted-foreground font-normal">({trafficDisplay})</span>
+            </Label>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Randomly assign based on traffic allocation
+            </p>
+          </div>
+        </div>
+
+        {/* Variant options */}
+        {sortedVariants.map((variant: any) => (
+          <div
+            key={variant.id}
+            className={cn(
+              "flex items-start space-x-2 p-2 rounded-md border cursor-pointer hover-elevate",
+              selectedVariantId === variant.id && "border-primary bg-primary/5"
+            )}
+            onClick={() => onVariantChange(variant.id)}
+            data-testid={`radio-variant-${variant.id}`}
+          >
+            <RadioGroupItem value={variant.id} id={variant.id} className="mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <Label
+                htmlFor={variant.id}
+                className="text-xs font-medium cursor-pointer flex items-center gap-2"
+              >
+                {variant.name || (variant.isControl ? "Control" : "Treatment")}
+                {variant.isControl && (
+                  <Badge variant="outline" className="text-xs">Baseline</Badge>
+                )}
+                <span className="text-muted-foreground font-normal">{variant.trafficWeight}%</span>
+              </Label>
+              {variant.description && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {variant.description}
+                </p>
+              )}
+            </div>
+          </div>
+        ))}
+      </RadioGroup>
     </div>
   );
 }

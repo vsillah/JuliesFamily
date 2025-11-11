@@ -109,7 +109,8 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
         let assignmentData: AbTestAssignment;
         
         // If admin has selected a specific variant, use that
-        if (adminVariantId && adminVariantId !== "random") {
+        // "auto" means let the system assign randomly based on traffic weights
+        if (adminVariantId && adminVariantId !== "auto" && adminVariantId !== "random") {
           // Create mock assignment for admin override
           assignmentData = {
             id: `admin-override-${test.id}`,
@@ -155,7 +156,7 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
         }
 
         // Track page view (only if not admin override)
-        if (!adminVariantId || adminVariantId === "random") {
+        if (!adminVariantId || adminVariantId === "auto" || adminVariantId === "random") {
           await trackABTestEvent(
             test.id,
             assignmentData.variantId,
@@ -181,7 +182,8 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     if (adminOverrides) {
       try {
         const overrides = JSON.parse(adminOverrides);
-        if (overrides[test.id] && overrides[test.id] !== "random") {
+        const variantOverride = overrides[test.id];
+        if (variantOverride && variantOverride !== "auto" && variantOverride !== "random") {
           return; // Admin is previewing specific variant, don't track
         }
       } catch (e) {
@@ -212,7 +214,8 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     if (adminOverrides) {
       try {
         const overrides = JSON.parse(adminOverrides);
-        if (overrides[test.id] && overrides[test.id] !== "random") {
+        const variantOverride = overrides[test.id];
+        if (variantOverride && variantOverride !== "auto" && variantOverride !== "random") {
           return; // Admin is previewing specific variant, don't track
         }
       } catch (e) {
@@ -236,7 +239,8 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
       const overrides = sessionStorage.getItem("admin-variant-override");
       if (!overrides) return false;
       const parsed = JSON.parse(overrides);
-      return test?.id && parsed[test.id] && parsed[test.id] !== "random";
+      const variantOverride = parsed[test?.id];
+      return test?.id && variantOverride && variantOverride !== "auto" && variantOverride !== "random";
     } catch {
       return false;
     }
