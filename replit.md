@@ -1,7 +1,7 @@
 # Julie's Family Learning Program Website (Powered by Kinflo)
 
 ## Overview
-Julie's Family Learning Program website is a non-profit, full-stack web application demonstrating educational programs, impact, testimonials, and events. It facilitates donations and volunteering. The platform also showcases **Kinflo**, a relationship-first CRM providing persona-based personalization, lead management, and communication automation for nonprofits. The project aims to create a warm online presence and highlight advanced CRM functionalities.
+Julie's Family Learning Program website is a non-profit, full-stack web application showcasing educational programs, impact, testimonials, and events, while facilitating donations and volunteering. It serves as a demonstration platform for **Kinflo**, a relationship-first CRM designed for nonprofits, featuring persona-based personalization, lead management, and communication automation. The project aims to establish a warm online presence and highlight Kinflo's advanced CRM capabilities, driving engagement and support for family learning initiatives.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -9,46 +9,43 @@ Preferred communication style: Simple, everyday language.
 ## System Architecture
 
 ### UI/UX Decisions
-The frontend uses React 18 with TypeScript and Vite, styled with Tailwind CSS, custom CSS variables, and shadcn/ui (New York style). It supports light/dark modes and WCAG AA compliant colors (orange/golden primary, olive/khaki secondary, warm beige backgrounds). Typography uses Playfair Display (serif) for headlines and Inter (sans-serif) for body text. Responsive design ensures optimal display across devices, with dynamic and data-driven navigation that matches page section order (Services → Resources → Impact → Testimonials → Events → Support Us → Virtual Tour). Navigation dynamically shows/hides links based on content visibility, with horizontally scrollable mobile inline navigation and full mobile menu overlay for complete access.
+The frontend is built with React 18, TypeScript, and Vite, styled using Tailwind CSS, custom CSS variables, and shadcn/ui (New York style). It supports light/dark modes and WCAG AA compliant colors. Typography features Playfair Display for headlines and Inter for body text. The design is responsive, ensuring optimal display across devices. Navigation is dynamic, data-driven, and matches page section order, with adaptable layouts for mobile.
 
 ### Technical Implementations
-The frontend is a single-page application using `wouter` for routing and TanStack Query for server state. Key features include:
--   **Persona-Based Personalization**: Tailored content delivery based on 5 user personas.
--   **Passion-Based Content Personalization**: Users can select their interests (literacy, stem, arts, nutrition, community) in their profile, and content is automatically filtered and ranked to match their passions. Features SQL-based passion matching with COUNT() scoring, three-tier fallback hierarchy (user profile → query string → standard ordering), NULL-safe handling with COALESCE, and multi-select passion checkboxes in the Profile UI with form persistence.
--   **Uniform Conditional Rendering System**: All matrix-controlled sections (services, lead-magnet, impact, testimonials, events, donation) implement consistent visibility logic using useContentAvailability hook. Features DEFAULT_SECTIONS fallback during loading, nullish coalescing for safe data merging, section wrappers with data-testid attributes for testing, and synchronized query patterns ensuring PersonalizedLeadMagnet matches section visibility requirements (persona-only enabling). Lead magnet section is fully data-driven, fetching title/description from database instead of hardcoded fallbacks, ensuring admin-configured content displays correctly for all persona×journey combinations.
--   **Admin Preview Mode**: Comprehensive preview system allowing administrators to view the site from different persona and funnel stage perspectives. When a persona×journey combination has active A/B tests, admins can select specific variants (Control or Treatment) to preview, or use random assignment for realistic testing. Features analytics suppression to prevent admin interactions from polluting test results. **Consolidated Admin Controls**: Streamlined dropdown interface in the navigation bar combining persona switcher, funnel stage selector, A/B variant overrides, and admin dashboard link into a single, accessible control. The dropdown trigger displays the currently applied persona and journey stage at a glance, with an Eye icon badge indicating when preview mode is active. Non-admin users do not see persona controls as persona assignment is system-managed based on user profile and behavior.
--   **Content Management System (CMS)**: Hybrid image management (Cloudinary and Object Storage with AI-powered file naming) and universal content visibility controls.
--   **Persona×Journey Matrix Grid**: Visual interface for configuring content visibility across 120 permutations.
--   **A/B Testing System**: Production-ready configuration-based testing platform that respects persona×journey matrix personalization. A/B tests apply presentation overrides (headlines, CTAs, images, button styles) AFTER content is selected via persona + journey stage + passion tags. This ensures all users receive personalized content while testing different messaging variations. System supports universal content type testing (hero, cta, service, testimonial, event, video) with detailed analytics and conversion tracking. Implementation includes query param sanitization to handle TanStack Query undefined serialization, loading state guards to prevent fallback content rendering, and diagnostic logging for development debugging. Architecture ensures 100% reliable variant assignment (control or treatment) with no edge case fallbacks. **Persistent Variant Assignment** ensures consistent user experience across browser sessions using a hybrid identification strategy: authenticated users via userId, anonymous users via localStorage-persisted visitorId (crypto.randomUUID), with sessionId as legacy fallback. The system implements intelligent identifier promotion, automatically upgrading visitor assignments to user assignments when users log in, maintaining variant consistency throughout the customer journey. **Comprehensive Variant Management**: Admin interface for creating and managing test variants with expandable/collapsible variant lists, type-specific configuration forms (hero/cta/messaging with structured fields, JSON fallback for other types), real-time traffic allocation calculator with visual feedback and dual-layer validation preventing over-allocation, AI-powered variant naming via Gemini integration matching admin tooling patterns, and variant editing with AlertDialog warnings for active tests explaining statistical impact. Edit functionality includes traffic validation excluding current variant from allocation totals, control variant protection preventing removal of last control, and requiresRebaseline flag for analytics reset. Wizard includes defensive error handling for API failures with context-specific guidance for authentication and network errors.
--   **User Management System**: Admin interface for managing user accounts, roles, and privileges with a three-tier RBAC system and audit logging.
--   **User Profile Management**: Self-service profile updates with data integrity protection, validation, and audit logging.
--   **Navigation Consolidation**: Streamlined user dropdown menu removing duplicate links (Update Photo, User Management, Preferences). Admin users see an Admin Dashboard link in the dropdown. Admin preferences are consolidated into the Profile Settings page via a collapsible "Admin Controls" section that displays key notification and communication preferences (New Lead Alerts, Donation Alerts, Daily Digest) with save/reset functionality. Full admin preferences remain accessible via /admin/preferences from the Admin Dashboard.
--   **AI-Powered Analysis**: Google Gemini AI for social media screenshot and YouTube video thumbnail analysis with metadata extraction.
--   **AI-Powered File Naming**: Intelligent file naming system using Google Gemini AI for uploaded images, generating descriptive, SEO-friendly filenames.
--   **Authenticated Donation System with Saved Payment Methods**: Secure payment processing requiring authentication, with Stripe Customer integration for saving payment methods. Features include automatic profile prefilling (name/email), smart opt-in checkbox (optional for one-time, required for recurring donations), and saved payment method selection for repeat donors.
--   **Email Automation System**: Transactional email delivery via SendGrid with template management and AI-powered copywriting.
--   **SMS Notification System**: Twilio-based template SMS messaging with persona targeting and AI-powered copywriting.
--   **Passion-Based Donation Campaigns**: AI-powered campaign system using frameworks from Alex Hormozi's "$100M Leads" for donor targeting, multi-channel distribution, real-time goal tracking, and filtered testimonial promotion.
--   **Admin Chatbot Assistant**: AI-powered troubleshooting and analytics assistant for authenticated admin users, offering platform logs, issue escalation, and various analytics (platform stats, lead analytics, content summary, donation stats).
--   **Database Backup Manager**: Admin-only system for surgical table-level backup and restore, including automated scheduling with configurable retention policies and timezone awareness.
--   **Storage Monitoring Dashboard**: Real-time database storage monitoring, projecting future consumption based on backup schedules to prevent exceeding storage limits.
--   **CRM Components**: Lead capture forms, Admin Dashboard for lead management, Communication Timeline, Task Management, Pipeline Management & Analytics, AI-Powered Copy Generation, and Bulk Lead Import (supporting Excel, CSV, and Google Sheets).
--   **Google Calendar Integration**: OAuth-authenticated integration for scheduling, event registration, and task synchronization.
--   **Bulk Lead Import System**: Multi-format import supporting Excel (.xlsx, .xls), CSV files, and Google Sheets via OAuth connection with comprehensive validation, duplicate detection, and gid-based sheet selection for multi-tab spreadsheets.
--   **Accurate Program Content**: All three JFLP program strands accurately reflect official program documentation: (1) Adult Basic Education (ABE)/Career Services for adults 16+ with 10 hours/week commitment, four instruction levels, HiSET diploma focus, and career transition support; (2) Family Development Services using multigenerational approach for mothers with young children, combining parent education with licensed early childhood programs; (3) Tech Goes Home offering FREE 15-hour digital literacy training with brand new Chromebook and 1-year internet access rewards. All Tech Goes Home UI components emphasize hours as the primary completion metric (≥15 hours for eligibility) with class sessions shown as secondary contextual information.
--   **Hero Section Rendering**: Layered z-index architecture ensuring proper visibility of background images, overlays, and decorative elements. Background image (z-0) loads from Cloudinary with opacity transitions, overlaid with dark gradient (z-[2]) for text contrast, decorative wave SVG (z-[3]) for curved bottom border, and white text content (z-10) for readability. Visibility states (imageLoaded, overlayVisible, textVisible) coordinate transitions for smooth loading experience.
+The frontend is a single-page application utilizing `wouter` for routing and TanStack Query for server state management. Key features include:
+-   **Persona-Based Personalization**: Delivers tailored content based on 5 predefined user personas.
+-   **Passion-Based Content Personalization**: Filters and ranks content based on user-selected interests (literacy, STEM, arts, nutrition, community) with SQL-based scoring and a three-tier fallback hierarchy.
+-   **Uniform Conditional Rendering System**: Manages content visibility across various sections (services, lead-magnet, impact, testimonials, events, donation) using a consistent `useContentAvailability` hook, ensuring data-driven content display.
+-   **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives, including A/B test variants, with analytics suppression. Consolidated admin controls offer a streamlined interface for preview settings.
+-   **Content Management System (CMS)**: Features hybrid image management (Cloudinary, object storage with AI naming) and universal content visibility controls.
+-   **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations.
+-   **A/B Testing System**: A production-ready, configuration-based platform for testing presentation overrides (headlines, CTAs, images) that respects persona×journey matrix personalization. It ensures consistent variant assignment across sessions and provides an admin interface for managing test variants, traffic allocation, and AI-powered variant naming.
+-   **User Management System**: Admin interface for user accounts, roles (three-tier RBAC), and audit logging.
+-   **User Profile Management**: Self-service profile updates with data integrity and audit logging.
+-   **Authenticated Donation System with Saved Payment Methods**: Secure payment processing via Stripe, allowing users to save payment methods and prefill donation forms.
+-   **Email Automation System**: Transactional email delivery via SendGrid with AI-powered copywriting.
+-   **SMS Notification System**: Twilio-based template messaging with persona targeting and AI-powered copywriting.
+-   **Passion-Based Donation Campaigns**: AI-powered campaign system for donor targeting, multi-channel distribution, and real-time goal tracking.
+-   **Admin Chatbot Assistant**: AI-powered assistant for troubleshooting, analytics, and issue escalation for authenticated admins.
+-   **Database Backup Manager**: Admin-only system for surgical, scheduled table-level backup and restore.
+-   **Storage Monitoring Dashboard**: Real-time database storage monitoring with future consumption projections.
+-   **CRM Components**: Includes lead capture, Admin Dashboard for lead management, communication timeline, task management, pipeline management, AI copy generation, and bulk lead import.
+-   **Google Calendar Integration**: OAuth-authenticated integration for scheduling and event registration.
+-   **Bulk Lead Import System**: Supports Excel, CSV, and Google Sheets with validation and duplicate detection.
+-   **Accurate Program Content**: Detailed and accurate representation of JFLP's Adult Basic Education, Family Development, and Tech Goes Home programs, with specific UI emphasis for Tech Goes Home's completion metrics.
+-   **Hero Section Rendering**: Layered z-index architecture for background images, overlays, and text content, ensuring smooth loading and readability.
 
 ### System Design Choices
-The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js), using PostgreSQL for session storage. Role-based access control is implemented with a three-tier system (client, admin, super_admin) and comprehensive audit logging.
+The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage. A three-tier RBAC system (client, admin, super_admin) is implemented with comprehensive audit logging.
 
 ### Enterprise Security
-The application implements comprehensive security measures:
+The application incorporates:
 -   **Helmet Security Headers**: HSTS, X-Frame-Options, X-Content-Type-Options.
--   **Rate Limiting**: Five-tier system for global, authentication, admin, payment, and lead submission endpoints.
--   **Centralized Audit Logging**: Tracking critical data mutations with actorId, action, tableName, recordId, changes, and metadata.
--   **Field Validation & Whitelisting**: Zod update schemas enforce strict field whitelisting to prevent mass assignment vulnerabilities.
--   **Error Sanitization**: Production error handler logs full details server-side while returning sanitized messages to clients.
--   **Session Security**: 7-day TTL, HttpOnly cookies, SameSite=lax, secure flag in production, PostgreSQL-backed persistence, automatic OIDC token refresh.
+-   **Rate Limiting**: Five-tier system for various endpoints.
+-   **Centralized Audit Logging**: Tracking critical data mutations.
+-   **Field Validation & Whitelisting**: Zod schemas prevent mass assignment.
+-   **Error Sanitization**: Production errors are logged fully server-side but sanitized for clients.
+-   **Session Security**: HttpOnly, SameSite=lax, secure flags, PostgreSQL persistence, and OIDC token refresh.
 
 ## External Dependencies
 
@@ -59,7 +56,6 @@ The application implements comprehensive security measures:
 
 ### Data Fetching & State Management
 -   TanStack Query
--   React Hook Form
 
 ### Database & ORM
 -   Drizzle ORM
