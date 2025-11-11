@@ -191,6 +191,7 @@ export default function AdminUserManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/content/visible-sections"] });
       toast({
         title: "Success",
@@ -212,6 +213,7 @@ export default function AdminUserManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
       queryClient.invalidateQueries({ queryKey: ["/api/content/visible-sections"] });
       toast({
         title: "Success",

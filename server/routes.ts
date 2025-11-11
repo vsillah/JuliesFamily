@@ -388,13 +388,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Check if already enrolled
+      // Check if enrollment exists (including withdrawn)
       const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(userId);
+      
       if (existingEnrollment) {
-        return res.status(400).json({ message: "User is already enrolled" });
+        // If enrollment exists but is withdrawn, reactivate it
+        if (existingEnrollment.status === "withdrawn") {
+          const reactivatedEnrollment = await storage.updateTechGoesHomeEnrollment(
+            existingEnrollment.id, 
+            { status: "active" }
+          );
+          return res.json(reactivatedEnrollment);
+        } else {
+          // Already active
+          return res.status(400).json({ message: "User is already enrolled" });
+        }
       }
       
-      // Create enrollment
+      // Create new enrollment
       const enrollment = await storage.createTechGoesHomeEnrollment({
         userId,
         programName: "Tech Goes Home",
