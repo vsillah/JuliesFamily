@@ -75,7 +75,8 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     }
     // Don't read from session storage for non-admin users during initialization
     // It will be set in the useEffect after auth completes
-    return null;
+    // Default to 'default' persona for explorers
+    return 'default';
   };
   
   const [persona, setPersonaState] = useState<Persona>(getInitialPersona);
@@ -119,11 +120,16 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       if (storedPersona && storedPersona !== "null") {
         setPersonaState(storedPersona as Persona);
       } else if (!modalShown && !adminOverride && !isKinfloPage) {
+        // Set default persona for explorers before showing modal
+        setPersonaState('default');
         // Only show modal for unauthenticated users on Julie's pages (not Kinflo)
         timeoutId = setTimeout(() => {
           setShowPersonaModal(true);
           sessionStorage.setItem(PERSONA_MODAL_SHOWN_KEY, "true");
         }, 2000);
+      } else {
+        // If modal was already shown but no persona selected, keep default
+        setPersonaState('default');
       }
     }
     

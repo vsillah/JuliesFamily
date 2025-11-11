@@ -13,7 +13,7 @@ The frontend is built with React 18, TypeScript, and Vite, styled using Tailwind
 
 ### Technical Implementations
 The frontend is a single-page application utilizing `wouter` for routing and TanStack Query for server state management. Key features include:
--   **Persona-Based Personalization**: Delivers tailored content based on 5 predefined user personas.
+-   **Persona-Based Personalization**: Delivers tailored content based on 6 predefined user personas (Default, Adult Education Student, Service Provider, Parent, Donor, Volunteer). The "Default" persona provides a welcoming experience for users exploring the site without selecting a specific identity.
 -   **Passion-Based Content Personalization**: Filters and ranks content based on user-selected interests (literacy, STEM, arts, nutrition, community) with SQL-based scoring and a three-tier fallback hierarchy.
 -   **Uniform Conditional Rendering System**: Manages content visibility across various sections (services, lead-magnet, impact, testimonials, events, donation) using a consistent `useContentAvailability` hook, ensuring data-driven content display.
 -   **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives, including A/B test variants, with analytics suppression. Consolidated admin controls offer a streamlined interface for preview settings. **Single Variant Selection**: Administrators can only select ONE A/B test variant at a time across all active tests for a given persona×funnel combination, preventing testing confusion and ensuring isolated test results. Variant selection automatically clears when persona or funnel stage changes.

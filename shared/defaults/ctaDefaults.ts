@@ -16,6 +16,36 @@ type CTADefaultsMatrix = {
 
 // Default CTA configurations organized by persona × funnel stage
 export const CTA_DEFAULTS: CTADefaultsMatrix = {
+  default: {
+    awareness: {
+      title: "Discover What We Offer",
+      description: "From adult education to early childhood programs, explore the many ways Julie's supports families in building brighter futures.",
+      primaryButton: "View All Programs",
+      secondaryButton: "Read Success Stories",
+      imageName: "cta-community"
+    },
+    consideration: {
+      title: "50 Years of Impact",
+      description: "Learn how our comprehensive approach to family support has helped thousands of Boston families achieve their goals.",
+      primaryButton: "See Our Impact",
+      secondaryButton: "Meet Our Team",
+      imageName: "cta-community"
+    },
+    decision: {
+      title: "Get Involved Today",
+      description: "Whether you're seeking services, looking to volunteer, or wanting to support our mission, there's a place for you here.",
+      primaryButton: "Find Your Path",
+      secondaryButton: "Contact Us",
+      imageName: "cta-community"
+    },
+    retention: {
+      title: "Part of Our Community",
+      description: "Stay connected with events, updates, and opportunities to engage with our vibrant community.",
+      primaryButton: "View Community Events",
+      secondaryButton: "Subscribe to Updates",
+      imageName: "cta-community"
+    }
+  },
   student: {
     awareness: {
       title: "Ready to Transform Your Future?",

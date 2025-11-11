@@ -17,6 +17,40 @@ type HeroDefaultsMatrix = {
 
 // Default hero configurations organized by persona × funnel stage
 export const HERO_DEFAULTS: HeroDefaultsMatrix = {
+  default: {
+    awareness: {
+      subtitle: "Julie's Mission",
+      title: "Empowering Families Through Education",
+      description: "A family support, wellness, and education center committed to the development of strong, stable, and healthy family functioning for over 50 years.",
+      primaryCTA: "Explore Our Programs",
+      secondaryCTA: "Learn Our Story",
+      imageName: "hero-volunteer-student"
+    },
+    consideration: {
+      subtitle: "Julie's Mission",
+      title: "50 Years of Changing Lives",
+      description: "From adult education to early childhood programs, we provide comprehensive support for families at every stage.",
+      primaryCTA: "View Our Impact",
+      secondaryCTA: "Meet Our Community",
+      imageName: "hero-volunteer-student"
+    },
+    decision: {
+      subtitle: "Julie's Mission",
+      title: "Find Your Path Forward",
+      description: "Whether you're seeking education, support, or ways to give back, discover how Julie's can help.",
+      primaryCTA: "Get Started",
+      secondaryCTA: "Contact Us",
+      imageName: "hero-volunteer-student"
+    },
+    retention: {
+      subtitle: "Julie's Mission",
+      title: "Welcome to Our Community",
+      description: "Join families, partners, and supporters who are building brighter futures together.",
+      primaryCTA: "Stay Connected",
+      secondaryCTA: "Explore Resources",
+      imageName: "hero-volunteer-student"
+    }
+  },
   student: {
     awareness: {
       subtitle: "Your Education Journey",

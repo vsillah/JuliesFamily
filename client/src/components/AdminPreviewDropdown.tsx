@@ -304,8 +304,9 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               <SelectValue placeholder="Select persona" />
             </SelectTrigger>
             <SelectContent className="z-[100000]">
-              <SelectItem value="none">Default (No persona)</SelectItem>
-              {personaConfigs.map((config) => (
+              <SelectItem value="none">None (Unauthenticated, no selection)</SelectItem>
+              <SelectItem value="default">Default (No Persona)</SelectItem>
+              {personaConfigs.filter(c => c.id !== 'default').map((config) => (
                 <SelectItem key={config.id} value={config.id}>
                   {config.label}
                 </SelectItem>
@@ -476,8 +477,9 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               <SelectValue placeholder="Select persona" />
             </SelectTrigger>
             <SelectContent className="z-[99999]">
-              <SelectItem value="none">Default (No persona)</SelectItem>
-              {personaConfigs.map((config) => (
+              <SelectItem value="none">None (Unauthenticated, no selection)</SelectItem>
+              <SelectItem value="default">Default (No Persona)</SelectItem>
+              {personaConfigs.filter(c => c.id !== 'default').map((config) => (
                 <SelectItem key={config.id} value={config.id}>
                   {config.label}
                 </SelectItem>
