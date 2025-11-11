@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -97,6 +97,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   const { isAdmin } = useUserRole();
   const { persona: appliedPersona } = usePersona();
   const [open, setOpen] = useState(false);
+  const [showMobileOverlay, setShowMobileOverlay] = useState(false);
   
   const {
     selectedPersona,
@@ -120,50 +121,205 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   const appliedPersonaConfig = personaConfigs.find(p => p.id === appliedPersona);
   const appliedFunnelConfig = funnelStageConfigs.find(f => f.id === currentFunnel);
 
-  return (
-    <DropdownMenu open={open} onOpenChange={setOpen}>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant={isScrolled ? "outline" : "ghost"}
-          size="sm"
-          className={cn(
-            "gap-2",
-            !isScrolled && "border-white/30 text-white hover:bg-white/10"
-          )}
-          data-testid="button-admin-preview-dropdown"
-        >
-          <Eye className={cn(
-            "w-4 h-4",
-            isPreviewActive && "text-primary"
-          )} />
+  // Check if mobile when button is clicked
+  const handleTriggerClick = () => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setShowMobileOverlay(true);
+    } else {
+      setOpen(true);
+    }
+  };
+
+  // Mobile full-screen overlay
+  const mobileOverlay = showMobileOverlay && (
+    <div 
+      className="fixed inset-0 bg-background z-[99999] overflow-y-auto"
+      data-testid="menu-admin-preview"
+    >
+      {/* Close button */}
+      <button
+        onClick={() => setShowMobileOverlay(false)}
+        className="absolute top-4 right-4 p-2 hover:bg-accent rounded-md transition-colors z-10"
+        data-testid="button-close-admin-preview"
+        aria-label="Close preview menu"
+      >
+        <X className="w-5 h-5" />
+      </button>
+      
+      <div className="p-4 pt-16">
+        <div className="flex items-center gap-2 mb-4">
+          <Eye className="w-4 h-4 text-primary" />
+          <h2 className="font-semibold">Admin Preview Mode</h2>
+        </div>
+        <div className="h-px bg-border mb-4" />
+  
+        {/* Persona Selection */}
+        <div className="py-2 space-y-2">
+          <label className="text-xs font-medium text-muted-foreground">Persona Type</label>
+          <Select
+            value={selectedPersona || "none"}
+            onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
+          >
+            <SelectTrigger className="h-8 text-sm" data-testid="select-persona">
+              <SelectValue placeholder="Select persona" />
+            </SelectTrigger>
+            <SelectContent className="z-[100000]">
+              <SelectItem value="none">Default (No persona)</SelectItem>
+              {personaConfigs.map((config) => (
+                <SelectItem key={config.id} value={config.id}>
+                  {config.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Funnel Stage Selection */}
+        <div className="py-2 space-y-2">
+          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+            <TrendingUp className="w-3 h-3" />
+            Funnel Stage
+          </label>
+          <Select
+            value={selectedFunnel}
+            onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
+          >
+            <SelectTrigger className="h-8 text-sm" data-testid="select-funnel">
+              <SelectValue placeholder="Select stage" />
+            </SelectTrigger>
+            <SelectContent className="z-[100000]">
+              <SelectItem value="none">None selected</SelectItem>
+              {funnelStageConfigs.map((config) => (
+                <SelectItem key={config.id} value={config.id}>
+                  {config.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* A/B Test Variants */}
+        {activeTests && activeTests.length > 0 && (
+          <>
+            <div className="h-px bg-border my-4" />
+            <div className="py-2 space-y-2">
+              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                <TestTube2 className="w-3 h-3" />
+                A/B Test Variants ({activeTests.length})
+              </label>
+              <div className="space-y-2">
+                {activeTests.map((test) => (
+                  <VariantSelector
+                    key={test.id}
+                    testId={test.id}
+                    testName={test.name}
+                    testType={test.type}
+                    selectedVariantId={selectedVariants[test.id]}
+                    onVariantChange={(variantId) => {
+                      setSelectedVariants(prev => ({
+                        ...prev,
+                        [test.id]: variantId
+                      }));
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="h-px bg-border my-4" />
+
+        {/* Action Buttons */}
+        <div className="py-2 space-y-2">
+          <Button
+            size="sm"
+            className="w-full"
+            onClick={() => {
+              handleApply();
+              setShowMobileOverlay(false);
+            }}
+            data-testid="button-apply-preview-dropdown"
+          >
+            Apply Preview
+          </Button>
           {isPreviewActive && (
-            <span className="text-xs font-medium">
-              {appliedPersonaConfig?.label || "Default"}
-              {appliedFunnelConfig && ` • ${appliedFunnelConfig.label}`}
-            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                handleReset();
+                setShowMobileOverlay(false);
+              }}
+              data-testid="button-reset-preview-dropdown"
+            >
+              <RotateCcw className="w-3 h-3 mr-2" />
+              Reset to Default
+            </Button>
           )}
-          {!isPreviewActive && (
-            <span className="text-xs">Preview</span>
-          )}
-          <ChevronDown className="w-3 h-3 opacity-50" />
-        </Button>
-      </DropdownMenuTrigger>
+        </div>
+
+        <div className="h-px bg-border my-4" />
+
+        {/* Admin Dashboard Link */}
+        <Link href="/admin">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start"
+            data-testid="menu-admin-dashboard-dropdown"
+          >
+            <Shield className="w-4 h-4 mr-2" />
+            Admin Dashboard
+          </Button>
+        </Link>
+      </div>
+    </div>
+  );
+
+  // Desktop dropdown and combined render
+  return (
+    <>
+      {mobileOverlay}
+      <DropdownMenu open={open} onOpenChange={setOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant={isScrolled ? "outline" : "ghost"}
+            size="sm"
+            className={cn(
+              "gap-2",
+              !isScrolled && "border-white/30 text-white hover:bg-white/10"
+            )}
+            data-testid="button-admin-preview-dropdown"
+            onClick={(e) => {
+              e.preventDefault();
+              handleTriggerClick();
+            }}
+          >
+            <Eye className={cn(
+              "w-4 h-4",
+              isPreviewActive && "text-primary"
+            )} />
+            {isPreviewActive && (
+              <span className="text-xs font-medium">
+                {appliedPersonaConfig?.label || "Default"}
+                {appliedFunnelConfig && ` • ${appliedFunnelConfig.label}`}
+              </span>
+            )}
+            {!isPreviewActive && (
+              <span className="text-xs">Preview</span>
+            )}
+            <ChevronDown className="w-3 h-3 opacity-50" />
+          </Button>
+        </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-80 z-[99999] md:w-80 md:max-h-[calc(100vh-100px)] fixed md:absolute inset-0 md:inset-auto w-full h-screen md:h-auto overflow-y-auto" 
+        className="w-80 z-[99999] max-h-[calc(100vh-100px)] overflow-y-auto" 
         data-testid="menu-admin-preview"
       >
-        {/* Close button for mobile */}
-        <button
-          onClick={() => setOpen(false)}
-          className="absolute top-4 right-4 p-2 hover:bg-accent rounded-md transition-colors md:hidden z-10"
-          data-testid="button-close-admin-preview"
-          aria-label="Close preview menu"
-        >
-          <X className="w-5 h-5" />
-        </button>
-        
-        <DropdownMenuLabel className="flex items-center gap-2 pt-6 md:pt-2">
+        <DropdownMenuLabel className="flex items-center gap-2">
           <Eye className="w-4 h-4 text-primary" />
           Admin Preview Mode
         </DropdownMenuLabel>
@@ -287,5 +443,6 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         </Link>
       </DropdownMenuContent>
     </DropdownMenu>
+    </>
   );
 }
