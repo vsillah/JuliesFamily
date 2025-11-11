@@ -10,38 +10,6 @@ export interface ContentVisibilityDefaults {
 
 // Services defaults - base content exists in database, these define persona×stage visibility/ordering
 export const SERVICE_DEFAULTS: Record<string, Record<Persona, Record<FunnelStage, ContentVisibilityDefaults>>> = {
-  "Children's Services": {
-    student: {
-      awareness: { isVisible: true, order: 3 },
-      consideration: { isVisible: true, order: 2 },
-      decision: { isVisible: true, order: 1 },
-      retention: { isVisible: true, order: 3 }
-    },
-    provider: {
-      awareness: { isVisible: true, order: 2 },
-      consideration: { isVisible: true, order: 2 },
-      decision: { isVisible: true, order: 2 },
-      retention: { isVisible: true, order: 2 }
-    },
-    parent: {
-      awareness: { isVisible: true, order: 1 },
-      consideration: { isVisible: true, order: 1 },
-      decision: { isVisible: true, order: 1 },
-      retention: { isVisible: true, order: 1 }
-    },
-    donor: {
-      awareness: { isVisible: true, order: 2 },
-      consideration: { isVisible: true, order: 2 },
-      decision: { isVisible: true, order: 2 },
-      retention: { isVisible: true, order: 2 }
-    },
-    volunteer: {
-      awareness: { isVisible: true, order: 2 },
-      consideration: { isVisible: true, order: 2 },
-      decision: { isVisible: true, order: 2 },
-      retention: { isVisible: true, order: 1 }
-    }
-  },
   "Family Development": {
     student: {
       awareness: { isVisible: true, order: 2 },
@@ -103,6 +71,38 @@ export const SERVICE_DEFAULTS: Record<string, Record<Persona, Record<FunnelStage
       awareness: { isVisible: true, order: 1 },
       consideration: { isVisible: true, order: 1 },
       decision: { isVisible: true, order: 1 },
+      retention: { isVisible: true, order: 2 }
+    }
+  },
+  "Tech Goes Home": {
+    student: {
+      awareness: { isVisible: true, order: 1 },
+      consideration: { isVisible: true, order: 1 },
+      decision: { isVisible: true, order: 1 },
+      retention: { isVisible: true, order: 1 }
+    },
+    provider: {
+      awareness: { isVisible: true, order: 2 },
+      consideration: { isVisible: true, order: 2 },
+      decision: { isVisible: true, order: 2 },
+      retention: { isVisible: true, order: 2 }
+    },
+    parent: {
+      awareness: { isVisible: true, order: 3 },
+      consideration: { isVisible: true, order: 3 },
+      decision: { isVisible: true, order: 3 },
+      retention: { isVisible: true, order: 3 }
+    },
+    donor: {
+      awareness: { isVisible: true, order: 2 },
+      consideration: { isVisible: true, order: 2 },
+      decision: { isVisible: true, order: 2 },
+      retention: { isVisible: true, order: 2 }
+    },
+    volunteer: {
+      awareness: { isVisible: true, order: 2 },
+      consideration: { isVisible: true, order: 2 },
+      decision: { isVisible: true, order: 2 },
       retention: { isVisible: true, order: 2 }
     }
   }

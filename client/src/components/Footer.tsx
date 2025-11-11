@@ -49,10 +49,9 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Programs</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Children's Services</li>
-              <li>Family Development</li>
-              <li>Adult Basic Education</li>
-              <li>Career Services</li>
+              <li>Family Development Services</li>
+              <li>Adult Basic Education (ABE)/Career Services</li>
+              <li>Tech Goes Home</li>
             </ul>
           </div>
 
