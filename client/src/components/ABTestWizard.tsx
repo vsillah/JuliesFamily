@@ -21,6 +21,11 @@ export interface TestVariantConfig {
   creationMode?: 'existing' | 'custom'; // How this variant was created
 }
 
+export interface BaselineTarget {
+  persona: string;
+  funnelStage: string;
+}
+
 export interface TestConfiguration {
   name: string;
   description: string;
@@ -28,6 +33,7 @@ export interface TestConfiguration {
   selectedCombinations: Set<string>; // Persona×stage combinations like "student:awareness"
   trafficAllocation: number;
   variants: TestVariantConfig[];
+  baselineTarget?: BaselineTarget; // Single persona×stage for control variant population
 }
 
 interface ABTestWizardProps {
@@ -180,6 +186,8 @@ export function ABTestWizard({ open, onOpenChange, onComplete }: ABTestWizardPro
               testType={mapTestTypeToInternal(testConfig.type)}
               variants={testConfig.variants}
               onVariantsChange={(variants) => updateConfig({ variants })}
+              baselineTarget={testConfig.baselineTarget}
+              onBaselineTargetChange={(target) => updateConfig({ baselineTarget: target })}
             />
           )}
 

@@ -9,10 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Plus, Trash2, Image as ImageIcon, AlertCircle, GripVertical, Upload } from "lucide-react";
+import { Plus, Trash2, Image as ImageIcon, AlertCircle, GripVertical, Upload, Info } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
+import { useBaselineConfig } from "@/hooks/useABTestBaseline";
 import CopyVariantGenerator from "../CopyVariantGenerator";
 import type { ContentItem } from "@shared/schema";
+import type { BaselineTarget } from "../ABTestWizard";
 
 interface Variant {
   id: string;
@@ -29,10 +33,28 @@ interface ConfigureStepProps {
   testType: string;
   variants: Variant[];
   onVariantsChange: (variants: Variant[]) => void;
+  baselineTarget?: BaselineTarget;
+  onBaselineTargetChange: (target: BaselineTarget | undefined) => void;
 }
 
-export function ConfigureStep({ testType, variants, onVariantsChange }: ConfigureStepProps) {
+const PERSONAS = [
+  { value: 'student', label: 'Student' },
+  { value: 'donor', label: 'Donor' },
+  { value: 'volunteer', label: 'Volunteer' },
+  { value: 'partner', label: 'Partner' },
+  { value: 'general', label: 'General Public' },
+];
+
+const FUNNEL_STAGES = [
+  { value: 'awareness', label: 'Awareness' },
+  { value: 'consideration', label: 'Consideration' },
+  { value: 'decision', label: 'Decision' },
+  { value: 'retention', label: 'Retention' },
+];
+
+export function ConfigureStep({ testType, variants, onVariantsChange, baselineTarget, onBaselineTargetChange }: ConfigureStepProps) {
   const [expandedVariant, setExpandedVariant] = useState<string | null>(null);
+  const { toast } = useToast();
 
   // Fetch content items based on test type
   const contentType = getContentTypeForTest(testType);
@@ -46,6 +68,64 @@ export function ConfigureStep({ testType, variants, onVariantsChange }: Configur
     queryKey: ["/api/images"],
     enabled: testType === 'hero_variation' || testType === 'cta_variation',
   });
+
+  // Fetch baseline configuration (lazy - only enabled when baselineTarget is set)
+  const hasBaselineTarget = !!(baselineTarget?.persona && baselineTarget?.funnelStage);
+  const { data: baselineConfig, isLoading: isLoadingBaseline } = useBaselineConfig(
+    baselineTarget?.persona,
+    baselineTarget?.funnelStage,
+    testType,
+    hasBaselineTarget
+  );
+
+  // Handler to auto-populate control variant with baseline configuration
+  const handleControlToggle = async (variantId: string, checked: boolean) => {
+    if (checked) {
+      // Check if baseline target is set
+      if (!hasBaselineTarget) {
+        toast({
+          title: "Baseline reference required",
+          description: "Please select a persona and funnel stage above to auto-populate the control variant.",
+          variant: "default",
+        });
+        // Still mark as control, but don't populate
+        onVariantsChange(
+          variants.map(v => ({ ...v, isControl: v.id === variantId }))
+        );
+        return;
+      }
+
+      // Prefetch baseline config if not already loaded
+      const config = baselineConfig || await queryClient.ensureQueryData({
+        queryKey: ['/api/ab-tests/baseline-config', { 
+          persona: baselineTarget.persona, 
+          funnelStage: baselineTarget.funnelStage, 
+          testType 
+        }],
+      });
+
+      if (config) {
+        // Auto-populate the variant with baseline configuration
+        onVariantsChange(
+          variants.map(v => 
+            v.id === variantId 
+              ? { ...v, isControl: true, configuration: config }
+              : { ...v, isControl: false }
+          )
+        );
+
+        toast({
+          title: "Control variant populated",
+          description: "Configuration auto-populated with current live settings.",
+        });
+      } else {
+        // Baseline fetch failed, just mark as control
+        onVariantsChange(
+          variants.map(v => ({ ...v, isControl: v.id === variantId }))
+        );
+      }
+    }
+  };
 
   const addVariant = () => {
     const variantCount = variants.length;
@@ -83,6 +163,77 @@ export function ConfigureStep({ testType, variants, onVariantsChange }: Configur
           Create different versions to test against each other. Each variant can reference existing content from the Content Manager.
         </p>
       </div>
+
+      {/* Baseline Target Selector */}
+      <Card className="bg-muted/30">
+        <CardHeader className="pb-3">
+          <div className="flex items-start gap-2">
+            <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <CardTitle className="text-sm font-medium">Baseline Reference (Optional)</CardTitle>
+              <CardDescription className="text-xs mt-1">
+                Select a persona and funnel stage to auto-populate the control variant with current live configuration
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-xs">Persona</Label>
+              <Select
+                value={baselineTarget?.persona || ""}
+                onValueChange={(value) => {
+                  if (value && baselineTarget?.funnelStage) {
+                    onBaselineTargetChange({ persona: value, funnelStage: baselineTarget.funnelStage });
+                  } else if (value) {
+                    onBaselineTargetChange({ persona: value, funnelStage: '' });
+                  } else {
+                    onBaselineTargetChange(undefined);
+                  }
+                }}
+              >
+                <SelectTrigger data-testid="select-baseline-persona" className="h-8">
+                  <SelectValue placeholder="Select persona..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {PERSONAS.map((persona) => (
+                    <SelectItem key={persona.value} value={persona.value}>
+                      {persona.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-xs">Funnel Stage</Label>
+              <Select
+                value={baselineTarget?.funnelStage || ""}
+                onValueChange={(value) => {
+                  if (value && baselineTarget?.persona) {
+                    onBaselineTargetChange({ persona: baselineTarget.persona, funnelStage: value });
+                  } else if (value) {
+                    onBaselineTargetChange({ persona: '', funnelStage: value });
+                  } else {
+                    onBaselineTargetChange(undefined);
+                  }
+                }}
+              >
+                <SelectTrigger data-testid="select-baseline-funnel" className="h-8">
+                  <SelectValue placeholder="Select stage..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {FUNNEL_STAGES.map((stage) => (
+                    <SelectItem key={stage.value} value={stage.value}>
+                      {stage.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Traffic weight warning */}
       {totalWeight !== 100 && variants.length > 0 && (
@@ -122,7 +273,12 @@ export function ConfigureStep({ testType, variants, onVariantsChange }: Configur
                         data-testid={`input-variant-name-${index}`}
                       />
                       {variant.isControl && (
-                        <Badge variant="outline" className="text-xs">Control</Badge>
+                        <>
+                          <Badge variant="outline" className="text-xs">Control</Badge>
+                          {hasBaselineTarget && Object.keys(variant.configuration || {}).length > 0 && (
+                            <Badge variant="secondary" className="text-xs">Current Live</Badge>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
@@ -179,17 +335,15 @@ export function ConfigureStep({ testType, variants, onVariantsChange }: Configur
                     <div className="flex items-center gap-2">
                       <Switch
                         checked={variant.isControl}
-                        onCheckedChange={(checked) => {
-                          // Only allow one control
-                          if (checked) {
-                            onVariantsChange(
-                              variants.map(v => ({ ...v, isControl: v.id === variant.id }))
-                            );
-                          }
-                        }}
+                        onCheckedChange={(checked) => handleControlToggle(variant.id, checked)}
                         data-testid={`switch-variant-control-${index}`}
                       />
-                      <Label className="text-sm">Mark as control</Label>
+                      <Label className="text-sm">
+                        Mark as control
+                        {hasBaselineTarget && variant.isControl && isLoadingBaseline && (
+                          <span className="text-xs text-muted-foreground ml-2">(loading baseline...)</span>
+                        )}
+                      </Label>
                     </div>
                   </div>
                 </div>
