@@ -24,7 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 import { 
   FlaskConical, Plus, Play, Pause, CheckCircle2, Trash2, 
   BarChart3, Edit, TrendingUp, Users, Target, ChevronDown, ChevronUp, AlertCircle,
-  Sparkles, Loader2
+  Sparkles, Loader2, Settings2, Type, Image as ImageIcon, Link as LinkIcon, MousePointerClick,
+  Palette, FileJson
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import type { AbTestWithVariants, AbTestVariant } from "@shared/schema";
@@ -1460,105 +1461,147 @@ export default function AdminABTesting() {
               })()}
             </div>
             {/* Configuration Fields - Dynamic based on test type */}
-            <div className="space-y-4 p-4 bg-muted/30 rounded-md border">
-              <h4 className="text-sm font-medium">Variant Configuration</h4>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 pb-2 border-b">
+                <Settings2 className="w-4 h-4 text-primary" />
+                <h4 className="text-sm font-semibold">Content Customization</h4>
+              </div>
               
               {/* Hero and CTA tests get title/headline field */}
               {(selectedTest?.type === 'hero' || selectedTest?.type === 'cta' || selectedTest?.type === 'messaging') && (
-                <div>
-                  <Label htmlFor="variant-title">
-                    {selectedTest?.type === 'hero' ? 'Title/Headline' : selectedTest?.type === 'cta' ? 'Headline' : 'Title'}
-                  </Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Type className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Label htmlFor="variant-title" className="text-sm font-medium">
+                      {selectedTest?.type === 'hero' ? 'Title/Headline' : selectedTest?.type === 'cta' ? 'Headline' : 'Title'}
+                    </Label>
+                  </div>
                   <Input
                     id="variant-title"
                     value={newVariant.title}
                     onChange={(e) => setNewVariant({ ...newVariant, title: e.target.value })}
                     placeholder={selectedTest?.type === 'hero' ? 'e.g., Ready to Take the First Step?' : 'e.g., Transform Your Future'}
                     data-testid="input-variant-title"
+                    className="text-sm"
                   />
+                  <p className="text-xs text-muted-foreground pl-5">
+                    Main headline visitors will see in this variant
+                  </p>
                 </div>
               )}
 
               {/* CTA button text field */}
               {(selectedTest?.type === 'hero' || selectedTest?.type === 'cta') && (
-                <div>
-                  <Label htmlFor="variant-cta-text">Button Text</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <MousePointerClick className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Label htmlFor="variant-cta-text" className="text-sm font-medium">Call-to-Action Text</Label>
+                  </div>
                   <Input
                     id="variant-cta-text"
                     value={newVariant.ctaText}
                     onChange={(e) => setNewVariant({ ...newVariant, ctaText: e.target.value })}
-                    placeholder="e.g., Get Started, Learn More"
+                    placeholder="e.g., Get Started, Learn More, Enroll Now"
                     data-testid="input-variant-cta-text"
+                    className="text-sm"
                   />
+                  <p className="text-xs text-muted-foreground pl-5">
+                    Text that appears on the action button
+                  </p>
                 </div>
               )}
 
               {/* Button style selector */}
               {(selectedTest?.type === 'hero' || selectedTest?.type === 'cta') && (
-                <div>
-                  <Label htmlFor="variant-button-style">Button Style</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Palette className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Label htmlFor="variant-button-style" className="text-sm font-medium">Button Appearance</Label>
+                  </div>
                   <Select
                     value={newVariant.buttonVariant}
                     onValueChange={(value) => setNewVariant({ ...newVariant, buttonVariant: value })}
                   >
-                    <SelectTrigger data-testid="select-variant-button-style">
+                    <SelectTrigger data-testid="select-variant-button-style" className="text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="default">Primary (Default)</SelectItem>
-                      <SelectItem value="secondary">Secondary</SelectItem>
-                      <SelectItem value="outline">Outline</SelectItem>
-                      <SelectItem value="ghost">Ghost</SelectItem>
+                      <SelectItem value="default">Primary (Solid color, most prominent)</SelectItem>
+                      <SelectItem value="secondary">Secondary (Subtle, less emphasis)</SelectItem>
+                      <SelectItem value="outline">Outline (Border only, minimal)</SelectItem>
+                      <SelectItem value="ghost">Ghost (Text only, subtle hover)</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground pl-5">
+                    Visual style of the button to match your desired emphasis
+                  </p>
                 </div>
               )}
 
               {/* Hero-specific fields */}
               {selectedTest?.type === 'hero' && (
                 <>
-                  <div>
-                    <Label htmlFor="variant-image">Image Name</Label>
+                  <div className="h-px bg-border my-2" />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                      <Label htmlFor="variant-image" className="text-sm font-medium">Background Image</Label>
+                    </div>
                     <Input
                       id="variant-image"
                       value={newVariant.imageName}
                       onChange={(e) => setNewVariant({ ...newVariant, imageName: e.target.value })}
                       placeholder="e.g., hero-student, hero-volunteer"
                       data-testid="input-variant-image"
+                      className="text-sm font-mono"
                     />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Reference to existing image in the system
+                    <p className="text-xs text-muted-foreground pl-5">
+                      Name of an existing image in your media library
                     </p>
                   </div>
-                  <div>
-                    <Label htmlFor="variant-cta-link">Button Link (optional)</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <LinkIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                      <Label htmlFor="variant-cta-link" className="text-sm font-medium">Button Destination <span className="text-xs text-muted-foreground font-normal">(optional)</span></Label>
+                    </div>
                     <Input
                       id="variant-cta-link"
                       value={newVariant.ctaLink}
                       onChange={(e) => setNewVariant({ ...newVariant, ctaLink: e.target.value })}
-                      placeholder="e.g., /programs, /get-started"
+                      placeholder="e.g., /programs, /get-started, #contact"
                       data-testid="input-variant-cta-link"
+                      className="text-sm font-mono"
                     />
+                    <p className="text-xs text-muted-foreground pl-5">
+                      Where users go when they click the button (leave empty to scroll to next section)
+                    </p>
                   </div>
                 </>
               )}
 
               {/* JSON fallback for other test types */}
               {selectedTest?.type !== 'hero' && selectedTest?.type !== 'cta' && selectedTest?.type !== 'messaging' && (
-                <div>
-                  <Label htmlFor="variant-json">Configuration (JSON)</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <FileJson className="w-3.5 h-3.5 text-muted-foreground" />
+                    <Label htmlFor="variant-json" className="text-sm font-medium">Advanced Configuration</Label>
+                  </div>
                   <Textarea
                     id="variant-json"
                     value={newVariant.jsonConfig}
                     onChange={(e) => setNewVariant({ ...newVariant, jsonConfig: e.target.value })}
                     rows={6}
                     placeholder='{"cardOrder": ["service-1", "service-2", "service-3"]}'
-                    className="font-mono text-sm"
+                    className="font-mono text-xs"
                     data-testid="input-variant-json"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    JSON object with variant-specific settings for {testTypeLabels[selectedTest?.type || ''] || 'this test type'}
-                  </p>
+                  <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-md">
+                    <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="text-xs text-muted-foreground space-y-1">
+                      <p className="font-medium text-foreground">JSON format required</p>
+                      <p>Provide settings for {testTypeLabels[selectedTest?.type || ''] || 'this test type'} as a valid JSON object</p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1712,50 +1755,77 @@ export default function AdminABTesting() {
 
             {/* Configuration Fields - Dynamic based on test type */}
             {selectedTest && (
-              <div className="space-y-4 p-4 bg-muted/30 rounded-md border">
-                <h4 className="text-sm font-medium">Variant Configuration</h4>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 pb-2 border-b">
+                  <Settings2 className="w-4 h-4 text-primary" />
+                  <h4 className="text-sm font-semibold">Content Customization</h4>
+                </div>
                 
                 {(selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') && (
                   <>
-                    <div>
-                      <Label htmlFor="edit-variant-title">
-                        {selectedTest.type === 'hero' ? 'Title/Headline' : selectedTest.type === 'cta' ? 'Headline' : 'Title'}
-                      </Label>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Type className="w-3.5 h-3.5 text-muted-foreground" />
+                        <Label htmlFor="edit-variant-title" className="text-sm font-medium">
+                          {selectedTest.type === 'hero' ? 'Title/Headline' : selectedTest.type === 'cta' ? 'Headline' : 'Title'}
+                        </Label>
+                      </div>
                       <Input
                         id="edit-variant-title"
                         value={editVariant.title}
                         onChange={(e) => setEditVariant({ ...editVariant, title: e.target.value })}
                         placeholder="e.g., Ready to Take the First Step?"
                         data-testid="input-edit-variant-title"
+                        className="text-sm"
                       />
+                      <p className="text-xs text-muted-foreground pl-5">
+                        Main headline visitors will see in this variant
+                      </p>
                     </div>
 
                     {(selectedTest.type === 'hero' || selectedTest.type === 'cta') && (
-                      <div>
-                        <Label htmlFor="edit-variant-cta-text">Button Text</Label>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <MousePointerClick className="w-3.5 h-3.5 text-muted-foreground" />
+                          <Label htmlFor="edit-variant-cta-text" className="text-sm font-medium">Call-to-Action Text</Label>
+                        </div>
                         <Input
                           id="edit-variant-cta-text"
                           value={editVariant.ctaText}
                           onChange={(e) => setEditVariant({ ...editVariant, ctaText: e.target.value })}
-                          placeholder="e.g., Get Started"
+                          placeholder="e.g., Get Started, Learn More, Enroll Now"
                           data-testid="input-edit-variant-cta-text"
+                          className="text-sm"
                         />
+                        <p className="text-xs text-muted-foreground pl-5">
+                          Text that appears on the action button
+                        </p>
                       </div>
                     )}
                   </>
                 )}
 
                 {selectedTest.type !== 'hero' && selectedTest.type !== 'cta' && selectedTest.type !== 'messaging' && (
-                  <div>
-                    <Label htmlFor="edit-variant-json">Configuration (JSON)</Label>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <FileJson className="w-3.5 h-3.5 text-muted-foreground" />
+                      <Label htmlFor="edit-variant-json" className="text-sm font-medium">Advanced Configuration</Label>
+                    </div>
                     <Textarea
                       id="edit-variant-json"
                       value={editVariant.jsonConfig}
                       onChange={(e) => setEditVariant({ ...editVariant, jsonConfig: e.target.value })}
                       rows={6}
-                      className="font-mono text-sm"
+                      className="font-mono text-xs"
                       data-testid="input-edit-variant-json"
                     />
+                    <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-md">
+                      <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p className="font-medium text-foreground">JSON format required</p>
+                        <p>Provide settings for {testTypeLabels[selectedTest.type || ''] || 'this test type'} as a valid JSON object</p>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
