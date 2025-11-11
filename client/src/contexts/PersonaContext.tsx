@@ -59,6 +59,7 @@ interface PersonaContextType {
   funnelStage: FunnelStage;
   showPersonaModal: boolean;
   setShowPersonaModal: (show: boolean) => void;
+  isPersonaLoading: boolean;
 }
 
 const PersonaContext = createContext<PersonaContextType | undefined>(undefined);
@@ -71,13 +72,33 @@ const ADMIN_FUNNEL_KEY = "admin-funnel-override";
 export function PersonaProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
-  const [persona, setPersonaState] = useState<Persona>(null);
+  
+  // Initialize persona from session storage to avoid flash
+  const getInitialPersona = (): Persona => {
+    const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
+    if (adminOverride && adminOverride !== "none") {
+      return adminOverride as Persona;
+    }
+    // Don't read from session storage for non-admin users during initialization
+    // It will be set in the useEffect after auth completes
+    return null;
+  };
+  
+  const [persona, setPersonaState] = useState<Persona>(getInitialPersona);
   const [funnelStage, setFunnelStage] = useState<FunnelStage>(null);
   const [showPersonaModal, setShowPersonaModal] = useState(false);
+  // If we have an admin override already, we're not loading
+  const [isPersonaLoading, setIsPersonaLoading] = useState(() => {
+    const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
+    return !(adminOverride && adminOverride !== "none");
+  });
 
   useEffect(() => {
     // Don't do anything while auth is loading
-    if (isLoading) return;
+    if (isLoading) {
+      setIsPersonaLoading(true);
+      return;
+    }
 
     // Don't show persona modal on Kinflo product landing pages
     // Use startsWith to handle query strings and trailing slashes
@@ -119,6 +140,9 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       setFunnelStage("awareness");
     }
 
+    // Mark persona as loaded
+    setIsPersonaLoading(false);
+
     // Cleanup timeout if component unmounts or location changes
     return () => {
       if (timeoutId) {
@@ -148,7 +172,7 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <PersonaContext.Provider value={{ persona, setPersona, funnelStage, showPersonaModal, setShowPersonaModal }}>
+    <PersonaContext.Provider value={{ persona, setPersona, funnelStage, showPersonaModal, setShowPersonaModal, isPersonaLoading }}>
       {children}
     </PersonaContext.Provider>
   );

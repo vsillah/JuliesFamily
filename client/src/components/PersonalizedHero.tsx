@@ -78,7 +78,7 @@ const heroContent: Record<string, HeroContent> = {
 };
 
 export default function PersonalizedHero() {
-  const { persona } = usePersona();
+  const { persona, isPersonaLoading } = usePersona();
   const [scrollScale, setScrollScale] = useState(1);
   const [textVisible, setTextVisible] = useState(false);
   const [shadeVisible, setShadeVisible] = useState(false);
@@ -142,6 +142,18 @@ export default function PersonalizedHero() {
       setImageLoaded(true);
     };
   }, [heroImageUrl]);
+
+  // Show loading state while persona is being determined
+  if (isPersonaLoading) {
+    return (
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">

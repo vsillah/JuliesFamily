@@ -71,6 +71,7 @@ async function upsertUser(
   const email = claims["email"] || claims["preferred_username"];
   const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(' ')[0];
   const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(' ')[1];
+  const persona = claims["persona"]; // Extract persona if provided (used for testing)
   
   console.log("[OIDC Claims] Extracted data:", {
     sub: claims["sub"],
@@ -78,17 +79,21 @@ async function upsertUser(
     firstName,
     lastName,
     profileImageUrl: claims["profile_image_url"] || claims["picture"],
+    persona,
   });
   
   // SECURITY: Never accept role from OIDC claims - this would allow privilege escalation!
   // Roles are only assigned via super_admin users through the User Management interface
   // New users default to 'client' role (safe default)
+  // 
+  // NOTE: Persona is safe to accept from claims as it's just a user preference (not a security concern)
   await storage.upsertUser({
     oidcSub: claims["sub"],
     email: email,
     firstName: firstName,
     lastName: lastName,
     profileImageUrl: claims["profile_image_url"] || claims["picture"],
+    persona: persona, // Include persona from claims if provided
     // Don't pass role from claims - preserve existing user's role or use database default ('client')
   });
 }
