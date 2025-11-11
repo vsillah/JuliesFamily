@@ -51,22 +51,22 @@ export default function ProgramDetailDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-[900px] max-h-[90vh] flex flex-col p-0 gap-0 [&>button]:bg-white/90 [&>button]:text-black [&>button]:hover:bg-white [&>button]:rounded-full [&>button]:h-8 [&>button]:w-8 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-lg [&>button]:z-50"
+        className="sm:max-w-[900px] h-[85vh] sm:h-[90vh] max-h-[85vh] sm:max-h-[90vh] flex flex-col p-0 gap-0 [&>button]:bg-white/90 [&>button]:text-black [&>button]:hover:bg-white [&>button]:rounded-full [&>button]:h-8 [&>button]:w-8 [&>button]:flex [&>button]:items-center [&>button]:justify-center [&>button]:shadow-lg [&>button]:z-50"
         data-testid={`dialog-program-detail-${program.id}`}
       >
-        <ScrollArea className="flex-1 overflow-y-auto">
+        <ScrollArea className="h-full w-full overflow-y-auto">
           {/* Hero Image */}
           {imageUrl && (
-            <div className="relative h-48 sm:h-64 w-full overflow-hidden">
+            <div className="relative h-40 sm:h-64 w-full overflow-hidden">
               <img 
                 src={imageUrl} 
                 alt={program.title}
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6">
                 <DialogHeader>
-                  <DialogTitle className="text-3xl sm:text-4xl font-serif font-bold text-white">
+                  <DialogTitle className="text-2xl sm:text-4xl font-serif font-bold text-white">
                     {program.title}
                   </DialogTitle>
                   <DialogDescription className="sr-only">
@@ -78,9 +78,9 @@ export default function ProgramDetailDialog({
           )}
 
           {!imageUrl && (
-            <div className="px-6 pt-6">
+            <div className="px-4 sm:px-6 pt-4 sm:pt-6">
               <DialogHeader>
-                <DialogTitle className="text-3xl sm:text-4xl font-serif font-bold">
+                <DialogTitle className="text-2xl sm:text-4xl font-serif font-bold">
                   {program.title}
                 </DialogTitle>
                 <DialogDescription className="sr-only">
@@ -91,48 +91,48 @@ export default function ProgramDetailDialog({
           )}
 
           {/* Quick Stats */}
-          <div className="px-6 py-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="px-4 sm:px-6 py-4 sm:py-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
               {program.ageRange && (
                 <Card>
-                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                    <Users className="w-5 h-5 text-primary" />
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     <div>
                       <p className="text-xs text-muted-foreground">Age Range</p>
-                      <p className="font-medium text-sm">{program.ageRange}</p>
+                      <p className="font-medium text-xs sm:text-sm break-words">{program.ageRange}</p>
                     </div>
                   </CardContent>
                 </Card>
               )}
               {program.schedule && (
                 <Card>
-                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                    <Clock className="w-5 h-5 text-primary" />
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2">
+                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     <div>
                       <p className="text-xs text-muted-foreground">Schedule</p>
-                      <p className="font-medium text-sm">{program.schedule}</p>
+                      <p className="font-medium text-xs sm:text-sm break-words">{program.schedule}</p>
                     </div>
                   </CardContent>
                 </Card>
               )}
               {program.location && (
                 <Card>
-                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                    <MapPin className="w-5 h-5 text-primary" />
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     <div>
                       <p className="text-xs text-muted-foreground">Location</p>
-                      <p className="font-medium text-sm">{program.location}</p>
+                      <p className="font-medium text-xs sm:text-sm break-words">{program.location}</p>
                     </div>
                   </CardContent>
                 </Card>
               )}
               {program.cost && (
                 <Card>
-                  <CardContent className="p-4 flex flex-col items-center text-center gap-2">
-                    <DollarSign className="w-5 h-5 text-primary" />
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-center text-center gap-1.5 sm:gap-2">
+                    <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                     <div>
                       <p className="text-xs text-muted-foreground">Cost</p>
-                      <p className="font-medium text-sm">{program.cost}</p>
+                      <p className="font-medium text-xs sm:text-sm break-words">{program.cost}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -141,7 +141,7 @@ export default function ProgramDetailDialog({
           </div>
 
           {/* Tabbed Content */}
-          <div className="px-6 pb-6">
+          <div className="px-4 sm:px-6 pb-6 sm:pb-8">
             <Tabs defaultValue="overview" className="w-full">
               <TabsList className="w-full inline-flex h-auto flex-nowrap overflow-x-auto sm:grid sm:grid-cols-4">
                 <TabsTrigger value="overview" data-testid="tab-overview" className="flex-shrink-0">Overview</TabsTrigger>
@@ -259,6 +259,9 @@ export default function ProgramDetailDialog({
               </TabsContent>
             </Tabs>
           </div>
+          
+          {/* Extra bottom padding for mobile browser UI */}
+          <div className="h-16 sm:h-0" aria-hidden="true" />
         </ScrollArea>
       </DialogContent>
     </Dialog>
