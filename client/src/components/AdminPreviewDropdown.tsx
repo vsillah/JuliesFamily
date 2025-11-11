@@ -80,12 +80,12 @@ function VariantSelector({ testId, testName, testType, selectedVariantId, onVari
   });
 
   return (
-    <div className="space-y-2 border rounded-md p-3 bg-card/50">
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-medium">
+    <div className="space-y-2 border rounded-md p-2 sm:p-3 bg-card/50">
+      <div className="flex items-center justify-between gap-2">
+        <label className="text-xs font-medium truncate">
           {contentTypeLabels[testType] || testType}
         </label>
-        <Badge variant="secondary" className="text-xs">
+        <Badge variant="secondary" className="text-[10px] sm:text-xs shrink-0 px-1.5 py-0">
           Preview Override
         </Badge>
       </div>
@@ -93,27 +93,27 @@ function VariantSelector({ testId, testName, testType, selectedVariantId, onVari
       <RadioGroup
         value={selectedVariantId || "auto"}
         onValueChange={onVariantChange}
-        className="space-y-2"
+        className="space-y-1.5 sm:space-y-2"
       >
         {/* Auto-assign option */}
         <div
           className={cn(
-            "flex items-start space-x-2 p-2 rounded-md border cursor-pointer hover-elevate",
+            "flex items-start space-x-2 p-2 sm:p-2.5 rounded-md border cursor-pointer hover-elevate",
             (!selectedVariantId || selectedVariantId === "auto") && "border-primary bg-primary/5"
           )}
           onClick={() => onVariantChange("auto")}
           data-testid={`radio-variant-auto-${testId}`}
         >
-          <RadioGroupItem value="auto" id={`auto-${testId}`} className="mt-0.5" />
+          <RadioGroupItem value="auto" id={`auto-${testId}`} className="mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <Label
               htmlFor={`auto-${testId}`}
-              className="text-xs font-medium cursor-pointer flex items-center gap-2"
+              className="text-xs font-medium cursor-pointer flex flex-wrap items-center gap-1 sm:gap-2"
             >
-              Auto-assign
-              <span className="text-muted-foreground font-normal">({trafficDisplay})</span>
+              <span>Auto-assign</span>
+              <span className="text-muted-foreground font-normal text-[11px] sm:text-xs">({trafficDisplay})</span>
             </Label>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
               Randomly assign based on traffic allocation
             </p>
           </div>
@@ -124,26 +124,26 @@ function VariantSelector({ testId, testName, testType, selectedVariantId, onVari
           <div
             key={variant.id}
             className={cn(
-              "flex items-start space-x-2 p-2 rounded-md border cursor-pointer hover-elevate",
+              "flex items-start space-x-2 p-2 sm:p-2.5 rounded-md border cursor-pointer hover-elevate",
               selectedVariantId === variant.id && "border-primary bg-primary/5"
             )}
             onClick={() => onVariantChange(variant.id)}
             data-testid={`radio-variant-${variant.id}`}
           >
-            <RadioGroupItem value={variant.id} id={variant.id} className="mt-0.5" />
+            <RadioGroupItem value={variant.id} id={variant.id} className="mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
               <Label
                 htmlFor={variant.id}
-                className="text-xs font-medium cursor-pointer flex items-center gap-2"
+                className="text-xs font-medium cursor-pointer flex flex-wrap items-center gap-1 sm:gap-2"
               >
-                {variant.name || (variant.isControl ? "Control" : "Treatment")}
+                <span className="truncate">{variant.name || (variant.isControl ? "Control" : "Treatment")}</span>
                 {variant.isControl && (
-                  <Badge variant="outline" className="text-xs">Baseline</Badge>
+                  <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">Baseline</Badge>
                 )}
-                <span className="text-muted-foreground font-normal">{variant.trafficWeight}%</span>
+                <span className="text-muted-foreground font-normal text-[11px] sm:text-xs shrink-0">{variant.trafficWeight}%</span>
               </Label>
               {variant.description && (
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-words">
                   {variant.description}
                 </p>
               )}
@@ -200,34 +200,34 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   // Mobile full-screen overlay
   const mobileOverlay = showMobileOverlay && (
     <div 
-      className="fixed inset-0 bg-background z-[99999] overflow-y-auto"
+      className="fixed inset-0 bg-background z-[99999] overflow-y-auto pb-6"
       data-testid="menu-admin-preview"
     >
       {/* Close button */}
       <button
         onClick={() => setShowMobileOverlay(false)}
-        className="absolute top-4 right-4 p-2 hover:bg-accent rounded-md transition-colors z-10"
+        className="absolute top-3 right-3 p-2 hover:bg-accent rounded-md transition-colors z-10"
         data-testid="button-close-admin-preview"
         aria-label="Close preview menu"
       >
         <X className="w-5 h-5" />
       </button>
       
-      <div className="p-4 pt-16">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="px-3 pt-14 pb-4">
+        <div className="flex items-center gap-2 mb-3">
           <Eye className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold">Admin Preview Mode</h2>
+          <h2 className="font-semibold text-sm">Admin Preview Mode</h2>
         </div>
-        <div className="h-px bg-border mb-4" />
+        <div className="h-px bg-border mb-3" />
   
         {/* Persona Selection */}
-        <div className="py-2 space-y-2">
+        <div className="py-1.5 space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground">Persona Type</label>
           <Select
             value={selectedPersona || "none"}
             onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
           >
-            <SelectTrigger className="h-8 text-sm" data-testid="select-persona">
+            <SelectTrigger className="h-9 text-sm" data-testid="select-persona">
               <SelectValue placeholder="Select persona" />
             </SelectTrigger>
             <SelectContent className="z-[100000]">
@@ -242,7 +242,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         </div>
 
         {/* Funnel Stage Selection */}
-        <div className="py-2 space-y-2">
+        <div className="py-1.5 space-y-1.5">
           <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
             <TrendingUp className="w-3 h-3" />
             Funnel Stage
@@ -251,7 +251,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             value={selectedFunnel}
             onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
           >
-            <SelectTrigger className="h-8 text-sm" data-testid="select-funnel">
+            <SelectTrigger className="h-9 text-sm" data-testid="select-funnel">
               <SelectValue placeholder="Select stage" />
             </SelectTrigger>
             <SelectContent className="z-[100000]">
@@ -268,13 +268,13 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         {/* A/B Test Variants */}
         {activeTests && activeTests.length > 0 && (
           <>
-            <div className="h-px bg-border my-4" />
-            <div className="py-2 space-y-2">
+            <div className="h-px bg-border my-3" />
+            <div className="py-1.5 space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <TestTube2 className="w-3 h-3" />
                 A/B Test Variants ({activeTests.length})
               </label>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {activeTests.map((test) => (
                   <VariantSelector
                     key={test.id}
@@ -295,46 +295,47 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           </>
         )}
 
-        <div className="h-px bg-border my-4" />
+        <div className="h-px bg-border my-3" />
 
         {/* Action Buttons */}
-        <div className="py-2 space-y-2">
+        <div className="py-1.5 space-y-2">
           <Button
             size="sm"
-            className="w-full"
+            className="w-full h-10"
             onClick={() => {
               handleApply();
               setShowMobileOverlay(false);
             }}
             data-testid="button-apply-preview-dropdown"
           >
+            <CheckCircle2 className="w-4 h-4 mr-2" />
             Apply Preview
           </Button>
           {isPreviewActive && (
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-full h-10"
               onClick={() => {
                 handleReset();
                 setShowMobileOverlay(false);
               }}
               data-testid="button-reset-preview-dropdown"
             >
-              <RotateCcw className="w-3 h-3 mr-2" />
+              <RotateCcw className="w-3.5 h-3.5 mr-2" />
               Reset to Default
             </Button>
           )}
         </div>
 
-        <div className="h-px bg-border my-4" />
+        <div className="h-px bg-border my-3" />
 
         {/* Admin Dashboard Link */}
         <Link href="/admin">
           <Button
             variant="ghost"
             size="sm"
-            className="w-full justify-start"
+            className="w-full justify-start h-10"
             data-testid="menu-admin-dashboard-dropdown"
           >
             <Shield className="w-4 h-4 mr-2" />
