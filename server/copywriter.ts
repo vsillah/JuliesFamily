@@ -380,3 +380,94 @@ Return ONLY valid JSON with exactly 3 variants:
     throw new Error("Failed to generate test variants. Please try again.");
   }
 }
+
+/**
+ * Simple AI text generation for form fields
+ * Generates appropriate content based on field type and context
+ */
+export async function generateFieldText(
+  fieldType: string,
+  contentTypeName: string,
+  currentValue?: string,
+  title?: string,
+  persona?: string
+): Promise<string> {
+  const personaLabel = persona ? PERSONA_LABELS[persona as Persona] : 'General Audience';
+  
+  const fieldGuidance: Record<string, { purpose: string; length: string; tone: string }> = {
+    description: {
+      purpose: 'Engaging description that explains what this content offers',
+      length: '2-4 sentences (40-80 words)',
+      tone: 'Warm, welcoming, and community-focused'
+    },
+    overview: {
+      purpose: 'Comprehensive program overview explaining benefits and what participants will experience',
+      length: '3-5 sentences (60-100 words)',
+      tone: 'Professional yet warm, emphasizing transformation and community'
+    },
+    subtitle: {
+      purpose: 'Brief tagline or supporting text that reinforces the main message',
+      length: '1 short sentence or phrase (5-10 words)',
+      tone: 'Inspiring and concise'
+    },
+    faqAnswer: {
+      purpose: 'Clear, helpful answer that addresses the specific question with actionable information',
+      length: '2-3 sentences (30-60 words)',
+      tone: 'Friendly, informative, and reassuring'
+    }
+  };
+
+  const guidance = fieldGuidance[fieldType] || fieldGuidance.description;
+  const titleContext = title ? `\n**Content Title**: "${title}"` : '';
+  const currentContext = currentValue ? `\n**Current Text** (for reference/improvement): "${currentValue}"` : '';
+
+  const prompt = `You are a copywriter for Julie's Family Learning Program - a warm, community-focused non-profit helping families through education.
+
+**Content Type**: ${contentTypeName}
+**Field**: ${fieldType}${titleContext}${currentContext}
+**Target Audience**: ${personaLabel}
+
+**Your Task**:
+Generate compelling ${fieldType} text that:
+- ${guidance.purpose}
+- Length: ${guidance.length}
+- Tone: ${guidance.tone}
+
+**Guidelines**:
+- Use warm, approachable language (not corporate or salesy)
+- Be specific and concrete (avoid vague promises)
+- Emphasize community, support, and transformation
+- Use "you/your" language to make it personal
+- Sound human and authentic
+
+**Output**:
+Return ONLY the text itself, with no JSON formatting, no quotes, no markdown, and no explanations. Just the raw text that will go directly into the form field.`;
+
+  try {
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+    });
+
+    const responseText = (result.response?.text() || result.text || "").trim();
+    
+    // Remove any quotes or markdown if present
+    let cleaned = responseText;
+    if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+      cleaned = cleaned.slice(1, -1);
+    }
+    if (cleaned.startsWith('```') || cleaned.includes('```')) {
+      cleaned = cleaned.replace(/```[a-z]*\n?/g, '').trim();
+    }
+    
+    return cleaned;
+  } catch (error) {
+    console.error("Failed to generate field text:", error);
+    throw new Error("Failed to generate text. Please try again.");
+  }
+}

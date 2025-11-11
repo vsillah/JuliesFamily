@@ -5911,6 +5911,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate text for form fields (description, overview, etc.)
+  app.post('/api/ai/generate-field-text', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { fieldType, contentType, currentValue, title, persona } = req.body;
+      
+      if (!fieldType || !contentType) {
+        return res.status(400).json({ 
+          message: "Missing required fields: fieldType and contentType" 
+        });
+      }
+
+      const { generateFieldText } = await import('./copywriter');
+      const text = await generateFieldText(
+        fieldType,
+        contentType,
+        currentValue,
+        title,
+        persona
+      );
+      
+      res.json({ text });
+    } catch (error: any) {
+      console.error("Error generating field text:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to generate text" 
+      });
+    }
+  });
+
   // Google Calendar Integration Routes
   
   // Create a calendar event

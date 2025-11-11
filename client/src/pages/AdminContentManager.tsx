@@ -14,12 +14,13 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star, CheckCircle2, AlertTriangle, XCircle, Sparkles, Loader2 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
 import ConsolidatedVisibilityBadge from "@/components/ConsolidatedVisibilityBadge";
 import { ObjectUploader } from "@/components/ObjectUploader";
+import { AITextarea } from "@/components/AITextarea";
 import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS, type Persona, type FunnelStage } from "@shared/defaults/personas";
 import { useContentAvailability } from "@/hooks/useContentAvailability";
 import { getUrlValidationMessage } from "@shared/utils/ctaValidation";
@@ -1395,16 +1396,18 @@ export default function AdminContentManager() {
                   data-testid="input-edit-title"
                 />
               </div>
-              <div>
-                <Label htmlFor="edit-description">Description</Label>
-                <Textarea
-                  id="edit-description"
-                  value={editingItem.description || ""}
-                  onChange={(e) => setEditingItem({ ...editingItem, description: e.target.value })}
-                  rows={4}
-                  data-testid="input-edit-description"
-                />
-              </div>
+              <AITextarea
+                id="edit-description"
+                label="Description"
+                value={editingItem.description || ""}
+                onChange={(value) => setEditingItem({ ...editingItem, description: value })}
+                fieldType="description"
+                contentType={editingItem.type}
+                title={editingItem.title}
+                persona={(editingItem.metadata as any)?.persona}
+                rows={4}
+                data-testid="input-edit-description"
+              />
               <div className="space-y-3">
                 <Label>Image</Label>
                 
@@ -1693,17 +1696,19 @@ export default function AdminContentManager() {
                     </p>
                   </div>
 
-                  <div>
-                    <Label htmlFor="edit-overview">Overview</Label>
-                    <Textarea
-                      id="edit-overview"
-                      value={(editingItem.metadata as any)?.overview || ""}
-                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), overview: e.target.value } })}
-                      rows={4}
-                      placeholder="Detailed program overview"
-                      data-testid="input-edit-overview"
-                    />
-                  </div>
+                  <AITextarea
+                    id="edit-overview"
+                    label="Overview"
+                    value={(editingItem.metadata as any)?.overview || ""}
+                    onChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), overview: value } })}
+                    fieldType="overview"
+                    contentType="program_detail"
+                    title={editingItem.title}
+                    persona={(editingItem.metadata as any)?.defaultPersona}
+                    rows={4}
+                    placeholder="Detailed program overview"
+                    data-testid="input-edit-overview"
+                  />
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -1858,21 +1863,25 @@ export default function AdminContentManager() {
                               data-testid={`input-edit-faq-question-${index}`}
                             />
                           </div>
-                          <div>
-                            <Label htmlFor={`edit-faq-answer-${index}`}>Answer</Label>
-                            <Textarea
-                              id={`edit-faq-answer-${index}`}
-                              value={faq.answer}
-                              onChange={(e) => {
-                                const faqs = [...((editingItem.metadata as any)?.faqs || [])];
-                                faqs[index] = { ...faqs[index], answer: e.target.value };
-                                setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), faqs } });
-                              }}
-                              rows={2}
-                              placeholder="Enter answer"
-                              data-testid={`input-edit-faq-answer-${index}`}
-                            />
-                          </div>
+                          <AITextarea
+                            id={`edit-faq-answer-${index}`}
+                            label="Answer"
+                            value={faq.answer}
+                            onChange={(value) => {
+                              const faqs = [...((editingItem.metadata as any)?.faqs || [])];
+                              faqs[index] = { ...faqs[index], answer: value };
+                              setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), faqs } });
+                            }}
+                            fieldType="faqAnswer"
+                            contentType="program_detail"
+                            getContext={() => ({
+                              title: faq.question,
+                              persona: (editingItem.metadata as any)?.defaultPersona
+                            })}
+                            rows={2}
+                            placeholder="Enter answer"
+                            data-testid={`input-edit-faq-answer-${index}`}
+                          />
                           <Button
                             type="button"
                             variant="destructive"
@@ -2213,17 +2222,19 @@ export default function AdminContentManager() {
                 data-testid="input-create-title"
               />
             </div>
-            <div>
-              <Label htmlFor="create-description">Description</Label>
-              <Textarea
-                id="create-description"
-                value={newItem.description}
-                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
-                rows={4}
-                placeholder="Enter description"
-                data-testid="input-create-description"
-              />
-            </div>
+            <AITextarea
+              id="create-description"
+              label="Description"
+              value={newItem.description}
+              onChange={(value) => setNewItem({ ...newItem, description: value })}
+              fieldType="description"
+              contentType={newItem.type}
+              title={newItem.title}
+              persona={(newItem.metadata as any)?.persona}
+              rows={4}
+              placeholder="Enter description"
+              data-testid="input-create-description"
+            />
             <div className="space-y-3">
               <Label>Image</Label>
               
@@ -2604,17 +2615,19 @@ export default function AdminContentManager() {
                   </p>
                 </div>
 
-                <div>
-                  <Label htmlFor="create-overview">Overview</Label>
-                  <Textarea
-                    id="create-overview"
-                    value={(newItem.metadata as any)?.overview || ""}
-                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), overview: e.target.value } })}
-                    rows={4}
-                    placeholder="Detailed program overview"
-                    data-testid="input-create-overview"
-                  />
-                </div>
+                <AITextarea
+                  id="create-overview"
+                  label="Overview"
+                  value={(newItem.metadata as any)?.overview || ""}
+                  onChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), overview: value } })}
+                  fieldType="overview"
+                  contentType="program_detail"
+                  title={newItem.title}
+                  persona={(newItem.metadata as any)?.defaultPersona}
+                  rows={4}
+                  placeholder="Detailed program overview"
+                  data-testid="input-create-overview"
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -2769,21 +2782,25 @@ export default function AdminContentManager() {
                             data-testid={`input-create-faq-question-${index}`}
                           />
                         </div>
-                        <div>
-                          <Label htmlFor={`faq-answer-${index}`}>Answer</Label>
-                          <Textarea
-                            id={`faq-answer-${index}`}
-                            value={faq.answer}
-                            onChange={(e) => {
-                              const faqs = [...((newItem.metadata as any)?.faqs || [])];
-                              faqs[index] = { ...faqs[index], answer: e.target.value };
-                              setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), faqs } });
-                            }}
-                            rows={2}
-                            placeholder="Enter answer"
-                            data-testid={`input-create-faq-answer-${index}`}
-                          />
-                        </div>
+                        <AITextarea
+                          id={`faq-answer-${index}`}
+                          label="Answer"
+                          value={faq.answer}
+                          onChange={(value) => {
+                            const faqs = [...((newItem.metadata as any)?.faqs || [])];
+                            faqs[index] = { ...faqs[index], answer: value };
+                            setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), faqs } });
+                          }}
+                          fieldType="faqAnswer"
+                          contentType="program_detail"
+                          getContext={() => ({
+                            title: faq.question,
+                            persona: (newItem.metadata as any)?.defaultPersona
+                          })}
+                          rows={2}
+                          placeholder="Enter answer"
+                          data-testid={`input-create-faq-answer-${index}`}
+                        />
                         <Button
                           type="button"
                           variant="destructive"
