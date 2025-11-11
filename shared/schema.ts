@@ -509,7 +509,14 @@ export const insertAbTestVariantSchema = createInsertSchema(abTestVariants).omit
   
   // If configuration is provided, validate it and apply defaults/transforms
   if (data.configuration) {
-    const result = abTestVariantConfigurationSchema.safeParse(data.configuration);
+    let configToValidate = data.configuration;
+    
+    // Backward compatibility: if 'kind' field is missing, assume 'presentation' type
+    if (typeof configToValidate === 'object' && configToValidate !== null && !('kind' in configToValidate)) {
+      configToValidate = { kind: 'presentation', ...configToValidate };
+    }
+    
+    const result = abTestVariantConfigurationSchema.safeParse(configToValidate);
     if (!result.success) {
       // Add detailed validation errors for configuration field
       result.error.errors.forEach((error) => {
@@ -533,9 +540,13 @@ export type AbTestWithVariants = AbTest & {
   variants: AbTestVariant[];
 };
 
-// Zod schema for A/B test variant configuration validation
-// Configuration contains presentation overrides applied to content after selection
-export const abTestVariantConfigurationSchema = z.object({
+// Zod schemas for A/B test variant configurations - type-specific with discriminated union
+
+// Presentation Override Configuration (hero, cta, messaging tests)
+// Contains presentation overrides applied to content after selection
+export const presentationOverrideConfigSchema = z.object({
+  kind: z.literal('presentation'),
+  
   // Text content overrides
   title: z.string().optional(),
   description: z.string().optional(),
@@ -555,7 +566,50 @@ export const abTestVariantConfigurationSchema = z.object({
   
   // Metadata overrides (for content-type specific fields)
   metadata: z.record(z.any()).optional(),
-}).strict(); // Strict mode prevents unknown keys
+}).strict();
+
+export type PresentationOverrideConfig = z.infer<typeof presentationOverrideConfigSchema>;
+
+// Card Order Configuration (card_order tests)
+// Defines the order of content items to display
+export const cardOrderConfigSchema = z.object({
+  kind: z.literal('card_order'),
+  
+  // Type of content being reordered
+  contentType: z.enum(['service', 'testimonial', 'event', 'program_detail', 'sponsor', 'impact_stat']),
+  
+  // Ordered array of content item IDs
+  itemIds: z.array(z.string()).min(1, "At least one item must be selected"),
+}).strict();
+
+export type CardOrderConfig = z.infer<typeof cardOrderConfigSchema>;
+
+// Layout Configuration (layout tests)
+// Defines visual layout and styling options
+export const layoutConfigSchema = z.object({
+  kind: z.literal('layout'),
+  
+  // Layout template identifier
+  template: z.enum(['grid-2col', 'grid-3col', 'grid-4col', 'sidebar-left', 'sidebar-right', 'single-column', 'masonry']),
+  
+  // Layout-specific options
+  options: z.object({
+    cardStyle: z.enum(['elevated', 'flat', 'bordered']).optional(),
+    spacing: z.enum(['compact', 'comfortable', 'spacious']).optional(),
+    imagePosition: z.enum(['top', 'left', 'right', 'background']).optional(),
+    showImages: z.boolean().optional(),
+    columnsOnMobile: z.enum(['1', '2']).optional(),
+  }).optional(),
+}).strict();
+
+export type LayoutConfig = z.infer<typeof layoutConfigSchema>;
+
+// Discriminated union of all configuration types
+export const abTestVariantConfigurationSchema = z.discriminatedUnion('kind', [
+  presentationOverrideConfigSchema,
+  cardOrderConfigSchema,
+  layoutConfigSchema,
+]);
 
 export type AbTestVariantConfiguration = z.infer<typeof abTestVariantConfigurationSchema>;
 
