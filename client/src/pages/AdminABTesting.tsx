@@ -53,13 +53,22 @@ export default function AdminABTesting() {
     trafficAllocation: 100,
   });
 
-  // New variant form
+  // New variant form - configuration fields separated for easier editing
   const [newVariant, setNewVariant] = useState({
     name: "",
     description: "",
     trafficWeight: 50,
-    configuration: "",
     isControl: false,
+    // Configuration fields (type-specific)
+    title: "",
+    ctaText: "",
+    ctaLink: "",
+    secondaryCtaText: "",
+    secondaryCtaLink: "",
+    buttonVariant: "default" as string,
+    imageName: "",
+    // JSON fallback for unsupported types
+    jsonConfig: "",
   });
 
   // Fetch all tests with variants
@@ -294,8 +303,15 @@ export default function AdminABTesting() {
         name: "",
         description: "",
         trafficWeight: 50,
-        configuration: "",
         isControl: false,
+        title: "",
+        ctaText: "",
+        ctaLink: "",
+        secondaryCtaText: "",
+        secondaryCtaLink: "",
+        buttonVariant: "default",
+        imageName: "",
+        jsonConfig: "",
       });
       toast({
         title: "Variant created",
@@ -394,25 +410,41 @@ export default function AdminABTesting() {
   const handleCreateVariant = () => {
     if (!selectedTest) return;
 
-    let parsedConfig = {};
-    try {
-      if (newVariant.configuration.trim()) {
-        parsedConfig = JSON.parse(newVariant.configuration);
+    let config: Record<string, any> = {};
+    
+    // For types with custom forms, build from individual fields
+    if (selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') {
+      if (newVariant.title) config.title = newVariant.title;
+      if (newVariant.ctaText) config.ctaText = newVariant.ctaText;
+      if (newVariant.ctaLink) config.ctaLink = newVariant.ctaLink;
+      if (newVariant.secondaryCtaText) config.secondaryCtaText = newVariant.secondaryCtaText;
+      if (newVariant.secondaryCtaLink) config.secondaryCtaLink = newVariant.secondaryCtaLink;
+      if (newVariant.buttonVariant && newVariant.buttonVariant !== "default") config.buttonVariant = newVariant.buttonVariant;
+      if (newVariant.imageName) config.imageName = newVariant.imageName;
+    } else {
+      // For other types, parse JSON config
+      if (newVariant.jsonConfig.trim()) {
+        try {
+          config = JSON.parse(newVariant.jsonConfig);
+        } catch (error) {
+          toast({
+            title: "Invalid JSON",
+            description: "Configuration must be valid JSON.",
+            variant: "destructive",
+          });
+          return;
+        }
       }
-    } catch (error) {
-      toast({
-        title: "Invalid JSON",
-        description: "Configuration must be valid JSON.",
-        variant: "destructive",
-      });
-      return;
     }
 
     createVariantMutation.mutate({
       testId: selectedTest.id,
       variantData: {
-        ...newVariant,
-        configuration: parsedConfig,
+        name: newVariant.name,
+        description: newVariant.description,
+        trafficWeight: newVariant.trafficWeight,
+        isControl: newVariant.isControl,
+        configuration: config,
       },
     });
   };
@@ -1040,20 +1072,108 @@ export default function AdminABTesting() {
                 Percentage of test traffic to show this variant (weights should sum to 100)
               </p>
             </div>
-            <div>
-              <Label htmlFor="variant-config">Configuration (JSON)</Label>
-              <Textarea
-                id="variant-config"
-                value={newVariant.configuration}
-                onChange={(e) => setNewVariant({ ...newVariant, configuration: e.target.value })}
-                rows={6}
-                placeholder='{"cardOrder": ["service-1", "service-2", "service-3"]}'
-                className="font-mono text-sm"
-                data-testid="input-variant-config"
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                JSON object with variant-specific settings
-              </p>
+            {/* Configuration Fields - Dynamic based on test type */}
+            <div className="space-y-4 p-4 bg-muted/30 rounded-md border">
+              <h4 className="text-sm font-medium">Variant Configuration</h4>
+              
+              {/* Hero and CTA tests get title/headline field */}
+              {(selectedTest?.type === 'hero' || selectedTest?.type === 'cta' || selectedTest?.type === 'messaging') && (
+                <div>
+                  <Label htmlFor="variant-title">
+                    {selectedTest?.type === 'hero' ? 'Title/Headline' : selectedTest?.type === 'cta' ? 'Headline' : 'Title'}
+                  </Label>
+                  <Input
+                    id="variant-title"
+                    value={newVariant.title}
+                    onChange={(e) => setNewVariant({ ...newVariant, title: e.target.value })}
+                    placeholder={selectedTest?.type === 'hero' ? 'e.g., Ready to Take the First Step?' : 'e.g., Transform Your Future'}
+                    data-testid="input-variant-title"
+                  />
+                </div>
+              )}
+
+              {/* CTA button text field */}
+              {(selectedTest?.type === 'hero' || selectedTest?.type === 'cta') && (
+                <div>
+                  <Label htmlFor="variant-cta-text">Button Text</Label>
+                  <Input
+                    id="variant-cta-text"
+                    value={newVariant.ctaText}
+                    onChange={(e) => setNewVariant({ ...newVariant, ctaText: e.target.value })}
+                    placeholder="e.g., Get Started, Learn More"
+                    data-testid="input-variant-cta-text"
+                  />
+                </div>
+              )}
+
+              {/* Button style selector */}
+              {(selectedTest?.type === 'hero' || selectedTest?.type === 'cta') && (
+                <div>
+                  <Label htmlFor="variant-button-style">Button Style</Label>
+                  <Select
+                    value={newVariant.buttonVariant}
+                    onValueChange={(value) => setNewVariant({ ...newVariant, buttonVariant: value })}
+                  >
+                    <SelectTrigger data-testid="select-variant-button-style">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">Primary (Default)</SelectItem>
+                      <SelectItem value="secondary">Secondary</SelectItem>
+                      <SelectItem value="outline">Outline</SelectItem>
+                      <SelectItem value="ghost">Ghost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Hero-specific fields */}
+              {selectedTest?.type === 'hero' && (
+                <>
+                  <div>
+                    <Label htmlFor="variant-image">Image Name</Label>
+                    <Input
+                      id="variant-image"
+                      value={newVariant.imageName}
+                      onChange={(e) => setNewVariant({ ...newVariant, imageName: e.target.value })}
+                      placeholder="e.g., hero-student, hero-volunteer"
+                      data-testid="input-variant-image"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Reference to existing image in the system
+                    </p>
+                  </div>
+                  <div>
+                    <Label htmlFor="variant-cta-link">Button Link (optional)</Label>
+                    <Input
+                      id="variant-cta-link"
+                      value={newVariant.ctaLink}
+                      onChange={(e) => setNewVariant({ ...newVariant, ctaLink: e.target.value })}
+                      placeholder="e.g., /programs, /get-started"
+                      data-testid="input-variant-cta-link"
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* JSON fallback for other test types */}
+              {selectedTest?.type !== 'hero' && selectedTest?.type !== 'cta' && selectedTest?.type !== 'messaging' && (
+                <div>
+                  <Label htmlFor="variant-json">Configuration (JSON)</Label>
+                  <Textarea
+                    id="variant-json"
+                    value={newVariant.jsonConfig}
+                    onChange={(e) => setNewVariant({ ...newVariant, jsonConfig: e.target.value })}
+                    rows={6}
+                    placeholder='{"cardOrder": ["service-1", "service-2", "service-3"]}'
+                    className="font-mono text-sm"
+                    data-testid="input-variant-json"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    JSON object with variant-specific settings for {testTypeLabels[selectedTest?.type || ''] || 'this test type'}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <Switch
