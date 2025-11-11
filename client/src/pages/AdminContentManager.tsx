@@ -14,13 +14,16 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star, CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
 import ConsolidatedVisibilityBadge from "@/components/ConsolidatedVisibilityBadge";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS, type Persona, type FunnelStage } from "@shared/defaults/personas";
+import { useContentAvailability } from "@/hooks/useContentAvailability";
+import { getUrlValidationMessage } from "@shared/utils/ctaValidation";
+import { PersonaContext } from "@/contexts/PersonaContext";
 import {
   DndContext,
   closestCenter,
@@ -47,6 +50,58 @@ const PASSION_OPTIONS = [
   { id: 'nutrition', label: 'Nutrition & Health' },
   { id: 'community', label: 'Community Building' },
 ];
+
+// URL Validation Badge Component
+function UrlValidationBadge({ url, persona, funnelStage }: { 
+  url: string | undefined | null;
+  persona: string | undefined;
+  funnelStage: string | undefined;
+}) {
+  const [visibleSections, setVisibleSections] = useState<any>(undefined);
+  
+  // Fetch visibility data for this specific persona×funnel combination
+  useEffect(() => {
+    if (persona && funnelStage) {
+      const params = new URLSearchParams();
+      params.append("persona", persona);
+      params.append("funnelStage", funnelStage);
+      
+      fetch(`/api/content/visible-sections?${params}`)
+        .then(res => res.json())
+        .then(data => setVisibleSections(data))
+        .catch(() => setVisibleSections(undefined));
+    } else {
+      setVisibleSections(undefined);
+    }
+  }, [persona, funnelStage]);
+  
+  if (!url || url.trim() === "") {
+    return null;
+  }
+  
+  const validation = getUrlValidationMessage(url, visibleSections);
+  
+  return (
+    <div className="flex items-start gap-2 mt-2">
+      {validation.type === "success" && (
+        <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-500 flex-shrink-0 mt-0.5" />
+      )}
+      {validation.type === "warning" && (
+        <AlertTriangle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 flex-shrink-0 mt-0.5" />
+      )}
+      {validation.type === "error" && (
+        <XCircle className="w-4 h-4 text-red-600 dark:text-red-500 flex-shrink-0 mt-0.5" />
+      )}
+      <p className={`text-xs ${
+        validation.type === "success" ? "text-green-600 dark:text-green-500" :
+        validation.type === "warning" ? "text-yellow-600 dark:text-yellow-500" :
+        "text-red-600 dark:text-red-500"
+      }`}>
+        {validation.message}
+      </p>
+    </div>
+  );
+}
 
 // Sortable Item Component
 function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageUrl }: {
@@ -1924,6 +1979,22 @@ export default function AdminContentManager() {
                   </div>
                   
                   <div>
+                    <Label htmlFor="edit-primary-button-link">Primary Button URL</Label>
+                    <Input
+                      id="edit-primary-button-link"
+                      value={(editingItem.metadata as any)?.primaryButtonLink || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), primaryButtonLink: e.target.value } })}
+                      placeholder="#services or /programs"
+                      data-testid="input-edit-primary-button-link"
+                    />
+                    <UrlValidationBadge 
+                      url={(editingItem.metadata as any)?.primaryButtonLink}
+                      persona={(editingItem.metadata as any)?.persona}
+                      funnelStage={(editingItem.metadata as any)?.funnelStage}
+                    />
+                  </div>
+                  
+                  <div>
                     <Label htmlFor="edit-secondary-button">Secondary Button Text</Label>
                     <Input
                       id="edit-secondary-button"
@@ -1931,6 +2002,22 @@ export default function AdminContentManager() {
                       onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), secondaryButton: e.target.value } })}
                       placeholder="Learn More"
                       data-testid="input-edit-secondary-button"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-secondary-button-link">Secondary Button URL</Label>
+                    <Input
+                      id="edit-secondary-button-link"
+                      value={(editingItem.metadata as any)?.secondaryButtonLink || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), secondaryButtonLink: e.target.value } })}
+                      placeholder="#services or /programs"
+                      data-testid="input-edit-secondary-button-link"
+                    />
+                    <UrlValidationBadge 
+                      url={(editingItem.metadata as any)?.secondaryButtonLink}
+                      persona={(editingItem.metadata as any)?.persona}
+                      funnelStage={(editingItem.metadata as any)?.funnelStage}
                     />
                   </div>
                 </>
@@ -2459,6 +2546,22 @@ export default function AdminContentManager() {
                 </div>
                 
                 <div>
+                  <Label htmlFor="create-primary-button-link">Primary Button URL</Label>
+                  <Input
+                    id="create-primary-button-link"
+                    value={(newItem.metadata as any)?.primaryButtonLink || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), primaryButtonLink: e.target.value } })}
+                    placeholder="#services or /programs"
+                    data-testid="input-create-primary-button-link"
+                  />
+                  <UrlValidationBadge 
+                    url={(newItem.metadata as any)?.primaryButtonLink}
+                    persona={(newItem.metadata as any)?.persona}
+                    funnelStage={(newItem.metadata as any)?.funnelStage}
+                  />
+                </div>
+                
+                <div>
                   <Label htmlFor="create-secondary-button">Secondary Button Text</Label>
                   <Input
                     id="create-secondary-button"
@@ -2466,6 +2569,22 @@ export default function AdminContentManager() {
                     onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), secondaryButton: e.target.value } })}
                     placeholder="Learn More"
                     data-testid="input-create-secondary-button"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="create-secondary-button-link">Secondary Button URL</Label>
+                  <Input
+                    id="create-secondary-button-link"
+                    value={(newItem.metadata as any)?.secondaryButtonLink || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), secondaryButtonLink: e.target.value } })}
+                    placeholder="#services or /programs"
+                    data-testid="input-create-secondary-button-link"
+                  />
+                  <UrlValidationBadge 
+                    url={(newItem.metadata as any)?.secondaryButtonLink}
+                    persona={(newItem.metadata as any)?.persona}
+                    funnelStage={(newItem.metadata as any)?.funnelStage}
                   />
                 </div>
               </>
