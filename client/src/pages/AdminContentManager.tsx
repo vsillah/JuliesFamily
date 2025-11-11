@@ -278,6 +278,10 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/type/video"],
   });
 
+  const { data: programDetails = [], isLoading: programDetailsLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/program_detail"],
+  });
+
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
     queryKey: ["/api/google-reviews/all"],
   });
@@ -979,6 +983,7 @@ export default function AdminContentManager() {
                     <TabsTrigger value="hero" data-testid="tab-hero" className="whitespace-nowrap flex-shrink-0">Hero ({heroContent.length})</TabsTrigger>
                     <TabsTrigger value="cta" data-testid="tab-cta" className="whitespace-nowrap flex-shrink-0">CTA ({ctaContent.length})</TabsTrigger>
                     <TabsTrigger value="service" data-testid="tab-services" className="whitespace-nowrap flex-shrink-0">Services ({services.length})</TabsTrigger>
+                    <TabsTrigger value="program_detail" data-testid="tab-program-details" className="whitespace-nowrap flex-shrink-0">Program Details ({programDetails.length})</TabsTrigger>
                     <TabsTrigger value="event" data-testid="tab-events" className="whitespace-nowrap flex-shrink-0">Events ({events.length})</TabsTrigger>
                     <TabsTrigger value="testimonial" data-testid="tab-testimonials" className="whitespace-nowrap flex-shrink-0">Testimonials ({testimonials.length})</TabsTrigger>
                     <TabsTrigger value="socialMedia" data-testid="tab-social-media" className="whitespace-nowrap flex-shrink-0">Social Media ({socialMediaPosts.length})</TabsTrigger>
@@ -1060,6 +1065,14 @@ export default function AdminContentManager() {
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
               renderContentList(services, "service")
+            )}
+          </TabsContent>
+
+          <TabsContent value="program_detail" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {programDetailsLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : (
+              renderContentList(programDetails, "program_detail")
             )}
           </TabsContent>
 

@@ -359,7 +359,7 @@ export type ImageAsset = typeof imageAssets.$inferSelect;
 // Content Items table for managing editable cards across the site
 export const contentItems = pgTable("content_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review'
+  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail'
   title: text("title").notNull(),
   description: text("description"),
   imageName: varchar("image_name"), // Cloudinary image name (legacy)
@@ -367,7 +367,7 @@ export const contentItems = pgTable("content_items", {
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
   passionTags: text("passion_tags").array(), // Array of passion tags for targeting (e.g., ['literacy', 'stem', 'arts'])
-  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, etc
+  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona, etc
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -384,7 +384,7 @@ export type ContentItem = typeof contentItems.$inferSelect;
 
 // Update schema for content items - whitelisted fields only
 export const updateContentItemSchema = z.object({
-  type: z.enum(['service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review']).optional(),
+  type: z.enum(['service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail']).optional(),
   title: z.string().optional(),
   description: z.string().optional(),
   imageName: z.string().optional(),
