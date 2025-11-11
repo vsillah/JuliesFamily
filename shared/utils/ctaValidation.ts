@@ -166,7 +166,7 @@ export function getUrlValidationMessage(
       };
     } else {
       return {
-        isValid: false,
+        isValid: true,
         message: `Links to ${getSectionDisplayName(parsed.section)}, which is hidden for this persona×journey combination`,
         type: "warning",
       };

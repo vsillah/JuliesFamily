@@ -57,23 +57,20 @@ function UrlValidationBadge({ url, persona, funnelStage }: {
   persona: string | undefined;
   funnelStage: string | undefined;
 }) {
-  const [visibleSections, setVisibleSections] = useState<any>(undefined);
-  
-  // Fetch visibility data for this specific persona×funnel combination
-  useEffect(() => {
-    if (persona && funnelStage) {
+  // Use TanStack Query for automatic caching and deduplication
+  const { data: visibleSections } = useQuery({
+    queryKey: ['/api/content/visible-sections', persona, funnelStage],
+    queryFn: async () => {
       const params = new URLSearchParams();
-      params.append("persona", persona);
-      params.append("funnelStage", funnelStage);
-      
-      fetch(`/api/content/visible-sections?${params}`)
-        .then(res => res.json())
-        .then(data => setVisibleSections(data))
-        .catch(() => setVisibleSections(undefined));
-    } else {
-      setVisibleSections(undefined);
-    }
-  }, [persona, funnelStage]);
+      params.append("persona", persona!);
+      params.append("funnelStage", funnelStage!);
+      const response = await fetch(`/api/content/visible-sections?${params}`);
+      if (!response.ok) throw new Error('Failed to fetch visible sections');
+      return response.json();
+    },
+    enabled: !!persona && !!funnelStage,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
   
   if (!url || url.trim() === "") {
     return null;
