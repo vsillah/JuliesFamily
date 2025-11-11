@@ -26,10 +26,9 @@ export function getOptimizedUrl(
     height?: number;
     quality?: "auto" | "auto:best" | "auto:good" | "auto:low";
     format?: "auto" | "webp" | "avif";
-    blur?: number;
   } = {}
 ): string {
-  const { width, height, quality = "auto", format = "auto", blur } = options;
+  const { width, height, quality = "auto", format = "auto" } = options;
   
   const params: string[] = [];
   
@@ -37,26 +36,9 @@ export function getOptimizedUrl(
   if (height) params.push(`h_${height}`);
   params.push(`q_${quality}`);
   params.push(`f_${format}`);
-  if (blur) params.push(`e_blur:${blur}`);
   params.push("c_limit");
   
   const transformation = params.join(",");
   
   return cloudinaryUrl.replace("/upload/", `/upload/${transformation}/`);
-}
-
-/**
- * Generates a low-quality image placeholder (LQIP) URL using Cloudinary transformations.
- * Creates a tiny, highly blurred version perfect for instant loading while full image loads.
- * 
- * @param cloudinaryUrl - The base Cloudinary URL
- * @returns Optimized LQIP URL (~2-5KB) with blur, low quality, and WebP format
- */
-export function getLQIPUrl(cloudinaryUrl: string): string {
-  return getOptimizedUrl(cloudinaryUrl, {
-    width: 100,
-    quality: "auto:low",
-    format: "webp",
-    blur: 1000,
-  });
 }

@@ -63,7 +63,6 @@ export default function ParallaxImage({
       ref={imageRef}
       className={`transition-transform duration-200 ease-out ${className}`}
       style={{ transform: `scale(${scale})` }}
-      loading="lazy"
       {...props}
     />
   );

@@ -88,14 +88,11 @@ The application incorporates:
 ### New Card/Content Section Checklist
 When developing a new card or content section for the website, ensure all of the following requirements are met:
 
-#### 1. Mobile Responsiveness & Performance
+#### 1. Mobile Responsiveness
 - [ ] **Responsive Grid Layout**: Use Tailwind responsive classes (`sm:`, `md:`, `lg:`, `xl:`) for grid columns and spacing
 - [ ] **Touch Interactions**: Ensure touch targets are minimum 44×44px for mobile accessibility
 - [ ] **Viewport Testing**: Test on mobile viewports (375px, 768px) and desktop (1024px+)
 - [ ] **Image Optimization**: Use responsive images with appropriate sizes for different breakpoints
-- [ ] **Lazy Loading**: Add `loading="lazy"` to all below-the-fold images (services, testimonials, events, impact sections)
-- [ ] **LQIP for Hero Images**: For above-the-fold hero/banner images, use `getLQIPUrl()` to generate blurred placeholders (~2-5KB) that load instantly while full-res image loads in background
-- [ ] **Skeleton Loaders**: Show skeleton placeholders (`bg-muted animate-pulse`) during data loading to prevent layout shift
 - [ ] **Text Readability**: Verify font sizes are readable on mobile (minimum 16px for body text)
 - [ ] **Horizontal Scroll**: Prevent horizontal scrolling on small viewports
 

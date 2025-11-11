@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
-import { useCloudinaryImage, getOptimizedUrl, getLQIPUrl } from "@/hooks/useCloudinaryImage";
+import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import { useABTest } from "@/hooks/useABTest";
 import { applyABVariantOverrides } from "@/lib/abTestUtils";
 import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
@@ -175,16 +175,11 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
 
   const navigationTargets = getNavigationTargets();
 
-  // Generate both LQIP (tiny blurred) and full-res URLs
   const heroImageUrl = heroImageAsset 
     ? getOptimizedUrl(heroImageAsset.cloudinarySecureUrl, {
         width: 1920,
         quality: "auto:best",
       })
-    : "";
-  
-  const lqipUrl = heroImageAsset
-    ? getLQIPUrl(heroImageAsset.cloudinarySecureUrl)
     : "";
 
   // Don't render hero until persona is loaded and hero content is available
@@ -200,44 +195,26 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
         minHeight: 'calc(100vh - var(--nav-height, 0px))' // Mobile: viewport minus navbar, Desktop: 75vh
       }}
     >
-      {/* Layer 1: Background Image with LQIP (Low-Quality Image Placeholder) */}
+      {/* Layer 1: Background Image (renders first) */}
       <div className="absolute inset-0 z-0">
         {heroImageUrl ? (
-          <>
-            {/* LQIP: Tiny blurred version loads instantly (~2-5KB) */}
-            {lqipUrl && (
-              <img
-                src={lqipUrl}
-                alt=""
-                aria-hidden="true"
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-                  imageLoaded ? 'opacity-0 blur-sm scale-110' : 'opacity-100 blur-lg scale-105'
-                }`}
-                style={{ 
-                  transform: `scale(${scrollScale * (imageLoaded ? 1.1 : 1.05)})`,
-                  filter: imageLoaded ? 'blur(10px)' : 'blur(20px)'
-                }}
-              />
-            )}
-            {/* Full-resolution image loads in background */}
-            <img
-              src={heroImageUrl}
-              alt="Julie's Family Learning Program classroom"
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-                imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
-              style={{ transform: `scale(${scrollScale})` }}
-              loading="eager"
-              onLoad={() => {
-                setImageLoaded(true);
-                onImageLoaded(true);
-              }}
-              onError={() => {
-                setImageError(true);
-                onImageLoaded(true); // Show navigation even if image fails
-              }}
-            />
-          </>
+          <img
+            src={heroImageUrl}
+            alt="Julie's Family Learning Program classroom"
+            className={`w-full h-full object-cover transition-all duration-500 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            style={{ transform: `scale(${scrollScale})` }}
+            loading="eager"
+            onLoad={() => {
+              setImageLoaded(true);
+              onImageLoaded(true);
+            }}
+            onError={() => {
+              setImageError(true);
+              onImageLoaded(true); // Show navigation even if image fails
+            }}
+          />
         ) : (
           <div className="w-full h-full bg-muted animate-pulse" />
         )}

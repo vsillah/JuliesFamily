@@ -147,7 +147,6 @@ export default function UnifiedTestimonialsCarousel({
                         })}
                         alt={testimonial.name}
                         className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-                        loading="lazy"
                       />
                     ) : testimonial.source === 'cms' && testimonial.imageSrc ? (
                       <CloudinaryImage
@@ -163,7 +162,6 @@ export default function UnifiedTestimonialsCarousel({
                         src={testimonial.imageUrl}
                         alt={testimonial.name}
                         className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-                        loading="lazy"
                       />
                     ) : (
                       <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
