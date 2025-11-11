@@ -182,24 +182,10 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
       })
     : "";
 
-  // Show gradient placeholder while persona is loading OR while hero content is loading
-  // This prevents any flash of default content
+  // Don't render hero until persona is loaded and hero content is available
+  // This prevents flash of default content without jarring placeholder
   if (isPersonaLoading || !currentHero) {
-    return (
-      <section 
-        className="relative flex items-center justify-center overflow-hidden md:min-h-[75vh]"
-        style={{
-          minHeight: 'calc(100vh - var(--nav-height, 0px))'
-        }}
-      >
-        <div 
-          className="absolute inset-0"
-          style={{
-            backgroundImage: 'linear-gradient(135deg, hsl(28, 90%, 85%) 0%, hsl(28, 80%, 70%) 25%, hsl(45, 85%, 75%) 50%, hsl(28, 85%, 65%) 75%, hsl(28, 90%, 80%) 100%)'
-          }}
-        />
-      </section>
-    );
+    return null;
   }
 
   return (
