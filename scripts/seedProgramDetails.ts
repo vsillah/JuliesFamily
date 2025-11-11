@@ -14,153 +14,152 @@ if (!process.env.DATABASE_URL) {
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle({ client: pool, schema });
 
-// Program detail data based on juliesfamily.org/services
+// Program detail data based on JFLP Student Classes document
 const PROGRAM_DETAILS = [
   {
-    id: 'adult-education',
-    title: 'Adult Education',
-    description: 'High school equivalency preparation, basic education, and family literacy programs',
+    id: 'adult-basic-education',
+    title: 'Adult Basic Education (ABE)/Career Services',
+    description: 'Academic classes for adults 16+ seeking high school credentials with up to 10 hours/week commitment',
     imageName: 'service-adult',
-    overview: "Our Adult Education program provides comprehensive support for adult learners seeking to complete their high school education or improve their basic skills. We offer personalized instruction in a supportive, family-centered environment that recognizes the unique challenges adult learners face.",
+    overview: "The Adult Basic Education (ABE)/Career Services strand partners with learners to advance and accelerate their academic achievement to the level required for success in postsecondary education/training or employment. One key goal is to provide opportunities for participants to secure their HiSET diploma. Many students are already employed and need their HiSET diploma to advance within their current organization or to qualify for additional career opportunities. Once this important milestone is achieved, staff work with graduates to chart a transition plan to higher education, job training, union apprenticeships and/or employment.",
     ageRange: '16+ years',
-    schedule: 'Flexible',
-    location: 'On-site',
+    schedule: 'Mornings & evenings (up to 10 hours/week, 2 hours/day)',
+    location: 'In-person & online',
     cost: 'Free',
     features: [
-      'Adult Basic Education (ABE) classes for reading, writing, and math fundamentals',
-      'High school equivalency prep classes (HiSet, GED)',
-      'Academic tutoring tailored to individual learning needs',
-      'Digital literacy classes to build computer and technology skills',
-      'Parenting skills and parent-as-teacher support groups',
-      'Family health, home management, and relationship classes',
-      'Monthly "parent and child together" activities',
-      'Guest speakers on topics of parental concern',
-      'Family financial literacy classes'
+      'Four levels of instruction offered mornings and evenings',
+      'In-person and online classes to accommodate work schedules',
+      'High school equivalency prep (HiSET diploma)',
+      'Digital literacy classes',
+      'Individual tutoring',
+      'Career services and counseling',
+      'Support services to help with various needs',
+      'Flexible scheduling for working adults',
+      'Transition planning to higher education or employment',
+      'Union apprenticeship connections'
     ],
     enrollmentSteps: [
-      'Fill out our online interest form or call our office',
-      'Schedule an initial assessment to determine your skill level and goals',
-      'Meet with our education coordinator to create your personalized learning plan',
-      'Begin classes at your own pace with ongoing support from our instructors'
+      'Fill out the registration form at juliesfamily.org',
+      'Complete initial assessment to determine your skill level',
+      'Meet with education coordinator to create your personalized plan',
+      'Begin classes with flexible morning or evening options'
     ],
     faqs: [
       {
-        question: 'Do I need a high school diploma to enroll?',
-        answer: 'No! Our program is designed for adults who want to complete their high school education or improve their basic skills. We welcome learners at all levels.'
+        question: 'How much time do I need to commit?',
+        answer: 'The program requires up to 10 hours per week (about 2 hours per day). We offer flexible scheduling with both morning and evening classes to accommodate work schedules and other commitments.'
       },
       {
-        question: 'How long does it take to prepare for the HiSet or GED?',
-        answer: 'The timeline varies by individual. Some students are ready within a few months, while others may need a year or more. We work at your pace and provide support every step of the way.'
+        question: 'Can I take classes online?',
+        answer: 'Yes! We offer both in-person and online classes so you can choose the format that works best for your situation.'
       },
       {
-        question: 'Can I attend if I have young children?',
-        answer: 'Yes! We offer onsite childcare for children ages 3 months to 6 years while you attend classes. This is one of our core services to support family success.'
+        question: 'What happens after I get my HiSET diploma?',
+        answer: 'Our staff will work with you to chart a transition plan to higher education, job training programs, union apprenticeships, or direct employment based on your goals.'
       },
       {
-        question: 'What if I work during the day?',
-        answer: 'We offer flexible scheduling options including evening classes. Contact us to discuss what works best for your situation.'
+        question: 'I already have a job. Can this program still help me?',
+        answer: 'Absolutely! Many of our ABE students are already employed and need their HiSET diploma to advance within their current organization or qualify for new career opportunities. We offer evening classes specifically for working adults.'
       }
     ],
     defaultPersona: 'student' as const
   },
   {
-    id: 'childrens-services',
-    title: "Children's Services",
-    description: 'Licensed early education center for children ages 3 months to 6 years',
+    id: 'family-development',
+    title: 'Family Development Services',
+    description: 'Multigenerational learning for mothers and their young children combining parent education with licensed early childhood programs',
     imageName: 'cdc-UqTrGSohyCs-unsplash',
-    overview: "Our licensed early education center provides a nurturing, educational environment for children ages 3 months to 6 years. We partner with Boston Public Schools' Pre-K program and offer comprehensive support to help your child thrive and prepare for school success.",
-    ageRange: '3 months - 6 years',
-    schedule: 'Monday-Friday, flexible hours',
-    location: 'On-site licensed center',
-    cost: 'Income-based',
+    overview: "Julie's Family Development Services strand offers learning opportunities to mothers and their young children by employing a unique multigenerational approach to family development. All adult participants are mothers who are determined to be both effective parents and their child's first and best teacher. The program offers each mother an intensive, integrated curriculum that emphasizes both life management and academic skills needed for future success, while engaging her infant, toddler, and pre-school children in a high-quality, fully licensed, early childhood development program.",
+    ageRange: 'Mothers with children (infants, toddlers, pre-school)',
+    schedule: 'Compatible schedules for mothers with preschool and school-aged children',
+    location: 'On-site',
+    cost: 'Free',
     features: [
-      'Licensed onsite early education center with certified teachers',
-      'Age-appropriate curriculum for infants, toddlers, and preschoolers',
-      'Boston Pre-K partnership for 4-year-olds',
-      'Early intervention referrals and developmental screenings',
-      'Assistance with transition to public school enrollment',
-      'Regular parent-teacher meetings and communication',
-      'Daily progress reports to keep families informed',
-      'Nutritious meals and snacks provided',
-      'Safe, stimulating learning environment'
+      'Unique multigenerational approach to family development',
+      'Family literacy activities on-site for parent and child together',
+      'High-quality, fully licensed early childhood development program',
+      'Parenting, Health, Home Management classes',
+      'Financial Literacy classes',
+      'Reading, Writing, Math, Science, and Social Studies classes',
+      'Topics shaped by learner input',
+      'Advocacy and support services for housing, health, employment, education, and legal needs',
+      'Compatible class schedules for mothers with children',
+      'Focus on mothers as their child\'s first and best teacher'
     ],
     enrollmentSteps: [
-      'Contact us to schedule a tour of our early education center',
-      'Complete the enrollment application and provide required documentation',
-      'Meet with our childcare director to discuss your child\'s needs and our program',
-      'Complete enrollment paperwork and schedule your child\'s start date'
+      'Fill out the registration form online',
+      'Schedule an initial meeting to discuss program fit and your goals',
+      'Complete enrollment for both adult and early childhood programs',
+      'Begin classes with integrated support for you and your child'
     ],
     faqs: [
       {
-        question: 'What ages do you serve?',
-        answer: 'We provide care and education for children from 3 months old through 6 years old, including infants, toddlers, and preschoolers.'
+        question: 'Who is this program for?',
+        answer: 'This program is specifically designed for mothers with young children (infants, toddlers, and preschoolers) who want to advance their own education while ensuring their children receive high-quality early education.'
       },
       {
-        question: 'Are you licensed?',
-        answer: 'Yes, we are a fully licensed early education center that meets all state requirements for health, safety, and educational quality.'
+        question: 'What makes this program unique?',
+        answer: 'Our multigenerational approach means both mother and child learn together. While you\'re in adult education classes, your child receives quality early childhood education, and you participate in family literacy activities together that foster a mutual love of learning.'
       },
       {
-        question: 'Do you offer Boston Pre-K?',
-        answer: 'Yes! We are a Boston Pre-K partner site, offering high-quality preschool programming for 4-year-olds at no cost to eligible Boston families.'
+        question: 'What kind of support services are available?',
+        answer: 'We provide advocacy and support when housing, health, employment, education, and legal emergencies or crises arise. We\'re here to support your whole family, not just academic needs.'
       },
       {
-        question: 'What are your hours?',
-        answer: 'We are open Monday through Friday with flexible scheduling options. Contact us to discuss specific hours that work for your family\'s needs.'
-      },
-      {
-        question: 'How much does it cost?',
-        answer: 'Our fees are income-based, and we work with families to ensure childcare is affordable. Many families qualify for subsidies. We can discuss payment options during enrollment.'
+        question: 'What will I learn in the classes?',
+        answer: 'You\'ll take core academic classes (Reading, Writing, Math, Science, Social Studies) as well as life skills classes in Parenting, Health, Home Management, and Financial Literacy. Topics are shaped by learner input to meet your specific needs.'
       }
     ],
     defaultPersona: 'parent' as const
   },
   {
-    id: 'workforce-development',
-    title: 'Workforce Development',
-    description: 'Career counseling, college readiness, and support services for your next steps',
+    id: 'tech-goes-home',
+    title: 'Tech Goes Home',
+    description: 'FREE 15-hour digital literacy program with brand new Chromebook and 1 year of internet access',
     imageName: 'sebastian-leon-prado-dBiIcdxMWfE-unsplash',
-    overview: "Our Workforce Development program helps you take the next steps toward a better future. Whether you're pursuing college, starting a new career, or need support during transitions, we provide comprehensive guidance, resources, and advocacy to help you succeed.",
-    ageRange: 'Adults 18+',
-    schedule: 'Flexible appointments',
-    location: 'On-site & virtual',
-    cost: 'Free',
+    overview: "Tech Goes Home strives to ensure that all residents of Greater Boston are equipped with the tools, training, and access to support 21st century skill development. This FREE program delivers at least 15 hours of face-to-face or Zoom courses focused on fundamental digital skills. Upon completion, participants receive a brand new Chromebook and 1 year of FREE internet service.",
+    ageRange: 'All ages',
+    schedule: 'At least 15 hours (in-person or Zoom)',
+    location: 'Julie\'s Family Learning Program',
+    cost: 'FREE (includes Chromebook + internet)',
     features: [
-      'College and career readiness classes to prepare for your next steps',
-      'Professional resume preparation and interview practice',
-      'Assistance with financial aid, scholarships, and college applications',
-      'Support for transitioning to jobs, school, or training programs',
-      'Post-employment and post-college support to ensure continued success',
-      'Individual career counseling tailored to your goals',
-      'Onsite case management and personal advocacy',
-      'Referrals to our network of partner organizations and resources',
-      'Food and emergency assistance when needed',
-      'Transportation assistance to remove barriers to success',
-      'Housing, health, legal, and financial advocacy support',
-      'Testing accommodations for learners with special needs',
-      'Access to technology, tutoring, and childcare during programs'
+      'At least 15 hours of in-person or Zoom classes',
+      'Curriculum designed to access powerful online resources',
+      'FREE brand new Chromebook laptop upon completion',
+      '1 year of FREE internet service through TGH',
+      'Using popular applications and the internet as resources',
+      'Effectively using technology for distance learning',
+      'Accessing essential goods and services online',
+      'Staying up to date with health and safety information',
+      'Programs and resources for school, work, and daily life',
+      'Fundamental digital skills training'
     ],
     enrollmentSteps: [
-      'Fill out our interest form or contact our office to schedule a meeting',
-      'Meet with a career counselor to discuss your goals and current situation',
-      'Create an individualized plan with action steps and milestones',
-      'Access services and support as needed, with ongoing guidance from your counselor'
+      'Talk to your teacher at Julie\'s Family Learning Program',
+      'Call the main office at (617) 269-6663',
+      'Email speckham@juliesfamily.org to express interest',
+      'Complete enrollment and begin your 15-hour course'
     ],
     faqs: [
       {
-        question: 'Do I need to be enrolled in other programs to access workforce services?',
-        answer: 'No, our workforce development services are available to all community members. However, many of our students benefit from combining workforce services with our education programs.'
+        question: 'Is this program really free?',
+        answer: 'Yes! Tech Goes Home is completely FREE. Upon completion of at least 15 hours of classes, you receive a brand new Chromebook laptop and 1 year of FREE internet service at no cost to you.'
       },
       {
-        question: 'Can you help me find a job?',
-        answer: 'We provide career counseling, resume preparation, interview practice, and connections to employers. While we don\'t place people in jobs directly, we give you all the tools and support you need to succeed in your job search.'
+        question: 'What will I learn?',
+        answer: 'You\'ll learn fundamental digital skills including how to use popular applications, access online resources for school and work, use technology for distance learning, access essential services online, and stay up to date with important health and safety information.'
       },
       {
-        question: 'What if I need help with things like housing or food while I\'m looking for work?',
-        answer: 'We provide emergency assistance and can connect you with our network of partner organizations for housing, food, transportation, and other critical needs. We believe in addressing the whole person, not just employment.'
+        question: 'Can I take classes online?',
+        answer: 'Yes! Classes are offered both in-person and via Zoom to accommodate your schedule and preferences.'
       },
       {
-        question: 'Do you help with college applications?',
-        answer: 'Yes! We assist with every step of the college application process, including filling out applications, writing essays, applying for financial aid, and finding scholarships.'
+        question: 'How do I sign up?',
+        answer: 'You can talk to your teacher at Julie\'s Family Learning Program, call our main office at (617) 269-6663, or email speckham@juliesfamily.org to get started.'
+      },
+      {
+        question: 'What are the requirements?',
+        answer: 'You need to complete at least 15 hours of face-to-face or Zoom courses. Classes are held at Julie\'s Family Learning Program and focus on building your digital literacy skills.'
       }
     ],
     defaultPersona: 'student' as const

@@ -120,7 +120,7 @@ export default function TechGoesHomeLanding() {
                   What You'll Learn
                 </CardTitle>
                 <CardDescription data-testid="text-program-description">
-                  Free 15-hour in-person or Zoom courses focused on fundamental digital skills
+                  At least 15 hours of in-person or Zoom courses focused on fundamental digital skills
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">

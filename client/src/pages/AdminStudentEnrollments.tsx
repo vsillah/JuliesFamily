@@ -83,16 +83,17 @@ export default function AdminStudentEnrollments() {
   const [isAttendanceSheetOpen, setIsAttendanceSheetOpen] = useState(false);
   const [enrollmentDetails, setEnrollmentDetails] = useState<EnrollmentWithDetails | null>(null);
 
-  // Redirect if not admin
+  // Fetch all enrollments
+  const { data: enrollments = [], isLoading } = useQuery<EnrichedEnrollment[]>({
+    queryKey: ["/api/admin/tgh/enrollments"],
+    enabled: !!user?.isAdmin, // Only fetch if user is admin
+  });
+
+  // Redirect if not admin (after all hooks are called to avoid React hooks violation)
   if (user && !user.isAdmin) {
     navigate("/");
     return null;
   }
-
-  // Fetch all enrollments
-  const { data: enrollments = [], isLoading } = useQuery<EnrichedEnrollment[]>({
-    queryKey: ["/api/admin/tgh/enrollments"],
-  });
 
   // Filter enrollments
   const filteredEnrollments = enrollments.filter((enrollment) => {
