@@ -517,6 +517,15 @@ export default function AdminContentManager() {
         videoId: (editingItem.metadata as any)?.videoId || '',
         category: (editingItem.metadata as any)?.category || 'student_story'
       };
+    } else if (editingItem.type === 'program_detail') {
+      // Normalize program_detail metadata: filter empty strings from arrays
+      metadata = {
+        ...(editingItem.metadata || {}),
+        features: ((editingItem.metadata as any)?.features || []).filter((f: string) => f?.trim() !== ''),
+        enrollmentSteps: ((editingItem.metadata as any)?.enrollmentSteps || []).filter((s: string) => s?.trim() !== ''),
+        faqs: ((editingItem.metadata as any)?.faqs || []).filter((faq: any) => faq?.question?.trim() && faq?.answer?.trim()),
+        defaultPersona: (editingItem.metadata as any)?.defaultPersona || 'student'
+      };
     }
     
     const updates: any = {
@@ -574,6 +583,18 @@ export default function AdminContentManager() {
           videoId: (itemToCreate.metadata as any)?.videoId || '',
           category: (itemToCreate.metadata as any)?.category || 'student_story'
         } 
+      };
+    } else if (newItem.type === 'program_detail') {
+      // Normalize program_detail metadata: filter empty strings from arrays
+      itemToCreate = {
+        ...itemToCreate,
+        metadata: {
+          ...itemToCreate.metadata,
+          features: ((itemToCreate.metadata as any)?.features || []).filter((f: string) => f?.trim() !== ''),
+          enrollmentSteps: ((itemToCreate.metadata as any)?.enrollmentSteps || []).filter((s: string) => s?.trim() !== ''),
+          faqs: ((itemToCreate.metadata as any)?.faqs || []).filter((faq: any) => faq?.question?.trim() && faq?.answer?.trim()),
+          defaultPersona: (itemToCreate.metadata as any)?.defaultPersona || 'student'
+        }
       };
     }
     
@@ -1603,6 +1624,259 @@ export default function AdminContentManager() {
                 </>
               )}
               
+              {/* Program Detail specific fields for edit */}
+              {editingItem.type === 'program_detail' && (
+                <>
+                  <div>
+                    <Label htmlFor="edit-program-id">Program ID</Label>
+                    <Input
+                      id="edit-program-id"
+                      value={(editingItem.metadata as any)?.programId || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), programId: e.target.value } })}
+                      placeholder="adult-education"
+                      data-testid="input-edit-program-id"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Unique identifier for this program
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-overview">Overview</Label>
+                    <Textarea
+                      id="edit-overview"
+                      value={(editingItem.metadata as any)?.overview || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), overview: e.target.value } })}
+                      rows={4}
+                      placeholder="Detailed program overview"
+                      data-testid="input-edit-overview"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-age-range">Age Range</Label>
+                      <Input
+                        id="edit-age-range"
+                        value={(editingItem.metadata as any)?.ageRange || ""}
+                        onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), ageRange: e.target.value } })}
+                        placeholder="16+"
+                        data-testid="input-edit-age-range"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="edit-cost">Cost</Label>
+                      <Input
+                        id="edit-cost"
+                        value={(editingItem.metadata as any)?.cost || ""}
+                        onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), cost: e.target.value } })}
+                        placeholder="FREE program"
+                        data-testid="input-edit-cost"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-schedule">Schedule</Label>
+                    <Input
+                      id="edit-schedule"
+                      value={(editingItem.metadata as any)?.schedule || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), schedule: e.target.value } })}
+                      placeholder="10 hours/week (2 hours/day), Mornings & Evenings"
+                      data-testid="input-edit-schedule"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-location">Location</Label>
+                    <Input
+                      id="edit-location"
+                      value={(editingItem.metadata as any)?.location || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), location: e.target.value } })}
+                      placeholder="In-Person & Online"
+                      data-testid="input-edit-location"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Program Features</Label>
+                    {((editingItem.metadata as any)?.features || []).map((feature: string, index: number) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={feature}
+                          onChange={(e) => {
+                            const features = [...((editingItem.metadata as any)?.features || [])];
+                            features[index] = e.target.value;
+                            setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), features } });
+                          }}
+                          placeholder="Enter feature"
+                          data-testid={`input-edit-feature-${index}`}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const features = [...((editingItem.metadata as any)?.features || [])];
+                            features.splice(index, 1);
+                            setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), features } });
+                          }}
+                          data-testid={`button-remove-edit-feature-${index}`}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const features = [...((editingItem.metadata as any)?.features || []), ""];
+                        setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), features } });
+                      }}
+                      data-testid="button-add-edit-feature"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Feature
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>Enrollment Steps</Label>
+                    {((editingItem.metadata as any)?.enrollmentSteps || []).map((step: string, index: number) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={step}
+                          onChange={(e) => {
+                            const enrollmentSteps = [...((editingItem.metadata as any)?.enrollmentSteps || [])];
+                            enrollmentSteps[index] = e.target.value;
+                            setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), enrollmentSteps } });
+                          }}
+                          placeholder="Enter step"
+                          data-testid={`input-edit-enrollment-step-${index}`}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const enrollmentSteps = [...((editingItem.metadata as any)?.enrollmentSteps || [])];
+                            enrollmentSteps.splice(index, 1);
+                            setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), enrollmentSteps } });
+                          }}
+                          data-testid={`button-remove-edit-enrollment-step-${index}`}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const enrollmentSteps = [...((editingItem.metadata as any)?.enrollmentSteps || []), ""];
+                        setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), enrollmentSteps } });
+                      }}
+                      data-testid="button-add-edit-enrollment-step"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Enrollment Step
+                    </Button>
+                  </div>
+
+                  <div className="space-y-3">
+                    <Label>FAQs</Label>
+                    {((editingItem.metadata as any)?.faqs || []).map((faq: { question: string; answer: string }, index: number) => (
+                      <Card key={index} className="p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor={`edit-faq-question-${index}`}>Question</Label>
+                            <Input
+                              id={`edit-faq-question-${index}`}
+                              value={faq.question}
+                              onChange={(e) => {
+                                const faqs = [...((editingItem.metadata as any)?.faqs || [])];
+                                faqs[index] = { ...faqs[index], question: e.target.value };
+                                setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), faqs } });
+                              }}
+                              placeholder="Enter question"
+                              data-testid={`input-edit-faq-question-${index}`}
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`edit-faq-answer-${index}`}>Answer</Label>
+                            <Textarea
+                              id={`edit-faq-answer-${index}`}
+                              value={faq.answer}
+                              onChange={(e) => {
+                                const faqs = [...((editingItem.metadata as any)?.faqs || [])];
+                                faqs[index] = { ...faqs[index], answer: e.target.value };
+                                setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), faqs } });
+                              }}
+                              rows={2}
+                              placeholder="Enter answer"
+                              data-testid={`input-edit-faq-answer-${index}`}
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              const faqs = [...((editingItem.metadata as any)?.faqs || [])];
+                              faqs.splice(index, 1);
+                              setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), faqs } });
+                            }}
+                            data-testid={`button-remove-edit-faq-${index}`}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove FAQ
+                          </Button>
+                        </div>
+                      </Card>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const faqs = [...((editingItem.metadata as any)?.faqs || []), { question: "", answer: "" }];
+                        setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), faqs } });
+                      }}
+                      data-testid="button-add-edit-faq"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add FAQ
+                    </Button>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-default-persona">Default Persona</Label>
+                    <Select
+                      value={(editingItem.metadata as any)?.defaultPersona || "student"}
+                      onValueChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), defaultPersona: value } })}
+                    >
+                      <SelectTrigger id="edit-default-persona" data-testid="select-edit-default-persona">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Adult Education Student</SelectItem>
+                        <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="provider">Service Provider</SelectItem>
+                        <SelectItem value="donor">Donor</SelectItem>
+                        <SelectItem value="volunteer">Volunteer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Select the primary persona this program targets
+                    </p>
+                  </div>
+                </>
+              )}
+              
               {/* Hero/CTA specific fields */}
               {(editingItem.type === 'hero' || editingItem.type === 'cta') && (
                 <>
@@ -2193,6 +2467,259 @@ export default function AdminContentManager() {
                     placeholder="Learn More"
                     data-testid="input-create-secondary-button"
                   />
+                </div>
+              </>
+            )}
+            
+            {/* Program Detail specific fields for create */}
+            {activeTab === 'program_detail' && (
+              <>
+                <div>
+                  <Label htmlFor="create-program-id">Program ID</Label>
+                  <Input
+                    id="create-program-id"
+                    value={(newItem.metadata as any)?.programId || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), programId: e.target.value } })}
+                    placeholder="adult-education"
+                    data-testid="input-create-program-id"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Unique identifier for this program (e.g., adult-education, family-development, tech-goes-home)
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="create-overview">Overview</Label>
+                  <Textarea
+                    id="create-overview"
+                    value={(newItem.metadata as any)?.overview || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), overview: e.target.value } })}
+                    rows={4}
+                    placeholder="Detailed program overview"
+                    data-testid="input-create-overview"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="create-age-range">Age Range</Label>
+                    <Input
+                      id="create-age-range"
+                      value={(newItem.metadata as any)?.ageRange || ""}
+                      onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), ageRange: e.target.value } })}
+                      placeholder="16+"
+                      data-testid="input-create-age-range"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="create-cost">Cost</Label>
+                    <Input
+                      id="create-cost"
+                      value={(newItem.metadata as any)?.cost || ""}
+                      onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), cost: e.target.value } })}
+                      placeholder="FREE program"
+                      data-testid="input-create-cost"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="create-schedule">Schedule</Label>
+                  <Input
+                    id="create-schedule"
+                    value={(newItem.metadata as any)?.schedule || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), schedule: e.target.value } })}
+                    placeholder="10 hours/week (2 hours/day), Mornings & Evenings"
+                    data-testid="input-create-schedule"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="create-location">Location</Label>
+                  <Input
+                    id="create-location"
+                    value={(newItem.metadata as any)?.location || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), location: e.target.value } })}
+                    placeholder="In-Person & Online"
+                    data-testid="input-create-location"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <Label>Program Features</Label>
+                  {((newItem.metadata as any)?.features || []).map((feature: string, index: number) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={feature}
+                        onChange={(e) => {
+                          const features = [...((newItem.metadata as any)?.features || [])];
+                          features[index] = e.target.value;
+                          setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), features } });
+                        }}
+                        placeholder="Enter feature"
+                        data-testid={`input-create-feature-${index}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const features = [...((newItem.metadata as any)?.features || [])];
+                          features.splice(index, 1);
+                          setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), features } });
+                        }}
+                        data-testid={`button-remove-feature-${index}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const features = [...((newItem.metadata as any)?.features || []), ""];
+                      setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), features } });
+                    }}
+                    data-testid="button-add-feature"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Feature
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <Label>Enrollment Steps</Label>
+                  {((newItem.metadata as any)?.enrollmentSteps || []).map((step: string, index: number) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={step}
+                        onChange={(e) => {
+                          const enrollmentSteps = [...((newItem.metadata as any)?.enrollmentSteps || [])];
+                          enrollmentSteps[index] = e.target.value;
+                          setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), enrollmentSteps } });
+                        }}
+                        placeholder="Enter step"
+                        data-testid={`input-create-enrollment-step-${index}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const enrollmentSteps = [...((newItem.metadata as any)?.enrollmentSteps || [])];
+                          enrollmentSteps.splice(index, 1);
+                          setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), enrollmentSteps } });
+                        }}
+                        data-testid={`button-remove-enrollment-step-${index}`}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const enrollmentSteps = [...((newItem.metadata as any)?.enrollmentSteps || []), ""];
+                      setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), enrollmentSteps } });
+                    }}
+                    data-testid="button-add-enrollment-step"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Enrollment Step
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <Label>FAQs</Label>
+                  {((newItem.metadata as any)?.faqs || []).map((faq: { question: string; answer: string }, index: number) => (
+                    <Card key={index} className="p-4">
+                      <div className="space-y-3">
+                        <div>
+                          <Label htmlFor={`faq-question-${index}`}>Question</Label>
+                          <Input
+                            id={`faq-question-${index}`}
+                            value={faq.question}
+                            onChange={(e) => {
+                              const faqs = [...((newItem.metadata as any)?.faqs || [])];
+                              faqs[index] = { ...faqs[index], question: e.target.value };
+                              setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), faqs } });
+                            }}
+                            placeholder="Enter question"
+                            data-testid={`input-create-faq-question-${index}`}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`faq-answer-${index}`}>Answer</Label>
+                          <Textarea
+                            id={`faq-answer-${index}`}
+                            value={faq.answer}
+                            onChange={(e) => {
+                              const faqs = [...((newItem.metadata as any)?.faqs || [])];
+                              faqs[index] = { ...faqs[index], answer: e.target.value };
+                              setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), faqs } });
+                            }}
+                            rows={2}
+                            placeholder="Enter answer"
+                            data-testid={`input-create-faq-answer-${index}`}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            const faqs = [...((newItem.metadata as any)?.faqs || [])];
+                            faqs.splice(index, 1);
+                            setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), faqs } });
+                          }}
+                          data-testid={`button-remove-faq-${index}`}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Remove FAQ
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const faqs = [...((newItem.metadata as any)?.faqs || []), { question: "", answer: "" }];
+                      setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), faqs } });
+                    }}
+                    data-testid="button-add-faq"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add FAQ
+                  </Button>
+                </div>
+
+                <div>
+                  <Label htmlFor="create-default-persona">Default Persona</Label>
+                  <Select
+                    value={(newItem.metadata as any)?.defaultPersona || "student"}
+                    onValueChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), defaultPersona: value } })}
+                  >
+                    <SelectTrigger id="create-default-persona" data-testid="select-create-default-persona">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="student">Adult Education Student</SelectItem>
+                      <SelectItem value="parent">Parent</SelectItem>
+                      <SelectItem value="provider">Service Provider</SelectItem>
+                      <SelectItem value="donor">Donor</SelectItem>
+                      <SelectItem value="volunteer">Volunteer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Select the primary persona this program targets
+                  </p>
                 </div>
               </>
             )}
