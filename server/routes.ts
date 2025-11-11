@@ -354,6 +354,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tech Goes Home Enrollment Management Routes
+  // Get all active enrollments
+  app.get('/api/admin/enrollments', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const enrollments = await storage.getActiveTechGoesHomeEnrollments();
+      res.json(enrollments);
+    } catch (error) {
+      console.error("Error fetching enrollments:", error);
+      res.status(500).json({ message: "Failed to fetch enrollments" });
+    }
+  });
+
+  // Get enrollment status for a user
+  app.get('/api/admin/users/:userId/enrollment', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(req.params.userId);
+      res.json({ isEnrolled: !!enrollment, enrollment });
+    } catch (error) {
+      console.error("Error checking enrollment:", error);
+      res.status(500).json({ message: "Failed to check enrollment status" });
+    }
+  });
+
+  // Enroll a user in Tech Goes Home
+  app.post('/api/admin/users/:userId/enrollment', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      // Check if user exists
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if already enrolled
+      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(userId);
+      if (existingEnrollment) {
+        return res.status(400).json({ message: "User is already enrolled" });
+      }
+      
+      // Create enrollment
+      const enrollment = await storage.createTechGoesHomeEnrollment({
+        userId,
+        programName: "Tech Goes Home",
+        status: "active",
+        totalClassesRequired: 15,
+      });
+      
+      res.json(enrollment);
+    } catch (error) {
+      console.error("Error enrolling user:", error);
+      res.status(500).json({ message: "Failed to enroll user" });
+    }
+  });
+
+  // Remove user enrollment
+  app.delete('/api/admin/users/:userId/enrollment', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(req.params.userId);
+      if (!enrollment) {
+        return res.status(404).json({ message: "User is not enrolled" });
+      }
+      
+      // For now, we'll update the status to withdrawn instead of deleting
+      await storage.updateTechGoesHomeEnrollment(enrollment.id, { status: "withdrawn" });
+      res.json({ message: "User enrollment withdrawn successfully" });
+    } catch (error) {
+      console.error("Error removing enrollment:", error);
+      res.status(500).json({ message: "Failed to remove enrollment" });
+    }
+  });
+
   // Audit Log Routes
   app.get('/api/admin/audit-logs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {

@@ -74,6 +74,20 @@ export default function AdminUserManagement() {
     queryKey: ["/api/auth/user"],
   });
 
+  const { data: enrollments = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/enrollments"],
+    enabled: !!users.length,
+  });
+
+  // Create a map of userId -> enrollment status for efficient lookup
+  const enrollmentMap = new Map(
+    enrollments
+      .filter((e) => e.status === "active")
+      .map((e) => [e.userId, e])
+  );
+
+  const isUserEnrolled = (userId: string) => enrollmentMap.has(userId);
+
   // Helper function to get role label
   const getRoleLabel = (role: UserRole): string => {
     switch (role) {
@@ -168,6 +182,48 @@ export default function AdminUserManagement() {
         variant: "destructive",
       });
       setDeleteConfirm(null);
+    },
+  });
+
+  const enrollUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest("POST", `/api/admin/users/${userId}/enrollment`, {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/content/visible-sections"] });
+      toast({
+        title: "Success",
+        description: "User enrolled successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to enroll user",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const unenrollUserMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return apiRequest("DELETE", `/api/admin/users/${userId}/enrollment`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/content/visible-sections"] });
+      toast({
+        title: "Success",
+        description: "User enrollment withdrawn successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to withdraw enrollment",
+        variant: "destructive",
+      });
     },
   });
 
@@ -294,6 +350,7 @@ export default function AdminUserManagement() {
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
+                      <TableHead>Enrolled</TableHead>
                       {isSuperAdmin && <TableHead className="text-right">Actions</TableHead>}
                     </TableRow>
                   </TableHeader>
@@ -360,6 +417,27 @@ export default function AdminUserManagement() {
                                 (Cannot change own role)
                               </span>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={isUserEnrolled(user.id)}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    enrollUserMutation.mutate(user.id);
+                                  } else {
+                                    unenrollUserMutation.mutate(user.id);
+                                  }
+                                }}
+                                disabled={enrollUserMutation.isPending || unenrollUserMutation.isPending}
+                                data-testid={`switch-enrollment-${user.id}`}
+                              />
+                              {isUserEnrolled(user.id) && (
+                                <Badge variant="outline" className="text-xs">
+                                  Tech Goes Home
+                                </Badge>
+                              )}
+                            </div>
                           </TableCell>
                           {isSuperAdmin && (
                             <TableCell className="text-right">
