@@ -43,6 +43,7 @@ import ProductLanding from "@/pages/ProductLanding";
 import ImageComparison from "@/pages/ImageComparison";
 import TechGoesHomeLanding from "@/pages/TechGoesHomeLanding";
 import TechGoesHomeStudentDashboard from "@/pages/TechGoesHomeStudentDashboard";
+import StudentDashboardPage from "@/pages/StudentDashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/donate" component={Donate} />
       <Route path="/donate/success" component={DonateSuccess} />
       <Route path="/profile" component={Profile} />
+      <Route path="/dashboard" component={StudentDashboardPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/admin/guide" component={AdminGuide} />
       <Route path="/admin/images" component={AdminImages} />
