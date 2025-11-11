@@ -54,7 +54,7 @@ export function TargetStep({
   onTrafficChange,
 }: TargetStepProps) {
   // Fetch available persona×stage combinations that have visible content
-  const { data: availableCombinations = [], isLoading } = useQuery<{ persona: string; funnelStage: string; }[]>({
+  const { data: availableCombinations = [], isLoading, isError, error } = useQuery<{ persona: string; funnelStage: string; }[]>({
     queryKey: ['/api/content/available-combinations'],
   });
 
@@ -108,6 +108,29 @@ export function TargetStep({
         <CardContent>
           {isLoading ? (
             <div className="text-sm text-muted-foreground">Loading available combinations...</div>
+          ) : isError ? (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Failed to load combinations.</strong>
+                {(() => {
+                  const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+                  const is401 = errorMessage.startsWith('401');
+                  const is403 = errorMessage.startsWith('403');
+                  
+                  if (is401 || is403) {
+                    return (
+                      <>
+                        <span className="block mt-1">Authentication required.</span>
+                        <span className="block mt-1 text-xs">Please log in or refresh your session to continue.</span>
+                      </>
+                    );
+                  }
+                  
+                  return <span className="block mt-1">{errorMessage}</span>;
+                })()}
+              </AlertDescription>
+            </Alert>
           ) : availableCombinations.length === 0 ? (
             <Alert>
               <Info className="h-4 w-4" />
