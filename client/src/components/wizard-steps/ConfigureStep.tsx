@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
 import { useBaselineConfig } from "@/hooks/useABTestBaseline";
 import CopyVariantGenerator from "../CopyVariantGenerator";
+import { HistoricalTestResults } from "../HistoricalTestResults";
 import type { ContentItem } from "@shared/schema";
 import type { BaselineTarget } from "../ABTestWizard";
 
@@ -124,6 +125,21 @@ export function ConfigureStep({ testType, variants, onVariantsChange, baselineTa
           variants.map(v => ({ ...v, isControl: v.id === variantId }))
         );
       }
+    } else {
+      // Unchecking control - prevent if this is the only control variant
+      const hasOtherControl = variants.some(v => v.id !== variantId && v.isControl);
+      if (!hasOtherControl && variants.length > 1) {
+        toast({
+          title: "Cannot remove control",
+          description: "At least one variant must be marked as control. Please mark another variant as control first.",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Allow unchecking if it's the only variant or there's another control
+      onVariantsChange(
+        variants.map(v => v.id === variantId ? { ...v, isControl: false } : v)
+      );
     }
   };
 
@@ -350,6 +366,17 @@ export function ConfigureStep({ testType, variants, onVariantsChange, baselineTa
 
                 {/* Content selection based on test type */}
                 {renderVariantConfig(testType, variant, updateVariant, contentItems, isLoadingContent, images)}
+
+                {/* Historical test results for control variant */}
+                {variant.isControl && (
+                  <div className="mt-4 pt-4 border-t">
+                    <HistoricalTestResults
+                      persona={baselineTarget?.persona}
+                      funnelStage={baselineTarget?.funnelStage}
+                      testType={testType}
+                    />
+                  </div>
+                )}
               </CardContent>
             )}
           </Card>
