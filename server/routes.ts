@@ -99,6 +99,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Development-only: Update user role for testing
+  // This endpoint allows tests to create/update users with specific roles
+  if (process.env.NODE_ENV === 'development') {
+    app.post('/api/test/set-user-role', isAuthenticated, async (req: any, res) => {
+      try {
+        const oidcSub = req.user.claims.sub;
+        const { role } = req.body;
+        
+        if (!role || !['client', 'admin', 'super_admin'].includes(role)) {
+          return res.status(400).json({ message: "Invalid role. Must be client, admin, or super_admin" });
+        }
+        
+        console.log(`[Test Helper] Setting role for oidcSub ${oidcSub} to ${role}`);
+        
+        // Get current user
+        const user = await storage.getUserByOidcSub(oidcSub);
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+        
+        // Update role using updateUser (requires actorId for audit logging)
+        const updated = await storage.updateUser(user.id, { role }, user.id);
+        console.log(`[Test Helper] Successfully updated user role to ${updated.role}`);
+        
+        res.json({ success: true, user: updated });
+      } catch (error) {
+        console.error("[Test Helper] Error setting user role:", error);
+        res.status(500).json({ message: "Failed to set user role" });
+      }
+    });
+  }
+
   // Update current user's profile
   app.patch('/api/user/profile', isAuthenticated, async (req: any, res) => {
     try {

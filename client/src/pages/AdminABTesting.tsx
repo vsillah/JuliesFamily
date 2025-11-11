@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { 
   FlaskConical, Plus, Play, Pause, CheckCircle2, Trash2, 
-  BarChart3, Edit, TrendingUp, Users, Target, ChevronDown, ChevronUp
+  BarChart3, Edit, TrendingUp, Users, Target, ChevronDown, ChevronUp, AlertCircle
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import type { AbTestWithVariants, AbTestVariant } from "@shared/schema";
@@ -409,6 +409,19 @@ export default function AdminABTesting() {
 
   const handleCreateVariant = () => {
     if (!selectedTest) return;
+
+    // VALIDATION: Check traffic allocation before submission
+    const existingAllocation = selectedTest.variants?.reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+    const proposedTotal = existingAllocation + newVariant.trafficWeight;
+    
+    if (proposedTotal > 100) {
+      toast({
+        title: "Traffic Allocation Exceeded",
+        description: `Cannot add variant. Total allocation would be ${proposedTotal}% (exceeds 100% by ${proposedTotal - 100}%).`,
+        variant: "destructive",
+      });
+      return;
+    }
 
     let config: Record<string, any> = {};
     
@@ -1057,7 +1070,7 @@ export default function AdminABTesting() {
                 data-testid="input-variant-description"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="variant-weight">Traffic Weight (%)</Label>
               <Input
                 id="variant-weight"
@@ -1068,9 +1081,84 @@ export default function AdminABTesting() {
                 onChange={(e) => setNewVariant({ ...newVariant, trafficWeight: parseInt(e.target.value) || 50 })}
                 data-testid="input-variant-weight"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                Percentage of test traffic to show this variant (weights should sum to 100)
-              </p>
+              {(() => {
+                // Current allocation from existing variants
+                const existingAllocation = selectedTest?.variants?.reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+                
+                // Proposed allocation including this new variant
+                const proposedTotal = existingAllocation + newVariant.trafficWeight;
+                const remainingAfterProposed = 100 - proposedTotal;
+                const isOverAllocated = proposedTotal > 100;
+                const isFullyAllocated = proposedTotal === 100;
+                
+                return (
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">
+                        Current: <span className="font-medium text-foreground">{existingAllocation}%</span>
+                      </span>
+                      <span className="text-muted-foreground">
+                        After New: <span className={`font-medium ${isOverAllocated ? 'text-destructive' : isFullyAllocated ? 'text-warning' : 'text-foreground'}`}>
+                          {proposedTotal}%
+                        </span>
+                      </span>
+                      {isOverAllocated ? (
+                        <span className="text-muted-foreground">
+                          Over by: <span className="font-medium text-destructive">
+                            {Math.abs(remainingAfterProposed)}%
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">
+                          Remaining: <span className={`font-medium ${isFullyAllocated ? 'text-warning' : 'text-foreground'}`}>
+                            {remainingAfterProposed}%
+                          </span>
+                        </span>
+                      )}
+                    </div>
+                    <div className="h-2 bg-muted rounded-full overflow-hidden relative">
+                      {/* Existing allocation (gray background)  */}
+                      <div 
+                        className="absolute h-full bg-muted-foreground/30 transition-all"
+                        style={{ width: `${Math.min(existingAllocation, 100)}%` }}
+                      />
+                      {/* Proposed total allocation (colored based on state, can exceed 100%) */}
+                      <div 
+                        className={`absolute h-full transition-all ${isOverAllocated ? 'bg-destructive' : isFullyAllocated ? 'bg-warning' : 'bg-primary'}`}
+                        style={{ width: `${proposedTotal}%`, maxWidth: '150%' }}
+                      />
+                      {/* Visual indicator when over 100% - striped pattern overlay */}
+                      {isOverAllocated && (
+                        <div 
+                          className="absolute h-full bg-destructive/50 transition-all"
+                          style={{ 
+                            left: '100%',
+                            width: `${proposedTotal - 100}%`,
+                            maxWidth: '50%',
+                            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.3) 2px, rgba(255,255,255,0.3) 4px)'
+                          }}
+                        />
+                      )}
+                    </div>
+                    {isOverAllocated && (
+                      <p className="text-xs text-destructive flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        Would exceed 100% by {proposedTotal - 100}% (total: {proposedTotal}%)
+                      </p>
+                    )}
+                    {isFullyAllocated && !isOverAllocated && (
+                      <p className="text-xs text-warning flex items-center gap-1">
+                        Perfect! This will use all 100% of traffic allocation.
+                      </p>
+                    )}
+                    {!isOverAllocated && !isFullyAllocated && remainingAfterProposed > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        After adding this variant, {remainingAfterProposed}% will remain unallocated
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
             {/* Configuration Fields - Dynamic based on test type */}
             <div className="space-y-4 p-4 bg-muted/30 rounded-md border">
@@ -1193,7 +1281,10 @@ export default function AdminABTesting() {
               </Button>
               <Button
                 onClick={handleCreateVariant}
-                disabled={createVariantMutation.isPending || !newVariant.name}
+                disabled={createVariantMutation.isPending || !newVariant.name || (() => {
+                  const allocatedWeight = selectedTest?.variants?.reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+                  return (allocatedWeight + newVariant.trafficWeight) > 100;
+                })()}
                 data-testid="button-submit-variant"
               >
                 {createVariantMutation.isPending ? "Creating..." : "Add Variant"}

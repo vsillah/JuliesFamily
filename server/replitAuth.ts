@@ -105,9 +105,13 @@ async function upsertUser(
   if (process.env.NODE_ENV === 'development' && role) {
     console.log("[OIDC Claims] Development mode: accepting role from claims:", role);
     upsertData.role = role;
+  } else {
+    console.log("[OIDC Claims] Role NOT added to upsertData. NODE_ENV:", process.env.NODE_ENV, "role:", role);
   }
   
-  await storage.upsertUser(upsertData);
+  console.log("[OIDC Claims] Calling upsertUser with:", JSON.stringify(upsertData, null, 2));
+  const result = await storage.upsertUser(upsertData);
+  console.log("[OIDC Claims] upsertUser returned user with role:", result.role);
 }
 
 export async function setupAuth(app: Express) {
