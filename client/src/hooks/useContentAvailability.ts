@@ -1,16 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
+import type { VisibleSections } from "@shared/types/contentVisibility";
 
-export interface VisibleSections {
-  "campaign-impact": boolean;
-  services: boolean;
-  "lead-magnet": boolean;
-  impact: boolean;
-  testimonials: boolean;
-  events: boolean;
-  donation: boolean;
-  "student-dashboard": boolean;
-}
+// Re-export for backward compatibility
+export type { VisibleSections };
 
 export function useContentAvailability() {
   const { persona, funnelStage } = usePersona();
