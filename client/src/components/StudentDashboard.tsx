@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, BookOpen, Award, Laptop, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
+import { StudentSubmissionForm } from "@/components/StudentSubmissionForm";
 
 interface TGHProgress {
   enrolled: boolean;
@@ -310,6 +311,11 @@ export function StudentDashboard() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Student Submissions Section */}
+        <div className="max-w-5xl mx-auto mt-8">
+          <StudentSubmissionForm />
         </div>
       </div>
     </section>
