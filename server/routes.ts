@@ -2977,6 +2977,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current baseline configuration for a persona×journey×test type (admin)
+  app.get('/api/ab-tests/baseline-config', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { persona, funnelStage, testType } = req.query;
+      
+      if (!persona || !funnelStage || !testType) {
+        return res.status(400).json({ 
+          message: "Missing required parameters: persona, funnelStage, testType" 
+        });
+      }
+      
+      const config = await storage.getCurrentBaselineConfiguration(
+        persona as string,
+        funnelStage as string,
+        testType as string
+      );
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error fetching baseline configuration:", error);
+      res.status(500).json({ message: "Failed to fetch baseline configuration" });
+    }
+  });
+
+  // Get historical test results for a persona×journey×test type (admin)
+  app.get('/api/ab-tests/historical-results', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { persona, funnelStage, testType } = req.query;
+      
+      if (!persona || !funnelStage || !testType) {
+        return res.status(400).json({ 
+          message: "Missing required parameters: persona, funnelStage, testType" 
+        });
+      }
+      
+      const results = await storage.getHistoricalTestResults(
+        persona as string,
+        funnelStage as string,
+        testType as string
+      );
+      
+      res.json(results);
+    } catch (error) {
+      console.error("Error fetching historical test results:", error);
+      res.status(500).json({ message: "Failed to fetch historical test results" });
+    }
+  });
+
   // Get test events (admin)
   app.get('/api/ab-tests/:testId/events', isAuthenticated, isAdmin, async (req, res) => {
     try {

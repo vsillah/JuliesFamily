@@ -56,6 +56,7 @@ import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
 import { createCacLtgpStorage, type ICacLtgpStorage } from "./storage/cacLtgpStorage";
 import { createTechGoesHomeStorage, type ITechGoesHomeStorage } from "./storage/tghStorage";
+import { calculateStatisticalConfidence } from "./statsUtils";
 
 export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   // User operations for Replit Auth
@@ -167,6 +168,19 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
     totalEvents: number;
     conversionRate: number;
   }[]>;
+  getCurrentBaselineConfiguration(persona: string, funnelStage: string, testType: string): Promise<any>;
+  getHistoricalTestResults(persona: string, funnelStage: string, testType: string): Promise<{
+    testId: string;
+    testName: string;
+    endDate: Date | null;
+    winnerVariantId: string | null;
+    controlVariantId: string | null;
+    controlConversionRate: number;
+    winnerConversionRate: number;
+    improvementPercent: number;
+    confidence: number;
+    sampleSize: number;
+  } | null>;
   
   // Performance Metrics operations
   getPerformanceMetrics(): Promise<{
@@ -1622,6 +1636,204 @@ export class DatabaseStorage implements IStorage {
         ? (Number(row.totalEvents) / Number(row.uniqueViews)) * 100 
         : 0,
     }));
+  }
+
+  async getCurrentBaselineConfiguration(persona: string, funnelStage: string, testType: string): Promise<any> {
+    // First check if there's an active A/B test for this persona×journey×type
+    // If so, return the control variant's configuration from that test
+    const activeTests = await db
+      .select({
+        testId: abTests.id,
+        status: abTests.status,
+      })
+      .from(abTests)
+      .innerJoin(abTestTargets, eq(abTestTargets.testId, abTests.id))
+      .where(
+        and(
+          eq(abTests.type, testType),
+          eq(abTests.status, 'active'),
+          eq(abTestTargets.persona, persona),
+          eq(abTestTargets.funnelStage, funnelStage)
+        )
+      )
+      .limit(1);
+
+    if (activeTests.length > 0) {
+      // Found an active test - return its control variant configuration
+      const variants = await this.getAbTestVariants(activeTests[0].testId);
+      const controlVariant = variants.find(v => v.isControl);
+      
+      if (controlVariant && controlVariant.configuration) {
+        return controlVariant.configuration;
+      }
+    }
+
+    // No active test found - return baseline from Content Manager
+    // Map test type to content type
+    const contentTypeMap: Record<string, string | null> = {
+      'hero_variation': 'hero',
+      'cta_variation': 'cta',
+      'service_card_order': 'service',
+      'event_card_order': 'event',
+      'testimonial_card_order': 'testimonial',
+      'messaging_test': 'hero', // Use hero content for messaging tests
+      'layout_test': null, // Layout is structural, not content-specific
+    };
+
+    const contentType = contentTypeMap[testType];
+
+    // For hero, CTA, and messaging tests, return the first visible content item
+    if (contentType === 'hero' || contentType === 'cta') {
+      const items = await this.getVisibleContentItems(contentType, persona, funnelStage);
+      const firstItem = items[0];
+      
+      if (!firstItem) {
+        return null;
+      }
+
+      // Return configuration matching variant structure
+      return {
+        kind: 'presentation',
+        title: firstItem.title || undefined,
+        description: firstItem.description || undefined,
+        imageName: firstItem.imageName || undefined,
+        imageUrl: firstItem.imageUrl || undefined,
+        // Extract CTA text from metadata if available
+        ctaText: firstItem.metadata?.primaryButton || undefined,
+        secondaryCtaText: firstItem.metadata?.secondaryButton || undefined,
+      };
+    }
+
+    // For card order tests, return ordered list of item IDs
+    if (contentType === 'service' || contentType === 'event' || contentType === 'testimonial') {
+      const items = await this.getVisibleContentItems(contentType, persona, funnelStage);
+      
+      return {
+        kind: 'card_order',
+        contentType,
+        itemIds: items.map(item => item.id),
+      };
+    }
+
+    // For layout tests, use sensible defaults based on content type
+    // Since layouts aren't stored per-persona/journey, return the most commonly used template
+    if (testType === 'layout_test') {
+      return {
+        kind: 'layout',
+        template: 'grid-3col', // Most common/balanced default
+        options: {
+          cardStyle: 'elevated',
+          spacing: 'comfortable',
+          imagePosition: 'top',
+          showImages: true,
+          columnsOnMobile: '1',
+        },
+      };
+    }
+
+    // For unknown types, return empty configuration
+    return {
+      kind: 'presentation',
+    };
+  }
+
+  async getHistoricalTestResults(
+    persona: string,
+    funnelStage: string,
+    testType: string
+  ): Promise<{
+    testId: string;
+    testName: string;
+    endDate: Date | null;
+    winnerVariantId: string | null;
+    controlVariantId: string | null;
+    controlConversionRate: number;
+    winnerConversionRate: number;
+    improvementPercent: number;
+    confidence: number;
+    sampleSize: number;
+  } | null> {
+    // Find the most recent completed test for this persona×journey×type combination
+    const completedTests = await db
+      .select({
+        testId: abTests.id,
+        testName: abTests.name,
+        testType: abTests.type,
+        status: abTests.status,
+        endDate: abTests.endDate,
+        winnerVariantId: abTests.winnerVariantId,
+      })
+      .from(abTests)
+      .innerJoin(abTestTargets, eq(abTestTargets.testId, abTests.id))
+      .where(
+        and(
+          eq(abTests.type, testType),
+          eq(abTests.status, 'completed'),
+          eq(abTestTargets.persona, persona),
+          eq(abTestTargets.funnelStage, funnelStage)
+        )
+      )
+      .orderBy(desc(abTests.endDate))
+      .limit(1);
+
+    if (completedTests.length === 0) {
+      return null;
+    }
+
+    const test = completedTests[0];
+
+    // Get analytics for this test
+    const analytics = await this.getTestAnalytics(test.testId);
+    
+    if (analytics.length === 0) {
+      return null;
+    }
+
+    // Find control and winner variants
+    const variants = await this.getAbTestVariants(test.testId);
+    const controlVariant = variants.find(v => v.isControl);
+    const winnerVariant = variants.find(v => v.id === test.winnerVariantId);
+
+    const controlAnalytics = controlVariant 
+      ? analytics.find(a => a.variantId === controlVariant.id)
+      : analytics[0]; // Fallback to first variant
+
+    const winnerAnalytics = winnerVariant
+      ? analytics.find(a => a.variantId === winnerVariant.id)
+      : analytics[0]; // Fallback to first variant
+
+    const controlConversionRate = controlAnalytics?.conversionRate || 0;
+    const winnerConversionRate = winnerAnalytics?.conversionRate || 0;
+
+    // Calculate improvement percentage
+    const improvementPercent = controlConversionRate > 0
+      ? ((winnerConversionRate - controlConversionRate) / controlConversionRate) * 100
+      : 0;
+
+    // Calculate total sample size (unique views across all variants)
+    const sampleSize = analytics.reduce((sum, a) => sum + a.uniqueViews, 0);
+
+    // Calculate statistical confidence using z-test for proportions
+    // This is a simplified calculation - for production, use a proper stats library
+    const confidence = calculateStatisticalConfidence(
+      controlAnalytics?.totalEvents || 0,
+      controlAnalytics?.uniqueViews || 0,
+      winnerAnalytics?.totalEvents || 0,
+      winnerAnalytics?.uniqueViews || 0
+    );
+
+    return {
+      testId: test.testId,
+      testName: test.testName,
+      endDate: test.endDate,
+      winnerVariantId: test.winnerVariantId,
+      controlVariantId: controlVariant?.id || null,
+      controlConversionRate,
+      winnerConversionRate,
+      improvementPercent,
+      confidence,
+      sampleSize,
+    };
   }
 
   // Performance Metrics operations
