@@ -211,6 +211,90 @@ function parseVariantResponse(responseText: string): GeneratedVariant[] {
 }
 
 /**
+ * Generates descriptive name and description for A/B test variant
+ * based on its configuration
+ */
+export async function generateVariantNameAndDescription(
+  testType: string,
+  configuration: Record<string, any>,
+  persona?: Persona,
+  funnelStage?: FunnelStage
+): Promise<{ name: string; description: string }> {
+  const personaLabel = persona ? PERSONA_LABELS[persona] : 'General Audience';
+  const stageLabel = funnelStage ? FUNNEL_STAGE_LABELS[funnelStage] : '';
+  const stageContext = funnelStage ? ` targeting ${personaLabel} in the ${stageLabel} stage` : ` targeting ${personaLabel}`;
+
+  // Create a readable summary of the configuration
+  const configSummary = Object.entries(configuration)
+    .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+    .join(', ');
+
+  const prompt = `You are an expert A/B testing analyst helping name test variants.
+
+**Test Type**: ${testType}
+**Target**: ${personaLabel}${stageContext}
+**Variant Configuration**: ${configSummary || 'Custom configuration'}
+
+**Your Task**:
+Generate a clear, descriptive name and description for this test variant.
+
+**Guidelines**:
+- Name: 3-6 words, descriptive of what's being tested (e.g., "Trust-First Hero with Video")
+- Description: 1-2 sentences explaining what makes this variant unique and what hypothesis it tests
+- Be specific about the key differences (e.g., button style, messaging focus, visual approach)
+- Use professional but friendly language
+
+**Output Format**:
+Return ONLY valid JSON:
+{
+  "name": "Descriptive variant name",
+  "description": "Clear explanation of what this variant tests and why it's different"
+}`;
+
+  try {
+    const result = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+    });
+
+    const responseText = result.response?.text() || result.text || "";
+    
+    // Clean the response
+    let cleanedResponse = responseText.trim();
+    if (cleanedResponse.startsWith('```json')) {
+      cleanedResponse = cleanedResponse.slice(7);
+    }
+    if (cleanedResponse.startsWith('```')) {
+      cleanedResponse = cleanedResponse.slice(3);
+    }
+    if (cleanedResponse.endsWith('```')) {
+      cleanedResponse = cleanedResponse.slice(0, -3);
+    }
+    cleanedResponse = cleanedResponse.trim();
+
+    const parsed = JSON.parse(cleanedResponse);
+    
+    if (!parsed.name || !parsed.description) {
+      throw new Error("Invalid response structure");
+    }
+
+    return {
+      name: parsed.name,
+      description: parsed.description
+    };
+  } catch (error) {
+    console.error("Failed to generate variant name/description:", error);
+    throw new Error("Failed to generate variant naming suggestions. Please try again.");
+  }
+}
+
+/**
  * Generates multiple A/B test variants from a control variant
  * Optimized for creating test alternatives quickly
  */

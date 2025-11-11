@@ -13,7 +13,8 @@ import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { 
   FlaskConical, Plus, Play, Pause, CheckCircle2, Trash2, 
-  BarChart3, Edit, TrendingUp, Users, Target, ChevronDown, ChevronUp, AlertCircle
+  BarChart3, Edit, TrendingUp, Users, Target, ChevronDown, ChevronUp, AlertCircle,
+  Sparkles, Loader2
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import type { AbTestWithVariants, AbTestVariant } from "@shared/schema";
@@ -322,6 +323,84 @@ export default function AdminABTesting() {
       toast({
         title: "Error",
         description: "Failed to create variant.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // AI suggestion mutation for variant name and description
+  const suggestVariantNameMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedTest) throw new Error("No test selected");
+      
+      // Build configuration from current form state
+      let configuration: Record<string, any> = {};
+      if (selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') {
+        if (newVariant.title) configuration.title = newVariant.title;
+        if (newVariant.ctaText) configuration.ctaText = newVariant.ctaText;
+        if (newVariant.ctaLink) configuration.ctaLink = newVariant.ctaLink;
+        if (newVariant.secondaryCtaText) configuration.secondaryCtaText = newVariant.secondaryCtaText;
+        if (newVariant.secondaryCtaLink) configuration.secondaryCtaLink = newVariant.secondaryCtaLink;
+        if (newVariant.buttonVariant && newVariant.buttonVariant !== "default") {
+          configuration.buttonVariant = newVariant.buttonVariant;
+        }
+        if (newVariant.imageName) configuration.imageName = newVariant.imageName;
+      } else {
+        // For JSON-based types, parse the config
+        if (newVariant.jsonConfig.trim()) {
+          try {
+            configuration = JSON.parse(newVariant.jsonConfig);
+          } catch {
+            throw new Error("Invalid JSON configuration");
+          }
+        }
+      }
+
+      const response = await apiRequest("POST", "/api/ai/suggest-variant-name", {
+        testType: selectedTest.type,
+        configuration,
+        persona: selectedTest.targetPersona || undefined,
+        funnelStage: selectedTest.targetFunnelStage || undefined,
+      });
+      
+      return await response.json();
+    },
+    onSuccess: (data: { name: string; description: string }) => {
+      // Store previous values for undo
+      const previousName = newVariant.name;
+      const previousDescription = newVariant.description;
+
+      // Auto-populate the fields
+      setNewVariant({
+        ...newVariant,
+        name: data.name,
+        description: data.description,
+      });
+
+      // Show success toast with undo action
+      toast({
+        title: "AI Suggestions Applied",
+        description: "Name and description have been generated. You can edit them further.",
+        action: {
+          label: "Undo",
+          onClick: () => {
+            setNewVariant({
+              ...newVariant,
+              name: previousName,
+              description: previousDescription,
+            });
+            toast({
+              title: "Reverted",
+              description: "AI suggestions have been undone.",
+            });
+          },
+        },
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Suggestion Failed",
+        description: error.message || "Failed to generate AI suggestions. Please try again.",
         variant: "destructive",
       });
     },
@@ -1069,6 +1148,55 @@ export default function AdminABTesting() {
                 placeholder="What's different in this variant?"
                 data-testid="input-variant-description"
               />
+            </div>
+            {/* AI Suggestion Button */}
+            <div>
+              <Button
+                variant="outline"
+                onClick={() => suggestVariantNameMutation.mutate()}
+                disabled={suggestVariantNameMutation.isPending || (() => {
+                  // Disable if no configuration data to base suggestions on
+                  if (!selectedTest) return true;
+                  
+                  if (selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') {
+                    // For form-based types, check if at least one field has content
+                    return !newVariant.title && !newVariant.ctaText && !newVariant.ctaLink && !newVariant.imageName;
+                  } else {
+                    // For JSON-based types, check if JSON is not empty
+                    return !newVariant.jsonConfig.trim();
+                  }
+                })()}
+                className="w-full"
+                data-testid="button-ai-suggest-variant-name"
+              >
+                {suggestVariantNameMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating Suggestions...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Suggest Name & Description with AI
+                  </>
+                )}
+              </Button>
+              <p className="text-xs text-muted-foreground mt-1.5">
+                {(() => {
+                  if (!selectedTest) return null;
+                  
+                  if (selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') {
+                    if (!newVariant.title && !newVariant.ctaText && !newVariant.ctaLink && !newVariant.imageName) {
+                      return "Fill in at least one configuration field to enable AI suggestions";
+                    }
+                  } else {
+                    if (!newVariant.jsonConfig.trim()) {
+                      return "Add configuration JSON to enable AI suggestions";
+                    }
+                  }
+                  return "AI will analyze your configuration to suggest a descriptive name and explanation";
+                })()}
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="variant-weight">Traffic Weight (%)</Label>

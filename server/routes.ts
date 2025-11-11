@@ -5808,6 +5808,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate descriptive name and description for A/B test variant
+  app.post('/api/ai/suggest-variant-name', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { testType, configuration, persona, funnelStage } = req.body;
+      
+      if (!testType || !configuration) {
+        return res.status(400).json({ 
+          message: "Missing required fields: testType and configuration" 
+        });
+      }
+
+      const { generateVariantNameAndDescription } = await import('./copywriter');
+      const response = await generateVariantNameAndDescription(
+        testType,
+        configuration,
+        persona,
+        funnelStage
+      );
+      
+      res.json(response);
+    } catch (error: any) {
+      console.error("Error suggesting variant name:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to suggest variant name" 
+      });
+    }
+  });
+
   // Generate A/B test variants from control variant
   app.post('/api/ai/generate-ab-test-variants', isAuthenticated, isAdmin, async (req, res) => {
     try {
