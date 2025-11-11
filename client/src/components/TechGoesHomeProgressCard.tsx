@@ -65,7 +65,7 @@ export function TechGoesHomeProgressCard({
     if (percent < 25) return "Great start! Keep it up!";
     if (percent < 50) return "You're making excellent progress!";
     if (percent < 75) return "More than halfway there! Keep going!";
-    if (percent < 100) return "Almost there! Just a few more classes!";
+    if (percent < 100) return "Almost there! Just a few more hours!";
     return "Congratulations! You've completed the program!";
   };
 
@@ -78,7 +78,7 @@ export function TechGoesHomeProgressCard({
             Tech Goes Home
           </CardTitle>
           <CardDescription data-testid="text-tgh-description">
-            Complete 15 classes to earn your rewards
+            Complete at least 15 hours to earn your rewards
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
@@ -86,7 +86,7 @@ export function TechGoesHomeProgressCard({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium" data-testid="text-progress-label">
-                  {completed} of {totalRequired} classes completed
+                  {data?.hoursCompleted || 0} hours completed ({completed} sessions)
                 </span>
                 <span className="text-sm text-muted-foreground" data-testid="text-progress-percent">
                   {percent}%
@@ -136,8 +136,8 @@ export function TechGoesHomeProgressCard({
               <Laptop className="h-6 w-6 text-primary" />
               My Progress
             </CardTitle>
-            <Badge variant="secondary" data-testid="badge-classes-remaining">
-              {remaining} classes left
+            <Badge variant="secondary" data-testid="badge-hours-goal">
+              Goal: 15+ hours
             </Badge>
           </div>
           <CardDescription data-testid="text-motivation">{getMotivationalMessage()}</CardDescription>
@@ -147,7 +147,7 @@ export function TechGoesHomeProgressCard({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium" data-testid="text-progress-label">
-                  Progress
+                  {data?.hoursCompleted || 0} hours completed ({completed} sessions)
                 </span>
                 <span className="text-sm text-muted-foreground" data-testid="text-progress-percent">
                   {percent}%
@@ -182,18 +182,18 @@ export function TechGoesHomeProgressCard({
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-3">
             <span className="text-lg font-semibold" data-testid="text-progress-label">
-              Class Completion
+              Training Progress
             </span>
             <Badge 
               variant={eligible ? "default" : "secondary"}
               data-testid="badge-status"
             >
-              {eligible ? "Eligible for Rewards!" : `${remaining} classes remaining`}
+              {eligible ? "Eligible for Rewards!" : `Goal: 15+ hours`}
             </Badge>
           </div>
           <Progress value={percent} className="h-4" data-testid="progress-bar" />
           <div className="flex items-center justify-between text-sm text-muted-foreground mt-2">
-            <span data-testid="text-classes-completed">{completed} of {totalRequired} classes completed</span>
+            <span data-testid="text-classes-completed">{data?.hoursCompleted || 0} hours completed ({completed} sessions)</span>
             <span data-testid="text-progress-percent">{percent}%</span>
           </div>
         </div>
@@ -220,7 +220,7 @@ export function TechGoesHomeProgressCard({
                       {reward.name}
                     </p>
                     <p className="text-sm text-muted-foreground" data-testid={`text-reward-status-${reward.name.toLowerCase().replace(/\s+/g, '-')}`}>
-                      {isReceived ? "Received" : isEligible ? "Ready to claim" : `Complete ${totalRequired} classes to earn`}
+                      {isReceived ? "Received" : isEligible ? "Ready to claim" : "Complete 15+ hours to earn"}
                     </p>
                   </div>
                   {isReceived ? (

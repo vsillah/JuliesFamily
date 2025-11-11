@@ -107,7 +107,7 @@ export default function TechGoesHomeLanding() {
             Tech Goes Home
           </h1>
           <p className="text-lg text-muted-foreground" data-testid="text-page-subtitle">
-            Empowering Greater Boston residents with digital skills, technology, and internet access
+            FREE program equipping Greater Boston residents with digital skills, technology, and internet access
           </p>
         </div>
 
@@ -152,7 +152,7 @@ export default function TechGoesHomeLanding() {
                   Your Rewards
                 </CardTitle>
                 <CardDescription data-testid="text-rewards-description">
-                  Complete all 15 classes to receive
+                  Complete at least 15 hours of training to receive
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -251,11 +251,11 @@ export default function TechGoesHomeLanding() {
               <CardContent className="space-y-2 text-sm">
                 <div className="flex items-start gap-2" data-testid="requirement-attendance">
                   <span className="text-primary mt-0.5">1.</span>
-                  <span>Attend EVERY class to receive the rewards</span>
+                  <span>Complete at least 15 hours of training to receive the rewards</span>
                 </div>
                 <div className="flex items-start gap-2" data-testid="requirement-makeup">
                   <span className="text-primary mt-0.5">2.</span>
-                  <span>If you miss a class, attend a make-up session to complete the 15 hours</span>
+                  <span>Attend all sessions or make-up sessions to complete the required hours</span>
                 </div>
                 <div className="flex items-start gap-2" data-testid="requirement-eligibility">
                   <span className="text-primary mt-0.5">3.</span>

@@ -113,7 +113,7 @@ export function StudentDashboard() {
                 Course Progress
               </CardTitle>
               <CardDescription>
-                {classesCompleted} of {enrollment.totalClassesRequired} classes completed • {hoursCompleted} hours
+                {hoursCompleted} hours completed ({classesCompleted} sessions)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -127,15 +127,15 @@ export function StudentDashboard() {
               
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Completed</div>
-                  <div className="text-2xl font-bold text-primary" data-testid="text-classes-completed">
-                    {classesCompleted}
+                  <div className="text-sm text-muted-foreground">Hours Completed</div>
+                  <div className="text-2xl font-bold text-primary" data-testid="text-hours-completed">
+                    {hoursCompleted}
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Remaining</div>
-                  <div className="text-2xl font-bold" data-testid="text-classes-remaining">
-                    {classesRemaining}
+                  <div className="text-sm text-muted-foreground">Sessions</div>
+                  <div className="text-2xl font-bold" data-testid="text-sessions-completed">
+                    {classesCompleted}
                   </div>
                 </div>
               </div>
@@ -149,10 +149,10 @@ export function StudentDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-primary" />
-                  Next Classes
+                  Next Sessions
                 </CardTitle>
                 <CardDescription>
-                  {classesRemaining > 0 ? `${classesRemaining} classes remaining` : 'All classes completed!'}
+                  {hoursCompleted >= 15 ? 'Goal achieved! 15+ hours completed' : `Goal: 15+ hours`}
                 </CardDescription>
               </CardHeader>
               <CardContent>
