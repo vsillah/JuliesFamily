@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema } from "@shared/schema";
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter } from "./security";
 import { eq } from "drizzle-orm";
@@ -2721,6 +2721,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error resetting content visibility overrides:", error);
       res.status(500).json({ message: "Failed to reset content visibility overrides" });
+    }
+  });
+
+  // ============ STUDENT SUBMISSION ROUTES ============
+  
+  // Submit student project or testimonial (authenticated students only)
+  app.post('/api/student/submit', isAuthenticated, async (req: any, res) => {
+    try {
+      // Get current user
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Validate submission data
+      const validatedData = insertStudentSubmissionSchema.parse(req.body);
+      
+      // Create content item with student submission metadata
+      const contentItem = await storage.createContentItem({
+        type: validatedData.type,
+        title: validatedData.title,
+        description: validatedData.description,
+        passionTags: validatedData.passionTags,
+        isActive: false, // Require admin approval
+        order: 0,
+        metadata: {
+          status: 'pending',
+          submittingUserId: currentUser.id,
+          submittingUserEmail: currentUser.email || '',
+          submittingUserName: `${currentUser.firstName} ${currentUser.lastName}`,
+          files: validatedData.files || [],
+          submittedAt: new Date().toISOString(),
+        }
+      });
+      
+      res.status(201).json(contentItem);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation error", errors: error.errors });
+      }
+      console.error("Error creating student submission:", error);
+      res.status(500).json({ message: "Failed to submit content" });
+    }
+  });
+  
+  // Get student's own submissions
+  app.get('/api/student/submissions', isAuthenticated, async (req: any, res) => {
+    try {
+      // Get current user
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get all student submissions
+      const allContent = await storage.getAllContentItems();
+      
+      // Filter to student submissions by this user
+      const userSubmissions = allContent.filter((item: any) => 
+        (item.type === 'student_project' || item.type === 'student_testimonial') &&
+        item.metadata?.submittingUserId === currentUser.id
+      );
+      
+      res.json(userSubmissions);
+    } catch (error) {
+      console.error("Error fetching student submissions:", error);
+      res.status(500).json({ message: "Failed to fetch submissions" });
+    }
+  });
+  
+  // Approve/reject student submission (admin only)
+  app.patch('/api/admin/student-submissions/:id/review', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { status, rejectionReason } = req.body;
+      
+      if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ message: "Status must be 'approved' or 'rejected'" });
+      }
+      
+      // Get current user
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get the content item
+      const item = await storage.getContentItem(id);
+      if (!item) {
+        return res.status(404).json({ message: "Submission not found" });
+      }
+      
+      // Update the submission
+      const updatedItem = await storage.updateContentItem(id, {
+        isActive: status === 'approved',
+        metadata: {
+          ...item.metadata,
+          status,
+          reviewedBy: currentUser.id,
+          reviewedAt: new Date().toISOString(),
+          rejectionReason: status === 'rejected' ? rejectionReason : undefined,
+        }
+      });
+      
+      res.json(updatedItem);
+    } catch (error) {
+      console.error("Error reviewing student submission:", error);
+      res.status(500).json({ message: "Failed to review submission" });
     }
   });
 

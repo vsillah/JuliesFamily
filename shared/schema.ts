@@ -359,7 +359,7 @@ export type ImageAsset = typeof imageAssets.$inferSelect;
 // Content Items table for managing editable cards across the site
 export const contentItems = pgTable("content_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail'
+  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial'
   title: text("title").notNull(),
   description: text("description"),
   imageName: varchar("image_name"), // Cloudinary image name (legacy)
@@ -367,7 +367,7 @@ export const contentItems = pgTable("content_items", {
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
   passionTags: text("passion_tags").array(), // Array of passion tags for targeting (e.g., ['literacy', 'stem', 'arts'])
-  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona, etc
+  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona, AND for student_project/student_testimonial: submittingUserId, submittingUserEmail, submittingUserName, programId, classId, files: [{url, alt, uploadedAt}], status: 'pending'|'approved'|'rejected', reviewedBy, reviewedAt, rejectionReason
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -384,7 +384,7 @@ export type ContentItem = typeof contentItems.$inferSelect;
 
 // Update schema for content items - whitelisted fields only
 export const updateContentItemSchema = z.object({
-  type: z.enum(['service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail']).optional(),
+  type: z.enum(['service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial']).optional(),
   title: z.string().optional(),
   description: z.string().optional(),
   imageName: z.string().optional(),
@@ -395,6 +395,20 @@ export const updateContentItemSchema = z.object({
   metadata: z.any().optional(), // JSONB
 }).strict();
 export type UpdateContentItem = z.infer<typeof updateContentItemSchema>;
+
+// Student submission schema - for students to submit projects and testimonials
+export const insertStudentSubmissionSchema = z.object({
+  type: z.enum(['student_project', 'student_testimonial']),
+  title: z.string().min(1, "Title is required").max(200),
+  description: z.string().min(1, "Description is required"),
+  passionTags: z.array(z.enum(['literacy', 'stem', 'arts', 'nutrition', 'community'])).min(1, "Select at least one passion"),
+  files: z.array(z.object({
+    url: z.string(),
+    alt: z.string().optional(),
+    uploadedAt: z.string().optional(),
+  })).optional(),
+});
+export type InsertStudentSubmission = z.infer<typeof insertStudentSubmissionSchema>;
 
 // Extended ContentItem type with resolved image URL from image_assets join
 export type ContentItemWithResolvedImage = ContentItem & {
