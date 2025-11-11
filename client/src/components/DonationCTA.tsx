@@ -1,16 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import { useABTestTracking } from "@/hooks/useABTestTracking";
 import { useViewportTracking } from "@/hooks/useViewportTracking";
 import { applyABVariantOverrides } from "@/lib/abTestUtils";
 import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
+import { isButtonTargetVisible, parseButtonUrl } from "@shared/utils/ctaValidation";
+import { getPersonaNavigationTargets } from "@shared/utils/ctaNavigation";
+import { useContentAvailability } from "@/hooks/useContentAvailability";
 import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 export default function DonationCTA() {
   const { persona, funnelStage } = usePersona();
+  const [, navigate] = useLocation();
   const [scale, setScale] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -136,6 +141,57 @@ export default function DonationCTA() {
       })
     : "";
 
+  // Get visible sections for button validation
+  const { data: visibleSections } = useContentAvailability();
+
+  // Handle button click based on URL type
+  const handleButtonClick = (url: string | undefined | null, fallbackSection?: string) => {
+    // Try URL first
+    if (url) {
+      const parsed = parseButtonUrl(url);
+      
+      if (parsed.type === "section") {
+        // Extract section ID from anchor (remove #)
+        const sectionId = url.replace("#", "");
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+        return;
+      } else if (parsed.type === "page") {
+        // Use SPA navigation for internal routes
+        navigate(url);
+        return;
+      } else if (parsed.type === "external" || parsed.type === "special") {
+        // Navigate to external URL or handle special protocols
+        window.location.href = url;
+        return;
+      }
+    }
+    
+    // Fall back to persona-based navigation
+    if (fallbackSection) {
+      const element = document.getElementById(fallbackSection);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      console.warn('[DonationCTA] No button URL or fallback section provided');
+    }
+  };
+
+  // Extract button URLs from metadata
+  const primaryButtonLink = (currentCta?.metadata as any)?.primaryButtonLink;
+  const secondaryButtonLink = (currentCta?.metadata as any)?.secondaryButtonLink;
+
+  // Get persona-based fallback targets
+  const fallbackTargets = getPersonaNavigationTargets(persona, visibleSections);
+
+  // Only hide buttons when URL is defined AND points to invisible target
+  // Undefined URLs use fallbacks and should always show
+  const showPrimaryButton = !primaryButtonLink || isButtonTargetVisible(primaryButtonLink, visibleSections);
+  const showSecondaryButton = !secondaryButtonLink || isButtonTargetVisible(secondaryButtonLink, visibleSections);
+
   return (
     <section 
       id="donation" 
@@ -195,37 +251,43 @@ export default function DonationCTA() {
           {currentCta?.description || "Your support helps families achieve their educational dreams and build brighter futures."}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button 
-            variant="default" 
-            size="lg" 
-            data-testid="button-donate-cta"
-            onClick={() => {
-              // Guard on abVariant to prevent null.id errors, compute ID lazily
-              if (abVariant) {
-                const ctaText = (currentCta?.metadata as any)?.primaryButton || "Make a Donation";
-                // Variant-specific ID for attribution - variant is always loaded by click time
-                tracking.cta.click(`${abVariant.id}-primary`, ctaText, '/donate');
-              }
-            }}
-          >
-            {(currentCta?.metadata as any)?.primaryButton || "Make a Donation"}
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
-            data-testid="button-volunteer"
-            onClick={() => {
-              // Guard on abVariant to prevent null.id errors, compute ID lazily
-              if (abVariant) {
-                const ctaText = (currentCta?.metadata as any)?.secondaryButton || "View Impact Report";
-                // Variant-specific ID for attribution - variant is always loaded by click time
-                tracking.cta.click(`${abVariant.id}-secondary`, ctaText, '/impact');
-              }
-            }}
-          >
-            {(currentCta?.metadata as any)?.secondaryButton || "View Impact Report"}
-          </Button>
+          {showPrimaryButton && (
+            <Button 
+              variant="default" 
+              size="lg" 
+              data-testid="button-donate-cta"
+              onClick={() => {
+                // Guard on abVariant to prevent null.id errors, compute ID lazily
+                if (abVariant) {
+                  const ctaText = (currentCta?.metadata as any)?.primaryButton || "Make a Donation";
+                  // Variant-specific ID for attribution - variant is always loaded by click time
+                  tracking.cta.click(`${abVariant.id}-primary`, ctaText, primaryButtonLink || '/donate');
+                }
+                handleButtonClick(primaryButtonLink, fallbackTargets.primary);
+              }}
+            >
+              {(currentCta?.metadata as any)?.primaryButton || "Make a Donation"}
+            </Button>
+          )}
+          {showSecondaryButton && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
+              data-testid="button-volunteer"
+              onClick={() => {
+                // Guard on abVariant to prevent null.id errors, compute ID lazily
+                if (abVariant) {
+                  const ctaText = (currentCta?.metadata as any)?.secondaryButton || "View Impact Report";
+                  // Variant-specific ID for attribution - variant is always loaded by click time
+                  tracking.cta.click(`${abVariant.id}-secondary`, ctaText, secondaryButtonLink || '/impact');
+                }
+                handleButtonClick(secondaryButtonLink, fallbackTargets.secondary);
+              }}
+            >
+              {(currentCta?.metadata as any)?.secondaryButton || "View Impact Report"}
+            </Button>
+          )}
         </div>
       </div>
     </section>

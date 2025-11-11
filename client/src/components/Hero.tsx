@@ -1,12 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import { useABTestTracking } from "@/hooks/useABTestTracking";
 import { useHeroEngagement } from "@/hooks/useViewportTracking";
 import { applyABVariantOverrides } from "@/lib/abTestUtils";
 import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
+import { isButtonTargetVisible, parseButtonUrl } from "@shared/utils/ctaValidation";
+import { getPersonaNavigationTargets } from "@shared/utils/ctaNavigation";
+import { useContentAvailability } from "@/hooks/useContentAvailability";
 import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 interface HeroProps {
@@ -16,6 +20,7 @@ interface HeroProps {
 
 export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   const { persona, funnelStage } = usePersona();
+  const [, navigate] = useLocation();
   const [scrollScale, setScrollScale] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -46,10 +51,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   
   // Fetch visible sections for current persona and funnel stage
   // CRITICAL: Don't fetch until persona is determined to prevent flash
-  const { data: visibleSections } = useQuery<Record<string, boolean>>({
-    queryKey: ["/api/content/visible-sections", { persona, funnelStage }],
-    enabled: !isPersonaLoading && !!persona,
-  });
+  const { data: visibleSections } = useContentAvailability();
   
   // Select first hero content (already filtered by persona×journey matrix and ordered by passion tags)
   const baseHero = heroContent?.[0];
@@ -151,52 +153,47 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
     }
   };
 
-  // Get preferred navigation targets based on persona
-  const getPreferredTargets = () => {
-    switch(persona) {
-      case 'student':
-        return { primary: 'lead-magnet', secondary: 'testimonials' };
-      case 'provider':
-        return { primary: 'lead-magnet', secondary: 'impact' };
-      case 'parent':
-        return { primary: 'lead-magnet', secondary: 'services' };
-      case 'donor':
-        return { primary: 'donation', secondary: 'campaign-impact' }; // Updated to scroll to Campaign Impact section
-      case 'volunteer':
-        return { primary: 'services', secondary: 'testimonials' };
-      default:
-        return { primary: 'lead-magnet', secondary: 'testimonials' };
-    }
-  };
-
-  // Determine actual navigation targets based on visibility
-  const getNavigationTargets = () => {
-    const preferred = getPreferredTargets();
-    
-    // If no visibility data yet, use preferred targets
-    if (!visibleSections) {
-      return preferred;
-    }
-    
-    // Priority order for fallbacks (sections most likely to be useful)
-    const fallbackOrder = ['services', 'lead-magnet', 'impact', 'testimonials', 'donation', 'events'];
-    
-    // Helper to find first visible section from a list
-    const findVisibleSection = (preferredSection: string) => {
-      if (visibleSections[preferredSection]) {
-        return preferredSection;
+  // Handle button click based on URL type
+  const handleButtonClick = (url: string | undefined | null, fallbackSection?: string) => {
+    // Try URL first
+    if (url) {
+      const parsed = parseButtonUrl(url);
+      
+      if (parsed.type === "section") {
+        // Extract section ID from anchor (remove #)
+        const sectionId = url.replace("#", "");
+        scrollToSection(sectionId);
+        return;
+      } else if (parsed.type === "page") {
+        // Use SPA navigation for internal routes
+        navigate(url);
+        return;
+      } else if (parsed.type === "external" || parsed.type === "special") {
+        // Navigate to external URL or handle special protocols
+        window.location.href = url;
+        return;
       }
-      // Fallback to first visible section
-      return fallbackOrder.find(section => visibleSections[section]) || preferredSection;
-    };
+    }
     
-    return {
-      primary: findVisibleSection(preferred.primary),
-      secondary: findVisibleSection(preferred.secondary)
-    };
+    // Fall back to persona-based navigation
+    if (fallbackSection) {
+      scrollToSection(fallbackSection);
+    } else {
+      console.warn('[Hero] No button URL or fallback section provided');
+    }
   };
 
-  const navigationTargets = getNavigationTargets();
+  // Extract button URLs from metadata
+  const primaryButtonLink = (currentHero?.metadata as any)?.primaryButtonLink;
+  const secondaryButtonLink = (currentHero?.metadata as any)?.secondaryButtonLink;
+
+  // Get persona-based fallback targets
+  const fallbackTargets = getPersonaNavigationTargets(persona, visibleSections);
+
+  // Only hide buttons when URL is defined AND points to invisible target
+  // Undefined URLs use fallbacks and should always show
+  const showPrimaryButton = !primaryButtonLink || isButtonTargetVisible(primaryButtonLink, visibleSections);
+  const showSecondaryButton = !secondaryButtonLink || isButtonTargetVisible(secondaryButtonLink, visibleSections);
 
   const heroImageUrl = heroImageAsset 
     ? getOptimizedUrl(heroImageAsset.cloudinarySecureUrl, {
@@ -289,29 +286,33 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
           {currentHero?.description || "A family support, wellness, and education center committed to the development of strong, stable, and healthy family functioning for over 50 years."}
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button
-            variant="outline"
-            size="lg"
-            className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
-            onClick={() => {
-              tracking.hero.ctaClick('secondary-button');
-              scrollToSection(navigationTargets.secondary);
-            }}
-            data-testid="button-learn-more"
-          >
-            {(currentHero?.metadata as any)?.secondaryButton || "Learn More"}
-          </Button>
-          <Button
-            variant="default"
-            size="lg"
-            onClick={() => {
-              tracking.hero.ctaClick('primary-button');
-              scrollToSection(navigationTargets.primary);
-            }}
-            data-testid="button-hero-donate"
-          >
-            {(currentHero?.metadata as any)?.primaryButton || "Donate Now"}
-          </Button>
+          {showSecondaryButton && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
+              onClick={() => {
+                tracking.hero.ctaClick('secondary-button');
+                handleButtonClick(secondaryButtonLink, fallbackTargets.secondary);
+              }}
+              data-testid="button-learn-more"
+            >
+              {(currentHero?.metadata as any)?.secondaryButton || "Learn More"}
+            </Button>
+          )}
+          {showPrimaryButton && (
+            <Button
+              variant="default"
+              size="lg"
+              onClick={() => {
+                tracking.hero.ctaClick('primary-button');
+                handleButtonClick(primaryButtonLink, fallbackTargets.primary);
+              }}
+              data-testid="button-hero-donate"
+            >
+              {(currentHero?.metadata as any)?.primaryButton || "Donate Now"}
+            </Button>
+          )}
         </div>
       </div>
       <svg
