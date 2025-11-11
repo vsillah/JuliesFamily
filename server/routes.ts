@@ -6092,6 +6092,290 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Tech Goes Home - Create demo enrollment with sample attendance (admin only)
+  app.post('/api/admin/tgh/demo-enrollment', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const user = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Delete existing enrollment for this user if any
+      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+      if (existingEnrollment) {
+        // Note: Attendance will be cascade deleted due to foreign key constraint
+        await storage.updateTechGoesHomeEnrollment(existingEnrollment.id, { 
+          status: 'withdrawn' as any 
+        });
+      }
+      
+      // Create new demo enrollment
+      const { insertTechGoesHomeEnrollmentSchema, insertTechGoesHomeAttendanceSchema } = await import("@shared/schema");
+      
+      const enrollmentData = insertTechGoesHomeEnrollmentSchema.parse({
+        userId: user.id,
+        programName: "Tech Goes Home",
+        enrollmentDate: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000), // 60 days ago
+        programStartDate: new Date(Date.now() - 55 * 24 * 60 * 60 * 1000), // 55 days ago
+        status: "active",
+        totalClassesRequired: 15,
+        chromebookReceived: false,
+        internetActivated: false,
+      });
+      
+      const enrollment = await storage.createTechGoesHomeEnrollment(enrollmentData);
+      
+      // Create 6 sample attendance records (with varied dates and some makeup classes)
+      const attendanceRecords = [
+        {
+          enrollmentId: enrollment.id,
+          classDate: new Date(Date.now() - 50 * 24 * 60 * 60 * 1000),
+          classNumber: 1,
+          attended: true,
+          isMakeup: false,
+          hoursCredits: 2,
+        },
+        {
+          enrollmentId: enrollment.id,
+          classDate: new Date(Date.now() - 43 * 24 * 60 * 60 * 1000),
+          classNumber: 2,
+          attended: true,
+          isMakeup: false,
+          hoursCredits: 2,
+        },
+        {
+          enrollmentId: enrollment.id,
+          classDate: new Date(Date.now() - 36 * 24 * 60 * 60 * 1000),
+          classNumber: 3,
+          attended: true,
+          isMakeup: false,
+          hoursCredits: 2,
+        },
+        {
+          enrollmentId: enrollment.id,
+          classDate: new Date(Date.now() - 29 * 24 * 60 * 60 * 1000),
+          classNumber: 4,
+          attended: false,
+          isMakeup: false,
+          hoursCredits: 0,
+        },
+        {
+          enrollmentId: enrollment.id,
+          classDate: new Date(Date.now() - 22 * 24 * 60 * 60 * 1000),
+          classNumber: 5,
+          attended: true,
+          isMakeup: false,
+          hoursCredits: 2,
+        },
+        {
+          enrollmentId: enrollment.id,
+          classDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+          classNumber: 6,
+          attended: true,
+          isMakeup: true,
+          hoursCredits: 2,
+          notes: "Makeup for Class 4"
+        },
+      ];
+      
+      const attendance = await Promise.all(
+        attendanceRecords.map(record => 
+          storage.createTechGoesHomeAttendance(insertTechGoesHomeAttendanceSchema.parse(record))
+        )
+      );
+      
+      // Get the progress to return
+      const progress = await storage.getStudentProgress(user.id);
+      
+      res.json({
+        message: "Demo enrollment created successfully",
+        enrollment,
+        attendanceCount: attendance.length,
+        progress
+      });
+    } catch (error: any) {
+      console.error("Error creating demo TGH enrollment:", error);
+      res.status(500).json({ 
+        message: "Failed to create demo enrollment",
+        error: error.message 
+      });
+    }
+  });
+
+  // Admin TGH Enrollment Management - List all enrollments
+  app.get('/api/admin/tgh/enrollments', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const enrollments = await storage.getAllTechGoesHomeEnrollments();
+      
+      // Enrich with user information and progress
+      const enrichedEnrollments = await Promise.all(
+        enrollments.map(async (enrollment) => {
+          const user = await storage.getUser(enrollment.userId);
+          const progress = await storage.getStudentProgress(enrollment.userId);
+          
+          return {
+            ...enrollment,
+            user: user ? {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+            } : null,
+            classesCompleted: progress?.classesCompleted || 0,
+            percentComplete: progress?.percentComplete || 0,
+          };
+        })
+      );
+      
+      res.json(enrichedEnrollments);
+    } catch (error: any) {
+      console.error("Error fetching enrollments:", error);
+      res.status(500).json({ message: "Failed to fetch enrollments" });
+    }
+  });
+
+  // Admin TGH Enrollment Management - Get single enrollment with attendance
+  app.get('/api/admin/tgh/enrollments/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const enrollment = await storage.getTechGoesHomeEnrollment(id);
+      
+      if (!enrollment) {
+        return res.status(404).json({ message: "Enrollment not found" });
+      }
+      
+      const attendance = await storage.getTechGoesHomeAttendance(id);
+      const user = await storage.getUser(enrollment.userId);
+      const progress = await storage.getStudentProgress(enrollment.userId);
+      
+      res.json({
+        ...enrollment,
+        attendance,
+        user: user ? {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        } : null,
+        progress,
+      });
+    } catch (error: any) {
+      console.error("Error fetching enrollment:", error);
+      res.status(500).json({ message: "Failed to fetch enrollment" });
+    }
+  });
+
+  // Admin TGH Enrollment Management - Create enrollment
+  app.post('/api/admin/tgh/enrollments', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { insertTechGoesHomeEnrollmentSchema } = await import("@shared/schema");
+      const enrollmentData = insertTechGoesHomeEnrollmentSchema.parse(req.body);
+      
+      // Check if user already has an active enrollment
+      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(enrollmentData.userId);
+      if (existingEnrollment && existingEnrollment.status === 'active') {
+        return res.status(400).json({ 
+          message: "User already has an active enrollment. Please complete or withdraw the existing enrollment first." 
+        });
+      }
+      
+      const enrollment = await storage.createTechGoesHomeEnrollment(enrollmentData);
+      res.json(enrollment);
+    } catch (error: any) {
+      console.error("Error creating enrollment:", error);
+      res.status(500).json({ message: "Failed to create enrollment", error: error.message });
+    }
+  });
+
+  // Admin TGH Enrollment Management - Update enrollment
+  app.patch('/api/admin/tgh/enrollments/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const enrollment = await storage.updateTechGoesHomeEnrollment(id, updates);
+      
+      if (!enrollment) {
+        return res.status(404).json({ message: "Enrollment not found" });
+      }
+      
+      res.json(enrollment);
+    } catch (error: any) {
+      console.error("Error updating enrollment:", error);
+      res.status(500).json({ message: "Failed to update enrollment", error: error.message });
+    }
+  });
+
+  // Admin TGH Enrollment Management - Delete enrollment (and cascade delete attendance)
+  app.delete('/api/admin/tgh/enrollments/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // First check if enrollment exists
+      const enrollment = await storage.getTechGoesHomeEnrollment(id);
+      if (!enrollment) {
+        return res.status(404).json({ message: "Enrollment not found" });
+      }
+      
+      // Mark as withdrawn instead of hard delete to preserve data
+      await storage.updateTechGoesHomeEnrollment(id, { status: 'withdrawn' as any });
+      
+      res.json({ message: "Enrollment withdrawn successfully" });
+    } catch (error: any) {
+      console.error("Error deleting enrollment:", error);
+      res.status(500).json({ message: "Failed to delete enrollment" });
+    }
+  });
+
+  // Admin TGH Attendance Management - Create attendance record
+  app.post('/api/admin/tgh/attendance', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { insertTechGoesHomeAttendanceSchema } = await import("@shared/schema");
+      const attendanceData = insertTechGoesHomeAttendanceSchema.parse({
+        ...req.body,
+        markedByAdminId: req.user.id,
+      });
+      
+      const attendance = await storage.createTechGoesHomeAttendance(attendanceData);
+      res.json(attendance);
+    } catch (error: any) {
+      console.error("Error creating attendance:", error);
+      res.status(500).json({ message: "Failed to create attendance", error: error.message });
+    }
+  });
+
+  // Admin TGH Attendance Management - Update attendance record
+  app.patch('/api/admin/tgh/attendance/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const attendance = await storage.updateTechGoesHomeAttendance(id, updates);
+      
+      if (!attendance) {
+        return res.status(404).json({ message: "Attendance record not found" });
+      }
+      
+      res.json(attendance);
+    } catch (error: any) {
+      console.error("Error updating attendance:", error);
+      res.status(500).json({ message: "Failed to update attendance", error: error.message });
+    }
+  });
+
+  // Admin TGH Attendance Management - Delete attendance record
+  app.delete('/api/admin/tgh/attendance/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      await storage.deleteTechGoesHomeAttendance(id);
+      res.json({ message: "Attendance record deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting attendance:", error);
+      res.status(500).json({ message: "Failed to delete attendance" });
+    }
+  });
+
   // Demo Data Seeding - Generate sample data for demonstration
   app.post('/api/demo/seed', async (req, res) => {
     try {

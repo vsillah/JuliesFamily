@@ -37,6 +37,7 @@ import AdminCacLtgpDashboard from "@/pages/AdminCacLtgpDashboard";
 import AdminCohortAnalysis from "@/pages/AdminCohortAnalysis";
 import AdminChannelManagement from "@/pages/AdminChannelManagement";
 import AdminDonorLifecycle from "@/pages/AdminDonorLifecycle";
+import AdminStudentEnrollments from "@/pages/AdminStudentEnrollments";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import ImageComparison from "@/pages/ImageComparison";
@@ -77,6 +78,7 @@ function Router() {
       <Route path="/admin/cohort-analysis" component={AdminCohortAnalysis} />
       <Route path="/admin/channel-management" component={AdminChannelManagement} />
       <Route path="/admin/donor-lifecycle" component={AdminDonorLifecycle} />
+      <Route path="/admin/student-enrollments" component={AdminStudentEnrollments} />
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />
