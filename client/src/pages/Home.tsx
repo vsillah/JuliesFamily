@@ -33,13 +33,13 @@ const DEFAULT_SECTIONS: VisibleSections = {
 };
 
 export default function Home() {
-  const { persona, funnelStage } = usePersona();
+  const { persona, funnelStage, isPersonaLoading } = usePersona();
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const { data: visibleSections } = useContentAvailability();
 
-  // Default to student/awareness while persona loads to avoid blank state
-  const effectivePersona = persona || "student";
-  const effectiveFunnelStage = funnelStage || "awareness";
+  // Use actual persona values - no fallback to prevent flash
+  const effectivePersona = persona;
+  const effectiveFunnelStage = funnelStage;
 
   // Fetch lead magnet content from database
   const { data: leadMagnets = [] } = useQuery<ContentItem[]>({
@@ -68,7 +68,7 @@ export default function Home() {
     <div className="min-h-screen">
       <SchemaMarkup />
       <Navigation heroImageLoaded={heroImageLoaded} />
-      <Hero onImageLoaded={setHeroImageLoaded} />
+      <Hero onImageLoaded={setHeroImageLoaded} isPersonaLoading={isPersonaLoading} />
       
       {/* Campaign Impact Section - Controlled by persona×journey matrix */}
       {sections["campaign-impact"] && (

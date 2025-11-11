@@ -9,9 +9,10 @@ import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 interface HeroProps {
   onImageLoaded: (loaded: boolean) => void;
+  isPersonaLoading: boolean;
 }
 
-export default function Hero({ onImageLoaded }: HeroProps) {
+export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   const { persona, funnelStage } = usePersona();
   const [scrollScale, setScrollScale] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -20,19 +21,24 @@ export default function Hero({ onImageLoaded }: HeroProps) {
   const [imageError, setImageError] = useState(false);
   
   // Check for active A/B test for hero content
+  // Only fetch when persona is loaded to prevent flash
   const { variant: abVariant, configuration: abConfig, trackConversion, isLoading: abTestLoading, hasTest } = useABTest('hero_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
   });
   
   // Fetch visible hero content filtered by persona + journey stage + passion tags
+  // CRITICAL: Don't fetch until persona is determined to prevent flash
   const { data: heroContent, isLoading: contentLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/visible/hero", { persona, funnelStage }],
+    enabled: !isPersonaLoading && !!persona,
   });
   
   // Fetch visible sections for current persona and funnel stage
+  // CRITICAL: Don't fetch until persona is determined to prevent flash
   const { data: visibleSections } = useQuery<Record<string, boolean>>({
     queryKey: ["/api/content/visible-sections", { persona, funnelStage }],
+    enabled: !isPersonaLoading && !!persona,
   });
   
   // Select first hero content (already filtered by persona×journey matrix and ordered by passion tags)
@@ -175,6 +181,26 @@ export default function Hero({ onImageLoaded }: HeroProps) {
         quality: "auto:best",
       })
     : "";
+
+  // Show gradient placeholder while persona is loading OR while hero content is loading
+  // This prevents any flash of default content
+  if (isPersonaLoading || !currentHero) {
+    return (
+      <section 
+        className="relative flex items-center justify-center overflow-hidden md:min-h-[75vh]"
+        style={{
+          minHeight: 'calc(100vh - var(--nav-height, 0px))'
+        }}
+      >
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'linear-gradient(135deg, hsl(28, 90%, 85%) 0%, hsl(28, 80%, 70%) 25%, hsl(45, 85%, 75%) 50%, hsl(28, 85%, 65%) 75%, hsl(28, 90%, 80%) 100%)'
+          }}
+        />
+      </section>
+    );
+  }
 
   return (
     <section 
