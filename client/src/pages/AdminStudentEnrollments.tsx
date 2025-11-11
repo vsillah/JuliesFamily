@@ -110,7 +110,7 @@ export default function AdminStudentEnrollments() {
   // Delete enrollment mutation
   const deleteMutation = useMutation({
     mutationFn: (enrollmentId: string) =>
-      apiRequest(`/api/admin/tgh/enrollments/${enrollmentId}`, "DELETE"),
+      apiRequest("DELETE", `/api/admin/tgh/enrollments/${enrollmentId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/tgh/enrollments"] });
       toast({
@@ -392,8 +392,8 @@ function EnrollmentFormDialog({
   const saveMutation = useMutation({
     mutationFn: (data: any) =>
       enrollment
-        ? apiRequest(`/api/admin/tgh/enrollments/${enrollment.id}`, "PATCH", data)
-        : apiRequest("/api/admin/tgh/enrollments", "POST", data),
+        ? apiRequest("PATCH", `/api/admin/tgh/enrollments/${enrollment.id}`, data)
+        : apiRequest("POST", "/api/admin/tgh/enrollments", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/tgh/enrollments"] });
       toast({
@@ -632,7 +632,7 @@ function AttendanceSheet({
   // Delete attendance mutation
   const deleteAttendanceMutation = useMutation({
     mutationFn: (attendanceId: string) =>
-      apiRequest(`/api/admin/tgh/attendance/${attendanceId}`, "DELETE"),
+      apiRequest("DELETE", `/api/admin/tgh/attendance/${attendanceId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/tgh/enrollments"] });
       toast({
@@ -644,7 +644,7 @@ function AttendanceSheet({
 
   // Create attendance mutation
   const createAttendanceMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("/api/admin/tgh/attendance", "POST", data),
+    mutationFn: (data: any) => apiRequest("POST", "/api/admin/tgh/attendance", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/tgh/enrollments"] });
       setIsAddingAttendance(false);

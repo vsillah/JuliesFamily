@@ -32,7 +32,7 @@ export default function TechGoesHomeLanding() {
 
   // Enrollment mutation
   const enrollMutation = useMutation({
-    mutationFn: () => apiRequest('/api/tgh/enroll', 'POST', {}),
+    mutationFn: () => apiRequest('POST', '/api/tgh/enroll', {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tgh/progress'] });
       toast({
