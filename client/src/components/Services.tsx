@@ -24,12 +24,11 @@ interface ProgramDetail {
 
 // Map service titles to program detail IDs
 const SERVICE_TO_PROGRAM_MAP: Record<string, string> = {
-  'Adult Basic Education': 'adult-education',
-  'Children\'s Services': 'childrens-services',
-  'Family Development': 'adult-education', // Family literacy + adult education
-  'Workforce Development': 'workforce-development',
-  'Career & College Readiness': 'workforce-development',
-  'Early Childhood Education': 'childrens-services',
+  'Adult Basic Education': 'adult-basic-education',
+  'Adult Basic Education (ABE)/Career Services': 'adult-basic-education',
+  'Family Development': 'family-development',
+  'Family Development Services': 'family-development',
+  'Tech Goes Home': 'tech-goes-home',
 };
 
 export default function Services() {

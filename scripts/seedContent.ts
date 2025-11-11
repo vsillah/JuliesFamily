@@ -71,6 +71,24 @@ async function seedContent() {
           volunteer: 1
         }
       }
+    },
+    {
+      type: "service",
+      title: "Tech Goes Home",
+      description: "FREE 15-hour digital literacy program with brand new Chromebook and 1 year of internet access upon completion.",
+      imageName: "sebastian-leon-prado-dBiIcdxMWfE-unsplash",
+      order: 4,
+      isActive: true,
+      metadata: {
+        number: "4",
+        priority: {
+          parent: 3,
+          student: 1,
+          provider: 2,
+          donor: 2,
+          volunteer: 2
+        }
+      }
     }
   ];
 
