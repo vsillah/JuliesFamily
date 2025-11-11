@@ -66,9 +66,15 @@ export function useAdminPreviewState() {
     
     sessionStorage.setItem(ADMIN_PERSONA_KEY, selectedPersona || "none");
     
-    // Save variant overrides
-    if (Object.keys(selectedVariants).length > 0) {
-      sessionStorage.setItem(ADMIN_VARIANT_KEY, JSON.stringify(selectedVariants));
+    // Save variant overrides (filter out "auto" which means no override)
+    const variantsToSave = Object.fromEntries(
+      Object.entries(selectedVariants).filter(([_, variantId]) => 
+        variantId && variantId !== "auto" && variantId !== "random"
+      )
+    );
+    
+    if (Object.keys(variantsToSave).length > 0) {
+      sessionStorage.setItem(ADMIN_VARIANT_KEY, JSON.stringify(variantsToSave));
     } else {
       sessionStorage.removeItem(ADMIN_VARIANT_KEY);
     }
