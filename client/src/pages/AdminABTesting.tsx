@@ -32,6 +32,8 @@ import type { AbTestWithVariants, AbTestVariant } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { ABTestWizard, type TestConfiguration } from "@/components/ABTestWizard";
+import { getConfigDefinition, createDefaultConfigForType } from "@/components/ab-test-config/registry";
+import type { AbTestVariantConfiguration } from "@shared/schema";
 
 export default function AdminABTesting() {
   const { user } = useAuth();
@@ -66,20 +68,39 @@ export default function AdminABTesting() {
   });
 
   // New variant form - configuration fields separated for easier editing
-  const [newVariant, setNewVariant] = useState({
+  const [newVariant, setNewVariant] = useState<{
+    name: string;
+    description: string;
+    trafficWeight: number;
+    isControl: boolean;
+    // Legacy presentation fields (hero, cta, messaging)
+    title: string;
+    ctaText: string;
+    ctaLink: string;
+    secondaryCtaText: string;
+    secondaryCtaLink: string;
+    buttonVariant: string;
+    imageName: string;
+    // Structured configuration for visual editors (card_order, layout)
+    configuration: AbTestVariantConfiguration | null;
+    // JSON fallback (deprecated)
+    jsonConfig: string;
+  }>({
     name: "",
     description: "",
     trafficWeight: 50,
     isControl: false,
-    // Configuration fields (type-specific)
+    // Legacy presentation fields
     title: "",
     ctaText: "",
     ctaLink: "",
     secondaryCtaText: "",
     secondaryCtaLink: "",
-    buttonVariant: "default" as string,
+    buttonVariant: "default",
     imageName: "",
-    // JSON fallback for unsupported types
+    // Structured configuration
+    configuration: null,
+    // JSON fallback
     jsonConfig: "",
   });
 
@@ -87,18 +108,39 @@ export default function AdminABTesting() {
   const [isEditVariantDialogOpen, setIsEditVariantDialogOpen] = useState(false);
   const [isEditWarningDialogOpen, setIsEditWarningDialogOpen] = useState(false);
   const [editingVariant, setEditingVariant] = useState<AbTestVariant | null>(null);
-  const [editVariant, setEditVariant] = useState({
+  const [editVariant, setEditVariant] = useState<{
+    name: string;
+    description: string;
+    trafficWeight: number;
+    isControl: boolean;
+    // Legacy presentation fields
+    title: string;
+    ctaText: string;
+    ctaLink: string;
+    secondaryCtaText: string;
+    secondaryCtaLink: string;
+    buttonVariant: string;
+    imageName: string;
+    // Structured configuration for visual editors
+    configuration: AbTestVariantConfiguration | null;
+    // JSON fallback (deprecated)
+    jsonConfig: string;
+  }>({
     name: "",
     description: "",
     trafficWeight: 50,
     isControl: false,
+    // Legacy presentation fields
     title: "",
     ctaText: "",
     ctaLink: "",
     secondaryCtaText: "",
     secondaryCtaLink: "",
-    buttonVariant: "default" as string,
+    buttonVariant: "default",
     imageName: "",
+    // Structured configuration
+    configuration: null,
+    // JSON fallback
     jsonConfig: "",
   });
 
@@ -330,11 +372,14 @@ export default function AdminABTesting() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/ab-tests"] });
       setIsVariantDialogOpen(false);
+      // Reset state with default config for current test type
+      const defaultConfig = selectedTest ? createDefaultConfigForType(selectedTest.type) : null;
       setNewVariant({
         name: "",
         description: "",
         trafficWeight: 50,
         isControl: false,
+        // Legacy presentation fields
         title: "",
         ctaText: "",
         ctaLink: "",
@@ -342,6 +387,9 @@ export default function AdminABTesting() {
         secondaryCtaLink: "",
         buttonVariant: "default",
         imageName: "",
+        // Structured configuration
+        configuration: defaultConfig,
+        // JSON fallback
         jsonConfig: "",
       });
       toast({
@@ -571,8 +619,11 @@ export default function AdminABTesting() {
 
     let config: Record<string, any> = {};
     
-    // For types with custom forms, build from individual fields
-    if (selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') {
+    const definition = getConfigDefinition(selectedTest.type);
+    
+    // For types using legacy form fields, build presentation config
+    if (definition?.usesLegacyForms) {
+      config.kind = 'presentation';
       if (newVariant.title) config.title = newVariant.title;
       if (newVariant.ctaText) config.ctaText = newVariant.ctaText;
       if (newVariant.ctaLink) config.ctaLink = newVariant.ctaLink;
@@ -580,20 +631,9 @@ export default function AdminABTesting() {
       if (newVariant.secondaryCtaLink) config.secondaryCtaLink = newVariant.secondaryCtaLink;
       if (newVariant.buttonVariant && newVariant.buttonVariant !== "default") config.buttonVariant = newVariant.buttonVariant;
       if (newVariant.imageName) config.imageName = newVariant.imageName;
-    } else {
-      // For other types, parse JSON config
-      if (newVariant.jsonConfig.trim()) {
-        try {
-          config = JSON.parse(newVariant.jsonConfig);
-        } catch (error) {
-          toast({
-            title: "Invalid JSON",
-            description: "Configuration must be valid JSON.",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
+    } else if (newVariant.configuration) {
+      // For visual editor types, use the configuration object directly
+      config = newVariant.configuration;
     }
 
     createVariantMutation.mutate({
@@ -613,7 +653,7 @@ export default function AdminABTesting() {
     
     setEditingVariant(variant);
     
-    // Parse configuration from variant
+    // Parse configuration from variant (handle legacy string JSON)
     let config = variant.configuration as any;
     if (typeof config === 'string') {
       try {
@@ -623,12 +663,25 @@ export default function AdminABTesting() {
       }
     }
     
+    const definition = getConfigDefinition(selectedTest.type);
+    let hydratedConfiguration: AbTestVariantConfiguration | null = null;
+    
+    // For visual editor types, use config directly (with kind discriminator)
+    if (definition && !definition.usesLegacyForms && config) {
+      // Ensure config has correct kind field
+      if (!config.kind) {
+        config.kind = selectedTest.type === 'card_order' ? 'card_order' : 'layout';
+      }
+      hydratedConfiguration = config;
+    }
+    
     // Populate edit form with variant data
     setEditVariant({
       name: variant.name,
       description: variant.description || "",
       trafficWeight: variant.trafficWeight,
       isControl: variant.isControl,
+      // Legacy presentation fields (for hero, cta, messaging)
       title: config?.title || "",
       ctaText: config?.ctaText || "",
       ctaLink: config?.ctaLink || "",
@@ -636,9 +689,10 @@ export default function AdminABTesting() {
       secondaryCtaLink: config?.secondaryCtaLink || "",
       buttonVariant: config?.buttonVariant || "default",
       imageName: config?.imageName || "",
-      jsonConfig: (selectedTest.type !== 'hero' && selectedTest.type !== 'cta' && selectedTest.type !== 'messaging') 
-        ? JSON.stringify(config || {}, null, 2) 
-        : "",
+      // Structured configuration for visual editors
+      configuration: hydratedConfiguration,
+      // JSON fallback (deprecated, only for legacy data)
+      jsonConfig: "",
     });
     
     // Show warning dialog for active tests, otherwise open edit dialog directly
@@ -682,8 +736,11 @@ export default function AdminABTesting() {
 
     let config: Record<string, any> = {};
     
-    // Build configuration from form
-    if (selectedTest.type === 'hero' || selectedTest.type === 'cta' || selectedTest.type === 'messaging') {
+    const definition = getConfigDefinition(selectedTest.type);
+    
+    // For types using legacy form fields, build presentation config
+    if (definition?.usesLegacyForms) {
+      config.kind = 'presentation';
       if (editVariant.title) config.title = editVariant.title;
       if (editVariant.ctaText) config.ctaText = editVariant.ctaText;
       if (editVariant.ctaLink) config.ctaLink = editVariant.ctaLink;
@@ -691,19 +748,9 @@ export default function AdminABTesting() {
       if (editVariant.secondaryCtaLink) config.secondaryCtaLink = editVariant.secondaryCtaLink;
       if (editVariant.buttonVariant && editVariant.buttonVariant !== "default") config.buttonVariant = editVariant.buttonVariant;
       if (editVariant.imageName) config.imageName = editVariant.imageName;
-    } else {
-      if (editVariant.jsonConfig.trim()) {
-        try {
-          config = JSON.parse(editVariant.jsonConfig);
-        } catch (error) {
-          toast({
-            title: "Invalid JSON",
-            description: "Configuration must be valid JSON.",
-            variant: "destructive",
-          });
-          return;
-        }
-      }
+    } else if (editVariant.configuration) {
+      // For visual editor types, use the configuration object directly
+      config = editVariant.configuration;
     }
 
     updateVariantMutation.mutate({
@@ -948,6 +995,26 @@ export default function AdminABTesting() {
                         variant="outline"
                         onClick={() => {
                           setSelectedTest(test);
+                          // Initialize configuration based on test type
+                          const defaultConfig = createDefaultConfigForType(test.type);
+                          setNewVariant({
+                            name: "",
+                            description: "",
+                            trafficWeight: 50,
+                            isControl: false,
+                            // Legacy presentation fields
+                            title: "",
+                            ctaText: "",
+                            ctaLink: "",
+                            secondaryCtaText: "",
+                            secondaryCtaLink: "",
+                            buttonVariant: "default",
+                            imageName: "",
+                            // Initialize structured config for visual editors
+                            configuration: defaultConfig,
+                            // JSON fallback
+                            jsonConfig: "",
+                          });
                           setIsVariantDialogOpen(true);
                         }}
                         data-testid={`button-add-variant-${test.id}`}
@@ -1579,31 +1646,24 @@ export default function AdminABTesting() {
                 </>
               )}
 
-              {/* JSON fallback for other test types */}
-              {selectedTest?.type !== 'hero' && selectedTest?.type !== 'cta' && selectedTest?.type !== 'messaging' && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <FileJson className="w-3.5 h-3.5 text-muted-foreground" />
-                    <Label htmlFor="variant-json" className="text-sm font-medium">Advanced Configuration</Label>
-                  </div>
-                  <Textarea
-                    id="variant-json"
-                    value={newVariant.jsonConfig}
-                    onChange={(e) => setNewVariant({ ...newVariant, jsonConfig: e.target.value })}
-                    rows={6}
-                    placeholder='{"cardOrder": ["service-1", "service-2", "service-3"]}'
-                    className="font-mono text-xs"
-                    data-testid="input-variant-json"
-                  />
-                  <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-md">
-                    <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <p className="font-medium text-foreground">JSON format required</p>
-                      <p>Provide settings for {testTypeLabels[selectedTest?.type || ''] || 'this test type'} as a valid JSON object</p>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* Visual editors for card_order and layout tests */}
+              {selectedTest && (() => {
+                const definition = getConfigDefinition(selectedTest.type);
+                
+                // If type uses visual editor, render it
+                if (definition && !definition.usesLegacyForms && definition.component) {
+                  const EditorComponent = definition.component;
+                  return (
+                    <EditorComponent
+                      value={newVariant.configuration as any}
+                      onChange={(config) => setNewVariant({ ...newVariant, configuration: config })}
+                      errors={{}}
+                    />
+                  );
+                }
+                
+                return null;
+              })()}
             </div>
             <div className="flex items-center gap-2">
               <Switch
@@ -1805,29 +1865,24 @@ export default function AdminABTesting() {
                   </>
                 )}
 
-                {selectedTest.type !== 'hero' && selectedTest.type !== 'cta' && selectedTest.type !== 'messaging' && (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <FileJson className="w-3.5 h-3.5 text-muted-foreground" />
-                      <Label htmlFor="edit-variant-json" className="text-sm font-medium">Advanced Configuration</Label>
-                    </div>
-                    <Textarea
-                      id="edit-variant-json"
-                      value={editVariant.jsonConfig}
-                      onChange={(e) => setEditVariant({ ...editVariant, jsonConfig: e.target.value })}
-                      rows={6}
-                      className="font-mono text-xs"
-                      data-testid="input-edit-variant-json"
-                    />
-                    <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-md">
-                      <AlertCircle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
-                      <div className="text-xs text-muted-foreground space-y-1">
-                        <p className="font-medium text-foreground">JSON format required</p>
-                        <p>Provide settings for {testTypeLabels[selectedTest.type || ''] || 'this test type'} as a valid JSON object</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {/* Visual editors for card_order and layout tests */}
+                {(() => {
+                  const definition = getConfigDefinition(selectedTest.type);
+                  
+                  // If type uses visual editor, render it
+                  if (definition && !definition.usesLegacyForms && definition.component) {
+                    const EditorComponent = definition.component;
+                    return (
+                      <EditorComponent
+                        value={editVariant.configuration as any}
+                        onChange={(config) => setEditVariant({ ...editVariant, configuration: config })}
+                        errors={{}}
+                      />
+                    );
+                  }
+                  
+                  return null;
+                })()}
               </div>
             )}
 
