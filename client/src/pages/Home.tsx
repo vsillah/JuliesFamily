@@ -41,6 +41,12 @@ export default function Home() {
   const effectivePersona = persona;
   const effectiveFunnelStage = funnelStage;
 
+  // Fetch hero content to know when it's ready
+  const { data: heroContent, isLoading: heroLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/visible/hero", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
+    enabled: !isPersonaLoading && !!persona,
+  });
+
   // Fetch lead magnet content from database
   const { data: leadMagnets = [] } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/visible/lead_magnet", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
@@ -64,8 +70,8 @@ export default function Home() {
     ...(visibleSections ?? {}),
   };
 
-  // Don't render anything until persona is loaded to prevent any content flash
-  if (isPersonaLoading) {
+  // Don't render anything until persona AND hero content are loaded to prevent any content flash
+  if (isPersonaLoading || heroLoading || !heroContent?.[0]) {
     return null;
   }
 
