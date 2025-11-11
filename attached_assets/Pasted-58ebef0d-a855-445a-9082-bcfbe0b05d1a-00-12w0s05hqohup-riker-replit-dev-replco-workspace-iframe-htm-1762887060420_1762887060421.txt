@@ -1,0 +1,372 @@
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/workspace_iframe.html?initialPath=%2F&id=%3Ar25%3A:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+recaptcha__en.js:1541 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+ZL.l.ZL.HB @ recaptcha__en.js:1541
+(anonymous) @ recaptcha__en.js:1545
+(anonymous) @ recaptcha__en.js:130
+el @ recaptcha__en.js:793
+(anonymous) @ recaptcha__en.js:392
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:739
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:104
+(anonymous) @ recaptcha__en.js:1556
+f.L @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:720
+v.next @ recaptcha__en.js:197
+w @ recaptcha__en.js:559
+Promise.then
+J @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:521
+T @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:187
+MW @ recaptcha__en.js:1014
+O @ recaptcha__en.js:738
+o @ 0eb799b5cc89f147.js:2
+recaptcha__en.js:1541 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+ZL.l.ZL.HB @ recaptcha__en.js:1541
+(anonymous) @ recaptcha__en.js:1545
+(anonymous) @ recaptcha__en.js:130
+el @ recaptcha__en.js:793
+(anonymous) @ recaptcha__en.js:392
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:739
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:104
+(anonymous) @ recaptcha__en.js:1556
+f.L @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:720
+v.next @ recaptcha__en.js:197
+w @ recaptcha__en.js:559
+Promise.then
+J @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:521
+T @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:187
+MW @ recaptcha__en.js:1014
+O @ recaptcha__en.js:738
+o @ 0eb799b5cc89f147.js:2
+recaptcha__en.js:1541 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+ZL.l.ZL.HB @ recaptcha__en.js:1541
+(anonymous) @ recaptcha__en.js:1545
+(anonymous) @ recaptcha__en.js:130
+el @ recaptcha__en.js:793
+(anonymous) @ recaptcha__en.js:392
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:739
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:104
+(anonymous) @ recaptcha__en.js:1556
+f.L @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:720
+v.next @ recaptcha__en.js:197
+w @ recaptcha__en.js:559
+Promise.then
+J @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:521
+T @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:187
+MW @ recaptcha__en.js:1014
+O @ recaptcha__en.js:738
+o @ 0eb799b5cc89f147.js:2
+recaptcha__en.js:1541 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+ZL.l.ZL.HB @ recaptcha__en.js:1541
+(anonymous) @ recaptcha__en.js:1545
+(anonymous) @ recaptcha__en.js:130
+el @ recaptcha__en.js:793
+(anonymous) @ recaptcha__en.js:392
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:739
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:104
+(anonymous) @ recaptcha__en.js:1556
+f.L @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:720
+v.next @ recaptcha__en.js:197
+w @ recaptcha__en.js:559
+Promise.then
+J @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:521
+T @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:187
+MW @ recaptcha__en.js:1014
+O @ recaptcha__en.js:738
+o @ 0eb799b5cc89f147.js:2
+recaptcha__en.js:1541 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+ZL.l.ZL.HB @ recaptcha__en.js:1541
+(anonymous) @ recaptcha__en.js:1545
+(anonymous) @ recaptcha__en.js:130
+el @ recaptcha__en.js:793
+(anonymous) @ recaptcha__en.js:392
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:739
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:104
+(anonymous) @ recaptcha__en.js:1556
+f.L @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:720
+v.next @ recaptcha__en.js:197
+w @ recaptcha__en.js:559
+Promise.then
+J @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:521
+T @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:187
+MW @ recaptcha__en.js:1014
+O @ recaptcha__en.js:738
+o @ 0eb799b5cc89f147.js:2
+recaptcha__en.js:1541 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+ZL.l.ZL.HB @ recaptcha__en.js:1541
+(anonymous) @ recaptcha__en.js:1545
+(anonymous) @ recaptcha__en.js:130
+el @ recaptcha__en.js:793
+(anonymous) @ recaptcha__en.js:392
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:393
+ZL.l.A.xF @ recaptcha__en.js:1547
+o @ 0eb799b5cc89f147.js:2
+setTimeout
+(anonymous) @ 0eb799b5cc89f147.js:2
+(anonymous) @ recaptcha__en.js:575
+(anonymous) @ recaptcha__en.js:689
+(anonymous) @ recaptcha__en.js:739
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:362
+(anonymous) @ recaptcha__en.js:104
+(anonymous) @ recaptcha__en.js:1556
+f.L @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:720
+v.next @ recaptcha__en.js:197
+w @ recaptcha__en.js:559
+Promise.then
+J @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:559
+(anonymous) @ recaptcha__en.js:521
+T @ recaptcha__en.js:396
+(anonymous) @ recaptcha__en.js:187
+MW @ recaptcha__en.js:1014
+O @ recaptcha__en.js:738
+o @ 0eb799b5cc89f147.js:2
+chunk-RPCDYKBN.js?v=70695e22:16670 Uncaught TypeError: Cannot read properties of undefined (reading 'some')
+    at useABTestTracking.ts:91:51
+    at Object.view (useABTestTracking.ts:153:7)
+    at Hero.tsx:70:21
+    at commitHookEffectListMount (chunk-RPCDYKBN.js?v=70695e22:16915:34)
+    at commitPassiveMountOnFiber (chunk-RPCDYKBN.js?v=70695e22:18156:19)
+    at commitPassiveMountEffects_complete (chunk-RPCDYKBN.js?v=70695e22:18129:17)
+    at commitPassiveMountEffects_begin (chunk-RPCDYKBN.js?v=70695e22:18119:15)
+    at commitPassiveMountEffects (chunk-RPCDYKBN.js?v=70695e22:18109:11)
+    at flushPassiveEffectsImpl (chunk-RPCDYKBN.js?v=70695e22:19490:11)
+    at flushPassiveEffects (chunk-RPCDYKBN.js?v=70695e22:19447:22)
+(anonymous) @ useABTestTracking.ts:91
+(anonymous) @ useABTestTracking.ts:153
+(anonymous) @ Hero.tsx:70
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=70695e22:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=70695e22:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=70695e22:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=70695e22:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=70695e22:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=70695e22:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=70695e22:19447
+(anonymous) @ chunk-RPCDYKBN.js?v=70695e22:19328
+workLoop @ chunk-RPCDYKBN.js?v=70695e22:197
+flushWork @ chunk-RPCDYKBN.js?v=70695e22:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=70695e22:384
+injected.js:27 The above error occurred in the <Hero> component:
+
+    at Hero (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/Hero.tsx:27:32)
+    at div
+    at Home (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/Home.tsx:52:54)
+    at Route (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=70695e22:323:16)
+    at Switch (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=70695e22:379:17)
+    at Router
+    at PersonaProvider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/contexts/PersonaContext.tsx:59:35)
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=70695e22:38:15)
+    at TooltipProvider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=70695e22:64:5)
+    at QueryClientProvider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=70695e22:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+(anonymous) @ injected.js:27
+logCapturedError @ chunk-RPCDYKBN.js?v=70695e22:14032
+update.callback @ chunk-RPCDYKBN.js?v=70695e22:14052
+callCallback @ chunk-RPCDYKBN.js?v=70695e22:11248
+commitUpdateQueue @ chunk-RPCDYKBN.js?v=70695e22:11265
+commitLayoutEffectOnFiber @ chunk-RPCDYKBN.js?v=70695e22:17093
+commitLayoutMountEffects_complete @ chunk-RPCDYKBN.js?v=70695e22:17980
+commitLayoutEffects_begin @ chunk-RPCDYKBN.js?v=70695e22:17969
+commitLayoutEffects @ chunk-RPCDYKBN.js?v=70695e22:17920
+commitRootImpl @ chunk-RPCDYKBN.js?v=70695e22:19353
+commitRoot @ chunk-RPCDYKBN.js?v=70695e22:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=70695e22:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=70695e22:9119
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=70695e22:19506
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=70695e22:19447
+(anonymous) @ chunk-RPCDYKBN.js?v=70695e22:19328
+workLoop @ chunk-RPCDYKBN.js?v=70695e22:197
+flushWork @ chunk-RPCDYKBN.js?v=70695e22:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=70695e22:384
+chunk-RPCDYKBN.js?v=70695e22:9129 Uncaught TypeError: Cannot read properties of undefined (reading 'some')
+    at useABTestTracking.ts:91:51
+    at Object.view (useABTestTracking.ts:153:7)
+    at Hero.tsx:70:21
+    at commitHookEffectListMount (chunk-RPCDYKBN.js?v=70695e22:16915:34)
+    at commitPassiveMountOnFiber (chunk-RPCDYKBN.js?v=70695e22:18156:19)
+    at commitPassiveMountEffects_complete (chunk-RPCDYKBN.js?v=70695e22:18129:17)
+    at commitPassiveMountEffects_begin (chunk-RPCDYKBN.js?v=70695e22:18119:15)
+    at commitPassiveMountEffects (chunk-RPCDYKBN.js?v=70695e22:18109:11)
+    at flushPassiveEffectsImpl (chunk-RPCDYKBN.js?v=70695e22:19490:11)
+    at flushPassiveEffects (chunk-RPCDYKBN.js?v=70695e22:19447:22)
+(anonymous) @ useABTestTracking.ts:91
+(anonymous) @ useABTestTracking.ts:153
+(anonymous) @ Hero.tsx:70
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=70695e22:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=70695e22:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=70695e22:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=70695e22:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=70695e22:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=70695e22:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=70695e22:19447
+(anonymous) @ chunk-RPCDYKBN.js?v=70695e22:19328
+workLoop @ chunk-RPCDYKBN.js?v=70695e22:197
+flushWork @ chunk-RPCDYKBN.js?v=70695e22:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=70695e22:384
