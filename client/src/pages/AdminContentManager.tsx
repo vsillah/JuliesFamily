@@ -538,10 +538,13 @@ export default function AdminContentManager() {
       });
     },
     onSuccess: () => {
+      // Invalidate all content-related queries
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
-          return key?.startsWith("/api/content/type");
+          return key?.startsWith("/api/content/type") || 
+                 key?.startsWith("/api/content/") ||
+                 key?.startsWith("/api/student/submissions");
         }
       });
       toast({
@@ -567,10 +570,13 @@ export default function AdminContentManager() {
       });
     },
     onSuccess: () => {
+      // Invalidate all content-related queries
       queryClient.invalidateQueries({ 
         predicate: (query) => {
           const key = query.queryKey[0] as string;
-          return key?.startsWith("/api/content/type");
+          return key?.startsWith("/api/content/type") || 
+                 key?.startsWith("/api/content/") ||
+                 key?.startsWith("/api/student/submissions");
         }
       });
       toast({
