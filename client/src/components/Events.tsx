@@ -31,8 +31,8 @@ export default function Events() {
   const { persona, funnelStage } = usePersona();
   const headline = headlineContent[persona || "donor"];
   
-  // Check for active A/B test for card order with integrated tracking
-  const { tracking, hasTest } = useABTestTracking('service_card_order', { 
+  // Check for active A/B test for event card order with integrated tracking
+  const { tracking, hasTest } = useABTestTracking('event_card_order', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
   });
@@ -100,9 +100,9 @@ export default function Events() {
               endTime={(event.metadata as any)?.endTime}
               allowRegistration={(event.metadata as any)?.allowRegistration || false}
               position={index}
-              onCardView={(pos) => hasTest && tracking.card.view(event.id, event.title, pos, events.length)}
-              onCardClick={(pos, actionType) => hasTest && tracking.card.click(event.id, event.title, pos, events.length)}
-              onCardEngage={(pos, dwellTime) => hasTest && tracking.card.dwell(event.id, event.title, pos, events.length, dwellTime)}
+              onCardView={(pos) => tracking.card.view(event.id, event.title, pos, events.length)}
+              onCardClick={(pos, actionType) => tracking.card.click(event.id, event.title, pos, events.length)}
+              onCardEngage={(pos, dwellTime) => tracking.card.dwell(event.id, event.title, pos, events.length, dwellTime)}
             />
           ))}
         </div>

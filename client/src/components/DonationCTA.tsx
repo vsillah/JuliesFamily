@@ -25,14 +25,14 @@ export default function DonationCTA() {
     funnelStage: funnelStage || undefined 
   });
   
-  // Track CTA visibility (only when test is active)
+  // Track CTA visibility - trackOnce will queue until test & variant are ready
+  // No guards needed here - trackOnce handles queueing and replay automatically
   const { ref: ctaRef, isVisible, dwellTime, hasEngaged } = useViewportTracking({
     threshold: 0.5,
     dwellThreshold: METRIC_THRESHOLDS.CTA_DWELL_TIME,
     onEnterViewport: () => {
-      if (hasTest) {
-        tracking.cta.view('donation-section');
-      }
+      // Call unconditionally - trackOnce queues if test/variant not ready yet
+      tracking.cta.view('donation-section');
     },
   });
   
@@ -200,9 +200,11 @@ export default function DonationCTA() {
             size="lg" 
             data-testid="button-donate-cta"
             onClick={() => {
-              if (hasTest) {
+              // Guard on abVariant to prevent null.id errors, compute ID lazily
+              if (abVariant) {
                 const ctaText = (currentCta?.metadata as any)?.primaryButton || "Make a Donation";
-                tracking.cta.click('donation-primary', ctaText, '/donate');
+                // Variant-specific ID for attribution - variant is always loaded by click time
+                tracking.cta.click(`${abVariant.id}-primary`, ctaText, '/donate');
               }
             }}
           >
@@ -214,9 +216,11 @@ export default function DonationCTA() {
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
             data-testid="button-volunteer"
             onClick={() => {
-              if (hasTest) {
+              // Guard on abVariant to prevent null.id errors, compute ID lazily
+              if (abVariant) {
                 const ctaText = (currentCta?.metadata as any)?.secondaryButton || "View Impact Report";
-                tracking.cta.click('donation-secondary', ctaText, '/impact');
+                // Variant-specific ID for attribution - variant is always loaded by click time
+                tracking.cta.click(`${abVariant.id}-secondary`, ctaText, '/impact');
               }
             }}
           >

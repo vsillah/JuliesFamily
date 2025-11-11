@@ -131,9 +131,9 @@ export default function Services() {
               imageName={service.imageName || ""}
               onLearnMore={() => handleLearnMore(service.title)}
               position={index}
-              onCardView={(pos) => hasTest && tracking.card.view(service.id, service.title, pos, services.length)}
-              onCardClick={(pos, actionType) => hasTest && tracking.card.click(service.id, service.title, pos, services.length)}
-              onCardEngage={(pos, dwellTime) => hasTest && tracking.card.dwell(service.id, service.title, pos, services.length, dwellTime)}
+              onCardView={(pos) => tracking.card.view(service.id, service.title, pos, services.length)}
+              onCardClick={(pos, actionType) => tracking.card.click(service.id, service.title, pos, services.length)}
+              onCardEngage={(pos, dwellTime) => tracking.card.dwell(service.id, service.title, pos, services.length, dwellTime)}
             />
           ))}
         </div>
