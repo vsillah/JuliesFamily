@@ -47,6 +47,13 @@ export default function Home() {
     enabled: !isPersonaLoading && !!persona,
   });
 
+  // Also fetch hero image to ensure it's ready before rendering
+  const heroImageName = heroContent?.[0]?.imageName || "hero-volunteer-student";
+  const { data: heroImageAsset, isLoading: heroImageLoading } = useQuery({
+    queryKey: ["/api/images/by-name/" + heroImageName],
+    enabled: !isPersonaLoading && !!heroContent?.[0],
+  });
+
   // Fetch lead magnet content from database
   const { data: leadMagnets = [] } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/visible/lead_magnet", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
@@ -70,8 +77,11 @@ export default function Home() {
     ...(visibleSections ?? {}),
   };
 
-  // Don't render anything until persona AND hero content are loaded to prevent any content flash
-  if (isPersonaLoading || heroLoading || !heroContent?.[0]) {
+  // Don't render anything until persona and hero content queries complete (to prevent flash)
+  // Note: We wait for loading to finish, not for content to exist (it might not exist for some personas)
+  const isContentReady = !isPersonaLoading && !heroLoading && (!heroImageLoading || !heroContent?.[0]);
+  
+  if (!isContentReady) {
     return null;
   }
 
