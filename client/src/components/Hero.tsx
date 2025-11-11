@@ -182,7 +182,6 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
       })
     : "";
 
-
   // Don't render hero until persona is loaded and hero content is available
   // This prevents flash of default content without jarring placeholder
   if (isPersonaLoading || !currentHero) {
@@ -197,7 +196,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
       }}
     >
       {/* Layer 1: Background Image (renders first) */}
-      <div className="absolute inset-0 z-[1]">
+      <div className="absolute inset-0 z-0">
         {heroImageUrl ? (
           <img
             src={heroImageUrl}
