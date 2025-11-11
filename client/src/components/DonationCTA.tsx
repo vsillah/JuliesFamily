@@ -3,8 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
-import { useABTest } from "@/hooks/useABTest";
+import { useABTestTracking } from "@/hooks/useABTestTracking";
+import { useViewportTracking } from "@/hooks/useViewportTracking";
 import { applyABVariantOverrides } from "@/lib/abTestUtils";
+import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
 import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 export default function DonationCTA() {
@@ -17,10 +19,21 @@ export default function DonationCTA() {
   const sectionRef = useRef<HTMLElement>(null);
   const animationFrameRef = useRef<number>();
   
-  // Check for active A/B test for CTA content
-  const { variant: abVariant, configuration: abConfig, trackConversion } = useABTest('cta_variation', { 
+  // Check for active A/B test for CTA content with integrated tracking
+  const { variant: abVariant, configuration: abConfig, isLoading: abTestLoading, hasTest, tracking } = useABTestTracking('cta_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
+  });
+  
+  // Track CTA visibility (only when test is active)
+  const { ref: ctaRef, isVisible, dwellTime, hasEngaged } = useViewportTracking({
+    threshold: 0.5,
+    dwellThreshold: METRIC_THRESHOLDS.CTA_DWELL_TIME,
+    onEnterViewport: () => {
+      if (hasTest) {
+        tracking.cta.view('donation-section');
+      }
+    },
   });
   
   // Fetch visible CTA content filtered by persona + journey stage + passion tags
@@ -124,7 +137,15 @@ export default function DonationCTA() {
     : "";
 
   return (
-    <section id="donation" ref={sectionRef} className="relative py-16 sm:py-20 overflow-hidden">
+    <section 
+      id="donation" 
+      ref={(node) => {
+        sectionRef.current = node;
+        ctaRef.current = node;
+      }}
+      className="relative py-16 sm:py-20 overflow-hidden"
+      data-testid="section-donation-cta"
+    >
       {/* Layer 1: Background Image (renders first) */}
       <div className="absolute inset-0">
         {ctaImageUrl ? (
@@ -179,8 +200,9 @@ export default function DonationCTA() {
             size="lg" 
             data-testid="button-donate-cta"
             onClick={() => {
-              if (abVariant) {
-                trackConversion('primary_button_click');
+              if (hasTest) {
+                const ctaText = (currentCta?.metadata as any)?.primaryButton || "Make a Donation";
+                tracking.cta.click('donation-primary', ctaText, '/donate');
               }
             }}
           >
@@ -192,8 +214,9 @@ export default function DonationCTA() {
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
             data-testid="button-volunteer"
             onClick={() => {
-              if (abVariant) {
-                trackConversion('secondary_button_click');
+              if (hasTest) {
+                const ctaText = (currentCta?.metadata as any)?.secondaryButton || "View Impact Report";
+                tracking.cta.click('donation-secondary', ctaText, '/impact');
               }
             }}
           >

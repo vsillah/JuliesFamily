@@ -2,6 +2,9 @@ import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import ParallaxImage from "./ParallaxImage";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
+import { useViewportTracking } from "@/hooks/useViewportTracking";
+import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
+import { useEffect } from "react";
 
 interface ServiceCardProps {
   number: string;
@@ -9,6 +12,10 @@ interface ServiceCardProps {
   description: string;
   imageName: string;
   onLearnMore?: () => void;
+  position?: number;
+  onCardView?: (position: number) => void;
+  onCardClick?: (position: number, actionType: string) => void;
+  onCardEngage?: (position: number, dwellTime: number) => void;
 }
 
 export default function ServiceCard({
@@ -17,6 +24,10 @@ export default function ServiceCard({
   description,
   imageName,
   onLearnMore,
+  position = 0,
+  onCardView,
+  onCardClick,
+  onCardEngage,
 }: ServiceCardProps) {
   const { data: imageAsset, isLoading } = useCloudinaryImage(imageName);
 
@@ -27,8 +38,34 @@ export default function ServiceCard({
       })
     : "";
 
+  // Track card visibility and engagement
+  const { ref: cardRef, isVisible, dwellTime, hasEngaged } = useViewportTracking({
+    threshold: 0.5,
+    dwellThreshold: METRIC_THRESHOLDS.CARD_DWELL_TIME,
+    onEnterViewport: () => {
+      if (onCardView) {
+        onCardView(position);
+      }
+    },
+    onDwellThresholdReached: (dwell) => {
+      if (onCardEngage) {
+        onCardEngage(position, dwell);
+      }
+    },
+  });
+
+  const handleClick = (actionType: string) => {
+    if (onCardClick) {
+      onCardClick(position, actionType);
+    }
+  };
+
   return (
-    <Card className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105">
+    <Card 
+      ref={cardRef}
+      className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105"
+      data-testid={`card-service-${position}`}
+    >
       <div className="relative aspect-[4/3] overflow-hidden">
         {isLoading ? (
           <div className="w-full h-full bg-muted animate-pulse" />
@@ -47,7 +84,12 @@ export default function ServiceCard({
         </h3>
         <p className="text-muted-foreground leading-relaxed mb-6">{description}</p>
         <button
-          onClick={onLearnMore}
+          onClick={() => {
+            handleClick('learn-more');
+            if (onLearnMore) {
+              onLearnMore();
+            }
+          }}
           className="inline-flex items-center gap-2 text-primary hover:gap-3 transition-all font-medium"
           data-testid={`link-learn-more-${title.toLowerCase().replace(/\s+/g, '-')}`}
         >

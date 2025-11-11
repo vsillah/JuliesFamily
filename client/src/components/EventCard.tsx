@@ -5,6 +5,8 @@ import { Calendar, MapPin, UserPlus } from "lucide-react";
 import ParallaxImage from "./ParallaxImage";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import EventRegistrationForm from "./EventRegistrationForm";
+import { useViewportTracking } from "@/hooks/useViewportTracking";
+import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
 import "add-to-calendar-button";
 
 interface EventCardProps {
@@ -18,6 +20,10 @@ interface EventCardProps {
   startTime?: string;
   endTime?: string;
   allowRegistration?: boolean;
+  position?: number;
+  onCardView?: (position: number) => void;
+  onCardClick?: (position: number, actionType: string) => void;
+  onCardEngage?: (position: number, dwellTime: number) => void;
 }
 
 export default function EventCard({ 
@@ -31,9 +37,35 @@ export default function EventCard({
   startTime, 
   endTime,
   allowRegistration = false,
+  position = 0,
+  onCardView,
+  onCardClick,
+  onCardEngage,
 }: EventCardProps) {
   const { data: imageAsset, isLoading } = useCloudinaryImage(resolvedImageUrl ? null : imageName);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+
+  // Track card visibility and engagement
+  const { ref: cardRef, isVisible, dwellTime, hasEngaged } = useViewportTracking({
+    threshold: 0.5,
+    dwellThreshold: METRIC_THRESHOLDS.CARD_DWELL_TIME,
+    onEnterViewport: () => {
+      if (onCardView) {
+        onCardView(position);
+      }
+    },
+    onDwellThresholdReached: (dwell) => {
+      if (onCardEngage) {
+        onCardEngage(position, dwell);
+      }
+    },
+  });
+
+  const handleClick = (actionType: string) => {
+    if (onCardClick) {
+      onCardClick(position, actionType);
+    }
+  };
 
   const imageUrl = resolvedImageUrl
     ? getOptimizedUrl(resolvedImageUrl, {
@@ -73,7 +105,11 @@ export default function EventCard({
   };
 
   return (
-    <Card className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105">
+    <Card 
+      ref={cardRef}
+      className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105"
+      data-testid={`card-event-${position}`}
+    >
       <div className="relative aspect-[16/9] overflow-hidden">
         {isLoading ? (
           <div className="w-full h-full bg-muted animate-pulse" />
@@ -100,7 +136,10 @@ export default function EventCard({
           {allowRegistration && hasValidCalendarData() && eventId && (
             <Button
               className="w-full"
-              onClick={() => setShowRegistrationForm(true)}
+              onClick={() => {
+                handleClick('register');
+                setShowRegistrationForm(true);
+              }}
               data-testid="button-register-event"
             >
               <UserPlus className="mr-2 h-4 w-4" />

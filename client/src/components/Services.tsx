@@ -3,6 +3,7 @@ import ServiceCard from "./ServiceCard";
 import ProgramDetailDialog from "./ProgramDetailDialog";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useQuery } from "@tanstack/react-query";
+import { useABTestTracking } from "@/hooks/useABTestTracking";
 import type { ContentItem } from "@shared/schema";
 import type { Persona } from "@/contexts/PersonaContext";
 
@@ -32,9 +33,15 @@ const SERVICE_TO_PROGRAM_MAP: Record<string, string> = {
 };
 
 export default function Services() {
-  const { persona } = usePersona();
+  const { persona, funnelStage } = usePersona();
   const [selectedProgram, setSelectedProgram] = useState<ProgramDetail | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Check for active A/B test for card order with integrated tracking
+  const { tracking, hasTest } = useABTestTracking('service_card_order', { 
+    persona: persona || undefined, 
+    funnelStage: funnelStage || undefined 
+  });
   
   const { data: allServices = [], isLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/service"],
@@ -123,6 +130,10 @@ export default function Services() {
               description={service.description || ""}
               imageName={service.imageName || ""}
               onLearnMore={() => handleLearnMore(service.title)}
+              position={index}
+              onCardView={(pos) => hasTest && tracking.card.view(service.id, service.title, pos, services.length)}
+              onCardClick={(pos, actionType) => hasTest && tracking.card.click(service.id, service.title, pos, services.length)}
+              onCardEngage={(pos, dwellTime) => hasTest && tracking.card.dwell(service.id, service.title, pos, services.length, dwellTime)}
             />
           ))}
         </div>

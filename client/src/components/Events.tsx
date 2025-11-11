@@ -1,6 +1,7 @@
 import EventCard from "./EventCard";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useQuery } from "@tanstack/react-query";
+import { useABTestTracking } from "@/hooks/useABTestTracking";
 import type { ContentItemWithResolvedImage } from "@shared/schema";
 
 const headlineContent: Record<string, { title: string; description: string }> = {
@@ -27,8 +28,14 @@ const headlineContent: Record<string, { title: string; description: string }> = 
 };
 
 export default function Events() {
-  const { persona } = usePersona();
+  const { persona, funnelStage } = usePersona();
   const headline = headlineContent[persona || "donor"];
+  
+  // Check for active A/B test for card order with integrated tracking
+  const { tracking, hasTest } = useABTestTracking('service_card_order', { 
+    persona: persona || undefined, 
+    funnelStage: funnelStage || undefined 
+  });
   
   const { data: allEvents = [], isLoading } = useQuery<ContentItemWithResolvedImage[]>({
     queryKey: ["/api/content/type/event"],
@@ -79,7 +86,7 @@ export default function Events() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {events.map((event) => (
+          {events.map((event, index) => (
             <EventCard 
               key={event.id}
               eventId={event.id}
@@ -92,6 +99,10 @@ export default function Events() {
               startTime={(event.metadata as any)?.startTime}
               endTime={(event.metadata as any)?.endTime}
               allowRegistration={(event.metadata as any)?.allowRegistration || false}
+              position={index}
+              onCardView={(pos) => hasTest && tracking.card.view(event.id, event.title, pos, events.length)}
+              onCardClick={(pos, actionType) => hasTest && tracking.card.click(event.id, event.title, pos, events.length)}
+              onCardEngage={(pos, dwellTime) => hasTest && tracking.card.dwell(event.id, event.title, pos, events.length, dwellTime)}
             />
           ))}
         </div>
