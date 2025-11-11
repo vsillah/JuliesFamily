@@ -64,14 +64,9 @@ export default function Home() {
     ...(visibleSections ?? {}),
   };
 
-  // Don't render page content until persona is loaded to prevent any content flash
+  // Don't render anything until persona is loaded to prevent any content flash
   if (isPersonaLoading) {
-    return (
-      <div className="min-h-screen">
-        <SchemaMarkup />
-        <Navigation heroImageLoaded={false} />
-      </div>
-    );
+    return null;
   }
 
   return (
