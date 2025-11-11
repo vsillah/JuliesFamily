@@ -49,8 +49,9 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   const isReady = !contentLoading && !abTestLoading;
   
   // Apply A/B test variant overrides if active test exists
-  const currentHero = baseHero && isReady
-    ? applyABVariantOverrides(baseHero, abConfig as AbTestVariantConfiguration | null)
+  // IMPORTANT: Show base hero while A/B test is loading to prevent blank screen
+  const currentHero = baseHero 
+    ? (isReady ? applyABVariantOverrides(baseHero, abConfig as AbTestVariantConfiguration | null) : baseHero)
     : undefined;
   
   // Diagnostic logging for A/B test debugging (development only)
