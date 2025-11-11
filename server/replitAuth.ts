@@ -72,7 +72,9 @@ async function upsertUser(
   const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(' ')[0];
   const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(' ')[1];
   const persona = claims["persona"]; // Extract persona if provided (used for testing)
-  const role = claims["role"]; // Extract role if provided (only used in development/test)
+  // Extract role if provided (only used in development/test)
+  // Support both "role" (singular string) and "roles" (array - take first element)
+  const role = claims["role"] || (Array.isArray(claims["roles"]) ? claims["roles"][0] : claims["roles"]);
   
   console.log("[OIDC Claims] Extracted data:", {
     sub: claims["sub"],
