@@ -27,12 +27,23 @@ export default function AdminABTesting() {
   const { toast } = useToast();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isVariantDialogOpen, setIsVariantDialogOpen] = useState(false);
   const [selectedTest, setSelectedTest] = useState<AbTest | null>(null);
 
   // New test form
   const [newTest, setNewTest] = useState({
+    name: "",
+    description: "",
+    type: "card_order" as string,
+    targetPersona: "all" as string,
+    targetFunnelStage: "all" as string,
+    trafficAllocation: 100,
+  });
+
+  // Edit test form
+  const [editTest, setEditTest] = useState({
     name: "",
     description: "",
     type: "card_order" as string,
@@ -227,6 +238,28 @@ export default function AdminABTesting() {
     },
   });
 
+  // Edit test mutation
+  const editTestMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      return await apiRequest("PATCH", `/api/ab-tests/${id}`, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/ab-tests"] });
+      setIsEditDialogOpen(false);
+      toast({
+        title: "Test updated",
+        description: "A/B test has been successfully updated.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update A/B test.",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete test mutation
   const deleteTestMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -291,6 +324,34 @@ export default function AdminABTesting() {
       targetFunnelStage: newTest.targetFunnelStage === "all" ? null : newTest.targetFunnelStage,
     };
     createTestMutation.mutate(testData);
+  };
+
+  const handleEditTest = () => {
+    if (!selectedTest) return;
+    
+    // Convert "all" values to null for the backend
+    const testData = {
+      name: editTest.name,
+      description: editTest.description,
+      type: editTest.type,
+      targetPersona: editTest.targetPersona === "all" ? null : editTest.targetPersona,
+      targetFunnelStage: editTest.targetFunnelStage === "all" ? null : editTest.targetFunnelStage,
+      trafficAllocation: editTest.trafficAllocation,
+    };
+    editTestMutation.mutate({ id: selectedTest.id, data: testData });
+  };
+
+  const openEditDialog = (test: AbTest) => {
+    setSelectedTest(test);
+    setEditTest({
+      name: test.name,
+      description: test.description || "",
+      type: test.type,
+      targetPersona: test.targetPersona || "all",
+      targetFunnelStage: test.targetFunnelStage || "all",
+      trafficAllocation: test.trafficAllocation || 100,
+    });
+    setIsEditDialogOpen(true);
   };
 
   const handleCreateVariant = () => {
@@ -537,6 +598,15 @@ export default function AdminABTesting() {
                       <Button
                         size="sm"
                         variant="outline"
+                        onClick={() => openEditDialog(test)}
+                        data-testid={`button-edit-${test.id}`}
+                      >
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
                         onClick={() => {
                           setSelectedTest(test);
                           setIsVariantDialogOpen(true);
@@ -688,6 +758,127 @@ export default function AdminABTesting() {
                 data-testid="button-submit-create"
               >
                 {createTestMutation.isPending ? "Creating..." : "Create Test"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Test Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-edit-test">
+          <DialogHeader>
+            <DialogTitle>Edit A/B Test</DialogTitle>
+            <DialogDescription>Update test settings and configuration</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="edit-test-name">Test Name*</Label>
+              <Input
+                id="edit-test-name"
+                value={editTest.name}
+                onChange={(e) => setEditTest({ ...editTest, name: e.target.value })}
+                placeholder="e.g., Service Cards Order Test"
+                data-testid="input-edit-test-name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-test-description">Description</Label>
+              <Textarea
+                id="edit-test-description"
+                value={editTest.description}
+                onChange={(e) => setEditTest({ ...editTest, description: e.target.value })}
+                rows={3}
+                placeholder="What are you testing and why?"
+                data-testid="input-edit-test-description"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-test-type">Test Type*</Label>
+              <Select
+                value={editTest.type}
+                onValueChange={(value) => setEditTest({ ...editTest, type: value })}
+              >
+                <SelectTrigger data-testid="select-edit-test-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="card_order">Card Order</SelectItem>
+                  <SelectItem value="layout">Layout</SelectItem>
+                  <SelectItem value="messaging">Messaging</SelectItem>
+                  <SelectItem value="cta">Call-to-Action</SelectItem>
+                  <SelectItem value="hero">Hero Section</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-test-persona">Target Persona (Optional)</Label>
+                <Select
+                  value={editTest.targetPersona}
+                  onValueChange={(value) => setEditTest({ ...editTest, targetPersona: value })}
+                >
+                  <SelectTrigger data-testid="select-edit-test-persona">
+                    <SelectValue placeholder="All personas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All personas</SelectItem>
+                    <SelectItem value="student">Adult Education Student</SelectItem>
+                    <SelectItem value="provider">Service Provider</SelectItem>
+                    <SelectItem value="parent">Parent</SelectItem>
+                    <SelectItem value="donor">Donor</SelectItem>
+                    <SelectItem value="volunteer">Volunteer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-test-funnel">Target Funnel Stage (Optional)</Label>
+                <Select
+                  value={editTest.targetFunnelStage}
+                  onValueChange={(value) => setEditTest({ ...editTest, targetFunnelStage: value })}
+                >
+                  <SelectTrigger data-testid="select-edit-test-funnel">
+                    <SelectValue placeholder="All stages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All stages</SelectItem>
+                    <SelectItem value="awareness">Awareness (TOFU)</SelectItem>
+                    <SelectItem value="consideration">Consideration (MOFU)</SelectItem>
+                    <SelectItem value="decision">Decision (BOFU)</SelectItem>
+                    <SelectItem value="retention">Retention</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="edit-test-traffic">Traffic Allocation (%)</Label>
+              <Input
+                id="edit-test-traffic"
+                type="number"
+                min="1"
+                max="100"
+                value={editTest.trafficAllocation}
+                onChange={(e) => setEditTest({ ...editTest, trafficAllocation: parseInt(e.target.value) || 100 })}
+                data-testid="input-edit-test-traffic"
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Percentage of matching visitors to include in the test
+              </p>
+            </div>
+            <div className="flex gap-2 justify-end pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+                data-testid="button-cancel-edit"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleEditTest}
+                disabled={editTestMutation.isPending || !editTest.name}
+                data-testid="button-submit-edit"
+              >
+                {editTestMutation.isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>
