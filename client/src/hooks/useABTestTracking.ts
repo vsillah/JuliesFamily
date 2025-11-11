@@ -50,19 +50,31 @@ export function useABTestTracking(testType: string, options?: { persona?: string
   const { test, variant, isAdminPreview, isLoading } = abTest;
   
   // Track which events have already been fired to prevent duplicates
-  const firedEvents = useRef<Set<string>>(new Set());
+  const firedEventsRef = useRef<Set<string>>();
+  if (!firedEventsRef.current) {
+    firedEventsRef.current = new Set();
+  }
+  const firedEvents = firedEventsRef;
   
   // Queue for events that fire before ready to track
-  const pendingEvents = useRef<Array<{ 
+  const pendingEventsRef = useRef<Array<{ 
     key: string; 
     fn: () => Promise<void>;
-  }>([]);
+  }>>();
+  if (!pendingEventsRef.current) {
+    pendingEventsRef.current = [];
+  }
+  const pendingEvents = pendingEventsRef;
   
   // Separate queue for events fired during admin preview
-  const adminSuppressedEvents = useRef<Array<{
+  const adminSuppressedEventsRef = useRef<Array<{
     key: string;
     fn: () => Promise<void>;
-  }>([]);
+  }>>();
+  if (!adminSuppressedEventsRef.current) {
+    adminSuppressedEventsRef.current = [];
+  }
+  const adminSuppressedEvents = adminSuppressedEventsRef;
   
   // Helper to check if we should track (guard against admin preview)
   const shouldTrack = useCallback(() => {
