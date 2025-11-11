@@ -36,27 +36,38 @@ const funnelStageConfigs = [
 
 type FunnelStage = "awareness" | "consideration" | "decision" | "retention";
 
-// Variant Selector for individual A/B tests
-interface VariantSelectorProps {
-  testId: string;
-  testName: string;
-  testType: string;
-  selectedVariantId?: string;
-  onVariantChange: (variantId: string) => void;
+// Unified Variant Selector - only allows ONE variant selection across all tests
+interface UnifiedVariantSelectorProps {
+  activeTests: any[];
+  selectedPersona: string | null;
+  selectedFunnel: string | "none";
+  selectedVariantId: string | undefined;
+  onVariantChange: (variantId: string, testId: string) => void;
 }
 
-function VariantSelector({ testId, testName, testType, selectedVariantId, onVariantChange }: VariantSelectorProps) {
-  const { data: variants, isLoading } = useQuery({
-    queryKey: [`/api/ab-tests/${testId}/variants`],
+function UnifiedVariantSelector({ 
+  activeTests, 
+  selectedPersona, 
+  selectedFunnel,
+  selectedVariantId, 
+  onVariantChange 
+}: UnifiedVariantSelectorProps) {
+  // Fetch variants for all active tests
+  const variantQueries = useQuery({
+    queryKey: ['/api/ab-tests/variants-all', activeTests.map(t => t.id)],
+    queryFn: async () => {
+      const results = await Promise.all(
+        activeTests.map(async (test) => {
+          const response = await fetch(`/api/ab-tests/${test.id}/variants`);
+          if (!response.ok) return { testId: test.id, variants: [] };
+          const variants = await response.json();
+          return { testId: test.id, testName: test.name, testType: test.type, variants };
+        })
+      );
+      return results;
+    },
+    enabled: activeTests.length > 0,
   });
-
-  if (isLoading) {
-    return <div className="text-xs text-muted-foreground">Loading variants...</div>;
-  }
-
-  if (!variants || variants.length === 0) {
-    return null;
-  }
 
   const contentTypeLabels: Record<string, string> = {
     hero_variation: "Hero",
@@ -67,84 +78,135 @@ function VariantSelector({ testId, testName, testType, selectedVariantId, onVari
     video_variation: "Video",
   };
 
-  // Calculate total traffic for auto-assign display
-  const totalTraffic = variants.reduce((sum: number, v: any) => sum + (v.trafficWeight || 0), 0);
-  const trafficDisplay = variants
-    .map((v: any) => `${v.trafficWeight || 0}%`)
-    .join(' / ');
+  const personaLabels: Record<string, string> = {
+    parent: "Parent",
+    volunteer: "Volunteer",
+    donor: "Donor",
+    partner: "Partner",
+    student: "Student",
+  };
 
-  // Sort variants to show control first
-  const sortedVariants = [...variants].sort((a: any, b: any) => {
-    if (a.isControl && !b.isControl) return -1;
-    if (!a.isControl && b.isControl) return 1;
-    return 0;
+  const funnelLabels: Record<string, string> = {
+    awareness: "Awareness",
+    consideration: "Consideration",
+    decision: "Decision",
+    retention: "Retention",
+  };
+
+  if (variantQueries.isLoading) {
+    return <div className="text-xs text-muted-foreground">Loading variants...</div>;
+  }
+
+  if (!variantQueries.data || variantQueries.data.length === 0) {
+    return null;
+  }
+
+  // Flatten all variants with test context
+  const allVariants: Array<{
+    variantId: string;
+    testId: string;
+    testName: string;
+    testType: string;
+    variant: any;
+  }> = [];
+
+  variantQueries.data.forEach((testData: any) => {
+    testData.variants.forEach((variant: any) => {
+      allVariants.push({
+        variantId: variant.id,
+        testId: testData.testId,
+        testName: testData.testName,
+        testType: testData.testType,
+        variant,
+      });
+    });
+  });
+
+  // Sort: control variants first, then by test name
+  allVariants.sort((a, b) => {
+    if (a.variant.isControl && !b.variant.isControl) return -1;
+    if (!a.variant.isControl && b.variant.isControl) return 1;
+    return a.testName.localeCompare(b.testName);
   });
 
   return (
-    <div className="space-y-2 border rounded-md p-2 sm:p-3 bg-card/50">
-      <div className="flex items-center justify-between gap-2">
-        <label className="text-xs font-medium truncate">
-          {contentTypeLabels[testType] || testType}
-        </label>
-        <Badge variant="secondary" className="text-[10px] sm:text-xs shrink-0 px-1.5 py-0">
-          Preview Override
-        </Badge>
-      </div>
-      
+    <div className="space-y-2">
       <RadioGroup
-        value={selectedVariantId || "auto"}
-        onValueChange={onVariantChange}
-        className="space-y-1.5 sm:space-y-2"
+        value={selectedVariantId || "none"}
+        onValueChange={(value) => {
+          if (value === "none") {
+            onVariantChange("none", "");
+          } else {
+            const selected = allVariants.find(v => v.variantId === value);
+            if (selected) {
+              onVariantChange(selected.variantId, selected.testId);
+            }
+          }
+        }}
+        className="space-y-2"
       >
-        {/* Auto-assign option */}
+        {/* No variant selected option */}
         <div
           className={cn(
             "flex items-start space-x-2 p-2 sm:p-2.5 rounded-md border cursor-pointer hover-elevate",
-            (!selectedVariantId || selectedVariantId === "auto") && "border-primary bg-primary/5"
+            (!selectedVariantId || selectedVariantId === "none") && "border-primary bg-primary/5"
           )}
-          onClick={() => onVariantChange("auto")}
-          data-testid={`radio-variant-auto-${testId}`}
+          onClick={() => onVariantChange("none", "")}
+          data-testid="radio-variant-none"
         >
-          <RadioGroupItem value="auto" id={`auto-${testId}`} className="mt-0.5 shrink-0" />
+          <RadioGroupItem value="none" id="variant-none" className="mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0">
             <Label
-              htmlFor={`auto-${testId}`}
-              className="text-xs font-medium cursor-pointer flex flex-wrap items-center gap-1 sm:gap-2"
+              htmlFor="variant-none"
+              className="text-xs font-medium cursor-pointer"
             >
-              <span>Auto-assign</span>
-              <span className="text-muted-foreground font-normal text-[11px] sm:text-xs">({trafficDisplay})</span>
+              No A/B Test Override
             </Label>
             <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-              Randomly assign based on traffic allocation
+              Use default experience (auto-assign per test)
             </p>
           </div>
         </div>
 
         {/* Variant options */}
-        {sortedVariants.map((variant: any) => (
+        {allVariants.map(({ variantId, testId, testName, testType, variant }) => (
           <div
-            key={variant.id}
+            key={variantId}
             className={cn(
               "flex items-start space-x-2 p-2 sm:p-2.5 rounded-md border cursor-pointer hover-elevate",
-              selectedVariantId === variant.id && "border-primary bg-primary/5"
+              selectedVariantId === variantId && "border-primary bg-primary/5"
             )}
-            onClick={() => onVariantChange(variant.id)}
-            data-testid={`radio-variant-${variant.id}`}
+            onClick={() => onVariantChange(variantId, testId)}
+            data-testid={`radio-variant-${variantId}`}
           >
-            <RadioGroupItem value={variant.id} id={variant.id} className="mt-0.5 shrink-0" />
+            <RadioGroupItem value={variantId} id={variantId} className="mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0">
               <Label
-                htmlFor={variant.id}
+                htmlFor={variantId}
                 className="text-xs font-medium cursor-pointer flex flex-wrap items-center gap-1 sm:gap-2"
               >
                 <span className="truncate">{variant.name || (variant.isControl ? "Control" : "Treatment")}</span>
                 {variant.isControl && (
                   <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">Baseline</Badge>
                 )}
-                <span className="text-muted-foreground font-normal text-[11px] sm:text-xs shrink-0">{variant.trafficWeight}%</span>
               </Label>
+              <div className="flex flex-wrap items-center gap-1 mt-0.5">
+                <Badge variant="secondary" className="text-[10px] shrink-0">
+                  {contentTypeLabels[testType] || testType}
+                </Badge>
+                {selectedPersona && (
+                  <Badge variant="secondary" className="text-[10px] shrink-0">
+                    {personaLabels[selectedPersona] || selectedPersona}
+                  </Badge>
+                )}
+                {selectedFunnel && selectedFunnel !== "none" && (
+                  <Badge variant="secondary" className="text-[10px] shrink-0">
+                    {funnelLabels[selectedFunnel] || selectedFunnel}
+                  </Badge>
+                )}
+              </div>
               {variant.description && (
-                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 break-words">
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 break-words">
                   {variant.description}
                 </p>
               )}
@@ -171,8 +233,8 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
     setSelectedPersona,
     selectedFunnel,
     setSelectedFunnel,
-    selectedVariants,
-    setSelectedVariants,
+    selectedVariant,
+    setSelectedVariant,
     isPreviewActive,
     currentFunnel,
     activeTests,
@@ -283,25 +345,24 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             <div className="py-1.5 space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <TestTube2 className="w-3 h-3" />
-                A/B Test Variants ({activeTests.length})
+                A/B Test Variant Override
               </label>
-              <div className="space-y-1.5">
-                {activeTests.map((test) => (
-                  <VariantSelector
-                    key={test.id}
-                    testId={test.id}
-                    testName={test.name}
-                    testType={test.type}
-                    selectedVariantId={selectedVariants[test.id]}
-                    onVariantChange={(variantId) => {
-                      setSelectedVariants(prev => ({
-                        ...prev,
-                        [test.id]: variantId
-                      }));
-                    }}
-                  />
-                ))}
-              </div>
+              <p className="text-[11px] text-muted-foreground mb-2">
+                Select one variant to test (only one can be active at a time)
+              </p>
+              <UnifiedVariantSelector
+                activeTests={activeTests}
+                selectedPersona={selectedPersona}
+                selectedFunnel={selectedFunnel}
+                selectedVariantId={selectedVariant?.variantId}
+                onVariantChange={(variantId, testId) => {
+                  if (variantId === "none") {
+                    setSelectedVariant(null);
+                  } else {
+                    setSelectedVariant({ testId, variantId });
+                  }
+                }}
+              />
             </div>
           </>
         )}
@@ -456,25 +517,24 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             <div className="px-2 py-2 space-y-2">
               <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
                 <TestTube2 className="w-3 h-3" />
-                A/B Test Variants ({activeTests.length})
+                A/B Test Variant Override
               </label>
-              <div className="space-y-2">
-                {activeTests.map((test) => (
-                  <VariantSelector
-                    key={test.id}
-                    testId={test.id}
-                    testName={test.name}
-                    testType={test.type}
-                    selectedVariantId={selectedVariants[test.id]}
-                    onVariantChange={(variantId) => {
-                      setSelectedVariants(prev => ({
-                        ...prev,
-                        [test.id]: variantId
-                      }));
-                    }}
-                  />
-                ))}
-              </div>
+              <p className="text-[11px] text-muted-foreground mb-2">
+                Select one variant to test (only one can be active at a time)
+              </p>
+              <UnifiedVariantSelector
+                activeTests={activeTests}
+                selectedPersona={selectedPersona}
+                selectedFunnel={selectedFunnel}
+                selectedVariantId={selectedVariant?.variantId}
+                onVariantChange={(variantId, testId) => {
+                  if (variantId === "none") {
+                    setSelectedVariant(null);
+                  } else {
+                    setSelectedVariant({ testId, variantId });
+                  }
+                }}
+              />
             </div>
           </>
         )}

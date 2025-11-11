@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona, type Persona } from "@/contexts/PersonaContext";
 import type { AbTest } from "@shared/schema";
@@ -13,7 +13,11 @@ export function useAdminPreviewState() {
   const { persona, setPersona } = usePersona();
   const [selectedPersona, setSelectedPersona] = useState<Persona | null>(persona);
   const [selectedFunnel, setSelectedFunnel] = useState<FunnelStage | "none">("none");
-  const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
+  // Single variant selection: only ONE variant can be selected at a time
+  const [selectedVariant, setSelectedVariant] = useState<{ testId: string; variantId: string } | null>(null);
+  
+  // Track if we're in the initial hydration phase
+  const isInitialHydration = useRef(true);
 
   // Load initial state from sessionStorage
   useEffect(() => {
@@ -34,12 +38,31 @@ export function useAdminPreviewState() {
     const savedVariants = sessionStorage.getItem(ADMIN_VARIANT_KEY);
     if (savedVariants) {
       try {
-        setSelectedVariants(JSON.parse(savedVariants));
+        const parsed = JSON.parse(savedVariants);
+        // Convert from old Record format to new single-selection format if needed
+        if (typeof parsed === 'object' && parsed !== null) {
+          const entries = Object.entries(parsed);
+          if (entries.length > 0) {
+            const [testId, variantId] = entries[0] as [string, string];
+            setSelectedVariant({ testId, variantId });
+          }
+        }
       } catch (e) {
-        setSelectedVariants({});
+        setSelectedVariant(null);
       }
     }
+    
+    // Mark initial hydration as complete
+    isInitialHydration.current = false;
   }, [persona]);
+
+  // Clear variant selection when persona or funnel changes (but not during initial hydration)
+  useEffect(() => {
+    // Skip clearing during initial hydration to preserve saved variant
+    if (isInitialHydration.current) return;
+    
+    setSelectedVariant(null);
+  }, [selectedPersona, selectedFunnel]);
 
   // Fetch active A/B tests for selected persona×funnel combination
   const { data: activeTests, isLoading: testsLoading } = useQuery<AbTest[]>({
@@ -66,15 +89,10 @@ export function useAdminPreviewState() {
     
     sessionStorage.setItem(ADMIN_PERSONA_KEY, selectedPersona || "none");
     
-    // Save variant overrides (filter out "auto" which means no override)
-    const variantsToSave = Object.fromEntries(
-      Object.entries(selectedVariants).filter(([_, variantId]) => 
-        variantId && variantId !== "auto" && variantId !== "random"
-      )
-    );
-    
-    if (Object.keys(variantsToSave).length > 0) {
-      sessionStorage.setItem(ADMIN_VARIANT_KEY, JSON.stringify(variantsToSave));
+    // Save single variant override (only if valid selection exists)
+    if (selectedVariant && selectedVariant.variantId && selectedVariant.variantId !== "none") {
+      const variantOverride = { [selectedVariant.testId]: selectedVariant.variantId };
+      sessionStorage.setItem(ADMIN_VARIANT_KEY, JSON.stringify(variantOverride));
     } else {
       sessionStorage.removeItem(ADMIN_VARIANT_KEY);
     }
@@ -86,7 +104,7 @@ export function useAdminPreviewState() {
     await setPersona(null);
     setSelectedPersona(null);
     setSelectedFunnel("none");
-    setSelectedVariants({});
+    setSelectedVariant(null);
     sessionStorage.removeItem(ADMIN_FUNNEL_KEY);
     sessionStorage.removeItem(ADMIN_PERSONA_KEY);
     sessionStorage.removeItem(ADMIN_VARIANT_KEY);
@@ -99,8 +117,8 @@ export function useAdminPreviewState() {
     setSelectedPersona,
     selectedFunnel,
     setSelectedFunnel,
-    selectedVariants,
-    setSelectedVariants,
+    selectedVariant,
+    setSelectedVariant,
     
     // Derived state
     isPreviewActive,
