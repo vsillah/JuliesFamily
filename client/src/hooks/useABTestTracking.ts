@@ -157,26 +157,26 @@ export function useABTestTracking(testType: string, options?: { persona?: string
       });
     }, [test, variant, trackOnce]),
     
-    engage: useCallback(async (
+    engage: useCallback((
       engagementType: "scroll" | "dwell" | "cta_click",
       dwellTime?: number,
       scrollDepth?: number,
       ctaTarget?: string
     ) => {
-      if (!shouldTrack() || !test || !variant) return;
-      
       const eventKey = `hero_engage_${engagementType}`;
       trackOnce(eventKey, async () => {
-        await trackHeroEngagement({
-          testId: test.id,
-          variantId: variant.id,
-          engagementType,
-          dwellTime,
-          scrollDepth,
-          ctaTarget,
-        });
+        if (test && variant) {
+          await trackHeroEngagement({
+            testId: test.id,
+            variantId: variant.id,
+            engagementType,
+            dwellTime,
+            scrollDepth,
+            ctaTarget,
+          });
+        }
       });
-    }, [test, variant, shouldTrack, trackOnce]),
+    }, [test, variant, trackOnce]),
     
     ctaClick: useCallback(async (ctaTarget: string) => {
       if (!shouldTrack() || !test || !variant) return;

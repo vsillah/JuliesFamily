@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
-import { useABTest } from "@/hooks/useABTest";
+import { useABTestTracking } from "@/hooks/useABTestTracking";
+import { useHeroEngagement } from "@/hooks/useViewportTracking";
 import { applyABVariantOverrides } from "@/lib/abTestUtils";
+import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
 import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 interface HeroProps {
@@ -20,11 +22,19 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   const [textVisible, setTextVisible] = useState(false);
   const [imageError, setImageError] = useState(false);
   
-  // Check for active A/B test for hero content
+  // Check for active A/B test for hero content with integrated tracking
   // Only fetch when persona is loaded to prevent flash
-  const { variant: abVariant, configuration: abConfig, trackConversion, isLoading: abTestLoading, hasTest } = useABTest('hero_variation', { 
+  const { variant: abVariant, configuration: abConfig, isLoading: abTestLoading, hasTest, tracking } = useABTestTracking('hero_variation', { 
     persona: persona || undefined, 
     funnelStage: funnelStage || undefined 
+  });
+  
+  // Track hero engagement (dwell time + scroll past)
+  const { ref: heroRef, metrics } = useHeroEngagement({
+    dwellThreshold: METRIC_THRESHOLDS.HERO_DWELL_TIME,
+    onEngage: (engagementType, value) => {
+      tracking.hero.engage(engagementType, value);
+    },
   });
   
   // Fetch visible hero content filtered by persona + journey stage + passion tags
@@ -54,6 +64,13 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
     ? (isReady ? applyABVariantOverrides(baseHero, abConfig as AbTestVariantConfiguration | null) : baseHero)
     : undefined;
   
+  // Track hero view when component is ready and visible
+  useEffect(() => {
+    if (isReady && currentHero) {
+      tracking.hero.view();
+    }
+  }, [isReady, currentHero, tracking]);
+  
   // Diagnostic logging for A/B test debugging (development only)
   useEffect(() => {
     if (import.meta.env.DEV && isReady && baseHero) {
@@ -64,10 +81,15 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
         configurationApplied: !!abConfig,
         baseHeroTitle: baseHero.title,
         finalHeroTitle: currentHero?.title,
-        overridesApplied: abConfig ? Object.keys(abConfig) : []
+        overridesApplied: abConfig ? Object.keys(abConfig) : [],
+        engagementTracking: {
+          isVisible: metrics.isVisible,
+          dwellTime: metrics.dwellTime,
+          hasEngaged: metrics.hasEngaged,
+        }
       });
     }
-  }, [isReady, hasTest, abVariant, abConfig, baseHero, currentHero]);
+  }, [isReady, hasTest, abVariant, abConfig, baseHero, currentHero, metrics]);
   
   const imageName = currentHero?.imageName || "hero-volunteer-student";
   const { data: heroImageAsset } = useCloudinaryImage(imageName);
@@ -191,10 +213,12 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
 
   return (
     <section 
+      ref={heroRef}
       className="relative flex items-center justify-center overflow-hidden md:min-h-[75vh]"
       style={{
         minHeight: 'calc(100vh - var(--nav-height, 0px))' // Mobile: viewport minus navbar, Desktop: 75vh
       }}
+      data-testid="section-hero"
     >
       {/* Layer 1: Background Image (renders first) */}
       <div className="absolute inset-0 z-0">
@@ -270,9 +294,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
             size="lg"
             className="bg-white/10 backdrop-blur-md border-white/30 text-white hover:bg-white/20"
             onClick={() => {
-              if (abVariant) {
-                trackConversion('secondary_button_click');
-              }
+              tracking.hero.ctaClick('secondary-button');
               scrollToSection(navigationTargets.secondary);
             }}
             data-testid="button-learn-more"
@@ -283,9 +305,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
             variant="default"
             size="lg"
             onClick={() => {
-              if (abVariant) {
-                trackConversion('primary_button_click');
-              }
+              tracking.hero.ctaClick('primary-button');
               scrollToSection(navigationTargets.primary);
             }}
             data-testid="button-hero-donate"
