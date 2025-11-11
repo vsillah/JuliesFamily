@@ -335,6 +335,14 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/type/program_detail"],
   });
 
+  const { data: studentProjects = [], isLoading: studentProjectsLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/student_project"],
+  });
+
+  const { data: studentTestimonials = [], isLoading: studentTestimonialsLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/student_testimonial"],
+  });
+
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
     queryKey: ["/api/google-reviews/all"],
   });
@@ -517,6 +525,64 @@ export default function AdminContentManager() {
           const key = query.queryKey[0] as string;
           return key?.startsWith("/api/content/type");
         }
+      });
+    },
+  });
+
+  const approveStudentSubmissionMutation = useMutation({
+    mutationFn: async (item: ContentItem) => {
+      const existingMetadata = (item.metadata as any) || {};
+      return apiRequest("PATCH", `/api/content/${item.id}`, {
+        isActive: true,
+        metadata: { ...existingMetadata, status: 'approved' }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.startsWith("/api/content/type");
+        }
+      });
+      toast({
+        title: "Approved",
+        description: "Student submission has been approved and published.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to approve submission",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const rejectStudentSubmissionMutation = useMutation({
+    mutationFn: async ({ item, reason }: { item: ContentItem; reason?: string }) => {
+      const existingMetadata = (item.metadata as any) || {};
+      return apiRequest("PATCH", `/api/content/${item.id}`, {
+        isActive: false,
+        metadata: { ...existingMetadata, status: 'rejected', rejectionReason: reason }
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          const key = query.queryKey[0] as string;
+          return key?.startsWith("/api/content/type");
+        }
+      });
+      toast({
+        title: "Rejected",
+        description: "Student submission has been rejected.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to reject submission",
+        variant: "destructive",
       });
     },
   });
@@ -1064,11 +1130,13 @@ export default function AdminContentManager() {
                     <TabsTrigger value="video" data-testid="tab-videos" className="whitespace-nowrap flex-shrink-0">Videos ({videos.length})</TabsTrigger>
                     <TabsTrigger value="googleReviews" data-testid="tab-google-reviews" className="whitespace-nowrap flex-shrink-0">Google Reviews ({googleReviews.length})</TabsTrigger>
                     <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets" className="whitespace-nowrap flex-shrink-0">Lead Magnets ({leadMagnets.length})</TabsTrigger>
+                    <TabsTrigger value="student_project" data-testid="tab-student-projects" className="whitespace-nowrap flex-shrink-0">Student Projects ({studentProjects.length})</TabsTrigger>
+                    <TabsTrigger value="student_testimonial" data-testid="tab-student-testimonials" className="whitespace-nowrap flex-shrink-0">Student Testimonials ({studentTestimonials.length})</TabsTrigger>
                   </TabsList>
                 </div>
               </div>
               
-              {activeTab !== "matrix" && activeTab !== "googleReviews" && (
+              {activeTab !== "matrix" && activeTab !== "googleReviews" && activeTab !== "student_project" && activeTab !== "student_testimonial" && (
                 <div className="flex justify-end">
                   <Button
                     onClick={() => {
@@ -1357,6 +1425,284 @@ export default function AdminContentManager() {
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
               renderContentList(leadMagnets, "lead magnet")
+            )}
+          </TabsContent>
+
+          <TabsContent value="student_project" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {studentProjectsLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : studentProjects.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>No student projects submitted yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {studentProjects.map((item) => {
+                  const metadata = item.metadata as any;
+                  const status = metadata?.status || 'pending';
+                  const isPending = status === 'pending';
+                  const isApproved = status === 'approved' && item.isActive;
+                  const isRejected = status === 'rejected';
+                  
+                  return (
+                    <Card key={item.id} className={!item.isActive ? "border-2 border-dashed border-muted-foreground/30 bg-muted/20" : ""}>
+                      <CardContent className="p-6">
+                        <div className="space-y-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-semibold text-lg" data-testid={`text-title-${item.id}`}>
+                                  {item.title}
+                                </h3>
+                                {isPending && (
+                                  <Badge variant="secondary" data-testid={`badge-status-${item.id}`}>
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    Pending Review
+                                  </Badge>
+                                )}
+                                {isApproved && (
+                                  <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30" data-testid={`badge-status-${item.id}`}>
+                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                    Approved
+                                  </Badge>
+                                )}
+                                {isRejected && (
+                                  <Badge variant="destructive" data-testid={`badge-status-${item.id}`}>
+                                    <XCircle className="w-3 h-3 mr-1" />
+                                    Rejected
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {item.description && (
+                                <p className="text-sm text-muted-foreground mb-3" data-testid={`text-description-${item.id}`}>
+                                  {item.description}
+                                </p>
+                              )}
+                              
+                              {item.passionTags && item.passionTags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-3">
+                                  {item.passionTags.map((tag) => (
+                                    <Badge key={tag} variant="outline" className="text-xs">
+                                      {PASSION_OPTIONS.find(p => p.id === tag)?.label || tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {metadata?.submittingUserId && (
+                                <p className="text-xs text-muted-foreground">
+                                  Submitted by user ID: {metadata.submittingUserId}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {isRejected && metadata?.rejectionReason && (
+                            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md">
+                              <p className="text-sm text-destructive">
+                                <strong>Rejection Reason:</strong> {metadata.rejectionReason}
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-2 pt-2 border-t">
+                            {isPending && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => approveStudentSubmissionMutation.mutate(item)}
+                                  disabled={approveStudentSubmissionMutation.isPending}
+                                  data-testid={`button-approve-${item.id}`}
+                                >
+                                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                                  Approve & Publish
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    const reason = prompt("Optional: Enter a reason for rejection (will be shown to the student)");
+                                    rejectStudentSubmissionMutation.mutate({ item, reason: reason || undefined });
+                                  }}
+                                  disabled={rejectStudentSubmissionMutation.isPending}
+                                  data-testid={`button-reject-${item.id}`}
+                                >
+                                  <XCircle className="w-4 h-4 mr-1" />
+                                  Reject
+                                </Button>
+                              </>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingItem(item);
+                                setIsEditDialogOpen(true);
+                              }}
+                              data-testid={`button-edit-${item.id}`}
+                            >
+                              <Pencil className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
+                                  deleteMutation.mutate(item.id);
+                                }
+                              }}
+                              data-testid={`button-delete-${item.id}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="student_testimonial" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {studentTestimonialsLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : studentTestimonials.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <p>No student testimonials submitted yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {studentTestimonials.map((item) => {
+                  const metadata = item.metadata as any;
+                  const status = metadata?.status || 'pending';
+                  const isPending = status === 'pending';
+                  const isApproved = status === 'approved' && item.isActive;
+                  const isRejected = status === 'rejected';
+                  
+                  return (
+                    <Card key={item.id} className={!item.isActive ? "border-2 border-dashed border-muted-foreground/30 bg-muted/20" : ""}>
+                      <CardContent className="p-6">
+                        <div className="space-y-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-semibold text-lg" data-testid={`text-title-${item.id}`}>
+                                  {item.title}
+                                </h3>
+                                {isPending && (
+                                  <Badge variant="secondary" data-testid={`badge-status-${item.id}`}>
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    Pending Review
+                                  </Badge>
+                                )}
+                                {isApproved && (
+                                  <Badge className="bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/30" data-testid={`badge-status-${item.id}`}>
+                                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                                    Approved
+                                  </Badge>
+                                )}
+                                {isRejected && (
+                                  <Badge variant="destructive" data-testid={`badge-status-${item.id}`}>
+                                    <XCircle className="w-3 h-3 mr-1" />
+                                    Rejected
+                                  </Badge>
+                                )}
+                              </div>
+                              
+                              {item.description && (
+                                <p className="text-sm text-muted-foreground mb-3" data-testid={`text-description-${item.id}`}>
+                                  {item.description}
+                                </p>
+                              )}
+                              
+                              {item.passionTags && item.passionTags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mb-3">
+                                  {item.passionTags.map((tag) => (
+                                    <Badge key={tag} variant="outline" className="text-xs">
+                                      {PASSION_OPTIONS.find(p => p.id === tag)?.label || tag}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              {metadata?.submittingUserId && (
+                                <p className="text-xs text-muted-foreground">
+                                  Submitted by user ID: {metadata.submittingUserId}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {isRejected && metadata?.rejectionReason && (
+                            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-md">
+                              <p className="text-sm text-destructive">
+                                <strong>Rejection Reason:</strong> {metadata.rejectionReason}
+                              </p>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center gap-2 pt-2 border-t">
+                            {isPending && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => approveStudentSubmissionMutation.mutate(item)}
+                                  disabled={approveStudentSubmissionMutation.isPending}
+                                  data-testid={`button-approve-${item.id}`}
+                                >
+                                  <CheckCircle2 className="w-4 h-4 mr-1" />
+                                  Approve & Publish
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    const reason = prompt("Optional: Enter a reason for rejection (will be shown to the student)");
+                                    rejectStudentSubmissionMutation.mutate({ item, reason: reason || undefined });
+                                  }}
+                                  disabled={rejectStudentSubmissionMutation.isPending}
+                                  data-testid={`button-reject-${item.id}`}
+                                >
+                                  <XCircle className="w-4 h-4 mr-1" />
+                                  Reject
+                                </Button>
+                              </>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingItem(item);
+                                setIsEditDialogOpen(true);
+                              }}
+                              data-testid={`button-edit-${item.id}`}
+                            >
+                              <Pencil className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                if (confirm(`Are you sure you want to delete "${item.title}"?`)) {
+                                  deleteMutation.mutate(item.id);
+                                }
+                              }}
+                              data-testid={`button-delete-${item.id}`}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
             )}
           </TabsContent>
         </Tabs>
