@@ -27,6 +27,26 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 
+// Hook to detect mobile viewport (runtime check to prevent React hook violations)
+function useIsMobile(breakpoint = 768) {
+  const [isMobile, setIsMobile] = useState(() => {
+    // SSR-safe initial value
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < breakpoint;
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < breakpoint);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 const funnelStageConfigs = [
   { id: "awareness", label: "Awareness (TOFU)", description: "Just discovered us" },
   { id: "consideration", label: "Consideration (MOFU)", description: "Exploring options" },
@@ -225,6 +245,7 @@ interface AdminPreviewDropdownProps {
 export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdownProps) {
   const { isAdmin } = useUserRole();
   const { persona: appliedPersona } = usePersona();
+  const isMobile = useIsMobile(768); // Runtime check for mobile viewport
   const [open, setOpen] = useState(false);
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
   
@@ -259,16 +280,6 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   // Use the actually applied persona for the trigger display, not the pending selection
   const appliedPersonaConfig = personaConfigs.find(p => p.id === appliedPersona);
   const appliedFunnelConfig = funnelStageConfigs.find(f => f.id === currentFunnel);
-
-  // Check if mobile when button is clicked
-  const handleTriggerClick = () => {
-    const isMobile = window.innerWidth < 768;
-    if (isMobile) {
-      setShowMobileOverlay(true);
-    } else {
-      setOpen(true);
-    }
-  };
 
   // Mobile full-screen overlay - portaled to document.body to escape stacking context
   const mobileOverlay = showMobileOverlay && typeof document !== 'undefined' && createPortal(
@@ -419,183 +430,198 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
     document.body
   );
 
-  // Desktop dropdown and combined render
+  // Render mobile OR desktop button based on runtime viewport check
+  // This prevents React hook order violations by ensuring only one button exists in DOM
   return (
     <>
       {mobileOverlay}
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant={isScrolled ? "outline" : "ghost"}
-            size="sm"
-            className={cn(
-              "gap-2",
-              !isScrolled && "border-white/30 text-white hover:bg-white/10"
-            )}
-            data-testid="button-admin-preview-dropdown"
-            onPointerDown={(e) => {
-              // Prevent Radix dropdown from opening on mobile
-              const isMobile = window.innerWidth < 768;
-              if (isMobile) {
-                e.preventDefault();
-                e.stopPropagation();
-                setShowMobileOverlay(true);
-                setOpen(false); // Ensure dropdown stays closed
-              }
-            }}
-            onClick={(e) => {
-              e.preventDefault();
-              const isMobile = window.innerWidth < 768;
-              if (!isMobile) {
-                handleTriggerClick();
-              }
-            }}
+      
+      {isMobile ? (
+        // Mobile-only button - no Radix UI, simple onClick handler
+        <Button
+          variant={isScrolled ? "outline" : "ghost"}
+          size="sm"
+          className={cn(
+            "gap-2",
+            !isScrolled && "border-white/30 text-white hover:bg-white/10"
+          )}
+          data-testid="button-admin-preview-dropdown"
+          onClick={() => setShowMobileOverlay(true)}
+        >
+          <Eye className={cn(
+            "w-4 h-4",
+            isPreviewActive && "text-primary"
+          )} />
+          {isPreviewActive && (
+            <span className="text-xs font-medium">
+              {appliedPersonaConfig?.label || "Default"}
+              {appliedFunnelConfig && ` • ${appliedFunnelConfig.label}`}
+            </span>
+          )}
+          {!isPreviewActive && (
+            <span className="text-xs">Preview</span>
+          )}
+          <ChevronDown className="w-3 h-3 opacity-50" />
+        </Button>
+      ) : (
+        // Desktop-only dropdown - uses Radix UI state management
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={isScrolled ? "outline" : "ghost"}
+              size="sm"
+              className={cn(
+                "gap-2",
+                !isScrolled && "border-white/30 text-white hover:bg-white/10"
+              )}
+              data-testid="button-admin-preview-dropdown"
+            >
+              <Eye className={cn(
+                "w-4 h-4",
+                isPreviewActive && "text-primary"
+              )} />
+              {isPreviewActive && (
+                <span className="text-xs font-medium">
+                  {appliedPersonaConfig?.label || "Default"}
+                  {appliedFunnelConfig && ` • ${appliedFunnelConfig.label}`}
+                </span>
+              )}
+              {!isPreviewActive && (
+                <span className="text-xs">Preview</span>
+              )}
+              <ChevronDown className="w-3 h-3 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent 
+            align="end" 
+            className="w-80 z-[99999] max-h-[calc(100vh-100px)] overflow-y-auto" 
+            data-testid="menu-admin-preview"
           >
-            <Eye className={cn(
-              "w-4 h-4",
-              isPreviewActive && "text-primary"
-            )} />
-            {isPreviewActive && (
-              <span className="text-xs font-medium">
-                {appliedPersonaConfig?.label || "Default"}
-                {appliedFunnelConfig && ` • ${appliedFunnelConfig.label}`}
-              </span>
-            )}
-            {!isPreviewActive && (
-              <span className="text-xs">Preview</span>
-            )}
-            <ChevronDown className="w-3 h-3 opacity-50" />
-          </Button>
-        </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-80 z-[99999] max-h-[calc(100vh-100px)] overflow-y-auto md:block hidden" 
-        data-testid="menu-admin-preview"
-      >
-        <DropdownMenuLabel className="flex items-center gap-2">
-          <Eye className="w-4 h-4 text-primary" />
-          Admin Preview Mode
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        {/* Persona Selection */}
-        <div className="px-2 py-2 space-y-2">
-          <label className="text-xs font-medium text-muted-foreground">Persona Type</label>
-          <Select
-            value={selectedPersona || "none"}
-            onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
-          >
-            <SelectTrigger className="h-8 text-sm" data-testid="select-persona">
-              <SelectValue placeholder="Select persona" />
-            </SelectTrigger>
-            <SelectContent className="z-[99999]">
-              <SelectItem value="none">None (Unauthenticated, no selection)</SelectItem>
-              <SelectItem value="default">Default (No Persona)</SelectItem>
-              {personaConfigs.filter(c => c.id !== 'default').map((config) => (
-                <SelectItem key={config.id} value={config.id}>
-                  {config.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Funnel Stage Selection */}
-        <div className="px-2 py-2 space-y-2">
-          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" />
-            Funnel Stage
-          </label>
-          <Select
-            value={selectedFunnel}
-            onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
-          >
-            <SelectTrigger className="h-8 text-sm" data-testid="select-funnel">
-              <SelectValue placeholder="Select stage" />
-            </SelectTrigger>
-            <SelectContent className="z-[99999]">
-              <SelectItem value="none">None selected</SelectItem>
-              {funnelStageConfigs.map((config) => (
-                <SelectItem key={config.id} value={config.id}>
-                  {config.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* A/B Test Variants */}
-        {activeTests && activeTests.length > 0 && (
-          <>
+            <DropdownMenuLabel className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-primary" />
+              Admin Preview Mode
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            
+            {/* Persona Selection */}
+            <div className="px-2 py-2 space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Persona Type</label>
+              <Select
+                value={selectedPersona || "none"}
+                onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
+              >
+                <SelectTrigger className="h-8 text-sm" data-testid="select-persona">
+                  <SelectValue placeholder="Select persona" />
+                </SelectTrigger>
+                <SelectContent className="z-[99999]">
+                  <SelectItem value="none">None (Unauthenticated, no selection)</SelectItem>
+                  <SelectItem value="default">Default (No Persona)</SelectItem>
+                  {personaConfigs.filter(c => c.id !== 'default').map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Funnel Stage Selection */}
             <div className="px-2 py-2 space-y-2">
               <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <TestTube2 className="w-3 h-3" />
-                A/B Test Variant Override
+                <TrendingUp className="w-3 h-3" />
+                Funnel Stage
               </label>
-              <p className="text-[11px] text-muted-foreground mb-2">
-                Select one variant to test (only one can be active at a time)
-              </p>
-              <UnifiedVariantSelector
-                activeTests={activeTests}
-                selectedPersona={selectedPersona}
-                selectedFunnel={selectedFunnel}
-                selectedVariantId={selectedVariant?.variantId}
-                onVariantChange={(variantId, testId) => {
-                  if (variantId === "none") {
-                    setSelectedVariant(null);
-                  } else {
-                    setSelectedVariant({ testId, variantId });
-                  }
-                }}
-              />
+              <Select
+                value={selectedFunnel}
+                onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
+              >
+                <SelectTrigger className="h-8 text-sm" data-testid="select-funnel">
+                  <SelectValue placeholder="Select stage" />
+                </SelectTrigger>
+                <SelectContent className="z-[99999]">
+                  <SelectItem value="none">None selected</SelectItem>
+                  {funnelStageConfigs.map((config) => (
+                    <SelectItem key={config.id} value={config.id}>
+                      {config.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </>
-        )}
 
-        <DropdownMenuSeparator />
+            {/* A/B Test Variants */}
+            {activeTests && activeTests.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-2 space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <TestTube2 className="w-3 h-3" />
+                    A/B Test Variant Override
+                  </label>
+                  <p className="text-[11px] text-muted-foreground mb-2">
+                    Select one variant to test (only one can be active at a time)
+                  </p>
+                  <UnifiedVariantSelector
+                    activeTests={activeTests}
+                    selectedPersona={selectedPersona}
+                    selectedFunnel={selectedFunnel}
+                    selectedVariantId={selectedVariant?.variantId}
+                    onVariantChange={(variantId, testId) => {
+                      if (variantId === "none") {
+                        setSelectedVariant(null);
+                      } else {
+                        setSelectedVariant({ testId, variantId });
+                      }
+                    }}
+                  />
+                </div>
+              </>
+            )}
 
-        {/* Action Buttons */}
-        <div className="px-2 py-2 space-y-2">
-          <Button
-            size="sm"
-            className="w-full"
-            onClick={() => {
-              setOpen(false);
-              handleApply();
-            }}
-            data-testid="button-apply-preview-dropdown"
-          >
-            Apply Preview
-          </Button>
-          {isPreviewActive && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                setOpen(false);
-                handleReset();
-              }}
-              data-testid="button-reset-preview-dropdown"
-            >
-              <RotateCcw className="w-3 h-3 mr-2" />
-              Reset to Default
-            </Button>
-          )}
-        </div>
+            <DropdownMenuSeparator />
 
-        <DropdownMenuSeparator />
+            {/* Action Buttons */}
+            <div className="px-2 py-2 space-y-2">
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  setOpen(false);
+                  handleApply();
+                }}
+                data-testid="button-apply-preview-dropdown"
+              >
+                Apply Preview
+              </Button>
+              {isPreviewActive && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    setOpen(false);
+                    handleReset();
+                  }}
+                  data-testid="button-reset-preview-dropdown"
+                >
+                  <RotateCcw className="w-3 h-3 mr-2" />
+                  Reset to Default
+                </Button>
+              )}
+            </div>
 
-        {/* Admin Dashboard Link */}
-        <Link href="/admin">
-          <DropdownMenuItem data-testid="menu-admin-dashboard-dropdown">
-            <Shield className="w-4 h-4 mr-2" />
-            Admin Dashboard
-          </DropdownMenuItem>
-        </Link>
-      </DropdownMenuContent>
-    </DropdownMenu>
+            <DropdownMenuSeparator />
+
+            {/* Admin Dashboard Link */}
+            <Link href="/admin">
+              <DropdownMenuItem data-testid="menu-admin-dashboard-dropdown">
+                <Shield className="w-4 h-4 mr-2" />
+                Admin Dashboard
+              </DropdownMenuItem>
+            </Link>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </>
   );
 }
