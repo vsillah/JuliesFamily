@@ -1073,6 +1073,7 @@ export const emailLogs = pgTable("email_logs", {
   recipientEmail: varchar("recipient_email").notNull(),
   recipientName: varchar("recipient_name"),
   subject: varchar("subject").notNull(),
+  trackingToken: varchar("tracking_token").notNull().unique(), // Unique token for tracking opens/clicks
   status: varchar("status").notNull().default('pending'), // 'pending', 'sent', 'failed', 'bounced'
   emailProvider: varchar("email_provider"), // 'sendgrid', 'resend', etc
   providerMessageId: varchar("provider_message_id"), // ID from email service
@@ -1080,7 +1081,9 @@ export const emailLogs = pgTable("email_logs", {
   metadata: jsonb("metadata"), // Variables used, related donation ID, etc
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  trackingTokenIdx: index("email_logs_tracking_token_idx").on(table.trackingToken),
+}));
 
 export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
   id: true,

@@ -1,6 +1,20 @@
 -- Email tracking tables for campaign analytics
 -- Phase 1: Opens and Clicks tracking
 
+-- Add trackingToken column to email_logs
+ALTER TABLE "email_logs" ADD COLUMN IF NOT EXISTS "tracking_token" varchar UNIQUE;
+
+-- Backfill existing email_logs with unique tracking tokens
+UPDATE "email_logs" 
+SET "tracking_token" = gen_random_uuid()::text 
+WHERE "tracking_token" IS NULL;
+
+-- Make tracking_token NOT NULL after backfill
+ALTER TABLE "email_logs" ALTER COLUMN "tracking_token" SET NOT NULL;
+
+-- Create index on tracking_token for fast lookups
+CREATE INDEX IF NOT EXISTS "email_logs_tracking_token_idx" ON "email_logs"("tracking_token");
+
 -- Email Opens table
 CREATE TABLE IF NOT EXISTS "email_opens" (
   "id" varchar PRIMARY KEY DEFAULT gen_random_uuid(),

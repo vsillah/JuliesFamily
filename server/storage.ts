@@ -6,7 +6,7 @@ import {
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems, donationCampaigns,
   campaignMembers, campaignTestimonials,
-  emailTemplates, emailLogs, smsTemplates, smsSends, communicationLogs,
+  emailTemplates, emailLogs, emailOpens, emailClicks, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
   adminPreferences, auditLogs,
@@ -34,6 +34,8 @@ import {
   type WishlistItem, type InsertWishlistItem,
   type EmailTemplate, type InsertEmailTemplate,
   type EmailLog, type InsertEmailLog,
+  type EmailOpen, type InsertEmailOpen,
+  type EmailClick, type InsertEmailClick,
   type SmsTemplate, type InsertSmsTemplate,
   type SmsSend, type InsertSmsSend,
   type CommunicationLog, type InsertCommunicationLog,
@@ -280,6 +282,17 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
   getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]>;
   getRecentEmailLogs(limit?: number): Promise<EmailLog[]>;
+  getEmailLog(id: string): Promise<EmailLog | undefined>;
+  getEmailLogByTrackingToken(trackingToken: string): Promise<EmailLog | undefined>;
+  
+  // Email Tracking operations (Opens & Clicks)
+  createEmailOpen(open: InsertEmailOpen): Promise<EmailOpen>;
+  getEmailOpensByToken(trackingToken: string): Promise<EmailOpen[]>;
+  getEmailOpensByCampaign(campaignId: string): Promise<EmailOpen[]>;
+  
+  createEmailClick(click: InsertEmailClick): Promise<EmailClick>;
+  getEmailClicksByToken(trackingToken: string): Promise<EmailClick[]>;
+  getEmailClicksByCampaign(campaignId: string): Promise<EmailClick[]>;
   
   // SMS Template operations
   createSmsTemplate(template: InsertSmsTemplate): Promise<SmsTemplate>;
@@ -2360,6 +2373,62 @@ export class DatabaseStorage implements IStorage {
       .from(emailLogs)
       .orderBy(desc(emailLogs.createdAt))
       .limit(limit);
+  }
+
+  async getEmailLog(id: string): Promise<EmailLog | undefined> {
+    const [log] = await db.select().from(emailLogs).where(eq(emailLogs.id, id));
+    return log;
+  }
+
+  async getEmailLogByTrackingToken(trackingToken: string): Promise<EmailLog | undefined> {
+    const [log] = await db
+      .select()
+      .from(emailLogs)
+      .where(eq(emailLogs.trackingToken, trackingToken));
+    return log;
+  }
+
+  // Email Tracking operations (Opens & Clicks)
+  async createEmailOpen(openData: InsertEmailOpen): Promise<EmailOpen> {
+    const [open] = await db.insert(emailOpens).values(openData).returning();
+    return open;
+  }
+
+  async getEmailOpensByToken(trackingToken: string): Promise<EmailOpen[]> {
+    return await db
+      .select()
+      .from(emailOpens)
+      .where(eq(emailOpens.trackingToken, trackingToken))
+      .orderBy(desc(emailOpens.openedAt));
+  }
+
+  async getEmailOpensByCampaign(campaignId: string): Promise<EmailOpen[]> {
+    return await db
+      .select()
+      .from(emailOpens)
+      .where(eq(emailOpens.campaignId, campaignId))
+      .orderBy(desc(emailOpens.openedAt));
+  }
+
+  async createEmailClick(clickData: InsertEmailClick): Promise<EmailClick> {
+    const [click] = await db.insert(emailClicks).values(clickData).returning();
+    return click;
+  }
+
+  async getEmailClicksByToken(trackingToken: string): Promise<EmailClick[]> {
+    return await db
+      .select()
+      .from(emailClicks)
+      .where(eq(emailClicks.trackingToken, trackingToken))
+      .orderBy(desc(emailClicks.clickedAt));
+  }
+
+  async getEmailClicksByCampaign(campaignId: string): Promise<EmailClick[]> {
+    return await db
+      .select()
+      .from(emailClicks)
+      .where(eq(emailClicks.campaignId, campaignId))
+      .orderBy(desc(emailClicks.clickedAt));
   }
 
   // SMS Template operations

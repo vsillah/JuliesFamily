@@ -1,5 +1,7 @@
 import sgMail from '@sendgrid/mail';
 import type { IStorage } from './storage';
+import { nanoid } from 'nanoid';
+import * as cheerio from 'cheerio';
 
 // Initialize SendGrid
 if (!process.env.SENDGRID_API_KEY) {
@@ -20,6 +22,8 @@ export interface SendEmailOptions {
   text?: string;
   templateId?: string;
   metadata?: Record<string, any>;
+  disableTracking?: boolean;
+  leadId?: string | null;
 }
 
 /**
@@ -38,6 +42,66 @@ export function renderTemplate(template: string, variables: Record<string, any>)
 }
 
 /**
+ * Prepare email content with tracking pixel and link rewriting
+ */
+export function prepareTrackedEmailContent(
+  baseUrl: string,
+  html: string,
+  trackingToken: string
+): string {
+  try {
+    // Load HTML with cheerio
+    const $ = cheerio.load(html);
+    
+    // Inject tracking pixel at the end of body
+    const trackingPixel = `<img src="${baseUrl}/track/open/${trackingToken}" width="1" height="1" style="display:none" alt="" />`;
+    
+    // Try to append to body, fallback to end of HTML if no body tag
+    if ($('body').length > 0) {
+      $('body').append(trackingPixel);
+    } else {
+      // If no body tag, append to root
+      $.root().append(trackingPixel);
+    }
+    
+    // Rewrite all <a> href links to use click tracking
+    $('a[href]').each((_, element) => {
+      const $link = $(element);
+      const originalHref = $link.attr('href');
+      
+      if (!originalHref) return;
+      
+      // Skip mailto:, tel:, and anchor links
+      if (
+        originalHref.startsWith('mailto:') ||
+        originalHref.startsWith('tel:') ||
+        originalHref.startsWith('#')
+      ) {
+        return;
+      }
+      
+      // Skip if already wrapped (defensive)
+      if (originalHref.includes('/track/click/')) {
+        return;
+      }
+      
+      // Build tracking URL with encoded original URL
+      const encodedUrl = encodeURIComponent(originalHref);
+      const trackingUrl = `${baseUrl}/track/click/${trackingToken}?url=${encodedUrl}`;
+      
+      $link.attr('href', trackingUrl);
+    });
+    
+    return $.html();
+    
+  } catch (error) {
+    console.error('[Email Tracking] Failed to prepare tracked content:', error);
+    // Fail gracefully - return original HTML if parsing fails
+    return html;
+  }
+}
+
+/**
  * Send an email using SendGrid and log to database
  */
 export async function sendEmail(
@@ -47,6 +111,20 @@ export async function sendEmail(
   try {
     if (!process.env.SENDGRID_API_KEY) {
       throw new Error('SENDGRID_API_KEY not configured');
+    }
+
+    // Generate tracking token
+    const trackingToken = nanoid();
+    
+    // Get base URL for tracking links
+    const baseUrl = process.env.REPLIT_DOMAINS 
+      ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
+      : 'http://localhost:5000';
+    
+    // Prepare HTML with tracking if not disabled
+    let finalHtml = options.html;
+    if (!options.disableTracking) {
+      finalHtml = prepareTrackedEmailContent(baseUrl, options.html, trackingToken);
     }
 
     // Prepare message
@@ -60,7 +138,7 @@ export async function sendEmail(
         name: DEFAULT_FROM_NAME,
       },
       subject: options.subject,
-      html: options.html,
+      html: finalHtml,
       text: options.text || stripHtml(options.html),
     };
 
@@ -77,17 +155,19 @@ export async function sendEmail(
       status: 'sent',
       emailProvider: 'sendgrid',
       providerMessageId: messageId,
+      trackingToken,
+      leadId: options.leadId,
       metadata: options.metadata,
       sentAt: new Date(),
     });
 
-    console.log('Email sent successfully:', messageId);
+    console.log('Email sent successfully:', messageId, 'tracking:', trackingToken);
     return { success: true, messageId };
     
   } catch (error: any) {
     console.error('Failed to send email:', error);
     
-    // Log failure to database
+    // Log failure to database (with tracking token for potential retry)
     await storage.createEmailLog({
       templateId: options.templateId,
       recipientEmail: options.to,
@@ -95,6 +175,8 @@ export async function sendEmail(
       subject: options.subject,
       status: 'failed',
       emailProvider: 'sendgrid',
+      trackingToken: nanoid(), // Generate token even for failed emails
+      leadId: options.leadId,
       errorMessage: error.message || 'Unknown error',
       metadata: options.metadata,
     });
@@ -112,7 +194,8 @@ export async function sendTemplatedEmail(
   recipientEmail: string,
   recipientName: string | undefined,
   variables: Record<string, any>,
-  additionalMetadata?: Record<string, any>
+  additionalMetadata?: Record<string, any>,
+  options?: { disableTracking?: boolean; leadId?: string | null }
 ): Promise<{ success: boolean; messageId?: string; error?: string }> {
   try {
     // Get template from database
@@ -165,6 +248,8 @@ export async function sendTemplatedEmail(
       text: textBody,
       templateId: template.id,
       metadata: { templateName, variables, ...additionalMetadata },
+      disableTracking: options?.disableTracking,
+      leadId: options?.leadId,
     });
     
   } catch (error: any) {

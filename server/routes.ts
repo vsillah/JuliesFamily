@@ -26,6 +26,7 @@ import { CalendarService } from "./calendarService";
 import { fromZonedTime } from "date-fns-tz";
 import { seedDemoData, seedFunnelProgressionRules } from "./demo-data";
 import { parseGoogleSheetUrl, fetchSheetData } from "./googleSheets";
+import { nanoid } from "nanoid";
 
 // Extend Express Request to properly type authenticated user
 interface AuthenticatedRequest extends Request {
@@ -88,6 +89,113 @@ const isAdmin: RequestHandler = requireAdmin;
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
+
+  // Public Email Tracking Endpoints (no auth required)
+  // Tracking pixel endpoint for email opens
+  app.get('/track/open/:token', async (req, res) => {
+    try {
+      const { token } = req.params;
+      
+      // Look up email log by tracking token
+      const emailLog = await storage.getEmailLogByTrackingToken(token);
+      
+      if (!emailLog) {
+        console.log(`[Email Tracking] Invalid tracking token: ${token}`);
+        // Return 1x1 transparent GIF even for invalid tokens (prevents leaking info)
+        const transparentGif = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+        res.set('Content-Type', 'image/gif');
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.set('Expires', '0');
+        return res.send(transparentGif);
+      }
+      
+      // Record the open event (idempotent - multiple opens from same recipient are OK)
+      await storage.createEmailOpen({
+        emailLogId: emailLog.id,
+        leadId: emailLog.leadId,
+        userAgent: req.get('user-agent') || null,
+        ipAddress: req.ip || null,
+      });
+      
+      console.log(`[Email Tracking] Email opened - log: ${emailLog.id}, lead: ${emailLog.leadId || 'N/A'}`);
+      
+      // Return 1x1 transparent GIF
+      const transparentGif = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+      res.set('Content-Type', 'image/gif');
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Expires', '0');
+      res.send(transparentGif);
+    } catch (error) {
+      console.error('[Email Tracking] Error recording email open:', error);
+      // Return 1x1 transparent GIF even on error (fail gracefully)
+      const transparentGif = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+      res.set('Content-Type', 'image/gif');
+      res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+      res.set('Expires', '0');
+      res.send(transparentGif);
+    }
+  });
+
+  // Click tracking endpoint with redirect
+  app.get('/track/click/:token', async (req, res) => {
+    try {
+      const { token } = req.params;
+      const { url } = req.query;
+      
+      // Validate URL parameter
+      if (!url || typeof url !== 'string') {
+        console.log(`[Email Tracking] Missing or invalid URL parameter`);
+        return res.status(400).send('Invalid request: missing url parameter');
+      }
+      
+      // Validate URL to prevent open redirect vulnerabilities
+      // Only allow HTTP(S) URLs
+      let targetUrl: URL;
+      try {
+        targetUrl = new URL(url);
+        if (!['http:', 'https:'].includes(targetUrl.protocol)) {
+          console.log(`[Email Tracking] Invalid URL protocol: ${targetUrl.protocol}`);
+          return res.status(400).send('Invalid URL');
+        }
+      } catch (error) {
+        console.log(`[Email Tracking] Malformed URL: ${url}`);
+        return res.status(400).send('Malformed URL');
+      }
+      
+      // Look up email log by tracking token
+      const emailLog = await storage.getEmailLogByTrackingToken(token);
+      
+      if (!emailLog) {
+        console.log(`[Email Tracking] Invalid tracking token: ${token}`);
+        // Redirect to target URL anyway (fail gracefully, don't break user experience)
+        return res.redirect(302, url);
+      }
+      
+      // Record the click event asynchronously (don't block redirect)
+      storage.createEmailClick({
+        emailLogId: emailLog.id,
+        leadId: emailLog.leadId,
+        clickedUrl: url,
+        userAgent: req.get('user-agent') || null,
+        ipAddress: req.ip || null,
+      }).then(() => {
+        console.log(`[Email Tracking] Click recorded - log: ${emailLog.id}, lead: ${emailLog.leadId || 'N/A'}, url: ${url}`);
+      }).catch((error) => {
+        console.error('[Email Tracking] Error recording click:', error);
+      });
+      
+      // Immediate redirect (don't wait for database write)
+      res.redirect(302, url);
+    } catch (error) {
+      console.error('[Email Tracking] Error in click tracking:', error);
+      // Redirect to target URL if available (fail gracefully)
+      const { url } = req.query;
+      if (url && typeof url === 'string') {
+        return res.redirect(302, url);
+      }
+      res.status(500).send('Internal server error');
+    }
+  });
 
   // Auth route: get current user
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
