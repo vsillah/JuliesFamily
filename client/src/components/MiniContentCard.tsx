@@ -23,10 +23,11 @@ const CONTENT_TYPE_CONFIG = {
   event: { label: 'Event', icon: Calendar, color: 'text-purple-500' },
   testimonial: { label: 'Testimonial', icon: Star, color: 'text-yellow-500' },
   lead_magnet: { label: 'Lead Magnet', icon: Gift, color: 'text-pink-500' },
+  student_dashboard_card: { label: 'Student Dashboard Card', icon: CheckCircle2, color: 'text-teal-500' },
 };
 
 interface MiniContentCardProps {
-  contentType: 'hero' | 'cta' | 'service' | 'event' | 'testimonial' | 'lead_magnet';
+  contentType: 'hero' | 'cta' | 'service' | 'event' | 'testimonial' | 'lead_magnet' | 'student_dashboard_card';
   contentItem: ContentItem | null;
   visibility: ContentVisibility | null;
   images: ImageAsset[];
