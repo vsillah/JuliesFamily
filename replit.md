@@ -37,6 +37,7 @@ The frontend is a single-page application utilizing `wouter` for routing and Tan
 -   **Bulk Lead Import System**: Supports Excel, CSV, and Google Sheets with validation and duplicate detection.
 -   **Accurate Program Content**: Detailed and accurate representation of JFLP's Adult Basic Education, Family Development, and Tech Goes Home programs, with specific UI emphasis for Tech Goes Home's completion metrics.
 -   **Hero Section Rendering**: Layered z-index architecture for background images, overlays, and text content, ensuring smooth loading and readability.
+-   **Student Dashboard Card Content Type**: Managed content system for Tech Goes Home progress cards, enabling persona×journey matrix personalization with metadata fields (buttonText, buttonLink, goalText, motivationalText). The TechGoesHomeProgressCard component fetches persona-filtered content via `/api/content/visible/student_dashboard_card` and gracefully falls back to defaults when no managed content exists. Admin interface includes AI-powered copywriting for goal and motivational text fields.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage. A three-tier RBAC system (client, admin, super_admin) is implemented with comprehensive audit logging.
