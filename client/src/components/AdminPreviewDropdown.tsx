@@ -456,7 +456,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-80 z-[99999] max-h-[calc(100vh-100px)] overflow-y-auto" 
+        className="w-80 z-[99999] max-h-[calc(100vh-100px)] overflow-y-auto md:block hidden" 
         data-testid="menu-admin-preview"
       >
         <DropdownMenuLabel className="flex items-center gap-2">
