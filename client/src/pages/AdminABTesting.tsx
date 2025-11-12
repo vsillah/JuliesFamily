@@ -34,6 +34,7 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { ABTestWizard, type TestConfiguration } from "@/components/ABTestWizard";
 import { getConfigDefinition, createDefaultConfigForType } from "@/components/ab-test-config/registry";
 import type { AbTestVariantConfiguration } from "@shared/schema";
+import { UniversalSearch } from "@/components/UniversalSearch";
 
 export default function AdminABTesting() {
   const { user } = useAuth();

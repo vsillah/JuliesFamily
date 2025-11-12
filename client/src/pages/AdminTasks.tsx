@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { UniversalSearch } from "@/components/UniversalSearch";
 
 export default function AdminTasks() {
   const { user } = useAuth();

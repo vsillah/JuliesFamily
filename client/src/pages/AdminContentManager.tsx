@@ -25,6 +25,7 @@ import { PERSONAS, FUNNEL_STAGES, PERSONA_LABELS, FUNNEL_STAGE_LABELS, type Pers
 import { useContentAvailability } from "@/hooks/useContentAvailability";
 import { getUrlValidationMessage } from "@shared/utils/ctaValidation";
 import { PersonaContext } from "@/contexts/PersonaContext";
+import { UniversalSearch } from "@/components/UniversalSearch";
 import {
   DndContext,
   closestCenter,
@@ -1132,11 +1133,14 @@ export default function AdminContentManager() {
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "Content Manager" }]} />
-        <div className="mb-8">
-          <h1 className="text-4xl font-serif font-bold mb-2">Content Manager</h1>
-          <p className="text-muted-foreground">
-            Manage all website content including services, events, testimonials, and lead magnets
-          </p>
+        <div className="mb-8 flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-4xl font-serif font-bold mb-2">Content Manager</h1>
+            <p className="text-muted-foreground">
+              Manage all website content including services, events, testimonials, and lead magnets
+            </p>
+          </div>
+          <UniversalSearch />
         </div>
       </div>
 
