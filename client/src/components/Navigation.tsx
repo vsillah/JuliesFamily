@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { AdminPreviewDropdown } from "@/components/AdminPreviewDropdown";
+import { DevAdminButton } from "@/components/DevAdminButton";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -291,6 +292,8 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                   Donate
                 </Button>
               </Link>
+              
+              {!isAdmin && isAuthenticated && <DevAdminButton />}
               
               {isAdmin && (
                 <AdminPreviewDropdown isScrolled={isScrolled} />

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona, type Persona } from "@/contexts/PersonaContext";
+import { queryClient } from "@/lib/queryClient";
 import type { AbTest } from "@shared/schema";
 
 type FunnelStage = "awareness" | "consideration" | "decision" | "retention";
@@ -97,7 +98,8 @@ export function useAdminPreviewState() {
       sessionStorage.removeItem(ADMIN_VARIANT_KEY);
     }
     
-    window.location.reload();
+    // Invalidate all queries to refetch with new persona/funnel/variant settings
+    await queryClient.invalidateQueries();
   };
 
   const handleReset = async () => {
@@ -108,7 +110,9 @@ export function useAdminPreviewState() {
     sessionStorage.removeItem(ADMIN_FUNNEL_KEY);
     sessionStorage.removeItem(ADMIN_PERSONA_KEY);
     sessionStorage.removeItem(ADMIN_VARIANT_KEY);
-    window.location.reload();
+    
+    // Invalidate all queries to refetch with default settings
+    await queryClient.invalidateQueries();
   };
 
   return {
