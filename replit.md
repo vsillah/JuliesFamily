@@ -36,6 +36,16 @@ Before finalizing any build or marking work as complete, the agent must perform 
 
 Use the `run_test` tool with comprehensive test plans that cover the implemented changes and related functionality.
 
+### Continuous Documentation Improvement
+When a chat interaction reveals patterns, preferences, or technical decisions that could make future interactions more efficient, the agent should proactively suggest adding those insights to this replit.md file. This includes:
+- Recurring troubleshooting solutions or workarounds
+- User preferences discovered during implementation
+- Architectural decisions and their rationale
+- Common patterns or conventions established in the codebase
+- Workflow optimizations that proved effective
+
+By capturing these learnings, we create a knowledge base that helps future agents work more efficiently and maintain consistency with past decisions.
+
 ## System Architecture
 
 ### UI/UX Decisions
