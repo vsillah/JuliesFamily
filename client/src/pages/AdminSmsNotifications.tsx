@@ -292,7 +292,7 @@ export default function AdminSmsNotifications() {
                           variant="ghost"
                           onClick={() => {
                             setSelectedTemplate(template);
-                            setMessageText(template.messageContent);
+                            setMessageText(template.messageContent || "");
                             setShowTemplateDialog(true);
                           }}
                           data-testid={`button-edit-template-${template.id}`}
@@ -381,9 +381,9 @@ export default function AdminSmsNotifications() {
                       originalContent={messageText}
                       contentType="email_body"
                       onSelectVariant={(variant) => {
-                        setMessageText(variant);
+                        setMessageText(variant || "");
                         const textarea = document.getElementById('customMessage') as HTMLTextAreaElement;
-                        if (textarea) textarea.value = variant;
+                        if (textarea) textarea.value = variant || "";
                       }}
                       buttonText="✨ AI SMS"
                       buttonVariant="outline"
@@ -399,7 +399,7 @@ export default function AdminSmsNotifications() {
                     data-testid="input-custom-message"
                   />
                   <p className="text-xs text-muted-foreground">
-                    SMS messages over 160 characters may be split into multiple messages. Current: {messageText.length} characters
+                    SMS messages over 160 characters may be split into multiple messages. Current: {messageText?.length || 0} characters
                   </p>
                 </div>
 
@@ -575,9 +575,9 @@ export default function AdminSmsNotifications() {
                   contentType="email_body"
                   persona={selectedTemplate?.persona as Persona}
                   onSelectVariant={(variant) => {
-                    setMessageText(variant);
+                    setMessageText(variant || "");
                     const textarea = document.getElementById('messageContent') as HTMLTextAreaElement;
-                    if (textarea) textarea.value = variant;
+                    if (textarea) textarea.value = variant || "";
                   }}
                   buttonText="✨ AI SMS"
                   buttonVariant="outline"
