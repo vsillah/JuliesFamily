@@ -115,15 +115,26 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       const storedPersona = sessionStorage.getItem(PERSONA_STORAGE_KEY);
       const modalShown = sessionStorage.getItem(PERSONA_MODAL_SHOWN_KEY);
       
+      console.log('[PersonaContext] Unauthenticated user persona check:', {
+        storedPersona,
+        modalShown,
+        adminOverride,
+        isKinfloPage,
+        location
+      });
+      
       if (storedPersona && storedPersona !== "null") {
+        console.log('[PersonaContext] Using stored persona:', storedPersona);
         setPersonaState(storedPersona as Persona);
       } else if (!modalShown && !adminOverride && !isKinfloPage) {
         // Set default persona for explorers before showing modal
+        console.log('[PersonaContext] First visit detected - showing persona modal');
         setPersonaState('default');
         // Show modal immediately for unauthenticated users on Julie's pages (not Kinflo)
         setShowPersonaModal(true);
       } else {
         // If modal was already shown but no persona selected, keep default
+        console.log('[PersonaContext] Modal already shown or admin override active');
         setPersonaState('default');
       }
     }
