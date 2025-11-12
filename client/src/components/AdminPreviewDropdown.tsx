@@ -227,6 +227,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   const { persona: appliedPersona } = usePersona();
   const [open, setOpen] = useState(false);
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
   
   const {
     selectedPersona,
@@ -376,10 +377,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             className="w-full h-12 text-base"
             onClick={() => {
               setShowMobileOverlay(false);
-              // Small delay to ensure overlay closes before reload
+              setIsApplying(true);
+              // Small delay for smooth transition
               setTimeout(() => {
                 handleApply();
-              }, 100);
+              }, 150);
             }}
             data-testid="button-apply-preview-dropdown"
           >
@@ -392,10 +394,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               className="w-full h-12 text-base"
               onClick={() => {
                 setShowMobileOverlay(false);
-                // Small delay to ensure overlay closes before reload
+                setIsApplying(true);
+                // Small delay for smooth transition
                 setTimeout(() => {
                   handleReset();
-                }, 100);
+                }, 150);
               }}
               data-testid="button-reset-preview-dropdown"
             >
@@ -425,10 +428,22 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
     document.body
   );
 
+  // Loading overlay during page reload
+  const loadingOverlay = isApplying && typeof document !== 'undefined' && createPortal(
+    <div className="fixed inset-0 w-screen h-screen bg-background/80 backdrop-blur-sm z-[100000] flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-muted-foreground">Applying preview...</p>
+      </div>
+    </div>,
+    document.body
+  );
+
   // Desktop dropdown and combined render
   return (
     <>
       {mobileOverlay}
+      {loadingOverlay}
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button
@@ -567,8 +582,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             size="sm"
             className="w-full"
             onClick={() => {
-              handleApply();
               setOpen(false);
+              setIsApplying(true);
+              setTimeout(() => {
+                handleApply();
+              }, 150);
             }}
             data-testid="button-apply-preview-dropdown"
           >
@@ -580,8 +598,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               size="sm"
               className="w-full"
               onClick={() => {
-                handleReset();
                 setOpen(false);
+                setIsApplying(true);
+                setTimeout(() => {
+                  handleReset();
+                }, 150);
               }}
               data-testid="button-reset-preview-dropdown"
             >
