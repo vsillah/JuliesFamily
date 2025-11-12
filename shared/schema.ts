@@ -1089,6 +1089,55 @@ export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
 export type InsertEmailLog = z.infer<typeof insertEmailLogSchema>;
 export type EmailLog = typeof emailLogs.$inferSelect;
 
+// Email Opens table for tracking when emails are opened
+export const emailOpens = pgTable("email_opens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  emailLogId: varchar("email_log_id").notNull().references(() => emailLogs.id, { onDelete: "cascade" }),
+  leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
+  trackingToken: varchar("tracking_token").notNull(),
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  metadata: jsonb("metadata"),
+  openedAt: timestamp("opened_at").defaultNow(),
+}, (table) => ({
+  trackingTokenIdx: index("email_opens_tracking_token_idx").on(table.trackingToken),
+  campaignAnalyticsIdx: index("email_opens_campaign_analytics_idx").on(table.campaignId, table.openedAt),
+  emailLogIdx: index("email_opens_email_log_idx").on(table.emailLogId),
+}));
+
+export const insertEmailOpenSchema = createInsertSchema(emailOpens).omit({
+  id: true,
+  openedAt: true,
+});
+export type InsertEmailOpen = z.infer<typeof insertEmailOpenSchema>;
+export type EmailOpen = typeof emailOpens.$inferSelect;
+
+// Email Clicks table for tracking link clicks in emails
+export const emailClicks = pgTable("email_clicks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  emailLogId: varchar("email_log_id").notNull().references(() => emailLogs.id, { onDelete: "cascade" }),
+  leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
+  trackingToken: varchar("tracking_token").notNull(),
+  targetUrl: text("target_url").notNull(), // Original URL being linked to
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  metadata: jsonb("metadata"),
+  clickedAt: timestamp("clicked_at").defaultNow(),
+}, (table) => ({
+  trackingTokenIdx: index("email_clicks_tracking_token_idx").on(table.trackingToken),
+  campaignAnalyticsIdx: index("email_clicks_campaign_analytics_idx").on(table.campaignId, table.clickedAt),
+  emailLogIdx: index("email_clicks_email_log_idx").on(table.emailLogId),
+}));
+
+export const insertEmailClickSchema = createInsertSchema(emailClicks).omit({
+  id: true,
+  clickedAt: true,
+});
+export type InsertEmailClick = z.infer<typeof insertEmailClickSchema>;
+export type EmailClick = typeof emailClicks.$inferSelect;
+
 // SMS Logs table for tracking sent SMS messages
 export const smsLogs = pgTable("sms_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
