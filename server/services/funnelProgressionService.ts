@@ -288,9 +288,28 @@ async function progressLeadToStage(params: {
  */
 export async function getLeadProgressionHistory(leadId: string) {
   return await db
-    .select()
+    .select({
+      id: funnelProgressionHistory.id,
+      leadId: funnelProgressionHistory.leadId,
+      fromStage: funnelProgressionHistory.fromStage,
+      toStage: funnelProgressionHistory.toStage,
+      reason: funnelProgressionHistory.reason,
+      engagementScore: funnelProgressionHistory.engagementScore,
+      triggeredBy: funnelProgressionHistory.triggeredBy,
+      createdAt: funnelProgressionHistory.createdAt,
+      lead: {
+        firstName: leads.firstName,
+        lastName: leads.lastName,
+        email: leads.email,
+        persona: leads.persona,
+      }
+    })
     .from(funnelProgressionHistory)
-    .where(eq(funnelProgressionHistory.leadId, leadId))
+    .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
+    .where(and(
+      eq(funnelProgressionHistory.leadId, leadId),
+      sql`${leads.persona} IS NOT NULL`
+    ))
     .orderBy(desc(funnelProgressionHistory.createdAt));
 }
 

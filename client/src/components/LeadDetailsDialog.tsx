@@ -68,6 +68,9 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   const [taskDueDate, setTaskDueDate] = useState("");
   const [taskPriority, setTaskPriority] = useState("medium");
   const [taskDescription, setTaskDescription] = useState("");
+  const [showManualProgression, setShowManualProgression] = useState(false);
+  const [manualProgressionStage, setManualProgressionStage] = useState("");
+  const [manualProgressionReason, setManualProgressionReason] = useState("");
 
   // Fetch lead details
   const { data: lead, isLoading: leadLoading, error: leadError } = useQuery<Lead>({
@@ -107,6 +110,13 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   const taskQueryUrl = leadId ? `/api/tasks?leadId=${leadId}` : "/api/tasks";
   const { data: tasks = [] } = useQuery<any[]>({
     queryKey: [taskQueryUrl],
+    enabled: !!leadId && open,
+    retry: false,
+  });
+
+  // Fetch funnel progression history
+  const { data: progressionHistory = [] } = useQuery<any[]>({
+    queryKey: ["/api/funnel/progression-history", leadId],
     enabled: !!leadId && open,
     retry: false,
   });
@@ -169,6 +179,35 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
       toast({
         title: "Error",
         description: "Failed to create task. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Manual funnel progression mutation
+  const manualProgressionMutation = useMutation({
+    mutationFn: async (data: { toStage: string; reason: string }) => {
+      return await apiRequest("POST", `/api/funnel/manual-progress/${leadId}`, {
+        toStage: data.toStage,
+        reason: data.reason,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/leads", leadId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/funnel/progression-history", leadId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/funnel/stats"] });
+      toast({
+        title: "Stage Updated",
+        description: "Lead funnel stage has been manually updated.",
+      });
+      setShowManualProgression(false);
+      setManualProgressionStage("");
+      setManualProgressionReason("");
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update funnel stage. Please try again.",
         variant: "destructive",
       });
     },
@@ -331,6 +370,21 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
     });
   };
 
+  const handleManualProgression = () => {
+    if (!manualProgressionStage || !manualProgressionReason) {
+      toast({
+        title: "Error",
+        description: "Please select a stage and provide a reason.",
+        variant: "destructive",
+      });
+      return;
+    }
+    manualProgressionMutation.mutate({
+      toStage: manualProgressionStage,
+      reason: manualProgressionReason,
+    });
+  };
+
   if (!leadId) return null;
 
   return (
@@ -448,6 +502,139 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
                     </div>
                   </>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Funnel Progression */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <div>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Funnel Progression
+                  </CardTitle>
+                  <CardDescription>
+                    Track and manage progression through sales funnel stages
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowManualProgression(!showManualProgression)}
+                  data-testid="button-manual-progression"
+                >
+                  <RefreshCcw className="w-4 h-4 mr-2" />
+                  Manual Override
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Manual Progression Form */}
+                {showManualProgression && (
+                  <div className="p-4 border rounded-lg space-y-3">
+                    <h4 className="font-medium">Manually Update Funnel Stage</h4>
+                    <div className="space-y-2">
+                      <Label htmlFor="manual-stage">New Stage</Label>
+                      <Select value={manualProgressionStage} onValueChange={setManualProgressionStage}>
+                        <SelectTrigger id="manual-stage" data-testid="select-manual-stage">
+                          <SelectValue placeholder="Select stage..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="awareness" data-testid="option-stage-awareness">Awareness</SelectItem>
+                          <SelectItem value="consideration" data-testid="option-stage-consideration">Consideration</SelectItem>
+                          <SelectItem value="decision" data-testid="option-stage-decision">Decision</SelectItem>
+                          <SelectItem value="retention" data-testid="option-stage-retention">Retention</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="manual-reason">Reason for Manual Update</Label>
+                      <Textarea
+                        id="manual-reason"
+                        value={manualProgressionReason}
+                        onChange={(e) => setManualProgressionReason(e.target.value)}
+                        placeholder="e.g., Direct conversation indicated higher intent..."
+                        className="min-h-20"
+                        data-testid="textarea-manual-reason"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleManualProgression}
+                        disabled={manualProgressionMutation.isPending || !manualProgressionStage || !manualProgressionReason}
+                        size="sm"
+                        data-testid="button-submit-manual-progression"
+                      >
+                        {manualProgressionMutation.isPending ? "Updating..." : "Update Stage"}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowManualProgression(false);
+                          setManualProgressionStage("");
+                          setManualProgressionReason("");
+                        }}
+                        size="sm"
+                        data-testid="button-cancel-manual-progression"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Progression History */}
+                <div className="space-y-2">
+                  <h4 className="font-medium">Progression History</h4>
+                  {progressionHistory.length === 0 ? (
+                    <div className="text-center text-muted-foreground py-6">
+                      No progression history yet
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {progressionHistory.slice(0, 5).map((progression: any) => (
+                        <div
+                          key={progression.id}
+                          className="p-3 border rounded-lg"
+                          data-testid={`progression-history-${progression.id}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {progression.fromStage ? (
+                                <>
+                                  <Badge variant="outline">
+                                    {funnelStageLabels[progression.fromStage]?.label || progression.fromStage}
+                                  </Badge>
+                                  <span className="text-muted-foreground">→</span>
+                                  <Badge className={funnelStageLabels[progression.toStage]?.color}>
+                                    {funnelStageLabels[progression.toStage]?.label || progression.toStage}
+                                  </Badge>
+                                </>
+                              ) : (
+                                <Badge className={funnelStageLabels[progression.toStage]?.color}>
+                                  {funnelStageLabels[progression.toStage]?.label || progression.toStage} (Initial)
+                                </Badge>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {format(new Date(progression.createdAt), "MMM d, h:mm a")}
+                            </span>
+                          </div>
+                          <div className="text-sm text-muted-foreground mt-1">
+                            {progression.reason}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            Score: {progression.engagementScore}
+                          </div>
+                        </div>
+                      ))}
+                      {progressionHistory.length > 5 && (
+                        <div className="text-center text-sm text-muted-foreground">
+                          +{progressionHistory.length - 5} more progression{progressionHistory.length - 5 !== 1 ? 's' : ''}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

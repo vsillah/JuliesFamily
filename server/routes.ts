@@ -1335,6 +1335,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get funnel progression statistics
+  app.get('/api/admin/funnel/stats', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { persona } = req.query;
+      
+      // Get total count of all progressions (with optional persona filter)
+      let totalQuery = db
+        .select({ count: sql<number>`count(*)` })
+        .from(funnelProgressionHistory)
+        .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
+        .where(sql`${leads.persona} IS NOT NULL`);
+      
+      if (persona && persona !== 'all') {
+        totalQuery = totalQuery.where(eq(leads.persona, persona as string));
+      }
+      
+      const [{ count: totalProgressions }] = await totalQuery;
+
+      // Get recent progression history with lead details (with optional persona filter)
+      let historyQuery = db
+        .select({
+          id: funnelProgressionHistory.id,
+          leadId: funnelProgressionHistory.leadId,
+          fromStage: funnelProgressionHistory.fromStage,
+          toStage: funnelProgressionHistory.toStage,
+          reason: funnelProgressionHistory.reason,
+          engagementScore: funnelProgressionHistory.engagementScore,
+          triggeredBy: funnelProgressionHistory.triggeredBy,
+          createdAt: funnelProgressionHistory.createdAt,
+          lead: {
+            firstName: leads.firstName,
+            lastName: leads.lastName,
+            email: leads.email,
+            persona: leads.persona,
+          }
+        })
+        .from(funnelProgressionHistory)
+        .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
+        .where(sql`${leads.persona} IS NOT NULL`)
+        .orderBy(desc(funnelProgressionHistory.createdAt))
+        .limit(50);
+
+      if (persona && persona !== 'all') {
+        historyQuery = historyQuery.where(eq(leads.persona, persona as string));
+      }
+
+      const recentHistory = await historyQuery;
+
+      // Get current stage distribution (with optional persona filter)
+      let stageQuery = db.select().from(leads);
+      if (persona && persona !== 'all') {
+        stageQuery = stageQuery.where(eq(leads.persona, persona as string));
+      }
+      
+      const allLeads = await stageQuery;
+      const progressionsByStage: Record<string, number> = {};
+
+      allLeads.forEach(lead => {
+        if (lead.funnelStage) {
+          progressionsByStage[lead.funnelStage] = (progressionsByStage[lead.funnelStage] || 0) + 1;
+        }
+      });
+
+      // Get ALL progression history grouped by persona for breakdown (with optional filter)
+      let personaHistoryQuery = db
+        .select({
+          persona: leads.persona,
+          count: sql<number>`count(*)`,
+        })
+        .from(funnelProgressionHistory)
+        .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
+        .where(sql`${leads.persona} IS NOT NULL`);
+
+      if (persona && persona !== 'all') {
+        personaHistoryQuery = personaHistoryQuery.where(eq(leads.persona, persona as string));
+      }
+
+      const allHistory = await personaHistoryQuery.groupBy(leads.persona);
+
+      const progressionsByPersona: Record<string, number> = {};
+      allHistory.forEach(row => {
+        if (row.persona) {
+          progressionsByPersona[row.persona] = Number(row.count);
+        }
+      });
+
+      // Calculate average velocity (days between stage changes) by persona (with optional filter)
+      const personaFilter = persona && persona !== 'all' ? sql`AND l.persona = ${persona}` : sql``;
+      const velocityQuery = await db.execute(sql`
+        WITH stage_transitions AS (
+          SELECT 
+            l.persona,
+            h.lead_id,
+            h.to_stage,
+            h.created_at,
+            LAG(h.created_at) OVER (PARTITION BY h.lead_id ORDER BY h.created_at) as prev_created_at
+          FROM funnel_progression_history h
+          INNER JOIN leads l ON h.lead_id = l.id
+          WHERE l.persona IS NOT NULL ${personaFilter}
+        )
+        SELECT 
+          persona,
+          ROUND(AVG(EXTRACT(EPOCH FROM (created_at - prev_created_at)) / 86400)::numeric, 1) as avg_days
+        FROM stage_transitions
+        WHERE prev_created_at IS NOT NULL AND persona IS NOT NULL
+        GROUP BY persona
+      `);
+
+      const averageVelocityDays: Record<string, number> = {};
+      velocityQuery.rows.forEach((row: any) => {
+        if (row.persona && row.avg_days !== null) {
+          averageVelocityDays[row.persona] = Number(row.avg_days); // Already rounded in SQL
+        }
+      });
+
+      const stats = {
+        totalProgressions: Number(totalProgressions),
+        progressionsByStage,
+        progressionsByPersona,
+        averageVelocityDays,
+        recentProgressions: recentHistory.slice(0, 20),
+      };
+
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching funnel stats:", error);
+      res.status(500).json({ message: "Failed to fetch funnel statistics" });
+    }
+  });
+
   // Admin CRM Routes
   app.get('/api/admin/leads', isAuthenticated, isAdmin, async (req, res) => {
     try {
