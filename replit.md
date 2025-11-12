@@ -43,8 +43,26 @@ When a chat interaction reveals patterns, preferences, or technical decisions th
 - Architectural decisions and their rationale
 - Common patterns or conventions established in the codebase
 - Workflow optimizations that proved effective
+- Development standards that emerged (technical implementation patterns, responsive design rules, performance optimizations)
 
 By capturing these learnings, we create a knowledge base that helps future agents work more efficiently and maintain consistency with past decisions.
+
+## Development Standards
+
+### Mobile Responsiveness
+**Breakpoint Standard**: Use 768px as the consistent mobile breakpoint across all responsive implementations.
+
+**Touch Target Accessibility**: All interactive elements (buttons, inputs, links, toggles) must meet WCAG's 44px minimum touch target height on mobile devices.
+
+**Mobile/Desktop Component Variants**: When creating components with different mobile and desktop versions, use runtime conditional rendering (`{isMobile ? <MobileComponent /> : <DesktopComponent />}`) rather than CSS-only hiding (e.g., `md:hidden`). This prevents React hook order violations by ensuring only one component exists in the DOM at any given time.
+
+**Mobile Safari Optimization**: Prefer React Query cache invalidation (`queryClient.invalidateQueries()`) over full page reloads (`window.location.reload()`) to prevent blank screen flashes during state transitions on mobile Safari.
+
+**Example Pattern**:
+```tsx
+const isMobile = useIsMobile(768);
+return isMobile ? <MobileOverlay /> : <DesktopDropdown />;
+```
 
 ## System Architecture
 
