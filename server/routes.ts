@@ -8,9 +8,9 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema } from "@shared/schema";
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter } from "./security";
-import { eq } from "drizzle-orm";
+import { eq, sql, desc, and, isNotNull } from "drizzle-orm";
 import { evaluateLeadProgression, getLeadProgressionHistory, manuallyProgressLead, calculateEngagementDelta, type EventType } from "./services/funnelProgressionService";
-import { funnelProgressionRules, insertFunnelProgressionRuleSchema } from "@shared/schema";
+import { leads, funnelProgressionRules, funnelProgressionHistory, insertFunnelProgressionRuleSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -1341,20 +1341,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { persona } = req.query;
       
       // Get total count of all progressions (with optional persona filter)
-      let totalQuery = db
+      const totalWhereCondition = persona && persona !== 'all'
+        ? and(isNotNull(leads.persona), eq(leads.persona, persona as string))
+        : isNotNull(leads.persona);
+      
+      const [{ count: totalProgressions }] = await db
         .select({ count: sql<number>`count(*)` })
         .from(funnelProgressionHistory)
         .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
-        .where(sql`${leads.persona} IS NOT NULL`);
-      
-      if (persona && persona !== 'all') {
-        totalQuery = totalQuery.where(eq(leads.persona, persona as string));
-      }
-      
-      const [{ count: totalProgressions }] = await totalQuery;
+        .where(totalWhereCondition);
 
       // Get recent progression history with lead details (with optional persona filter)
-      let historyQuery = db
+      const historyWhereCondition = persona && persona !== 'all'
+        ? and(isNotNull(leads.persona), eq(leads.persona, persona as string))
+        : isNotNull(leads.persona);
+      
+      const recentHistory = await db
         .select({
           id: funnelProgressionHistory.id,
           leadId: funnelProgressionHistory.leadId,
@@ -1364,24 +1366,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
           engagementScore: funnelProgressionHistory.engagementScore,
           triggeredBy: funnelProgressionHistory.triggeredBy,
           createdAt: funnelProgressionHistory.createdAt,
-          lead: {
-            firstName: leads.firstName,
-            lastName: leads.lastName,
-            email: leads.email,
-            persona: leads.persona,
-          }
+          leadFirstName: leads.firstName,
+          leadLastName: leads.lastName,
+          leadEmail: leads.email,
+          leadPersona: leads.persona,
         })
         .from(funnelProgressionHistory)
         .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
-        .where(sql`${leads.persona} IS NOT NULL`)
+        .where(historyWhereCondition)
         .orderBy(desc(funnelProgressionHistory.createdAt))
         .limit(50);
-
-      if (persona && persona !== 'all') {
-        historyQuery = historyQuery.where(eq(leads.persona, persona as string));
-      }
-
-      const recentHistory = await historyQuery;
+      
+      // Reshape flat structure to nested for backwards compatibility
+      const reshapedHistory = recentHistory.map(h => ({
+        id: h.id,
+        leadId: h.leadId,
+        fromStage: h.fromStage,
+        toStage: h.toStage,
+        reason: h.reason,
+        engagementScore: h.engagementScore,
+        triggeredBy: h.triggeredBy,
+        createdAt: h.createdAt,
+        lead: {
+          firstName: h.leadFirstName,
+          lastName: h.leadLastName,
+          email: h.leadEmail,
+          persona: h.leadPersona,
+        }
+      }));
 
       // Get current stage distribution (with optional persona filter)
       let stageQuery = db.select().from(leads);
@@ -1399,20 +1411,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Get ALL progression history grouped by persona for breakdown (with optional filter)
-      let personaHistoryQuery = db
+      const personaHistoryWhereCondition = persona && persona !== 'all'
+        ? and(isNotNull(leads.persona), eq(leads.persona, persona as string))
+        : isNotNull(leads.persona);
+      
+      const allHistory = await db
         .select({
           persona: leads.persona,
           count: sql<number>`count(*)`,
         })
         .from(funnelProgressionHistory)
         .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
-        .where(sql`${leads.persona} IS NOT NULL`);
-
-      if (persona && persona !== 'all') {
-        personaHistoryQuery = personaHistoryQuery.where(eq(leads.persona, persona as string));
-      }
-
-      const allHistory = await personaHistoryQuery.groupBy(leads.persona);
+        .where(personaHistoryWhereCondition)
+        .groupBy(leads.persona);
 
       const progressionsByPersona: Record<string, number> = {};
       allHistory.forEach(row => {
@@ -1455,7 +1466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         progressionsByStage,
         progressionsByPersona,
         averageVelocityDays,
-        recentProgressions: recentHistory.slice(0, 20),
+        recentProgressions: reshapedHistory.slice(0, 20),
       };
 
       res.json(stats);
