@@ -38,6 +38,12 @@ The frontend is a single-page application utilizing `wouter` for routing and Tan
 -   **Accurate Program Content**: Detailed and accurate representation of JFLP's Adult Basic Education, Family Development, and Tech Goes Home programs, with specific UI emphasis for Tech Goes Home's completion metrics.
 -   **Hero Section Rendering**: Layered z-index architecture for background images, overlays, and text content, ensuring smooth loading and readability.
 -   **Student Dashboard Card Content Type**: Managed content system for Tech Goes Home progress cards, enabling persona×journey matrix personalization with metadata fields (buttonText, buttonLink, goalText, motivationalText). The TechGoesHomeProgressCard component fetches persona-filtered content via `/api/content/visible/student_dashboard_card` and gracefully falls back to defaults when no managed content exists. Admin interface includes AI-powered copywriting for goal and motivational text fields.
+-   **Volunteer Enrollment Tracking System**: Comprehensive system for managing volunteer activities with four-table relational schema (volunteer_events, volunteer_shifts, volunteer_enrollments, volunteer_session_logs). Features include:
+    -   **Student Dashboard Integration**: VolunteerEnrollmentCard displays next upcoming shift, YTD hours, and links to detailed engagement page
+    -   **Volunteer Engagement Page** (`/volunteer`): Shows upcoming commitments, hours metrics (YTD, total, session count), and attendance history
+    -   **Admin Management Interface** (`/admin/volunteer-management`): Tab-based interface for managing events, shifts, enrollments, and attendance logging
+    -   **Hours Tracking**: Attendance logging with minute-level precision, automatic YTD calculations via SQL aggregation
+    -   **Role Tracking**: Adult Tutor Volunteer role (1-2 hours/week, Monday-Thursday, 9:30AM-2PM or 6-8PM class times)
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage. A three-tier RBAC system (client, admin, super_admin) is implemented with comprehensive audit logging.
