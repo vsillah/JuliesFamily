@@ -17,24 +17,24 @@ export function useAdminPreviewState() {
   // Single variant selection: only ONE variant can be selected at a time
   const [selectedVariant, setSelectedVariant] = useState<{ testId: string; variantId: string } | null>(null);
   
-  // Track if we're in the initial hydration phase
-  const isInitialHydration = useRef(true);
+  // Track previous values to detect actual changes (not just initial hydration)
+  const prevPersona = useRef<Persona | null | undefined>(undefined);
+  const prevFunnel = useRef<FunnelStage | "none" | undefined>(undefined);
+  const isHydrating = useRef(true);
 
-  // Load initial state from sessionStorage
+  // Load initial state from sessionStorage (runs only once on mount)
   useEffect(() => {
     const adminPersonaOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
-    if (adminPersonaOverride && adminPersonaOverride !== "none") {
-      setSelectedPersona(adminPersonaOverride as Persona);
-    } else {
-      setSelectedPersona(persona);
-    }
+    const loadedPersona = (adminPersonaOverride && adminPersonaOverride !== "none") 
+      ? adminPersonaOverride as Persona 
+      : persona;
+    setSelectedPersona(loadedPersona);
 
     const adminFunnelOverride = sessionStorage.getItem(ADMIN_FUNNEL_KEY);
-    if (adminFunnelOverride) {
-      setSelectedFunnel(adminFunnelOverride as FunnelStage);
-    } else {
-      setSelectedFunnel("none");
-    }
+    const loadedFunnel = adminFunnelOverride 
+      ? adminFunnelOverride as FunnelStage 
+      : "none";
+    setSelectedFunnel(loadedFunnel);
 
     const savedVariants = sessionStorage.getItem(ADMIN_VARIANT_KEY);
     if (savedVariants) {
@@ -53,16 +53,34 @@ export function useAdminPreviewState() {
       }
     }
     
-    // Mark initial hydration as complete
-    isInitialHydration.current = false;
+    // Sync refs with loaded values BEFORE clearing hydration flag
+    queueMicrotask(() => {
+      prevPersona.current = loadedPersona;
+      prevFunnel.current = loadedFunnel;
+      isHydrating.current = false;
+    });
   }, [persona]);
 
-  // Clear variant selection when persona or funnel changes (but not during initial hydration)
+  // Clear variant selection when persona or funnel ACTUALLY CHANGES (not during initial load)
   useEffect(() => {
-    // Skip clearing during initial hydration to preserve saved variant
-    if (isInitialHydration.current) return;
+    // Skip during hydration to preserve loaded variant
+    if (isHydrating.current) {
+      prevPersona.current = selectedPersona;
+      prevFunnel.current = selectedFunnel;
+      return;
+    }
     
-    setSelectedVariant(null);
+    // Only clear if there was an actual change from previous values
+    const personaChanged = prevPersona.current !== undefined && prevPersona.current !== selectedPersona;
+    const funnelChanged = prevFunnel.current !== undefined && prevFunnel.current !== selectedFunnel;
+    
+    if (personaChanged || funnelChanged) {
+      setSelectedVariant(null);
+    }
+    
+    // Update refs for next render
+    prevPersona.current = selectedPersona;
+    prevFunnel.current = selectedFunnel;
   }, [selectedPersona, selectedFunnel]);
 
   // Fetch active A/B tests for selected persona×funnel combination

@@ -148,7 +148,7 @@ function UnifiedVariantSelector({
         {/* No variant selected option */}
         <div
           className={cn(
-            "flex items-start space-x-3 p-3 rounded-md border cursor-pointer hover-elevate",
+            "flex items-start space-x-3 p-3 min-h-11 rounded-md border cursor-pointer hover-elevate",
             (!selectedVariantId || selectedVariantId === "none") && "border-primary bg-primary/5"
           )}
           onClick={() => onVariantChange("none", "")}
@@ -173,7 +173,7 @@ function UnifiedVariantSelector({
           <div
             key={variantId}
             className={cn(
-              "flex items-start space-x-3 p-3 rounded-md border cursor-pointer hover-elevate",
+              "flex items-start space-x-3 p-3 min-h-11 rounded-md border cursor-pointer hover-elevate",
               selectedVariantId === variantId && "border-primary bg-primary/5"
             )}
             onClick={() => onVariantChange(variantId, testId)}
