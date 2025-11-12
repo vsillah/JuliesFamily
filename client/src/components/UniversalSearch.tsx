@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -10,13 +10,13 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { Badge } from "@/components/ui/badge";
 import { staticSearchRegistry, type SearchItem, type SearchCategory } from "@shared/searchRegistry";
 import { 
   Search, ChevronRight, Hash, Users as UsersIcon, Mail, 
   Target, Calendar, Heart, FileText 
 } from "lucide-react";
-import type { Lead, Task, EmailCampaign, Content } from "@shared/schema";
+import type { Lead, Task, EmailCampaign, ContentItem } from "@shared/schema";
+import Fuse from "fuse.js";
 
 interface DynamicSearchResult {
   id: string;
@@ -27,6 +27,7 @@ interface DynamicSearchResult {
   route: string;
   parent?: string;
   metadata?: Record<string, any>;
+  score?: number;
 }
 
 const categoryLabels: Record<SearchCategory, string> = {
@@ -42,6 +43,27 @@ export function UniversalSearch() {
   const [query, setQuery] = useState("");
   const [, navigate] = useLocation();
 
+  // Memoize static Fuse instance based on registry contents to handle edits and additions
+  // Include all searchable fields (title, description, keywords) in dependency to catch any edits
+  const staticFuse = useMemo(() => {
+    return new Fuse(staticSearchRegistry, {
+      keys: [
+        { name: "title", weight: 2 },
+        { name: "description", weight: 1 },
+        { name: "keywords", weight: 1.5 },
+      ],
+      threshold: 0.4,
+      includeScore: true,
+    });
+  }, [JSON.stringify(staticSearchRegistry.map(item => ({ 
+    id: item.id, 
+    title: item.title, 
+    description: item.description,
+    keywords: item.keywords,
+    parent: item.parent,
+    route: item.route 
+  })))]);
+
   // Keyboard shortcut
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -55,146 +77,181 @@ export function UniversalSearch() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // Fetch dynamic data only when search is open and query exists
-  const shouldFetchDynamic = open && query.length >= 2;
+  // Prefetch dynamic data when search is open (not gated on query length)
+  // This ensures data is available when user starts typing
+  const shouldFetchDynamic = open;
 
-  // Dynamic loaders - only fetch when needed
-  const { data: leads = [] } = useQuery<Lead[]>({
+  // Dynamic loaders - use default queryFn from query client for consistent auth handling
+  const { data: leads = [], isLoading: leadsLoading } = useQuery<Lead[]>({
     queryKey: ["/api/admin/leads"],
     enabled: shouldFetchDynamic,
     staleTime: 60000, // Cache for 1 minute
   });
 
-  const { data: tasks = [] } = useQuery<Task[]>({
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
     queryKey: ["/api/tasks"],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });
 
-  const { data: emailCampaigns = [] } = useQuery<EmailCampaign[]>({
+  const { data: emailCampaigns = [], isLoading: campaignsLoading } = useQuery<EmailCampaign[]>({
     queryKey: ["/api/email-campaigns"],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });
 
-  const { data: content = [] } = useQuery<Content[]>({
+  const { data: content = [], isLoading: contentLoading } = useQuery<ContentItem[]>({
     queryKey: ["/api/content"],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });
 
-  // Build dynamic search results
-  const getDynamicResults = useCallback((): DynamicSearchResult[] => {
-    if (!shouldFetchDynamic) return [];
+  const dynamicDataLoading = leadsLoading || tasksLoading || campaignsLoading || contentLoading;
 
-    const lowerQuery = query.toLowerCase();
+  // Fuzzy search for dynamic leads
+  const leadsFuse = useMemo(() => {
+    const searchableLeads = leads.map(lead => ({
+      ...lead,
+      searchText: `${lead.firstName} ${lead.lastName} ${lead.email}`,
+    }));
+    return new Fuse(searchableLeads, {
+      keys: [
+        { name: "searchText", weight: 2 },
+        { name: "persona", weight: 1 },
+      ],
+      threshold: 0.4,
+      includeScore: true,
+    });
+  }, [leads]);
+
+  // Fuzzy search for tasks
+  const tasksFuse = useMemo(() => {
+    return new Fuse(tasks, {
+      keys: [
+        { name: "title", weight: 2 },
+        { name: "description", weight: 1 },
+      ],
+      threshold: 0.4,
+      includeScore: true,
+    });
+  }, [tasks]);
+
+  // Fuzzy search for email campaigns
+  const campaignsFuse = useMemo(() => {
+    return new Fuse(emailCampaigns, {
+      keys: [
+        { name: "name", weight: 2 },
+        { name: "description", weight: 1 },
+      ],
+      threshold: 0.4,
+      includeScore: true,
+    });
+  }, [emailCampaigns]);
+
+  // Fuzzy search for content
+  const contentFuse = useMemo(() => {
+    return new Fuse(content, {
+      keys: [
+        { name: "title", weight: 2 },
+        { name: "subtitle", weight: 1 },
+        { name: "type", weight: 1 },
+      ],
+      threshold: 0.4,
+      includeScore: true,
+    });
+  }, [content]);
+
+  // Build dynamic search results with fuzzy ranking
+  const getDynamicResults = useCallback((): DynamicSearchResult[] => {
+    // Only show dynamic results when user has typed at least 2 characters
+    if (query.length < 2) return [];
+
     const results: DynamicSearchResult[] = [];
 
-    // Search leads
-    leads
-      .filter(lead => 
-        lead.firstName?.toLowerCase().includes(lowerQuery) ||
-        lead.lastName?.toLowerCase().includes(lowerQuery) ||
-        lead.email?.toLowerCase().includes(lowerQuery)
-      )
-      .slice(0, 5)
-      .forEach(lead => {
-        results.push({
-          id: `lead-${lead.id}`,
-          title: `${lead.firstName} ${lead.lastName}`,
-          description: `${lead.email} • ${lead.persona || 'No persona'}`,
-          category: "crm",
-          icon: UsersIcon,
-          route: `/admin#lead-${lead.id}`,
-          parent: "Leads",
-          metadata: { type: "lead", data: lead }
-        });
+    // Search leads with fuzzy matching
+    const leadResults = leadsFuse.search(query).slice(0, 5);
+    leadResults.forEach(({ item: lead, score }) => {
+      results.push({
+        id: `lead-${lead.id}`,
+        title: `${lead.firstName} ${lead.lastName}`,
+        description: `${lead.email} • ${lead.persona || 'No persona'}`,
+        category: "crm",
+        icon: UsersIcon,
+        route: `/admin#lead-${lead.id}`,
+        parent: "Leads",
+        score,
+        metadata: { type: "lead", data: lead }
       });
+    });
 
-    // Search tasks
-    tasks
-      .filter(task => 
-        task.title?.toLowerCase().includes(lowerQuery) ||
-        task.description?.toLowerCase().includes(lowerQuery)
-      )
-      .slice(0, 5)
-      .forEach(task => {
-        results.push({
-          id: `task-${task.id}`,
-          title: task.title,
-          description: task.description || 'No description',
-          category: "crm",
-          icon: Target,
-          route: `/admin/tasks#task-${task.id}`,
-          parent: "Tasks",
-          metadata: { type: "task", data: task }
-        });
+    // Search tasks with fuzzy matching
+    const taskResults = tasksFuse.search(query).slice(0, 5);
+    taskResults.forEach(({ item: task, score }) => {
+      results.push({
+        id: `task-${task.id}`,
+        title: task.title,
+        description: task.description || 'No description',
+        category: "crm",
+        icon: Target,
+        route: `/admin/tasks#task-${task.id}`,
+        parent: "Tasks",
+        score,
+        metadata: { type: "task", data: task }
       });
+    });
 
-    // Search email campaigns
-    emailCampaigns
-      .filter(campaign => 
-        campaign.name?.toLowerCase().includes(lowerQuery) ||
-        campaign.description?.toLowerCase().includes(lowerQuery)
-      )
-      .slice(0, 5)
-      .forEach(campaign => {
-        results.push({
-          id: `campaign-${campaign.id}`,
-          title: campaign.name,
-          description: campaign.description || 'No description',
-          category: "communication",
-          icon: Mail,
-          route: `/admin/email-campaigns/${campaign.id}`,
-          parent: "Email Campaigns",
-          metadata: { type: "campaign", data: campaign }
-        });
+    // Search email campaigns with fuzzy matching
+    const campaignResults = campaignsFuse.search(query).slice(0, 5);
+    campaignResults.forEach(({ item: campaign, score }) => {
+      results.push({
+        id: `campaign-${campaign.id}`,
+        title: campaign.name,
+        description: campaign.description || 'No description',
+        category: "communication",
+        icon: Mail,
+        route: `/admin/email-campaigns/${campaign.id}`,
+        parent: "Email Campaigns",
+        score,
+        metadata: { type: "campaign", data: campaign }
       });
+    });
 
-    // Search content items
-    content
-      .filter(item => 
-        item.title?.toLowerCase().includes(lowerQuery) ||
-        item.subtitle?.toLowerCase().includes(lowerQuery)
-      )
-      .slice(0, 8)
-      .forEach(item => {
-        const contentTypeLabels: Record<string, string> = {
-          hero: "Hero",
-          cta: "CTA",
-          service: "Service",
-          event: "Event",
-          testimonial: "Testimonial",
-          lead_magnet: "Lead Magnet",
-        };
-        
-        results.push({
-          id: `content-${item.id}`,
-          title: item.title,
-          description: `${contentTypeLabels[item.type] || item.type} • ${item.subtitle || ''}`,
-          category: "content",
-          icon: FileText,
-          route: `/admin/content#${item.type}`,
-          parent: "Content Manager",
-          metadata: { type: "content", data: item }
-        });
+    // Search content items with fuzzy matching
+    const contentResults = contentFuse.search(query).slice(0, 8);
+    contentResults.forEach(({ item, score }) => {
+      const contentTypeLabels: Record<string, string> = {
+        hero: "Hero",
+        cta: "CTA",
+        service: "Service",
+        event: "Event",
+        testimonial: "Testimonial",
+        lead_magnet: "Lead Magnet",
+      };
+      
+      results.push({
+        id: `content-${item.id}`,
+        title: item.title,
+        description: `${contentTypeLabels[item.type] || item.type} • ${item.subtitle || ''}`,
+        category: "content",
+        icon: FileText,
+        route: `/admin/content#${item.type}`,
+        parent: "Content Manager",
+        score,
+        metadata: { type: "content", data: item }
       });
+    });
 
-    return results;
-  }, [shouldFetchDynamic, query, leads, tasks, emailCampaigns, content]);
+    // Sort by score (lower is better in Fuse.js)
+    return results.sort((a, b) => (a.score || 0) - (b.score || 0));
+  }, [query, leadsFuse, tasksFuse, campaignsFuse, contentFuse]);
 
-  // Filter static items
+  // Filter static items with fuzzy search
   const getStaticResults = useCallback((): SearchItem[] => {
     if (query.length === 0) return staticSearchRegistry;
     
-    const lowerQuery = query.toLowerCase();
-    return staticSearchRegistry.filter(item => {
-      const titleMatch = item.title.toLowerCase().includes(lowerQuery);
-      const descMatch = item.description?.toLowerCase().includes(lowerQuery);
-      const keywordMatch = item.keywords?.some(k => k.toLowerCase().includes(lowerQuery));
-      return titleMatch || descMatch || keywordMatch;
-    });
-  }, [query]);
+    const fuseResults = staticFuse.search(query);
+    return fuseResults.map(result => result.item);
+  }, [query, staticFuse]);
 
   const staticResults = getStaticResults();
   const dynamicResults = getDynamicResults();
@@ -223,7 +280,7 @@ export function UniversalSearch() {
       setTimeout(() => {
         const element = document.getElementById(hash);
         if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
         }
       }, 100);
     } else {
@@ -254,7 +311,9 @@ export function UniversalSearch() {
           data-testid="input-universal-search"
         />
         <CommandList>
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty>
+            {dynamicDataLoading && query.length >= 2 ? "Loading results..." : "No results found."}
+          </CommandEmpty>
 
           {/* Static Results */}
           {Object.entries(groupedStatic).map(([category, items]) => (
@@ -294,8 +353,8 @@ export function UniversalSearch() {
             )
           ))}
 
-          {/* Dynamic Results */}
-          {shouldFetchDynamic && Object.entries(groupedDynamic).map(([category, items]) => (
+          {/* Dynamic Results - only shown when query >= 2 chars */}
+          {query.length >= 2 && Object.entries(groupedDynamic).map(([category, items]) => (
             items.length > 0 && (
               <div key={`dynamic-${category}`}>
                 <CommandGroup heading={`${categoryLabels[category as SearchCategory]} Items`}>

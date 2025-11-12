@@ -75,6 +75,7 @@
     "express-rate-limit": "^8.2.1",
     "express-session": "^1.18.1",
     "framer-motion": "^11.13.1",
+    "fuse.js": "^7.1.0",
     "google-auth-library": "^10.5.0",
     "googleapis": "^165.0.0",
     "helmet": "^8.1.0",
