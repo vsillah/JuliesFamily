@@ -29,24 +29,24 @@ async function seedVolunteerData() {
 
       const morningShift: InsertVolunteerShift = {
         eventId: createdEvent.id,
-        shiftDate: shiftDate.toISOString().split('T')[0],
+        shiftDate: new Date(shiftDate),
         startTime: "09:30",
         endTime: "11:30",
         location: "Julie's Family Learning Program - Main Campus",
         maxVolunteers: 4,
         currentEnrollments: 0,
-        requirements: "Orientation attendance required",
+        notes: "Orientation attendance required",
       };
 
       const eveningShift: InsertVolunteerShift = {
         eventId: createdEvent.id,
-        shiftDate: shiftDate.toISOString().split('T')[0],
+        shiftDate: new Date(shiftDate),
         startTime: "18:00",
         endTime: "20:00",
         location: "Julie's Family Learning Program - Main Campus",
         maxVolunteers: 3,
         currentEnrollments: 0,
-        requirements: "Orientation attendance required",
+        notes: "Orientation attendance required",
       };
 
       shifts.push(morningShift, eveningShift);
