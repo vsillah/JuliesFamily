@@ -6,17 +6,17 @@ import { Calendar, Clock, Users, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 
-interface VolunteerEnrollmentCardProps {
-  userId?: string;
-}
-
-export function VolunteerEnrollmentCard({ userId }: VolunteerEnrollmentCardProps) {
-  const { data, isLoading } = useQuery({
-    queryKey: ['/api/volunteer/my-enrollments'],
-    enabled: !!userId,
+export function VolunteerEnrollmentCard() {
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
   });
 
-  if (!userId || isLoading) {
+  const { data, isLoading } = useQuery({
+    queryKey: ['/api/volunteer/my-enrollments'],
+    enabled: !!user,
+  });
+
+  if (!user || isLoading) {
     return (
       <Card data-testid="card-volunteer-enrollment">
         <CardHeader>

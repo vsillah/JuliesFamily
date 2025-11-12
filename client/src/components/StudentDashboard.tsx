@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, BookOpen, Award, Laptop, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { StudentSubmissionForm } from "@/components/StudentSubmissionForm";
+import { VolunteerEnrollmentCard } from "@/components/VolunteerEnrollmentCard";
 
 interface TGHProgress {
   enrolled: boolean;
@@ -311,6 +312,11 @@ export function StudentDashboard() {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Volunteer Engagement Card */}
+        <div className="max-w-5xl mx-auto mt-8">
+          <VolunteerEnrollmentCard />
         </div>
 
         {/* Student Submissions Section */}
