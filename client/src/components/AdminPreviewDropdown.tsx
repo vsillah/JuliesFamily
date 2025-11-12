@@ -375,8 +375,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           <Button
             className="w-full h-12 text-base"
             onClick={() => {
-              handleApply();
               setShowMobileOverlay(false);
+              // Small delay to ensure overlay closes before reload
+              setTimeout(() => {
+                handleApply();
+              }, 100);
             }}
             data-testid="button-apply-preview-dropdown"
           >
@@ -388,8 +391,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               variant="outline"
               className="w-full h-12 text-base"
               onClick={() => {
-                handleReset();
                 setShowMobileOverlay(false);
+                // Small delay to ensure overlay closes before reload
+                setTimeout(() => {
+                  handleReset();
+                }, 100);
               }}
               data-testid="button-reset-preview-dropdown"
             >
