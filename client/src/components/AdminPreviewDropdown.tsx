@@ -276,10 +276,10 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
       className="fixed inset-0 w-screen h-screen bg-background z-[99999] overflow-y-auto"
       data-testid="menu-admin-preview"
     >
-      {/* Close button */}
+      {/* Close button - fixed position so it stays visible while scrolling */}
       <button
         onClick={() => setShowMobileOverlay(false)}
-        className="absolute top-4 right-4 h-11 w-11 flex items-center justify-center hover:bg-accent rounded-md transition-colors z-10"
+        className="fixed top-4 right-4 h-11 w-11 flex items-center justify-center hover:bg-accent rounded-md transition-colors z-[100000]"
         data-testid="button-close-admin-preview"
         aria-label="Close preview menu"
       >
