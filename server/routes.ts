@@ -9,6 +9,8 @@ import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, inse
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter } from "./security";
 import { eq } from "drizzle-orm";
+import { evaluateLeadProgression, getLeadProgressionHistory, manuallyProgressLead, calculateEngagementDelta, type EventType } from "./services/funnelProgressionService";
+import { funnelProgressionRules, insertFunnelProgressionRuleSchema } from "@shared/schema";
 import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { ObjectPermission } from "./objectAcl";
 import { z } from "zod";
@@ -22,7 +24,7 @@ import Stripe from "stripe";
 import * as XLSX from "xlsx";
 import { CalendarService } from "./calendarService";
 import { fromZonedTime } from "date-fns-tz";
-import { seedDemoData } from "./demo-data";
+import { seedDemoData, seedFunnelProgressionRules } from "./demo-data";
 import { parseGoogleSheetUrl, fetchSheetData } from "./googleSheets";
 
 // Extend Express Request to properly type authenticated user
@@ -1152,6 +1154,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertInteractionSchema.parse(req.body);
       const interaction = await storage.createInteraction(validatedData);
+      
+      // If interaction has a leadId and interactionType, update engagement score and evaluate progression
+      if (validatedData.leadId && validatedData.interactionType) {
+        try {
+          // Calculate engagement delta from event type (may be 0 for conversion events)
+          const engagementDelta = calculateEngagementDelta(validatedData.interactionType as EventType);
+          
+          // Update lead's engagement score and lastInteractionDate (even if delta is 0)
+          // This ensures conversion events (donation_completed, etc.) are tracked
+          const lead = await storage.getLeadById(validatedData.leadId);
+          
+          if (lead) {
+            const newScore = (lead.engagementScore || 0) + engagementDelta;
+            await storage.updateLead(validatedData.leadId, {
+              engagementScore: newScore,
+              lastInteractionDate: new Date(),
+            });
+            
+            // Always evaluate funnel progression after any recognized interaction
+            // This ensures:
+            // 1. Threshold-based advancement works for cumulative low-value events
+            // 2. Auto-progression events (with 0 delta) trigger stage advancement
+            await evaluateLeadProgression(
+              validatedData.leadId,
+              validatedData.interactionType as EventType
+            );
+          }
+        } catch (progressionError) {
+          // Log but don't fail the interaction creation
+          console.error("Error updating engagement or evaluating progression:", progressionError);
+        }
+      }
+      
       res.status(201).json(interaction);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -1159,6 +1194,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       console.error("Error creating interaction:", error);
       res.status(500).json({ message: "Failed to create interaction" });
+    }
+  });
+
+  // Funnel Progression API Endpoints
+  
+  // Trigger funnel progression evaluation for a lead
+  app.post('/api/funnel/evaluate/:leadId', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { leadId } = req.params;
+      const { triggerEvent } = req.body;
+      
+      const result = await evaluateLeadProgression(
+        leadId,
+        triggerEvent as EventType | undefined,
+        req.user.id
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error evaluating funnel progression:", error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to evaluate progression" });
+    }
+  });
+  
+  // Get progression history for a lead
+  app.get('/api/funnel/progression-history/:leadId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { leadId } = req.params;
+      const history = await getLeadProgressionHistory(leadId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching progression history:", error);
+      res.status(500).json({ message: "Failed to fetch progression history" });
+    }
+  });
+  
+  // Manually advance/regress a lead's funnel stage (admin override)
+  app.post('/api/funnel/manual-progress/:leadId', isAuthenticated, isAdmin, async (req: AuthenticatedRequest, res) => {
+    try {
+      const { leadId } = req.params;
+      const { toStage, reason } = req.body;
+      
+      if (!toStage) {
+        return res.status(400).json({ message: "toStage is required" });
+      }
+      
+      // Validate toStage is a valid funnel stage
+      const validStages = ['awareness', 'consideration', 'decision', 'retention'];
+      if (!validStages.includes(toStage)) {
+        return res.status(400).json({ 
+          message: "Invalid toStage. Must be one of: awareness, consideration, decision, retention" 
+        });
+      }
+      
+      const result = await manuallyProgressLead(
+        leadId,
+        toStage,
+        req.user.id,
+        reason
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error("Error manually progressing lead:", error);
+      res.status(500).json({ message: error instanceof Error ? error.message : "Failed to manually progress lead" });
+    }
+  });
+  
+  // Get all funnel progression rules
+  app.get('/api/admin/funnel/rules', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const rules = await db.select().from(funnelProgressionRules);
+      res.json(rules);
+    } catch (error) {
+      console.error("Error fetching funnel rules:", error);
+      res.status(500).json({ message: "Failed to fetch funnel rules" });
+    }
+  });
+  
+  // Create a new funnel progression rule
+  app.post('/api/admin/funnel/rules', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const validatedData = insertFunnelProgressionRuleSchema.parse(req.body);
+      const [rule] = await db.insert(funnelProgressionRules).values(validatedData).returning();
+      res.status(201).json(rule);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid rule data", errors: error.errors });
+      }
+      console.error("Error creating funnel rule:", error);
+      res.status(500).json({ message: "Failed to create funnel rule" });
+    }
+  });
+  
+  // Update a funnel progression rule
+  app.patch('/api/admin/funnel/rules/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = insertFunnelProgressionRuleSchema.partial().parse(req.body);
+      
+      const [updated] = await db
+        .update(funnelProgressionRules)
+        .set({ ...validatedData, updatedAt: new Date() })
+        .where(eq(funnelProgressionRules.id, id))
+        .returning();
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid rule data", errors: error.errors });
+      }
+      console.error("Error updating funnel rule:", error);
+      res.status(500).json({ message: "Failed to update funnel rule" });
+    }
+  });
+  
+  // Delete a funnel progression rule
+  app.delete('/api/admin/funnel/rules/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const [deleted] = await db
+        .delete(funnelProgressionRules)
+        .where(eq(funnelProgressionRules.id, id))
+        .returning();
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Rule not found" });
+      }
+      
+      res.json({ message: "Rule deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting funnel rule:", error);
+      res.status(500).json({ message: "Failed to delete funnel rule" });
     }
   });
 
@@ -6962,6 +7135,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error seeding demo data:", error);
       res.status(500).json({ 
         message: error.message || "Failed to seed demo data",
+        error: error.toString(),
+      });
+    }
+  });
+
+  // Funnel Progression Rules Seeding - Initialize default persona-specific rules
+  app.post('/api/admin/funnel/seed-rules', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { clearExisting = false } = req.body; // Default to NOT clearing existing rules
+      const result = await seedFunnelProgressionRules(clearExisting);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error seeding funnel progression rules:", error);
+      res.status(500).json({ 
+        message: error.message || "Failed to seed funnel progression rules",
         error: error.toString(),
       });
     }

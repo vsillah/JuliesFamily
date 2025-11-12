@@ -2,6 +2,7 @@ import type { IStorage } from "../storage/index";
 import { db } from "../db";
 import { sql, eq, desc, and, gte, lte } from "drizzle-orm";
 import { donations, donorLifecycleStages, leads, donorEconomics } from "@shared/schema";
+import { evaluateLeadProgression } from "./funnelProgressionService";
 
 /**
  * DonorLifecycleService - Automatically tracks and updates donor lifecycle stages
@@ -59,6 +60,15 @@ export class DonorLifecycleService {
     
     // Update donor economics with current LTGP at this stage
     await this.updateEconomicsAtStage(leadId, updates.currentStage || lifecycleStage.currentStage);
+    
+    // Trigger funnel progression evaluation for donation completion
+    // This ensures scheduler-driven/webhook donations advance stages (not just API interactions)
+    try {
+      await evaluateLeadProgression(leadId, 'donation_completed');
+    } catch (error) {
+      console.error(`[DonorLifecycle] Failed to evaluate funnel progression for lead ${leadId}:`, error);
+      // Don't fail the donation processing if funnel evaluation fails
+    }
   }
   
   /**

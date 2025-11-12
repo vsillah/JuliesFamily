@@ -5,6 +5,7 @@ import {
   contentItems, 
   campaignMembers,
   users,
+  funnelProgressionRules,
 } from "../shared/schema";
 import { sql } from "drizzle-orm";
 
@@ -316,6 +317,218 @@ export async function seedDemoData(clearExisting = false) {
 
   } catch (error) {
     console.error("❌ Error seeding demo data:", error);
+    throw error;
+  }
+}
+
+/**
+ * Seed default funnel progression rules for all personas
+ * Based on sales funnel best practices and engagement scoring
+ */
+export async function seedFunnelProgressionRules(clearExisting = false) {
+  console.log("🎯 Starting funnel progression rules seeding...");
+
+  try {
+    // Clear existing rules if requested
+    if (clearExisting) {
+      console.log("🗑️ Clearing existing funnel progression rules...");
+      await db.delete(funnelProgressionRules);
+      console.log("✅ Existing rules cleared");
+    }
+
+    // Default progression rules for each persona
+    // Thresholds based on engagement scoring system (see funnelProgressionService.ts)
+    const defaultRules = [
+      // DONOR PERSONA
+      {
+        persona: "donor",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 100, // ~10 page views or 3-4 resource downloads
+        minimumDaysInStage: 1, // At least 1 day before advancing
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 90, // 3 months of inactivity
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "donor",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 150, // Donation page view (60pts) + calculator use (25pts) + more
+        minimumDaysInStage: 2,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60, // 2 months
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "donor",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999, // Auto-progress only via donation_completed event
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["donation_completed"],
+        inactivityDaysThreshold: 45, // 1.5 months
+        decayToStage: "consideration",
+        isActive: true,
+      },
+
+      // STUDENT PERSONA
+      {
+        persona: "student",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 80, // Quiz start (20pts) + video watch (25pts) + engagement
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "student",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 120, // Program inquiry (90pts) + other engagement
+        minimumDaysInStage: 3, // Students take time to decide
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 45,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "student",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["enrollment_submitted"],
+        inactivityDaysThreshold: 30,
+        decayToStage: "consideration",
+        isActive: true,
+      },
+
+      // PARENT PERSONA
+      {
+        persona: "parent",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 90, // Testimonials (25pts) + impact calculator (25pts) + more
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 75,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "parent",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 140, // Program inquiry (90pts) + engagement
+        minimumDaysInStage: 2,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "parent",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["enrollment_submitted"], // Enrolling child
+        inactivityDaysThreshold: 30,
+        decayToStage: "consideration",
+        isActive: true,
+      },
+
+      // VOLUNTEER PERSONA
+      {
+        persona: "volunteer",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 70, // Resource downloads + video engagement
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 90,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "volunteer",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 110, // Volunteer inquiry (80pts) + engagement
+        minimumDaysInStage: 2,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "volunteer",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["volunteer_enrolled"],
+        inactivityDaysThreshold: 45,
+        decayToStage: "consideration",
+        isActive: true,
+      },
+
+      // PROVIDER PERSONA (Service providers/partners)
+      {
+        persona: "provider",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 100, // Resource downloads + testimonial engagement
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 90,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "provider",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 200, // Multiple high-value engagements before partnership
+        minimumDaysInStage: 5, // Partnerships take time
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true,
+      },
+      {
+        persona: "provider",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["contact_form_submit"], // Partnership inquiry
+        inactivityDaysThreshold: 45,
+        decayToStage: "consideration",
+        isActive: true,
+      },
+    ];
+
+    // Insert rules
+    const inserted = await db.insert(funnelProgressionRules).values(defaultRules).returning();
+    
+    console.log(`✅ Created ${inserted.length} funnel progression rules`);
+    console.log("✨ Funnel progression rules seeding complete!");
+
+    return {
+      success: true,
+      rulesCreated: inserted.length,
+      rules: inserted,
+    };
+
+  } catch (error) {
+    console.error("❌ Error seeding funnel progression rules:", error);
     throw error;
   }
 }
