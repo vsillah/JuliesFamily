@@ -6,10 +6,13 @@ import { Laptop, Award, Wifi, Users, Clock, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { usePersona } from "@/contexts/PersonaContext";
+import type { ContentItem } from "@shared/schema";
 
 export default function TechGoesHomeLanding() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { persona, funnelStage } = usePersona();
 
   // Fetch current user to check auth status
   const { data: user } = useQuery<any>({ 
@@ -29,6 +32,31 @@ export default function TechGoesHomeLanding() {
     queryKey: ['/api/tgh/demo-progress'],
     enabled: !user
   });
+
+  // Fetch student dashboard card content for personalization
+  const { data: dashboardCardContent = [] } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/visible/student_dashboard_card", { persona, funnelStage }],
+    queryFn: async () => {
+      if (!persona || !funnelStage) return [];
+      const params = new URLSearchParams();
+      params.append('persona', persona);
+      params.append('funnelStage', funnelStage);
+      const res = await fetch(`/api/content/visible/student_dashboard_card?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch student dashboard card content');
+      return res.json();
+    },
+    enabled: !!persona && !!funnelStage && !!studentProgress?.enrolled,
+  });
+
+  // Normalize first content item for the card (if available)
+  const cardContent = dashboardCardContent[0] ? {
+    title: dashboardCardContent[0].title,
+    description: dashboardCardContent[0].description,
+    buttonText: (dashboardCardContent[0].metadata as any)?.buttonText || "View Dashboard",
+    buttonLink: (dashboardCardContent[0].metadata as any)?.buttonLink || "/student/tech-goes-home",
+    goalText: (dashboardCardContent[0].metadata as any)?.goalText,
+    motivationalText: (dashboardCardContent[0].metadata as any)?.motivationalText,
+  } : undefined;
 
   // Enrollment mutation
   const enrollMutation = useMutation({
@@ -216,6 +244,7 @@ export default function TechGoesHomeLanding() {
               <TechGoesHomeProgressCard 
                 mode={cardMode}
                 data={progressData}
+                content={cardContent}
                 onEnroll={handleEnroll}
                 showEnrollButton={cardMode === "demo" && !!user}
               />

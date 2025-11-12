@@ -5,6 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Laptop, Award, Wifi, CheckCircle2, Circle } from "lucide-react";
 import { Link } from "wouter";
 
+interface StudentDashboardCardContent {
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+  goalText?: string;
+  motivationalText?: string;
+}
+
 interface TechGoesHomeProgressCardProps {
   mode: "demo" | "summary" | "full";
   data?: {
@@ -21,6 +30,7 @@ interface TechGoesHomeProgressCardProps {
       internetActivated?: boolean;
     };
   };
+  content?: StudentDashboardCardContent;
   onEnroll?: () => void;
   showEnrollButton?: boolean;
 }
@@ -28,6 +38,7 @@ interface TechGoesHomeProgressCardProps {
 export function TechGoesHomeProgressCard({ 
   mode, 
   data,
+  content,
   onEnroll,
   showEnrollButton = false
 }: TechGoesHomeProgressCardProps) {
@@ -36,6 +47,21 @@ export function TechGoesHomeProgressCard({
   const remaining = data?.classesRemaining || totalRequired;
   const percent = data?.percentComplete || 0;
   const eligible = data?.isEligibleForRewards || false;
+  
+  // Default content values for fallback
+  const defaultContent: StudentDashboardCardContent = {
+    title: "My Progress",
+    description: "Track your learning journey",
+    buttonText: "View Full Details",
+    buttonLink: "/student/tech-goes-home",
+    goalText: "Goal: 15+ hours"
+  };
+  
+  // Merge provided content with defaults
+  const cardContent: StudentDashboardCardContent = {
+    ...defaultContent,
+    ...content
+  };
   
   // Reward items
   const rewards = [
@@ -134,13 +160,17 @@ export function TechGoesHomeProgressCard({
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2" data-testid="text-tgh-title">
               <Laptop className="h-6 w-6 text-primary" />
-              My Progress
+              {cardContent.title}
             </CardTitle>
-            <Badge variant="secondary" data-testid="badge-hours-goal">
-              Goal: 15+ hours
-            </Badge>
+            {cardContent.goalText && (
+              <Badge variant="secondary" data-testid="badge-hours-goal">
+                {cardContent.goalText}
+              </Badge>
+            )}
           </div>
-          <CardDescription data-testid="text-motivation">{getMotivationalMessage()}</CardDescription>
+          <CardDescription data-testid="text-motivation">
+            {cardContent.motivationalText || getMotivationalMessage()}
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
@@ -159,8 +189,8 @@ export function TechGoesHomeProgressCard({
         </CardContent>
         <CardFooter className="bg-secondary/20 border-t">
           <Button variant="outline" className="w-full" asChild data-testid="button-view-details">
-            <Link href="/student/tech-goes-home">
-              View Full Details
+            <Link href={cardContent.buttonLink}>
+              {cardContent.buttonText}
             </Link>
           </Button>
         </CardFooter>
