@@ -47,6 +47,49 @@ When a chat interaction reveals patterns, preferences, or technical decisions th
 
 By capturing these learnings, we create a knowledge base that helps future agents work more efficiently and maintain consistency with past decisions.
 
+### Development Testing Utilities
+
+**Developer Grant Admin Button** - A development-only feature that bypasses OIDC authentication constraints when testing admin features.
+
+**Location & Identification:**
+- Component: `DevAdminButton` in `client/src/components/DevAdminButton.tsx`
+- Displayed in: Navigation component (`client/src/components/Navigation.tsx`)
+- Test ID: `data-testid="button-grant-admin-dev"`
+- Label: "DEV: Grant Admin" (desktop) / "Admin" (mobile)
+
+**When It Appears:**
+- Only visible in development mode (`NODE_ENV=development` on server, `!import.meta.env.PROD` on client)
+- Only shown when user is authenticated via OIDC but does NOT have admin/super_admin role
+- Automatically hidden in production builds for security
+
+**How It Works:**
+- Clicking the button calls `POST /api/test/set-user-role` with `{ role: 'super_admin' }`
+- Server endpoint validates the request and updates the user's role in the database
+- Page automatically reloads to apply new permissions
+- User gains full super_admin access to all admin features
+
+**Testing Workflow:**
+1. Start test with OIDC claims configured (use OIDC test helper)
+2. Navigate to homepage or any public page
+3. Complete OIDC login flow
+4. Look for "DEV: Grant Admin" button in navigation
+5. Click the button and wait for page reload (~1.5 seconds)
+6. Navigate to admin pages (/admin, /admin/content, etc.)
+7. User now has super_admin privileges for testing
+
+**Common Testing Issues:**
+- **401 Unauthorized errors**: If you see these after OIDC login, you likely need to click the Grant Admin button first
+- **Missing button**: Button only appears for authenticated non-admin users; if already admin, button won't show
+- **Production testing**: This feature is completely disabled in production; use proper OIDC flows for production testing
+
+**Alternative for Automated Tests:**
+For Playwright tests that encounter OIDC authentication issues:
+1. Set OIDC claims with test user data
+2. Navigate to a public page to complete initial auth
+3. Look for and click `button-grant-admin-dev`
+4. Wait for reload
+5. Proceed with admin feature testing
+
 ## Development Standards
 
 ### Mobile Responsiveness
