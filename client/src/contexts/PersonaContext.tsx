@@ -99,8 +99,6 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     // Use startsWith to handle query strings and trailing slashes
     const isKinfloPage = location.startsWith('/kinflo') || location.startsWith('/product');
 
-    let timeoutId: NodeJS.Timeout | null = null;
-
     const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
     
     if (adminOverride && adminOverride !== "none") {
@@ -122,11 +120,8 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       } else if (!modalShown && !adminOverride && !isKinfloPage) {
         // Set default persona for explorers before showing modal
         setPersonaState('default');
-        // Only show modal for unauthenticated users on Julie's pages (not Kinflo)
-        timeoutId = setTimeout(() => {
-          setShowPersonaModal(true);
-          sessionStorage.setItem(PERSONA_MODAL_SHOWN_KEY, "true");
-        }, 2000);
+        // Show modal immediately for unauthenticated users on Julie's pages (not Kinflo)
+        setShowPersonaModal(true);
       } else {
         // If modal was already shown but no persona selected, keep default
         setPersonaState('default');
@@ -142,13 +137,6 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
 
     // Mark persona as loaded
     setIsPersonaLoading(false);
-
-    // Cleanup timeout if component unmounts or location changes
-    return () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
   }, [isAuthenticated, user, isLoading, location]);
 
   const setPersona = async (newPersona: Persona) => {

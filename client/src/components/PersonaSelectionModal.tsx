@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, Handshake, Baby, Heart, Hand, X } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
+import { useEffect, useRef } from "react";
 
 const iconComponents = {
   GraduationCap,
@@ -12,8 +13,20 @@ const iconComponents = {
   Hand
 };
 
+const PERSONA_MODAL_SHOWN_KEY = "julies-persona-modal-shown";
+
 export default function PersonaSelectionModal() {
   const { showPersonaModal, setShowPersonaModal, setPersona } = usePersona();
+  const wasOpenRef = useRef(false);
+
+  // Track when modal closes and mark it as shown in session storage
+  useEffect(() => {
+    if (wasOpenRef.current && !showPersonaModal) {
+      // Modal just closed - mark it as shown so it won't appear again
+      sessionStorage.setItem(PERSONA_MODAL_SHOWN_KEY, "true");
+    }
+    wasOpenRef.current = showPersonaModal;
+  }, [showPersonaModal]);
 
   const handlePersonaSelect = (personaId: typeof personaConfigs[number]["id"]) => {
     setPersona(personaId);
