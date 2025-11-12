@@ -328,13 +328,20 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
 
         {/* Funnel Stage Selection */}
         <div className="py-2 space-y-2">
-          <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+          <label className={cn(
+            "text-sm font-medium flex items-center gap-1.5",
+            selectedPersona === "default" ? "text-muted-foreground/50" : "text-muted-foreground"
+          )}>
             <TrendingUp className="w-4 h-4" />
             Funnel Stage
+            {selectedPersona === "default" && (
+              <span className="text-xs font-normal">(Not available for default persona)</span>
+            )}
           </label>
           <Select
             value={selectedFunnel}
             onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
+            disabled={selectedPersona === "default"}
           >
             <SelectTrigger className="h-11 text-base" data-testid="select-funnel">
               <SelectValue placeholder="Select stage" />
@@ -527,13 +534,20 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
 
             {/* Funnel Stage Selection */}
             <div className="px-2 py-2 space-y-2">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+              <label className={cn(
+                "text-xs font-medium flex items-center gap-1",
+                selectedPersona === "default" ? "text-muted-foreground/50" : "text-muted-foreground"
+              )}>
                 <TrendingUp className="w-3 h-3" />
                 Funnel Stage
+                {selectedPersona === "default" && (
+                  <span className="text-[10px] font-normal">(Not available for default)</span>
+                )}
               </label>
               <Select
                 value={selectedFunnel}
                 onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
+                disabled={selectedPersona === "default"}
               >
                 <SelectTrigger className="h-8 text-sm" data-testid="select-funnel">
                   <SelectValue placeholder="Select stage" />
