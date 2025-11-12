@@ -107,6 +107,32 @@ const isMobile = useIsMobile(768);
 return isMobile ? <MobileOverlay /> : <DesktopDropdown />;
 ```
 
+### Database Query Patterns
+
+**Drizzle ORM Workaround**: Raw SQL is a proven workaround for complex Drizzle ORM issues, particularly when encountering internal errors like `orderSelectedFields` receiving null/undefined. When Drizzle's query builder fails despite correct schema and query patterns, use `db.execute()` with parameterized SQL queries for better control and reliability.
+
+**When to Use Raw SQL**:
+- Complex JOIN queries that trigger internal Drizzle errors
+- Queries requiring precise control over field selection and ordering
+- When encountering `Cannot convert undefined or null to object` errors in Drizzle's internal functions
+- Performance-critical queries where fine-tuning SQL is necessary
+
+**Example Pattern**:
+```typescript
+// Instead of complex Drizzle query builder that may fail
+const results = await db.execute<ResultType>(sql`
+  SELECT 
+    fph.id,
+    fph.created_at as "createdAt",
+    l.email as "userEmail"
+  FROM table_name fph
+  INNER JOIN related_table l ON fph.user_id = l.id
+  WHERE l.status IS NOT NULL ${optionalFilter}
+  ORDER BY fph.created_at DESC
+  LIMIT 50
+`);
+```
+
 ## System Architecture
 
 ### UI/UX Decisions
