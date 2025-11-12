@@ -1339,23 +1339,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/funnel/stats', isAuthenticated, isAdmin, async (req, res) => {
     try {
       const { persona } = req.query;
+      console.log('[funnel-stats] Starting query, persona filter:', persona);
       
       // Get total count of all progressions (with optional persona filter)
       const totalWhereCondition = persona && persona !== 'all'
         ? and(isNotNull(leads.persona), eq(leads.persona, persona as string))
         : isNotNull(leads.persona);
       
+      console.log('[funnel-stats] About to execute total count query');
       const [{ count: totalProgressions }] = await db
         .select({ count: sql<number>`count(*)` })
         .from(funnelProgressionHistory)
         .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
         .where(totalWhereCondition);
+      console.log('[funnel-stats] Total count query completed:', totalProgressions);
 
       // Get recent progression history with lead details (with optional persona filter)
       const historyWhereCondition = persona && persona !== 'all'
         ? and(isNotNull(leads.persona), eq(leads.persona, persona as string))
         : isNotNull(leads.persona);
       
+      console.log('[funnel-stats] About to execute recent history query');
+      // Direct inline select without spread operators
       const recentHistory = await db
         .select({
           id: funnelProgressionHistory.id,
@@ -1374,8 +1379,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .from(funnelProgressionHistory)
         .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
         .where(historyWhereCondition)
-        .orderBy(desc(funnelProgressionHistory.createdAt))
         .limit(50);
+      console.log('[funnel-stats] Recent history query completed:', recentHistory.length, 'rows');
       
       // Reshape flat structure to nested for backwards compatibility
       const reshapedHistory = recentHistory.map(h => ({
@@ -1396,12 +1401,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
 
       // Get current stage distribution (with optional persona filter)
-      let stageQuery = db.select().from(leads);
-      if (persona && persona !== 'all') {
-        stageQuery = stageQuery.where(eq(leads.persona, persona as string));
-      }
+      const stageWhereCondition = persona && persona !== 'all'
+        ? eq(leads.persona, persona as string)
+        : undefined;
       
-      const allLeads = await stageQuery;
+      console.log('[funnel-stats] About to execute stage distribution query');
+      const allLeads = stageWhereCondition
+        ? await db.select({ funnelStage: leads.funnelStage }).from(leads).where(stageWhereCondition)
+        : await db.select({ funnelStage: leads.funnelStage }).from(leads);
+      console.log('[funnel-stats] Stage distribution query completed:', allLeads.length, 'rows');
       const progressionsByStage: Record<string, number> = {};
 
       allLeads.forEach(lead => {
@@ -1415,6 +1423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? and(isNotNull(leads.persona), eq(leads.persona, persona as string))
         : isNotNull(leads.persona);
       
+      console.log('[funnel-stats] About to execute persona breakdown query');
       const allHistory = await db
         .select({
           persona: leads.persona,
@@ -1424,6 +1433,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
         .where(personaHistoryWhereCondition)
         .groupBy(leads.persona);
+      console.log('[funnel-stats] Persona breakdown query completed:', allHistory.length, 'rows');
 
       const progressionsByPersona: Record<string, number> = {};
       allHistory.forEach(row => {
