@@ -27,6 +27,15 @@ After **one failed attempt** at either of the following, escalate to the archite
 
 **Rationale**: This ensures we get expert architectural guidance early rather than spending excessive time on difficult problems. The architect agent has specialized analytical capabilities and can provide strategic direction when standard approaches don't work.
 
+### Testing Protocol
+Before finalizing any build or marking work as complete, the agent must perform end-to-end automation and regression testing to ensure:
+- New features work as expected across different user flows
+- Existing functionality remains intact (no regressions)
+- UI interactions are responsive and accessible
+- Critical user journeys complete successfully
+
+Use the `run_test` tool with comprehensive test plans that cover the implemented changes and related functionality.
+
 ## System Architecture
 
 ### UI/UX Decisions
