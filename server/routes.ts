@@ -1360,30 +1360,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : isNotNull(leads.persona);
       
       console.log('[funnel-stats] About to execute recent history query');
-      // Direct inline select without spread operators
-      const recentHistory = await db
-        .select({
-          id: funnelProgressionHistory.id,
-          leadId: funnelProgressionHistory.leadId,
-          fromStage: funnelProgressionHistory.fromStage,
-          toStage: funnelProgressionHistory.toStage,
-          reason: funnelProgressionHistory.reason,
-          engagementScore: funnelProgressionHistory.engagementScore,
-          triggeredBy: funnelProgressionHistory.triggeredBy,
-          createdAt: funnelProgressionHistory.createdAt,
-          leadFirstName: leads.firstName,
-          leadLastName: leads.lastName,
-          leadEmail: leads.email,
-          leadPersona: leads.persona,
-        })
-        .from(funnelProgressionHistory)
-        .innerJoin(leads, eq(funnelProgressionHistory.leadId, leads.id))
-        .where(historyWhereCondition)
-        .limit(50);
-      console.log('[funnel-stats] Recent history query completed:', recentHistory.length, 'rows');
+      // Use raw SQL to bypass orderSelectedFields issue
+      const personaSQLFilter = persona && persona !== 'all' 
+        ? sql`AND l.persona = ${persona}` 
+        : sql``;
+      
+      const recentHistory = await db.execute<{
+        id: string;
+        leadId: string;
+        fromStage: string;
+        toStage: string;
+        reason: string;
+        engagementScore: number | null;
+        triggeredBy: string;
+        createdAt: Date;
+        leadFirstName: string;
+        leadLastName: string;
+        leadEmail: string;
+        leadPersona: string;
+      }>(sql`
+        SELECT 
+          fph.id,
+          fph.lead_id as "leadId",
+          fph.from_stage as "fromStage",
+          fph.to_stage as "toStage",
+          fph.reason,
+          fph.engagement_score_at_change as "engagementScore",
+          fph.triggered_by as "triggeredBy",
+          fph.created_at as "createdAt",
+          l.first_name as "leadFirstName",
+          l.last_name as "leadLastName",
+          l.email as "leadEmail",
+          l.persona as "leadPersona"
+        FROM funnel_progression_history fph
+        INNER JOIN leads l ON fph.lead_id = l.id
+        WHERE l.persona IS NOT NULL ${personaSQLFilter}
+        ORDER BY fph.created_at DESC
+        LIMIT 50
+      `);
+      console.log('[funnel-stats] Recent history query completed:', recentHistory.rows.length, 'rows');
       
       // Reshape flat structure to nested for backwards compatibility
-      const reshapedHistory = recentHistory.map(h => ({
+      const reshapedHistory = recentHistory.rows.map(h => ({
         id: h.id,
         leadId: h.leadId,
         fromStage: h.fromStage,
