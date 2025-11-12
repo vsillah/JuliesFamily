@@ -138,6 +138,7 @@ export const leads = pgTable("leads", {
   leadSource: varchar("lead_source"), // organic, referral, ad, etc
   engagementScore: integer("engagement_score").default(0),
   lastInteractionDate: timestamp("last_interaction_date"),
+  lastFunnelUpdateAt: timestamp("last_funnel_update_at"), // Tracks when funnel stage was last evaluated/changed
   convertedAt: timestamp("converted_at"),
   notes: text("notes"),
   passions: jsonb("passions"), // Array of passion tags for donor targeting: ['literacy', 'stem', 'arts', 'nutrition', 'community']
@@ -178,6 +179,7 @@ export const updateLeadSchema = z.object({
   leadSource: z.string().optional(),
   engagementScore: z.number().int().min(0).optional(),
   lastInteractionDate: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
+  lastFunnelUpdateAt: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
   convertedAt: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
   notes: z.string().optional(),
   passions: z.any().optional(), // JSONB
@@ -302,6 +304,70 @@ export const insertPipelineHistorySchema = createInsertSchema(pipelineHistory).o
 });
 export type InsertPipelineHistory = z.infer<typeof insertPipelineHistorySchema>;
 export type PipelineHistory = typeof pipelineHistory.$inferSelect;
+
+// Funnel Progression Rules - defines thresholds for automatic funnel stage advancement
+export const funnelProgressionRules = pgTable("funnel_progression_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  persona: varchar("persona").notNull(), // student, provider, parent, donor, volunteer
+  fromStage: varchar("from_stage").notNull(), // awareness, consideration, decision
+  toStage: varchar("to_stage").notNull(), // consideration, decision, retention
+  
+  // Threshold settings for progression
+  engagementScoreThreshold: integer("engagement_score_threshold").notNull(), // Min engagement points to advance
+  minimumDaysInStage: integer("minimum_days_in_stage").default(0), // Prevent premature advancement
+  
+  // Optional: High-value events that trigger instant progression (bypassing threshold)
+  autoProgressEvents: jsonb("auto_progress_events"), // Array like ['donation_completed', 'enrollment_submitted']
+  
+  // Decay/regression rules for inactive leads
+  inactivityDaysThreshold: integer("inactivity_days_threshold"), // Days without interaction before regression
+  decayToStage: varchar("decay_to_stage"), // Stage to regress to on inactivity (null = no decay)
+  
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("funnel_rules_persona_idx").on(table.persona),
+  index("funnel_rules_transition_idx").on(table.fromStage, table.toStage),
+  // Prevent duplicate rules for same persona+transition
+  uniqueIndex("funnel_rules_unique_transition").on(table.persona, table.fromStage, table.toStage),
+]);
+
+export const insertFunnelProgressionRuleSchema = createInsertSchema(funnelProgressionRules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertFunnelProgressionRule = z.infer<typeof insertFunnelProgressionRuleSchema>;
+export type FunnelProgressionRule = typeof funnelProgressionRules.$inferSelect;
+
+// Funnel Progression History - audit log of funnel stage changes
+export const funnelProgressionHistory = pgTable("funnel_progression_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
+  fromStage: varchar("from_stage"), // Null for initial stage assignment
+  toStage: varchar("to_stage").notNull(),
+  
+  // Context about the progression
+  reason: varchar("reason").notNull(), // 'threshold_met', 'manual_override', 'high_value_event', 'inactivity_decay'
+  triggeredBy: varchar("triggered_by").references(() => users.id), // User ID if manual override, null if automated
+  engagementScoreAtChange: integer("engagement_score_at_change"), // Engagement score when change occurred
+  triggerEvent: varchar("trigger_event"), // Specific interaction/event that caused progression
+  
+  metadata: jsonb("metadata"), // Additional context (rule applied, threshold details, etc.)
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("funnel_history_lead_id_idx").on(table.leadId),
+  index("funnel_history_created_at_idx").on(table.createdAt),
+  index("funnel_history_reason_idx").on(table.reason),
+]);
+
+export const insertFunnelProgressionHistorySchema = createInsertSchema(funnelProgressionHistory).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFunnelProgressionHistory = z.infer<typeof insertFunnelProgressionHistorySchema>;
+export type FunnelProgressionHistory = typeof funnelProgressionHistory.$inferSelect;
 
 // Lead Magnets table for managing content offers
 export const leadMagnets = pgTable("lead_magnets", {
