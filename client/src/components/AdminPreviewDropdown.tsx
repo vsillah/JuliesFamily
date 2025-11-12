@@ -308,15 +308,14 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         <div className="py-2 space-y-2">
           <label className="text-sm font-medium text-muted-foreground">Persona Type</label>
           <Select
-            value={selectedPersona || "none"}
-            onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
+            value={selectedPersona || "default"}
+            onValueChange={(value) => setSelectedPersona(value as Persona)}
           >
             <SelectTrigger className="h-11 text-base" data-testid="select-persona">
               <SelectValue placeholder="Select persona" />
             </SelectTrigger>
             <SelectContent className="z-[100000]">
-              <SelectItem value="none">None (Unauthenticated, no selection)</SelectItem>
-              <SelectItem value="default">Default (No Persona)</SelectItem>
+              <SelectItem value="default">Default (Unauthenticated)</SelectItem>
               {personaConfigs.filter(c => c.id !== 'default').map((config) => (
                 <SelectItem key={config.id} value={config.id}>
                   {config.label}
@@ -514,15 +513,14 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             <div className="px-2 py-2 space-y-2">
               <label className="text-xs font-medium text-muted-foreground">Persona Type</label>
               <Select
-                value={selectedPersona || "none"}
-                onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
+                value={selectedPersona || "default"}
+                onValueChange={(value) => setSelectedPersona(value as Persona)}
               >
                 <SelectTrigger className="h-8 text-sm" data-testid="select-persona">
                   <SelectValue placeholder="Select persona" />
                 </SelectTrigger>
                 <SelectContent className="z-[99999]">
-                  <SelectItem value="none">None (Unauthenticated, no selection)</SelectItem>
-                  <SelectItem value="default">Default (No Persona)</SelectItem>
+                  <SelectItem value="default">Default (Unauthenticated)</SelectItem>
                   {personaConfigs.filter(c => c.id !== 'default').map((config) => (
                     <SelectItem key={config.id} value={config.id}>
                       {config.label}
