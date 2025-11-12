@@ -44,6 +44,7 @@ import ImageComparison from "@/pages/ImageComparison";
 import TechGoesHomeLanding from "@/pages/TechGoesHomeLanding";
 import TechGoesHomeStudentDashboard from "@/pages/TechGoesHomeStudentDashboard";
 import StudentDashboardPage from "@/pages/StudentDashboard";
+import VolunteerEngagement from "@/pages/VolunteerEngagement";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -88,6 +89,7 @@ function Router() {
       <Route path="/comparison" component={ImageComparison} />
       <Route path="/programs/tech-goes-home" component={TechGoesHomeLanding} />
       <Route path="/student/tech-goes-home" component={TechGoesHomeStudentDashboard} />
+      <Route path="/volunteer" component={VolunteerEngagement} />
       <Route component={NotFound} />
     </Switch>
   );

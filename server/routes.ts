@@ -6710,6 +6710,248 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ============================================================================
+  // VOLUNTEER ENROLLMENT SYSTEM
+  // ============================================================================
+
+  // Get all volunteer events (public)
+  app.get('/api/volunteer/events', async (req, res) => {
+    try {
+      const events = await storage.getActiveVolunteerEvents();
+      res.json(events);
+    } catch (error: any) {
+      console.error("Error fetching volunteer events:", error);
+      res.status(500).json({ message: "Failed to fetch volunteer events" });
+    }
+  });
+
+  // Get single volunteer event with shifts (public)
+  app.get('/api/volunteer/events/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const event = await storage.getVolunteerEvent(id);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      const shifts = await storage.getEventShifts(id);
+      
+      res.json({ event, shifts });
+    } catch (error: any) {
+      console.error("Error fetching volunteer event:", error);
+      res.status(500).json({ message: "Failed to fetch volunteer event" });
+    }
+  });
+
+  // Get user's volunteer enrollments and hours (authenticated)
+  app.get('/api/volunteer/my-enrollments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      
+      const enrollments = await storage.getUserEnrollments(userId);
+      const hours = await storage.getUserVolunteerHours(userId);
+      
+      res.json({ enrollments, hours });
+    } catch (error: any) {
+      console.error("Error fetching user enrollments:", error);
+      res.status(500).json({ message: "Failed to fetch enrollments" });
+    }
+  });
+
+  // Create volunteer enrollment (authenticated)
+  app.post('/api/volunteer/enroll', isAuthenticated, async (req: any, res) => {
+    try {
+      const { insertVolunteerEnrollmentSchema } = await import("@shared/schema");
+      const enrollmentData = insertVolunteerEnrollmentSchema.parse({
+        ...req.body,
+        userId: req.user.id,
+      });
+      
+      const enrollment = await storage.createVolunteerEnrollment(enrollmentData);
+      res.json(enrollment);
+    } catch (error: any) {
+      console.error("Error creating enrollment:", error);
+      res.status(500).json({ message: "Failed to create enrollment", error: error.message });
+    }
+  });
+
+  // ============================================================================
+  // ADMIN VOLUNTEER MANAGEMENT
+  // ============================================================================
+
+  // Admin - Get all volunteer events
+  app.get('/api/admin/volunteer/events', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const events = await storage.getAllVolunteerEvents();
+      res.json(events);
+    } catch (error: any) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+
+  // Admin - Create volunteer event
+  app.post('/api/admin/volunteer/events', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { insertVolunteerEventSchema } = await import("@shared/schema");
+      const eventData = insertVolunteerEventSchema.parse({
+        ...req.body,
+        createdBy: (req as any).user.id,
+      });
+      
+      const event = await storage.createVolunteerEvent(eventData);
+      res.json(event);
+    } catch (error: any) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ message: "Failed to create event", error: error.message });
+    }
+  });
+
+  // Admin - Update volunteer event
+  app.patch('/api/admin/volunteer/events/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const event = await storage.updateVolunteerEvent(id, updates);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error: any) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Failed to update event", error: error.message });
+    }
+  });
+
+  // Admin - Delete volunteer event
+  app.delete('/api/admin/volunteer/events/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteVolunteerEvent(id);
+      res.json({ message: "Event deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+
+  // Admin - Create volunteer shift
+  app.post('/api/admin/volunteer/shifts', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { insertVolunteerShiftSchema } = await import("@shared/schema");
+      const shiftData = insertVolunteerShiftSchema.parse(req.body);
+      
+      const shift = await storage.createVolunteerShift(shiftData);
+      res.json(shift);
+    } catch (error: any) {
+      console.error("Error creating shift:", error);
+      res.status(500).json({ message: "Failed to create shift", error: error.message });
+    }
+  });
+
+  // Admin - Update volunteer shift
+  app.patch('/api/admin/volunteer/shifts/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const shift = await storage.updateVolunteerShift(id, updates);
+      
+      if (!shift) {
+        return res.status(404).json({ message: "Shift not found" });
+      }
+      
+      res.json(shift);
+    } catch (error: any) {
+      console.error("Error updating shift:", error);
+      res.status(500).json({ message: "Failed to update shift", error: error.message });
+    }
+  });
+
+  // Admin - Delete volunteer shift
+  app.delete('/api/admin/volunteer/shifts/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteVolunteerShift(id);
+      res.json({ message: "Shift deleted successfully" });
+    } catch (error: any) {
+      console.error("Error deleting shift:", error);
+      res.status(500).json({ message: "Failed to delete shift" });
+    }
+  });
+
+  // Admin - Get all enrollments with filters
+  app.get('/api/admin/volunteer/enrollments', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { shiftId } = req.query;
+      
+      let enrollments;
+      if (shiftId) {
+        enrollments = await storage.getShiftEnrollments(shiftId as string);
+      } else {
+        // For now, return all enrollments - could add pagination later
+        enrollments = [];
+      }
+      
+      res.json(enrollments);
+    } catch (error: any) {
+      console.error("Error fetching enrollments:", error);
+      res.status(500).json({ message: "Failed to fetch enrollments" });
+    }
+  });
+
+  // Admin - Update enrollment status
+  app.patch('/api/admin/volunteer/enrollments/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      const enrollment = await storage.updateVolunteerEnrollment(id, updates);
+      
+      if (!enrollment) {
+        return res.status(404).json({ message: "Enrollment not found" });
+      }
+      
+      res.json(enrollment);
+    } catch (error: any) {
+      console.error("Error updating enrollment:", error);
+      res.status(500).json({ message: "Failed to update enrollment", error: error.message });
+    }
+  });
+
+  // Admin - Log volunteer session (attendance and hours)
+  app.post('/api/admin/volunteer/sessions', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { insertVolunteerSessionLogSchema } = await import("@shared/schema");
+      const sessionData = insertVolunteerSessionLogSchema.parse({
+        ...req.body,
+        loggedBy: req.user.id,
+      });
+      
+      const session = await storage.createVolunteerSessionLog(sessionData);
+      res.json(session);
+    } catch (error: any) {
+      console.error("Error creating session log:", error);
+      res.status(500).json({ message: "Failed to create session log", error: error.message });
+    }
+  });
+
+  // Admin - Get volunteer's session logs
+  app.get('/api/admin/volunteer/sessions/:enrollmentId', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { enrollmentId } = req.params;
+      const sessions = await storage.getEnrollmentSessions(enrollmentId);
+      res.json(sessions);
+    } catch (error: any) {
+      console.error("Error fetching sessions:", error);
+      res.status(500).json({ message: "Failed to fetch sessions" });
+    }
+  });
+
   // Demo Data Seeding - Generate sample data for demonstration
   app.post('/api/demo/seed', async (req, res) => {
     try {

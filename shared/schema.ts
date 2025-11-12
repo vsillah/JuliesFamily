@@ -1833,3 +1833,179 @@ export const insertTechGoesHomeAttendanceSchema = createInsertSchema(techGoesHom
 });
 export type InsertTechGoesHomeAttendance = z.infer<typeof insertTechGoesHomeAttendanceSchema>;
 export type TechGoesHomeAttendance = typeof techGoesHomeAttendance.$inferSelect;
+
+// Volunteer Events - organization-created volunteer opportunities
+export const volunteerEvents = pgTable("volunteer_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Event details
+  name: varchar("name").notNull(), // "Adult Tutoring Program", "Community Event Support", etc.
+  description: text("description").notNull(),
+  roleDescription: text("role_description"), // Specific responsibilities and requirements
+  
+  // Coordinator contact
+  coordinatorName: varchar("coordinator_name"),
+  coordinatorEmail: varchar("coordinator_email"),
+  coordinatorPhone: varchar("coordinator_phone"),
+  
+  // Location and modality
+  location: varchar("location"), // Physical address or "Remote"
+  modalityOptions: jsonb("modality_options").default(['on_site']), // ['on_site', 'remote', 'hybrid']
+  
+  // Hours and commitment
+  estimatedHoursPerSession: integer("estimated_hours_per_session").default(2), // Default 2 hours
+  typicalWeeklyCommitment: varchar("typical_weekly_commitment"), // "1-2 hours per week"
+  
+  // Requirements
+  requiresApplication: boolean("requires_application").default(false),
+  applicationUrl: varchar("application_url"),
+  requiresBackground: boolean("requires_background_check").default(false),
+  
+  // Program classification
+  programType: varchar("program_type"), // "Adult Education", "Family Development", "Tech Goes Home", "Community Event"
+  passionTags: jsonb("passion_tags"), // Array: ['literacy', 'stem', 'arts', 'nutrition', 'community']
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  
+  // Metadata
+  metadata: jsonb("metadata"), // Additional details
+  
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("volunteer_events_active_idx").on(table.isActive),
+  index("volunteer_events_program_idx").on(table.programType),
+]);
+
+export const insertVolunteerEventSchema = createInsertSchema(volunteerEvents).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVolunteerEvent = z.infer<typeof insertVolunteerEventSchema>;
+export type VolunteerEvent = typeof volunteerEvents.$inferSelect;
+
+// Volunteer Shifts - specific date/time slots for volunteer events
+export const volunteerShifts = pgTable("volunteer_shifts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").notNull().references(() => volunteerEvents.id, { onDelete: "cascade" }),
+  
+  // Shift timing
+  shiftDate: timestamp("shift_date").notNull(),
+  startTime: varchar("start_time").notNull(), // "09:30 AM", "6:00 PM"
+  endTime: varchar("end_time").notNull(), // "2:00 PM", "8:00 PM"
+  
+  // Capacity
+  maxVolunteers: integer("max_volunteers"), // Null = unlimited
+  currentEnrollments: integer("current_enrollments").default(0),
+  
+  // Shift details
+  location: varchar("location"), // Override event location if different
+  modality: varchar("modality"), // 'on_site', 'remote', 'hybrid'
+  notes: text("notes"), // Specific instructions for this shift
+  
+  // Google Calendar integration (optional)
+  calendarEventId: varchar("calendar_event_id"),
+  
+  // Status
+  status: varchar("status").notNull().default('scheduled'), // 'scheduled', 'in_progress', 'completed', 'cancelled'
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("volunteer_shifts_event_idx").on(table.eventId),
+  index("volunteer_shifts_date_idx").on(table.shiftDate),
+  index("volunteer_shifts_status_idx").on(table.status),
+]);
+
+export const insertVolunteerShiftSchema = createInsertSchema(volunteerShifts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVolunteerShift = z.infer<typeof insertVolunteerShiftSchema>;
+export type VolunteerShift = typeof volunteerShifts.$inferSelect;
+
+// Volunteer Enrollments - links volunteers to specific shifts
+export const volunteerEnrollments = pgTable("volunteer_enrollments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  shiftId: varchar("shift_id").notNull().references(() => volunteerShifts.id, { onDelete: "cascade" }),
+  
+  // Volunteer (can be authenticated user or lead from CRM)
+  userId: varchar("user_id").references(() => users.id, { onDelete: "cascade" }),
+  leadId: varchar("lead_id").references(() => leads.id, { onDelete: "cascade" }),
+  
+  // Role details
+  volunteerRole: varchar("volunteer_role"), // "Tutor", "Event Assistant", "Coordinator"
+  
+  // Preferences
+  preferredModality: varchar("preferred_modality"), // 'on_site', 'remote'
+  
+  // Application tracking
+  applicationStatus: varchar("application_status").default('pending'), // 'pending', 'approved', 'rejected', 'waitlisted'
+  applicationSubmittedAt: timestamp("application_submitted_at"),
+  applicationNotes: text("application_notes"),
+  
+  // Enrollment status
+  enrollmentStatus: varchar("enrollment_status").notNull().default('registered'), // 'registered', 'confirmed', 'checked_in', 'completed', 'no_show', 'cancelled'
+  
+  // Communication
+  confirmationSent: boolean("confirmation_sent").default(false),
+  reminderSent: boolean("reminder_sent").default(false),
+  
+  // Metadata
+  metadata: jsonb("metadata"), // Emergency contact, special requirements, etc.
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("volunteer_enrollments_shift_idx").on(table.shiftId),
+  index("volunteer_enrollments_user_idx").on(table.userId),
+  index("volunteer_enrollments_lead_idx").on(table.leadId),
+  index("volunteer_enrollments_status_idx").on(table.enrollmentStatus),
+]);
+
+export const insertVolunteerEnrollmentSchema = createInsertSchema(volunteerEnrollments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVolunteerEnrollment = z.infer<typeof insertVolunteerEnrollmentSchema>;
+export type VolunteerEnrollment = typeof volunteerEnrollments.$inferSelect;
+
+// Volunteer Session Logs - tracks actual attendance and hours served
+export const volunteerSessionLogs = pgTable("volunteer_session_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  enrollmentId: varchar("enrollment_id").notNull().references(() => volunteerEnrollments.id, { onDelete: "cascade" }),
+  
+  // Attendance tracking
+  attended: boolean("attended").notNull().default(true),
+  checkInTime: timestamp("check_in_time"),
+  checkOutTime: timestamp("check_out_time"),
+  
+  // Hours served
+  minutesServed: integer("minutes_served").notNull(), // Actual minutes volunteered
+  
+  // Session details
+  sessionNotes: text("session_notes"), // What was accomplished, feedback, etc.
+  impact: text("impact"), // Optional: impact description (students helped, tasks completed)
+  
+  // Admin tracking
+  loggedBy: varchar("logged_by").references(() => users.id), // Admin who logged this session
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("volunteer_session_logs_enrollment_idx").on(table.enrollmentId),
+  index("volunteer_session_logs_created_at_idx").on(table.createdAt),
+]);
+
+export const insertVolunteerSessionLogSchema = createInsertSchema(volunteerSessionLogs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVolunteerSessionLog = z.infer<typeof insertVolunteerSessionLogSchema>;
+export type VolunteerSessionLog = typeof volunteerSessionLogs.$inferSelect;

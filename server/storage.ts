@@ -13,6 +13,7 @@ import {
   outreachEmails, icpCriteria,
   chatbotConversations, chatbotIssues,
   backupSnapshots, backupSchedules,
+  volunteerEvents, volunteerShifts, volunteerEnrollments, volunteerSessionLogs,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -50,7 +51,11 @@ import {
   type ChatbotConversation, type InsertChatbotConversation,
   type ChatbotIssue, type InsertChatbotIssue,
   type BackupSnapshot, type InsertBackupSnapshot,
-  type BackupSchedule, type InsertBackupSchedule
+  type BackupSchedule, type InsertBackupSchedule,
+  type VolunteerEvent, type InsertVolunteerEvent,
+  type VolunteerShift, type InsertVolunteerShift,
+  type VolunteerEnrollment, type InsertVolunteerEnrollment,
+  type VolunteerSessionLog, type InsertVolunteerSessionLog
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -555,6 +560,39 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   // Economics Settings
   getEconomicsSettings(): Promise<EconomicsSettings | undefined>;
   updateEconomicsSettings(updates: Partial<InsertEconomicsSettings>): Promise<EconomicsSettings>;
+  
+  // Volunteer Event operations
+  createVolunteerEvent(event: InsertVolunteerEvent): Promise<VolunteerEvent>;
+  getVolunteerEvent(id: string): Promise<VolunteerEvent | undefined>;
+  getAllVolunteerEvents(): Promise<VolunteerEvent[]>;
+  getActiveVolunteerEvents(): Promise<VolunteerEvent[]>;
+  updateVolunteerEvent(id: string, updates: Partial<InsertVolunteerEvent>): Promise<VolunteerEvent | undefined>;
+  deleteVolunteerEvent(id: string): Promise<void>;
+  
+  // Volunteer Shift operations
+  createVolunteerShift(shift: InsertVolunteerShift): Promise<VolunteerShift>;
+  getVolunteerShift(id: string): Promise<VolunteerShift | undefined>;
+  getEventShifts(eventId: string): Promise<VolunteerShift[]>;
+  getUpcomingShifts(eventId?: string, limit?: number): Promise<VolunteerShift[]>;
+  updateVolunteerShift(id: string, updates: Partial<InsertVolunteerShift>): Promise<VolunteerShift | undefined>;
+  deleteVolunteerShift(id: string): Promise<void>;
+  
+  // Volunteer Enrollment operations
+  createVolunteerEnrollment(enrollment: InsertVolunteerEnrollment): Promise<VolunteerEnrollment>;
+  getVolunteerEnrollment(id: string): Promise<VolunteerEnrollment | undefined>;
+  getShiftEnrollments(shiftId: string): Promise<VolunteerEnrollment[]>;
+  getUserEnrollments(userId: string): Promise<any[]>; // Returns enriched data with event/shift info
+  getLeadEnrollmentsVolunteer(leadId: string): Promise<any[]>; // Returns enriched data
+  updateVolunteerEnrollment(id: string, updates: Partial<InsertVolunteerEnrollment>): Promise<VolunteerEnrollment | undefined>;
+  deleteVolunteerEnrollment(id: string): Promise<void>;
+  
+  // Volunteer Session Log operations
+  createVolunteerSessionLog(log: InsertVolunteerSessionLog): Promise<VolunteerSessionLog>;
+  getEnrollmentSessions(enrollmentId: string): Promise<VolunteerSessionLog[]>;
+  getUserVolunteerHours(userId: string, year?: number): Promise<{ totalMinutes: number; sessionCount: number; yearToDate: number }>;
+  getLeadVolunteerHours(leadId: string, year?: number): Promise<{ totalMinutes: number; sessionCount: number; yearToDate: number }>;
+  updateVolunteerSessionLog(id: string, updates: Partial<InsertVolunteerSessionLog>): Promise<VolunteerSessionLog | undefined>;
+  deleteVolunteerSessionLog(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3597,6 +3635,239 @@ export class DatabaseStorage implements IStorage {
       projectedUsagePercent,
       tableBreakdown: tableBreakdown.sort((a, b) => b.estimatedBackupBytes - a.estimatedBackupBytes),
     };
+  }
+
+  // Volunteer Event operations
+  async createVolunteerEvent(event: InsertVolunteerEvent): Promise<VolunteerEvent> {
+    const [result] = await db.insert(volunteerEvents).values(event).returning();
+    return result;
+  }
+
+  async getVolunteerEvent(id: string): Promise<VolunteerEvent | undefined> {
+    const [result] = await db.select().from(volunteerEvents).where(eq(volunteerEvents.id, id));
+    return result;
+  }
+
+  async getAllVolunteerEvents(): Promise<VolunteerEvent[]> {
+    return await db.select().from(volunteerEvents).orderBy(desc(volunteerEvents.createdAt));
+  }
+
+  async getActiveVolunteerEvents(): Promise<VolunteerEvent[]> {
+    return await db.select().from(volunteerEvents).where(eq(volunteerEvents.isActive, true)).orderBy(volunteerEvents.name);
+  }
+
+  async updateVolunteerEvent(id: string, updates: Partial<InsertVolunteerEvent>): Promise<VolunteerEvent | undefined> {
+    const [result] = await db.update(volunteerEvents).set(updates).where(eq(volunteerEvents.id, id)).returning();
+    return result;
+  }
+
+  async deleteVolunteerEvent(id: string): Promise<void> {
+    await db.delete(volunteerEvents).where(eq(volunteerEvents.id, id));
+  }
+
+  // Volunteer Shift operations
+  async createVolunteerShift(shift: InsertVolunteerShift): Promise<VolunteerShift> {
+    const [result] = await db.insert(volunteerShifts).values(shift).returning();
+    return result;
+  }
+
+  async getVolunteerShift(id: string): Promise<VolunteerShift | undefined> {
+    const [result] = await db.select().from(volunteerShifts).where(eq(volunteerShifts.id, id));
+    return result;
+  }
+
+  async getEventShifts(eventId: string): Promise<VolunteerShift[]> {
+    return await db.select().from(volunteerShifts).where(eq(volunteerShifts.eventId, eventId)).orderBy(volunteerShifts.shiftDate);
+  }
+
+  async getUpcomingShifts(eventId?: string, limit: number = 10): Promise<VolunteerShift[]> {
+    const now = new Date();
+    let query = db.select().from(volunteerShifts).where(sql`${volunteerShifts.shiftDate} >= ${now}`);
+    
+    if (eventId) {
+      query = query.where(and(
+        eq(volunteerShifts.eventId, eventId),
+        sql`${volunteerShifts.shiftDate} >= ${now}`
+      ) as any);
+    }
+    
+    return await query.orderBy(volunteerShifts.shiftDate).limit(limit);
+  }
+
+  async updateVolunteerShift(id: string, updates: Partial<InsertVolunteerShift>): Promise<VolunteerShift | undefined> {
+    const [result] = await db.update(volunteerShifts).set(updates).where(eq(volunteerShifts.id, id)).returning();
+    return result;
+  }
+
+  async deleteVolunteerShift(id: string): Promise<void> {
+    await db.delete(volunteerShifts).where(eq(volunteerShifts.id, id));
+  }
+
+  // Volunteer Enrollment operations
+  async createVolunteerEnrollment(enrollment: InsertVolunteerEnrollment): Promise<VolunteerEnrollment> {
+    const [result] = await db.insert(volunteerEnrollments).values(enrollment).returning();
+    
+    // Increment shift enrollment count
+    const shift = await this.getVolunteerShift(enrollment.shiftId);
+    if (shift) {
+      await this.updateVolunteerShift(enrollment.shiftId, {
+        currentEnrollments: (shift.currentEnrollments || 0) + 1
+      });
+    }
+    
+    return result;
+  }
+
+  async getVolunteerEnrollment(id: string): Promise<VolunteerEnrollment | undefined> {
+    const [result] = await db.select().from(volunteerEnrollments).where(eq(volunteerEnrollments.id, id));
+    return result;
+  }
+
+  async getShiftEnrollments(shiftId: string): Promise<VolunteerEnrollment[]> {
+    return await db.select().from(volunteerEnrollments).where(eq(volunteerEnrollments.shiftId, shiftId));
+  }
+
+  async getUserEnrollments(userId: string): Promise<any[]> {
+    const results = await db
+      .select({
+        enrollment: volunteerEnrollments,
+        shift: volunteerShifts,
+        event: volunteerEvents,
+      })
+      .from(volunteerEnrollments)
+      .leftJoin(volunteerShifts, eq(volunteerEnrollments.shiftId, volunteerShifts.id))
+      .leftJoin(volunteerEvents, eq(volunteerShifts.eventId, volunteerEvents.id))
+      .where(eq(volunteerEnrollments.userId, userId))
+      .orderBy(desc(volunteerShifts.shiftDate));
+    
+    return results;
+  }
+
+  async getLeadEnrollmentsVolunteer(leadId: string): Promise<any[]> {
+    const results = await db
+      .select({
+        enrollment: volunteerEnrollments,
+        shift: volunteerShifts,
+        event: volunteerEvents,
+      })
+      .from(volunteerEnrollments)
+      .leftJoin(volunteerShifts, eq(volunteerEnrollments.shiftId, volunteerShifts.id))
+      .leftJoin(volunteerEvents, eq(volunteerShifts.eventId, volunteerEvents.id))
+      .where(eq(volunteerEnrollments.leadId, leadId))
+      .orderBy(desc(volunteerShifts.shiftDate));
+    
+    return results;
+  }
+
+  async updateVolunteerEnrollment(id: string, updates: Partial<InsertVolunteerEnrollment>): Promise<VolunteerEnrollment | undefined> {
+    const [result] = await db.update(volunteerEnrollments).set(updates).where(eq(volunteerEnrollments.id, id)).returning();
+    return result;
+  }
+
+  async deleteVolunteerEnrollment(id: string): Promise<void> {
+    const enrollment = await this.getVolunteerEnrollment(id);
+    if (enrollment) {
+      await db.delete(volunteerEnrollments).where(eq(volunteerEnrollments.id, id));
+      
+      // Decrement shift enrollment count
+      const shift = await this.getVolunteerShift(enrollment.shiftId);
+      if (shift && shift.currentEnrollments && shift.currentEnrollments > 0) {
+        await this.updateVolunteerShift(enrollment.shiftId, {
+          currentEnrollments: shift.currentEnrollments - 1
+        });
+      }
+    }
+  }
+
+  // Volunteer Session Log operations
+  async createVolunteerSessionLog(log: InsertVolunteerSessionLog): Promise<VolunteerSessionLog> {
+    const [result] = await db.insert(volunteerSessionLogs).values(log).returning();
+    return result;
+  }
+
+  async getEnrollmentSessions(enrollmentId: string): Promise<VolunteerSessionLog[]> {
+    return await db.select().from(volunteerSessionLogs).where(eq(volunteerSessionLogs.enrollmentId, enrollmentId)).orderBy(desc(volunteerSessionLogs.createdAt));
+  }
+
+  async getUserVolunteerHours(userId: string, year?: number): Promise<{ totalMinutes: number; sessionCount: number; yearToDate: number }> {
+    const currentYear = year || new Date().getFullYear();
+    const yearStart = new Date(currentYear, 0, 1);
+    const yearEnd = new Date(currentYear, 11, 31, 23, 59, 59);
+    
+    const enrollments = await db
+      .select({ id: volunteerEnrollments.id })
+      .from(volunteerEnrollments)
+      .where(eq(volunteerEnrollments.userId, userId));
+    
+    const enrollmentIds = enrollments.map(e => e.id);
+    
+    if (enrollmentIds.length === 0) {
+      return { totalMinutes: 0, sessionCount: 0, yearToDate: 0 };
+    }
+    
+    const allSessions = await db
+      .select()
+      .from(volunteerSessionLogs)
+      .where(sql`${volunteerSessionLogs.enrollmentId} = ANY(${enrollmentIds})`);
+    
+    const ytdSessions = allSessions.filter(session => {
+      const createdAt = new Date(session.createdAt!);
+      return createdAt >= yearStart && createdAt <= yearEnd;
+    });
+    
+    const totalMinutes = allSessions.reduce((sum, session) => sum + (session.minutesServed || 0), 0);
+    const yearToDate = ytdSessions.reduce((sum, session) => sum + (session.minutesServed || 0), 0);
+    
+    return {
+      totalMinutes,
+      sessionCount: allSessions.length,
+      yearToDate
+    };
+  }
+
+  async getLeadVolunteerHours(leadId: string, year?: number): Promise<{ totalMinutes: number; sessionCount: number; yearToDate: number }> {
+    const currentYear = year || new Date().getFullYear();
+    const yearStart = new Date(currentYear, 0, 1);
+    const yearEnd = new Date(currentYear, 11, 31, 23, 59, 59);
+    
+    const enrollments = await db
+      .select({ id: volunteerEnrollments.id })
+      .from(volunteerEnrollments)
+      .where(eq(volunteerEnrollments.leadId, leadId));
+    
+    const enrollmentIds = enrollments.map(e => e.id);
+    
+    if (enrollmentIds.length === 0) {
+      return { totalMinutes: 0, sessionCount: 0, yearToDate: 0 };
+    }
+    
+    const allSessions = await db
+      .select()
+      .from(volunteerSessionLogs)
+      .where(sql`${volunteerSessionLogs.enrollmentId} = ANY(${enrollmentIds})`);
+    
+    const ytdSessions = allSessions.filter(session => {
+      const createdAt = new Date(session.createdAt!);
+      return createdAt >= yearStart && createdAt <= yearEnd;
+    });
+    
+    const totalMinutes = allSessions.reduce((sum, session) => sum + (session.minutesServed || 0), 0);
+    const yearToDate = ytdSessions.reduce((sum, session) => sum + (session.minutesServed || 0), 0);
+    
+    return {
+      totalMinutes,
+      sessionCount: allSessions.length,
+      yearToDate
+    };
+  }
+
+  async updateVolunteerSessionLog(id: string, updates: Partial<InsertVolunteerSessionLog>): Promise<VolunteerSessionLog | undefined> {
+    const [result] = await db.update(volunteerSessionLogs).set(updates).where(eq(volunteerSessionLogs.id, id)).returning();
+    return result;
+  }
+
+  async deleteVolunteerSessionLog(id: string): Promise<void> {
+    await db.delete(volunteerSessionLogs).where(eq(volunteerSessionLogs.id, id));
   }
 }
 
