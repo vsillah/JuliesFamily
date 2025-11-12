@@ -2066,6 +2066,34 @@ export default function AdminContentManager() {
                 </>
               )}
               
+              {/* Service specific fields for edit */}
+              {editingItem.type === 'service' && (
+                <>
+                  <div>
+                    <Label htmlFor="edit-linked-program-detail">Linked Program Detail (Optional)</Label>
+                    <Select
+                      value={(editingItem.metadata as any)?.linkedProgramDetailId || ""}
+                      onValueChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), linkedProgramDetailId: value || undefined } })}
+                    >
+                      <SelectTrigger id="edit-linked-program-detail" data-testid="select-edit-linked-program-detail">
+                        <SelectValue placeholder="Select a program detail..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">None</SelectItem>
+                        {programDetails.map((pd) => (
+                          <SelectItem key={pd.id} value={pd.id}>
+                            {pd.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Link this service to a program detail page. When users click "Learn More", they'll see the full program information.
+                    </p>
+                  </div>
+                </>
+              )}
+              
               {/* Program Detail specific fields for edit */}
               {editingItem.type === 'program_detail' && (
                 <>
@@ -3052,6 +3080,34 @@ export default function AdminContentManager() {
                     persona={(newItem.metadata as any)?.persona}
                     funnelStage={(newItem.metadata as any)?.funnelStage}
                   />
+                </div>
+              </>
+            )}
+            
+            {/* Service specific fields for create */}
+            {activeTab === 'service' && (
+              <>
+                <div>
+                  <Label htmlFor="create-linked-program-detail">Linked Program Detail (Optional)</Label>
+                  <Select
+                    value={(newItem.metadata as any)?.linkedProgramDetailId || ""}
+                    onValueChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), linkedProgramDetailId: value || undefined } })}
+                  >
+                    <SelectTrigger id="create-linked-program-detail" data-testid="select-create-linked-program-detail">
+                      <SelectValue placeholder="Select a program detail..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {programDetails.map((pd) => (
+                        <SelectItem key={pd.id} value={pd.id}>
+                          {pd.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Link this service to a program detail page. When users click "Learn More", they'll see the full program information.
+                  </p>
                 </div>
               </>
             )}

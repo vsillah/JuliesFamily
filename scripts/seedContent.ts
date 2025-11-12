@@ -1,5 +1,10 @@
 // Script to seed the database with existing hardcoded content
 // Run with: npx tsx scripts/seedContent.ts
+//
+// IMPORTANT: After seeding content and program details, run the linking script:
+//   1. npx tsx scripts/seedContent.ts
+//   2. npx tsx scripts/seedProgramDetails.ts
+//   3. npx tsx scripts/linkServicesToProgramDetails.ts
 
 import { storage } from "../server/storage";
 import type { InsertContentItem } from "@shared/schema";

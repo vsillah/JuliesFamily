@@ -367,7 +367,7 @@ export const contentItems = pgTable("content_items", {
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
   passionTags: text("passion_tags").array(), // Array of passion tags for targeting (e.g., ['literacy', 'stem', 'arts'])
-  metadata: jsonb("metadata"), // Additional data: location, date, rating, icon, videoId, category, platform, programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona, AND for student_project/student_testimonial: submittingUserId, submittingUserEmail, submittingUserName, programId, classId, files: [{url, alt, uploadedAt}], status: 'pending'|'approved'|'rejected', reviewedBy, reviewedAt, rejectionReason. For student_dashboard_card: buttonText, buttonLink
+  metadata: jsonb("metadata"), // Additional data: For service: number, priority, linkedProgramDetailId. For program_detail: programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona. For event/testimonial: location, date, rating, icon. For socialMedia/video: videoId, category, platform. For student_project/student_testimonial: submittingUserId, submittingUserEmail, submittingUserName, programId, classId, files: [{url, alt, uploadedAt}], status: 'pending'|'approved'|'rejected', reviewedBy, reviewedAt, rejectionReason. For student_dashboard_card: buttonText, buttonLink
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -418,6 +418,32 @@ export const studentDashboardCardMetadataSchema = z.object({
   motivationalText: z.string().optional(), // Optional override for motivational messages
 }).strict();
 export type StudentDashboardCardMetadata = z.infer<typeof studentDashboardCardMetadataSchema>;
+
+// Service metadata schema
+export const serviceMetadataSchema = z.object({
+  number: z.string().optional(),
+  priority: z.record(z.number()).optional(), // { parent: 1, student: 2, ... }
+  linkedProgramDetailId: z.string().optional(), // Reference to a program_detail content item
+}).passthrough(); // Allow additional fields
+export type ServiceMetadata = z.infer<typeof serviceMetadataSchema>;
+
+// Program detail metadata schema
+export const programDetailMetadataSchema = z.object({
+  programId: z.string().optional(),
+  overview: z.string().optional(),
+  ageRange: z.string().optional(),
+  schedule: z.string().optional(),
+  location: z.string().optional(),
+  cost: z.string().optional(),
+  features: z.array(z.string()).optional(),
+  enrollmentSteps: z.array(z.string()).optional(),
+  faqs: z.array(z.object({
+    question: z.string(),
+    answer: z.string(),
+  })).optional(),
+  defaultPersona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional(),
+}).passthrough(); // Allow additional fields
+export type ProgramDetailMetadata = z.infer<typeof programDetailMetadataSchema>;
 
 // Extended ContentItem type with resolved image URL from image_assets join
 export type ContentItemWithResolvedImage = ContentItem & {

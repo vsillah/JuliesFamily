@@ -23,15 +23,6 @@ interface ProgramDetail {
   defaultPersona?: Persona;
 }
 
-// Map service titles to program detail IDs
-const SERVICE_TO_PROGRAM_MAP: Record<string, string> = {
-  'Adult Basic Education': 'adult-basic-education',
-  'Adult Basic Education (ABE)/Career Services': 'adult-basic-education',
-  'Family Development': 'family-development',
-  'Family Development Services': 'family-development',
-  'Tech Goes Home': 'tech-goes-home',
-};
-
 export default function Services() {
   const { persona, funnelStage } = usePersona();
   const [selectedProgram, setSelectedProgram] = useState<ProgramDetail | null>(null);
@@ -61,21 +52,23 @@ export default function Services() {
       })
     : activeServices;
 
-  const handleLearnMore = (serviceTitle: string) => {
-    // Find the matching program detail
-    const programId = SERVICE_TO_PROGRAM_MAP[serviceTitle] || Object.values(SERVICE_TO_PROGRAM_MAP).find(id => 
-      serviceTitle.toLowerCase().includes(id.replace('-', ' '))
-    );
+  const handleLearnMore = (serviceId: string) => {
+    // Find the service by ID
+    const service = services.find(s => s.id === serviceId);
+    if (!service) return;
 
-    const program = programDetails.find(p => {
-      const meta = p.metadata as any;
-      return meta?.programId === programId;
-    });
+    // Get the linked program detail ID from service metadata
+    const linkedProgramDetailId = (service.metadata as any)?.linkedProgramDetailId;
+    
+    // Find the program detail by ID
+    const program = linkedProgramDetailId 
+      ? programDetails.find(p => p.id === linkedProgramDetailId)
+      : null;
 
     if (program) {
       const meta = program.metadata as any;
       setSelectedProgram({
-        id: meta.programId,
+        id: meta.programId || program.id,
         title: program.title,
         description: program.description || '',
         imageName: program.imageName || undefined,
@@ -129,7 +122,7 @@ export default function Services() {
               title={service.title}
               description={service.description || ""}
               imageName={service.imageName || ""}
-              onLearnMore={() => handleLearnMore(service.title)}
+              onLearnMore={() => handleLearnMore(service.id)}
               position={index}
               onCardView={(pos) => tracking.card.view(service.id, service.title, pos, services.length)}
               onCardClick={(pos, actionType) => tracking.card.click(service.id, service.title, pos, services.length)}
