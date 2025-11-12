@@ -933,7 +933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { persona } = req.body;
       
       // Validate persona value
-      const validPersonas = ['student', 'provider', 'parent', 'donor', 'volunteer', null];
+      const validPersonas = ['student', 'provider', 'parent', 'donor', 'volunteer', 'default', null];
       if (!validPersonas.includes(persona)) {
         return res.status(400).json({ message: "Invalid persona value" });
       }

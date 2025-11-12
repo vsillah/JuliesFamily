@@ -433,9 +433,22 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               !isScrolled && "border-white/30 text-white hover:bg-white/10"
             )}
             data-testid="button-admin-preview-dropdown"
+            onPointerDown={(e) => {
+              // Prevent Radix dropdown from opening on mobile
+              const isMobile = window.innerWidth < 768;
+              if (isMobile) {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowMobileOverlay(true);
+                setOpen(false); // Ensure dropdown stays closed
+              }
+            }}
             onClick={(e) => {
               e.preventDefault();
-              handleTriggerClick();
+              const isMobile = window.innerWidth < 768;
+              if (!isMobile) {
+                handleTriggerClick();
+              }
             }}
           >
             <Eye className={cn(
