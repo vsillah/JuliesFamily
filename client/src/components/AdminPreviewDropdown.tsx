@@ -148,7 +148,7 @@ function UnifiedVariantSelector({
         {/* No variant selected option */}
         <div
           className={cn(
-            "flex items-start space-x-2 p-2 sm:p-2.5 rounded-md border cursor-pointer hover-elevate",
+            "flex items-start space-x-3 p-3 rounded-md border cursor-pointer hover-elevate",
             (!selectedVariantId || selectedVariantId === "none") && "border-primary bg-primary/5"
           )}
           onClick={() => onVariantChange("none", "")}
@@ -158,11 +158,11 @@ function UnifiedVariantSelector({
           <div className="flex-1 min-w-0">
             <Label
               htmlFor="variant-none"
-              className="text-xs font-medium cursor-pointer"
+              className="text-sm font-medium cursor-pointer leading-snug"
             >
               No A/B Test Override
             </Label>
-            <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
               Use default experience (auto-assign per test)
             </p>
           </div>
@@ -173,7 +173,7 @@ function UnifiedVariantSelector({
           <div
             key={variantId}
             className={cn(
-              "flex items-start space-x-2 p-2 sm:p-2.5 rounded-md border cursor-pointer hover-elevate",
+              "flex items-start space-x-3 p-3 rounded-md border cursor-pointer hover-elevate",
               selectedVariantId === variantId && "border-primary bg-primary/5"
             )}
             onClick={() => onVariantChange(variantId, testId)}
@@ -183,30 +183,30 @@ function UnifiedVariantSelector({
             <div className="flex-1 min-w-0">
               <Label
                 htmlFor={variantId}
-                className="text-xs font-medium cursor-pointer flex flex-wrap items-center gap-1 sm:gap-2"
+                className="text-sm font-medium cursor-pointer flex flex-wrap items-center gap-1.5 leading-snug"
               >
-                <span className="truncate">{variant.name || (variant.isControl ? "Control" : "Treatment")}</span>
+                <span className="break-words">{variant.name || (variant.isControl ? "Control" : "Treatment")}</span>
                 {variant.isControl && (
-                  <Badge variant="outline" className="text-[10px] sm:text-xs shrink-0">Baseline</Badge>
+                  <Badge variant="outline" className="text-xs shrink-0">Baseline</Badge>
                 )}
               </Label>
-              <div className="flex flex-wrap items-center gap-1 mt-0.5">
-                <Badge variant="secondary" className="text-[10px] shrink-0">
+              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                <Badge variant="secondary" className="text-xs shrink-0">
                   {contentTypeLabels[testType] || testType}
                 </Badge>
                 {selectedPersona && (
-                  <Badge variant="secondary" className="text-[10px] shrink-0">
+                  <Badge variant="secondary" className="text-xs shrink-0">
                     {personaLabels[selectedPersona] || selectedPersona}
                   </Badge>
                 )}
                 {selectedFunnel && selectedFunnel !== "none" && (
-                  <Badge variant="secondary" className="text-[10px] shrink-0">
+                  <Badge variant="secondary" className="text-xs shrink-0">
                     {funnelLabels[selectedFunnel] || selectedFunnel}
                   </Badge>
                 )}
               </div>
               {variant.description && (
-                <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 break-words">
+                <p className="text-xs text-muted-foreground mt-1.5 break-words leading-relaxed">
                   {variant.description}
                 </p>
               )}
@@ -279,28 +279,28 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
       {/* Close button */}
       <button
         onClick={() => setShowMobileOverlay(false)}
-        className="absolute top-3 right-3 p-2 hover:bg-accent rounded-md transition-colors z-10"
+        className="absolute top-4 right-4 h-11 w-11 flex items-center justify-center hover:bg-accent rounded-md transition-colors z-10"
         data-testid="button-close-admin-preview"
         aria-label="Close preview menu"
       >
         <X className="w-5 h-5" />
       </button>
       
-      <div className="px-3 pt-14 pb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <Eye className="w-4 h-4 text-primary" />
-          <h2 className="font-semibold text-sm">Admin Preview Mode</h2>
+      <div className="px-4 pt-16 pb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Eye className="w-5 h-5 text-primary" />
+          <h2 className="font-semibold text-base">Admin Preview Mode</h2>
         </div>
-        <div className="h-px bg-border mb-3" />
+        <div className="h-px bg-border mb-4" />
   
         {/* Persona Selection */}
-        <div className="py-1.5 space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Persona Type</label>
+        <div className="py-2 space-y-2">
+          <label className="text-sm font-medium text-muted-foreground">Persona Type</label>
           <Select
             value={selectedPersona || "none"}
             onValueChange={(value) => setSelectedPersona(value === "none" ? null : value as Persona)}
           >
-            <SelectTrigger className="h-9 text-sm" data-testid="select-persona">
+            <SelectTrigger className="h-11 text-base" data-testid="select-persona">
               <SelectValue placeholder="Select persona" />
             </SelectTrigger>
             <SelectContent className="z-[100000]">
@@ -316,16 +316,16 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         </div>
 
         {/* Funnel Stage Selection */}
-        <div className="py-1.5 space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" />
+        <div className="py-2 space-y-2">
+          <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+            <TrendingUp className="w-4 h-4" />
             Funnel Stage
           </label>
           <Select
             value={selectedFunnel}
             onValueChange={(value) => setSelectedFunnel(value as FunnelStage | "none")}
           >
-            <SelectTrigger className="h-9 text-sm" data-testid="select-funnel">
+            <SelectTrigger className="h-11 text-base" data-testid="select-funnel">
               <SelectValue placeholder="Select stage" />
             </SelectTrigger>
             <SelectContent className="z-[100000]">
@@ -342,13 +342,13 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         {/* A/B Test Variants */}
         {activeTests && activeTests.length > 0 && (
           <>
-            <div className="h-px bg-border my-3" />
-            <div className="py-1.5 space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                <TestTube2 className="w-3 h-3" />
+            <div className="h-px bg-border my-4" />
+            <div className="py-2 space-y-2">
+              <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                <TestTube2 className="w-4 h-4" />
                 A/B Test Variant Override
               </label>
-              <p className="text-[11px] text-muted-foreground mb-2">
+              <p className="text-xs text-muted-foreground mb-3">
                 Select one variant to test (only one can be active at a time)
               </p>
               <UnifiedVariantSelector
@@ -368,53 +368,52 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           </>
         )}
 
-        <div className="h-px bg-border my-3" />
+        <div className="h-px bg-border my-4" />
 
         {/* Action Buttons */}
-        <div className="py-1.5 space-y-2">
+        <div className="py-2 space-y-3">
           <Button
-            size="sm"
-            className="w-full h-10"
+            className="w-full h-12 text-base"
             onClick={() => {
               handleApply();
               setShowMobileOverlay(false);
             }}
             data-testid="button-apply-preview-dropdown"
           >
-            <CheckCircle2 className="w-4 h-4 mr-2" />
-            Apply Preview
+            <CheckCircle2 className="w-5 h-5 mr-2" />
+            Preview
           </Button>
           {isPreviewActive && (
             <Button
               variant="outline"
-              size="sm"
-              className="w-full h-10"
+              className="w-full h-12 text-base"
               onClick={() => {
                 handleReset();
                 setShowMobileOverlay(false);
               }}
               data-testid="button-reset-preview-dropdown"
             >
-              <RotateCcw className="w-3.5 h-3.5 mr-2" />
+              <RotateCcw className="w-4 h-4 mr-2" />
               Reset to Default
             </Button>
           )}
         </div>
 
-        <div className="h-px bg-border my-3" />
+        <div className="h-px bg-border my-4" />
 
-        {/* Admin Dashboard Link */}
-        <Link href="/admin">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start h-10"
-            data-testid="menu-admin-dashboard-dropdown"
-          >
-            <Shield className="w-4 h-4 mr-2" />
-            Admin Dashboard
-          </Button>
-        </Link>
+        {/* Admin Dashboard Link & Sign Out */}
+        <div className="space-y-2">
+          <Link href="/admin">
+            <Button
+              variant="ghost"
+              className="w-full justify-start h-12 text-base"
+              data-testid="menu-admin-dashboard-dropdown"
+            >
+              <Shield className="w-5 h-5 mr-2" />
+              Admin Dashboard
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>,
     document.body
