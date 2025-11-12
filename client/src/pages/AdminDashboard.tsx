@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import LeadDetailsDialog from "@/components/LeadDetailsDialog";
+import { UniversalSearch } from "@/components/UniversalSearch";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -93,11 +94,14 @@ export default function AdminDashboard() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <Breadcrumbs items={[{ label: "Admin Dashboard" }]} />
           <div className="flex flex-col gap-6 mt-4">
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-serif font-bold">CRM Dashboard</h1>
-              <p className="text-muted-foreground text-base sm:text-lg mt-2">
-                Manage leads and track funnel performance
-              </p>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h1 className="text-3xl sm:text-4xl font-serif font-bold">CRM Dashboard</h1>
+                <p className="text-muted-foreground text-base sm:text-lg mt-2">
+                  Manage leads and track funnel performance
+                </p>
+              </div>
+              <UniversalSearch />
             </div>
             <div className="flex flex-wrap gap-2">
               {/* Primary CRM Actions */}
