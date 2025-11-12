@@ -273,20 +273,20 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   // Mobile full-screen overlay - portaled to document.body to escape stacking context
   const mobileOverlay = showMobileOverlay && typeof document !== 'undefined' && createPortal(
     <div 
-      className="fixed inset-0 w-screen h-screen bg-background z-[99999] overflow-y-auto"
+      className="fixed inset-0 w-screen h-screen bg-background z-[99999]"
       data-testid="menu-admin-preview"
     >
       {/* Close button - fixed position so it stays visible while scrolling */}
       <button
         onClick={() => setShowMobileOverlay(false)}
-        className="fixed top-4 right-4 h-11 w-11 flex items-center justify-center hover:bg-accent rounded-md transition-colors z-[100000]"
+        className="fixed top-4 right-4 h-11 w-11 flex items-center justify-center hover:bg-accent rounded-md transition-colors z-[100001] pointer-events-auto"
         data-testid="button-close-admin-preview"
         aria-label="Close preview menu"
       >
         <X className="w-5 h-5" />
       </button>
       
-      <div className="px-4 pt-16 pb-8">
+      <div className="h-full overflow-y-auto px-4 pt-16 pb-8 relative z-[100000]">
         <div className="flex items-center gap-2 mb-4">
           <Eye className="w-5 h-5 text-primary" />
           <h2 className="font-semibold text-base">Admin Preview Mode</h2>
