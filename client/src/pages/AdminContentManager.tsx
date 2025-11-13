@@ -2441,6 +2441,7 @@ export default function AdminContentManager() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="default">Default (all personas)</SelectItem>
                         <SelectItem value="student">Adult Education Student</SelectItem>
                         <SelectItem value="provider">Service Provider</SelectItem>
                         <SelectItem value="parent">Parent</SelectItem>
@@ -2448,6 +2449,11 @@ export default function AdminContentManager() {
                         <SelectItem value="volunteer">Volunteer</SelectItem>
                       </SelectContent>
                     </Select>
+                    {(editingItem.metadata as any)?.persona === 'default' && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        This is the fallback hero shown when no persona-specific hero matches
+                      </p>
+                    )}
                   </div>
                   
                   {editingItem.type === 'hero' && (
@@ -3010,6 +3016,7 @@ export default function AdminContentManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="default">Default (all personas)</SelectItem>
                       <SelectItem value="student">Adult Education Student</SelectItem>
                       <SelectItem value="provider">Service Provider</SelectItem>
                       <SelectItem value="parent">Parent</SelectItem>
@@ -3017,6 +3024,11 @@ export default function AdminContentManager() {
                       <SelectItem value="volunteer">Volunteer</SelectItem>
                     </SelectContent>
                   </Select>
+                  {(newItem.metadata as any)?.persona === 'default' && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      This is the fallback hero shown when no persona-specific hero matches
+                    </p>
+                  )}
                 </div>
                 
                 {activeTab === 'hero' && (
