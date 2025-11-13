@@ -25,7 +25,7 @@ import {
   FlaskConical, Plus, Play, Pause, CheckCircle2, Trash2, 
   BarChart3, Edit, TrendingUp, Users, Target, ChevronDown, ChevronUp, AlertCircle,
   Sparkles, Loader2, Settings2, Type, Image as ImageIcon, Link as LinkIcon, MousePointerClick,
-  Palette, FileJson
+  Palette, FileJson, Zap
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import type { AbTestWithVariants, AbTestVariant } from "@shared/schema";
@@ -830,6 +830,12 @@ export default function AdminABTesting() {
                 <Button variant="outline" data-testid="button-back-dashboard" size="sm" className="w-full sm:w-auto">
                   <BarChart3 className="w-4 h-4 mr-2" />
                   <span className="sm:inline">CRM Dashboard</span>
+                </Button>
+              </Link>
+              <Link href="/admin/automation-rules">
+                <Button variant="outline" data-testid="button-automation" size="sm" className="w-full sm:w-auto">
+                  <Zap className="w-4 h-4 mr-2" />
+                  <span className="sm:inline">Automation</span>
                 </Button>
               </Link>
               <Button
