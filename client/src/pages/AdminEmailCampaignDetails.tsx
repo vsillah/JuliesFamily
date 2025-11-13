@@ -105,6 +105,17 @@ export default function AdminEmailCampaignDetails() {
     enabled: !!campaignId,
   });
 
+  // Fetch campaign link performance
+  const { data: linkPerformance, isLoading: linkPerformanceLoading } = useQuery<Array<{
+    url: string;
+    totalClicks: number;
+    uniqueClicks: number;
+    ctr: number;
+  }>>({
+    queryKey: ['/api/email-campaigns', campaignId, 'link-performance'],
+    enabled: !!campaignId,
+  });
+
   // Backfill mutation (for Graduation Path only)
   const backfillMutation = useMutation({
     mutationFn: async () => {
@@ -377,6 +388,72 @@ export default function AdminEmailCampaignDetails() {
                         </p>
                       </div>
                     </div>
+                  </CardContent>
+                </Card>
+
+                {/* Link Performance Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MousePointerClick className="w-5 h-5" />
+                      Link Performance
+                    </CardTitle>
+                    <CardDescription>
+                      See which links in your campaign are driving the most engagement
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {linkPerformanceLoading ? (
+                      <p className="text-muted-foreground">Loading link performance...</p>
+                    ) : !linkPerformance || linkPerformance.length === 0 ? (
+                      <div className="text-center py-8">
+                        <MousePointerClick className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                        <p className="text-muted-foreground">No link clicks yet</p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Link performance data will appear once recipients click on links in your emails
+                        </p>
+                      </div>
+                    ) : (
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[50%]">URL</TableHead>
+                            <TableHead className="text-right">Total Clicks</TableHead>
+                            <TableHead className="text-right">Unique Clicks</TableHead>
+                            <TableHead className="text-right">CTR</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {linkPerformance.map((link, index) => (
+                            <TableRow key={index} data-testid={`row-link-${index}`}>
+                              <TableCell className="font-medium">
+                                <a 
+                                  href={link.url} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline truncate block max-w-md"
+                                  title={link.url}
+                                  data-testid={`link-url-${index}`}
+                                >
+                                  {link.url}
+                                </a>
+                              </TableCell>
+                              <TableCell className="text-right font-semibold" data-testid={`text-total-clicks-${index}`}>
+                                {link.totalClicks}
+                              </TableCell>
+                              <TableCell className="text-right" data-testid={`text-unique-clicks-${index}`}>
+                                {link.uniqueClicks}
+                              </TableCell>
+                              <TableCell className="text-right" data-testid={`text-ctr-${index}`}>
+                                <Badge variant="outline">
+                                  {link.ctr.toFixed(1)}%
+                                </Badge>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    )}
                   </CardContent>
                 </Card>
               </>
