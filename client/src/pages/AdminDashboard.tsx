@@ -29,6 +29,7 @@ export default function AdminDashboard() {
   const [, navigate] = useLocation();
   const [selectedPersona, setSelectedPersona] = useState<string>("all");
   const [selectedFunnelStage, setSelectedFunnelStage] = useState<string>("all");
+  const [selectedEngagement, setSelectedEngagement] = useState<string>("all");
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
 
@@ -38,10 +39,11 @@ export default function AdminDashboard() {
     retry: false,
   });
 
-  // Fetch leads
+  // Fetch leads with combined filters
   const queryParams = new URLSearchParams();
   if (selectedPersona !== "all") queryParams.append("persona", selectedPersona);
   if (selectedFunnelStage !== "all") queryParams.append("funnelStage", selectedFunnelStage);
+  if (selectedEngagement !== "all") queryParams.append("engagement", selectedEngagement);
   const queryString = queryParams.toString();
 
   const { data: leads = [] } = useQuery<Lead[]>({
@@ -354,6 +356,19 @@ export default function AdminDashboard() {
                   {Object.entries(funnelStageLabels).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
                   ))}
+                </select>
+                <select
+                  className="px-3 py-2 border rounded-md text-sm flex-1"
+                  value={selectedEngagement}
+                  onChange={(e) => setSelectedEngagement(e.target.value)}
+                  data-testid="select-engagement-filter"
+                >
+                  <option value="all">All Engagement</option>
+                  <option value="high_engagers">High Engagers (5+ opens or 2+ clicks)</option>
+                  <option value="active">Active (opened in last 30 days)</option>
+                  <option value="clickers">Clickers (at least 1 click)</option>
+                  <option value="non_openers">Non-Openers (never opened)</option>
+                  <option value="inactive">Inactive (no activity in 60 days)</option>
                 </select>
               </div>
             </div>

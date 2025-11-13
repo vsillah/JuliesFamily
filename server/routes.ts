@@ -1608,16 +1608,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin CRM Routes
   app.get('/api/admin/leads', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const { persona, funnelStage } = req.query;
+      const { persona, funnelStage, engagement } = req.query;
       
-      let leads;
-      if (persona) {
-        leads = await storage.getLeadsByPersona(persona as string);
-      } else if (funnelStage) {
-        leads = await storage.getLeadsByFunnelStage(funnelStage as string);
-      } else {
-        leads = await storage.getAllLeads();
-      }
+      // Use new combined filtering method
+      const leads = await storage.getFilteredLeads({
+        persona: persona as string | undefined,
+        funnelStage: funnelStage as string | undefined,
+        engagement: engagement as string | undefined,
+      });
       
       res.json(leads);
     } catch (error) {

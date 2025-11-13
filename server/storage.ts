@@ -2519,6 +2519,150 @@ export class DatabaseStorage implements IStorage {
     return results.rows;
   }
 
+  async getFilteredLeads(options: {
+    persona?: string;
+    funnelStage?: string;
+    engagement?: string;
+  }): Promise<Lead[]> {
+    const { persona, funnelStage, engagement } = options;
+
+    // Build base filter conditions
+    const baseConditions: any[] = [];
+    if (persona) {
+      baseConditions.push(sql`persona = ${persona}`);
+    }
+    if (funnelStage) {
+      baseConditions.push(sql`funnel_stage = ${funnelStage}`);
+    }
+
+    const baseFilterClause = baseConditions.length > 0
+      ? sql`WHERE ${sql.join(baseConditions, sql` AND `)}`
+      : sql``;
+
+    // If no engagement filter, return with base filters only
+    if (!engagement || engagement === 'all') {
+      const results = await db.execute<Lead>(sql`
+        SELECT * FROM leads ${baseFilterClause}
+        ORDER BY created_at DESC
+      `);
+      return results.rows;
+    }
+
+    // Use CTE for filtered leads, then apply engagement logic
+    switch (engagement) {
+      case 'high_engagers':
+        // 5+ opens OR 2+ clicks
+        const highEngagers = await db.execute<Lead>(sql`
+          WITH filtered_leads AS (
+            SELECT * FROM leads ${baseFilterClause}
+          ),
+          engagement_stats AS (
+            SELECT 
+              fl.id,
+              COUNT(DISTINCT eo.id) as open_count,
+              COUNT(DISTINCT ec.id) as click_count
+            FROM filtered_leads fl
+            LEFT JOIN email_opens eo ON fl.id = eo.lead_id
+            LEFT JOIN email_clicks ec ON fl.id = ec.lead_id
+            GROUP BY fl.id
+          )
+          SELECT fl.*
+          FROM filtered_leads fl
+          INNER JOIN engagement_stats es ON fl.id = es.id
+          WHERE es.open_count >= 5 OR es.click_count >= 2
+          ORDER BY fl.created_at DESC
+        `);
+        return highEngagers.rows;
+
+      case 'active':
+        // At least 1 open in last 30 days
+        const active = await db.execute<Lead>(sql`
+          WITH filtered_leads AS (
+            SELECT * FROM leads ${baseFilterClause}
+          )
+          SELECT DISTINCT fl.*
+          FROM filtered_leads fl
+          INNER JOIN email_opens eo ON fl.id = eo.lead_id
+          WHERE eo.opened_at >= CURRENT_TIMESTAMP - INTERVAL '30 days'
+          ORDER BY fl.created_at DESC
+        `);
+        return active.rows;
+
+      case 'non_openers':
+        // Received emails (ever) but never opened (scoped to filtered leads)
+        const nonOpeners = await db.execute<Lead>(sql`
+          WITH filtered_leads AS (
+            SELECT * FROM leads ${baseFilterClause}
+          ),
+          leads_with_sends AS (
+            SELECT DISTINCT fl.id
+            FROM filtered_leads fl
+            INNER JOIN email_logs el ON el.lead_id = fl.id
+            WHERE el.status = 'sent'
+          )
+          SELECT fl.*
+          FROM filtered_leads fl
+          INNER JOIN leads_with_sends lws ON fl.id = lws.id
+          WHERE NOT EXISTS (
+            SELECT 1 FROM email_opens eo WHERE eo.lead_id = fl.id
+          )
+          ORDER BY fl.created_at DESC
+        `);
+        return nonOpeners.rows;
+
+      case 'clickers':
+        // At least 1 click (scoped to filtered leads)
+        const clickers = await db.execute<Lead>(sql`
+          WITH filtered_leads AS (
+            SELECT * FROM leads ${baseFilterClause}
+          )
+          SELECT DISTINCT fl.*
+          FROM filtered_leads fl
+          INNER JOIN email_clicks ec ON fl.id = ec.lead_id
+          ORDER BY fl.created_at DESC
+        `);
+        return clickers.rows;
+
+      case 'inactive':
+        // Received emails in last 60 days BUT no opens/clicks in last 60 days
+        const inactive = await db.execute<Lead>(sql`
+          WITH filtered_leads AS (
+            SELECT * FROM leads ${baseFilterClause}
+          ),
+          recent_sends AS (
+            SELECT DISTINCT fl.id
+            FROM filtered_leads fl
+            INNER JOIN email_logs el ON el.lead_id = fl.id
+            WHERE el.status = 'sent'
+              AND el.sent_at >= CURRENT_TIMESTAMP - INTERVAL '60 days'
+          )
+          SELECT fl.*
+          FROM filtered_leads fl
+          INNER JOIN recent_sends rs ON fl.id = rs.id
+          WHERE NOT EXISTS (
+            SELECT 1 FROM email_opens eo 
+            WHERE eo.lead_id = fl.id 
+              AND eo.opened_at >= CURRENT_TIMESTAMP - INTERVAL '60 days'
+          )
+          AND NOT EXISTS (
+            SELECT 1 FROM email_clicks ec 
+            WHERE ec.lead_id = fl.id 
+              AND ec.clicked_at >= CURRENT_TIMESTAMP - INTERVAL '60 days'
+          )
+          ORDER BY fl.created_at DESC
+        `);
+        return inactive.rows;
+
+      default:
+        // Fallback to base filters
+        const results = await db.execute<Lead>(sql`
+          SELECT * FROM leads ${baseFilterClause}
+          ORDER BY created_at DESC
+        `);
+        return results.rows;
+    }
+  }
+
   // SMS Template operations
   async createSmsTemplate(templateData: InsertSmsTemplate): Promise<SmsTemplate> {
     const [template] = await db.insert(smsTemplates).values(templateData).returning();

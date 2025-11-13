@@ -1108,6 +1108,7 @@ export const emailOpens = pgTable("email_opens", {
   trackingTokenIdx: index("email_opens_tracking_token_idx").on(table.trackingToken),
   campaignAnalyticsIdx: index("email_opens_campaign_analytics_idx").on(table.campaignId, table.openedAt),
   emailLogIdx: index("email_opens_email_log_idx").on(table.emailLogId),
+  leadEngagementIdx: index("email_opens_lead_engagement_idx").on(table.leadId, table.openedAt),
 }));
 
 export const insertEmailOpenSchema = createInsertSchema(emailOpens).omit({
@@ -1154,6 +1155,7 @@ export const emailClicks = pgTable("email_clicks", {
   emailLinkIdIdx: index("email_clicks_email_link_id_idx").on(table.emailLinkId),
   campaignAnalyticsIdx: index("email_clicks_campaign_analytics_idx").on(table.campaignId, table.clickedAt),
   emailLogIdx: index("email_clicks_email_log_idx").on(table.emailLogId),
+  leadEngagementIdx: index("email_clicks_lead_engagement_idx").on(table.leadId, table.clickedAt),
 }));
 
 export const insertEmailClickSchema = createInsertSchema(emailClicks).omit({
