@@ -11,6 +11,7 @@ const students = [
   {
     name: "Tomik Thompson",
     email: "tomik.t@example.com",
+    oidcSub: "tomik-tgh-student",
     project: {
       title: "My Pet Newsletter - Dwarf Hamster",
       description: "A comprehensive newsletter about dwarf hamsters covering their characteristics, habitat, care requirements, and interesting facts. Includes research on hamster population, varieties, and proper care techniques.",
@@ -21,6 +22,7 @@ const students = [
   {
     name: "Sammy Ortiz",
     email: "sammy.o@example.com",
+    oidcSub: "sammy-tgh-student",
     project: {
       title: "Loaded Shrimp Baked Potato Recipe",
       description: "A delicious recipe combining baked potatoes with seasoned jumbo shrimp, featuring detailed preparation steps, ingredient lists, and cooking tips. Created as part of the Tech Goes Home program.",
@@ -31,6 +33,7 @@ const students = [
   {
     name: "Maria Santos",
     email: "maria.s@example.com",
+    oidcSub: "maria-tgh-student",
     project: {
       title: "Banana Bread Recipe",
       description: "A classic banana bread recipe with detailed ingredients, preparation steps, and helpful tips. Features measurements, baking times, and suggestions for variations using raisins or cranberries.",
@@ -41,6 +44,7 @@ const students = [
   {
     name: "Jessica Rivera",
     email: "jessica.r@example.com",
+    oidcSub: "jessica-tgh-student",
     project: {
       title: "Philly Cheesesteak Egg Rolls",
       description: "An innovative fusion recipe combining the classic Philly cheesesteak with crispy egg roll wrappers. Includes ingredient lists, step-by-step preparation, and cooking instructions.",
@@ -51,6 +55,7 @@ const students = [
   {
     name: "Lisa Johnson",
     email: "lisa.j@example.com",
+    oidcSub: "lisa-tgh-student",
     project: {
       title: "Julie's Family Learning Program Benefits",
       description: "An informative newsletter highlighting the benefits and statistics of Julie's Family Learning Program, including education offerings, child development programs, and success percentages in life skills, math, science, and writing.",
@@ -81,6 +86,7 @@ async function seedTechGoesHomeStudents() {
           const newUser: InsertUser = {
             email: student.email,
             name: student.name,
+            oidcSub: student.oidcSub,
             role: "student",
             persona: "student",
             funnelStage: "retention", // Completed program
@@ -89,6 +95,12 @@ async function seedTechGoesHomeStudents() {
           user = await storage.createUser(newUser);
           console.log(`    ✓ Created user: ${student.name}`);
         } else {
+          // Update oidcSub if it's missing
+          if (!user.oidcSub && student.oidcSub) {
+            await storage.updateUser(user.id, { oidcSub: student.oidcSub });
+            user = await storage.getUser(user.id);
+            console.log(`    ✓ Updated oidcSub for: ${student.name}`);
+          }
           console.log(`    ℹ User already exists: ${student.name}`);
         }
       } catch (error) {
