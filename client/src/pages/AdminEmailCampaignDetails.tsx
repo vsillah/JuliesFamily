@@ -12,6 +12,7 @@ import { Mail, Users, CheckCircle, XCircle, Clock, AlertCircle, RefreshCw, Arrow
 import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import CampaignTimeSeriesChart from "@/components/CampaignTimeSeriesChart";
+import BestSendTimeInsights from "@/components/BestSendTimeInsights";
 import type { EmailCampaign } from "@shared/schema";
 
 interface EnrollmentDetail {
@@ -536,6 +537,9 @@ export default function AdminEmailCampaignDetails() {
                     })()}
                   </CardContent>
                 </Card>
+
+                {/* Best Send Time Insights */}
+                {campaignId && <BestSendTimeInsights scope="campaign" scopeId={campaignId} />}
               </>
             )}
           </TabsContent>
