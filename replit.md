@@ -1,137 +1,10 @@
 # Julie's Family Learning Program Website (Powered by Kinflo)
 
 ## Overview
-Julie's Family Learning Program website is a non-profit, full-stack web application designed to showcase educational programs, impact, testimonials, and events, and facilitate donations and volunteering. It also serves as a demonstration platform for **Kinflo**, a relationship-first CRM for nonprofits, highlighting its persona-based personalization, lead management, and communication automation capabilities. The project aims to create a welcoming online presence and demonstrate Kinflo's advanced features to drive engagement and support for family learning initiatives.
+Julie's Family Learning Program website is a non-profit, full-stack web application showcasing educational programs, impact, testimonials, and events. It facilitates donations and volunteering and serves as a demonstration platform for **Kinflo**, a relationship-first CRM for nonprofits, highlighting its persona-based personalization, lead management, and communication automation. The project aims to create a welcoming online presence and drive engagement and support for family learning initiatives.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
-
-## Agent Workflow Guidelines
-
-### Escalation Protocol
-After **one failed attempt** at either of the following, escalate to the architect tool for expert guidance:
-
-1. **Resolving a Technical Issue/Bug**: If initial troubleshooting or debugging does not resolve the problem, call the architect tool with:
-   - Detailed description of the issue
-   - What was attempted and why it failed
-   - Relevant error messages and logs
-   - Files involved in the investigation
-   - `responsibility: "debug"`
-
-2. **Designing an Actionable Build Plan**: If initial planning does not produce a clear, implementable task list, call the architect tool with:
-   - Description of the feature/requirement
-   - Challenges or ambiguities encountered
-   - Proposed approaches that were considered
-   - Files that would be affected
-   - `responsibility: "plan"`
-
-**Rationale**: This ensures we get expert architectural guidance early rather than spending excessive time on difficult problems. The architect agent has specialized analytical capabilities and can provide strategic direction when standard approaches don't work.
-
-### Testing Protocol
-Before finalizing any build or marking work as complete, the agent must perform end-to-end automation and regression testing to ensure:
-- New features work as expected across different user flows
-- Existing functionality remains intact (no regressions)
-- UI interactions are responsive and accessible
-- Critical user journeys complete successfully
-
-Use the `run_test` tool with comprehensive test plans that cover the implemented changes and related functionality.
-
-### Continuous Documentation Improvement
-When a chat interaction reveals patterns, preferences, or technical decisions that could make future interactions more efficient, the agent should proactively suggest adding those insights to this replit.md file. This includes:
-- Recurring troubleshooting solutions or workarounds
-- User preferences discovered during implementation
-- Architectural decisions and their rationale
-- Common patterns or conventions established in the codebase
-- Workflow optimizations that proved effective
-- Development standards that emerged (technical implementation patterns, responsive design rules, performance optimizations)
-
-By capturing these learnings, we create a knowledge base that helps future agents work more efficiently and maintain consistency with past decisions.
-
-### Development Testing Utilities
-
-**Developer Grant Admin Button** - A development-only feature that bypasses OIDC authentication constraints when testing admin features.
-
-**Location & Identification:**
-- Component: `DevAdminButton` in `client/src/components/DevAdminButton.tsx`
-- Displayed in: Navigation component (`client/src/components/Navigation.tsx`)
-- Test ID: `data-testid="button-grant-admin-dev"`
-- Label: "DEV: Grant Admin" (desktop) / "Admin" (mobile)
-
-**When It Appears:**
-- Only visible in development mode (`NODE_ENV=development` on server, `!import.meta.env.PROD` on client)
-- Only shown when user is authenticated via OIDC but does NOT have admin/super_admin role
-- Automatically hidden in production builds for security
-
-**How It Works:**
-- Clicking the button calls `POST /api/test/set-user-role` with `{ role: 'super_admin' }`
-- Server endpoint validates the request and updates the user's role in the database
-- Page automatically reloads to apply new permissions
-- User gains full super_admin access to all admin features
-
-**Testing Workflow:**
-1. Start test with OIDC claims configured (use OIDC test helper)
-2. Navigate to homepage or any public page
-3. Complete OIDC login flow
-4. Look for "DEV: Grant Admin" button in navigation
-5. Click the button and wait for page reload (~1.5 seconds)
-6. Navigate to admin pages (/admin, /admin/content, etc.)
-7. User now has super_admin privileges for testing
-
-**Common Testing Issues:**
-- **401 Unauthorized errors**: If you see these after OIDC login, you likely need to click the Grant Admin button first
-- **Missing button**: Button only appears for authenticated non-admin users; if already admin, button won't show
-- **Production testing**: This feature is completely disabled in production; use proper OIDC flows for production testing
-
-**Alternative for Automated Tests:**
-For Playwright tests that encounter OIDC authentication issues:
-1. Set OIDC claims with test user data
-2. Navigate to a public page to complete initial auth
-3. Look for and click `button-grant-admin-dev`
-4. Wait for reload
-5. Proceed with admin feature testing
-
-## Development Standards
-
-### Mobile Responsiveness
-**Breakpoint Standard**: Use 768px as the consistent mobile breakpoint across all responsive implementations.
-
-**Touch Target Accessibility**: All interactive elements (buttons, inputs, links, toggles) must meet WCAG's 44px minimum touch target height on mobile devices.
-
-**Mobile/Desktop Component Variants**: When creating components with different mobile and desktop versions, use runtime conditional rendering (`{isMobile ? <MobileComponent /> : <DesktopComponent />}`) rather than CSS-only hiding (e.g., `md:hidden`). This prevents React hook order violations by ensuring only one component exists in the DOM at any given time.
-
-**Mobile Safari Optimization**: Prefer React Query cache invalidation (`queryClient.invalidateQueries()`) over full page reloads (`window.location.reload()`) to prevent blank screen flashes during state transitions on mobile Safari.
-
-**Example Pattern**:
-```tsx
-const isMobile = useIsMobile(768);
-return isMobile ? <MobileOverlay /> : <DesktopDropdown />;
-```
-
-### Database Query Patterns
-
-**Drizzle ORM Workaround**: Raw SQL is a proven workaround for complex Drizzle ORM issues, particularly when encountering internal errors like `orderSelectedFields` receiving null/undefined. When Drizzle's query builder fails despite correct schema and query patterns, use `db.execute()` with parameterized SQL queries for better control and reliability.
-
-**When to Use Raw SQL**:
-- Complex JOIN queries that trigger internal Drizzle errors
-- Queries requiring precise control over field selection and ordering
-- When encountering `Cannot convert undefined or null to object` errors in Drizzle's internal functions
-- Performance-critical queries where fine-tuning SQL is necessary
-
-**Example Pattern**:
-```typescript
-// Instead of complex Drizzle query builder that may fail
-const results = await db.execute<ResultType>(sql`
-  SELECT 
-    fph.id,
-    fph.created_at as "createdAt",
-    l.email as "userEmail"
-  FROM table_name fph
-  INNER JOIN related_table l ON fph.user_id = l.id
-  WHERE l.status IS NOT NULL ${optionalFilter}
-  ORDER BY fph.created_at DESC
-  LIMIT 50
-`);
-```
 
 ## System Architecture
 
@@ -140,13 +13,13 @@ The frontend uses React 18, TypeScript, and Vite, styled with Tailwind CSS, cust
 
 ### Technical Implementations
 The frontend is a single-page application using `wouter` for routing and TanStack Query for server state management. Key features include:
--   **Persona-Based Personalization**: Tailors content for 6 user personas (Default, Adult Education Student, Service Provider, Parent, Donor, Volunteer).
--   **Passion-Based Content Personalization**: Filters and ranks content based on user-selected interests (literacy, STEM, arts, nutrition, community) with SQL-based scoring.
--   **Uniform Conditional Rendering System**: Manages content visibility across sections using a `useContentAvailability` hook.
--   **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives, including A/B test variants, with consolidated admin controls. A single A/B test variant can be selected at a time, and mobile implementation uses runtime conditional rendering.
+-   **Persona-Based Personalization**: Tailors content for 6 user personas.
+-   **Passion-Based Content Personalization**: Filters and ranks content based on user-selected interests with SQL-based scoring.
+-   **Uniform Conditional Rendering System**: Manages content visibility across sections.
+-   **Admin Preview Mode**: Allows administrators to preview the site from different persona and funnel stage perspectives, including A/B test variants, with consolidated admin controls.
 -   **Content Management System (CMS)**: Features hybrid image management (Cloudinary, object storage with AI naming) and universal content visibility controls.
 -   **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations.
--   **A/B Testing System**: A production-ready, configuration-based platform for testing presentation overrides (headlines, CTAs, images). It ensures consistent variant assignment, provides an admin interface for managing tests, and includes control variant auto-population and historical test results display.
+-   **A/B Testing System**: A production-ready, configuration-based platform for testing presentation overrides, ensuring consistent variant assignment and providing an admin interface.
 -   **User Management System**: Admin interface for user accounts, roles (three-tier RBAC), and audit logging.
 -   **User Profile Management**: Self-service profile updates.
 -   **Authenticated Donation System with Saved Payment Methods**: Secure payment processing via Stripe.
@@ -162,14 +35,12 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Accurate Program Content**: Detailed representation of JFLP's Adult Basic Education, Family Development, and Tech Goes Home programs.
 -   **Hero Section Rendering**: Layered z-index architecture for background images, overlays, and text.
 -   **Student Dashboard Card Content Type**: Managed content system for Tech Goes Home progress cards, enabling persona×journey matrix personalization.
--   **Volunteer Enrollment Tracking System**: Comprehensive system for managing volunteer activities with four-table relational schema, including student dashboard integration, volunteer engagement page, and admin management interface for tracking hours and roles.
--   **Lead-Level Email Engagement Tracking**: Tabbed LeadDetailsDialog interface (Overview, Engagement, Timeline) displaying email analytics per lead. The Engagement tab shows summary metrics (total opens/clicks, engaged campaigns, last activity), email opens list with campaign names and timestamps, and link clicks list with URLs and campaign context. Backend provides GET /api/leads/:id/email-engagement endpoint returning aggregated engagement data. Storage layer uses direct lead_id queries on email_opens and email_clicks tables (both have their own lead_id and campaign_id fields) with LEFT JOINs to email_campaigns for names. Database index on email_logs.lead_id optimizes lead-centric queries. Each tab uses ScrollArea with independent scroll positions for improved UX.
+-   **Volunteer Enrollment Tracking System**: Comprehensive system for managing volunteer activities with four-table relational schema, including student dashboard integration and admin management.
+-   **Lead-Level Email Engagement Tracking**: Tabbed LeadDetailsDialog interface displaying email analytics per lead, including summary metrics, opens, and clicks. Backend provides aggregated engagement data via an API endpoint.
+-   **Scheduled Email Reports**: Automated recurring email reporting system with full CRUD management via an admin UI, supporting various frequencies and report types.
 
 ### System Design Choices
-The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage. A three-tier RBAC system (client, admin, super_admin) is implemented with comprehensive audit logging.
-
-### Enterprise Security
-The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation and whitelisting, error sanitization, and secure session management.
+The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a three-tier RBAC system with audit logging. The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
 
 ## External Dependencies
 
