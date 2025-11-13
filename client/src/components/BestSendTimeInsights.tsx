@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, Clock, BarChart3, AlertCircle } from "lucide-react";
+import { ResponsiveContainer, ScatterChart, XAxis, YAxis, Tooltip, CartesianGrid, Scatter, Cell } from "recharts";
 
 interface SendTimeWindow {
   dayOfWeek: number;
@@ -222,107 +223,154 @@ export default function BestSendTimeInsights({ scope, scopeId }: BestSendTimeIns
 }
 
 function SendTimeHeatmap({ insights }: { insights: SendTimeInsights }) {
-  // Build heatmap data structure
-  const heatmapData: Record<string, number | null> = {};
+  // Build complete 7x24 heatmap data as flat array for Recharts
+  const heatmapData: Array<{
+    hour: number;
+    day: number;
+    dayName: string;
+    timeRange: string;
+    openRate: number | null;
+    sendCount: number;
+    confidenceScore: number;
+  }> = [];
   
-  // Initialize all cells to null
+  // Create lookup map from insights
+  const insightMap = new Map<string, EmailSendTimeInsight>();
+  insights.insights.forEach(insight => {
+    insightMap.set(`${insight.dayOfWeek}-${insight.hourOfDay}`, insight);
+  });
+  
+  // Build complete 7x24 grid
   for (let day = 0; day < 7; day++) {
     for (let hour = 0; hour < 24; hour++) {
-      heatmapData[`${day}-${hour}`] = null;
+      const key = `${day}-${hour}`;
+      const insight = insightMap.get(key);
+      
+      heatmapData.push({
+        hour,
+        day,
+        dayName: DAY_NAMES[day],
+        timeRange: formatHourRange(hour),
+        openRate: insight?.openRate ?? null,
+        sendCount: insight?.sendCount ?? 0,
+        confidenceScore: insight?.confidenceScore ?? 0,
+      });
     }
   }
   
-  // Populate with actual data
-  insights.topWindows.forEach(window => {
-    heatmapData[`${window.dayOfWeek}-${window.hourOfDay}`] = window.openRate;
-  });
-  
   // Find min/max for color scaling (only from non-null values)
-  const validRates = Object.values(heatmapData).filter((rate): rate is number => rate !== null);
-  const minRate = Math.min(...validRates);
-  const maxRate = Math.max(...validRates);
+  const validRates = heatmapData.filter(d => d.openRate !== null).map(d => d.openRate!);
+  const minRate = validRates.length > 0 ? Math.min(...validRates) : 0;
+  const maxRate = validRates.length > 0 ? Math.max(...validRates) : 10000;
   
+  // Color scale function (returns hex color)
   function getCellColor(rate: number | null): string {
     if (rate === null) {
-      return 'bg-muted/50';
+      return '#d4d4d8'; // zinc-300 for no data
     }
     
     // Normalize to 0-1 range
     const normalized = (rate - minRate) / (maxRate - minRate || 1);
     
-    // Color intensity: lighter (low) to darker (high)
-    if (normalized >= 0.8) return 'bg-green-500 dark:bg-green-600';
-    if (normalized >= 0.6) return 'bg-green-400 dark:bg-green-500';
-    if (normalized >= 0.4) return 'bg-yellow-400 dark:bg-yellow-500';
-    if (normalized >= 0.2) return 'bg-orange-400 dark:bg-orange-500';
-    return 'bg-red-400 dark:bg-red-500';
+    // Color intensity: red (low) -> yellow -> green (high)
+    if (normalized >= 0.8) return '#22c55e'; // green-500
+    if (normalized >= 0.6) return '#84cc16'; // lime-500
+    if (normalized >= 0.4) return '#eab308'; // yellow-500
+    if (normalized >= 0.2) return '#f97316'; // orange-500
+    return '#ef4444'; // red-500
   }
   
-  function getCellTooltip(day: number, hour: number): string {
-    const rate = heatmapData[`${day}-${hour}`];
-    if (rate === null) {
-      return `${DAY_NAMES[day]} ${formatHourRange(hour)}: No data`;
-    }
-    return `${DAY_NAMES[day]} ${formatHourRange(hour)}: ${(rate / 100).toFixed(1)}% open rate`;
+  // Custom tooltip content
+  function CustomTooltip({ active, payload }: any) {
+    if (!active || !payload || !payload.length) return null;
+    
+    const data = payload[0].payload;
+    
+    return (
+      <div className="bg-popover border border-border rounded-md p-3 shadow-md" data-testid="tooltip-heatmap">
+        <p className="font-semibold text-sm mb-1">
+          {data.dayName} {data.timeRange}
+        </p>
+        {data.openRate !== null ? (
+          <>
+            <p className="text-sm">Open Rate: {(data.openRate / 100).toFixed(1)}%</p>
+            <p className="text-sm">Sends: {data.sendCount.toLocaleString()}</p>
+            <p className="text-sm">Confidence: {data.confidenceScore}</p>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">No data</p>
+        )}
+      </div>
+    );
+  }
+  
+  // Custom cell shape
+  function renderCell(props: any) {
+    const { cx, cy, payload } = props;
+    const cellSize = 20;
+    
+    return (
+      <rect
+        x={cx - cellSize / 2}
+        y={cy - cellSize / 2}
+        width={cellSize}
+        height={cellSize}
+        fill={getCellColor(payload.openRate)}
+        stroke="hsl(var(--border))"
+        strokeWidth={0.5}
+        rx={2}
+        data-testid={`rect-heatmap-${payload.day}-${payload.hour}`}
+      />
+    );
   }
   
   return (
-    <div className="overflow-x-auto" data-testid="container-heatmap-grid">
-      <div className="min-w-[600px]">
-        {/* Header Row - Hour Labels */}
-        <div className="grid grid-cols-[80px_repeat(24,minmax(0,1fr))] gap-1 mb-2">
-          <div className="text-xs font-medium text-muted-foreground"></div>
-          {Array.from({ length: 24 }, (_, hour) => (
-            <div 
-              key={hour} 
-              className="text-xs text-center text-muted-foreground"
-              data-testid={`label-hour-${hour}`}
-            >
-              {hour % 6 === 0 ? hour : ''}
-            </div>
-          ))}
+    <div className="w-full" data-testid="container-heatmap-recharts">
+      <ResponsiveContainer width="100%" height={300}>
+        <ScatterChart
+          margin={{ top: 20, right: 30, bottom: 40, left: 70 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+          
+          <XAxis
+            type="number"
+            dataKey="hour"
+            domain={[-0.5, 23.5]}
+            ticks={[0, 6, 12, 18, 23]}
+            label={{ value: 'Hour of Day', position: 'insideBottom', offset: -25 }}
+            stroke="hsl(var(--muted-foreground))"
+          />
+          
+          <YAxis
+            type="number"
+            dataKey="day"
+            domain={[-0.5, 6.5]}
+            ticks={[0, 1, 2, 3, 4, 5, 6]}
+            tickFormatter={(day) => DAY_ABBREV[day]}
+            label={{ value: 'Day of Week', angle: -90, position: 'insideLeft' }}
+            stroke="hsl(var(--muted-foreground))"
+          />
+          
+          <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
+          
+          <Scatter
+            data={heatmapData}
+            shape={renderCell}
+          />
+        </ScatterChart>
+      </ResponsiveContainer>
+      
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-2 mt-4">
+        <span className="text-xs text-muted-foreground">Low</span>
+        <div className="flex gap-1">
+          <div className="w-6 h-4 rounded-sm" style={{ backgroundColor: '#ef4444' }} data-testid="legend-color-low" />
+          <div className="w-6 h-4 rounded-sm" style={{ backgroundColor: '#f97316' }} data-testid="legend-color-medium-low" />
+          <div className="w-6 h-4 rounded-sm" style={{ backgroundColor: '#eab308' }} data-testid="legend-color-medium" />
+          <div className="w-6 h-4 rounded-sm" style={{ backgroundColor: '#84cc16' }} data-testid="legend-color-medium-high" />
+          <div className="w-6 h-4 rounded-sm" style={{ backgroundColor: '#22c55e' }} data-testid="legend-color-high" />
         </div>
-        
-        {/* Heatmap Grid */}
-        <div className="space-y-1">
-          {Array.from({ length: 7 }, (_, day) => (
-            <div key={day} className="grid grid-cols-[80px_repeat(24,minmax(0,1fr))] gap-1">
-              {/* Day Label */}
-              <div 
-                className="text-xs font-medium text-muted-foreground flex items-center"
-                data-testid={`label-day-${day}`}
-              >
-                {DAY_ABBREV[day]}
-              </div>
-              
-              {/* Hour Cells */}
-              {Array.from({ length: 24 }, (_, hour) => {
-                const rate = heatmapData[`${day}-${hour}`];
-                return (
-                  <div
-                    key={hour}
-                    className={`h-8 rounded-sm transition-colors ${getCellColor(rate)}`}
-                    title={getCellTooltip(day, hour)}
-                    data-testid={`cell-heatmap-${day}-${hour}`}
-                  />
-                );
-              })}
-            </div>
-          ))}
-        </div>
-        
-        {/* Legend */}
-        <div className="flex items-center justify-center gap-2 mt-4">
-          <span className="text-xs text-muted-foreground">Low</span>
-          <div className="flex gap-1">
-            <div className="w-6 h-4 bg-red-400 dark:bg-red-500 rounded-sm" data-testid="legend-color-low" />
-            <div className="w-6 h-4 bg-orange-400 dark:bg-orange-500 rounded-sm" data-testid="legend-color-medium-low" />
-            <div className="w-6 h-4 bg-yellow-400 dark:bg-yellow-500 rounded-sm" data-testid="legend-color-medium" />
-            <div className="w-6 h-4 bg-green-400 dark:bg-green-500 rounded-sm" data-testid="legend-color-medium-high" />
-            <div className="w-6 h-4 bg-green-500 dark:bg-green-600 rounded-sm" data-testid="legend-color-high" />
-          </div>
-          <span className="text-xs text-muted-foreground">High</span>
-        </div>
+        <span className="text-xs text-muted-foreground">High</span>
       </div>
     </div>
   );
