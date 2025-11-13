@@ -499,3 +499,95 @@ function computeNextRun(schedule: EmailReportSchedule, currentTime: Date): Date 
     return add(currentTime, { days: 1 });
   }
 }
+
+/**
+ * Compute the initial next run time for a new schedule
+ * Used by API routes when creating schedules without explicit nextRunAt
+ */
+export function computeInitialNextRun(frequency: string, referenceDate: Date = new Date()): Date {
+  try {
+    const zonedNow = toZonedTime(referenceDate, TIMEZONE);
+    let nextZonedRun: Date;
+    
+    switch (frequency) {
+      case 'daily':
+        // Schedule for 8 AM tomorrow
+        nextZonedRun = set(zonedNow, {
+          hours: 8,
+          minutes: 0,
+          seconds: 0,
+          milliseconds: 0,
+        });
+        
+        // If we've passed 8 AM today, move to tomorrow
+        if (nextZonedRun <= zonedNow) {
+          nextZonedRun = add(nextZonedRun, { days: 1 });
+        }
+        break;
+      
+      case 'weekly':
+        // Schedule for next Monday at 8 AM
+        const targetDay = 1; // Monday
+        const currentDay = zonedNow.getDay();
+        
+        nextZonedRun = set(zonedNow, {
+          hours: 8,
+          minutes: 0,
+          seconds: 0,
+          milliseconds: 0,
+        });
+        
+        let daysUntilMonday = targetDay - currentDay;
+        if (daysUntilMonday <= 0) {
+          daysUntilMonday += 7;
+        }
+        
+        nextZonedRun = add(nextZonedRun, { days: daysUntilMonday });
+        break;
+      
+      case 'monthly':
+        // Schedule for 1st of next month at 8 AM
+        nextZonedRun = set(zonedNow, {
+          date: 1,
+          hours: 8,
+          minutes: 0,
+          seconds: 0,
+          milliseconds: 0,
+        });
+        
+        // Always move to next month for initial schedule
+        nextZonedRun = add(nextZonedRun, { months: 1 });
+        break;
+      
+      default:
+        // Fallback: tomorrow at 8 AM
+        console.warn(`[EmailReportScheduler] Unknown frequency: ${frequency}, using daily fallback`);
+        nextZonedRun = add(set(zonedNow, { hours: 8, minutes: 0, seconds: 0, milliseconds: 0 }), { days: 1 });
+    }
+    
+    const nextRunUtc = fromZonedTime(nextZonedRun, TIMEZONE);
+    return nextRunUtc;
+  } catch (error) {
+    console.error('[EmailReportScheduler] Error computing initial next run:', error);
+    // Fallback: tomorrow at 8 AM
+    return add(set(referenceDate, { hours: 8, minutes: 0, seconds: 0, milliseconds: 0 }), { days: 1 });
+  }
+}
+
+/**
+ * Manually execute a schedule immediately
+ * Used by API routes for manual/on-demand report generation
+ */
+export async function executeScheduleNow(scheduleId: string, actorId?: string): Promise<void> {
+  console.log(`[EmailReportScheduler] Manual execution requested for schedule ${scheduleId} by actor ${actorId || 'unknown'}`);
+  
+  const schedule = await storage.getEmailReportSchedule(scheduleId);
+  if (!schedule) {
+    throw new Error(`Schedule ${scheduleId} not found`);
+  }
+  
+  // Execute the schedule (reuses the same execution pipeline)
+  await executeSchedule(schedule);
+  
+  console.log(`[EmailReportScheduler] Manual execution completed for schedule ${scheduleId}`);
+}

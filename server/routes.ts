@@ -4288,6 +4288,151 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email Report Schedule Routes (super admin only)
+
+  // Create new email report schedule
+  app.post('/api/email-report-schedules', isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { computeInitialNextRun } = await import('./services/emailReportScheduler');
+      
+      const validatedData = insertEmailReportScheduleSchema.parse(req.body);
+      
+      // Calculate nextRunAt if not provided
+      if (!validatedData.nextRunAt) {
+        validatedData.nextRunAt = computeInitialNextRun(validatedData.frequency);
+      } else {
+        // Validate that nextRunAt is in the future
+        if (validatedData.nextRunAt <= new Date()) {
+          return res.status(400).json({ message: "Next run time must be in the future" });
+        }
+      }
+      
+      // Set createdBy
+      (validatedData as any).createdBy = req.user!.id;
+      
+      const schedule = await storage.createEmailReportSchedule(validatedData as any);
+      res.json(schedule);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid schedule data", errors: error.errors });
+      }
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(409).json({ message: "A schedule with this name already exists" });
+      }
+      console.error("Error creating email report schedule:", error);
+      res.status(500).json({ message: "Failed to create email report schedule" });
+    }
+  });
+
+  // Get all email report schedules
+  app.get('/api/email-report-schedules', isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const schedules = await storage.getAllEmailReportSchedules();
+      res.json(schedules);
+    } catch (error) {
+      console.error("Error fetching email report schedules:", error);
+      res.status(500).json({ message: "Failed to fetch email report schedules" });
+    }
+  });
+
+  // Get single email report schedule
+  app.get('/api/email-report-schedules/:id', isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const schedule = await storage.getEmailReportSchedule(id);
+      
+      if (!schedule) {
+        return res.status(404).json({ message: "Schedule not found" });
+      }
+      
+      res.json(schedule);
+    } catch (error) {
+      console.error("Error fetching email report schedule:", error);
+      res.status(500).json({ message: "Failed to fetch email report schedule" });
+    }
+  });
+
+  // Update email report schedule
+  app.patch('/api/email-report-schedules/:id', isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { computeInitialNextRun } = await import('./services/emailReportScheduler');
+      
+      const validatedData = updateEmailReportScheduleSchema.parse(req.body);
+      
+      // If frequency changed and nextRunAt not explicitly provided, recalculate
+      if (validatedData.frequency && !validatedData.nextRunAt) {
+        validatedData.nextRunAt = computeInitialNextRun(validatedData.frequency);
+      }
+      
+      // If nextRunAt provided, validate it's in the future
+      if (validatedData.nextRunAt && validatedData.nextRunAt <= new Date()) {
+        return res.status(400).json({ message: "Next run time must be in the future" });
+      }
+      
+      const updated = await storage.updateEmailReportSchedule(id, validatedData as any);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Schedule not found" });
+      }
+      
+      res.json(updated);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid schedule data", errors: error.errors });
+      }
+      if (error.code === '23505') { // Unique constraint violation
+        return res.status(409).json({ message: "A schedule with this name already exists" });
+      }
+      console.error("Error updating email report schedule:", error);
+      res.status(500).json({ message: "Failed to update email report schedule" });
+    }
+  });
+
+  // Delete email report schedule
+  app.delete('/api/email-report-schedules/:id', isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verify schedule exists first
+      const schedule = await storage.getEmailReportSchedule(id);
+      if (!schedule) {
+        return res.status(404).json({ message: "Schedule not found" });
+      }
+      
+      await storage.deleteEmailReportSchedule(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting email report schedule:", error);
+      res.status(500).json({ message: "Failed to delete email report schedule" });
+    }
+  });
+
+  // Manually send a report now
+  app.post('/api/email-report-schedules/:id/send-now', isAuthenticated, isSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { executeScheduleNow } = await import('./services/emailReportScheduler');
+      
+      // Execute the schedule immediately
+      await executeScheduleNow(id, req.user!.id);
+      
+      res.json({ success: true, message: "Report sent successfully" });
+    } catch (error: any) {
+      console.error("Error sending report manually:", error);
+      
+      if (error.message?.includes('not found')) {
+        return res.status(404).json({ message: "Schedule not found" });
+      }
+      
+      if (error.message?.includes('SendGrid not configured')) {
+        return res.status(503).json({ message: "Email service not configured" });
+      }
+      
+      res.status(500).json({ message: "Failed to send report" });
+    }
+  });
+
   // Get email logs for a campaign (independent pagination from enrollments)
   app.get('/api/email-logs/campaign/:campaignId', isAuthenticated, isAdmin, async (req, res) => {
     try {

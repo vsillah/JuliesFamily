@@ -1223,13 +1223,27 @@ export const emailReportSchedules = pgTable("email_report_schedules", {
   activeIdx: index("email_report_schedules_active_idx").on(table.isActive),
 }));
 
+// Email Report Schedule validation helpers
+export const emailArraySchema = z.array(z.string().email()).min(1, "At least one recipient email is required");
+export const frequencyEnumSchema = z.enum(['daily', 'weekly', 'monthly']);
+export const reportTypeEnumSchema = z.enum(['campaign_summary', 'engagement_summary', 'full_analytics']);
+
 export const insertEmailReportScheduleSchema = createInsertSchema(emailReportSchedules).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
   lastRunAt: true,
+}).extend({
+  recipients: emailArraySchema,
+  frequency: frequencyEnumSchema,
+  reportType: reportTypeEnumSchema,
+  nextRunAt: z.string().datetime().transform(str => new Date(str)).optional(),
 });
+
+export const updateEmailReportScheduleSchema = insertEmailReportScheduleSchema.partial();
+
 export type InsertEmailReportSchedule = z.infer<typeof insertEmailReportScheduleSchema>;
+export type UpdateEmailReportSchedule = z.infer<typeof updateEmailReportScheduleSchema>;
 export type EmailReportSchedule = typeof emailReportSchedules.$inferSelect;
 
 // Lead-level email engagement DTOs (with joined campaign/link metadata)
