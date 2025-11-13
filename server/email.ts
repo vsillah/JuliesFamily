@@ -43,33 +43,38 @@ export function renderTemplate(template: string, variables: Record<string, any>)
 
 /**
  * Prepare email content with tracking pixel and link rewriting
+ * Returns modified HTML and link tracking data to be stored in database
  */
 export function prepareTrackedEmailContent(
   baseUrl: string,
   html: string,
   trackingToken: string
-): string {
+): { html: string; links: Array<{ linkToken: string; targetUrl: string }> } {
   try {
-    // Load HTML with cheerio
-    const $ = cheerio.load(html);
+    // Check if HTML has a body tag - if not, wrap it to ensure pixel placement
+    const hasBody = /<body[^>]*>/i.test(html);
+    const wrappedHtml = hasBody ? html : `<body>${html}</body>`;
+    
+    // Load HTML with cheerio (decodeEntities: true normalizes HTML entities)
+    const $ = cheerio.load(wrappedHtml, { decodeEntities: true });
     
     // Inject tracking pixel at the end of body
     const trackingPixel = `<img src="${baseUrl}/track/open/${trackingToken}" width="1" height="1" style="display:none" alt="" />`;
+    $('body').append(trackingPixel);
     
-    // Try to append to body, fallback to end of HTML if no body tag
-    if ($('body').length > 0) {
-      $('body').append(trackingPixel);
-    } else {
-      // If no body tag, append to root
-      $.root().append(trackingPixel);
-    }
+    // Track links that need to be stored in database
+    const linksToTrack: Array<{ linkToken: string; targetUrl: string }> = [];
     
     // Rewrite all <a> href links to use click tracking
     $('a[href]').each((_, element) => {
       const $link = $(element);
-      const originalHref = $link.attr('href');
+      let originalHref = $link.attr('href');
       
       if (!originalHref) return;
+      
+      // Cheerio decodes entities, so we get the actual URL here
+      // Trim whitespace that might have been added
+      originalHref = originalHref.trim();
       
       // Skip mailto:, tel:, and anchor links
       if (
@@ -85,19 +90,51 @@ export function prepareTrackedEmailContent(
         return;
       }
       
-      // Build tracking URL with encoded original URL
-      const encodedUrl = encodeURIComponent(originalHref);
-      const trackingUrl = `${baseUrl}/track/click/${trackingToken}?url=${encodedUrl}`;
+      // Validate URL before encoding
+      try {
+        new URL(originalHref);
+      } catch {
+        // Invalid URL - skip tracking
+        console.warn('[Email Tracking] Skipping invalid URL:', originalHref);
+        return;
+      }
+      
+      // Generate unique link token for this specific link
+      const linkToken = nanoid();
+      
+      // Store link tracking data
+      linksToTrack.push({
+        linkToken,
+        targetUrl: originalHref,
+      });
+      
+      // Build tracking URL using link token (no URL in query string)
+      const trackingUrl = `${baseUrl}/track/click/${linkToken}`;
       
       $link.attr('href', trackingUrl);
     });
     
-    return $.html();
+    // Return HTML - if we added body wrapper, extract just the body content
+    let finalHtml: string;
+    if (!hasBody) {
+      // Return inner HTML of body to avoid adding wrapper that SendGrid might strip
+      finalHtml = $('body').html() || html;
+    } else {
+      finalHtml = $.html();
+    }
+    
+    return {
+      html: finalHtml,
+      links: linksToTrack,
+    };
     
   } catch (error) {
     console.error('[Email Tracking] Failed to prepare tracked content:', error);
     // Fail gracefully - return original HTML if parsing fails
-    return html;
+    return {
+      html,
+      links: [],
+    };
   }
 }
 
@@ -123,8 +160,12 @@ export async function sendEmail(
     
     // Prepare HTML with tracking if not disabled
     let finalHtml = options.html;
+    let trackedLinks: Array<{ linkToken: string; targetUrl: string }> = [];
+    
     if (!options.disableTracking) {
-      finalHtml = prepareTrackedEmailContent(baseUrl, options.html, trackingToken);
+      const result = prepareTrackedEmailContent(baseUrl, options.html, trackingToken);
+      finalHtml = result.html;
+      trackedLinks = result.links;
     }
 
     // Prepare message
@@ -147,7 +188,7 @@ export async function sendEmail(
     const messageId = response.headers['x-message-id'] as string;
 
     // Log success to database
-    await storage.createEmailLog({
+    const emailLog = await storage.createEmailLog({
       templateId: options.templateId,
       recipientEmail: options.to,
       recipientName: options.toName,
@@ -160,6 +201,18 @@ export async function sendEmail(
       metadata: options.metadata,
       sentAt: new Date(),
     });
+
+    // Store tracked links in database for secure server-side lookup
+    if (trackedLinks.length > 0) {
+      for (const link of trackedLinks) {
+        await storage.createEmailLink({
+          emailLogId: emailLog.id,
+          linkToken: link.linkToken,
+          targetUrl: link.targetUrl,
+        });
+      }
+      console.log(`[Email Tracking] Stored ${trackedLinks.length} tracked links for email ${emailLog.id}`);
+    }
 
     console.log('Email sent successfully:', messageId, 'tracking:', trackingToken);
     return { success: true, messageId };

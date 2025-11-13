@@ -136,63 +136,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Click tracking endpoint with redirect
-  app.get('/track/click/:token', async (req, res) => {
+  // Click tracking endpoint with redirect (uses secure server-side URL lookup)
+  app.get('/track/click/:linkToken', async (req, res) => {
     try {
-      const { token } = req.params;
-      const { url } = req.query;
+      const { linkToken } = req.params;
       
-      // Validate URL parameter
-      if (!url || typeof url !== 'string') {
-        console.log(`[Email Tracking] Missing or invalid URL parameter`);
-        return res.status(400).send('Invalid request: missing url parameter');
+      // Look up email link by link token to get target URL
+      const emailLink = await storage.getEmailLinkByToken(linkToken);
+      
+      if (!emailLink) {
+        console.log(`[Email Tracking] Invalid link token: ${linkToken}`);
+        // Return 404 since we can't redirect without knowing the destination
+        return res.status(404).send('Link not found');
       }
       
-      // Validate URL to prevent open redirect vulnerabilities
-      // Only allow HTTP(S) URLs
-      let targetUrl: URL;
+      const targetUrl = emailLink.targetUrl;
+      
+      // Validate stored URL (defensive check)
       try {
-        targetUrl = new URL(url);
-        if (!['http:', 'https:'].includes(targetUrl.protocol)) {
-          console.log(`[Email Tracking] Invalid URL protocol: ${targetUrl.protocol}`);
-          return res.status(400).send('Invalid URL');
+        const parsedUrl = new URL(targetUrl);
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+          console.error(`[Email Tracking] Invalid stored URL protocol: ${parsedUrl.protocol}`);
+          return res.status(400).send('Invalid link');
         }
       } catch (error) {
-        console.log(`[Email Tracking] Malformed URL: ${url}`);
-        return res.status(400).send('Malformed URL');
+        console.error(`[Email Tracking] Malformed stored URL: ${targetUrl}`);
+        return res.status(400).send('Invalid link');
       }
       
-      // Look up email log by tracking token
-      const emailLog = await storage.getEmailLogByTrackingToken(token);
-      
-      if (!emailLog) {
-        console.log(`[Email Tracking] Invalid tracking token: ${token}`);
-        // Redirect to target URL anyway (fail gracefully, don't break user experience)
-        return res.redirect(302, url);
-      }
+      // Look up email log for additional context
+      const emailLog = await storage.getEmailLog(emailLink.emailLogId);
       
       // Record the click event asynchronously (don't block redirect)
       storage.createEmailClick({
-        emailLogId: emailLog.id,
-        leadId: emailLog.leadId,
-        clickedUrl: url,
+        emailLogId: emailLink.emailLogId,
+        emailLinkId: emailLink.id,
+        leadId: emailLog?.leadId || null,
+        trackingToken: emailLog?.trackingToken || linkToken,
+        targetUrl: targetUrl,
         userAgent: req.get('user-agent') || null,
         ipAddress: req.ip || null,
       }).then(() => {
-        console.log(`[Email Tracking] Click recorded - log: ${emailLog.id}, lead: ${emailLog.leadId || 'N/A'}, url: ${url}`);
+        console.log(`[Email Tracking] Click recorded - link: ${emailLink.id}, email: ${emailLink.emailLogId}, url: ${targetUrl}`);
       }).catch((error) => {
         console.error('[Email Tracking] Error recording click:', error);
       });
       
       // Immediate redirect (don't wait for database write)
-      res.redirect(302, url);
+      res.redirect(302, targetUrl);
     } catch (error) {
       console.error('[Email Tracking] Error in click tracking:', error);
-      // Redirect to target URL if available (fail gracefully)
-      const { url } = req.query;
-      if (url && typeof url === 'string') {
-        return res.redirect(302, url);
-      }
       res.status(500).send('Internal server error');
     }
   });

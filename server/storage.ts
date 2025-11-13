@@ -6,7 +6,7 @@ import {
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems, donationCampaigns,
   campaignMembers, campaignTestimonials,
-  emailTemplates, emailLogs, emailOpens, emailClicks, smsTemplates, smsSends, communicationLogs,
+  emailTemplates, emailLogs, emailOpens, emailLinks, emailClicks, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
   adminPreferences, auditLogs,
@@ -35,6 +35,7 @@ import {
   type EmailTemplate, type InsertEmailTemplate,
   type EmailLog, type InsertEmailLog,
   type EmailOpen, type InsertEmailOpen,
+  type EmailLink, type InsertEmailLink,
   type EmailClick, type InsertEmailClick,
   type SmsTemplate, type InsertSmsTemplate,
   type SmsSend, type InsertSmsSend,
@@ -289,6 +290,10 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   createEmailOpen(open: InsertEmailOpen): Promise<EmailOpen>;
   getEmailOpensByToken(trackingToken: string): Promise<EmailOpen[]>;
   getEmailOpensByCampaign(campaignId: string): Promise<EmailOpen[]>;
+  
+  createEmailLink(link: InsertEmailLink): Promise<EmailLink>;
+  getEmailLinkByToken(linkToken: string): Promise<EmailLink | undefined>;
+  getEmailLinksByEmailLog(emailLogId: string): Promise<EmailLink[]>;
   
   createEmailClick(click: InsertEmailClick): Promise<EmailClick>;
   getEmailClicksByToken(trackingToken: string): Promise<EmailClick[]>;
@@ -2408,6 +2413,28 @@ export class DatabaseStorage implements IStorage {
       .from(emailOpens)
       .where(eq(emailOpens.campaignId, campaignId))
       .orderBy(desc(emailOpens.openedAt));
+  }
+
+  // Email Link operations (for secure server-side URL storage)
+  async createEmailLink(linkData: InsertEmailLink): Promise<EmailLink> {
+    const [link] = await db.insert(emailLinks).values(linkData).returning();
+    return link;
+  }
+
+  async getEmailLinkByToken(linkToken: string): Promise<EmailLink | undefined> {
+    const [link] = await db
+      .select()
+      .from(emailLinks)
+      .where(eq(emailLinks.linkToken, linkToken));
+    return link;
+  }
+
+  async getEmailLinksByEmailLog(emailLogId: string): Promise<EmailLink[]> {
+    return await db
+      .select()
+      .from(emailLinks)
+      .where(eq(emailLinks.emailLogId, emailLogId))
+      .orderBy(desc(emailLinks.createdAt));
   }
 
   async createEmailClick(clickData: InsertEmailClick): Promise<EmailClick> {

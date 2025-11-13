@@ -1116,20 +1116,41 @@ export const insertEmailOpenSchema = createInsertSchema(emailOpens).omit({
 export type InsertEmailOpen = z.infer<typeof insertEmailOpenSchema>;
 export type EmailOpen = typeof emailOpens.$inferSelect;
 
+// Email Links table - stores link tokens and target URLs server-side for security
+export const emailLinks = pgTable("email_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  emailLogId: varchar("email_log_id").notNull().references(() => emailLogs.id, { onDelete: "cascade" }),
+  linkToken: varchar("link_token").notNull().unique(),
+  targetUrl: text("target_url").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  linkTokenIdx: index("email_links_link_token_idx").on(table.linkToken),
+  emailLogIdIdx: index("email_links_email_log_id_idx").on(table.emailLogId),
+}));
+
+export const insertEmailLinkSchema = createInsertSchema(emailLinks).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEmailLink = z.infer<typeof insertEmailLinkSchema>;
+export type EmailLink = typeof emailLinks.$inferSelect;
+
 // Email Clicks table for tracking link clicks in emails
 export const emailClicks = pgTable("email_clicks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   emailLogId: varchar("email_log_id").notNull().references(() => emailLogs.id, { onDelete: "cascade" }),
+  emailLinkId: varchar("email_link_id").references(() => emailLinks.id, { onDelete: "set null" }),
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
   campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
   trackingToken: varchar("tracking_token").notNull(),
-  targetUrl: text("target_url").notNull(), // Original URL being linked to
+  targetUrl: text("target_url").notNull(), // Original URL being linked to  
   ipAddress: varchar("ip_address"),
   userAgent: text("user_agent"),
   metadata: jsonb("metadata"),
   clickedAt: timestamp("clicked_at").defaultNow(),
 }, (table) => ({
   trackingTokenIdx: index("email_clicks_tracking_token_idx").on(table.trackingToken),
+  emailLinkIdIdx: index("email_clicks_email_link_id_idx").on(table.emailLinkId),
   campaignAnalyticsIdx: index("email_clicks_campaign_analytics_idx").on(table.campaignId, table.clickedAt),
   emailLogIdx: index("email_clicks_email_log_idx").on(table.emailLogId),
 }));
