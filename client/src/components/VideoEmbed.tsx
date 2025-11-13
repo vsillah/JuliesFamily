@@ -45,7 +45,7 @@ function extractVideoId(input: string): string {
 export function VideoEmbed({ 
   videoId, 
   title, 
-  poster = 'maxresdefault'
+  poster = 'hqdefault'
 }: VideoEmbedProps) {
   const extractedId = extractVideoId(videoId);
   
@@ -55,7 +55,7 @@ export function VideoEmbed({
         id={extractedId}
         title={title}
         poster={poster}
-        noCookie={false}
+        noCookie={true}
       />
     </div>
   );
