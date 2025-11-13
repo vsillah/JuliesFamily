@@ -5775,6 +5775,145 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Twilio SMS webhook handler for STOP/START/HELP keywords
+  // This endpoint receives incoming SMS messages from Twilio
+  // Reference: TCPA compliance for SMS opt-out
+  app.post('/api/twilio/sms', async (req, res) => {
+    try {
+      const { Body, From, To } = req.body;
+      
+      // Get Twilio signature for validation
+      const twilioSignature = req.headers['x-twilio-signature'] as string;
+      
+      if (!twilioSignature) {
+        console.error('Missing X-Twilio-Signature header');
+        return res.status(401).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+      }
+      
+      // Validate Twilio signature to prevent spoofing
+      const twilio = await import('twilio');
+      const { getTwilioClient } = await import('./twilio');
+      
+      // Get auth token for signature validation
+      const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+      const xReplitToken = process.env.REPL_IDENTITY 
+        ? 'repl ' + process.env.REPL_IDENTITY 
+        : process.env.WEB_REPL_RENEWAL 
+        ? 'depl ' + process.env.WEB_REPL_RENEWAL 
+        : null;
+        
+      if (!xReplitToken) {
+        console.error('X_REPLIT_TOKEN not found for Twilio webhook validation');
+        return res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+      }
+      
+      const connectionSettings = await fetch(
+        'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=twilio',
+        {
+          headers: {
+            'Accept': 'application/json',
+            'X_REPLIT_TOKEN': xReplitToken
+          }
+        }
+      ).then(r => r.json()).then(data => data.items?.[0]);
+      
+      const authToken = connectionSettings?.settings?.api_key_secret;
+      
+      if (!authToken) {
+        console.error('Twilio auth token not found for webhook validation');
+        return res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+      }
+      
+      // Construct the full URL for signature validation
+      // Twilio uses the full URL including protocol, host, and path
+      const protocol = req.protocol;
+      const host = req.get('host');
+      const url = `${protocol}://${host}${req.originalUrl}`;
+      
+      // Validate request signature
+      const isValid = twilio.validateRequest(
+        authToken,
+        twilioSignature,
+        url,
+        req.body
+      );
+      
+      if (!isValid) {
+        console.error('Invalid Twilio signature - possible spoofing attempt');
+        return res.status(401).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+      }
+      
+      // Extract and normalize the message body
+      const message = (Body || '').trim().toUpperCase();
+      const fromPhone = From; // Already in E.164 format from Twilio
+      
+      // Handle SMS keywords
+      let responseMessage = '';
+      
+      if (message === 'STOP' || message === 'UNSUBSCRIBE' || message === 'END' || message === 'QUIT') {
+        // STOP keyword - create SMS unsubscribe record
+        try {
+          // Check if already unsubscribed
+          const existingUnsubscribe = await storage.getSmsUnsubscribe(fromPhone);
+          
+          if (existingUnsubscribe) {
+            responseMessage = "You're already unsubscribed. You won't receive any more messages from us.";
+          } else {
+            // Create SMS unsubscribe record
+            await storage.createEmailUnsubscribe({
+              phone: fromPhone,
+              channel: 'sms',
+              source: 'keyword',
+              reason: 'user_request',
+              feedback: 'STOP keyword received'
+            });
+            
+            responseMessage = "You have been unsubscribed. You will not receive any more messages from us. Reply START to resubscribe.";
+          }
+        } catch (error: any) {
+          console.error('Error processing STOP keyword:', error);
+          responseMessage = "Your request has been received.";
+        }
+      } else if (message === 'START' || message === 'UNSTOP' || message === 'SUBSCRIBE') {
+        // START keyword - resubscribe (remove unsubscribe)
+        try {
+          const existingUnsubscribe = await storage.getSmsUnsubscribe(fromPhone);
+          
+          if (!existingUnsubscribe) {
+            responseMessage = "You're already subscribed. You will receive messages from us.";
+          } else {
+            // Remove the unsubscribe (soft delete - marks as inactive)
+            await storage.removeUnsubscribe(existingUnsubscribe.id);
+            
+            responseMessage = "You have been resubscribed. You will now receive messages from Julie's Family Learning Program.";
+          }
+        } catch (error: any) {
+          console.error('Error processing START keyword:', error);
+          responseMessage = "Your request has been received.";
+        }
+      } else if (message === 'HELP' || message === 'INFO') {
+        // HELP keyword - provide information
+        responseMessage = "Julie's Family Learning Program: Reply STOP to unsubscribe, START to resubscribe. For help, visit juliesfamily.org or call us at (617) 555-0100. Msg&data rates may apply.";
+      } else {
+        // Unrecognized keyword - send generic help message
+        responseMessage = "Thank you for your message. Reply HELP for info, STOP to unsubscribe. For support, visit juliesfamily.org";
+      }
+      
+      // Return TwiML response
+      res.type('text/xml');
+      res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+  <Message>${responseMessage}</Message>
+</Response>`);
+      
+    } catch (error: any) {
+      console.error('Error processing Twilio SMS webhook:', error);
+      // Return empty TwiML to acknowledge receipt without error
+      res.type('text/xml');
+      res.send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+    }
+  });
+
   // Get communication timeline for a lead
   app.get('/api/leads/:leadId/timeline', isAuthenticated, isAdmin, async (req, res) => {
     try {
