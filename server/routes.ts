@@ -4595,7 +4595,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Preview segment size (count only)
+  // Preview segment size with detailed statistics
+  // Now includes SMS unsubscribe filtering and counts
+  // Returns dual format: { size, stats } for backward compatibility
   app.post('/api/segments/preview/size', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
       const { filters } = req.body;
@@ -4604,14 +4606,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Filters are required" });
       }
       
-      // Use singleton service instance (same as size endpoint)
+      // Use singleton service instance
       const { segmentEvaluationService } = await import('./services/segmentEvaluation');
-      const size = await segmentEvaluationService.getSegmentSize(filters);
       
-      res.json({ size });
+      // Get detailed stats showing unsubscribe impact
+      const stats = await segmentEvaluationService.getSegmentStats(filters);
+      
+      // Return dual format: legacy 'size' field + new 'stats' object
+      // Maintains backward compatibility while enabling future UI enhancements
+      res.json({
+        size: stats.effectiveCount,  // Legacy field for existing UI
+        stats: stats                 // Full stats for future consumption
+      });
     } catch (error) {
-      console.error("Error getting segment size:", error);
-      res.status(500).json({ message: "Failed to get segment size" });
+      console.error("Error getting segment stats:", error);
+      res.status(500).json({ message: "Failed to get segment stats" });
     }
   });
 

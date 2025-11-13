@@ -2276,7 +2276,7 @@ export const segments = pgTable("segments", {
   description: text("description"),
   
   // Filter criteria (stored as JSON)
-  // Example: { personas: ['donor', 'volunteer'], funnelStages: ['consideration', 'decision'], passions: ['literacy', 'stem'], engagementMin: 50, lastActivityDays: 30, excludeUnsubscribed: true }
+  // Example: { personas: ['donor', 'volunteer'], funnelStages: ['consideration', 'decision'], passions: ['literacy', 'stem'], engagementMin: 50, lastActivityDays: 30, excludeUnsubscribed: true, excludeSmsUnsubscribed: true }
   filters: jsonb("filters").notNull(),
   
   // Metadata
@@ -2298,6 +2298,7 @@ export const segmentFiltersSchema = z.object({
   engagementMax: z.number().min(0).max(100).optional(),
   lastActivityDays: z.number().min(0).optional(),
   excludeUnsubscribed: z.boolean().optional(),
+  excludeSmsUnsubscribed: z.boolean().optional(), // TCPA compliance: filter SMS opt-outs
 }).strict(); // Strict to prevent unknown fields
 
 export type SegmentFilters = z.infer<typeof segmentFiltersSchema>;
