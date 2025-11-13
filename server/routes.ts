@@ -4481,6 +4481,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export campaign analytics as CSV
+  app.get('/api/email-campaigns/:id/export/csv', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id: campaignId } = req.params;
+      
+      // Fetch campaign details
+      const campaign = await storage.getEmailCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Fetch analytics summary
+      const emailLogs = await storage.getEmailLogsByCampaign(campaignId);
+      const emailOpens = await storage.getEmailOpensByCampaign(campaignId);
+      const emailClicks = await storage.getEmailClicksByCampaign(campaignId);
+      
+      // Calculate metrics
+      const totalSent = emailLogs.length;
+      const uniqueOpenLogIds = new Set(emailOpens.map(open => open.emailLogId));
+      const uniqueOpens = uniqueOpenLogIds.size;
+      const uniqueClickLogIds = new Set(emailClicks.map(click => click.emailLogId));
+      const uniqueClicks = uniqueClickLogIds.size;
+      const uniqueEngagedLogIds = new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      
+      const openRate = totalSent > 0 ? (uniqueOpens / totalSent) * 100 : 0;
+      const clickRate = totalSent > 0 ? (uniqueClicks / totalSent) * 100 : 0;
+      const clickToOpenRate = uniqueOpens > 0 ? (uniqueClicks / uniqueOpens) * 100 : 0;
+      const uniqueEngagementRate = totalSent > 0 ? (uniqueEngagedLogIds.size / totalSent) * 100 : 0;
+      
+      // Build email log data with engagement details
+      const exportData = emailLogs.map(log => {
+        const logOpens = emailOpens.filter(open => open.emailLogId === log.id);
+        const logClicks = emailClicks.filter(click => click.emailLogId === log.id);
+        const firstOpen = logOpens.length > 0 ? logOpens[0].openedAt : null;
+        const firstClick = logClicks.length > 0 ? logClicks[0].clickedAt : null;
+        
+        return {
+          'Recipient Email': log.leadEmail || 'N/A',
+          'Status': log.status,
+          'Sent At': log.sentAt ? new Date(log.sentAt).toISOString() : 'Not sent',
+          'Total Opens': logOpens.length,
+          'First Opened': firstOpen ? new Date(firstOpen).toISOString() : 'Never',
+          'Total Clicks': logClicks.length,
+          'First Clicked': firstClick ? new Date(firstClick).toISOString() : 'Never',
+          'Error Message': log.errorMessage || '',
+        };
+      });
+      
+      // Add campaign summary row at top
+      const summaryRow = {
+        'Recipient Email': `CAMPAIGN SUMMARY: ${campaign.name}`,
+        'Status': campaign.status,
+        'Sent At': `Total Sent: ${totalSent}`,
+        'Total Opens': `Open Rate: ${openRate.toFixed(1)}%`,
+        'First Opened': `Unique Opens: ${uniqueOpens}`,
+        'Total Clicks': `Click Rate: ${clickRate.toFixed(1)}%`,
+        'First Clicked': `Unique Clicks: ${uniqueClicks}`,
+        'Error Message': `Engagement Rate: ${uniqueEngagementRate.toFixed(1)}%`,
+      };
+      
+      // Combine summary and detail rows
+      const fullExportData = [summaryRow, {}, ...exportData];
+      
+      // Convert to CSV
+      const worksheet = XLSX.utils.json_to_sheet(fullExportData);
+      const csv = XLSX.utils.sheet_to_csv(worksheet);
+      
+      // Set response headers
+      const filename = `campaign_${campaignId}_analytics_${new Date().toISOString().split('T')[0]}.csv`;
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+      res.setHeader('Content-Type', 'text/csv');
+      res.send(csv);
+      
+    } catch (error) {
+      console.error("Error exporting campaign analytics:", error);
+      res.status(500).json({ message: "Failed to export campaign analytics" });
+    }
+  });
+
   // Email Insights Routes
   
   // Get best send time insights with scope filtering
