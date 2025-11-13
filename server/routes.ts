@@ -5,7 +5,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema } from "@shared/schema";
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter } from "./security";
 import { eq, sql, desc, and, isNotNull } from "drizzle-orm";
@@ -4430,6 +4430,197 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ message: "Failed to send report" });
+    }
+  });
+
+  // ====================
+  // Segment Routes
+  // ====================
+  
+  // Create segment
+  app.post('/api/segments', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const validatedData = insertSegmentSchema.parse(req.body);
+      const segment = await storage.createSegment({
+        ...validatedData,
+        createdBy: req.user!.id
+      });
+      res.status(201).json(segment);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid segment data", errors: error.errors });
+      }
+      console.error("Error creating segment:", error);
+      res.status(500).json({ message: "Failed to create segment" });
+    }
+  });
+
+  // Get all segments
+  app.get('/api/segments', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const segments = await storage.getAllSegments();
+      res.json(segments);
+    } catch (error) {
+      console.error("Error fetching segments:", error);
+      res.status(500).json({ message: "Failed to fetch segments" });
+    }
+  });
+
+  // Get single segment
+  app.get('/api/segments/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const segment = await storage.getSegment(id);
+      
+      if (!segment) {
+        return res.status(404).json({ message: "Segment not found" });
+      }
+      
+      res.json(segment);
+    } catch (error) {
+      console.error("Error fetching segment:", error);
+      res.status(500).json({ message: "Failed to fetch segment" });
+    }
+  });
+
+  // Evaluate segment (get matching leads)
+  app.get('/api/segments/:id/evaluate', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      
+      const segment = await storage.getSegment(id);
+      if (!segment) {
+        return res.status(404).json({ message: "Segment not found" });
+      }
+      
+      // Import evaluation service
+      const { segmentEvaluationService } = await import('./services/segmentEvaluation');
+      const leads = await segmentEvaluationService.evaluateFilters(segment.filters as any, { limit });
+      
+      res.json({
+        segmentId: id,
+        segmentName: segment.name,
+        totalLeads: leads.length,
+        leads
+      });
+    } catch (error) {
+      console.error("Error evaluating segment:", error);
+      res.status(500).json({ message: "Failed to evaluate segment" });
+    }
+  });
+
+  // Get segment size (count only)
+  app.get('/api/segments/:id/size', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const segment = await storage.getSegment(id);
+      if (!segment) {
+        return res.status(404).json({ message: "Segment not found" });
+      }
+      
+      // Import evaluation service
+      const { segmentEvaluationService } = await import('./services/segmentEvaluation');
+      const size = await segmentEvaluationService.getSegmentSize(segment.filters as any);
+      
+      res.json({
+        segmentId: id,
+        segmentName: segment.name,
+        size
+      });
+    } catch (error) {
+      console.error("Error getting segment size:", error);
+      res.status(500).json({ message: "Failed to get segment size" });
+    }
+  });
+
+  // Update segment
+  app.patch('/api/segments/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updateSegmentSchema.parse(req.body);
+      
+      const updated = await storage.updateSegment(id, validatedData);
+      
+      if (!updated) {
+        return res.status(404).json({ message: "Segment not found" });
+      }
+      
+      res.json(updated);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid segment data", errors: error.errors });
+      }
+      console.error("Error updating segment:", error);
+      res.status(500).json({ message: "Failed to update segment" });
+    }
+  });
+
+  // Delete segment
+  app.delete('/api/segments/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const segment = await storage.getSegment(id);
+      if (!segment) {
+        return res.status(404).json({ message: "Segment not found" });
+      }
+      
+      await storage.deleteSegment(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting segment:", error);
+      res.status(500).json({ message: "Failed to delete segment" });
+    }
+  });
+
+  // ====================
+  // Email Unsubscribe Routes
+  // ====================
+  
+  // Create unsubscribe (opt-out an email)
+  app.post('/api/email-unsubscribes', async (req, res) => {
+    try {
+      const validatedData = insertEmailUnsubscribeSchema.parse(req.body);
+      
+      // Check if email is already unsubscribed
+      const existing = await storage.getEmailUnsubscribe(validatedData.email);
+      if (existing) {
+        return res.status(409).json({ message: "Email already unsubscribed" });
+      }
+      
+      const unsubscribe = await storage.createEmailUnsubscribe(validatedData);
+      res.status(201).json(unsubscribe);
+    } catch (error: any) {
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ message: "Invalid unsubscribe data", errors: error.errors });
+      }
+      console.error("Error creating unsubscribe:", error);
+      res.status(500).json({ message: "Failed to process unsubscribe" });
+    }
+  });
+
+  // Get all unsubscribes (admin only)
+  app.get('/api/email-unsubscribes', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const unsubscribes = await storage.getAllEmailUnsubscribes();
+      res.json(unsubscribes);
+    } catch (error) {
+      console.error("Error fetching unsubscribes:", error);
+      res.status(500).json({ message: "Failed to fetch unsubscribes" });
+    }
+  });
+
+  // Check if email is unsubscribed
+  app.get('/api/email-unsubscribes/check/:email', async (req, res) => {
+    try {
+      const { email } = req.params;
+      const isUnsubscribed = await storage.isEmailUnsubscribed(email);
+      res.json({ email, isUnsubscribed });
+    } catch (error) {
+      console.error("Error checking unsubscribe status:", error);
+      res.status(500).json({ message: "Failed to check unsubscribe status" });
     }
   });
 

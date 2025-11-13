@@ -14,6 +14,7 @@ import {
   chatbotConversations, chatbotIssues,
   backupSnapshots, backupSchedules,
   volunteerEvents, volunteerShifts, volunteerEnrollments, volunteerSessionLogs,
+  segments, emailUnsubscribes,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -60,7 +61,9 @@ import {
   type VolunteerEvent, type InsertVolunteerEvent,
   type VolunteerShift, type InsertVolunteerShift,
   type VolunteerEnrollment, type InsertVolunteerEnrollment,
-  type VolunteerSessionLog, type InsertVolunteerSessionLog
+  type VolunteerSessionLog, type InsertVolunteerSessionLog,
+  type Segment, type InsertSegment, type UpdateSegment,
+  type EmailUnsubscribe, type InsertEmailUnsubscribe
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -402,6 +405,21 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   getSchedulesDueForExecution(): Promise<EmailReportSchedule[]>;
   updateEmailReportSchedule(id: string, updates: Partial<InsertEmailReportSchedule>): Promise<EmailReportSchedule | undefined>;
   deleteEmailReportSchedule(id: string): Promise<void>;
+  
+  // Segment operations
+  createSegment(segment: InsertSegment): Promise<Segment>;
+  getAllSegments(): Promise<Segment[]>;
+  getSegment(id: string): Promise<Segment | undefined>;
+  getActiveSegments(): Promise<Segment[]>;
+  updateSegment(id: string, updates: UpdateSegment): Promise<Segment | undefined>;
+  deleteSegment(id: string): Promise<void>;
+  evaluateSegment(segmentId: string): Promise<Lead[]>;
+  
+  // Email Unsubscribe operations
+  createEmailUnsubscribe(unsubscribe: InsertEmailUnsubscribe): Promise<EmailUnsubscribe>;
+  getEmailUnsubscribe(email: string): Promise<EmailUnsubscribe | undefined>;
+  getAllEmailUnsubscribes(): Promise<EmailUnsubscribe[]>;
+  isEmailUnsubscribed(email: string): Promise<boolean>;
   
   // Pipeline Stage operations
   getPipelineStages(): Promise<PipelineStage[]>;
@@ -3333,6 +3351,79 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEmailReportSchedule(id: string): Promise<void> {
     await db.delete(emailReportSchedules).where(eq(emailReportSchedules.id, id));
+  }
+
+  // Segment operations
+  async createSegment(segmentData: InsertSegment): Promise<Segment> {
+    const [segment] = await db.insert(segments).values(segmentData).returning();
+    return segment;
+  }
+
+  async getAllSegments(): Promise<Segment[]> {
+    return await db.select().from(segments).orderBy(desc(segments.createdAt));
+  }
+
+  async getSegment(id: string): Promise<Segment | undefined> {
+    const [segment] = await db.select().from(segments).where(eq(segments.id, id));
+    return segment;
+  }
+
+  async getActiveSegments(): Promise<Segment[]> {
+    return await db
+      .select()
+      .from(segments)
+      .where(eq(segments.isActive, true))
+      .orderBy(desc(segments.createdAt));
+  }
+
+  async updateSegment(id: string, updates: UpdateSegment): Promise<Segment | undefined> {
+    const [updated] = await db
+      .update(segments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(segments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteSegment(id: string): Promise<void> {
+    await db.delete(segments).where(eq(segments.id, id));
+  }
+
+  async evaluateSegment(segmentId: string): Promise<Lead[]> {
+    const segment = await this.getSegment(segmentId);
+    if (!segment) {
+      throw new Error('Segment not found');
+    }
+
+    // Import and use segment evaluation service
+    const { segmentEvaluationService } = await import('./services/segmentEvaluation');
+    return await segmentEvaluationService.evaluateFilters(segment.filters as any);
+  }
+
+  // Email Unsubscribe operations
+  async createEmailUnsubscribe(unsubscribeData: InsertEmailUnsubscribe): Promise<EmailUnsubscribe> {
+    const [unsubscribe] = await db.insert(emailUnsubscribes).values(unsubscribeData).returning();
+    return unsubscribe;
+  }
+
+  async getEmailUnsubscribe(email: string): Promise<EmailUnsubscribe | undefined> {
+    const [unsubscribe] = await db
+      .select()
+      .from(emailUnsubscribes)
+      .where(eq(emailUnsubscribes.email, email));
+    return unsubscribe;
+  }
+
+  async getAllEmailUnsubscribes(): Promise<EmailUnsubscribe[]> {
+    return await db
+      .select()
+      .from(emailUnsubscribes)
+      .orderBy(desc(emailUnsubscribes.unsubscribedAt));
+  }
+
+  async isEmailUnsubscribed(email: string): Promise<boolean> {
+    const unsubscribe = await this.getEmailUnsubscribe(email);
+    return !!unsubscribe;
   }
 
   // Email Sequence Step operations
