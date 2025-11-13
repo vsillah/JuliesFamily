@@ -169,6 +169,16 @@ function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageU
                 
                 <ContentUsageIndicator contentId={item.id} />
                 
+                {/* Default hero indicator */}
+                {item.type === 'hero' && (item.metadata as any)?.persona === 'default' && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Badge variant="default" className="text-xs bg-primary text-primary-foreground">
+                      <Star className="w-3 h-3 mr-1 fill-current" />
+                      Default Hero
+                    </Badge>
+                  </div>
+                )}
+                
                 {/* Platform indicator for social media posts */}
                 {item.type === 'socialMedia' && (
                   <div className="flex items-center gap-1.5 mt-2">
