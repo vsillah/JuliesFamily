@@ -979,6 +979,8 @@ export const emailCampaignEnrollments = pgTable("email_campaign_enrollments", {
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   uniqueIndex("enrollment_unique_idx").on(table.campaignId, table.leadId),
+  index("enrollments_enrolled_at_idx").on(table.enrolledAt),
+  index("enrollments_campaign_enrolled_idx").on(table.campaignId, table.enrolledAt),
 ]);
 
 export const insertEmailCampaignEnrollmentSchema = createInsertSchema(emailCampaignEnrollments).omit({
@@ -1084,6 +1086,9 @@ export const emailLogs = pgTable("email_logs", {
 }, (table) => ({
   trackingTokenIdx: index("email_logs_tracking_token_idx").on(table.trackingToken),
   leadIdIdx: index("email_logs_lead_id_idx").on(table.leadId),
+  sentAtIdx: index("email_logs_sent_at_idx").on(table.sentAt),
+  campaignSentAtIdx: index("email_logs_campaign_sent_at_idx").on(table.campaignId, table.sentAt),
+  createdAtIdx: index("email_logs_created_at_idx").on(table.createdAt),
 }));
 
 export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
