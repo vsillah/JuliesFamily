@@ -28,9 +28,9 @@ export default function AdminAutomationRules() {
     name: "",
     description: "",
     metricWeightProfileId: "",
-    targetPersona: "" as string,
-    targetFunnelStage: "" as string,
-    contentType: "" as string,
+    targetPersona: "all" as string,
+    targetFunnelStage: "all" as string,
+    contentType: "all" as string,
     baselineWindow: 30,
     minimumSampleSize: 100,
     compositeScoreThreshold: 5000,
@@ -142,9 +142,9 @@ export default function AdminAutomationRules() {
       name: "",
       description: "",
       metricWeightProfileId: "",
-      targetPersona: "",
-      targetFunnelStage: "",
-      contentType: "",
+      targetPersona: "all",
+      targetFunnelStage: "all",
+      contentType: "all",
       baselineWindow: 30,
       minimumSampleSize: 100,
       compositeScoreThreshold: 5000,
@@ -154,12 +154,24 @@ export default function AdminAutomationRules() {
   };
 
   const handleCreate = () => {
-    createRuleMutation.mutate(ruleForm);
+    const formData = {
+      ...ruleForm,
+      targetPersona: ruleForm.targetPersona === "all" ? "" : ruleForm.targetPersona,
+      targetFunnelStage: ruleForm.targetFunnelStage === "all" ? "" : ruleForm.targetFunnelStage,
+      contentType: ruleForm.contentType === "all" ? "" : ruleForm.contentType,
+    };
+    createRuleMutation.mutate(formData);
   };
 
   const handleUpdate = () => {
     if (editingRule) {
-      updateRuleMutation.mutate({ id: editingRule.id, data: ruleForm });
+      const formData = {
+        ...ruleForm,
+        targetPersona: ruleForm.targetPersona === "all" ? "" : ruleForm.targetPersona,
+        targetFunnelStage: ruleForm.targetFunnelStage === "all" ? "" : ruleForm.targetFunnelStage,
+        contentType: ruleForm.contentType === "all" ? "" : ruleForm.contentType,
+      };
+      updateRuleMutation.mutate({ id: editingRule.id, data: formData });
     }
   };
 
@@ -169,9 +181,9 @@ export default function AdminAutomationRules() {
       name: rule.name,
       description: rule.description || "",
       metricWeightProfileId: rule.metricWeightProfileId || "",
-      targetPersona: rule.targetPersona || "",
-      targetFunnelStage: rule.targetFunnelStage || "",
-      contentType: rule.contentType || "",
+      targetPersona: rule.targetPersona || "all",
+      targetFunnelStage: rule.targetFunnelStage || "all",
+      contentType: rule.contentType || "all",
       baselineWindow: rule.baselineWindow,
       minimumSampleSize: rule.minimumSampleSize,
       compositeScoreThreshold: rule.compositeScoreThreshold,
@@ -425,7 +437,7 @@ export default function AdminAutomationRules() {
                     <SelectValue placeholder="All Personas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Personas</SelectItem>
+                    <SelectItem value="all">All Personas</SelectItem>
                     {personas.map((p) => (
                       <SelectItem key={p} value={p}>
                         {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -445,7 +457,7 @@ export default function AdminAutomationRules() {
                     <SelectValue placeholder="All Stages" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Stages</SelectItem>
+                    <SelectItem value="all">All Stages</SelectItem>
                     {funnelStages.map((s) => (
                       <SelectItem key={s} value={s}>
                         {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -466,7 +478,7 @@ export default function AdminAutomationRules() {
                   <SelectValue placeholder="All Content Types" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Content Types</SelectItem>
+                  <SelectItem value="all">All Content Types</SelectItem>
                   {contentTypes.map((t) => (
                     <SelectItem key={t} value={t}>
                       {t.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
