@@ -48,15 +48,38 @@ export async function getTwilioFromPhoneNumber() {
   return phoneNumber;
 }
 
-export async function sendSMS(to: string, body: string): Promise<{ success: boolean; messageId?: string; error?: string }> {
+export async function sendSMS(to: string, body: string): Promise<{ success: boolean; messageId?: string; error?: string; blocked?: boolean }> {
   try {
+    // TCPA Compliance: Check if recipient has opted out of SMS
+    const { storage } = await import('../storage');
+    
+    // Format phone to E.164 for consistent lookup
+    const { formatPhoneNumber } = await import('../twilio');
+    let formattedPhone: string;
+    try {
+      formattedPhone = formatPhoneNumber(to);
+    } catch (e: any) {
+      return { success: false, error: `Invalid phone number: ${e.message}` };
+    }
+    
+    const isUnsubscribed = await storage.isSmsUnsubscribed(formattedPhone);
+    
+    if (isUnsubscribed) {
+      console.log(`[SMS Blocked] Recipient ${formattedPhone} has opted out via STOP keyword - TCPA compliance`);
+      return {
+        success: false,
+        blocked: true,
+        error: `Recipient has opted out of SMS messages. Send blocked for TCPA compliance.`
+      };
+    }
+    
     const client = await getTwilioClient();
     const from = await getTwilioFromPhoneNumber();
     
     const message = await client.messages.create({
       body,
       from,
-      to
+      to: formattedPhone
     });
     
     return { success: true, messageId: message.sid };

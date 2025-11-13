@@ -7137,18 +7137,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               });
               
-              const result = await sendSMS({
-                to: lead.phone,
-                message: personalized.message,
-                templateId: smsTemplate.id,
-                leadId: lead.id,
-                metadata: { campaignId: campaign.id }
-              }, storage);
+              // Send SMS (now includes TCPA compliance check)
+              const result = await sendSMS(
+                lead.phone,
+                personalized.message,
+                { campaignId: campaign.id, leadId: lead.id, templateId: smsTemplate.id }
+              );
               
               if (result.success) {
                 results.smsSent++;
+                // Create SMS send record
+                await storage.createSmsSend({
+                  templateId: smsTemplate.id,
+                  leadId: lead.id,
+                  recipientPhone: lead.phone,
+                  recipientName: lead.name,
+                  messageContent: personalized.message,
+                  status: 'sent',
+                  smsProvider: 'twilio',
+                  providerMessageId: result.messageId,
+                  sentAt: new Date(),
+                  metadata: { campaignId: campaign.id }
+                });
               } else {
                 results.smsFailed++;
+                // Log blocked sends for audit trail
+                if (result.blocked) {
+                  console.log(`[Campaign ${campaign.id}] SMS blocked for ${lead.phone} - recipient opted out`);
+                }
               }
             }
           } catch (error) {

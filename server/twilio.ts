@@ -49,17 +49,31 @@ export async function getTwilioFromPhoneNumber() {
 
 /**
  * Send an SMS message via Twilio
+ * Now includes TCPA compliance check for SMS opt-outs
  */
 export async function sendSMS(
   to: string,
   message: string,
   metadata?: Record<string, any>
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
+): Promise<{ success: boolean; messageId?: string; error?: string; blocked?: boolean }> {
   try {
     // Format and validate phone number
     const formattedNumber = formatPhoneNumber(to);
     if (!formattedNumber || formattedNumber === '+' || formattedNumber.length < 10) {
       throw new Error(`Invalid phone number: ${to}. Must be a valid phone number with area code.`);
+    }
+
+    // TCPA Compliance: Check if recipient has opted out of SMS
+    const { storage } = await import('./storage');
+    const isUnsubscribed = await storage.isSmsUnsubscribed(formattedNumber);
+    
+    if (isUnsubscribed) {
+      console.log(`[SMS Blocked] Recipient ${formattedNumber} has opted out via STOP keyword - TCPA compliance`);
+      return {
+        success: false,
+        blocked: true,
+        error: `Recipient has opted out of SMS messages. Send blocked for TCPA compliance.`
+      };
     }
 
     const client = await getTwilioClient();
