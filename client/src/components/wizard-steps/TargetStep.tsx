@@ -266,14 +266,20 @@ export function TargetStep({
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Estimated reach:</strong> ~{audienceSize}% of total website traffic will see this test.
-          {audienceSize < 20 && selectedCombinations.size > 0 && (
-            <span className="block mt-1 text-xs">
-              ⚠️ Small audience size may require 2-4 weeks to reach statistical significance.
+          <strong>Test Configuration:</strong> {selectedCombinations.size} persona×stage combination{selectedCombinations.size !== 1 ? 's' : ''} selected
+          {trafficAllocation < 100 && selectedCombinations.size > 0 && (
+            <span className="block mt-1">
+              • {trafficAllocation}% of matching visitors will see test variants
+              <br />• {100 - trafficAllocation}% will see original content
+            </span>
+          )}
+          {selectedCombinations.size > 0 && selectedCombinations.size < 3 && (
+            <span className="block mt-1 text-xs text-muted-foreground">
+              ⚠️ Targeting fewer combinations may take longer to reach statistical significance. Consider broadening your audience for faster results.
             </span>
           )}
           {selectedCombinations.size === 0 && (
-            <span className="block mt-1 text-xs">
+            <span className="block mt-1 text-xs text-destructive">
               ⚠️ Please select at least one persona×stage combination to target.
             </span>
           )}
