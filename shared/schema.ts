@@ -541,6 +541,112 @@ export const insertContentVisibilitySchema = createInsertSchema(contentVisibilit
 export type InsertContentVisibility = z.infer<typeof insertContentVisibilitySchema>;
 export type ContentVisibility = typeof contentVisibility.$inferSelect;
 
+// ==================== AUTOMATED A/B TESTING SYSTEM (FOUNDATION TABLES) ====================
+// NOTE: These must be defined BEFORE ab_tests and ab_test_variants which reference them
+
+// Metric Weight Profiles - Define how different metrics contribute to overall performance score
+export const metricWeightProfiles = pgTable("metric_weight_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(), // 'hero_default', 'cta_donor_focused', 'card_engagement'
+  contentType: varchar("content_type").notNull(), // 'hero', 'cta', 'card_order', 'layout', 'messaging'
+  persona: varchar("persona"), // Optional: specific persona optimization (null = all personas)
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("metric_profiles_content_type_idx").on(table.contentType),
+  index("metric_profiles_persona_idx").on(table.persona),
+]);
+
+export const insertMetricWeightProfileSchema = createInsertSchema(metricWeightProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMetricWeightProfile = z.infer<typeof insertMetricWeightProfileSchema>;
+export type MetricWeightProfile = typeof metricWeightProfiles.$inferSelect;
+
+// Metric Weight Profile Metrics - Individual metric configurations within a profile
+export const metricWeightProfileMetrics = pgTable("metric_weight_profile_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  profileId: varchar("profile_id").notNull().references(() => metricWeightProfiles.id, { onDelete: "cascade" }),
+  metricKey: varchar("metric_key").notNull(), // 'page_view', 'cta_click', 'dwell_time', 'scroll_depth', 'conversion'
+  weight: integer("weight").notNull().default(100), // 0-1000 (multiply by 0.001 for percentage)
+  direction: varchar("direction").notNull().default('maximize'), // 'maximize' or 'minimize'
+  minimumSample: integer("minimum_sample").default(30), // Minimum events before metric is considered
+  maximumCap: integer("maximum_cap"), // Optional ceiling for outlier protection
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("metric_weight_profile_metrics_unique_idx").on(table.profileId, table.metricKey),
+]);
+
+export const insertMetricWeightProfileMetricSchema = createInsertSchema(metricWeightProfileMetrics).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertMetricWeightProfileMetric = z.infer<typeof insertMetricWeightProfileMetricSchema>;
+export type MetricWeightProfileMetric = typeof metricWeightProfileMetrics.$inferSelect;
+
+// A/B Test Automation Rules - Define when and how to automatically create tests
+export const abTestAutomationRules = pgTable("ab_test_automation_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(),
+  description: text("description"),
+  
+  // Scope configuration
+  contentType: varchar("content_type").notNull(), // Which content type to optimize
+  targetPersona: varchar("target_persona"), // Optional: null = all personas
+  targetFunnelStage: varchar("target_funnel_stage"), // Optional: null = all stages
+  
+  // Trigger strategy
+  triggerType: varchar("trigger_type").notNull().default('threshold'), // 'threshold', 'scheduled', 'manual'
+  evaluationCadence: varchar("evaluation_cadence").default('daily'), // 'hourly', 'daily', 'weekly'
+  
+  // Performance thresholds for triggering new tests
+  minimumBaselineSample: integer("minimum_baseline_sample").default(100), // Min views before evaluation
+  performanceThresholdType: varchar("performance_threshold_type").default('percentile'), // 'percentile', 'absolute'
+  performanceThresholdValue: integer("performance_threshold_value").default(25), // Bottom 25th percentile triggers test
+  
+  // AI generation settings
+  aiProvider: varchar("ai_provider").default('gemini'), // 'gemini', 'openai' (future)
+  aiModel: varchar("ai_model").default('gemini-2.0-flash-exp'),
+  aiTemperature: integer("ai_temperature").default(70), // 0-100 (multiply by 0.01)
+  variantsToGenerate: integer("variants_to_generate").default(2), // How many AI variants per test
+  requiresManualApproval: boolean("requires_manual_approval").default(false), // Queue for review before launching
+  
+  // Safety limits
+  maxConcurrentTests: integer("max_concurrent_tests").default(3), // Max simultaneous tests per rule
+  cooldownPeriod: integer("cooldown_period").default(7), // Days between tests for same content
+  
+  // Statistical configuration
+  minimumTestSample: integer("minimum_test_sample").default(100), // Min samples per variant for promotion
+  confidenceThreshold: integer("confidence_threshold").default(95), // 95% confidence for winner
+  minimumTestDuration: integer("minimum_test_duration").default(3), // Min days before promotion allowed
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  lastRunAt: timestamp("last_run_at"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("ab_automation_rules_content_type_idx").on(table.contentType),
+  index("ab_automation_rules_active_idx").on(table.isActive),
+  index("ab_automation_rules_next_run_idx").on(table.lastRunAt),
+]);
+
+export const insertAbTestAutomationRuleSchema = createInsertSchema(abTestAutomationRules).omit({
+  id: true,
+  lastRunAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAbTestAutomationRule = z.infer<typeof insertAbTestAutomationRuleSchema>;
+export type AbTestAutomationRule = typeof abTestAutomationRules.$inferSelect;
+
+// ==================== END FOUNDATION TABLES ====================
+
 // A/B Testing tables for experimentation and optimization
 export const abTests = pgTable("ab_tests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -554,6 +660,12 @@ export const abTests = pgTable("ab_tests", {
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   winnerVariantId: varchar("winner_variant_id"), // ID of winning variant once determined
+  
+  // Automation fields
+  isAutomated: boolean("is_automated").default(false), // Was this test created by automation?
+  automationRuleId: varchar("automation_rule_id").references(() => abTestAutomationRules.id, { onDelete: "set null" }), // Link to automation rule if automated
+  autoPromotedAt: timestamp("auto_promoted_at"), // When winner was automatically promoted
+  
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -603,6 +715,12 @@ export const abTestVariants = pgTable("ab_test_variants", {
   configuration: jsonb("configuration"), // Optional during migration period - will be required in v2.0
   contentItemId: varchar("content_item_id").references(() => contentItems.id, { onDelete: "set null" }), // DEPRECATED v1.5: Will be removed in v2.0. Use configuration overrides instead. Existing tests using this field will continue to work but new tests should use configuration-only approach.
   isControl: boolean("is_control").default(false), // Is this the control/baseline variant?
+  
+  // AI generation fields
+  generationSource: varchar("generation_source").default('manual'), // 'manual', 'ai_generated', 'ai_assisted'
+  primaryMetric: varchar("primary_metric"), // The key metric this variant optimizes for
+  weightingProfileId: varchar("weighting_profile_id").references(() => metricWeightProfiles.id, { onDelete: "set null" }),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
