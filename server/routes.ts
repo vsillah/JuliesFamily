@@ -4481,6 +4481,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Email Insights Routes
+  
+  // Get best send time insights with scope filtering
+  app.get('/api/email-insights/best-send-times', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { scope = 'global', scopeId, forceRecalculate } = req.query;
+      
+      // Validate scope parameter
+      const validScopes = ['global', 'campaign', 'persona'];
+      if (!validScopes.includes(scope as string)) {
+        return res.status(400).json({ 
+          message: "Invalid scope. Must be 'global', 'campaign', or 'persona'" 
+        });
+      }
+      
+      // Validate scopeId is provided when scope is not global
+      if (scope !== 'global' && !scopeId) {
+        return res.status(400).json({ 
+          message: "scopeId is required for campaign and persona scopes" 
+        });
+      }
+      
+      // Parse forceRecalculate as boolean
+      const shouldForceRecalculate = forceRecalculate === 'true' || forceRecalculate === '1';
+      
+      const insights = await storage.getSendTimeInsights(
+        scope as 'global' | 'campaign' | 'persona',
+        scopeId as string | undefined,
+        shouldForceRecalculate
+      );
+      
+      res.json(insights);
+    } catch (error) {
+      console.error("Error fetching send time insights:", error);
+      res.status(500).json({ message: "Failed to fetch send time insights" });
+    }
+  });
+
   // SMS Template Routes
   
   // Get all SMS templates
