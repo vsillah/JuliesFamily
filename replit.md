@@ -29,6 +29,13 @@ Each phase should conclude with architectural review before proceeding to the ne
 ### UI/UX Decisions
 The frontend uses React 18, TypeScript, and Vite, styled with Tailwind CSS, custom CSS variables, and shadcn/ui (New York style). It supports light/dark modes and WCAG AA compliant colors. Typography includes Playfair Display for headlines and Inter for body text. The design is responsive across all devices, with dynamic, data-driven navigation matching page sections.
 
+### Current Development: Admin Role Provisioning System (Backend Complete)
+Built an extensible admin testing and impersonation system with:
+- **Phase 1 (COMPLETE)**: Database schema with `programs`, `admin_entitlements`, `admin_impersonation_sessions` tables; added `isTestData` + `createdByAdminId` flags to enrollment tables
+- **Phase 2 (COMPLETE)**: Modular storage layer (`server/storage/adminProvisioningStorage.ts`) with transactional entitlement creation, auto-populated test data, and impersonation session management. Wired into `DatabaseStorage` via delegation pattern matching CAC/LTGP and TGH modules.
+- **Phase 3 (COMPLETE)**: Backend API routes (`/api/admin/programs`, `/api/admin/entitlements`, `/api/admin/impersonation/*`) + service layer (`AdminEntitlementService`) for transactional cleanup with defensive guards
+- **Phase 4 (PENDING)**: Frontend admin UI components
+
 ### Technical Implementations
 The frontend is a single-page application using `wouter` for routing and TanStack Query for server state management. Key features include:
 -   **Persona-Based Personalization**: Tailors content for 6 user personas.

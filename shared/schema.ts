@@ -2358,11 +2358,19 @@ export const techGoesHomeEnrollments = pgTable("tech_goes_home_enrollments", {
   chromebookReceived: boolean("chromebook_received").default(false),
   internetActivated: boolean("internet_activated").default(false),
   notes: text("notes"),
+  
+  // Admin testing support
+  isTestData: boolean("is_test_data").default(false),
+  createdByAdminId: varchar("created_by_admin_id").references(() => users.id, { onDelete: "set null" }),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("tgh_enrollments_user_idx").on(table.userId),
   index("tgh_enrollments_status_idx").on(table.status),
+  index("tgh_enrollments_test_data_idx").on(table.isTestData),
+  // Compound index for common query pattern: filtering real data by status
+  index("tgh_enrollments_real_data_status_idx").on(table.isTestData, table.status),
 ]);
 
 export const insertTechGoesHomeEnrollmentSchema = createInsertSchema(techGoesHomeEnrollments).omit({
@@ -2384,11 +2392,16 @@ export const techGoesHomeAttendance = pgTable("tech_goes_home_attendance", {
   hoursCredits: integer("hours_credits").notNull().default(2), // Usually 2 hours per class
   notes: text("notes"),
   markedByAdminId: varchar("marked_by_admin_id").references(() => users.id, { onDelete: "set null" }),
+  
+  // Admin testing support
+  isTestData: boolean("is_test_data").default(false),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("tgh_attendance_enrollment_idx").on(table.enrollmentId),
   index("tgh_attendance_date_idx").on(table.classDate),
+  index("tgh_attendance_test_data_idx").on(table.isTestData),
   uniqueIndex("tgh_attendance_unique_idx").on(table.enrollmentId, table.classDate),
 ]);
 
@@ -2524,6 +2537,10 @@ export const volunteerEnrollments = pgTable("volunteer_enrollments", {
   // Metadata
   metadata: jsonb("metadata"), // Emergency contact, special requirements, etc.
   
+  // Admin testing support
+  isTestData: boolean("is_test_data").default(false),
+  createdByAdminId: varchar("created_by_admin_id").references(() => users.id, { onDelete: "set null" }),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
@@ -2531,6 +2548,9 @@ export const volunteerEnrollments = pgTable("volunteer_enrollments", {
   index("volunteer_enrollments_user_idx").on(table.userId),
   index("volunteer_enrollments_lead_idx").on(table.leadId),
   index("volunteer_enrollments_status_idx").on(table.enrollmentStatus),
+  index("volunteer_enrollments_test_data_idx").on(table.isTestData),
+  // Compound index for common query pattern: filtering real data by status
+  index("volunteer_enrollments_real_data_status_idx").on(table.isTestData, table.enrollmentStatus),
 ]);
 
 export const insertVolunteerEnrollmentSchema = createInsertSchema(volunteerEnrollments).omit({
@@ -2561,11 +2581,15 @@ export const volunteerSessionLogs = pgTable("volunteer_session_logs", {
   // Admin tracking
   loggedBy: varchar("logged_by").references(() => users.id), // Admin who logged this session
   
+  // Admin testing support
+  isTestData: boolean("is_test_data").default(false),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("volunteer_session_logs_enrollment_idx").on(table.enrollmentId),
   index("volunteer_session_logs_created_at_idx").on(table.createdAt),
+  index("volunteer_session_logs_test_data_idx").on(table.isTestData),
 ]);
 
 export const insertVolunteerSessionLogSchema = createInsertSchema(volunteerSessionLogs).omit({
@@ -2709,3 +2733,136 @@ export type EmailUnsubscribe = typeof emailUnsubscribes.$inferSelect;
 
 // Channel type for type safety
 export type CommunicationChannel = 'email' | 'sms' | 'all';
+
+// ====================
+// Admin Role Provisioning & Impersonation
+// ====================
+
+// Program Types for admin testing
+export type ProgramType = 'student_program' | 'volunteer_opportunity';
+
+// Generic Programs Catalog - lists all testable programs/opportunities
+export const programs = pgTable("programs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Program identification
+  name: varchar("name").notNull(), // "Tech Goes Home Spring 2024", "Adult Tutoring - Saturday Morning"
+  programType: varchar("program_type").notNull().$type<ProgramType>(), // "student_program" | "volunteer_opportunity"
+  description: text("description"),
+  
+  // Type-safe foreign keys (one will be populated based on programType)
+  techGoesHomeEnrollmentTemplate: varchar("tgh_enrollment_template"), // For student programs: template settings
+  volunteerShiftId: varchar("volunteer_shift_id").references(() => volunteerShifts.id, { onDelete: "set null" }),
+  volunteerEventId: varchar("volunteer_event_id").references(() => volunteerEvents.id, { onDelete: "set null" }),
+  
+  // Test data generation configuration
+  autoPopulateConfig: jsonb("auto_populate_config").$type<{
+    progressPercent?: number;
+    attendanceCount?: number;
+    completedClasses?: number;
+    hoursServed?: number;
+    metadata?: Record<string, any>;
+  }>(),
+  
+  // Status
+  isActive: boolean("is_active").default(true),
+  isAvailableForTesting: boolean("is_available_for_testing").default(true),
+  
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("programs_type_idx").on(table.programType),
+  index("programs_active_idx").on(table.isActive),
+]);
+
+export const insertProgramSchema = createInsertSchema(programs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertProgram = z.infer<typeof insertProgramSchema>;
+export type Program = typeof programs.$inferSelect;
+
+// Admin Entitlements - tracks which test enrollments each admin has activated
+export const adminEntitlements = pgTable("admin_entitlements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Which admin is testing
+  adminId: varchar("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Which program they're testing
+  programId: varchar("program_id").notNull().references(() => programs.id, { onDelete: "cascade" }),
+  
+  // The actual enrollment record created (polymorphic based on program type)
+  tghEnrollmentId: varchar("tgh_enrollment_id").references(() => techGoesHomeEnrollments.id, { onDelete: "set null" }),
+  volunteerEnrollmentId: varchar("volunteer_enrollment_id").references(() => volunteerEnrollments.id, { onDelete: "set null" }),
+  
+  // Metadata for context
+  metadata: jsonb("metadata"),
+  
+  // Status (soft delete for history)
+  isActive: boolean("is_active").default(true),
+  deactivatedAt: timestamp("deactivated_at"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("admin_entitlements_admin_idx").on(table.adminId),
+  index("admin_entitlements_program_idx").on(table.programId),
+  index("admin_entitlements_admin_active_idx").on(table.adminId, table.isActive),
+  
+  // Partial unique: prevent duplicate active entitlements for same admin+program
+  // Only enforced when is_active = true, allows historical inactive rows
+  uniqueIndex("admin_entitlements_unique_active_idx")
+    .on(table.adminId, table.programId)
+    .where(sql`${table.isActive} = true`),
+]);
+
+export const insertAdminEntitlementSchema = createInsertSchema(adminEntitlements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAdminEntitlement = z.infer<typeof insertAdminEntitlementSchema>;
+export type AdminEntitlement = typeof adminEntitlements.$inferSelect;
+
+// Admin Impersonation Sessions - audit trail for user impersonation
+export const adminImpersonationSessions = pgTable("admin_impersonation_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Who is impersonating whom
+  adminId: varchar("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  impersonatedUserId: varchar("impersonated_user_id").references(() => users.id, { onDelete: "set null" }),
+  
+  // Session tracking
+  isActive: boolean("is_active").default(true),
+  startedAt: timestamp("started_at").defaultNow(),
+  endedAt: timestamp("ended_at"),
+  
+  // Audit details (captured at session start)
+  reason: text("reason"), // Optional: why admin is impersonating
+  ipAddress: varchar("ip_address"),
+  userAgent: text("user_agent"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("impersonation_sessions_admin_idx").on(table.adminId),
+  index("impersonation_sessions_user_idx").on(table.impersonatedUserId),
+  
+  // Compound index for active session lookups
+  index("impersonation_sessions_admin_active_idx").on(table.adminId).where(sql`${table.isActive} = true`),
+  
+  // Partial unique: only one active impersonation per admin at a time
+  // Prevents concurrent impersonations, enforced only when is_active = true
+  uniqueIndex("impersonation_sessions_unique_active_idx")
+    .on(table.adminId)
+    .where(sql`${table.isActive} = true`),
+]);
+
+export const insertAdminImpersonationSessionSchema = createInsertSchema(adminImpersonationSessions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAdminImpersonationSession = z.infer<typeof insertAdminImpersonationSessionSchema>;
+export type AdminImpersonationSession = typeof adminImpersonationSessions.$inferSelect;

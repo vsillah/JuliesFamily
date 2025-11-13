@@ -19,6 +19,7 @@ import {
   backupSnapshots, backupSchedules,
   volunteerEvents, volunteerShifts, volunteerEnrollments, volunteerSessionLogs,
   segments, emailUnsubscribes,
+  programs, adminEntitlements, adminImpersonationSessions,
   type User, type UpsertUser, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
@@ -75,15 +76,20 @@ import {
   type VolunteerEnrollment, type InsertVolunteerEnrollment,
   type VolunteerSessionLog, type InsertVolunteerSessionLog,
   type Segment, type InsertSegment, type UpdateSegment,
-  type EmailUnsubscribe, type InsertEmailUnsubscribe
+  type EmailUnsubscribe, type InsertEmailUnsubscribe,
+  type Program, type InsertProgram,
+  type AdminEntitlement, type InsertAdminEntitlement,
+  type AdminImpersonationSession, type InsertAdminImpersonationSession,
+  type ProgramType,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
 import { createCacLtgpStorage, type ICacLtgpStorage } from "./storage/cacLtgpStorage";
 import { createTechGoesHomeStorage, type ITechGoesHomeStorage } from "./storage/tghStorage";
+import { createAdminProvisioningStorage, type IAdminProvisioningStorage } from "./storage/adminProvisioningStorage";
 import { calculateStatisticalConfidence } from "./statsUtils";
 
-export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
+export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminProvisioningStorage {
   // User operations for Replit Auth
   getUser(id: string): Promise<User | undefined>;
   getUserByOidcSub(oidcSub: string): Promise<User | undefined>;
@@ -774,6 +780,58 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   getLeadVolunteerHours(leadId: string, year?: number): Promise<{ totalMinutes: number; sessionCount: number; yearToDate: number }>;
   updateVolunteerSessionLog(id: string, updates: Partial<InsertVolunteerSessionLog>): Promise<VolunteerSessionLog | undefined>;
   deleteVolunteerSessionLog(id: string): Promise<void>;
+  
+  // ====================
+  // Admin Role Provisioning & Impersonation
+  // ====================
+  
+  // Program CRUD operations
+  createProgram(program: InsertProgram): Promise<Program>;
+  getAllPrograms(filters?: { 
+    programType?: ProgramType; 
+    isActive?: boolean;
+    isAvailableForTesting?: boolean;
+  }): Promise<Program[]>;
+  getProgram(id: string): Promise<Program | undefined>;
+  updateProgram(id: string, updates: Partial<InsertProgram>): Promise<Program | undefined>;
+  deleteProgram(id: string): Promise<void>; // Soft delete: sets isActive = false
+  
+  // Admin Entitlement operations
+  // Note: createAdminEntitlement is transactional:
+  //   1. Creates entitlement record
+  //   2. Creates test enrollment (TGH or volunteer based on programType)
+  //   3. Auto-populates progress data
+  //   Returns: { entitlement, enrollmentId } for audit trail
+  //   Throws on failure, transaction rolls back automatically
+  createAdminEntitlement(params: {
+    adminId: string;
+    programId: string;
+    metadata?: Record<string, any>;
+  }): Promise<{ entitlement: AdminEntitlement; enrollmentId: string }>;
+  
+  getActiveAdminEntitlements(adminId: string): Promise<AdminEntitlement[]>; // WHERE isActive = true
+  getAdminEntitlements(adminId: string): Promise<AdminEntitlement[]>; // All (for history)
+  getAdminEntitlement(id: string): Promise<AdminEntitlement | undefined>;
+  
+  // Update entitlement status (soft delete pattern)
+  // Note: Service layer handles transactional cleanup when setting isActive = false
+  updateAdminEntitlementStatus(id: string, isActive: boolean): Promise<AdminEntitlement | undefined>;
+  
+  hasActiveEntitlement(adminId: string, programId: string): Promise<boolean>;
+  
+  // Helper for UI - returns entitlements with joined program details
+  getActiveAdminEntitlementsWithPrograms(adminId: string): Promise<Array<AdminEntitlement & { program: Program }>>;
+  
+  // Impersonation Session operations
+  createImpersonationSession(session: InsertAdminImpersonationSession): Promise<AdminImpersonationSession>;
+  getActiveImpersonationSession(adminId: string): Promise<AdminImpersonationSession | undefined>; // WHERE isActive = true
+  getImpersonationSessions(adminId: string): Promise<AdminImpersonationSession[]>; // All (audit trail)
+  endImpersonationSession(sessionId: string): Promise<AdminImpersonationSession | undefined>; // Sets isActive = false, endedAt = NOW
+  
+  // Helper for middleware - returns user being impersonated (with user details joined)
+  getCurrentlyImpersonatedUser(adminId: string): Promise<User | undefined>;
+  
+  hasActiveImpersonation(adminId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -782,6 +840,9 @@ export class DatabaseStorage implements IStorage {
   
   // Tech Goes Home storage module composition
   private tghStorage: ITechGoesHomeStorage;
+  
+  // Admin Provisioning storage module composition
+  private adminProvisioningStorage: IAdminProvisioningStorage;
   
   // CAC/LTGP method delegation (initialized in constructor)
   createAcquisitionChannel!: ICacLtgpStorage['createAcquisitionChannel'];
@@ -832,12 +893,35 @@ export class DatabaseStorage implements IStorage {
   deleteTechGoesHomeAttendance!: ITechGoesHomeStorage['deleteTechGoesHomeAttendance'];
   getStudentProgress!: ITechGoesHomeStorage['getStudentProgress'];
   
+  // Admin Provisioning method delegation (initialized in constructor)
+  createProgram!: IAdminProvisioningStorage['createProgram'];
+  getAllPrograms!: IAdminProvisioningStorage['getAllPrograms'];
+  getProgram!: IAdminProvisioningStorage['getProgram'];
+  updateProgram!: IAdminProvisioningStorage['updateProgram'];
+  deleteProgram!: IAdminProvisioningStorage['deleteProgram'];
+  createAdminEntitlement!: IAdminProvisioningStorage['createAdminEntitlement'];
+  getActiveAdminEntitlements!: IAdminProvisioningStorage['getActiveAdminEntitlements'];
+  getAdminEntitlements!: IAdminProvisioningStorage['getAdminEntitlements'];
+  getAdminEntitlement!: IAdminProvisioningStorage['getAdminEntitlement'];
+  updateAdminEntitlementStatus!: IAdminProvisioningStorage['updateAdminEntitlementStatus'];
+  hasActiveEntitlement!: IAdminProvisioningStorage['hasActiveEntitlement'];
+  getActiveAdminEntitlementsWithPrograms!: IAdminProvisioningStorage['getActiveAdminEntitlementsWithPrograms'];
+  createImpersonationSession!: IAdminProvisioningStorage['createImpersonationSession'];
+  getActiveImpersonationSession!: IAdminProvisioningStorage['getActiveImpersonationSession'];
+  getImpersonationSessions!: IAdminProvisioningStorage['getImpersonationSessions'];
+  endImpersonationSession!: IAdminProvisioningStorage['endImpersonationSession'];
+  getCurrentlyImpersonatedUser!: IAdminProvisioningStorage['getCurrentlyImpersonatedUser'];
+  hasActiveImpersonation!: IAdminProvisioningStorage['hasActiveImpersonation'];
+  
   constructor() {
     // Initialize CAC/LTGP storage module
     this.cacLtgpStorage = createCacLtgpStorage();
     
     // Initialize Tech Goes Home storage module
     this.tghStorage = createTechGoesHomeStorage();
+    
+    // Initialize Admin Provisioning storage module
+    this.adminProvisioningStorage = createAdminProvisioningStorage(db);
     
     // Bind all CAC/LTGP methods
     this.createAcquisitionChannel = this.cacLtgpStorage.createAcquisitionChannel.bind(this.cacLtgpStorage);
@@ -887,6 +971,26 @@ export class DatabaseStorage implements IStorage {
     this.updateTechGoesHomeAttendance = this.tghStorage.updateTechGoesHomeAttendance.bind(this.tghStorage);
     this.deleteTechGoesHomeAttendance = this.tghStorage.deleteTechGoesHomeAttendance.bind(this.tghStorage);
     this.getStudentProgress = this.tghStorage.getStudentProgress.bind(this.tghStorage);
+    
+    // Bind all Admin Provisioning methods
+    this.createProgram = this.adminProvisioningStorage.createProgram.bind(this.adminProvisioningStorage);
+    this.getAllPrograms = this.adminProvisioningStorage.getAllPrograms.bind(this.adminProvisioningStorage);
+    this.getProgram = this.adminProvisioningStorage.getProgram.bind(this.adminProvisioningStorage);
+    this.updateProgram = this.adminProvisioningStorage.updateProgram.bind(this.adminProvisioningStorage);
+    this.deleteProgram = this.adminProvisioningStorage.deleteProgram.bind(this.adminProvisioningStorage);
+    this.createAdminEntitlement = this.adminProvisioningStorage.createAdminEntitlement.bind(this.adminProvisioningStorage);
+    this.getActiveAdminEntitlements = this.adminProvisioningStorage.getActiveAdminEntitlements.bind(this.adminProvisioningStorage);
+    this.getAdminEntitlements = this.adminProvisioningStorage.getAdminEntitlements.bind(this.adminProvisioningStorage);
+    this.getAdminEntitlement = this.adminProvisioningStorage.getAdminEntitlement.bind(this.adminProvisioningStorage);
+    this.updateAdminEntitlementStatus = this.adminProvisioningStorage.updateAdminEntitlementStatus.bind(this.adminProvisioningStorage);
+    this.hasActiveEntitlement = this.adminProvisioningStorage.hasActiveEntitlement.bind(this.adminProvisioningStorage);
+    this.getActiveAdminEntitlementsWithPrograms = this.adminProvisioningStorage.getActiveAdminEntitlementsWithPrograms.bind(this.adminProvisioningStorage);
+    this.createImpersonationSession = this.adminProvisioningStorage.createImpersonationSession.bind(this.adminProvisioningStorage);
+    this.getActiveImpersonationSession = this.adminProvisioningStorage.getActiveImpersonationSession.bind(this.adminProvisioningStorage);
+    this.getImpersonationSessions = this.adminProvisioningStorage.getImpersonationSessions.bind(this.adminProvisioningStorage);
+    this.endImpersonationSession = this.adminProvisioningStorage.endImpersonationSession.bind(this.adminProvisioningStorage);
+    this.getCurrentlyImpersonatedUser = this.adminProvisioningStorage.getCurrentlyImpersonatedUser.bind(this.adminProvisioningStorage);
+    this.hasActiveImpersonation = this.adminProvisioningStorage.hasActiveImpersonation.bind(this.adminProvisioningStorage);
   }
   
   // User operations

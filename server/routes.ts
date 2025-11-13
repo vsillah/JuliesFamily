@@ -5,8 +5,9 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema, insertProgramSchema } from "@shared/schema";
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
+import { AdminEntitlementService } from "./services/adminEntitlementService";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter, unsubscribeVerifyLimiter, unsubscribeProcessLimiter } from "./security";
 import { eq, sql, desc, and, isNotNull } from "drizzle-orm";
 import { evaluateLeadProgression, getLeadProgressionHistory, manuallyProgressLead, calculateEngagementDelta, type EventType } from "./services/funnelProgressionService";
@@ -1026,6 +1027,280 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching storage metrics:", error);
       res.status(500).json({ message: "Failed to fetch storage metrics" });
+    }
+  });
+
+  // ====================
+  // Admin Role Provisioning Routes
+  // ====================
+  
+  // Program CRUD
+  app.get('/api/admin/programs', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { programType, isActive, isAvailableForTesting } = req.query;
+      
+      const filters: Parameters<typeof storage.getAllPrograms>[0] = {};
+      if (programType) filters.programType = programType;
+      if (isActive !== undefined) filters.isActive = isActive === 'true';
+      if (isAvailableForTesting !== undefined) filters.isAvailableForTesting = isAvailableForTesting === 'true';
+      
+      const programs = await storage.getAllPrograms(filters);
+      res.json(programs);
+    } catch (error) {
+      console.error("Error fetching programs:", error);
+      res.status(500).json({ message: "Failed to fetch programs" });
+    }
+  });
+  
+  app.post('/api/admin/programs', isAuthenticated, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Validate request body
+      const validationResult = insertProgramSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid program data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const program = await storage.createProgram(validationResult.data);
+      res.status(201).json(program);
+    } catch (error) {
+      console.error("Error creating program:", error);
+      res.status(500).json({ message: "Failed to create program" });
+    }
+  });
+  
+  app.patch('/api/admin/programs/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      const updateSchema = insertProgramSchema.partial();
+      const validationResult = updateSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid update data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const updated = await storage.updateProgram(id, validationResult.data);
+      if (!updated) {
+        return res.status(404).json({ message: "Program not found" });
+      }
+      
+      res.json(updated);
+    } catch (error) {
+      console.error("Error updating program:", error);
+      res.status(500).json({ message: "Failed to update program" });
+    }
+  });
+  
+  app.delete('/api/admin/programs/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // Verify program exists
+      const program = await storage.getProgram(id);
+      if (!program) {
+        return res.status(404).json({ message: "Program not found" });
+      }
+      
+      await storage.deleteProgram(id); // Soft delete
+      res.json({ message: "Program deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting program:", error);
+      res.status(500).json({ message: "Failed to delete program" });
+    }
+  });
+  
+  // Admin Entitlements
+  app.get('/api/admin/entitlements', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      const entitlements = await storage.getActiveAdminEntitlementsWithPrograms(currentUser.id);
+      res.json(entitlements);
+    } catch (error) {
+      console.error("Error fetching entitlements:", error);
+      res.status(500).json({ message: "Failed to fetch entitlements" });
+    }
+  });
+  
+  app.post('/api/admin/entitlements', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Validate request body
+      const bodySchema = z.object({
+        programId: z.string(),
+        metadata: z.record(z.any()).optional(),
+      });
+      
+      const validationResult = bodySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid entitlement data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      // Check if entitlement already exists
+      const hasEntitlement = await storage.hasActiveEntitlement(
+        currentUser.id, 
+        validationResult.data.programId
+      );
+      
+      if (hasEntitlement) {
+        return res.status(409).json({ message: "Entitlement already exists for this program" });
+      }
+      
+      // Create entitlement (transactional: creates entitlement + test enrollment + progress)
+      const result = await storage.createAdminEntitlement({
+        adminId: currentUser.id,
+        programId: validationResult.data.programId,
+        metadata: validationResult.data.metadata,
+      });
+      
+      res.status(201).json(result);
+    } catch (error) {
+      console.error("Error creating entitlement:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to create entitlement" 
+      });
+    }
+  });
+  
+  app.delete('/api/admin/entitlements/:id', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Verify entitlement exists and belongs to current user
+      const entitlement = await storage.getAdminEntitlement(id);
+      if (!entitlement) {
+        return res.status(404).json({ message: "Entitlement not found" });
+      }
+      
+      if (entitlement.adminId !== currentUser.id) {
+        return res.status(403).json({ message: "Cannot delete another admin's entitlement" });
+      }
+      
+      // Deactivate entitlement with transactional cleanup (uses service layer)
+      const adminEntitlementService = new AdminEntitlementService(storage);
+      await adminEntitlementService.deactivateEntitlement(id);
+      res.json({ message: "Entitlement deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting entitlement:", error);
+      res.status(500).json({ message: "Failed to delete entitlement" });
+    }
+  });
+  
+  // Impersonation
+  app.get('/api/admin/impersonation/session', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      const session = await storage.getActiveImpersonationSession(currentUser.id);
+      res.json(session || null);
+    } catch (error) {
+      console.error("Error fetching impersonation session:", error);
+      res.status(500).json({ message: "Failed to fetch impersonation session" });
+    }
+  });
+  
+  app.post('/api/admin/impersonation/start', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Validate request body
+      const bodySchema = z.object({
+        impersonatedUserId: z.string(),
+        reason: z.string().optional(),
+      });
+      
+      const validationResult = bodySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid request data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      // Verify impersonated user exists
+      const targetUser = await storage.getUser(validationResult.data.impersonatedUserId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "Target user not found" });
+      }
+      
+      // Create impersonation session (transactionally ends existing session)
+      const session = await storage.createImpersonationSession({
+        adminId: currentUser.id,
+        impersonatedUserId: validationResult.data.impersonatedUserId,
+        reason: validationResult.data.reason,
+      });
+      
+      res.status(201).json(session);
+    } catch (error) {
+      console.error("Error starting impersonation:", error);
+      res.status(500).json({ message: "Failed to start impersonation" });
+    }
+  });
+  
+  app.post('/api/admin/impersonation/end', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Get active session
+      const session = await storage.getActiveImpersonationSession(currentUser.id);
+      if (!session) {
+        return res.status(404).json({ message: "No active impersonation session" });
+      }
+      
+      // End session
+      await storage.endImpersonationSession(session.id);
+      res.json({ message: "Impersonation ended successfully" });
+    } catch (error) {
+      console.error("Error ending impersonation:", error);
+      res.status(500).json({ message: "Failed to end impersonation" });
     }
   });
 
