@@ -1,13 +1,20 @@
 import crypto from 'crypto';
 
-// Require dedicated unsubscribe secret - fail fast if missing
-const SECRET_KEY = process.env.UNSUBSCRIBE_SECRET;
-
-if (!SECRET_KEY) {
-  throw new Error(
-    'UNSUBSCRIBE_SECRET environment variable is required for secure token generation. ' +
-    'Generate one with: openssl rand -base64 32'
-  );
+/**
+ * Get the unsubscribe secret key with lazy validation
+ * Only throws when actually needed (not at import time)
+ */
+function getSecretKey(): string {
+  const SECRET_KEY = process.env.UNSUBSCRIBE_SECRET;
+  
+  if (!SECRET_KEY) {
+    throw new Error(
+      'UNSUBSCRIBE_SECRET environment variable is required for secure token generation. ' +
+      'Generate one with: openssl rand -base64 32'
+    );
+  }
+  
+  return SECRET_KEY;
 }
 
 /**
@@ -16,6 +23,8 @@ if (!SECRET_KEY) {
  * Valid for 60 days (exceeds CAN-SPAM 30-day requirement)
  */
 export function generateUnsubscribeToken(email: string): string {
+  const SECRET_KEY = getSecretKey(); // Lazy check - only throws when called
+  
   const normalizedEmail = email.toLowerCase().trim();
   const timestamp = Date.now().toString();
   const message = `${normalizedEmail}:${timestamp}`;
@@ -37,6 +46,8 @@ export function generateUnsubscribeToken(email: string): string {
  */
 export function verifyUnsubscribeToken(token: string): string | null {
   try {
+    const SECRET_KEY = getSecretKey(); // Lazy check - only throws when called
+    
     // Decode from base64url
     const decoded = Buffer.from(token, 'base64url').toString('utf-8');
     const parts = decoded.split(':');

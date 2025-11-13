@@ -2,6 +2,7 @@ import sgMail from '@sendgrid/mail';
 import type { IStorage } from './storage';
 import { nanoid } from 'nanoid';
 import * as cheerio from 'cheerio';
+import { generateUnsubscribeUrl } from './utils/unsubscribeToken';
 
 // Initialize SendGrid
 if (!process.env.SENDGRID_API_KEY) {
@@ -144,10 +145,31 @@ export function prepareTrackedEmailContent(
 export async function sendEmail(
   storage: IStorage,
   options: SendEmailOptions
-): Promise<{ success: boolean; messageId?: string; error?: string }> {
+): Promise<{ success: boolean; messageId?: string; error?: string; skipped?: boolean }> {
   try {
     if (!process.env.SENDGRID_API_KEY) {
       throw new Error('SENDGRID_API_KEY not configured');
+    }
+
+    // Check if email is unsubscribed
+    const isUnsubscribed = await storage.isEmailUnsubscribed(options.to);
+    if (isUnsubscribed) {
+      console.log(`[Email] Skipping email to ${options.to} - unsubscribed`);
+      
+      // Log as skipped
+      await storage.createEmailLog({
+        templateId: options.templateId,
+        recipientEmail: options.to,
+        recipientName: options.toName,
+        subject: options.subject,
+        status: 'failed',
+        emailProvider: 'sendgrid',
+        errorMessage: 'Recipient has unsubscribed',
+        leadId: options.leadId,
+        metadata: { ...options.metadata, skippedReason: 'unsubscribed' },
+      });
+      
+      return { success: false, error: 'Recipient has unsubscribed', skipped: true };
     }
 
     // Generate tracking token
@@ -158,12 +180,23 @@ export async function sendEmail(
       ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
       : 'http://localhost:5000';
     
+    // Generate unsubscribe URL for this email
+    const unsubscribeUrl = generateUnsubscribeUrl(options.to, baseUrl);
+    
+    // Add unsubscribe link to HTML
+    let htmlWithUnsubscribe = addUnsubscribeToHtml(options.html, unsubscribeUrl);
+    
+    // Add unsubscribe link to text
+    let textWithUnsubscribe = options.text 
+      ? addUnsubscribeToText(options.text, unsubscribeUrl)
+      : addUnsubscribeToText(stripHtml(options.html), unsubscribeUrl);
+    
     // Prepare HTML with tracking if not disabled
-    let finalHtml = options.html;
+    let finalHtml = htmlWithUnsubscribe;
     let trackedLinks: Array<{ linkToken: string; targetUrl: string }> = [];
     
     if (!options.disableTracking) {
-      const result = prepareTrackedEmailContent(baseUrl, options.html, trackingToken);
+      const result = prepareTrackedEmailContent(baseUrl, htmlWithUnsubscribe, trackingToken);
       finalHtml = result.html;
       trackedLinks = result.links;
     }
@@ -180,7 +213,7 @@ export async function sendEmail(
       },
       subject: options.subject,
       html: finalHtml,
-      text: options.text || stripHtml(options.html),
+      text: textWithUnsubscribe,
     };
 
     // Send via SendGrid
@@ -321,4 +354,35 @@ function stripHtml(html: string): string {
     .replace(/<[^>]+>/g, '')
     .replace(/\s\s+/g, ' ')
     .trim();
+}
+
+/**
+ * Add unsubscribe link to HTML email
+ * Injects a footer with unsubscribe link before closing body tag
+ */
+function addUnsubscribeToHtml(html: string, unsubscribeUrl: string): string {
+  const unsubscribeFooter = `
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #E5E7EB; font-size: 12px; color: #6B7280; text-align: center;">
+      <p style="margin: 0 0 8px 0;">
+        You are receiving this email because you are part of Julie's Family Learning Program community.
+      </p>
+      <p style="margin: 0;">
+        <a href="${unsubscribeUrl}" style="color: #6B7280; text-decoration: underline;">Unsubscribe from all emails</a>
+      </p>
+    </div>
+  `;
+  
+  // Try to inject before closing body tag, or append to end
+  if (html.includes('</body>')) {
+    return html.replace('</body>', `${unsubscribeFooter}</body>`);
+  } else {
+    return html + unsubscribeFooter;
+  }
+}
+
+/**
+ * Add unsubscribe link to plain text email
+ */
+function addUnsubscribeToText(text: string, unsubscribeUrl: string): string {
+  return `${text}\n\n---\n\nYou are receiving this email because you are part of Julie's Family Learning Program community.\n\nTo unsubscribe from all emails, visit:\n${unsubscribeUrl}`;
 }
