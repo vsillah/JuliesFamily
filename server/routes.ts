@@ -4829,6 +4829,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public SMS unsubscribe endpoints (token-based, TCPA compliant)
+  
+  // Verify SMS unsubscribe token (called on page load)
+  app.post('/api/sms-unsubscribe/verify', unsubscribeVerifyLimiter, async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ 
+          valid: false, 
+          message: "Token is required" 
+        });
+      }
+      
+      // Import token utility (may throw if UNSUBSCRIBE_SECRET not set)
+      const { verifySmsUnsubscribeToken } = await import('./utils/smsUnsubscribeToken');
+      
+      // Verify token and extract phone
+      const phone = verifySmsUnsubscribeToken(token);
+      
+      if (!phone) {
+        return res.status(400).json({ 
+          valid: false, 
+          message: "Invalid or expired unsubscribe link. Links are valid for 60 days." 
+        });
+      }
+      
+      res.json({ 
+        valid: true, 
+        phone 
+      });
+    } catch (error: any) {
+      console.error("[SMS Unsubscribe Verify] Error:", error);
+      
+      // Handle missing secret
+      if (error.message?.includes('UNSUBSCRIBE_SECRET')) {
+        return res.status(500).json({ 
+          valid: false, 
+          message: "Server configuration error. Please contact support." 
+        });
+      }
+      
+      res.status(500).json({ 
+        valid: false, 
+        message: "Failed to verify unsubscribe link" 
+      });
+    }
+  });
+  
+  // Process SMS unsubscribe (called when user confirms)
+  app.post('/api/sms-unsubscribe', unsubscribeProcessLimiter, async (req, res) => {
+    try {
+      const { token, reason, feedback } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+      
+      // Import token utility
+      const { verifySmsUnsubscribeToken } = await import('./utils/smsUnsubscribeToken');
+      
+      // Verify token and extract phone
+      const phone = verifySmsUnsubscribeToken(token);
+      
+      if (!phone || !phone.trim()) {
+        return res.status(400).json({ 
+          message: "Invalid or expired unsubscribe link. Phone number could not be verified." 
+        });
+      }
+      
+      // Check if already unsubscribed
+      const existing = await storage.getSmsUnsubscribe(phone);
+      if (existing) {
+        return res.json({ 
+          success: true, 
+          message: "Phone number already unsubscribed",
+          phone 
+        });
+      }
+      
+      // Find lead by phone (if exists)
+      const lead = await storage.getLeadByPhone(phone);
+      
+      // Create unsubscribe record for SMS channel
+      // Explicitly set email to undefined for SMS-only unsubscribes
+      const unsubscribeData = {
+        email: undefined,
+        phone,
+        channel: 'sms' as const,
+        leadId: lead?.id || null,
+        reason: reason || null,
+        feedback: feedback || null,
+        source: 'user_request' as const,
+      };
+      
+      const validatedData = insertEmailUnsubscribeSchema.parse(unsubscribeData);
+      await storage.createEmailUnsubscribe(validatedData);
+      
+      console.log('[SMS Unsubscribe] Successfully unsubscribed:', { 
+        phone, 
+        reason, 
+        hasLead: !!lead 
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Successfully unsubscribed",
+        phone 
+      });
+    } catch (error: any) {
+      console.error("[SMS Unsubscribe Process] Error:", error);
+      
+      // Handle validation errors
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid unsubscribe data", 
+          errors: error.errors 
+        });
+      }
+      
+      // Handle missing secret
+      if (error.message?.includes('UNSUBSCRIBE_SECRET')) {
+        return res.status(500).json({ 
+          message: "Server configuration error. Please contact support." 
+        });
+      }
+      
+      res.status(500).json({ message: "Failed to process SMS unsubscribe" });
+    }
+  });
+
   // Get email logs for a campaign (independent pagination from enrollments)
   app.get('/api/email-logs/campaign/:campaignId', isAuthenticated, isAdmin, async (req, res) => {
     try {
