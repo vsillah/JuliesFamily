@@ -1599,8 +1599,35 @@ export class DatabaseStorage implements IStorage {
     funnelStage: string | null | undefined,
     userPassions: string[] | null | undefined
   ) {
+    // Build join conditions - only add persona/funnelStage filters when they're provided
+    const joinConditions = [eq(contentVisibility.contentItemId, contentItems.id)];
+    
+    // Only filter by persona if it's provided (not undefined)
+    if (persona !== undefined) {
+      joinConditions.push(
+        persona === null
+          ? sql`${contentVisibility.persona} IS NULL`
+          : or(
+              sql`${contentVisibility.persona} IS NULL`,
+              eq(contentVisibility.persona, persona)
+            )
+      );
+    }
+    
+    // Only filter by funnelStage if it's provided (not undefined)
+    if (funnelStage !== undefined) {
+      joinConditions.push(
+        funnelStage === null
+          ? sql`${contentVisibility.funnelStage} IS NULL`
+          : or(
+              sql`${contentVisibility.funnelStage} IS NULL`,
+              eq(contentVisibility.funnelStage, funnelStage)
+            )
+      );
+    }
+    
     let query = db
-      .select({
+      .selectDistinctOn([contentItems.id], {
         id: contentItems.id,
         type: contentItems.type,
         title: contentItems.title,
@@ -1617,21 +1644,7 @@ export class DatabaseStorage implements IStorage {
       .from(contentItems)
       .innerJoin(
         contentVisibility,
-        and(
-          eq(contentVisibility.contentItemId, contentItems.id),
-          persona === null || persona === undefined
-            ? sql`${contentVisibility.persona} IS NULL`
-            : or(
-                sql`${contentVisibility.persona} IS NULL`,
-                eq(contentVisibility.persona, persona)
-              ),
-          funnelStage === null || funnelStage === undefined
-            ? sql`${contentVisibility.funnelStage} IS NULL`
-            : or(
-                sql`${contentVisibility.funnelStage} IS NULL`,
-                eq(contentVisibility.funnelStage, funnelStage)
-              )
-        )
+        and(...joinConditions)
       )
       .where(
         and(
@@ -1645,6 +1658,7 @@ export class DatabaseStorage implements IStorage {
     if (userPassions && userPassions.length > 0) {
       // With passions: prioritize content matching user's interests
       query = query.orderBy(
+        contentItems.id, // For DISTINCT ON
         sql`(
           SELECT COUNT(*)
           FROM jsonb_array_elements_text(COALESCE(${contentItems.passionTags}, '[]'::jsonb)) AS tag
@@ -1656,6 +1670,7 @@ export class DatabaseStorage implements IStorage {
     } else {
       // Without passions: use standard ordering
       query = query.orderBy(
+        contentItems.id, // For DISTINCT ON
         sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
         contentItems.createdAt
       );

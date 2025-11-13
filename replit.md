@@ -38,6 +38,8 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a three-tier RBAC system with audit logging. The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
 
+**Content Visibility Architecture**: The system uses a persona×funnel stage matrix (6 personas × 4 stages = 24 combinations) for granular content control. The `buildVisibilityQuery` method in `server/storage.ts` conditionally applies persona/funnelStage filters only when explicitly provided—when undefined, it returns all active visible content without persona/stage restrictions. This enables public pages (e.g., Virtual Tour) to display all relevant content while supporting targeted personalization when user context is available. Uses `selectDistinctOn` to prevent duplicate results from multi-row visibility assignments.
+
 ## External Dependencies
 
 ### UI Framework & Components
