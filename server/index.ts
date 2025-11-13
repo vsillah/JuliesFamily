@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initBackupScheduler, shutdownBackupScheduler } from "./services/backupScheduler";
 import { initDonorLifecycleScheduler, shutdownDonorLifecycleScheduler } from "./services/donorLifecycleScheduler";
+import { initEmailReportScheduler, shutdownEmailReportScheduler } from "./services/emailReportScheduler";
 import { helmetConfig, globalLimiter } from "./security";
 
 const app = express();
@@ -100,6 +101,9 @@ app.use((req, res, next) => {
   
   // Initialize donor lifecycle scheduler (runs daily lapsed donor detection)
   initDonorLifecycleScheduler();
+  
+  // Initialize email report scheduler (sends scheduled email reports)
+  initEmailReportScheduler();
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
@@ -123,6 +127,9 @@ app.use((req, res, next) => {
     
     // Shutdown the donor lifecycle scheduler
     await shutdownDonorLifecycleScheduler();
+    
+    // Shutdown the email report scheduler
+    await shutdownEmailReportScheduler();
     
     // Close the server
     server.close(() => {
