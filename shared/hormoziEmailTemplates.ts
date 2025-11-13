@@ -325,5 +325,281 @@ export const HORMOZI_EMAIL_TEMPLATES: HormoziEmailTemplate[] = [
     description: 'Cold acquisition email with emotional storytelling and specific impact',
     exampleContext: 'Community members who haven\'t donated before',
     variables: ['impactNumber', 'goalNumber', 'cityName', 'unmetNeedNumber', 'donationLevel1', 'impact1', 'donationLevel2', 'impact2', 'donationLevel3', 'impact3', 'studentName', 'testimonialQuote', 'totalStudents', 'donateLink']
+  },
+  
+  // ========== HORMOZI 4-WORD DESIRE OPENERS (COLD OUTREACH) ==========
+  // Ultra-simple engagement starters - "Are you still looking to [4 word desire]?"
+  
+  {
+    name: 'cold_4word_desire_parent_awareness',
+    subject: 'Are you looking to help your child succeed?',
+    htmlBody: '<p>Are you looking to help your child succeed?</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Are you looking to help your child succeed?\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'cold_outreach',
+    templateCategory: 'value_first',
+    persona: 'parent',
+    funnelStage: 'awareness',
+    description: 'Hormozi 4-word desire opener - ultra-minimal engagement starter',
+    exampleContext: 'Parent prospect who has not engaged before - first touch to gauge interest',
+    variables: ['unsubscribeUrl']
+  },
+  {
+    name: 'cold_4word_desire_student_awareness',
+    subject: 'Looking to earn your GED fast?',
+    htmlBody: '<p>Looking to earn your GED fast?</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Looking to earn your GED fast?\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'cold_outreach',
+    templateCategory: 'value_first',
+    persona: 'student',
+    funnelStage: 'awareness',
+    description: 'Hormozi 4-word desire opener - minimal GED student engagement',
+    exampleContext: 'Adult education prospect, first contact to test interest',
+    variables: ['unsubscribeUrl']
+  },
+  {
+    name: 'cold_4word_desire_donor_awareness',
+    subject: 'Want to make measurable community impact?',
+    htmlBody: '<p>Want to make measurable community impact?</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Want to make measurable community impact?\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'cold_outreach',
+    templateCategory: 'value_first',
+    persona: 'donor',
+    funnelStage: 'awareness',
+    description: 'Hormozi 4-word desire opener - donor impact focus',
+    exampleContext: 'Donor prospect, community professional, first touch',
+    variables: ['unsubscribeUrl']
+  },
+  {
+    name: 'cold_4word_desire_volunteer_awareness',
+    subject: 'Want to mentor kids weekly?',
+    htmlBody: '<p>Want to mentor kids weekly?</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Want to mentor kids weekly?\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'cold_outreach',
+    templateCategory: 'value_first',
+    persona: 'volunteer',
+    funnelStage: 'awareness',
+    description: 'Hormozi 4-word desire opener - volunteer time commitment focus',
+    exampleContext: 'Volunteer prospect, first contact to gauge availability',
+    variables: ['unsubscribeUrl']
+  },
+  
+  // ========== HORMOZI A-C-A FRAMEWORK (WARM OUTREACH) ==========
+  // Acknowledge-Context-Action structure for relationship building
+  
+  {
+    name: 'warm_aca_parent_consideration',
+    subject: '{firstName}, saw {childName} at {event}!',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>I saw {childName} at {event} last week - what a {compliment}!</p>\n\n<p>I really admire parents like you who {dedication}. It shows you understand how important {value} is for young children.</p>\n\n<p>Quick question: Does {challenge} make it hard to find quality early learning programs? We help families like yours give their kids a strong foundation despite busy schedules.</p>\n\n<p>Would a quick 5-minute chat make sense? I have some ideas that might help.</p>\n\n<p><a href="{calendarLink}">Grab a time here</a> or just reply with your availability.</p>\n\n<p>Warmly,<br>Julie</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nI saw {childName} at {event} last week - what a {compliment}!\n\nI really admire parents like you who {dedication}. It shows you understand how important {value} is for young children.\n\nQuick question: Does {challenge} make it hard to find quality early learning programs? We help families like yours give their kids a strong foundation despite busy schedules.\n\nWould a quick 5-minute chat make sense? I have some ideas that might help.\n\nGrab a time here: {calendarLink}\nOr just reply with your availability.\n\nWarmly,\nJulie\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'a_c_a',
+    persona: 'parent',
+    funnelStage: 'consideration',
+    description: 'Hormozi A-C-A framework - Acknowledge recent interaction, Compliment dedication, Ask about challenges',
+    exampleContext: 'Parent you saw at community event or whose social media post you noticed',
+    variables: ['firstName', 'childName', 'event', 'compliment', 'dedication', 'value', 'challenge', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'warm_aca_student_consideration',
+    subject: '{firstName}, loved your comment about {topic}',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>I saw your comment about {topic} on {platform} - that really resonated with me!</p>\n\n<p>You must be incredibly {compliment} to {dedication}. Not everyone has that kind of determination.</p>\n\n<p>Quick question: Does {challenge} make it harder to improve your English skills? A lot of adult learners we work with face the same issue.</p>\n\n<p>I\'ve helped {numberStudents} students overcome this exact challenge. Would a 5-minute call make sense to share what worked for them?</p>\n\n<p><a href="{calendarLink}">Pick a time</a> that works for you.</p>\n\n<p>Best,<br>Maria</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nI saw your comment about {topic} on {platform} - that really resonated with me!\n\nYou must be incredibly {compliment} to {dedication}. Not everyone has that kind of determination.\n\nQuick question: Does {challenge} make it harder to improve your English skills? A lot of adult learners we work with face the same issue.\n\nI\'ve helped {numberStudents} students overcome this exact challenge. Would a 5-minute call make sense to share what worked for them?\n\nPick a time: {calendarLink}\n\nBest,\nMaria\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'a_c_a',
+    persona: 'student',
+    funnelStage: 'consideration',
+    description: 'Hormozi A-C-A framework - Acknowledge online engagement, Compliment determination, Ask about obstacles',
+    exampleContext: 'Student who commented on your social media post or engaged with online content',
+    variables: ['firstName', 'topic', 'platform', 'compliment', 'dedication', 'challenge', 'numberStudents', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'warm_aca_donor_consideration',
+    subject: '{firstName}, saw you at {event}!',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Great to see you at {event} last {timeframe}! Your {achievement} was really impressive.</p>\n\n<p>I really admire professionals like you who {compliment}. It shows you understand the importance of {value}.</p>\n\n<p>Quick question: Have you thought about amplifying your community impact through strategic philanthropy? We help {numberFamilies} families every year, and partners like you make it possible.</p>\n\n<p>Would a brief 10-minute call make sense to explore how you could maximize your impact?</p>\n\n<p><a href="{calendarLink}">Book a time</a> or just reply with your availability.</p>\n\n<p>Respectfully,<br>Development Team</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nGreat to see you at {event} last {timeframe}! Your {achievement} was really impressive.\n\nI really admire professionals like you who {compliment}. It shows you understand the importance of {value}.\n\nQuick question: Have you thought about amplifying your community impact through strategic philanthropy? We help {numberFamilies} families every year, and partners like you make it possible.\n\nWould a brief 10-minute call make sense to explore how you could maximize your impact?\n\nBook a time: {calendarLink}\nOr just reply with your availability.\n\nRespectfully,\nDevelopment Team\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'a_c_a',
+    persona: 'donor',
+    funnelStage: 'consideration',
+    description: 'Hormozi A-C-A framework - Acknowledge event attendance, Compliment achievement, Ask about philanthropy',
+    exampleContext: 'Donor prospect met at networking or community event',
+    variables: ['firstName', 'event', 'timeframe', 'achievement', 'compliment', 'value', 'numberFamilies', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'warm_aca_volunteer_consideration',
+    subject: '{firstName}, noticed you at {event}',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>I noticed you at {event} last week - thank you for {contribution}!</p>\n\n<p>I really admire community members like you who {compliment}. It\'s clear you care about {value}.</p>\n\n<p>Quick question: Does {challenge} make it hard to volunteer regularly? We\'ve designed our program specifically for busy professionals - just 2 hours a week makes a life-changing difference for kids.</p>\n\n<p>Would a quick 5-minute call make sense to see if it\'s a fit?</p>\n\n<p><a href="{calendarLink}">Pick a time</a> or reply with your availability.</p>\n\n<p>Looking forward to connecting,<br>Sarah</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nI noticed you at {event} last week - thank you for {contribution}!\n\nI really admire community members like you who {compliment}. It\'s clear you care about {value}.\n\nQuick question: Does {challenge} make it hard to volunteer regularly? We\'ve designed our program specifically for busy professionals - just 2 hours a week makes a life-changing difference for kids.\n\nWould a quick 5-minute call make sense to see if it\'s a fit?\n\nPick a time: {calendarLink}\nOr reply with your availability.\n\nLooking forward to connecting,\nSarah\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'a_c_a',
+    persona: 'volunteer',
+    funnelStage: 'consideration',
+    description: 'Hormozi A-C-A framework - Acknowledge community involvement, Compliment values, Ask about time constraints',
+    exampleContext: 'Volunteer prospect who attended community event or showed community involvement',
+    variables: ['firstName', 'event', 'contribution', 'compliment', 'value', 'challenge', 'calendarLink', 'unsubscribeUrl']
+  },
+  
+  // ========== HORMOZI MULTI-DAY FOLLOW-UP SEQUENCES ==========
+  // Day 1, Day 3, Day 4, Day 8 follow-up cadence - "Time Kills All Deals"
+  
+  {
+    name: 'sequence_multi_day_parent_day3',
+    subject: '{firstName}, checking in',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Friendly follow-up from our {interactionType} on {date}.</p>\n\n<p>I wanted to check in - do you still have plans to explore early learning options for {childName} this year?</p>\n\n<p>If so, we should definitely have a quick chat. What\'s tomorrow like for you?</p>\n\n<p><a href="{calendarLink}">Pick a time</a> or just reply with your availability.</p>\n\n<p>No pressure - just want to make sure you have what you need to decide.</p>\n\n<p>Warmly,<br>Julie</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nFriendly follow-up from our {interactionType} on {date}.\n\nI wanted to check in - do you still have plans to explore early learning options for {childName} this year?\n\nIf so, we should definitely have a quick chat. What\'s tomorrow like for you?\n\nPick a time: {calendarLink}\nOr just reply with your availability.\n\nNo pressure - just want to make sure you have what you need to decide.\n\nWarmly,\nJulie\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'parent',
+    funnelStage: 'decision',
+    description: 'Day 3 follow-up sequence - Friendly check-in maintaining momentum toward decision',
+    exampleContext: 'Parent who had initial conversation or inquiry 3 days ago but hasn\'t scheduled next step',
+    variables: ['firstName', 'interactionType', 'date', 'childName', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'sequence_multi_day_parent_day8',
+    subject: 'Are you busy, {firstName}?',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Me again - considering this is my 3rd email, I\'m sure you\'re busy! (This is actually a good thing.)</p>\n\n<p>Problem: If you want to give {childName} a strong academic foundation this year, it takes a TON of planning and coordination...</p>\n\n<p>Solution: If you take just 7 minutes, I can explain our process that gives {childName} the skills needed for kindergarten success while you focus on {parentChallenge}.</p>\n\n<p>Here\'s what families who made time for this call discovered:</p>\n<ul>\n<li>{benefit1}</li>\n<li>{benefit2}</li>\n<li>{benefit3}</li>\n</ul>\n\n<p>Let me know what time works for you and I\'ll make it happen.</p>\n\n<p><a href="{calendarLink}">Book directly here</a> if that\'s easier.</p>\n\n<p>Warmly,<br>Julie</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nMe again - considering this is my 3rd email, I\'m sure you\'re busy! (This is actually a good thing.)\n\nProblem: If you want to give {childName} a strong academic foundation this year, it takes a TON of planning and coordination...\n\nSolution: If you take just 7 minutes, I can explain our process that gives {childName} the skills needed for kindergarten success while you focus on {parentChallenge}.\n\nHere\'s what families who made time for this call discovered:\n- {benefit1}\n- {benefit2}\n- {benefit3}\n\nLet me know what time works for you and I\'ll make it happen.\n\nBook directly here: {calendarLink}\n\nWarmly,\nJulie\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'parent',
+    funnelStage: 'decision',
+    description: 'Day 8 follow-up sequence - "Are you busy?" problem/solution reframe with value stack',
+    exampleContext: 'Parent who received Day 1 and Day 3 emails but hasn\'t responded - final push',
+    variables: ['firstName', 'childName', 'parentChallenge', 'benefit1', 'benefit2', 'benefit3', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'sequence_multi_day_student_day3',
+    subject: 'Following up, {firstName}',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Friendly follow-up from our conversation on {date}.</p>\n\n<p>Checking to see if you still have plans in 2025 to {goal}? If so, we should definitely have a chat.</p>\n\n<p>What\'s tomorrow like for you?</p>\n\n<p><a href="{calendarLink}">Pick a time</a></p>\n\n<p>Best,<br>Maria</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nFriendly follow-up from our conversation on {date}.\n\nChecking to see if you still have plans in 2025 to {goal}? If so, we should definitely have a chat.\n\nWhat\'s tomorrow like for you?\n\nPick a time: {calendarLink}\n\nBest,\nMaria\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'student',
+    funnelStage: 'decision',
+    description: 'Day 3 follow-up sequence - Simple check-in maintaining engagement',
+    exampleContext: 'Student who expressed interest 3 days ago but hasn\'t booked assessment or enrolled',
+    variables: ['firstName', 'date', 'goal', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'sequence_multi_day_student_day8',
+    subject: 'Are you busy, {firstName}?',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Me again - considering this is the 3rd email, I am sure you are busy! (This is good)</p>\n\n<p>Problem: If you plan to {goal} this year, it takes a TON of time between {obstacle1}, {obstacle2}, and {obstacle3}...</p>\n\n<p>Solution: If you take 5 minutes, I can explain our process to expedite your progress toward {goal} so you can focus on {studentPriority}.</p>\n\n<p>Students who made time for this call got:</p>\n<ul>\n<li>Personalized learning plan based on your exact goals</li>\n<li>Clear timeline to {goal}</li>\n<li>Immediate next steps you can act on today</li>\n</ul>\n\n<p>Let me know what time works for you and I\'ll make it happen.</p>\n\n<p>If it\'s easier, <a href="{calendarLink}">book a time directly here</a>.</p>\n\n<p>Best,<br>Maria</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nMe again - considering this is the 3rd email, I am sure you are busy! (This is good)\n\nProblem: If you plan to {goal} this year, it takes a TON of time between {obstacle1}, {obstacle2}, and {obstacle3}...\n\nSolution: If you take 5 minutes, I can explain our process to expedite your progress toward {goal} so you can focus on {studentPriority}.\n\nStudents who made time for this call got:\n- Personalized learning plan based on your exact goals\n- Clear timeline to {goal}\n- Immediate next steps you can act on today\n\nLet me know what time works for you and I\'ll make it happen.\n\nIf it\'s easier, book a time directly here: {calendarLink}\n\nBest,\nMaria\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'student',
+    funnelStage: 'decision',
+    description: 'Day 8 follow-up sequence - Problem/solution reframe with specific value proposition',
+    exampleContext: 'Student who received earlier follow-ups but hasn\'t taken action - final value push',
+    variables: ['firstName', 'goal', 'obstacle1', 'obstacle2', 'obstacle3', 'studentPriority', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'sequence_multi_day_donor_day3',
+    subject: 'Following up, {firstName}',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Friendly follow-up from our {interactionType} on {date}.</p>\n\n<p>Checking to see if you still have interest in maximizing your community impact in 2025? If so, we should definitely have a chat.</p>\n\n<p>What\'s tomorrow like for you?</p>\n\n<p><a href="{calendarLink}">Book a time</a></p>\n\n<p>Respectfully,<br>Development Team</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nFriendly follow-up from our {interactionType} on {date}.\n\nChecking to see if you still have interest in maximizing your community impact in 2025? If so, we should definitely have a chat.\n\nWhat\'s tomorrow like for you?\n\nBook a time: {calendarLink}\n\nRespectfully,\nDevelopment Team\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'donor',
+    funnelStage: 'decision',
+    description: 'Day 3 follow-up sequence - Professional check-in for donor prospects',
+    exampleContext: 'Donor prospect who expressed interest 3 days ago but hasn\'t scheduled conversation',
+    variables: ['firstName', 'interactionType', 'date', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'sequence_multi_day_donor_day8',
+    subject: 'Are you busy, {firstName}?',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Me again - considering this is the 3rd email, I am sure you are busy! (This is actually good - busy professionals make the best strategic partners.)</p>\n\n<p>Problem: If you want to make a lasting impact on literacy in {cityName} this year, it takes significant time to research organizations, verify impact, and ensure your dollars are well-spent...</p>\n\n<p>Solution: If you take 10 minutes, I can explain our transparent impact model that lets you see exactly how your investment changes lives while you focus on {donorPriority}.</p>\n\n<p>Partners who made time for this call discovered:</p>\n<ul>\n<li>100% of program donations go directly to services (not overhead)</li>\n<li>Clear metrics: ${dollarAmount} = {specificImpact}</li>\n<li>Quarterly impact reports with stories from families you\'ve helped</li>\n</ul>\n\n<p>Let me know what time works for you and I\'ll make it happen.</p>\n\n<p>If it\'s easier, <a href="{calendarLink}">book a time directly here</a>.</p>\n\n<p>With gratitude,<br>Development Team</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nMe again - considering this is the 3rd email, I am sure you are busy! (This is actually good - busy professionals make the best strategic partners.)\n\nProblem: If you want to make a lasting impact on literacy in {cityName} this year, it takes significant time to research organizations, verify impact, and ensure your dollars are well-spent...\n\nSolution: If you take 10 minutes, I can explain our transparent impact model that lets you see exactly how your investment changes lives while you focus on {donorPriority}.\n\nPartners who made time for this call discovered:\n- 100% of program donations go directly to services (not overhead)\n- Clear metrics: ${dollarAmount} = {specificImpact}\n- Quarterly impact reports with stories from families you\'ve helped\n\nLet me know what time works for you and I\'ll make it happen.\n\nIf it\'s easier, book a time directly here: {calendarLink}\n\nWith gratitude,\nDevelopment Team\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'donor',
+    funnelStage: 'decision',
+    description: 'Day 8 follow-up sequence - Problem/solution for donor with transparency focus',
+    exampleContext: 'Donor prospect who received earlier outreach but hasn\'t engaged - final value proposition',
+    variables: ['firstName', 'cityName', 'donorPriority', 'dollarAmount', 'specificImpact', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'sequence_multi_day_volunteer_day3',
+    subject: 'Checking in, {firstName}',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Friendly follow-up from {date}.</p>\n\n<p>Checking to see if you still have plans to get involved with mentoring this year? If so, we should definitely chat.</p>\n\n<p>What\'s tomorrow like for you?</p>\n\n<p><a href="{calendarLink}">Pick a time</a></p>\n\n<p>Looking forward to connecting,<br>Sarah</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nFriendly follow-up from {date}.\n\nChecking to see if you still have plans to get involved with mentoring this year? If so, we should definitely chat.\n\nWhat\'s tomorrow like for you?\n\nPick a time: {calendarLink}\n\nLooking forward to connecting,\nSarah\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'volunteer',
+    funnelStage: 'decision',
+    description: 'Day 3 follow-up sequence - Simple check-in for volunteer prospects',
+    exampleContext: 'Volunteer prospect who expressed interest 3 days ago but hasn\'t attended orientation',
+    variables: ['firstName', 'date', 'calendarLink', 'unsubscribeUrl']
+  },
+  {
+    name: 'sequence_multi_day_volunteer_day8',
+    subject: 'Are you busy, {firstName}?',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>Me again - considering this is the 3rd email, I am sure you are busy! (This is good - we need dedicated volunteers.)</p>\n\n<p>Problem: If you want to make a real difference in kids\' lives this year, it takes a LOT of time to find the right opportunity, get trained, and build meaningful relationships...</p>\n\n<p>Solution: If you take 5 minutes, I can explain our streamlined mentoring program where just 2 hours a week creates life-changing impact while fitting into {volunteerPriority}.</p>\n\n<p>Volunteers who made time for this call discovered:</p>\n<ul>\n<li>Full training provided (no teaching experience needed)</li>\n<li>Flexible scheduling (you choose your 2-hour block)</li>\n<li>Immediate impact (students progress within weeks)</li>\n</ul>\n\n<p>Next orientation is {orientationDate}. Let me know what time works for a quick call and I\'ll make it happen.</p>\n\n<p>If it\'s easier, <a href="{calendarLink}">book a time directly here</a>.</p>\n\n<p>Looking forward to welcoming you,<br>Sarah</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nMe again - considering this is the 3rd email, I am sure you are busy! (This is good - we need dedicated volunteers.)\n\nProblem: If you want to make a real difference in kids\' lives this year, it takes a LOT of time to find the right opportunity, get trained, and build meaningful relationships...\n\nSolution: If you take 5 minutes, I can explain our streamlined mentoring program where just 2 hours a week creates life-changing impact while fitting into {volunteerPriority}.\n\nVolunteers who made time for this call discovered:\n- Full training provided (no teaching experience needed)\n- Flexible scheduling (you choose your 2-hour block)\n- Immediate impact (students progress within weeks)\n\nNext orientation is {orientationDate}. Let me know what time works for a quick call and I\'ll make it happen.\n\nIf it\'s easier, book a time directly here: {calendarLink}\n\nLooking forward to welcoming you,\nSarah\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'volunteer',
+    funnelStage: 'decision',
+    description: 'Day 8 follow-up sequence - Problem/solution with low-barrier value proposition',
+    exampleContext: 'Volunteer prospect who received earlier follow-ups but hasn\'t taken action - final push',
+    variables: ['firstName', 'volunteerPriority', 'orientationDate', 'calendarLink', 'unsubscribeUrl']
+  },
+  
+  // ========== HORMOZI CALL BOOKING PUSH TEMPLATES ==========
+  // "Time Kills All Deals" - immediate booking with urgency
+  
+  {
+    name: 'warm_booking_push_parent_decision',
+    subject: '{firstName}, would take 23,498 pages to type this out...',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>I have so much to share about how we can help {childName} build {skillArea} skills before kindergarten...</p>\n\n<p>But honestly? It would take 23,498 pages to type out haha.</p>\n\n<p>Whenever we both have a minute, let\'s hop on a quick 5-minute call and I can explain everything.</p>\n\n<p>Would you be up for that? (no pressure)</p>\n\n<p><strong>TWO OPTIONS:</strong></p>\n\n<p><strong>Option 1: Call right now</strong><br>\nHere\'s my cell: {phoneNumber}<br>\nWhat\'s yours?</p>\n\n<p><strong>Option 2: Schedule for today</strong><br>\n<a href="{calendarLink}">Grab a time here</a><br>\nOnce you pick, let me know so I can confirm on my side.</p>\n\n<p>Note: We hold consultation spots for just 48 hours to prioritize families ready to act. {spotsRemaining} spots left for {cohortDate} enrollment.</p>\n\n<p>Talk soon!<br>Julie</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nI have so much to share about how we can help {childName} build {skillArea} skills before kindergarten...\n\nBut honestly? It would take 23,498 pages to type out haha.\n\nWhenever we both have a minute, let\'s hop on a quick 5-minute call and I can explain everything.\n\nWould you be up for that? (no pressure)\n\nTWO OPTIONS:\n\nOption 1: Call right now\nHere\'s my cell: {phoneNumber}\nWhat\'s yours?\n\nOption 2: Schedule for today\nGrab a time here: {calendarLink}\nOnce you pick, let me know so I can confirm on my side.\n\nNote: We hold consultation spots for just 48 hours to prioritize families ready to act. {spotsRemaining} spots left for {cohortDate} enrollment.\n\nTalk soon!\nJulie\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'parent',
+    funnelStage: 'decision',
+    description: 'Hormozi call booking push - "23,498 pages" framing with immediate call or same-day options',
+    exampleContext: 'Parent who has engaged but hasn\'t scheduled consultation - urgency + scarcity',
+    variables: ['firstName', 'childName', 'skillArea', 'phoneNumber', 'calendarLink', 'spotsRemaining', 'cohortDate', 'unsubscribeUrl']
+  },
+  {
+    name: 'warm_booking_push_student_decision',
+    subject: '{firstName}, let\'s talk (can\'t type this all out...)',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>I have great suggestions for accelerating your progress toward {goal}...</p>\n\n<p>But it would take forever to type out. Let\'s just hop on a quick 5-minute call and I can walk you through everything.</p>\n\n<p>Sound good?</p>\n\n<p><strong>TWO OPTIONS:</strong></p>\n\n<p><strong>Option 1: Call me now</strong><br>\nMy number: {phoneNumber}<br>\nWhat\'s yours?</p>\n\n<p><strong>Option 2: Pick a time today</strong><br>\n<a href="{calendarLink}">Schedule here</a><br>\nJust let me know once you grab a time.</p>\n\n<p>Note: Classes start {cohortDate}. We hold assessment slots for 48 hours - after that they go to the next person on the waitlist.</p>\n\n<p>Talk soon!<br>Maria</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nI have great suggestions for accelerating your progress toward {goal}...\n\nBut it would take forever to type out. Let\'s just hop on a quick 5-minute call and I can walk you through everything.\n\nSound good?\n\nTWO OPTIONS:\n\nOption 1: Call me now\nMy number: {phoneNumber}\nWhat\'s yours?\n\nOption 2: Pick a time today\nSchedule here: {calendarLink}\nJust let me know once you grab a time.\n\nNote: Classes start {cohortDate}. We hold assessment slots for 48 hours - after that they go to the next person on the waitlist.\n\nTalk soon!\nMaria\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'student',
+    funnelStage: 'decision',
+    description: 'Hormozi call booking push - Immediate action with 48-hour urgency',
+    exampleContext: 'Student who completed assessment but hasn\'t enrolled - enrollment deadline approaching',
+    variables: ['firstName', 'goal', 'phoneNumber', 'calendarLink', 'cohortDate', 'unsubscribeUrl']
+  },
+  {
+    name: 'warm_booking_push_donor_decision',
+    subject: '{firstName}, quick call about your impact?',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>I have some exciting ways you could maximize your community impact...</p>\n\n<p>But it would take pages to explain in email. Can we hop on a quick 10-minute call and I\'ll walk you through it?</p>\n\n<p><strong>TWO OPTIONS:</strong></p>\n\n<p><strong>Option 1: Call now</strong><br>\nReach me at: {phoneNumber}</p>\n\n<p><strong>Option 2: Schedule for this week</strong><br>\n<a href="{calendarLink}">Pick a time here</a></p>\n\n<p>Note: We\'re finalizing our {campaignName} matching gift program this week. Partners who join before {deadline} get {benefit}.</p>\n\n<p>Looking forward to connecting,<br>Development Team</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nI have some exciting ways you could maximize your community impact...\n\nBut it would take pages to explain in email. Can we hop on a quick 10-minute call and I\'ll walk you through it?\n\nTWO OPTIONS:\n\nOption 1: Call now\nReach me at: {phoneNumber}\n\nOption 2: Schedule for this week\nPick a time here: {calendarLink}\n\nNote: We\'re finalizing our {campaignName} matching gift program this week. Partners who join before {deadline} get {benefit}.\n\nLooking forward to connecting,\nDevelopment Team\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'donor',
+    funnelStage: 'decision',
+    description: 'Hormozi call booking push - Professional tone with campaign urgency',
+    exampleContext: 'Donor prospect who expressed interest - matching gift deadline creating urgency',
+    variables: ['firstName', 'phoneNumber', 'calendarLink', 'campaignName', 'deadline', 'benefit', 'unsubscribeUrl']
+  },
+  {
+    name: 'warm_booking_push_volunteer_decision',
+    subject: '{firstName}, can\'t type this all out - let\'s talk',
+    htmlBody: '<p>Hi {firstName},</p>\n\n<p>I have so much to share about how rewarding our mentoring program is...</p>\n\n<p>But honestly, it would take forever to type out. Let\'s just hop on a quick 5-minute call and I\'ll explain everything.</p>\n\n<p>Sound good?</p>\n\n<p><strong>TWO OPTIONS:</strong></p>\n\n<p><strong>Option 1: Call me now</strong><br>\nMy number: {phoneNumber}</p>\n\n<p><strong>Option 2: Schedule for this week</strong><br>\n<a href="{calendarLink}">Pick a time</a></p>\n\n<p>Note: Next orientation is {orientationDate}. We limit each session to {maxVolunteers} volunteers for quality training. {spotsRemaining} spots left.</p>\n\n<p>Talk soon!<br>Sarah</p>\n\n<p><a href="{unsubscribeUrl}">Unsubscribe</a></p>',
+    textBody: 'Hi {firstName},\n\nI have so much to share about how rewarding our mentoring program is...\n\nBut honestly, it would take forever to type out. Let\'s just hop on a quick 5-minute call and I\'ll explain everything.\n\nSound good?\n\nTWO OPTIONS:\n\nOption 1: Call me now\nMy number: {phoneNumber}\n\nOption 2: Schedule for this week\nPick a time: {calendarLink}\n\nNote: Next orientation is {orientationDate}. We limit each session to {maxVolunteers} volunteers for quality training. {spotsRemaining} spots left.\n\nTalk soon!\nSarah\n\nUnsubscribe: {unsubscribeUrl}',
+    outreachType: 'warm_outreach',
+    templateCategory: 'follow_up',
+    persona: 'volunteer',
+    funnelStage: 'decision',
+    description: 'Hormozi call booking push - Friendly urgency with orientation deadline',
+    exampleContext: 'Volunteer prospect who expressed interest - orientation filling up',
+    variables: ['firstName', 'phoneNumber', 'calendarLink', 'orientationDate', 'maxVolunteers', 'spotsRemaining', 'unsubscribeUrl']
   }
 ];
