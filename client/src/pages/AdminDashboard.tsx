@@ -14,7 +14,7 @@ import {
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
   BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
-  Shield, BookOpen, MessageSquare, Kanban, Settings, ChevronDown, Database, GraduationCap
+  Shield, BookOpen, MessageSquare, Kanban, Settings, ChevronDown, Database, GraduationCap, Clock
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
