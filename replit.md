@@ -38,6 +38,8 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Volunteer Enrollment Tracking System**: Comprehensive system for managing volunteer activities with four-table relational schema, including student dashboard integration and admin management.
 -   **Lead-Level Email Engagement Tracking**: Tabbed LeadDetailsDialog interface displaying email analytics per lead, including summary metrics, opens, and clicks. Backend provides aggregated engagement data via an API endpoint.
 -   **Scheduled Email Reports**: Automated recurring email reporting system with full CRUD management via an admin UI, supporting various frequencies and report types.
+-   **Advanced Segmentation System**: Dynamic audience targeting with flexible JSONB filter criteria supporting personas, funnel stages, passions, engagement scores, and activity recency for precision campaign targeting.
+-   **Email Unsubscribe Management**: CAN-SPAM compliant unsubscribe tracking with permanent email storage, reason capture, source attribution, and audit-friendly SET NULL foreign keys for data preservation.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a three-tier RBAC system with audit logging. The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.

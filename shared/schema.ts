@@ -2268,3 +2268,76 @@ export const insertVolunteerSessionLogSchema = createInsertSchema(volunteerSessi
 });
 export type InsertVolunteerSessionLog = z.infer<typeof insertVolunteerSessionLogSchema>;
 export type VolunteerSessionLog = typeof volunteerSessionLogs.$inferSelect;
+
+// Segments table for dynamic audience targeting
+export const segments = pgTable("segments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  
+  // Filter criteria (stored as JSON)
+  // Example: { personas: ['donor', 'volunteer'], funnelStages: ['consideration', 'decision'], passions: ['literacy', 'stem'], engagementMin: 50, lastActivityDays: 30, excludeUnsubscribed: true }
+  filters: jsonb("filters").notNull(),
+  
+  // Metadata
+  isActive: boolean("is_active").default(true),
+  createdBy: varchar("created_by").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("segments_created_by_idx").on(table.createdBy),
+  index("segments_is_active_idx").on(table.isActive),
+]);
+
+export const insertSegmentSchema = createInsertSchema(segments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateSegmentSchema = createInsertSchema(segments).omit({
+  id: true,
+  createdBy: true,
+  createdAt: true,
+  updatedAt: true,
+}).partial();
+
+export type InsertSegment = z.infer<typeof insertSegmentSchema>;
+export type UpdateSegment = z.infer<typeof updateSegmentSchema>;
+export type Segment = typeof segments.$inferSelect;
+
+// Email Unsubscribes table for tracking opt-outs (CAN-SPAM compliance)
+export const emailUnsubscribes = pgTable("email_unsubscribes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  
+  // Lead reference (nullable for non-lead email addresses)
+  leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
+  
+  // Email address (required for lookups even if lead is deleted)
+  email: varchar("email").notNull().unique(),
+  
+  // Unsubscribe details
+  reason: varchar("reason"), // 'too_frequent', 'not_interested', 'irrelevant', 'other'
+  feedback: text("feedback"), // Optional detailed feedback
+  
+  // Source tracking
+  source: varchar("source").default('user_request'), // 'user_request', 'bounce', 'spam_complaint', 'admin'
+  campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }), // Campaign that triggered unsubscribe (if any)
+  
+  // Timestamps
+  unsubscribedAt: timestamp("unsubscribed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("email_unsubscribes_email_idx").on(table.email),
+  index("email_unsubscribes_lead_id_idx").on(table.leadId),
+  index("email_unsubscribes_unsubscribed_at_idx").on(table.unsubscribedAt),
+]);
+
+export const insertEmailUnsubscribeSchema = createInsertSchema(emailUnsubscribes).omit({
+  id: true,
+  unsubscribedAt: true,
+  createdAt: true,
+});
+
+export type InsertEmailUnsubscribe = z.infer<typeof insertEmailUnsubscribeSchema>;
+export type EmailUnsubscribe = typeof emailUnsubscribes.$inferSelect;
