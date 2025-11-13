@@ -174,6 +174,12 @@ export default function AdminDashboard() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
+                    <Link href="/admin/email-reports" className="flex items-center cursor-pointer" data-testid="link-email-reports">
+                      <Clock className="w-4 h-4 mr-2" />
+                      Email Reports
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link href="/admin/sms-notifications" className="flex items-center cursor-pointer">
                       <MessageSquare className="w-4 h-4 mr-2" />
                       SMS Notifications
