@@ -4628,15 +4628,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email Unsubscribe Routes
   // ====================
   
-  // Create unsubscribe (opt-out an email)
+  // Create unsubscribe (opt-out an email or phone)
   app.post('/api/email-unsubscribes', async (req, res) => {
     try {
       const validatedData = insertEmailUnsubscribeSchema.parse(req.body);
       
-      // Check if email is already unsubscribed
-      const existing = await storage.getEmailUnsubscribe(validatedData.email);
+      // Check for existing unsubscribe based on channel and identifiers
+      let existing = null;
+      
+      // For 'all' channel, check both email and phone
+      if (validatedData.channel === 'all') {
+        const emailExists = validatedData.email ? await storage.getEmailUnsubscribe(validatedData.email) : null;
+        const phoneExists = validatedData.phone ? await storage.getSmsUnsubscribe(validatedData.phone) : null;
+        existing = emailExists || phoneExists;
+      } 
+      // For 'email' channel, check email only
+      else if (validatedData.channel === 'email' && validatedData.email) {
+        existing = await storage.getEmailUnsubscribe(validatedData.email);
+      }
+      // For 'sms' channel, check phone only
+      else if (validatedData.channel === 'sms' && validatedData.phone) {
+        existing = await storage.getSmsUnsubscribe(validatedData.phone);
+      }
+      
       if (existing) {
-        return res.status(409).json({ message: "Email already unsubscribed" });
+        return res.status(409).json({ message: "Contact already unsubscribed for this channel" });
       }
       
       const unsubscribe = await storage.createEmailUnsubscribe(validatedData);
@@ -4658,6 +4674,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching unsubscribes:", error);
       res.status(500).json({ message: "Failed to fetch unsubscribes" });
+    }
+  });
+
+  // Delete/resubscribe an unsubscribe record (admin only)
+  app.delete('/api/email-unsubscribes/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.removeUnsubscribe(id);
+      res.json({ message: "Unsubscribe record removed successfully" });
+    } catch (error: any) {
+      console.error("Error deleting unsubscribe:", error);
+      res.status(500).json({ message: error.message || "Failed to delete unsubscribe" });
     }
   });
 
