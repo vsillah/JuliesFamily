@@ -2719,7 +2719,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           decision: leads.filter(l => l.funnelStage === 'decision').length,
           retention: leads.filter(l => l.funnelStage === 'retention').length,
         },
-        converted: leads.filter(l => l.convertedAt !== null).length,
+        converted: leads.filter(l => l.funnelStage === 'decision' || l.funnelStage === 'retention').length,
         avgEngagementScore: leads.reduce((sum, l) => sum + (l.engagementScore || 0), 0) / leads.length || 0,
       };
       
