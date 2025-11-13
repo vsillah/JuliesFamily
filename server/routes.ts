@@ -4575,6 +4575,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Preview segment (evaluate filters without creating segment)
+  app.post('/api/segments/preview', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { filters, limit } = req.body;
+      
+      if (!filters) {
+        return res.status(400).json({ message: "Filters are required" });
+      }
+      
+      // Use singleton service instance (same as evaluate endpoint)
+      const { segmentEvaluationService } = await import('./services/segmentEvaluation');
+      const leads = await segmentEvaluationService.evaluateFilters(filters, { limit });
+      
+      res.json({ leads });
+    } catch (error) {
+      console.error("Error previewing segment:", error);
+      res.status(500).json({ message: "Failed to preview segment" });
+    }
+  });
+
+  // Preview segment size (count only)
+  app.post('/api/segments/preview/size', isAuthenticated, requireSuperAdmin, async (req, res) => {
+    try {
+      const { filters } = req.body;
+      
+      if (!filters) {
+        return res.status(400).json({ message: "Filters are required" });
+      }
+      
+      // Use singleton service instance (same as size endpoint)
+      const { segmentEvaluationService } = await import('./services/segmentEvaluation');
+      const size = await segmentEvaluationService.getSegmentSize(filters);
+      
+      res.json({ size });
+    } catch (error) {
+      console.error("Error getting segment size:", error);
+      res.status(500).json({ message: "Failed to get segment size" });
+    }
+  });
+
   // ====================
   // Email Unsubscribe Routes
   // ====================

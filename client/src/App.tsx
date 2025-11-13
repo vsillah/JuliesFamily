@@ -41,6 +41,7 @@ import AdminDonorLifecycle from "@/pages/AdminDonorLifecycle";
 import AdminStudentEnrollments from "@/pages/AdminStudentEnrollments";
 import AdminVolunteerManagement from "@/pages/AdminVolunteerManagement";
 import AdminFunnelAnalytics from "@/pages/AdminFunnelAnalytics";
+import AdminSegments from "@/pages/AdminSegments";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import ImageComparison from "@/pages/ImageComparison";
@@ -88,6 +89,7 @@ function Router() {
       <Route path="/admin/student-enrollments" component={AdminStudentEnrollments} />
       <Route path="/admin/volunteer-management" component={AdminVolunteerManagement} />
       <Route path="/admin/funnel-analytics" component={AdminFunnelAnalytics} />
+      <Route path="/admin/segments" component={AdminSegments} />
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />
