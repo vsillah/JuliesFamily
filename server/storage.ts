@@ -300,6 +300,10 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   getEmailClicksByToken(trackingToken: string): Promise<EmailClick[]>;
   getEmailClicksByCampaign(campaignId: string): Promise<EmailClick[]>;
   
+  // Lead-level Email Engagement operations
+  getLeadEmailOpens(leadId: string, limit?: number): Promise<LeadEmailOpen[]>;
+  getLeadEmailClicks(leadId: string, limit?: number): Promise<LeadEmailClick[]>;
+  
   // SMS Template operations
   createSmsTemplate(template: InsertSmsTemplate): Promise<SmsTemplate>;
   getAllSmsTemplates(): Promise<SmsTemplate[]>;
@@ -2465,6 +2469,54 @@ export class DatabaseStorage implements IStorage {
       .from(emailClicks)
       .where(eq(emailClicks.campaignId, campaignId))
       .orderBy(desc(emailClicks.clickedAt));
+  }
+
+  // Lead-level Email Engagement operations
+  async getLeadEmailOpens(leadId: string, limit?: number): Promise<LeadEmailOpen[]> {
+    const results = await db.execute<LeadEmailOpen>(sql`
+      SELECT 
+        eo.id,
+        eo.email_log_id as "emailLogId",
+        eo.lead_id as "leadId",
+        eo.campaign_id as "campaignId",
+        eo.tracking_token as "trackingToken",
+        eo.ip_address as "ipAddress",
+        eo.user_agent as "userAgent",
+        eo.metadata,
+        eo.opened_at as "openedAt",
+        ec.name as "campaignName"
+      FROM email_opens eo
+      LEFT JOIN email_campaigns ec ON eo.campaign_id = ec.id
+      WHERE eo.lead_id = ${leadId}
+      ORDER BY eo.opened_at DESC
+      ${limit ? sql`LIMIT ${limit}` : sql``}
+    `);
+    return results.rows;
+  }
+
+  async getLeadEmailClicks(leadId: string, limit?: number): Promise<LeadEmailClick[]> {
+    const results = await db.execute<LeadEmailClick>(sql`
+      SELECT 
+        ec.id,
+        ec.email_log_id as "emailLogId",
+        ec.email_link_id as "emailLinkId",
+        ec.lead_id as "leadId",
+        ec.campaign_id as "campaignId",
+        ec.tracking_token as "trackingToken",
+        ec.target_url as "targetUrl",
+        ec.ip_address as "ipAddress",
+        ec.user_agent as "userAgent",
+        ec.metadata,
+        ec.clicked_at as "clickedAt",
+        ecamp.name as "campaignName",
+        ec.target_url as "linkUrl"
+      FROM email_clicks ec
+      LEFT JOIN email_campaigns ecamp ON ec.campaign_id = ecamp.id
+      WHERE ec.lead_id = ${leadId}
+      ORDER BY ec.clicked_at DESC
+      ${limit ? sql`LIMIT ${limit}` : sql``}
+    `);
+    return results.rows;
   }
 
   // SMS Template operations

@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { format } from "date-fns";
@@ -13,9 +15,9 @@ import {
   User, Mail, Phone, Calendar, TrendingUp, MessageSquare,
   History, Send, MessageCircle, CalendarCheck, RefreshCcw,
   Edit2, Check, X, Download, FileText, CheckCircle2, Target, Users,
-  ListTodo, Plus, Clock
+  ListTodo, Plus, Clock, BarChart3, Activity, ExternalLink
 } from "lucide-react";
-import type { Lead, Interaction } from "@shared/schema";
+import type { Lead, Interaction, LeadEmailOpen, LeadEmailClick } from "@shared/schema";
 import CommunicationTimeline from "@/components/CommunicationTimeline";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -117,6 +119,22 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   // Fetch funnel progression history
   const { data: progressionHistory = [] } = useQuery<any[]>({
     queryKey: ["/api/funnel/progression-history", leadId],
+    enabled: !!leadId && open,
+    retry: false,
+  });
+
+  // Fetch email engagement
+  const { data: emailEngagement, isLoading: engagementLoading } = useQuery<{
+    summary: {
+      totalOpens: number;
+      totalClicks: number;
+      engagedCampaigns: number;
+      lastActivity: string | null;
+    };
+    opens: LeadEmailOpen[];
+    clicks: LeadEmailClick[];
+  }>({
+    queryKey: ["/api/leads", leadId, "email-engagement"],
     enabled: !!leadId && open,
     retry: false,
   });
@@ -415,9 +433,27 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
             </Button>
           </div>
         ) : lead ? (
-          <div className="space-y-6">
-            {/* Contact Information */}
-            <Card>
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview" data-testid="tab-overview">
+                <User className="w-4 h-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="engagement" data-testid="tab-engagement">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Engagement
+              </TabsTrigger>
+              <TabsTrigger value="timeline" data-testid="tab-timeline">
+                <History className="w-4 h-4 mr-2" />
+                Timeline
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="overview" className="mt-6">
+              <ScrollArea className="h-[calc(90vh-240px)]" type="auto">
+                <div className="space-y-6 pr-4">
+                  {/* Contact Information */}
+                  <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Contact Information</CardTitle>
               </CardHeader>
@@ -1063,10 +1099,184 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
                 </div>
               </CardContent>
             </Card>
+                </div>
+              </ScrollArea>
+            </TabsContent>
 
-            {/* Communication Timeline - unified view of all interactions */}
-            <CommunicationTimeline leadId={leadId} />
-          </div>
+            {/* Engagement Tab */}
+            <TabsContent value="engagement" className="mt-6">
+              <ScrollArea className="h-[calc(90vh-240px)]" type="auto">
+                <div className="space-y-6 pr-4">
+                  {engagementLoading ? (
+                    <div className="text-center py-12 text-muted-foreground">
+                      Loading engagement data...
+                    </div>
+                  ) : emailEngagement ? (
+                    <>
+                      {/* Summary Metrics */}
+                      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-md">
+                                <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Total Opens</p>
+                                <p className="text-2xl font-bold" data-testid="metric-total-opens">{emailEngagement.summary.totalOpens}</p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-md">
+                                <Target className="w-5 h-5 text-green-600 dark:text-green-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Total Clicks</p>
+                                <p className="text-2xl font-bold" data-testid="metric-total-clicks">{emailEngagement.summary.totalClicks}</p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-md">
+                                <BarChart3 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Campaigns</p>
+                                <p className="text-2xl font-bold" data-testid="metric-engaged-campaigns">{emailEngagement.summary.engagedCampaigns}</p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card>
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-md">
+                                <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                              </div>
+                              <div>
+                                <p className="text-sm text-muted-foreground">Last Active</p>
+                                <p className="text-sm font-medium" data-testid="metric-last-activity">
+                                  {emailEngagement.summary.lastActivity 
+                                    ? format(new Date(emailEngagement.summary.lastActivity), "MMM d, yyyy")
+                                    : "Never"}
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      {/* Campaign Activity */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Campaign Activity</CardTitle>
+                          <CardDescription>Email engagement by campaign</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {emailEngagement.opens.length === 0 && emailEngagement.clicks.length === 0 ? (
+                            <div className="text-center py-12 text-muted-foreground">
+                              <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                              <p>No email activity yet</p>
+                              <p className="text-sm mt-2">Opens and clicks will appear here when the lead engages with campaigns.</p>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {/* Email Opens */}
+                              {emailEngagement.opens.length > 0 && (
+                                <div>
+                                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                                    <Mail className="w-4 h-4" />
+                                    Email Opens ({emailEngagement.opens.length})
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {emailEngagement.opens.slice(0, 10).map((open, idx) => (
+                                      <div key={open.id || idx} className="flex items-center justify-between p-3 border rounded-md text-sm" data-testid={`open-${idx}`}>
+                                        <div className="flex-1">
+                                          <div className="font-medium">{open.campaignName || "Untitled Campaign"}</div>
+                                          <div className="text-muted-foreground text-xs">
+                                            {open.openedAt ? format(new Date(open.openedAt), "MMM d, yyyy 'at' h:mm a") : "Unknown"}
+                                          </div>
+                                        </div>
+                                        <Badge variant="outline" className="text-xs">Opened</Badge>
+                                      </div>
+                                    ))}
+                                    {emailEngagement.opens.length > 10 && (
+                                      <p className="text-sm text-muted-foreground text-center pt-2">
+                                        ...and {emailEngagement.opens.length - 10} more
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Email Clicks */}
+                              {emailEngagement.clicks.length > 0 && (
+                                <div>
+                                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                                    <Target className="w-4 h-4" />
+                                    Link Clicks ({emailEngagement.clicks.length})
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {emailEngagement.clicks.slice(0, 10).map((click, idx) => (
+                                      <div key={click.id || idx} className="flex items-center justify-between p-3 border rounded-md text-sm" data-testid={`click-${idx}`}>
+                                        <div className="flex-1">
+                                          <div className="font-medium">{click.campaignName || "Untitled Campaign"}</div>
+                                          {click.linkUrl && (
+                                            <div className="text-muted-foreground text-xs flex items-center gap-1 mt-1">
+                                              <ExternalLink className="w-3 h-3" />
+                                              <span className="truncate max-w-xs">{click.linkUrl}</span>
+                                            </div>
+                                          )}
+                                          <div className="text-muted-foreground text-xs">
+                                            {click.clickedAt ? format(new Date(click.clickedAt), "MMM d, yyyy 'at' h:mm a") : "Unknown"}
+                                          </div>
+                                        </div>
+                                        <Badge variant="outline" className="text-xs">Clicked</Badge>
+                                      </div>
+                                    ))}
+                                    {emailEngagement.clicks.length > 10 && (
+                                      <p className="text-sm text-muted-foreground text-center pt-2">
+                                        ...and {emailEngagement.clicks.length - 10} more
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </>
+                  ) : (
+                    <div className="text-center py-12 text-muted-foreground">
+                      <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No engagement data available</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+
+            {/* Timeline Tab */}
+            <TabsContent value="timeline" className="mt-6">
+              <ScrollArea className="h-[calc(90vh-240px)]" type="auto">
+                <div className="pr-4">
+                  {/* Communication Timeline - unified view of all interactions */}
+                  <CommunicationTimeline leadId={leadId} />
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
             Lead not found.

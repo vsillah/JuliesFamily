@@ -1083,6 +1083,7 @@ export const emailLogs = pgTable("email_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   trackingTokenIdx: index("email_logs_tracking_token_idx").on(table.trackingToken),
+  leadIdIdx: index("email_logs_lead_id_idx").on(table.leadId),
 }));
 
 export const insertEmailLogSchema = createInsertSchema(emailLogs).omit({
@@ -1161,6 +1162,16 @@ export const insertEmailClickSchema = createInsertSchema(emailClicks).omit({
 });
 export type InsertEmailClick = z.infer<typeof insertEmailClickSchema>;
 export type EmailClick = typeof emailClicks.$inferSelect;
+
+// Lead-level email engagement DTOs (with joined campaign/link metadata)
+export type LeadEmailOpen = EmailOpen & {
+  campaignName: string | null;
+};
+
+export type LeadEmailClick = EmailClick & {
+  campaignName: string | null;
+  linkUrl: string | null;
+};
 
 // SMS Logs table for tracking sent SMS messages
 export const smsLogs = pgTable("sms_logs", {

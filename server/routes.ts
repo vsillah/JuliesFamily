@@ -2242,6 +2242,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Lead Email Engagement
+  app.get('/api/leads/:id/email-engagement', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id: leadId } = req.params;
+      
+      // Fetch opens and clicks
+      const [opens, clicks] = await Promise.all([
+        storage.getLeadEmailOpens(leadId),
+        storage.getLeadEmailClicks(leadId),
+      ]);
+
+      // Compute summary metrics
+      const uniqueCampaigns = new Set([
+        ...opens.map(o => o.campaignId).filter(Boolean),
+        ...clicks.map(c => c.campaignId).filter(Boolean),
+      ]);
+
+      const lastActivity = [...opens, ...clicks]
+        .map(item => 'openedAt' in item ? item.openedAt : item.clickedAt)
+        .filter(Boolean)
+        .sort((a, b) => new Date(b!).getTime() - new Date(a!).getTime())[0];
+
+      const summary = {
+        totalOpens: opens.length,
+        totalClicks: clicks.length,
+        engagedCampaigns: uniqueCampaigns.size,
+        lastActivity: lastActivity || null,
+      };
+
+      res.json({ summary, opens, clicks });
+    } catch (error) {
+      console.error("Error fetching email engagement:", error);
+      res.status(500).json({ message: "Failed to fetch email engagement" });
+    }
+  });
+
   // Lead Magnets Management
   app.get('/api/lead-magnets', async (req, res) => {
     try {
