@@ -6,7 +6,7 @@ import {
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems, donationCampaigns,
   campaignMembers, campaignTestimonials,
-  emailTemplates, emailLogs, emailOpens, emailLinks, emailClicks, smsTemplates, smsSends, communicationLogs,
+  emailTemplates, emailLogs, emailOpens, emailLinks, emailClicks, emailSendTimeInsights, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
   adminPreferences, auditLogs,
@@ -37,6 +37,7 @@ import {
   type EmailOpen, type InsertEmailOpen,
   type EmailLink, type InsertEmailLink,
   type EmailClick, type InsertEmailClick,
+  type EmailSendTimeInsight, type InsertEmailSendTimeInsight,
   type SmsTemplate, type InsertSmsTemplate,
   type SmsSend, type InsertSmsSend,
   type CommunicationLog, type InsertCommunicationLog,
@@ -315,6 +316,30 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
     startDate?: Date,
     endDate?: Date
   ): Promise<Array<{ timestamp: string; count: number }>>;
+  
+  // Send Time Insights operations (Best Send Time Analytics)
+  computeSendTimeInsights(
+    scope: 'global' | 'campaign' | 'persona',
+    scopeId?: string,
+    options?: { minSampleSize?: number }
+  ): Promise<EmailSendTimeInsight[]>;
+  
+  getSendTimeInsights(
+    scope: 'global' | 'campaign' | 'persona',
+    scopeId?: string,
+    options?: { forceRecompute?: boolean; minConfidence?: number }
+  ): Promise<{
+    insights: EmailSendTimeInsight[];
+    topWindows: Array<{
+      dayOfWeek: number;
+      hourOfDay: number;
+      openRate: number;
+      confidenceScore: number;
+      sendCount: number;
+      liftPercent: number;
+    }>;
+    cacheAge: number | null;
+  }>;
   
   // Lead-level Email Engagement operations
   getLeadEmailOpens(leadId: string, limit?: number): Promise<LeadEmailOpen[]>;
@@ -2776,6 +2801,312 @@ export class DatabaseStorage implements IStorage {
       timestamp: row.bucket,
       count: Number(row.count)
     }));
+  }
+
+  // Send Time Insights - Best Send Time Analytics
+  async computeSendTimeInsights(
+    scope: 'global' | 'campaign' | 'persona',
+    scopeId?: string,
+    options?: { minSampleSize?: number }
+  ): Promise<EmailSendTimeInsight[]> {
+    const minSampleSize = options?.minSampleSize || 10;
+    
+    try {
+      // Build scope filter based on scope type
+      let scopeFilter = '';
+      const params: string[] = [];
+      
+      if (scope === 'campaign' && scopeId) {
+        scopeFilter = 'AND el.campaign_id = $1';
+        params.push(scopeId);
+      } else if (scope === 'persona' && scopeId) {
+        scopeFilter = 'AND COALESCE(el.persona, l.persona) = $1';
+        params.push(scopeId);
+      }
+      // global scope has no filter
+      
+      // Execute CTE query with timezone conversion, aggregation, and baseline calculation
+      // Fixed: Pre-aggregates opens/clicks per email_log to prevent row multiplication
+      const results = await db.execute<{
+        day_of_week: number;
+        hour_of_day: number;
+        send_count: number;
+        open_count: number;
+        unique_opens: number;
+        click_count: number;
+        median_seconds_to_open: number | null;
+        max_sent_at_ny: string;
+        baseline_open_rate: number;
+        baseline_send_count: number;
+      }>(sql.raw(`
+        WITH sends AS (
+          SELECT 
+            el.id as log_id,
+            el.sent_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York' as sent_at_ny,
+            el.lead_id
+          FROM email_logs el
+          LEFT JOIN leads l ON l.id = el.lead_id
+          WHERE el.sent_at IS NOT NULL
+            AND el.status IN ('sent', 'delivered')
+            ${scopeFilter}
+        ),
+        open_stats AS (
+          SELECT 
+            eo.email_log_id,
+            COUNT(*) as open_count_per_send,
+            COUNT(DISTINCT eo.lead_id) as unique_openers,
+            MIN(eo.opened_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York') as first_opened_at_ny
+          FROM email_opens eo
+          WHERE EXISTS (SELECT 1 FROM sends s WHERE s.log_id = eo.email_log_id)
+          GROUP BY eo.email_log_id
+        ),
+        click_stats AS (
+          SELECT 
+            ec.email_log_id,
+            COUNT(*) as click_count_per_send
+          FROM email_clicks ec
+          WHERE EXISTS (SELECT 1 FROM sends s WHERE s.log_id = ec.email_log_id)
+          GROUP BY ec.email_log_id
+        ),
+        baseline AS (
+          SELECT
+            COUNT(DISTINCT s.log_id) as total_sends,
+            COUNT(DISTINCT CASE WHEN o.email_log_id IS NOT NULL THEN s.lead_id END) as total_unique_opens
+          FROM sends s
+          LEFT JOIN open_stats o ON o.email_log_id = s.log_id
+        ),
+        aggregated AS (
+          SELECT
+            EXTRACT(DOW FROM s.sent_at_ny)::integer as day_of_week,
+            EXTRACT(HOUR FROM s.sent_at_ny)::integer as hour_of_day,
+            COUNT(*) as send_count,
+            SUM(COALESCE(o.open_count_per_send, 0)) as open_count,
+            SUM(COALESCE(o.unique_openers, 0)) as unique_opens,
+            SUM(COALESCE(c.click_count_per_send, 0)) as click_count,
+            percentile_cont(0.5) WITHIN GROUP (
+              ORDER BY EXTRACT(EPOCH FROM (o.first_opened_at_ny - s.sent_at_ny))
+            ) FILTER (WHERE o.first_opened_at_ny IS NOT NULL) as median_seconds_to_open,
+            MAX(s.sent_at_ny) as max_sent_at_ny
+          FROM sends s
+          LEFT JOIN open_stats o ON o.email_log_id = s.log_id
+          LEFT JOIN click_stats c ON c.email_log_id = s.log_id
+          GROUP BY day_of_week, hour_of_day
+          HAVING COUNT(*) >= ${minSampleSize}
+        )
+        SELECT 
+          a.*,
+          CASE 
+            WHEN b.total_sends > 0 
+            THEN ROUND((b.total_unique_opens::numeric / b.total_sends::numeric) * 10000)
+            ELSE 0 
+          END as baseline_open_rate,
+          b.total_sends as baseline_send_count
+        FROM aggregated a
+        CROSS JOIN baseline b
+        ORDER BY a.day_of_week, a.hour_of_day
+      `, params));
+      
+      // Calculate metrics and confidence scores for each bucket
+      const now = new Date();
+      const insights: InsertEmailSendTimeInsight[] = results.rows.map(row => {
+        const sendCount = Number(row.send_count);
+        const openCount = Number(row.open_count);
+        const uniqueOpens = Number(row.unique_opens);
+        const clickCount = Number(row.click_count);
+        const baselineOpenRate = Number(row.baseline_open_rate);
+        const baselineSendCount = Number(row.baseline_send_count);
+        
+        // Calculate open rate and click rate as percentage * 100 for precision
+        const openRate = sendCount > 0 ? Math.round((uniqueOpens / sendCount) * 10000) : 0;
+        const clickRate = sendCount > 0 ? Math.round((clickCount / sendCount) * 10000) : 0;
+        
+        // Calculate base confidence score based on sample size
+        let baseConfidence = 0;
+        if (sendCount <= 20) baseConfidence = 25;
+        else if (sendCount <= 50) baseConfidence = 50;
+        else if (sendCount <= 100) baseConfidence = 70;
+        else baseConfidence = 90;
+        
+        // Apply recency decay: linear over 14 days, clamped at 40%
+        const maxSentAt = new Date(row.max_sent_at_ny);
+        const daysStale = Math.floor((now.getTime() - maxSentAt.getTime()) / (1000 * 60 * 60 * 24));
+        const decayFactor = Math.max(0.4, 1 - daysStale / 14);
+        const confidenceScore = Math.round(Math.max(0, Math.min(100, baseConfidence * decayFactor)));
+        
+        // Convert median time-to-open from seconds to minutes
+        const medianTimeToOpen = row.median_seconds_to_open 
+          ? Math.round(Number(row.median_seconds_to_open) / 60)
+          : null;
+        
+        // Check if this is a low volume bucket (less than 2x min sample size)
+        const isLowVolume = sendCount < (minSampleSize * 2);
+        
+        return {
+          scope,
+          scopeId: scopeId || null,
+          dayOfWeek: Number(row.day_of_week),
+          hourOfDay: Number(row.hour_of_day),
+          sendCount,
+          openCount,
+          uniqueOpens,
+          clickCount,
+          openRate,
+          clickRate,
+          medianTimeToOpen,
+          confidenceScore,
+          sampleSize: sendCount, // Store actual count, no cap
+          metadata: {
+            baselineOpenRate,
+            baselineSendCount,
+            daysStale,
+            isLowVolume
+          },
+          analyzedAt: now
+        };
+      });
+      
+      // Transactional cache replacement: delete old entries then bulk insert new ones
+      await db.transaction(async (tx) => {
+        // Delete existing cache for this scope
+        if (scope === 'global') {
+          await tx.delete(emailSendTimeInsights).where(
+            and(
+              eq(emailSendTimeInsights.scope, scope),
+              sql`${emailSendTimeInsights.scopeId} IS NULL`
+            )
+          );
+        } else {
+          await tx.delete(emailSendTimeInsights).where(
+            and(
+              eq(emailSendTimeInsights.scope, scope),
+              eq(emailSendTimeInsights.scopeId, scopeId!)
+            )
+          );
+        }
+        
+        // Bulk insert new insights
+        if (insights.length > 0) {
+          await tx.insert(emailSendTimeInsights).values(insights);
+        }
+      });
+      
+      // Query and return the inserted records
+      const inserted = await db.select()
+        .from(emailSendTimeInsights)
+        .where(
+          scope === 'global'
+            ? and(
+                eq(emailSendTimeInsights.scope, scope),
+                sql`${emailSendTimeInsights.scopeId} IS NULL`
+              )
+            : and(
+                eq(emailSendTimeInsights.scope, scope),
+                eq(emailSendTimeInsights.scopeId, scopeId!)
+              )
+        )
+        .orderBy(emailSendTimeInsights.dayOfWeek, emailSendTimeInsights.hourOfDay);
+      
+      return inserted;
+    } catch (error) {
+      console.error('Error computing send time insights:', error);
+      throw new Error(`Failed to compute send time insights: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async getSendTimeInsights(
+    scope: 'global' | 'campaign' | 'persona',
+    scopeId?: string,
+    options?: { forceRecompute?: boolean; minConfidence?: number }
+  ): Promise<{
+    insights: EmailSendTimeInsight[];
+    topWindows: Array<{
+      dayOfWeek: number;
+      hourOfDay: number;
+      openRate: number;
+      confidenceScore: number;
+      sendCount: number;
+      liftPercent: number;
+    }>;
+    cacheAge: number | null;
+  }> {
+    const minConfidence = options?.minConfidence || 0;
+    
+    try {
+      // Check cache freshness
+      const cached = await db.select()
+        .from(emailSendTimeInsights)
+        .where(
+          scope === 'global'
+            ? and(
+                eq(emailSendTimeInsights.scope, scope),
+                sql`${emailSendTimeInsights.scopeId} IS NULL`
+              )
+            : and(
+                eq(emailSendTimeInsights.scope, scope),
+                eq(emailSendTimeInsights.scopeId, scopeId!)
+              )
+        )
+        .orderBy(desc(emailSendTimeInsights.analyzedAt));
+      
+      // Calculate cache age in hours
+      const cacheAge = cached[0]
+        ? Math.floor((Date.now() - cached[0].analyzedAt.getTime()) / (1000 * 60 * 60))
+        : null;
+      
+      // Determine if recomputation is needed (>24 hours old or forced)
+      const needsRecompute = 
+        !cached.length || 
+        options?.forceRecompute || 
+        (cacheAge !== null && cacheAge > 24);
+      
+      // Recompute if needed
+      let insights = cached;
+      if (needsRecompute) {
+        insights = await this.computeSendTimeInsights(scope, scopeId);
+      }
+      
+      // Filter by minimum confidence
+      const filtered = insights.filter(i => i.confidenceScore >= minConfidence);
+      
+      // Calculate baseline open rate from metadata (use first insight's metadata)
+      const baselineOpenRate = filtered[0]?.metadata?.baselineOpenRate || 0;
+      
+      // Calculate top 3 windows sorted by confidence then open rate
+      const topWindows = filtered
+        .sort((a, b) => {
+          // Sort by confidence first, then by open rate
+          if (b.confidenceScore !== a.confidenceScore) {
+            return b.confidenceScore - a.confidenceScore;
+          }
+          return b.openRate - a.openRate;
+        })
+        .slice(0, 3)
+        .map(insight => {
+          // Calculate lift percent compared to baseline
+          // Guard against zero baseline
+          const liftPercent = baselineOpenRate > 0
+            ? ((insight.openRate - baselineOpenRate) / baselineOpenRate) * 100
+            : 0;
+          
+          return {
+            dayOfWeek: insight.dayOfWeek,
+            hourOfDay: insight.hourOfDay,
+            openRate: insight.openRate / 100, // Convert back to percentage (2543 -> 25.43)
+            confidenceScore: insight.confidenceScore,
+            sendCount: insight.sendCount,
+            liftPercent: Math.round(liftPercent * 100) / 100 // Round to 2 decimals
+          };
+        });
+      
+      return {
+        insights: filtered,
+        topWindows,
+        cacheAge
+      };
+    } catch (error) {
+      console.error('Error getting send time insights:', error);
+      throw new Error(`Failed to get send time insights: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   // SMS Template operations
