@@ -6,6 +6,24 @@ Julie's Family Learning Program website is a non-profit, full-stack web applicat
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 
+## Development Best Practices
+
+### Phased Development for Large Efforts
+When implementing complex, multi-component systems, break the work into distinct phases with clear deliverables. This approach:
+- Enables incremental progress tracking and testing
+- Reduces integration risk by building on verified foundations
+- Allows for course correction between phases
+- Provides natural checkpoints for architectural review
+
+**Phase Structure Template:**
+1. **Foundation Phase**: Core data models, storage interfaces, and database schema
+2. **Service Layer Phase**: Business logic, calculations, and orchestration
+3. **Integration Phase**: External service connections (AI, email, etc.)
+4. **UI Phase**: Admin interfaces and user-facing components
+5. **Testing & Optimization Phase**: End-to-end validation and performance tuning
+
+Each phase should conclude with architectural review before proceeding to the next phase.
+
 ## System Architecture
 
 ### UI/UX Decisions

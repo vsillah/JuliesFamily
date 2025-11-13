@@ -3,6 +3,10 @@
 import { 
   users, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
+  metricWeightProfiles, metricWeightProfileMetrics,
+  abTestAutomationRules, abTestAutomationRuleMetrics,
+  abTestPerformanceBaselines, abTestVariantAiGenerations,
+  abTestAutomationRuns, abTestSafetyLimits,
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems, donationCampaigns,
   campaignMembers, campaignTestimonials,
@@ -22,6 +26,14 @@ import {
   type ImageAsset, type InsertImageAsset,
   type ContentItem, type InsertContentItem, type ContentItemWithResolvedImage,
   type ContentVisibility, type InsertContentVisibility,
+  type MetricWeightProfile, type InsertMetricWeightProfile,
+  type MetricWeightProfileMetric, type InsertMetricWeightProfileMetric,
+  type AbTestAutomationRule, type InsertAbTestAutomationRule,
+  type AbTestAutomationRuleMetric, type InsertAbTestAutomationRuleMetric,
+  type AbTestPerformanceBaseline, type InsertAbTestPerformanceBaseline,
+  type AbTestVariantAiGeneration, type InsertAbTestVariantAiGeneration,
+  type AbTestAutomationRun, type InsertAbTestAutomationRun,
+  type AbTestSafetyLimit, type InsertAbTestSafetyLimit,
   type AbTest, type InsertAbTest, type AbTestWithVariants,
   type AbTestTarget, type InsertAbTestTarget,
   type AbTestVariant, type InsertAbTestVariant,
@@ -195,6 +207,79 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
     confidence: number;
     sampleSize: number;
   } | null>;
+  
+  // Automated A/B Testing - Metric Weight Profiles
+  createMetricWeightProfile(profile: InsertMetricWeightProfile): Promise<MetricWeightProfile>;
+  getMetricWeightProfile(id: string): Promise<MetricWeightProfile | undefined>;
+  getAllMetricWeightProfiles(): Promise<MetricWeightProfile[]>;
+  getMetricWeightProfilesByContentType(contentType: string): Promise<MetricWeightProfile[]>;
+  updateMetricWeightProfile(id: string, updates: Partial<InsertMetricWeightProfile>): Promise<MetricWeightProfile | undefined>;
+  deleteMetricWeightProfile(id: string): Promise<void>;
+  
+  // Automated A/B Testing - Metric Weight Profile Metrics
+  createMetricWeightProfileMetric(metric: InsertMetricWeightProfileMetric): Promise<MetricWeightProfileMetric>;
+  getMetricWeightProfileMetrics(profileId: string): Promise<MetricWeightProfileMetric[]>;
+  deleteMetricWeightProfileMetric(id: string): Promise<void>;
+  deleteMetricWeightProfileMetricsByProfileId(profileId: string): Promise<void>; // Bulk delete for profile updates
+  
+  // Automated A/B Testing - Automation Rules (Admin CRUD)
+  createAbTestAutomationRule(rule: InsertAbTestAutomationRule): Promise<AbTestAutomationRule>;
+  getAbTestAutomationRule(id: string): Promise<AbTestAutomationRule | undefined>;
+  getAllAbTestAutomationRules(): Promise<AbTestAutomationRule[]>;
+  getActiveAbTestAutomationRules(): Promise<AbTestAutomationRule[]>;
+  updateAbTestAutomationRule(id: string, updates: Partial<InsertAbTestAutomationRule>): Promise<AbTestAutomationRule | undefined>;
+  deleteAbTestAutomationRule(id: string): Promise<void>;
+  
+  // Automated A/B Testing - Automation Rule Metrics (Metric overrides for rules)
+  createAbTestAutomationRuleMetric(metric: InsertAbTestAutomationRuleMetric): Promise<AbTestAutomationRuleMetric>;
+  getAbTestAutomationRuleMetrics(ruleId: string): Promise<AbTestAutomationRuleMetric[]>;
+  updateAbTestAutomationRuleMetric(id: string, updates: Partial<InsertAbTestAutomationRuleMetric>): Promise<AbTestAutomationRuleMetric | undefined>;
+  deleteAbTestAutomationRuleMetric(id: string): Promise<void>;
+  
+  // Automated A/B Testing - Performance Baselines (Read + Upsert)
+  upsertAbTestPerformanceBaseline(baseline: InsertAbTestPerformanceBaseline): Promise<AbTestPerformanceBaseline>;
+  getAbTestPerformanceBaselines(filters: {
+    contentType?: string;
+    contentItemId?: string;
+    persona?: string;
+    funnelStage?: string;
+    windowStart?: Date;
+  }): Promise<AbTestPerformanceBaseline[]>;
+  getLatestBaseline(contentItemId: string, persona?: string, funnelStage?: string): Promise<AbTestPerformanceBaseline | undefined>;
+  
+  // Automated A/B Testing - AI Generations (Append-only)
+  createAbTestVariantAiGeneration(generation: InsertAbTestVariantAiGeneration): Promise<AbTestVariantAiGeneration>;
+  getAbTestVariantAiGeneration(variantId: string): Promise<AbTestVariantAiGeneration | undefined>; // Returns single generation (unique per variant)
+  getAllAbTestVariantAiGenerations(filters?: { status?: string; provider?: string }): Promise<AbTestVariantAiGeneration[]>;
+  
+  // Automated A/B Testing - Automation Runs (Append-only + Query)
+  createAbTestAutomationRun(run: InsertAbTestAutomationRun): Promise<AbTestAutomationRun>;
+  getAbTestAutomationRun(id: string): Promise<AbTestAutomationRun | undefined>;
+  getAbTestAutomationRuns(filters: {
+    ruleId?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<AbTestAutomationRun[]>;
+  updateAbTestAutomationRun(id: string, updates: Partial<InsertAbTestAutomationRun>): Promise<AbTestAutomationRun | undefined>;
+  
+  // Automated A/B Testing - Safety Limits (Singleton Get + Update)
+  getAbTestSafetyLimits(): Promise<AbTestSafetyLimit | undefined>;
+  upsertAbTestSafetyLimits(limits: InsertAbTestSafetyLimit): Promise<AbTestSafetyLimit>;
+  
+  // Automated A/B Testing - Query Helpers for Automation Workflows
+  getAutomationReadyTests(filters: {
+    contentType?: string;
+    persona?: string;
+    funnelStage?: string;
+  }): Promise<Array<{
+    test: AbTest;
+    variants: AbTestVariant[];
+    baseline: AbTestPerformanceBaseline | null;
+    rule: AbTestAutomationRule | null;
+    weightProfile: MetricWeightProfile | null;
+    weightProfileMetrics: MetricWeightProfileMetric[];
+    ruleMetricOverrides: AbTestAutomationRuleMetric[];
+  }>>;
   
   // Performance Metrics operations
   getPerformanceMetrics(): Promise<{
@@ -1999,6 +2084,439 @@ export class DatabaseStorage implements IStorage {
       sampleSize,
     };
   }
+
+  // ==================== AUTOMATED A/B TESTING METHODS ====================
+  
+  // Metric Weight Profiles operations (6 methods)
+  async createMetricWeightProfile(profile: InsertMetricWeightProfile): Promise<MetricWeightProfile> {
+    const [created] = await db.insert(metricWeightProfiles).values(profile).returning();
+    return created;
+  }
+
+  async getMetricWeightProfile(id: string): Promise<MetricWeightProfile | undefined> {
+    const [profile] = await db
+      .select()
+      .from(metricWeightProfiles)
+      .where(eq(metricWeightProfiles.id, id));
+    return profile;
+  }
+
+  async getAllMetricWeightProfiles(): Promise<MetricWeightProfile[]> {
+    return await db
+      .select()
+      .from(metricWeightProfiles)
+      .orderBy(desc(metricWeightProfiles.createdAt));
+  }
+
+  async getMetricWeightProfilesByContentType(contentType: string): Promise<MetricWeightProfile[]> {
+    return await db
+      .select()
+      .from(metricWeightProfiles)
+      .where(eq(metricWeightProfiles.contentType, contentType))
+      .orderBy(desc(metricWeightProfiles.createdAt));
+  }
+
+  async updateMetricWeightProfile(id: string, updates: Partial<InsertMetricWeightProfile>): Promise<MetricWeightProfile | undefined> {
+    const [profile] = await db
+      .update(metricWeightProfiles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(metricWeightProfiles.id, id))
+      .returning();
+    return profile;
+  }
+
+  async deleteMetricWeightProfile(id: string): Promise<void> {
+    await db.delete(metricWeightProfiles).where(eq(metricWeightProfiles.id, id));
+  }
+
+  // Metric Weight Profile Metrics operations (4 methods)
+  async createMetricWeightProfileMetric(metric: InsertMetricWeightProfileMetric): Promise<MetricWeightProfileMetric> {
+    const [created] = await db.insert(metricWeightProfileMetrics).values(metric).returning();
+    return created;
+  }
+
+  async getMetricWeightProfileMetrics(profileId: string): Promise<MetricWeightProfileMetric[]> {
+    return await db
+      .select()
+      .from(metricWeightProfileMetrics)
+      .where(eq(metricWeightProfileMetrics.profileId, profileId));
+  }
+
+  async deleteMetricWeightProfileMetric(id: string): Promise<void> {
+    await db.delete(metricWeightProfileMetrics).where(eq(metricWeightProfileMetrics.id, id));
+  }
+
+  async deleteMetricWeightProfileMetricsByProfileId(profileId: string): Promise<void> {
+    await db
+      .delete(metricWeightProfileMetrics)
+      .where(eq(metricWeightProfileMetrics.profileId, profileId));
+  }
+
+  // Automation Rules operations (6 methods)
+  async createAbTestAutomationRule(rule: InsertAbTestAutomationRule): Promise<AbTestAutomationRule> {
+    const [created] = await db.insert(abTestAutomationRules).values(rule).returning();
+    return created;
+  }
+
+  async getAbTestAutomationRule(id: string): Promise<AbTestAutomationRule | undefined> {
+    const [rule] = await db
+      .select()
+      .from(abTestAutomationRules)
+      .where(eq(abTestAutomationRules.id, id));
+    return rule;
+  }
+
+  async getAllAbTestAutomationRules(): Promise<AbTestAutomationRule[]> {
+    return await db
+      .select()
+      .from(abTestAutomationRules)
+      .orderBy(desc(abTestAutomationRules.createdAt));
+  }
+
+  async getActiveAbTestAutomationRules(): Promise<AbTestAutomationRule[]> {
+    return await db
+      .select()
+      .from(abTestAutomationRules)
+      .where(eq(abTestAutomationRules.isActive, true))
+      .orderBy(desc(abTestAutomationRules.createdAt));
+  }
+
+  async updateAbTestAutomationRule(id: string, updates: Partial<InsertAbTestAutomationRule>): Promise<AbTestAutomationRule | undefined> {
+    const [rule] = await db
+      .update(abTestAutomationRules)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(abTestAutomationRules.id, id))
+      .returning();
+    return rule;
+  }
+
+  async deleteAbTestAutomationRule(id: string): Promise<void> {
+    await db.delete(abTestAutomationRules).where(eq(abTestAutomationRules.id, id));
+  }
+
+  // Automation Rule Metrics operations (4 methods)
+  async createAbTestAutomationRuleMetric(metric: InsertAbTestAutomationRuleMetric): Promise<AbTestAutomationRuleMetric> {
+    const [created] = await db.insert(abTestAutomationRuleMetrics).values(metric).returning();
+    return created;
+  }
+
+  async getAbTestAutomationRuleMetrics(ruleId: string): Promise<AbTestAutomationRuleMetric[]> {
+    return await db
+      .select()
+      .from(abTestAutomationRuleMetrics)
+      .where(eq(abTestAutomationRuleMetrics.ruleId, ruleId));
+  }
+
+  async updateAbTestAutomationRuleMetric(id: string, updates: Partial<InsertAbTestAutomationRuleMetric>): Promise<AbTestAutomationRuleMetric | undefined> {
+    const [metric] = await db
+      .update(abTestAutomationRuleMetrics)
+      .set(updates)
+      .where(eq(abTestAutomationRuleMetrics.id, id))
+      .returning();
+    return metric;
+  }
+
+  async deleteAbTestAutomationRuleMetric(id: string): Promise<void> {
+    await db.delete(abTestAutomationRuleMetrics).where(eq(abTestAutomationRuleMetrics.id, id));
+  }
+
+  // Performance Baselines operations (3 methods)
+  async upsertAbTestPerformanceBaseline(baseline: InsertAbTestPerformanceBaseline): Promise<AbTestPerformanceBaseline> {
+    const [result] = await db
+      .insert(abTestPerformanceBaselines)
+      .values(baseline)
+      .onConflictDoUpdate({
+        target: [
+          abTestPerformanceBaselines.contentType,
+          abTestPerformanceBaselines.contentItemId,
+          abTestPerformanceBaselines.persona,
+          abTestPerformanceBaselines.funnelStage,
+          abTestPerformanceBaselines.windowStart,
+        ],
+        set: {
+          windowEnd: baseline.windowEnd,
+          totalViews: baseline.totalViews,
+          uniqueViews: baseline.uniqueViews,
+          totalEvents: baseline.totalEvents,
+          compositeScore: baseline.compositeScore,
+          metricBreakdown: baseline.metricBreakdown,
+          sampleSize: baseline.sampleSize,
+          variance: baseline.variance,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return result;
+  }
+
+  async getAbTestPerformanceBaselines(filters: {
+    contentType?: string;
+    contentItemId?: string;
+    persona?: string;
+    funnelStage?: string;
+    windowStart?: Date;
+  }): Promise<AbTestPerformanceBaseline[]> {
+    const conditions = [];
+    
+    if (filters.contentType) {
+      conditions.push(eq(abTestPerformanceBaselines.contentType, filters.contentType));
+    }
+    if (filters.contentItemId) {
+      conditions.push(eq(abTestPerformanceBaselines.contentItemId, filters.contentItemId));
+    }
+    if (filters.persona) {
+      conditions.push(eq(abTestPerformanceBaselines.persona, filters.persona));
+    }
+    if (filters.funnelStage) {
+      conditions.push(eq(abTestPerformanceBaselines.funnelStage, filters.funnelStage));
+    }
+    if (filters.windowStart) {
+      conditions.push(eq(abTestPerformanceBaselines.windowStart, filters.windowStart));
+    }
+
+    return await db
+      .select()
+      .from(abTestPerformanceBaselines)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(abTestPerformanceBaselines.windowStart));
+  }
+
+  async getLatestBaseline(
+    contentItemId: string,
+    persona?: string,
+    funnelStage?: string
+  ): Promise<AbTestPerformanceBaseline | undefined> {
+    const conditions = [eq(abTestPerformanceBaselines.contentItemId, contentItemId)];
+    
+    if (persona) {
+      conditions.push(eq(abTestPerformanceBaselines.persona, persona));
+    }
+    if (funnelStage) {
+      conditions.push(eq(abTestPerformanceBaselines.funnelStage, funnelStage));
+    }
+
+    const [baseline] = await db
+      .select()
+      .from(abTestPerformanceBaselines)
+      .where(and(...conditions))
+      .orderBy(desc(abTestPerformanceBaselines.windowStart))
+      .limit(1);
+    
+    return baseline;
+  }
+
+  // AI Generations operations (3 methods)
+  async createAbTestVariantAiGeneration(generation: InsertAbTestVariantAiGeneration): Promise<AbTestVariantAiGeneration> {
+    const [created] = await db.insert(abTestVariantAiGenerations).values(generation).returning();
+    return created;
+  }
+
+  async getAbTestVariantAiGeneration(variantId: string): Promise<AbTestVariantAiGeneration | undefined> {
+    const [generation] = await db
+      .select()
+      .from(abTestVariantAiGenerations)
+      .where(eq(abTestVariantAiGenerations.variantId, variantId));
+    return generation;
+  }
+
+  async getAllAbTestVariantAiGenerations(filters?: {
+    status?: string;
+    provider?: string;
+  }): Promise<AbTestVariantAiGeneration[]> {
+    const conditions = [];
+    
+    if (filters?.status) {
+      conditions.push(eq(abTestVariantAiGenerations.generationStatus, filters.status));
+    }
+    if (filters?.provider) {
+      conditions.push(eq(abTestVariantAiGenerations.aiProvider, filters.provider));
+    }
+
+    return await db
+      .select()
+      .from(abTestVariantAiGenerations)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(abTestVariantAiGenerations.createdAt));
+  }
+
+  // Automation Runs operations (4 methods)
+  async createAbTestAutomationRun(run: InsertAbTestAutomationRun): Promise<AbTestAutomationRun> {
+    const [created] = await db.insert(abTestAutomationRuns).values(run).returning();
+    return created;
+  }
+
+  async getAbTestAutomationRun(id: string): Promise<AbTestAutomationRun | undefined> {
+    const [run] = await db
+      .select()
+      .from(abTestAutomationRuns)
+      .where(eq(abTestAutomationRuns.id, id));
+    return run;
+  }
+
+  async getAbTestAutomationRuns(filters: {
+    ruleId?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<AbTestAutomationRun[]> {
+    const conditions = [];
+    
+    if (filters.ruleId) {
+      conditions.push(eq(abTestAutomationRuns.ruleId, filters.ruleId));
+    }
+    if (filters.status) {
+      conditions.push(eq(abTestAutomationRuns.status, filters.status));
+    }
+
+    const limit = filters.limit ?? 50;
+
+    return await db
+      .select()
+      .from(abTestAutomationRuns)
+      .where(conditions.length > 0 ? and(...conditions) : undefined)
+      .orderBy(desc(abTestAutomationRuns.createdAt))
+      .limit(limit);
+  }
+
+  async updateAbTestAutomationRun(id: string, updates: Partial<InsertAbTestAutomationRun>): Promise<AbTestAutomationRun | undefined> {
+    const [run] = await db
+      .update(abTestAutomationRuns)
+      .set(updates)
+      .where(eq(abTestAutomationRuns.id, id))
+      .returning();
+    return run;
+  }
+
+  // Safety Limits operations (2 methods)
+  async getAbTestSafetyLimits(): Promise<AbTestSafetyLimit | undefined> {
+    const [limits] = await db
+      .select()
+      .from(abTestSafetyLimits)
+      .where(eq(abTestSafetyLimits.scope, 'global'));
+    return limits;
+  }
+
+  async upsertAbTestSafetyLimits(limits: InsertAbTestSafetyLimit): Promise<AbTestSafetyLimit> {
+    const [result] = await db
+      .insert(abTestSafetyLimits)
+      .values({ ...limits, scope: 'global' })
+      .onConflictDoUpdate({
+        target: abTestSafetyLimits.scope,
+        set: {
+          ...limits,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return result;
+  }
+
+  // Query Helper for Automation Workflows (1 method)
+  async getAutomationReadyTests(filters: {
+    contentType?: string;
+    persona?: string;
+    funnelStage?: string;
+  }): Promise<Array<{
+    test: AbTest;
+    variants: AbTestVariant[];
+    baseline: AbTestPerformanceBaseline | null;
+    rule: AbTestAutomationRule | null;
+    weightProfile: MetricWeightProfile | null;
+    weightProfileMetrics: MetricWeightProfileMetric[];
+    ruleMetricOverrides: AbTestAutomationRuleMetric[];
+  }>> {
+    // Build conditions for test filtering
+    const testConditions = [eq(abTests.status, 'active')];
+    
+    // Get all active tests first
+    let tests = await db
+      .select()
+      .from(abTests)
+      .where(and(...testConditions));
+
+    // If persona/funnelStage filters are provided, filter by targets
+    if (filters.persona || filters.funnelStage) {
+      const targetConditions = [];
+      if (filters.persona) {
+        targetConditions.push(eq(abTestTargets.persona, filters.persona));
+      }
+      if (filters.funnelStage) {
+        targetConditions.push(eq(abTestTargets.funnelStage, filters.funnelStage));
+      }
+
+      const validTestIds = await db
+        .selectDistinct({ testId: abTestTargets.testId })
+        .from(abTestTargets)
+        .where(and(...targetConditions));
+
+      const validIds = validTestIds.map(t => t.testId);
+      tests = tests.filter(test => validIds.includes(test.id));
+    }
+
+    // Filter by contentType if provided
+    if (filters.contentType) {
+      tests = tests.filter(test => test.type === filters.contentType);
+    }
+
+    // For each test, fetch related data
+    const results = await Promise.all(
+      tests.map(async (test) => {
+        // Get variants
+        const variants = await this.getAbTestVariants(test.id);
+
+        // Get automation rule if linked
+        let rule: AbTestAutomationRule | null = null;
+        if (test.automationRuleId) {
+          rule = await this.getAbTestAutomationRule(test.automationRuleId) || null;
+        }
+
+        // Get weight profile if linked to control variant
+        let weightProfile: MetricWeightProfile | null = null;
+        let weightProfileMetrics: MetricWeightProfileMetric[] = [];
+        const controlVariant = variants.find(v => v.isControl);
+        if (controlVariant?.weightingProfileId) {
+          weightProfile = await this.getMetricWeightProfile(controlVariant.weightingProfileId) || null;
+          if (weightProfile) {
+            weightProfileMetrics = await this.getMetricWeightProfileMetrics(weightProfile.id);
+          }
+        }
+
+        // Get rule metric overrides if rule exists
+        let ruleMetricOverrides: AbTestAutomationRuleMetric[] = [];
+        if (rule) {
+          ruleMetricOverrides = await this.getAbTestAutomationRuleMetrics(rule.id);
+        }
+
+        // Get baseline for control variant if it exists and has contentItemId
+        let baseline: AbTestPerformanceBaseline | null = null;
+        if (controlVariant?.contentItemId) {
+          // Get test targets to find persona/funnelStage
+          const targets = await this.getAbTestTargets(test.id);
+          if (targets.length > 0) {
+            const target = targets[0]; // Use first target for baseline lookup
+            baseline = await this.getLatestBaseline(
+              controlVariant.contentItemId,
+              target.persona,
+              target.funnelStage
+            ) || null;
+          }
+        }
+
+        return {
+          test,
+          variants,
+          baseline,
+          rule,
+          weightProfile,
+          weightProfileMetrics,
+          ruleMetricOverrides,
+        };
+      })
+    );
+
+    return results;
+  }
+
+  // ==================== END AUTOMATED A/B TESTING METHODS ====================
 
   // Performance Metrics operations
   async getPerformanceMetrics(): Promise<{

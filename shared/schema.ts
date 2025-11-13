@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, jsonb, index, boolean, integer, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, jsonb, index, boolean, integer, uniqueIndex, numeric, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -644,6 +644,195 @@ export const insertAbTestAutomationRuleSchema = createInsertSchema(abTestAutomat
 });
 export type InsertAbTestAutomationRule = z.infer<typeof insertAbTestAutomationRuleSchema>;
 export type AbTestAutomationRule = typeof abTestAutomationRules.$inferSelect;
+
+// A/B Test Automation Rule Metrics - Metric-specific configuration for automation rules
+export const abTestAutomationRuleMetrics = pgTable("ab_test_automation_rule_metrics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleId: varchar("rule_id").notNull().references(() => abTestAutomationRules.id, { onDelete: "cascade" }),
+  metricKey: varchar("metric_key").notNull(), // 'cta_click', 'conversion', 'dwell_time', etc
+  weight: integer("weight").notNull(), // Override default profile weight if needed
+  direction: varchar("direction").notNull().default('maximize'),
+  thresholdType: varchar("threshold_type").notNull(), // 'percentile', 'absolute', 'change_rate'
+  thresholdValue: numeric("threshold_value").notNull(), // Supports decimals: 25.5 for 25.5th percentile, 0.15 for 15% uplift
+  minimumSample: integer("minimum_sample").default(30),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("ab_automation_rule_metrics_unique_idx").on(table.ruleId, table.metricKey),
+]);
+
+export const insertAbTestAutomationRuleMetricSchema = createInsertSchema(abTestAutomationRuleMetrics).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAbTestAutomationRuleMetric = z.infer<typeof insertAbTestAutomationRuleMetricSchema>;
+export type AbTestAutomationRuleMetric = typeof abTestAutomationRuleMetrics.$inferSelect;
+
+// A/B Test Performance Baselines - Rolling performance data for content
+export const abTestPerformanceBaselines = pgTable("ab_test_performance_baselines", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  contentType: varchar("content_type").notNull(),
+  contentItemId: varchar("content_item_id").references(() => contentItems.id, { onDelete: "cascade" }),
+  persona: varchar("persona"),
+  funnelStage: varchar("funnel_stage"),
+  
+  // Time window for baseline
+  windowStart: timestamp("window_start").notNull(),
+  windowEnd: timestamp("window_end").notNull(),
+  
+  // Aggregate metrics
+  totalViews: integer("total_views").default(0),
+  uniqueViews: integer("unique_views").default(0),
+  totalEvents: integer("total_events").default(0),
+  compositeScore: integer("composite_score"), // Weighted score (0-10000)
+  
+  // Metric breakdown (JSONB for flexibility)
+  metricBreakdown: jsonb("metric_breakdown"), // { "cta_click": 50.5, "dwell_time": 120.3, "scroll_depth": 75.2 }
+  
+  // Statistical data
+  sampleSize: integer("sample_size").notNull(),
+  variance: doublePrecision("variance"), // Statistical variance for significance testing
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("baselines_content_window_unique_idx").on(table.contentType, table.contentItemId, table.persona, table.funnelStage, table.windowStart),
+  index("baselines_content_item_idx").on(table.contentItemId),
+  index("baselines_persona_funnel_idx").on(table.persona, table.funnelStage),
+  index("baselines_window_idx").on(table.windowStart, table.windowEnd),
+  index("baselines_content_type_idx").on(table.contentType),
+]);
+
+export const insertAbTestPerformanceBaselineSchema = createInsertSchema(abTestPerformanceBaselines).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertAbTestPerformanceBaseline = z.infer<typeof insertAbTestPerformanceBaselineSchema>;
+export type AbTestPerformanceBaseline = typeof abTestPerformanceBaselines.$inferSelect;
+
+// A/B Test Variant AI Generations - Track AI-generated content metadata
+export const abTestVariantAiGenerations = pgTable("ab_test_variant_ai_generations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  variantId: varchar("variant_id").notNull().unique(), // One generation record per variant
+  
+  // AI generation metadata
+  aiProvider: varchar("ai_provider").notNull(), // 'gemini', 'openai'
+  aiModel: varchar("ai_model").notNull(),
+  temperature: integer("temperature"), // 0-100 (multiply by 0.01)
+  
+  // Prompt and response
+  systemPrompt: text("system_prompt"),
+  userPrompt: text("user_prompt").notNull(),
+  aiResponse: text("ai_response").notNull(),
+  
+  // Source inputs for generation
+  sourceContentItemId: varchar("source_content_item_id").references(() => contentItems.id),
+  baselineData: jsonb("baseline_data"), // Performance data used to inform generation
+  personaContext: text("persona_context"), // Persona-specific context provided to AI
+  
+  // Generation results
+  tokensUsed: integer("tokens_used"),
+  generationTimeMs: integer("generation_time_ms"),
+  generationStatus: varchar("generation_status").notNull().default('success'), // 'success', 'failed', 'retry'
+  errorMessage: text("error_message"),
+  
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("ai_generations_variant_idx").on(table.variantId),
+  index("ai_generations_provider_idx").on(table.aiProvider),
+  index("ai_generations_status_idx").on(table.generationStatus),
+]);
+
+export const insertAbTestVariantAiGenerationSchema = createInsertSchema(abTestVariantAiGenerations).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAbTestVariantAiGeneration = z.infer<typeof insertAbTestVariantAiGenerationSchema>;
+export type AbTestVariantAiGeneration = typeof abTestVariantAiGenerations.$inferSelect;
+
+// A/B Test Automation Runs - Audit trail of automation execution
+export const abTestAutomationRuns = pgTable("ab_test_automation_runs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ruleId: varchar("rule_id").notNull().references(() => abTestAutomationRules.id, { onDelete: "cascade" }),
+  
+  // Run status
+  status: varchar("status").notNull().default('running'), // 'running', 'completed', 'failed', 'cancelled'
+  triggerType: varchar("trigger_type").notNull(), // 'scheduled', 'manual', 'threshold'
+  triggeredBy: varchar("triggered_by").references(() => users.id), // User if manual trigger
+  
+  // Execution details
+  evaluationStart: timestamp("evaluation_start").notNull().defaultNow(),
+  evaluationEnd: timestamp("evaluation_end"),
+  
+  // Results
+  opportunitiesDetected: integer("opportunities_detected").default(0),
+  testsCreated: integer("tests_created").default(0),
+  variantsGenerated: integer("variants_generated").default(0),
+  
+  // Created test IDs for tracking
+  createdTestIds: jsonb("created_test_ids"), // Array of test IDs created during this run
+  
+  // Errors and logs
+  errorMessage: text("error_message"),
+  executionLog: jsonb("execution_log"), // Detailed step-by-step log
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+}, (table) => [
+  index("automation_runs_rule_idx").on(table.ruleId),
+  index("automation_runs_status_idx").on(table.status),
+  index("automation_runs_created_at_idx").on(table.createdAt),
+  index("automation_runs_evaluation_start_idx").on(table.evaluationStart),
+]);
+
+export const insertAbTestAutomationRunSchema = createInsertSchema(abTestAutomationRuns).omit({
+  id: true,
+  createdAt: true,
+  completedAt: true,
+});
+export type InsertAbTestAutomationRun = z.infer<typeof insertAbTestAutomationRunSchema>;
+export type AbTestAutomationRun = typeof abTestAutomationRuns.$inferSelect;
+
+// A/B Test Safety Limits - Global safety guardrails for automation
+export const abTestSafetyLimits = pgTable("ab_test_safety_limits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  scope: varchar("scope").notNull().unique().default('global'), // 'global' (singleton pattern)
+  
+  // Global limits
+  maxConcurrentAutomatedTests: integer("max_concurrent_automated_tests").default(10),
+  maxTestsPerDay: integer("max_tests_per_day").default(5),
+  maxTestsPerPersona: integer("max_tests_per_persona").default(3),
+  maxTrafficAllocation: integer("max_traffic_allocation").default(50), // Max % of traffic in automated tests
+  
+  // Performance degradation detection
+  degradationThreshold: integer("degradation_threshold").default(20), // % drop triggers rollback
+  degradationCheckWindowMinutes: integer("degradation_check_window_minutes").default(60),
+  
+  // Cooldown periods
+  globalCooldownHours: integer("global_cooldown_hours").default(24), // Between any automated actions
+  perContentCooldownDays: integer("per_content_cooldown_days").default(7),
+  
+  // Emergency controls
+  automationEnabled: boolean("automation_enabled").default(true), // Master kill switch
+  requireAdminApproval: boolean("require_admin_approval").default(false), // Require approval for all
+  
+  // Notification thresholds
+  notifyOnTestCreation: boolean("notify_on_test_creation").default(true),
+  notifyOnWinnerPromotion: boolean("notify_on_winner_promotion").default(true),
+  notifyOnFailure: boolean("notify_on_failure").default(true),
+  
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by").references(() => users.id),
+}, (table) => [
+  uniqueIndex("safety_limits_scope_unique_idx").on(table.scope),
+]);
+
+export const insertAbTestSafetyLimitSchema = createInsertSchema(abTestSafetyLimits).omit({
+  id: true,
+  updatedAt: true,
+});
+export type InsertAbTestSafetyLimit = z.infer<typeof insertAbTestSafetyLimitSchema>;
+export type AbTestSafetyLimit = typeof abTestSafetyLimits.$inferSelect;
 
 // ==================== END FOUNDATION TABLES ====================
 
