@@ -6,7 +6,7 @@ import {
   abTests, abTestTargets, abTestVariants, abTestAssignments, abTestEvents,
   googleReviews, donations, wishlistItems, donationCampaigns,
   campaignMembers, campaignTestimonials,
-  emailTemplates, emailLogs, emailOpens, emailLinks, emailClicks, emailSendTimeInsights, smsTemplates, smsSends, communicationLogs,
+  emailTemplates, emailLogs, emailOpens, emailLinks, emailClicks, emailSendTimeInsights, emailReportSchedules, smsTemplates, smsSends, communicationLogs,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
   adminPreferences, auditLogs,
@@ -38,6 +38,7 @@ import {
   type EmailLink, type InsertEmailLink,
   type EmailClick, type InsertEmailClick,
   type EmailSendTimeInsight, type InsertEmailSendTimeInsight,
+  type EmailReportSchedule, type InsertEmailReportSchedule,
   type SmsTemplate, type InsertSmsTemplate,
   type SmsSend, type InsertSmsSend,
   type CommunicationLog, type InsertCommunicationLog,
@@ -392,6 +393,15 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   getCampaignEnrollments(campaignId: string): Promise<EmailCampaignEnrollment[]>;
   getEnrollment(campaignId: string, leadId: string): Promise<EmailCampaignEnrollment | undefined>;
   updateEnrollment(id: string, updates: Partial<InsertEmailCampaignEnrollment>): Promise<EmailCampaignEnrollment | undefined>;
+  
+  // Email Report Schedule operations
+  createEmailReportSchedule(schedule: InsertEmailReportSchedule): Promise<EmailReportSchedule>;
+  getAllEmailReportSchedules(): Promise<EmailReportSchedule[]>;
+  getEmailReportSchedule(id: string): Promise<EmailReportSchedule | undefined>;
+  getActiveEmailReportSchedules(): Promise<EmailReportSchedule[]>;
+  getSchedulesDueForExecution(): Promise<EmailReportSchedule[]>;
+  updateEmailReportSchedule(id: string, updates: Partial<InsertEmailReportSchedule>): Promise<EmailReportSchedule | undefined>;
+  deleteEmailReportSchedule(id: string): Promise<void>;
   
   // Pipeline Stage operations
   getPipelineStages(): Promise<PipelineStage[]>;
@@ -3270,6 +3280,59 @@ export class DatabaseStorage implements IStorage {
 
   async deleteEmailCampaign(id: string): Promise<void> {
     await db.delete(emailCampaigns).where(eq(emailCampaigns.id, id));
+  }
+
+  // Email Report Schedule operations
+  async createEmailReportSchedule(scheduleData: InsertEmailReportSchedule): Promise<EmailReportSchedule> {
+    const [schedule] = await db.insert(emailReportSchedules).values(scheduleData).returning();
+    return schedule;
+  }
+
+  async getAllEmailReportSchedules(): Promise<EmailReportSchedule[]> {
+    return await db.select().from(emailReportSchedules).orderBy(desc(emailReportSchedules.createdAt));
+  }
+
+  async getEmailReportSchedule(id: string): Promise<EmailReportSchedule | undefined> {
+    const [schedule] = await db.select().from(emailReportSchedules).where(eq(emailReportSchedules.id, id));
+    return schedule;
+  }
+
+  async getActiveEmailReportSchedules(): Promise<EmailReportSchedule[]> {
+    return await db
+      .select()
+      .from(emailReportSchedules)
+      .where(eq(emailReportSchedules.isActive, true))
+      .orderBy(desc(emailReportSchedules.createdAt));
+  }
+
+  async getSchedulesDueForExecution(): Promise<EmailReportSchedule[]> {
+    const now = new Date();
+    return await db
+      .select()
+      .from(emailReportSchedules)
+      .where(
+        and(
+          eq(emailReportSchedules.isActive, true),
+          or(
+            sql`${emailReportSchedules.nextRunAt} IS NULL`,
+            sql`${emailReportSchedules.nextRunAt} <= ${now}`
+          )
+        )
+      )
+      .orderBy(emailReportSchedules.nextRunAt);
+  }
+
+  async updateEmailReportSchedule(id: string, updates: Partial<InsertEmailReportSchedule>): Promise<EmailReportSchedule | undefined> {
+    const [updated] = await db
+      .update(emailReportSchedules)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(emailReportSchedules.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteEmailReportSchedule(id: string): Promise<void> {
+    await db.delete(emailReportSchedules).where(eq(emailReportSchedules.id, id));
   }
 
   // Email Sequence Step operations

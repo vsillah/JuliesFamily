@@ -1203,6 +1203,35 @@ export const insertEmailSendTimeInsightSchema = createInsertSchema(emailSendTime
 export type InsertEmailSendTimeInsight = z.infer<typeof insertEmailSendTimeInsightSchema>;
 export type EmailSendTimeInsight = typeof emailSendTimeInsights.$inferSelect;
 
+// Email Report Schedules table for automated email analytics reports
+// Allows admins to schedule recurring reports (daily/weekly/monthly) to be sent via email
+export const emailReportSchedules = pgTable("email_report_schedules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull().unique(), // Unique name for the report schedule
+  description: text("description"), // Optional description
+  frequency: varchar("frequency").notNull(), // 'daily', 'weekly', 'monthly'
+  recipients: jsonb("recipients").notNull(), // Array of email addresses: ['admin@example.com', 'manager@example.com']
+  reportType: varchar("report_type").notNull(), // 'campaign_summary', 'engagement_summary', 'full_analytics'
+  isActive: boolean("is_active").default(true).notNull(), // Whether the schedule is active
+  nextRunAt: timestamp("next_run_at"), // When the next report should run
+  lastRunAt: timestamp("last_run_at"), // When the last report was sent
+  createdBy: varchar("created_by").references(() => users.id, { onDelete: "set null" }), // Admin who created the schedule
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  nextRunIdx: index("email_report_schedules_next_run_idx").on(table.nextRunAt),
+  activeIdx: index("email_report_schedules_active_idx").on(table.isActive),
+}));
+
+export const insertEmailReportScheduleSchema = createInsertSchema(emailReportSchedules).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastRunAt: true,
+});
+export type InsertEmailReportSchedule = z.infer<typeof insertEmailReportScheduleSchema>;
+export type EmailReportSchedule = typeof emailReportSchedules.$inferSelect;
+
 // Lead-level email engagement DTOs (with joined campaign/link metadata)
 export type LeadEmailOpen = EmailOpen & {
   campaignName: string | null;
