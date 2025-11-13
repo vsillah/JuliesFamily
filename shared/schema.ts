@@ -134,6 +134,7 @@ export const leads = pgTable("leads", {
   phone: varchar("phone"),
   persona: varchar("persona").notNull(), // student, provider, parent, donor, volunteer
   funnelStage: varchar("funnel_stage").notNull(), // awareness, consideration, decision, retention
+  leadStatus: varchar("lead_status").notNull().default('active'), // active, nurture, disqualified, unresponsive - tracks engagement level
   pipelineStage: varchar("pipeline_stage").default('new_lead'), // References pipeline stages: new_lead, contacted, qualified, etc.
   leadSource: varchar("lead_source"), // organic, referral, ad, etc
   engagementScore: integer("engagement_score").default(0),
@@ -175,6 +176,7 @@ export const updateLeadSchema = z.object({
   phone: z.string().optional(),
   persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional(),
   funnelStage: z.enum(['awareness', 'consideration', 'decision', 'retention']).optional(),
+  leadStatus: z.enum(['active', 'nurture', 'disqualified', 'unresponsive']).optional(),
   pipelineStage: z.string().optional(),
   leadSource: z.string().optional(),
   engagementScore: z.number().int().min(0).optional(),

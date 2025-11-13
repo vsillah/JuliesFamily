@@ -30,6 +30,7 @@ export default function AdminDashboard() {
   const [selectedPersona, setSelectedPersona] = useState<string>("all");
   const [selectedFunnelStage, setSelectedFunnelStage] = useState<string>("all");
   const [selectedEngagement, setSelectedEngagement] = useState<string>("all");
+  const [selectedLeadStatus, setSelectedLeadStatus] = useState<string>("all");
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
 
@@ -44,6 +45,7 @@ export default function AdminDashboard() {
   if (selectedPersona !== "all") queryParams.append("persona", selectedPersona);
   if (selectedFunnelStage !== "all") queryParams.append("funnelStage", selectedFunnelStage);
   if (selectedEngagement !== "all") queryParams.append("engagement", selectedEngagement);
+  if (selectedLeadStatus !== "all") queryParams.append("leadStatus", selectedLeadStatus);
   const queryString = queryParams.toString();
   const leadsUrl = queryString ? `/api/admin/leads?${queryString}` : "/api/admin/leads";
 
@@ -376,6 +378,18 @@ export default function AdminDashboard() {
                   <option value="clickers">Clickers (at least 1 click)</option>
                   <option value="non_openers">Non-Openers (never opened)</option>
                   <option value="inactive">Inactive (no activity in 60 days)</option>
+                </select>
+                <select
+                  className="px-3 py-2 border rounded-md text-sm flex-1"
+                  value={selectedLeadStatus}
+                  onChange={(e) => setSelectedLeadStatus(e.target.value)}
+                  data-testid="select-lead-status-filter"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="nurture">Nurture</option>
+                  <option value="disqualified">Disqualified</option>
+                  <option value="unresponsive">Unresponsive</option>
                 </select>
               </div>
             </div>

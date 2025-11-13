@@ -3267,8 +3267,9 @@ export class DatabaseStorage implements IStorage {
     persona?: string;
     funnelStage?: string;
     engagement?: string;
+    leadStatus?: string;
   }): Promise<Lead[]> {
-    const { persona, funnelStage, engagement } = options;
+    const { persona, funnelStage, engagement, leadStatus } = options;
 
     // Build base filter conditions
     const baseConditions: any[] = [];
@@ -3277,6 +3278,9 @@ export class DatabaseStorage implements IStorage {
     }
     if (funnelStage) {
       baseConditions.push(sql`funnel_stage = ${funnelStage}`);
+    }
+    if (leadStatus) {
+      baseConditions.push(sql`lead_status = ${leadStatus}`);
     }
 
     const baseFilterClause = baseConditions.length > 0
