@@ -49,6 +49,7 @@ import TechGoesHomeLanding from "@/pages/TechGoesHomeLanding";
 import TechGoesHomeStudentDashboard from "@/pages/TechGoesHomeStudentDashboard";
 import StudentDashboardPage from "@/pages/StudentDashboard";
 import VolunteerEngagement from "@/pages/VolunteerEngagement";
+import Unsubscribe from "@/pages/Unsubscribe";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -98,6 +99,7 @@ function Router() {
       <Route path="/programs/tech-goes-home" component={TechGoesHomeLanding} />
       <Route path="/student/tech-goes-home" component={TechGoesHomeStudentDashboard} />
       <Route path="/volunteer" component={VolunteerEngagement} />
+      <Route path="/unsubscribe" component={Unsubscribe} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -7,7 +7,7 @@ import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema } from "@shared/schema";
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
-import { authLimiter, adminLimiter, paymentLimiter, leadLimiter } from "./security";
+import { authLimiter, adminLimiter, paymentLimiter, leadLimiter, unsubscribeVerifyLimiter, unsubscribeProcessLimiter } from "./security";
 import { eq, sql, desc, and, isNotNull } from "drizzle-orm";
 import { evaluateLeadProgression, getLeadProgressionHistory, manuallyProgressLead, calculateEngagementDelta, type EventType } from "./services/funnelProgressionService";
 import { leads, funnelProgressionRules, funnelProgressionHistory, insertFunnelProgressionRuleSchema } from "@shared/schema";
@@ -4661,6 +4661,134 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking unsubscribe status:", error);
       res.status(500).json({ message: "Failed to check unsubscribe status" });
+    }
+  });
+
+  // Public unsubscribe endpoints (token-based, CAN-SPAM compliant)
+  
+  // Verify unsubscribe token (called on page load)
+  app.post('/api/unsubscribe/verify', unsubscribeVerifyLimiter, async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ 
+          valid: false, 
+          message: "Token is required" 
+        });
+      }
+      
+      // Import token utility (may throw if UNSUBSCRIBE_SECRET not set)
+      const { verifyUnsubscribeToken } = await import('./utils/unsubscribeToken');
+      
+      // Verify token and extract email
+      const email = verifyUnsubscribeToken(token);
+      
+      if (!email) {
+        return res.status(400).json({ 
+          valid: false, 
+          message: "Invalid or expired unsubscribe link. Links are valid for 60 days." 
+        });
+      }
+      
+      res.json({ 
+        valid: true, 
+        email 
+      });
+    } catch (error: any) {
+      console.error("[Unsubscribe Verify] Error:", error);
+      
+      // Handle missing secret
+      if (error.message?.includes('UNSUBSCRIBE_SECRET')) {
+        return res.status(500).json({ 
+          valid: false, 
+          message: "Server configuration error. Please contact support." 
+        });
+      }
+      
+      res.status(500).json({ 
+        valid: false, 
+        message: "Failed to verify unsubscribe link" 
+      });
+    }
+  });
+  
+  // Process unsubscribe (called when user confirms)
+  app.post('/api/unsubscribe', unsubscribeProcessLimiter, async (req, res) => {
+    try {
+      const { token, reason, feedback } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ message: "Token is required" });
+      }
+      
+      // Import token utility
+      const { verifyUnsubscribeToken } = await import('./utils/unsubscribeToken');
+      
+      // Verify token and extract email
+      const email = verifyUnsubscribeToken(token);
+      
+      if (!email) {
+        return res.status(400).json({ 
+          message: "Invalid or expired unsubscribe link" 
+        });
+      }
+      
+      // Check if already unsubscribed
+      const existing = await storage.getEmailUnsubscribe(email);
+      if (existing) {
+        return res.json({ 
+          success: true, 
+          message: "Email already unsubscribed",
+          email 
+        });
+      }
+      
+      // Find lead by email (if exists)
+      const lead = await storage.getLeadByEmail(email);
+      
+      // Create unsubscribe record
+      const unsubscribeData = {
+        email,
+        leadId: lead?.id || null,
+        reason: reason || null,
+        feedback: feedback || null,
+        source: 'user_request' as const,
+      };
+      
+      const validatedData = insertEmailUnsubscribeSchema.parse(unsubscribeData);
+      await storage.createEmailUnsubscribe(validatedData);
+      
+      console.log('[Unsubscribe] Successfully unsubscribed:', { 
+        email, 
+        reason, 
+        hasLead: !!lead 
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Successfully unsubscribed",
+        email 
+      });
+    } catch (error: any) {
+      console.error("[Unsubscribe Process] Error:", error);
+      
+      // Handle validation errors
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid unsubscribe data", 
+          errors: error.errors 
+        });
+      }
+      
+      // Handle missing secret
+      if (error.message?.includes('UNSUBSCRIBE_SECRET')) {
+        return res.status(500).json({ 
+          message: "Server configuration error. Please contact support." 
+        });
+      }
+      
+      res.status(500).json({ message: "Failed to process unsubscribe" });
     }
   });
 

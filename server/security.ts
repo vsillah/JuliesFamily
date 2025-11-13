@@ -55,6 +55,28 @@ export const leadLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Rate limiter for unsubscribe token verification (read-only)
+// Applied to /api/unsubscribe/verify
+// Allows higher throughput since it's read-only and hits on every page load
+export const unsubscribeVerifyLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 60, // Accommodate shared-IP bursts (corporate networks, NAT)
+  message: 'Too many verification requests, please try again in a few minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Rate limiter for processing unsubscribes (write operations)
+// Applied to /api/unsubscribe (POST to actually unsubscribe)
+// Stricter since it modifies database
+export const unsubscribeProcessLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000, // 5 minutes
+  max: 10, // Protect write path from abuse while allowing legitimate retries
+  message: 'Too many unsubscribe attempts, please try again in a few minutes.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 /**
  * Helmet Configuration
  * Note: CSP and COEP disabled to work with Replit infrastructure
