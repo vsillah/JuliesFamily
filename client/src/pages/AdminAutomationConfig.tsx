@@ -56,10 +56,7 @@ export default function AdminAutomationConfig() {
   // Update safety limits mutation
   const updateLimitsMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/automation/safety-limits", {
-        method: "PATCH",
-        body: data,
-      });
+      return await apiRequest("PATCH", "/api/automation/safety-limits", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/safety-limits"] });
@@ -80,10 +77,7 @@ export default function AdminAutomationConfig() {
   // Create metric profile mutation
   const createProfileMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/automation/metric-weight-profiles", {
-        method: "POST",
-        body: data,
-      });
+      return await apiRequest("POST", "/api/automation/metric-weight-profiles", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/metric-weight-profiles"] });
@@ -112,10 +106,7 @@ export default function AdminAutomationConfig() {
   // Update metric profile mutation
   const updateProfileMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      return await apiRequest(`/api/automation/metric-weight-profiles/${id}`, {
-        method: "PATCH",
-        body: data,
-      });
+      return await apiRequest("PATCH", `/api/automation/metric-weight-profiles/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/metric-weight-profiles"] });
@@ -138,9 +129,7 @@ export default function AdminAutomationConfig() {
   // Delete metric profile mutation
   const deleteProfileMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/automation/metric-weight-profiles/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/automation/metric-weight-profiles/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/metric-weight-profiles"] });

@@ -52,11 +52,7 @@ export default function AppointmentScheduling() {
       end: { dateTime: string; timeZone: string };
       attendees: Array<{ email: string; displayName: string }>;
     }) => {
-      return await apiRequest("/api/calendar/events", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: { "Content-Type": "application/json" },
-      });
+      return await apiRequest("POST", "/api/calendar/events", data);
     },
     onSuccess: () => {
       setBookingComplete(true);

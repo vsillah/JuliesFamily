@@ -51,10 +51,7 @@ export default function AdminAutomationRules() {
   // Create rule mutation
   const createRuleMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/automation/rules", {
-        method: "POST",
-        body: data,
-      });
+      return await apiRequest("POST", "/api/automation/rules", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/rules"] });
@@ -77,10 +74,7 @@ export default function AdminAutomationRules() {
   // Update rule mutation
   const updateRuleMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      return await apiRequest(`/api/automation/rules/${id}`, {
-        method: "PATCH",
-        body: data,
-      });
+      return await apiRequest("PATCH", `/api/automation/rules/${id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/rules"] });
@@ -104,9 +98,7 @@ export default function AdminAutomationRules() {
   // Delete rule mutation
   const deleteRuleMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest(`/api/automation/rules/${id}`, {
-        method: "DELETE",
-      });
+      return await apiRequest("DELETE", `/api/automation/rules/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/rules"] });
@@ -127,10 +119,7 @@ export default function AdminAutomationRules() {
   // Toggle rule activation mutation
   const toggleRuleMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      return await apiRequest(`/api/automation/rules/${id}`, {
-        method: "PATCH",
-        body: { isActive },
-      });
+      return await apiRequest("PATCH", `/api/automation/rules/${id}`, { isActive });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/rules"] });

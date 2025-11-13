@@ -27,9 +27,7 @@ export default function AdminAutomationRuns() {
   // Manual trigger mutation
   const triggerMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest("/api/automation/run", {
-        method: "POST",
-      });
+      return await apiRequest("POST", "/api/automation/run");
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/runs"] });
