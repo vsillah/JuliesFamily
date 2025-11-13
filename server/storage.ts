@@ -308,6 +308,14 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
     ctr: number;
   }>>;
   
+  getCampaignTimeSeries(
+    campaignId: string,
+    metric: 'opens' | 'clicks' | 'sends',
+    interval: 'hour' | 'day' | 'week',
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<Array<{ timestamp: string; count: number }>>;
+  
   // Lead-level Email Engagement operations
   getLeadEmailOpens(leadId: string, limit?: number): Promise<LeadEmailOpen[]>;
   getLeadEmailClicks(leadId: string, limit?: number): Promise<LeadEmailClick[]>;
@@ -2711,6 +2719,62 @@ export class DatabaseStorage implements IStorage {
       totalClicks: Number(row.total_clicks),
       uniqueClicks: Number(row.unique_clicks),
       ctr: totalSends > 0 ? (Number(row.unique_clicks) / totalSends) * 100 : 0
+    }));
+  }
+
+  async getCampaignTimeSeries(
+    campaignId: string,
+    metric: 'opens' | 'clicks' | 'sends',
+    interval: 'hour' | 'day' | 'week',
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<Array<{ timestamp: string; count: number }>> {
+    // Determine the table and timestamp column based on metric
+    const tableConfig = {
+      opens: { table: 'email_opens', timestampCol: 'opened_at' },
+      clicks: { table: 'email_clicks', timestampCol: 'clicked_at' },
+      sends: { table: 'email_logs', timestampCol: 'sent_at' }
+    };
+    
+    const { table, timestampCol } = tableConfig[metric];
+    
+    // Build date filter conditions
+    // sql.raw() is safe here because table/timestampCol/interval come from controlled config, not user input
+    let dateFilter = '';
+    if (startDate && endDate) {
+      dateFilter = `AND ${timestampCol} >= '${startDate.toISOString()}' AND ${timestampCol} <= '${endDate.toISOString()}'`;
+    } else if (startDate) {
+      dateFilter = `AND ${timestampCol} >= '${startDate.toISOString()}'`;
+    } else if (endDate) {
+      dateFilter = `AND ${timestampCol} <= '${endDate.toISOString()}'`;
+    }
+    
+    // Add status filter for sends metric
+    const statusFilter = metric === 'sends' 
+      ? `AND status IN ('sent', 'delivered', 'queued')`
+      : '';
+    
+    // Execute time-series query with date_trunc for bucketing
+    // Uses new indexes: campaign_id+sent_at for email_logs, campaign_id+opened_at/clicked_at for email_opens/clicks
+    // Using parameterized query for campaignId to prevent SQL injection
+    const results = await db.execute<{
+      bucket: string;
+      count: number;
+    }>(sql.raw(`
+      SELECT 
+        date_trunc('${interval}', ${timestampCol}) as bucket,
+        COUNT(*) as count
+      FROM ${table}
+      WHERE campaign_id = $1
+        ${statusFilter}
+        ${dateFilter}
+      GROUP BY bucket
+      ORDER BY bucket ASC
+    `, [campaignId]));
+
+    return results.rows.map(row => ({
+      timestamp: row.bucket,
+      count: Number(row.count)
     }));
   }
 

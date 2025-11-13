@@ -4436,6 +4436,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get email campaign time-series analytics
+  app.get('/api/email-campaigns/:id/time-series', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id: campaignId } = req.params;
+      const { metric = 'opens', interval = 'day', startDate, endDate } = req.query;
+      
+      // Validate metric parameter
+      const validMetrics = ['opens', 'clicks', 'sends'];
+      if (!validMetrics.includes(metric as string)) {
+        return res.status(400).json({ message: "Invalid metric. Must be 'opens', 'clicks', or 'sends'" });
+      }
+      
+      // Validate interval parameter
+      const validIntervals = ['hour', 'day', 'week'];
+      if (!validIntervals.includes(interval as string)) {
+        return res.status(400).json({ message: "Invalid interval. Must be 'hour', 'day', or 'week'" });
+      }
+      
+      // Parse optional date parameters
+      const parsedStartDate = startDate ? new Date(startDate as string) : undefined;
+      const parsedEndDate = endDate ? new Date(endDate as string) : undefined;
+      
+      // Validate dates if provided
+      if (parsedStartDate && isNaN(parsedStartDate.getTime())) {
+        return res.status(400).json({ message: "Invalid startDate format" });
+      }
+      if (parsedEndDate && isNaN(parsedEndDate.getTime())) {
+        return res.status(400).json({ message: "Invalid endDate format" });
+      }
+      
+      const timeSeries = await storage.getCampaignTimeSeries(
+        campaignId,
+        metric as 'opens' | 'clicks' | 'sends',
+        interval as 'hour' | 'day' | 'week',
+        parsedStartDate,
+        parsedEndDate
+      );
+      
+      res.json(timeSeries);
+    } catch (error) {
+      console.error("Error fetching campaign time-series data:", error);
+      res.status(500).json({ message: "Failed to fetch time-series data" });
+    }
+  });
+
   // SMS Template Routes
   
   // Get all SMS templates
