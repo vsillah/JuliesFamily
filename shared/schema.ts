@@ -168,34 +168,34 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
 
-// Update schema for leads - whitelisted fields only
+// Update schema for leads - strict field whitelisting with partial updates allowed
 export const updateLeadSchema = z.object({
-  email: z.string().email().optional(),
-  firstName: z.string().trim().optional(),
-  lastName: z.string().trim().optional(),
-  phone: z.string().optional(),
-  persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']).optional(),
-  funnelStage: z.enum(['awareness', 'consideration', 'decision', 'retention']).optional(),
-  leadStatus: z.enum(['active', 'nurture', 'disqualified', 'unresponsive']).optional(),
-  pipelineStage: z.string().optional(),
-  leadSource: z.string().optional(),
-  engagementScore: z.number().int().min(0).optional(),
-  lastInteractionDate: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
-  lastFunnelUpdateAt: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
-  convertedAt: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
-  notes: z.string().optional(),
-  passions: z.any().optional(), // JSONB
-  metadata: z.any().optional(), // JSONB
-  company: z.string().optional(),
-  jobTitle: z.string().optional(),
-  linkedinUrl: z.string().url().optional(),
-  qualificationScore: z.number().int().min(0).max(100).optional(),
-  qualificationStatus: z.enum(['pending', 'qualified', 'disqualified', 'review_needed']).optional(),
-  qualificationInsights: z.string().optional(),
-  enrichmentData: z.any().optional(), // JSONB
-  outreachStatus: z.enum(['pending', 'draft_ready', 'sent', 'opened', 'replied', 'bounced', 'unsubscribed']).optional(),
-  lastOutreachAt: z.union([z.date(), z.string().transform((val) => new Date(val))]).optional(),
-}).strict();
+  email: z.string().email(),
+  firstName: z.string().trim(),
+  lastName: z.string().trim(),
+  phone: z.string(),
+  persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']),
+  funnelStage: z.enum(['awareness', 'consideration', 'decision', 'retention']),
+  leadStatus: z.enum(['active', 'nurture', 'disqualified', 'unresponsive']),
+  pipelineStage: z.string(),
+  leadSource: z.string(),
+  engagementScore: z.number().int().min(0),
+  lastInteractionDate: z.union([z.date(), z.string().transform((val) => new Date(val))]),
+  lastFunnelUpdateAt: z.union([z.date(), z.string().transform((val) => new Date(val))]),
+  convertedAt: z.union([z.date(), z.string().transform((val) => new Date(val))]),
+  notes: z.string(),
+  passions: z.any(), // JSONB
+  metadata: z.any(), // JSONB
+  company: z.string(),
+  jobTitle: z.string(),
+  linkedinUrl: z.string().url(),
+  qualificationScore: z.number().int().min(0).max(100),
+  qualificationStatus: z.enum(['pending', 'qualified', 'disqualified', 'review_needed']),
+  qualificationInsights: z.string(),
+  enrichmentData: z.any(), // JSONB
+  outreachStatus: z.enum(['pending', 'draft_ready', 'sent', 'opened', 'replied', 'bounced', 'unsubscribed']),
+  lastOutreachAt: z.union([z.date(), z.string().transform((val) => new Date(val))]),
+}).strict().partial();
 export type UpdateLead = z.infer<typeof updateLeadSchema>;
 
 // Interactions table for tracking all lead activities

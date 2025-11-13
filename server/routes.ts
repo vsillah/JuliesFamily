@@ -1961,12 +1961,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/leads/:id', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const lead = await storage.updateLead(req.params.id, req.body);
+      // Validate request body against updateLeadSchema
+      const validatedData = updateLeadSchema.parse(req.body);
+      const lead = await storage.updateLead(req.params.id, validatedData);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
       res.json(lead);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid lead data", 
+          errors: error.errors 
+        });
+      }
       console.error("Error updating lead:", error);
       res.status(500).json({ message: "Failed to update lead" });
     }
@@ -2702,9 +2710,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analytics endpoint
   app.get('/api/admin/analytics', isAuthenticated, isAdmin, async (req, res) => {
     try {
-      const leads = await storage.getAllLeads();
+      const allLeads = await storage.getAllLeads();
       
-      // Calculate analytics
+      // Filter to only active leads (exclude disqualified and unresponsive)
+      // Analytics should reflect active pipeline health
+      const leads = allLeads.filter(l => {
+        const status = l.leadStatus || 'active';
+        return status === 'active' || status === 'nurture';
+      });
+      
+      // Calculate analytics based on active leads only
       const analytics = {
         totalLeads: leads.length,
         byPersona: {

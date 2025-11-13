@@ -73,6 +73,8 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   const [showManualProgression, setShowManualProgression] = useState(false);
   const [manualProgressionStage, setManualProgressionStage] = useState("");
   const [manualProgressionReason, setManualProgressionReason] = useState("");
+  const [isEditingStatus, setIsEditingStatus] = useState(false);
+  const [editedLeadStatus, setEditedLeadStatus] = useState<'active' | 'nurture' | 'disqualified' | 'unresponsive'>('active');
 
   // Fetch lead details
   const { data: lead, isLoading: leadLoading, error: leadError } = useQuery<Lead>({
@@ -281,11 +283,44 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
     },
   });
 
-  // Sync notes when lead data loads or changes
+  // Update lead status mutation
+  const updateLeadStatusMutation = useMutation({
+    mutationFn: async (newStatus: 'active' | 'nurture' | 'disqualified' | 'unresponsive') => {
+      if (!lead || !newStatus || newStatus === (lead.leadStatus || 'active')) {
+        throw new Error("No changes to save");
+      }
+      return await apiRequest("PATCH", `/api/admin/leads/${leadId}`, { leadStatus: newStatus });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/leads", leadId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/leads"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/analytics"] });
+      setIsEditingStatus(false);
+      toast({
+        title: "Status Updated",
+        description: "Lead status has been updated successfully.",
+      });
+    },
+    onError: (error: Error) => {
+      // Only show error toast if it's not the "no changes" error
+      if (error.message !== "No changes to save") {
+        toast({
+          title: "Error",
+          description: "Failed to update lead status. Please try again.",
+          variant: "destructive",
+        });
+      }
+      setIsEditingStatus(false);
+    },
+  });
+
+  // Sync notes and lead status when lead data loads or changes
   useEffect(() => {
     if (lead?.notes) {
       setNotes(lead.notes);
     }
+    // Always set lead status - default to 'active' if not set
+    setEditedLeadStatus(lead?.leadStatus || 'active');
   }, [lead]);
 
   const personaLabels: Record<string, string> = {
@@ -301,6 +336,13 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
     consideration: { label: "Consideration (MOFU)", color: "bg-yellow-500" },
     decision: { label: "Decision (BOFU)", color: "bg-orange-500" },
     retention: { label: "Retention", color: "bg-green-500" },
+  };
+
+  const leadStatusLabels: Record<string, { label: string; color: string }> = {
+    active: { label: "Active", color: "bg-green-600" },
+    nurture: { label: "Nurture", color: "bg-blue-600" },
+    disqualified: { label: "Disqualified", color: "bg-gray-500" },
+    unresponsive: { label: "Unresponsive", color: "bg-orange-600" },
   };
 
   // Outreach suggestions based on funnel stage
@@ -511,6 +553,64 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
                     <Badge className={funnelStageLabels[lead.funnelStage]?.color} data-testid="badge-lead-funnel">
                       {funnelStageLabels[lead.funnelStage]?.label || lead.funnelStage}
                     </Badge>
+                  </div>
+                  <div className="space-y-1">
+                    <div className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Activity className="w-4 h-4" />
+                      Lead Status
+                    </div>
+                    {isEditingStatus ? (
+                      <div className="flex gap-2">
+                        <Select value={editedLeadStatus} onValueChange={setEditedLeadStatus}>
+                          <SelectTrigger data-testid="select-lead-status">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="nurture">Nurture</SelectItem>
+                            <SelectItem value="disqualified">Disqualified</SelectItem>
+                            <SelectItem value="unresponsive">Unresponsive</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button 
+                          size="icon" 
+                          onClick={() => updateLeadStatusMutation.mutate(editedLeadStatus)} 
+                          disabled={updateLeadStatusMutation.isPending || editedLeadStatus === (lead.leadStatus || 'active')}
+                          data-testid="button-save-status"
+                        >
+                          <Check className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          size="icon" 
+                          variant="outline" 
+                          onClick={() => {
+                            setEditedLeadStatus(lead.leadStatus || 'active');
+                            setIsEditingStatus(false);
+                          }} 
+                          disabled={updateLeadStatusMutation.isPending}
+                          data-testid="button-cancel-status"
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <Badge className={leadStatusLabels[lead.leadStatus || 'active']?.color} data-testid="badge-lead-status">
+                          {leadStatusLabels[lead.leadStatus || 'active']?.label || lead.leadStatus}
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            if (!lead) return;
+                            setIsEditingStatus(true);
+                          }}
+                          data-testid="button-edit-status"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <div className="space-y-1">
                     <div className="text-sm text-muted-foreground flex items-center gap-2">
