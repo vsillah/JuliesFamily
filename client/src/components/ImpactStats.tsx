@@ -78,24 +78,24 @@ function AnimatedCounter({ targetValue }: { targetValue: string }) {
 export default function ImpactStats() {
   const stats = [
     {
-      icon: Calendar,
-      number: "50",
-      label: "Years of Service",
-    },
-    {
       icon: Users,
-      number: "1,000+",
-      label: "Families Served",
+      number: "299",
+      label: "Students Served in 2024",
     },
     {
       icon: GraduationCap,
-      number: "500+",
-      label: "Graduates",
+      number: "+31%",
+      label: "Growth in Enrollment",
     },
     {
       icon: Award,
-      number: "100%",
-      label: "Commitment",
+      number: "+155%",
+      label: "Increase in HSE Testing",
+    },
+    {
+      icon: Calendar,
+      number: "95",
+      label: "Monthly Average Enrollment",
     },
   ];
 
@@ -107,11 +107,11 @@ export default function ImpactStats() {
             – Our Impact –
           </p>
           <h2 className="text-4xl sm:text-5xl font-serif font-semibold mb-6">
-            Celebrating <span className="italic">Five Decades</span> of{" "}
-            <span className="font-bold">Excellence</span>
+            2024: A Year of <span className="italic">Incredible</span>{" "}
+            <span className="font-bold">Growth</span>
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            For 50 years, we've been dedicated to empowering families through education and support.
+            JFLP grew in FY24, serving more students and families than ever before with our programs in Adult Basic Education, Family Development, and Children's Services.
           </p>
         </div>
 
