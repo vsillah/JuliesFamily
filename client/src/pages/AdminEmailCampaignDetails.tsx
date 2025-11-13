@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, Users, CheckCircle, XCircle, Clock, AlertCircle, RefreshCw, ArrowLeft, BarChart3, MousePointerClick, Eye, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import CampaignTimeSeriesChart from "@/components/CampaignTimeSeriesChart";
 import type { EmailCampaign } from "@shared/schema";
 
 interface EnrollmentDetail {
@@ -351,6 +352,9 @@ export default function AdminEmailCampaignDetails() {
                     </CardContent>
                   </Card>
                 </div>
+
+                {/* Time-Series Analytics Chart */}
+                {campaignId && <CampaignTimeSeriesChart campaignId={campaignId} />}
 
                 {/* Detailed Metrics Grid */}
                 <Card>
