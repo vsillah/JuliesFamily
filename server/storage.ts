@@ -282,6 +282,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   // Email Log operations
   createEmailLog(log: InsertEmailLog): Promise<EmailLog>;
   getEmailLogsByRecipient(recipientEmail: string): Promise<EmailLog[]>;
+  getEmailLogsByCampaign(campaignId: string): Promise<EmailLog[]>;
   getRecentEmailLogs(limit?: number): Promise<EmailLog[]>;
   getEmailLog(id: string): Promise<EmailLog | undefined>;
   getEmailLogByTrackingToken(trackingToken: string): Promise<EmailLog | undefined>;
@@ -2391,6 +2392,14 @@ export class DatabaseStorage implements IStorage {
       .from(emailLogs)
       .where(eq(emailLogs.trackingToken, trackingToken));
     return log;
+  }
+
+  async getEmailLogsByCampaign(campaignId: string): Promise<EmailLog[]> {
+    return await db
+      .select()
+      .from(emailLogs)
+      .where(eq(emailLogs.campaignId, campaignId))
+      .orderBy(desc(emailLogs.createdAt));
   }
 
   // Email Tracking operations (Opens & Clicks)

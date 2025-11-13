@@ -4320,6 +4320,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get email campaign analytics
+  app.get('/api/email-campaigns/:id/analytics', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id: campaignId } = req.params;
+      
+      // Get all email logs for this campaign
+      const emailLogs = await storage.getEmailLogsByCampaign(campaignId);
+      
+      if (emailLogs.length === 0) {
+        return res.json({
+          totalSent: 0,
+          totalOpens: 0,
+          uniqueOpens: 0,
+          totalClicks: 0,
+          uniqueClicks: 0,
+          openRate: 0,
+          clickRate: 0,
+          clickToOpenRate: 0,
+          uniqueEngagementRate: 0,
+        });
+      }
+      
+      // Get all email opens for this campaign
+      const emailOpens = await storage.getEmailOpensByCampaign(campaignId);
+      
+      // Get all email clicks for this campaign
+      const emailClicks = await storage.getEmailClicksByCampaign(campaignId);
+      
+      // Calculate metrics
+      const totalSent = emailLogs.length;
+      const totalOpens = emailOpens.length;
+      const totalClicks = emailClicks.length;
+      
+      // Calculate unique opens (distinct email log IDs)
+      const uniqueOpenLogIds = new Set(emailOpens.map(open => open.emailLogId));
+      const uniqueOpens = uniqueOpenLogIds.size;
+      
+      // Calculate unique clicks (distinct email log IDs)
+      const uniqueClickLogIds = new Set(emailClicks.map(click => click.emailLogId));
+      const uniqueClicks = uniqueClickLogIds.size;
+      
+      // Calculate unique engagement (emails with at least one open OR click)
+      const uniqueEngagedLogIds = new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      const uniqueEngaged = uniqueEngagedLogIds.size;
+      
+      // Calculate rates
+      const openRate = totalSent > 0 ? (uniqueOpens / totalSent) * 100 : 0;
+      const clickRate = totalSent > 0 ? (uniqueClicks / totalSent) * 100 : 0;
+      const clickToOpenRate = uniqueOpens > 0 ? (uniqueClicks / uniqueOpens) * 100 : 0;
+      const uniqueEngagementRate = totalSent > 0 ? (uniqueEngaged / totalSent) * 100 : 0;
+      
+      res.json({
+        totalSent,
+        totalOpens,
+        uniqueOpens,
+        totalClicks,
+        uniqueClicks,
+        openRate: Math.round(openRate * 10) / 10, // Round to 1 decimal place
+        clickRate: Math.round(clickRate * 10) / 10,
+        clickToOpenRate: Math.round(clickToOpenRate * 10) / 10,
+        uniqueEngagementRate: Math.round(uniqueEngagementRate * 10) / 10,
+      });
+    } catch (error) {
+      console.error("Error fetching campaign analytics:", error);
+      res.status(500).json({ message: "Failed to fetch campaign analytics" });
+    }
+  });
+
   // SMS Template Routes
   
   // Get all SMS templates

@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Users, CheckCircle, XCircle, Clock, AlertCircle, RefreshCw, ArrowLeft } from "lucide-react";
+import { Mail, Users, CheckCircle, XCircle, Clock, AlertCircle, RefreshCw, ArrowLeft, BarChart3, MousePointerClick, Eye } from "lucide-react";
 import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import type { EmailCampaign } from "@shared/schema";
@@ -43,6 +43,18 @@ interface EmailLogDetail {
     lastName: string;
     email: string;
   } | null;
+}
+
+interface CampaignAnalytics {
+  totalSent: number;
+  totalOpens: number;
+  uniqueOpens: number;
+  totalClicks: number;
+  uniqueClicks: number;
+  openRate: number;
+  clickRate: number;
+  clickToOpenRate: number;
+  uniqueEngagementRate: number;
 }
 
 export default function AdminEmailCampaignDetails() {
@@ -84,6 +96,12 @@ export default function AdminEmailCampaignDetails() {
     offset: number;
   }>({
     queryKey: ['/api/email-logs/campaign', campaignId, { limit: logPageSize, offset: logPage * logPageSize }],
+    enabled: !!campaignId,
+  });
+
+  // Fetch campaign analytics
+  const { data: analytics, isLoading: analyticsLoading } = useQuery<CampaignAnalytics>({
+    queryKey: ['/api/email-campaigns', campaignId, 'analytics'],
     enabled: !!campaignId,
   });
 
@@ -223,16 +241,147 @@ export default function AdminEmailCampaignDetails() {
           </Card>
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="enrollments" className="w-full">
+        {/* Tabs - Analytics is default to foreground campaign performance */}
+        <Tabs defaultValue="analytics" className="w-full">
           <TabsList>
+            <TabsTrigger value="analytics" data-testid="tab-analytics">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics
+            </TabsTrigger>
             <TabsTrigger value="enrollments" data-testid="tab-enrollments">
+              <Users className="w-4 h-4 mr-2" />
               Enrollments
             </TabsTrigger>
             <TabsTrigger value="logs" data-testid="tab-logs">
+              <Mail className="w-4 h-4 mr-2" />
               Email Logs
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="analytics" className="space-y-6">
+            {analyticsLoading ? (
+              <Card>
+                <CardContent className="py-8">
+                  <p className="text-muted-foreground text-center">Loading analytics...</p>
+                </CardContent>
+              </Card>
+            ) : !analytics || analytics.totalSent === 0 ? (
+              <Card>
+                <CardContent className="py-12">
+                  <div className="text-center space-y-4">
+                    <BarChart3 className="w-16 h-16 mx-auto text-muted-foreground" />
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold">No Activity Yet</h3>
+                      <p className="text-muted-foreground max-w-md mx-auto">
+                        Metrics will populate after the first email is sent. Once your campaign is active and emails are delivered, you'll see open rates, click rates, and engagement metrics here.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Hero Metrics Row */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Open Rate</CardTitle>
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="text-3xl font-bold">{analytics.openRate}%</div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all" 
+                          style={{ width: `${Math.min(analytics.openRate, 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {analytics.uniqueOpens} of {analytics.totalSent} recipients opened
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Click Rate</CardTitle>
+                      <MousePointerClick className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="text-3xl font-bold">{analytics.clickRate}%</div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all" 
+                          style={{ width: `${Math.min(analytics.clickRate, 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {analytics.uniqueClicks} of {analytics.totalSent} recipients clicked
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
+                      <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="text-3xl font-bold">{analytics.uniqueEngagementRate}%</div>
+                      <div className="w-full bg-secondary rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all" 
+                          style={{ width: `${Math.min(analytics.uniqueEngagementRate, 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Recipients who opened or clicked
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Detailed Metrics Grid */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Detailed Metrics</CardTitle>
+                    <CardDescription>
+                      Comprehensive breakdown of email campaign performance
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Total Sent</p>
+                        <p className="text-2xl font-bold">{analytics.totalSent}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Total Opens</p>
+                        <p className="text-2xl font-bold">{analytics.totalOpens}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {analytics.uniqueOpens} unique
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Total Clicks</p>
+                        <p className="text-2xl font-bold">{analytics.totalClicks}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {analytics.uniqueClicks} unique
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm text-muted-foreground">Click-to-Open Rate</p>
+                        <p className="text-2xl font-bold">{analytics.clickToOpenRate}%</p>
+                        <p className="text-xs text-muted-foreground">
+                          Of those who opened
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+          </TabsContent>
 
           <TabsContent value="enrollments" className="space-y-4">
             <Card>
