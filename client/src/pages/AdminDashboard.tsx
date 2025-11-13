@@ -45,9 +45,10 @@ export default function AdminDashboard() {
   if (selectedFunnelStage !== "all") queryParams.append("funnelStage", selectedFunnelStage);
   if (selectedEngagement !== "all") queryParams.append("engagement", selectedEngagement);
   const queryString = queryParams.toString();
+  const leadsUrl = queryString ? `/api/admin/leads?${queryString}` : "/api/admin/leads";
 
   const { data: leads = [] } = useQuery<Lead[]>({
-    queryKey: ["/api/admin/leads", queryString],
+    queryKey: [leadsUrl],
     retry: false,
   });
 
