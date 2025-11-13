@@ -17,7 +17,7 @@ import {
   Edit2, Check, X, Download, FileText, CheckCircle2, Target, Users,
   ListTodo, Plus, Clock, BarChart3, Activity, ExternalLink
 } from "lucide-react";
-import type { Lead, Interaction, LeadEmailOpen, LeadEmailClick } from "@shared/schema";
+import type { Lead, Interaction, LeadEmailOpen, LeadEmailClick, LeadStatus } from "@shared/schema";
 import CommunicationTimeline from "@/components/CommunicationTimeline";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -74,7 +74,7 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
   const [manualProgressionStage, setManualProgressionStage] = useState("");
   const [manualProgressionReason, setManualProgressionReason] = useState("");
   const [isEditingStatus, setIsEditingStatus] = useState(false);
-  const [editedLeadStatus, setEditedLeadStatus] = useState<'active' | 'nurture' | 'disqualified' | 'unresponsive'>('active');
+  const [editedLeadStatus, setEditedLeadStatus] = useState<LeadStatus>('active');
 
   // Fetch lead details
   const { data: lead, isLoading: leadLoading, error: leadError } = useQuery<Lead>({
@@ -285,7 +285,7 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
 
   // Update lead status mutation
   const updateLeadStatusMutation = useMutation({
-    mutationFn: async (newStatus: 'active' | 'nurture' | 'disqualified' | 'unresponsive') => {
+    mutationFn: async (newStatus: LeadStatus) => {
       if (!lead || !newStatus || newStatus === (lead.leadStatus || 'active')) {
         throw new Error("No changes to save");
       }

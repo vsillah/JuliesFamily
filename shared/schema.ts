@@ -168,6 +168,10 @@ export const insertLeadSchema = createInsertSchema(leads).omit({
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
 
+// Lead status enum for type safety
+export const leadStatusEnum = z.enum(['active', 'nurture', 'disqualified', 'unresponsive']);
+export type LeadStatus = z.infer<typeof leadStatusEnum>;
+
 // Update schema for leads - strict field whitelisting with partial updates allowed
 export const updateLeadSchema = z.object({
   email: z.string().email(),
@@ -176,7 +180,7 @@ export const updateLeadSchema = z.object({
   phone: z.string(),
   persona: z.enum(['student', 'provider', 'parent', 'donor', 'volunteer']),
   funnelStage: z.enum(['awareness', 'consideration', 'decision', 'retention']),
-  leadStatus: z.enum(['active', 'nurture', 'disqualified', 'unresponsive']),
+  leadStatus: leadStatusEnum,
   pipelineStage: z.string(),
   leadSource: z.string(),
   engagementScore: z.number().int().min(0),
