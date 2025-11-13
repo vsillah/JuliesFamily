@@ -2323,38 +2323,81 @@ export type InsertSegment = z.infer<typeof insertSegmentSchema>;
 export type UpdateSegment = z.infer<typeof updateSegmentSchema>;
 export type Segment = typeof segments.$inferSelect;
 
-// Email Unsubscribes table for tracking opt-outs (CAN-SPAM compliance)
+// Communication Unsubscribes table for tracking opt-outs (CAN-SPAM & TCPA compliance)
 export const emailUnsubscribes = pgTable("email_unsubscribes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   
-  // Lead reference (nullable for non-lead email addresses)
+  // Lead reference (nullable for non-lead contacts)
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
   
-  // Email address (required for lookups even if lead is deleted)
-  email: varchar("email").notNull().unique(),
+  // Channel: 'email', 'sms', or 'all'
+  channel: varchar("channel").notNull().default('email'),
+  
+  // Contact info (at least one required)
+  email: varchar("email"), // For email unsubscribes
+  phone: varchar("phone"), // For SMS unsubscribes
+  
+  // Soft delete support (for resubscribe via START keyword)
+  isActive: boolean("is_active").notNull().default(true), // false = resubscribed
+  resubscribedAt: timestamp("resubscribed_at"), // When they resubscribed via START
   
   // Unsubscribe details
   reason: varchar("reason"), // 'too_frequent', 'not_interested', 'irrelevant', 'other'
   feedback: text("feedback"), // Optional detailed feedback
   
   // Source tracking
-  source: varchar("source").default('user_request'), // 'user_request', 'bounce', 'spam_complaint', 'admin'
+  source: varchar("source").default('user_request'), // 'user_request', 'bounce', 'spam_complaint', 'admin', 'keyword' (for SMS STOP)
   campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }), // Campaign that triggered unsubscribe (if any)
   
   // Timestamps
   unsubscribedAt: timestamp("unsubscribed_at").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("email_unsubscribes_email_idx").on(table.email),
-  index("email_unsubscribes_lead_id_idx").on(table.leadId),
-  index("email_unsubscribes_unsubscribed_at_idx").on(table.unsubscribedAt),
-]);
+}, (table) => ({
+  // Regular indexes
+  emailIdx: index("email_unsubscribes_email_idx").on(table.email),
+  phoneIdx: index("email_unsubscribes_phone_idx").on(table.phone),
+  channelIdx: index("email_unsubscribes_channel_idx").on(table.channel),
+  isActiveIdx: index("email_unsubscribes_is_active_idx").on(table.isActive),
+  leadIdIdx: index("email_unsubscribes_lead_id_idx").on(table.leadId),
+  unsubscribedAtIdx: index("email_unsubscribes_unsubscribed_at_idx").on(table.unsubscribedAt),
+  
+  // Partial unique indexes - prevent duplicate active unsubscribes per channel
+  // Unique for (channel, email) where email is not null and is_active=true
+  channelEmailUnique: uniqueIndex("email_unsubscribes_channel_email_unique")
+    .on(table.channel, table.email)
+    .where(sql`${table.email} IS NOT NULL AND ${table.isActive} = true`),
+  
+  // Unique for (channel, phone) where phone is not null and is_active=true
+  channelPhoneUnique: uniqueIndex("email_unsubscribes_channel_phone_unique")
+    .on(table.channel, table.phone)
+    .where(sql`${table.phone} IS NOT NULL AND ${table.isActive} = true`),
+}));
 
 export const insertEmailUnsubscribeSchema = createInsertSchema(emailUnsubscribes).omit({
   id: true,
   unsubscribedAt: true,
   createdAt: true,
-});
+  resubscribedAt: true,
+}).refine(
+  (data) => {
+    // Channel defaults to 'email' in DB, so treat undefined as 'email'
+    const channel = data.channel || 'email';
+    
+    // For email channel (or default), email must be provided
+    if (channel === 'email' && !data.email) return false;
+    // For sms channel, phone must be provided
+    if (channel === 'sms' && !data.phone) return false;
+    // For 'all' channel, BOTH email and phone must be provided for cross-channel suppression
+    if (channel === 'all' && (!data.email || !data.phone)) return false;
+    // Must have at least one identifier (belt and suspenders)
+    if (!data.email && !data.phone) return false;
+    return true;
+  },
+  { message: 'Email required for email channel (default), phone required for SMS channel, both required for all channel' }
+);
 
 export type InsertEmailUnsubscribe = z.infer<typeof insertEmailUnsubscribeSchema>;
 export type EmailUnsubscribe = typeof emailUnsubscribes.$inferSelect;
+
+// Channel type for type safety
+export type CommunicationChannel = 'email' | 'sms' | 'all';

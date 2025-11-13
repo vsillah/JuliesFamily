@@ -415,11 +415,14 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   deleteSegment(id: string): Promise<void>;
   evaluateSegment(segmentId: string): Promise<Lead[]>;
   
-  // Email Unsubscribe operations
+  // Communication Unsubscribe operations (Email & SMS)
   createEmailUnsubscribe(unsubscribe: InsertEmailUnsubscribe): Promise<EmailUnsubscribe>;
   getEmailUnsubscribe(email: string): Promise<EmailUnsubscribe | undefined>;
-  getAllEmailUnsubscribes(): Promise<EmailUnsubscribe[]>;
+  getSmsUnsubscribe(phone: string): Promise<EmailUnsubscribe | undefined>;
+  getAllEmailUnsubscribes(includeInactive?: boolean): Promise<EmailUnsubscribe[]>; // includeInactive for audit trail
   isEmailUnsubscribed(email: string): Promise<boolean>;
+  isSmsUnsubscribed(phone: string): Promise<boolean>;
+  removeUnsubscribe(id: string): Promise<void>; // For handling START keyword
   
   // Pipeline Stage operations
   getPipelineStages(): Promise<PipelineStage[]>;
@@ -3400,8 +3403,25 @@ export class DatabaseStorage implements IStorage {
     return await segmentEvaluationService.evaluateFilters(segment.filters as any);
   }
 
-  // Email Unsubscribe operations
+  // Communication Unsubscribe operations
   async createEmailUnsubscribe(unsubscribeData: InsertEmailUnsubscribe): Promise<EmailUnsubscribe> {
+    // Validate at least one identifier before insert (belt and suspenders)
+    if (!unsubscribeData.email && !unsubscribeData.phone) {
+      throw new Error('At least one contact identifier (email or phone) is required');
+    }
+    
+    // Validate channel-specific requirements
+    const channel = unsubscribeData.channel || 'email'; // Default channel
+    if (channel === 'email' && !unsubscribeData.email) {
+      throw new Error('Email is required for email channel unsubscribes');
+    }
+    if (channel === 'sms' && !unsubscribeData.phone) {
+      throw new Error('Phone is required for SMS channel unsubscribes');
+    }
+    if (channel === 'all' && (!unsubscribeData.email || !unsubscribeData.phone)) {
+      throw new Error('Both email and phone are required for all-channel unsubscribes');
+    }
+    
     const [unsubscribe] = await db.insert(emailUnsubscribes).values(unsubscribeData).returning();
     return unsubscribe;
   }
@@ -3410,20 +3430,80 @@ export class DatabaseStorage implements IStorage {
     const [unsubscribe] = await db
       .select()
       .from(emailUnsubscribes)
-      .where(eq(emailUnsubscribes.email, email));
+      .where(
+        and(
+          eq(emailUnsubscribes.email, email),
+          eq(emailUnsubscribes.isActive, true),
+          or(
+            eq(emailUnsubscribes.channel, 'email'),
+            eq(emailUnsubscribes.channel, 'all')
+          )
+        )
+      );
     return unsubscribe;
   }
 
-  async getAllEmailUnsubscribes(): Promise<EmailUnsubscribe[]> {
-    return await db
+  async getSmsUnsubscribe(phone: string): Promise<EmailUnsubscribe | undefined> {
+    const [unsubscribe] = await db
       .select()
       .from(emailUnsubscribes)
-      .orderBy(desc(emailUnsubscribes.unsubscribedAt));
+      .where(
+        and(
+          eq(emailUnsubscribes.phone, phone),
+          eq(emailUnsubscribes.isActive, true),
+          or(
+            eq(emailUnsubscribes.channel, 'sms'),
+            eq(emailUnsubscribes.channel, 'all')
+          )
+        )
+      );
+    return unsubscribe;
+  }
+
+  async getAllEmailUnsubscribes(includeInactive: boolean = false): Promise<EmailUnsubscribe[]> {
+    // Return both active and inactive for audit trail unless explicitly filtered
+    const query = db.select().from(emailUnsubscribes);
+    
+    if (!includeInactive) {
+      return await query
+        .where(eq(emailUnsubscribes.isActive, true))
+        .orderBy(desc(emailUnsubscribes.unsubscribedAt));
+    }
+    
+    // Include all records (active and inactive) for audit purposes
+    return await query.orderBy(desc(emailUnsubscribes.unsubscribedAt));
   }
 
   async isEmailUnsubscribed(email: string): Promise<boolean> {
     const unsubscribe = await this.getEmailUnsubscribe(email);
     return !!unsubscribe;
+  }
+
+  async isSmsUnsubscribed(phone: string): Promise<boolean> {
+    const unsubscribe = await this.getSmsUnsubscribe(phone);
+    return !!unsubscribe;
+  }
+
+  async removeUnsubscribe(id: string): Promise<void> {
+    // Soft delete - for resubscribe via START keyword
+    // Only update if record exists and is currently active
+    const [result] = await db
+      .update(emailUnsubscribes)
+      .set({ 
+        isActive: false, 
+        resubscribedAt: new Date() 
+      })
+      .where(
+        and(
+          eq(emailUnsubscribes.id, id),
+          eq(emailUnsubscribes.isActive, true)
+        )
+      )
+      .returning();
+    
+    if (!result) {
+      throw new Error('Unsubscribe record not found or already inactive');
+    }
   }
 
   // Email Sequence Step operations
