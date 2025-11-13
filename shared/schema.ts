@@ -548,7 +548,7 @@ export type ContentVisibility = typeof contentVisibility.$inferSelect;
 export const metricWeightProfiles = pgTable("metric_weight_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull().unique(), // 'hero_default', 'cta_donor_focused', 'card_engagement'
-  contentType: varchar("content_type").notNull(), // 'hero', 'cta', 'card_order', 'layout', 'messaging'
+  contentType: varchar("content_type"), // Optional: 'hero', 'cta', 'card_order', 'layout', 'messaging' (null = general-purpose)
   persona: varchar("persona"), // Optional: specific persona optimization (null = all personas)
   description: text("description"),
   isActive: boolean("is_active").default(true),
