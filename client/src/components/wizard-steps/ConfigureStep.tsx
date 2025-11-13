@@ -34,8 +34,7 @@ interface ConfigureStepProps {
   testType: string;
   variants: Variant[];
   onVariantsChange: (variants: Variant[]) => void;
-  baselineTarget?: BaselineTarget;
-  onBaselineTargetChange: (target: BaselineTarget | undefined) => void;
+  selectedCombinations: Set<string>;
 }
 
 const PERSONAS = [
@@ -53,9 +52,17 @@ const FUNNEL_STAGES = [
   { value: 'retention', label: 'Retention' },
 ];
 
-export function ConfigureStep({ testType, variants, onVariantsChange, baselineTarget, onBaselineTargetChange }: ConfigureStepProps) {
+export function ConfigureStep({ testType, variants, onVariantsChange, selectedCombinations }: ConfigureStepProps) {
   const [expandedVariant, setExpandedVariant] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Derive baseline from first selected target combination (sorted for determinism)
+  const baselineTarget = (() => {
+    if (selectedCombinations.size === 0) return undefined;
+    const sorted = Array.from(selectedCombinations).sort();
+    const [persona, funnelStage] = sorted[0].split(':');
+    return { persona, funnelStage };
+  })();
 
   // Fetch content items based on test type
   const contentType = getContentTypeForTest(testType);
@@ -70,7 +77,7 @@ export function ConfigureStep({ testType, variants, onVariantsChange, baselineTa
     enabled: testType === 'hero_variation' || testType === 'cta_variation',
   });
 
-  // Fetch baseline configuration (lazy - only enabled when baselineTarget is set)
+  // Fetch baseline configuration (lazy - only enabled when baselineTarget is derived)
   const hasBaselineTarget = !!(baselineTarget?.persona && baselineTarget?.funnelStage);
   const { data: baselineConfig, isLoading: isLoadingBaseline } = useBaselineConfig(
     baselineTarget?.persona,
@@ -82,11 +89,11 @@ export function ConfigureStep({ testType, variants, onVariantsChange, baselineTa
   // Handler to auto-populate control variant with baseline configuration
   const handleControlToggle = async (variantId: string, checked: boolean) => {
     if (checked) {
-      // Check if baseline target is set
+      // Check if baseline target is derived from selected combinations
       if (!hasBaselineTarget) {
         toast({
-          title: "Baseline reference required",
-          description: "Please select a persona and funnel stage above to auto-populate the control variant.",
+          title: "Target audience required",
+          description: "Please select target persona×stage combinations in Step 3 first to auto-populate the control variant.",
           variant: "default",
         });
         // Still mark as control, but don't populate
@@ -180,76 +187,27 @@ export function ConfigureStep({ testType, variants, onVariantsChange, baselineTa
         </p>
       </div>
 
-      {/* Baseline Target Selector */}
-      <Card className="bg-muted/30">
-        <CardHeader className="pb-3">
-          <div className="flex items-start gap-2">
-            <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <div className="flex-1">
-              <CardTitle className="text-sm font-medium">Baseline Reference (Optional)</CardTitle>
-              <CardDescription className="text-xs mt-1">
-                Select a persona and funnel stage to auto-populate the control variant with current live configuration
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label className="text-xs">Persona</Label>
-              <Select
-                value={baselineTarget?.persona || ""}
-                onValueChange={(value) => {
-                  if (value && baselineTarget?.funnelStage) {
-                    onBaselineTargetChange({ persona: value, funnelStage: baselineTarget.funnelStage });
-                  } else if (value) {
-                    onBaselineTargetChange({ persona: value, funnelStage: '' });
-                  } else {
-                    onBaselineTargetChange(undefined);
-                  }
-                }}
-              >
-                <SelectTrigger data-testid="select-baseline-persona" className="h-8">
-                  <SelectValue placeholder="Select persona..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {PERSONAS.map((persona) => (
-                    <SelectItem key={persona.value} value={persona.value}>
-                      {persona.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label className="text-xs">Funnel Stage</Label>
-              <Select
-                value={baselineTarget?.funnelStage || ""}
-                onValueChange={(value) => {
-                  if (value && baselineTarget?.persona) {
-                    onBaselineTargetChange({ persona: baselineTarget.persona, funnelStage: value });
-                  } else if (value) {
-                    onBaselineTargetChange({ persona: '', funnelStage: value });
-                  } else {
-                    onBaselineTargetChange(undefined);
-                  }
-                }}
-              >
-                <SelectTrigger data-testid="select-baseline-funnel" className="h-8">
-                  <SelectValue placeholder="Select stage..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {FUNNEL_STAGES.map((stage) => (
-                    <SelectItem key={stage.value} value={stage.value}>
-                      {stage.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Baseline Reference Info (Auto-derived) */}
+      {hasBaselineTarget && (
+        <Alert className="bg-muted/30">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Baseline Reference:</strong> Using {baselineTarget.persona} at {baselineTarget.funnelStage} stage (auto-derived from your first target selection in Step 3)
+            <span className="block mt-1 text-xs text-muted-foreground">
+              This combination will be used to auto-populate the control variant with current live content.
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {!hasBaselineTarget && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            <strong>No baseline reference yet.</strong> Select target audience combinations in Step 3 to enable control variant auto-population from live content.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Traffic weight warning */}
       {totalWeight !== 100 && variants.length > 0 && (
