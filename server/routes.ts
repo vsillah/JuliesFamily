@@ -4560,6 +4560,241 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Export campaign analytics as Excel with multiple formatted sheets
+  app.get('/api/email-campaigns/:id/export/excel', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id: campaignId } = req.params;
+      
+      // Fetch campaign details
+      const campaign = await storage.getEmailCampaign(campaignId);
+      if (!campaign) {
+        return res.status(404).json({ message: "Campaign not found" });
+      }
+      
+      // Fetch analytics data
+      const emailLogs = await storage.getEmailLogsByCampaign(campaignId);
+      const emailOpens = await storage.getEmailOpensByCampaign(campaignId);
+      const emailClicks = await storage.getEmailClicksByCampaign(campaignId);
+      const linkPerformance = await storage.getCampaignLinkPerformance(campaignId);
+      
+      // Calculate metrics
+      const totalSent = emailLogs.length;
+      const uniqueOpenLogIds = new Set(emailOpens.map(open => open.emailLogId));
+      const uniqueOpens = uniqueOpenLogIds.size;
+      const uniqueClickLogIds = new Set(emailClicks.map(click => click.emailLogId));
+      const uniqueClicks = uniqueClickLogIds.size;
+      const uniqueEngagedLogIds = new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      
+      const openRate = totalSent > 0 ? (uniqueOpens / totalSent) * 100 : 0;
+      const clickRate = totalSent > 0 ? (uniqueClicks / totalSent) * 100 : 0;
+      const clickToOpenRate = uniqueOpens > 0 ? (uniqueClicks / uniqueOpens) * 100 : 0;
+      const uniqueEngagementRate = totalSent > 0 ? (uniqueEngagedLogIds.size / totalSent) * 100 : 0;
+      
+      // Sheet 1: Campaign Summary (using proper types for Excel formatting)
+      const summaryData = [
+        { Metric: 'Campaign Name', Value: campaign.name },
+        { Metric: 'Status', Value: campaign.status },
+        { Metric: 'Subject Line', Value: campaign.subject || 'N/A' },
+        { Metric: 'Created At', Value: campaign.createdAt ? new Date(campaign.createdAt) : 'N/A' },
+        { Metric: '', Value: '' }, // Spacer
+        { Metric: 'Total Sent', Value: totalSent },
+        { Metric: 'Total Opens', Value: emailOpens.length },
+        { Metric: 'Unique Opens', Value: uniqueOpens },
+        { Metric: 'Total Clicks', Value: emailClicks.length },
+        { Metric: 'Unique Clicks', Value: uniqueClicks },
+        { Metric: '', Value: '' }, // Spacer
+        { Metric: 'Open Rate', Value: openRate / 100 }, // Store as decimal for percentage format
+        { Metric: 'Click Rate', Value: clickRate / 100 },
+        { Metric: 'Click-to-Open Rate', Value: clickToOpenRate / 100 },
+        { Metric: 'Engagement Rate', Value: uniqueEngagementRate / 100 },
+      ];
+      
+      // Sheet 2: Lead Details (using proper types for Excel formatting)
+      const leadDetailsData = emailLogs.map(log => {
+        const logOpens = emailOpens.filter(open => open.emailLogId === log.id);
+        const logClicks = emailClicks.filter(click => click.emailLogId === log.id);
+        const firstOpen = logOpens.length > 0 ? logOpens[0].openedAt : null;
+        const firstClick = logClicks.length > 0 ? logClicks[0].clickedAt : null;
+        const lastOpen = logOpens.length > 0 ? logOpens[logOpens.length - 1].openedAt : null;
+        
+        return {
+          'Recipient Email': log.leadEmail || 'N/A',
+          'Status': log.status,
+          'Sent At': log.sentAt ? new Date(log.sentAt) : 'Not sent',
+          'Total Opens': logOpens.length,
+          'First Opened': firstOpen ? new Date(firstOpen) : 'Never',
+          'Last Opened': lastOpen ? new Date(lastOpen) : 'Never',
+          'Total Clicks': logClicks.length,
+          'First Clicked': firstClick ? new Date(firstClick) : 'Never',
+          'Engaged': (logOpens.length > 0 || logClicks.length > 0) ? 'Yes' : 'No',
+          'Error Message': log.errorMessage || '',
+        };
+      });
+      
+      // Sheet 3: Link Performance (using proper types for Excel formatting)
+      const linkPerformanceData = linkPerformance.map(link => ({
+        'Link URL': link.url,
+        'Total Clicks': link.totalClicks,
+        'Unique Clicks': link.uniqueClicks,
+        'Click-Through Rate': link.clickThroughRate / 100, // Store as decimal for percentage format
+        'Unique Recipients': link.uniqueRecipients,
+      }));
+      
+      // Helper function to apply Excel cell formatting
+      const applySheetFormatting = (sheet: any, config: {
+        percentageColumns?: { col: number, startRow: number, endRow?: number }[],
+        dateColumns?: { col: number, startRow: number, endRow?: number }[],
+        boldHeader?: boolean,
+      }) => {
+        if (!sheet['!ref']) return;
+        
+        const range = XLSX.utils.decode_range(sheet['!ref']);
+        
+        // Apply bold styling to header row
+        if (config.boldHeader) {
+          for (let col = range.s.c; col <= range.e.c; col++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+            if (sheet[cellAddress]) {
+              sheet[cellAddress].s = { font: { bold: true } };
+            }
+          }
+          // Set header row height
+          sheet['!rows'] = [{ hpt: 18 }];
+        }
+        
+        // Apply percentage formatting to specified columns
+        if (config.percentageColumns) {
+          for (const { col, startRow, endRow } of config.percentageColumns) {
+            const lastRow = endRow ?? range.e.r;
+            for (let row = startRow; row <= lastRow; row++) {
+              const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+              if (sheet[cellAddress] && typeof sheet[cellAddress].v === 'number') {
+                sheet[cellAddress].t = 'n'; // number type
+                sheet[cellAddress].z = '0.0%'; // percentage format
+              }
+            }
+          }
+        }
+        
+        // Apply date formatting to specified columns
+        if (config.dateColumns) {
+          for (const { col, startRow, endRow } of config.dateColumns) {
+            const lastRow = endRow ?? range.e.r;
+            for (let row = startRow; row <= lastRow; row++) {
+              const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
+              if (sheet[cellAddress] && sheet[cellAddress].v instanceof Date) {
+                sheet[cellAddress].t = 'd'; // date type
+                sheet[cellAddress].z = 'yyyy-mm-dd hh:mm:ss'; // date format
+              }
+            }
+          }
+        }
+      };
+      
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+      
+      // Sheet 1: Campaign Summary with formatting
+      const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+      
+      // Set column widths for summary sheet
+      summarySheet['!cols'] = [
+        { wch: 25 }, // Metric column
+        { wch: 50 }, // Value column
+      ];
+      
+      // Freeze header row
+      summarySheet['!freeze'] = { xSplit: 0, ySplit: 1 };
+      
+      // Apply cell formatting
+      // Note: json_to_sheet adds header row, so data rows are 1-indexed (row 0 = headers)
+      applySheetFormatting(summarySheet, {
+        boldHeader: true,
+        percentageColumns: [
+          { col: 1, startRow: 12, endRow: 15 }, // Value column: Open Rate, Click Rate, Click-to-Open Rate, Engagement Rate
+        ],
+        dateColumns: [
+          { col: 1, startRow: 4, endRow: 4 }, // Value column: Created At
+        ],
+      });
+      
+      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Campaign Summary');
+      
+      // Sheet 2: Lead Details with formatting
+      const leadDetailsSheet = XLSX.utils.json_to_sheet(leadDetailsData);
+      
+      // Set column widths for lead details sheet
+      leadDetailsSheet['!cols'] = [
+        { wch: 30 }, // Recipient Email
+        { wch: 10 }, // Status
+        { wch: 22 }, // Sent At
+        { wch: 12 }, // Total Opens
+        { wch: 22 }, // First Opened
+        { wch: 22 }, // Last Opened
+        { wch: 12 }, // Total Clicks
+        { wch: 22 }, // First Clicked
+        { wch: 10 }, // Engaged
+        { wch: 40 }, // Error Message
+      ];
+      
+      // Freeze header row
+      leadDetailsSheet['!freeze'] = { xSplit: 0, ySplit: 1 };
+      
+      // Apply cell formatting
+      applySheetFormatting(leadDetailsSheet, {
+        boldHeader: true,
+        dateColumns: [
+          { col: 2, startRow: 1 }, // Sent At column (0-indexed col 2)
+          { col: 4, startRow: 1 }, // First Opened column (0-indexed col 4)
+          { col: 5, startRow: 1 }, // Last Opened column (0-indexed col 5)
+          { col: 7, startRow: 1 }, // First Clicked column (0-indexed col 7)
+        ],
+      });
+      
+      XLSX.utils.book_append_sheet(workbook, leadDetailsSheet, 'Lead Details');
+      
+      // Sheet 3: Link Performance with formatting (if data exists)
+      if (linkPerformanceData.length > 0) {
+        const linkPerformanceSheet = XLSX.utils.json_to_sheet(linkPerformanceData);
+        
+        // Set column widths for link performance sheet
+        linkPerformanceSheet['!cols'] = [
+          { wch: 50 }, // Link URL
+          { wch: 12 }, // Total Clicks
+          { wch: 14 }, // Unique Clicks
+          { wch: 18 }, // Click-Through Rate
+          { wch: 18 }, // Unique Recipients
+        ];
+        
+        // Freeze header row
+        linkPerformanceSheet['!freeze'] = { xSplit: 0, ySplit: 1 };
+        
+        // Apply cell formatting
+        applySheetFormatting(linkPerformanceSheet, {
+          boldHeader: true,
+          percentageColumns: [
+            { col: 3, startRow: 1 }, // Click-Through Rate column (0-indexed col 3)
+          ],
+        });
+        
+        XLSX.utils.book_append_sheet(workbook, linkPerformanceSheet, 'Link Performance');
+      }
+      
+      // Generate Excel file
+      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      
+      // Set response headers
+      const filename = `campaign_${campaignId}_analytics_${new Date().toISOString().split('T')[0]}.xlsx`;
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.send(buffer);
+      
+    } catch (error) {
+      console.error("Error exporting campaign analytics to Excel:", error);
+      res.status(500).json({ message: "Failed to export campaign analytics to Excel" });
+    }
+  });
+
   // Email Insights Routes
   
   // Get best send time insights with scope filtering
