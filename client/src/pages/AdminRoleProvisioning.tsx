@@ -1,5 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -64,6 +66,8 @@ type User = {
 };
 
 export default function AdminRoleProvisioning() {
+  const { user, isLoading: authLoading } = useAuth();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedProgramId, setSelectedProgramId] = useState<string>("");
@@ -71,24 +75,34 @@ export default function AdminRoleProvisioning() {
   const [impersonatedUserId, setImpersonatedUserId] = useState("");
   const [impersonationReason, setImpersonationReason] = useState("");
 
-  // Fetch available programs for testing
+  // Redirect if not admin
+  if (user && !user.isAdmin) {
+    navigate("/");
+    return null;
+  }
+
+  // Fetch available programs for testing (only when authenticated)
   const { data: programs = [], isLoading: programsLoading, isError: programsError } = useQuery<Program[]>({
-    queryKey: ['/api/admin/programs', { isAvailableForTesting: true, isActive: true }],
+    queryKey: ['/api/admin/programs', { isAvailableForTesting: 'true', isActive: 'true' }],
+    enabled: !!user,
   });
 
-  // Fetch active entitlements
+  // Fetch active entitlements (only when authenticated)
   const { data: entitlements = [], isLoading: entitlementsLoading } = useQuery<Entitlement[]>({
     queryKey: ['/api/admin/entitlements'],
+    enabled: !!user,
   });
 
-  // Fetch active impersonation session
+  // Fetch active impersonation session (only when authenticated)
   const { data: impersonationSession } = useQuery<ImpersonationSession | null>({
     queryKey: ['/api/admin/impersonation/session'],
+    enabled: !!user,
   });
 
-  // Fetch all users for impersonation
+  // Fetch all users for impersonation (only when authenticated)
   const { data: users = [], isLoading: usersLoading, isError: usersError } = useQuery<User[]>({
     queryKey: ['/api/admin/users'],
+    enabled: !!user,
   });
 
   // Create entitlement mutation
@@ -206,6 +220,15 @@ export default function AdminRoleProvisioning() {
       reason: impersonationReason,
     });
   };
+
+  // Show loading while authenticating
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">

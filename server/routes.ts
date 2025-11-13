@@ -273,6 +273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin User Management Routes
   app.get('/api/admin/users', isAuthenticated, isAdmin, async (req, res) => {
     try {
+      console.log('[AdminProvisioning] GET /api/admin/users');
       const users = await storage.getAllUsers();
       res.json(users);
     } catch (error) {
@@ -1037,6 +1038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Program CRUD
   app.get('/api/admin/programs', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
+      console.log('[AdminProvisioning] GET /api/admin/programs - query:', req.query);
       const { programType, isActive, isAvailableForTesting } = req.query;
       
       const filters: Parameters<typeof storage.getAllPrograms>[0] = {};
@@ -1044,10 +1046,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (isActive !== undefined) filters.isActive = isActive === 'true';
       if (isAvailableForTesting !== undefined) filters.isAvailableForTesting = isAvailableForTesting === 'true';
       
+      console.log('[AdminProvisioning] Filters:', filters);
       const programs = await storage.getAllPrograms(filters);
+      console.log('[AdminProvisioning] Found programs:', programs.length);
       res.json(programs);
     } catch (error) {
-      console.error("Error fetching programs:", error);
+      console.error("[AdminProvisioning] Error fetching programs:", error);
       res.status(500).json({ message: "Failed to fetch programs" });
     }
   });
@@ -1125,6 +1129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin Entitlements
   app.get('/api/admin/entitlements', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
+      console.log('[AdminProvisioning] GET /api/admin/entitlements');
       const oidcSub = req.user.claims.sub;
       const currentUser = await storage.getUserByOidcSub(oidcSub);
       
@@ -1222,6 +1227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Impersonation
   app.get('/api/admin/impersonation/session', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
+      console.log('[AdminProvisioning] GET /api/admin/impersonation/session');
       const oidcSub = req.user.claims.sub;
       const currentUser = await storage.getUserByOidcSub(oidcSub);
       
