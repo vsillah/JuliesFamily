@@ -1592,13 +1592,13 @@ export class DatabaseStorage implements IStorage {
     await db.delete(contentVisibility).where(eq(contentVisibility.id, id));
   }
 
-  async getVisibleContentItems(
+  // Private helper to build visibility query with specific persona/funnelStage filters
+  private buildVisibilityQuery(
     type: string,
-    persona?: string | null,
-    funnelStage?: string | null,
-    userPassions?: string[] | null
-  ): Promise<ContentItem[]> {
-    // Build base query
+    persona: string | null | undefined,
+    funnelStage: string | null | undefined,
+    userPassions: string[] | null | undefined
+  ) {
     let query = db
       .select({
         id: contentItems.id,
@@ -1661,7 +1661,26 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
-    return await query;
+    return query;
+  }
+
+  async getVisibleContentItems(
+    type: string,
+    persona?: string | null,
+    funnelStage?: string | null,
+    userPassions?: string[] | null
+  ): Promise<ContentItem[]> {
+    // Build and execute query with requested persona/funnel
+    const results = await this.buildVisibilityQuery(type, persona, funnelStage, userPassions);
+
+    // For hero content: if no persona-specific results and a specific persona was requested,
+    // fall back to the default hero (persona='default')
+    if (type === 'hero' && results.length === 0 && persona && persona !== 'default') {
+      const defaultResults = await this.buildVisibilityQuery(type, 'default', funnelStage, userPassions);
+      return defaultResults;
+    }
+
+    return results;
   }
 
   async getAvailablePersonaStageCombinations(): Promise<{ persona: string; funnelStage: string; }[]> {
