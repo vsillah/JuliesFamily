@@ -4422,6 +4422,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get email campaign link performance
+  app.get('/api/email-campaigns/:id/link-performance', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const { id: campaignId } = req.params;
+      
+      const linkPerformance = await storage.getCampaignLinkPerformance(campaignId);
+      
+      res.json(linkPerformance);
+    } catch (error) {
+      console.error("Error fetching campaign link performance:", error);
+      res.status(500).json({ message: "Failed to fetch link performance data" });
+    }
+  });
+
   // SMS Template Routes
   
   // Get all SMS templates

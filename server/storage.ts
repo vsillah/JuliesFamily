@@ -300,6 +300,14 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   getEmailClicksByToken(trackingToken: string): Promise<EmailClick[]>;
   getEmailClicksByCampaign(campaignId: string): Promise<EmailClick[]>;
   
+  // Email Campaign Analytics operations
+  getCampaignLinkPerformance(campaignId: string): Promise<Array<{
+    url: string;
+    totalClicks: number;
+    uniqueClicks: number;
+    ctr: number;
+  }>>;
+  
   // Lead-level Email Engagement operations
   getLeadEmailOpens(leadId: string, limit?: number): Promise<LeadEmailOpen[]>;
   getLeadEmailClicks(leadId: string, limit?: number): Promise<LeadEmailClick[]>;
@@ -2661,6 +2669,49 @@ export class DatabaseStorage implements IStorage {
         `);
         return results.rows;
     }
+  }
+
+  // Email Campaign Link Performance Analytics
+  async getCampaignLinkPerformance(campaignId: string): Promise<Array<{
+    url: string;
+    totalClicks: number;
+    uniqueClicks: number;
+    ctr: number;
+  }>> {
+    // Get total sends for the campaign (denominator for CTR)
+    // Include all meaningful send statuses: sent, delivered, queued
+    const sendCountResult = await db.execute<{ count: number }>(sql`
+      SELECT COUNT(DISTINCT id) as count
+      FROM email_logs
+      WHERE campaign_id = ${campaignId}
+        AND status IN ('sent', 'delivered', 'queued')
+    `);
+    const totalSends = Number(sendCountResult.rows[0]?.count || 0);
+
+    // Get click performance by URL
+    // Use email_log_id for unique clicks to handle NULL lead_id values correctly
+    const results = await db.execute<{
+      url: string;
+      total_clicks: number;
+      unique_clicks: number;
+    }>(sql`
+      SELECT 
+        target_url as url,
+        COUNT(*) as total_clicks,
+        COUNT(DISTINCT email_log_id) as unique_clicks
+      FROM email_clicks
+      WHERE campaign_id = ${campaignId}
+      GROUP BY target_url
+      ORDER BY total_clicks DESC
+    `);
+
+    // Calculate CTR for each link (force 0 if no sends)
+    return results.rows.map(row => ({
+      url: row.url,
+      totalClicks: Number(row.total_clicks),
+      uniqueClicks: Number(row.unique_clicks),
+      ctr: totalSends > 0 ? (Number(row.unique_clicks) / totalSends) * 100 : 0
+    }));
   }
 
   // SMS Template operations
