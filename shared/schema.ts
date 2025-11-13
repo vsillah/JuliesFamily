@@ -2289,10 +2289,25 @@ export const segments = pgTable("segments", {
   index("segments_is_active_idx").on(table.isActive),
 ]);
 
+// Segment filter schema for validation (camelCase for consistency with frontend)
+export const segmentFiltersSchema = z.object({
+  personas: z.array(z.string()).optional(),
+  funnelStages: z.array(z.string()).optional(),
+  passions: z.array(z.string()).optional(),
+  engagementMin: z.number().min(0).max(100).optional(),
+  engagementMax: z.number().min(0).max(100).optional(),
+  lastActivityDays: z.number().min(0).optional(),
+  excludeUnsubscribed: z.boolean().optional(),
+}).strict(); // Strict to prevent unknown fields
+
+export type SegmentFilters = z.infer<typeof segmentFiltersSchema>;
+
 export const insertSegmentSchema = createInsertSchema(segments).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  filters: segmentFiltersSchema, // Add proper validation for filters JSONB field
 });
 
 export const updateSegmentSchema = createInsertSchema(segments).omit({
@@ -2300,6 +2315,8 @@ export const updateSegmentSchema = createInsertSchema(segments).omit({
   createdBy: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  filters: segmentFiltersSchema.partial(), // Partial for updates
 }).partial();
 
 export type InsertSegment = z.infer<typeof insertSegmentSchema>;

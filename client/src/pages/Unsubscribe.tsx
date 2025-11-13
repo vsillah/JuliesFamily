@@ -17,7 +17,7 @@ export default function Unsubscribe() {
   const token = params.get('token');
   
   // State
-  const [step, setStep] = useState<'confirm' | 'processing' | 'success' | 'error'>('confirm');
+  const [step, setStep] = useState<'verifying' | 'confirm' | 'processing' | 'success' | 'error'>('verifying');
   const [email, setEmail] = useState<string>('');
   const [reason, setReason] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
@@ -41,6 +41,7 @@ export default function Unsubscribe() {
       .then(data => {
         if (data.valid && data.email) {
           setEmail(data.email);
+          setStep('confirm'); // Only show confirm UI after successful verification
         } else {
           setStep('error');
           setErrorMessage(data.message || 'Invalid or expired unsubscribe link. Links are valid for 60 days.');
@@ -99,6 +100,18 @@ export default function Unsubscribe() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
+        {step === 'verifying' && (
+          <>
+            <CardHeader>
+              <CardTitle>Verifying unsubscribe link...</CardTitle>
+              <CardDescription>Please wait while we verify your request.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" data-testid="spinner-verifying" />
+            </CardContent>
+          </>
+        )}
+        
         {step === 'confirm' && (
           <>
             <CardHeader>
