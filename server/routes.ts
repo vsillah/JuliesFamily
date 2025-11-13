@@ -4291,7 +4291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email Report Schedule Routes (super admin only)
 
   // Create new email report schedule
-  app.post('/api/email-report-schedules', isAuthenticated, isSuperAdmin, async (req, res) => {
+  app.post('/api/email-report-schedules', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
       const { computeInitialNextRun } = await import('./services/emailReportScheduler');
       
@@ -4325,7 +4325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all email report schedules
-  app.get('/api/email-report-schedules', isAuthenticated, isSuperAdmin, async (req, res) => {
+  app.get('/api/email-report-schedules', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
       const schedules = await storage.getAllEmailReportSchedules();
       res.json(schedules);
@@ -4336,7 +4336,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single email report schedule
-  app.get('/api/email-report-schedules/:id', isAuthenticated, isSuperAdmin, async (req, res) => {
+  app.get('/api/email-report-schedules/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const schedule = await storage.getEmailReportSchedule(id);
@@ -4353,7 +4353,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update email report schedule
-  app.patch('/api/email-report-schedules/:id', isAuthenticated, isSuperAdmin, async (req, res) => {
+  app.patch('/api/email-report-schedules/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { computeInitialNextRun } = await import('./services/emailReportScheduler');
@@ -4390,7 +4390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete email report schedule
-  app.delete('/api/email-report-schedules/:id', isAuthenticated, isSuperAdmin, async (req, res) => {
+  app.delete('/api/email-report-schedules/:id', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -4409,7 +4409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Manually send a report now
-  app.post('/api/email-report-schedules/:id/send-now', isAuthenticated, isSuperAdmin, async (req, res) => {
+  app.post('/api/email-report-schedules/:id/send-now', isAuthenticated, requireSuperAdmin, async (req, res) => {
     try {
       const { id } = req.params;
       const { executeScheduleNow } = await import('./services/emailReportScheduler');
