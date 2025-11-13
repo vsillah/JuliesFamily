@@ -24,6 +24,22 @@ When implementing complex, multi-component systems, break the work into distinct
 
 Each phase should conclude with architectural review before proceeding to the next phase.
 
+### Bug Pattern Detection & Codebase-Wide Fixes
+When a bug is discovered in one location, always conduct a comprehensive search for similar patterns across the entire codebase before considering the issue resolved. This approach:
+- Prevents recurring issues from spreading undetected
+- Ensures consistent code quality and patterns throughout the application
+- Reduces technical debt by catching multiple instances of the same problem
+- Saves time by fixing all occurrences in one sweep rather than discovering them incrementally
+
+**Search Strategy:**
+1. **Identify the Pattern**: Document the exact bug pattern (e.g., incorrect URL construction, missing validation, improper error handling)
+2. **Search Exhaustively**: Use grep, architect tool, or IDE search to find all similar patterns across the codebase
+3. **Fix Systematically**: Apply the same fix pattern to all instances found
+4. **Verify Comprehensively**: Test all affected areas to ensure the fix works correctly everywhere
+5. **Document**: Update this file with the pattern and solution for future reference
+
+**Example**: When fixing a TanStack Query URL construction bug where `queryKey: ['/api/endpoint', queryString]` created malformed URLs like `/api/endpoint/param=value` instead of `/api/endpoint?param=value`, we searched all files using `URLSearchParams` and `queryKey` to identify and fix all instances of this pattern.
+
 ## System Architecture
 
 ### UI/UX Decisions
