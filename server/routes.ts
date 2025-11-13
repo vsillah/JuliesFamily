@@ -2873,6 +2873,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get current student's project (authenticated students only)
+  app.get('/api/student/my-project', isAuthenticated, async (req, res) => {
+    try {
+      const oidcSub = req.user?.claims?.sub;
+      if (!oidcSub) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const user = await storage.getUserByOidcSub(oidcSub);
+      if (!user) {
+        return res.status(401).json({ message: "User not found" });
+      }
+
+      const project = await storage.getStudentProjectByUserId(user.id);
+      
+      if (!project) {
+        return res.status(404).json({ message: "No project found" });
+      }
+
+      res.json(project);
+    } catch (error) {
+      console.error("Error fetching student project:", error);
+      res.status(500).json({ message: "Failed to fetch student project" });
+    }
+  });
+
   // Get visible content items (public, filtered by persona/funnel/passions)
   app.get('/api/content/visible/:type', async (req, res) => {
     try {

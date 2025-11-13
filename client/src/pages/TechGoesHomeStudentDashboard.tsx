@@ -3,7 +3,7 @@ import { TechGoesHomeProgressCard } from "@/components/TechGoesHomeProgressCard"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, CheckCircle2, Circle, ArrowLeft } from "lucide-react";
+import { Calendar, CheckCircle2, Circle, ArrowLeft, FileText, Download } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
 
@@ -14,6 +14,28 @@ export default function TechGoesHomeStudentDashboard() {
   const { data: progress, isLoading, error, isError, refetch } = useQuery({
     queryKey: ['/api/tgh/progress'],
     retry: 1
+  });
+
+  // Fetch current student's project (treats 404 as null - no project)
+  const { data: myProject } = useQuery<any | null>({
+    queryKey: ['/api/student/my-project'],
+    queryFn: async () => {
+      const response = await fetch('/api/student/my-project', {
+        credentials: 'include'
+      });
+      
+      // Treat 404 as "no project" (return null instead of throwing)
+      if (response.status === 404) {
+        return null;
+      }
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch project');
+      }
+      
+      return response.json();
+    },
+    retry: false
   });
 
   if (isLoading) {
@@ -267,6 +289,110 @@ export default function TechGoesHomeStudentDashboard() {
                   </CardContent>
                 </Card>
               )}
+
+              {myProject ? (
+                <Card data-testid="card-my-project">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2" data-testid="text-project-title">
+                      <FileText className="h-5 w-5 text-primary" />
+                      My Final Project
+                    </CardTitle>
+                    <CardDescription data-testid="text-project-status">
+                      {myProject.metadata?.status === 'approved' && (
+                        <Badge variant="default" data-testid="badge-project-approved">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Approved
+                        </Badge>
+                      )}
+                      {myProject.metadata?.status === 'pending' && (
+                        <Badge variant="secondary" data-testid="badge-project-pending">
+                          Pending Review
+                        </Badge>
+                      )}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <h3 className="font-semibold mb-1" data-testid="text-project-name">
+                        {myProject.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground" data-testid="text-project-description">
+                        {myProject.description}
+                      </p>
+                    </div>
+                    
+                    {myProject.passionTags && myProject.passionTags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {myProject.passionTags.map((tag: string) => (
+                          <Badge 
+                            key={tag} 
+                            variant="outline" 
+                            className="text-xs"
+                            data-testid={`badge-passion-${tag}`}
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {myProject.metadata?.files?.[0] && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full gap-2"
+                        asChild
+                        data-testid="button-view-project"
+                      >
+                        <a 
+                          href={myProject.metadata.files[0].url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                        >
+                          <Download className="h-4 w-4" />
+                          View Project (PDF)
+                        </a>
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+              ) : myProject === null ? (
+                <Card data-testid="card-no-project" className="bg-accent/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2" data-testid="text-no-project-title">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                      Final Project
+                    </CardTitle>
+                    <CardDescription data-testid="text-no-project-description">
+                      Not yet submitted
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Your final project will demonstrate the digital literacy skills you've learned in the Tech Goes Home program.
+                    </p>
+                    <div className="space-y-2 text-sm">
+                      <p className="font-medium">Project Ideas:</p>
+                      <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                        <li>Create a newsletter or flyer</li>
+                        <li>Design a recipe card</li>
+                        <li>Write about a topic you care about</li>
+                      </ul>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      asChild
+                      data-testid="button-contact-instructor"
+                    >
+                      <a href="tel:+16172696663">
+                        Contact Instructor
+                      </a>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : null}
 
               <Card className="bg-primary/5 border-primary/20" data-testid="card-help">
                 <CardContent className="p-4 space-y-2">

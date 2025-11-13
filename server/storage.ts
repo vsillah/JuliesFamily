@@ -127,6 +127,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage {
   getContentItem(id: string): Promise<ContentItem | undefined>;
   getAllContentItems(): Promise<ContentItemWithResolvedImage[]>;
   getContentItemsByType(type: string): Promise<ContentItemWithResolvedImage[]>;
+  getStudentProjectByUserId(userId: string): Promise<ContentItemWithResolvedImage | undefined>;
   updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined>;
   deleteContentItem(id: string): Promise<void>;
   updateContentItemOrder(id: string, newOrder: number): Promise<ContentItem | undefined>;
@@ -1269,6 +1270,36 @@ export class DatabaseStorage implements IStorage {
       .orderBy(contentItems.order);
     
     return results as unknown as ContentItemWithResolvedImage[];
+  }
+
+  async getStudentProjectByUserId(userId: string): Promise<ContentItemWithResolvedImage | undefined> {
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        imageUrl: contentItems.imageUrl,
+        passionTags: contentItems.passionTags,
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+      })
+      .from(contentItems)
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
+      .where(
+        and(
+          eq(contentItems.type, 'student_project'),
+          sql<boolean>`${contentItems.metadata}->>'submittingUserId' = ${userId}`
+        )
+      )
+      .limit(1);
+    
+    return results.length > 0 ? (results[0] as unknown as ContentItemWithResolvedImage) : undefined;
   }
 
   async updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined> {
