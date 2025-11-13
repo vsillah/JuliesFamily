@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Users, CheckCircle, XCircle, Clock, AlertCircle, RefreshCw, ArrowLeft, BarChart3, MousePointerClick, Eye } from "lucide-react";
+import { Mail, Users, CheckCircle, XCircle, Clock, AlertCircle, RefreshCw, ArrowLeft, BarChart3, MousePointerClick, Eye, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import type { EmailCampaign } from "@shared/schema";
@@ -391,15 +391,15 @@ export default function AdminEmailCampaignDetails() {
                   </CardContent>
                 </Card>
 
-                {/* Link Performance Section */}
+                {/* Link Performance Section with Visual Ranking */}
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MousePointerClick className="w-5 h-5" />
-                      Link Performance
+                      Link Performance Ranking
                     </CardTitle>
                     <CardDescription>
-                      See which links in your campaign are driving the most engagement
+                      Visual ranking of top-performing links sorted by click-through rate
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -413,47 +413,123 @@ export default function AdminEmailCampaignDetails() {
                           Link performance data will appear once recipients click on links in your emails
                         </p>
                       </div>
-                    ) : (
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[50%]">URL</TableHead>
-                            <TableHead className="text-right">Total Clicks</TableHead>
-                            <TableHead className="text-right">Unique Clicks</TableHead>
-                            <TableHead className="text-right">CTR</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {linkPerformance.map((link, index) => (
-                            <TableRow key={index} data-testid={`row-link-${index}`}>
-                              <TableCell className="font-medium">
-                                <a 
-                                  href={link.url} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-primary hover:underline truncate block max-w-md"
-                                  title={link.url}
-                                  data-testid={`link-url-${index}`}
-                                >
-                                  {link.url}
-                                </a>
-                              </TableCell>
-                              <TableCell className="text-right font-semibold" data-testid={`text-total-clicks-${index}`}>
-                                {link.totalClicks}
-                              </TableCell>
-                              <TableCell className="text-right" data-testid={`text-unique-clicks-${index}`}>
-                                {link.uniqueClicks}
-                              </TableCell>
-                              <TableCell className="text-right" data-testid={`text-ctr-${index}`}>
-                                <Badge variant="outline">
-                                  {link.ctr.toFixed(1)}%
-                                </Badge>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    )}
+                    ) : (() => {
+                      const sortedLinks = [...linkPerformance].sort((a, b) => b.ctr - a.ctr);
+                      const maxCTR = Math.max(...sortedLinks.map(l => l.ctr));
+                      
+                      const getPerformanceTier = (ctr: number) => {
+                        if (sortedLinks.length === 1) return 'high';
+                        const avgCTR = sortedLinks.reduce((sum, l) => sum + l.ctr, 0) / sortedLinks.length;
+                        if (ctr >= avgCTR * 1.2) return 'high';
+                        if (ctr >= avgCTR * 0.8) return 'medium';
+                        return 'low';
+                      };
+                      
+                      return (
+                        <div className="space-y-4">
+                          {sortedLinks.map((link, index) => {
+                            const tier = getPerformanceTier(link.ctr);
+                            const relativeWidth = maxCTR > 0 ? (link.ctr / maxCTR) * 100 : 0;
+                            
+                            return (
+                              <div 
+                                key={index} 
+                                className="space-y-2 p-4 rounded-lg border hover-elevate"
+                                data-testid={`container-link-rank-${index}`}
+                              >
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                                    <Badge 
+                                      variant={index < 3 ? "default" : "secondary"}
+                                      className="shrink-0"
+                                      data-testid={`badge-rank-${index}`}
+                                    >
+                                      #{index + 1}
+                                    </Badge>
+                                    <div className="flex-1 min-w-0">
+                                      <a 
+                                        href={link.url} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-sm font-medium text-primary hover:underline block truncate"
+                                        title={link.url}
+                                        data-testid={`link-url-${index}`}
+                                      >
+                                        {link.url}
+                                      </a>
+                                    </div>
+                                  </div>
+                                  <Badge 
+                                    variant={
+                                      tier === 'high' ? 'default' : 
+                                      tier === 'medium' ? 'secondary' : 
+                                      'outline'
+                                    }
+                                    className="shrink-0 flex items-center gap-1"
+                                    data-testid={`badge-tier-${index}`}
+                                  >
+                                    {tier === 'high' ? (
+                                      <>
+                                        <TrendingUp className="w-3 h-3" />
+                                        High
+                                      </>
+                                    ) : tier === 'medium' ? (
+                                      <>
+                                        <Minus className="w-3 h-3" />
+                                        Medium
+                                      </>
+                                    ) : (
+                                      <>
+                                        <TrendingDown className="w-3 h-3" />
+                                        Low
+                                      </>
+                                    )}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="grid grid-cols-3 gap-4 text-sm">
+                                  <div>
+                                    <p className="text-muted-foreground text-xs">Total Clicks</p>
+                                    <p className="font-semibold" data-testid={`text-total-clicks-${index}`}>
+                                      {link.totalClicks}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground text-xs">Unique Clicks</p>
+                                    <p className="font-semibold" data-testid={`text-unique-clicks-${index}`}>
+                                      {link.uniqueClicks}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <p className="text-muted-foreground text-xs">Click-Through Rate</p>
+                                    <p className="font-semibold" data-testid={`text-ctr-${index}`}>
+                                      {link.ctr.toFixed(1)}%
+                                    </p>
+                                  </div>
+                                </div>
+                                
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between text-xs">
+                                    <span className="text-muted-foreground">Performance</span>
+                                    <span className="font-medium">{relativeWidth.toFixed(0)}% of top</span>
+                                  </div>
+                                  <div className="w-full bg-secondary rounded-full h-2" data-testid={`progress-bar-${index}`}>
+                                    <div 
+                                      className={`h-2 rounded-full transition-all ${
+                                        tier === 'high' ? 'bg-primary' : 
+                                        tier === 'medium' ? 'bg-blue-500' : 
+                                        'bg-muted-foreground'
+                                      }`}
+                                      style={{ width: `${relativeWidth}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </>
