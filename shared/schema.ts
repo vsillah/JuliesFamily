@@ -1170,6 +1170,39 @@ export const insertEmailClickSchema = createInsertSchema(emailClicks).omit({
 export type InsertEmailClick = z.infer<typeof insertEmailClickSchema>;
 export type EmailClick = typeof emailClicks.$inferSelect;
 
+// Email Send Time Insights table for storing best send time analytics
+// Stores pre-computed engagement metrics by day-of-week and hour-of-day
+export const emailSendTimeInsights = pgTable("email_send_time_insights", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  scope: varchar("scope").notNull(), // 'global', 'campaign', 'persona'
+  scopeId: varchar("scope_id"), // Campaign ID or persona value (null for global)
+  dayOfWeek: integer("day_of_week").notNull(), // 0-6 where 0=Sunday
+  hourOfDay: integer("hour_of_day").notNull(), // 0-23 in America/New_York timezone
+  sendCount: integer("send_count").notNull().default(0), // Total emails sent in this bucket
+  openCount: integer("open_count").notNull().default(0), // Total opens in this bucket
+  uniqueOpens: integer("unique_opens").notNull().default(0), // Unique leads who opened
+  clickCount: integer("click_count").notNull().default(0), // Total clicks in this bucket
+  openRate: integer("open_rate").notNull().default(0), // Percentage * 100 (e.g., 2543 = 25.43%)
+  clickRate: integer("click_rate").notNull().default(0), // Percentage * 100
+  medianTimeToOpen: integer("median_time_to_open"), // Median minutes from send to open
+  confidenceScore: integer("confidence_score").notNull().default(0), // 0-100 based on sample size
+  sampleSize: integer("sample_size").notNull().default(0), // Min(sendCount, 50) for confidence calculation
+  metadata: jsonb("metadata"), // Additional stats, quartiles, etc
+  analyzedAt: timestamp("analyzed_at").defaultNow().notNull(), // When this analysis was computed
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  scopeAnalyzedIdx: index("email_send_time_insights_scope_analyzed_idx").on(table.scope, table.analyzedAt),
+  scopeIdIdx: index("email_send_time_insights_scope_id_idx").on(table.scopeId),
+  dayHourIdx: index("email_send_time_insights_day_hour_idx").on(table.dayOfWeek, table.hourOfDay),
+}));
+
+export const insertEmailSendTimeInsightSchema = createInsertSchema(emailSendTimeInsights).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertEmailSendTimeInsight = z.infer<typeof insertEmailSendTimeInsightSchema>;
+export type EmailSendTimeInsight = typeof emailSendTimeInsights.$inferSelect;
+
 // Lead-level email engagement DTOs (with joined campaign/link metadata)
 export type LeadEmailOpen = EmailOpen & {
   campaignName: string | null;
