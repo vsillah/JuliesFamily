@@ -2,7 +2,8 @@ import {
   Kanban, Target, BarChart3, MessageSquare, Settings,
   TrendingUp, Users, Mail, FileText, Image as ImageIcon,
   Shield, Database, BookOpen, Phone, Calendar, GraduationCap,
-  Heart, UserPlus, Grid3x3, FileEdit, FlaskConical, Filter
+  Heart, UserPlus, Grid3x3, FileEdit, FlaskConical, Filter,
+  Zap, History
 } from "lucide-react";
 
 export type SearchCategory = "navigation" | "content" | "crm" | "analytics" | "communication";
@@ -75,6 +76,33 @@ export const staticSearchRegistry: SearchItem[] = [
     icon: FlaskConical,
     route: "/admin/ab-testing",
     keywords: ["experiments", "variants", "testing", "optimization"]
+  },
+  {
+    id: "automation-rules",
+    title: "Automation Rules",
+    description: "Configure automated A/B test rules",
+    category: "analytics",
+    icon: Zap,
+    route: "/admin/automation-rules",
+    keywords: ["automation", "rules", "ai", "testing", "automated", "optimization"]
+  },
+  {
+    id: "automation-runs",
+    title: "Automation Runs",
+    description: "View automation run history",
+    category: "analytics",
+    icon: History,
+    route: "/admin/automation-runs",
+    keywords: ["automation", "history", "runs", "ai", "testing"]
+  },
+  {
+    id: "automation-config",
+    title: "Automation Configuration",
+    description: "Configure safety limits and metric profiles",
+    category: "analytics",
+    icon: Settings,
+    route: "/admin/automation-config",
+    keywords: ["automation", "config", "safety", "metrics", "profiles", "settings"]
   },
   {
     id: "cohort-analysis",

@@ -3736,6 +3736,168 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ==================== AUTOMATED A/B TESTING SYSTEM ROUTES ====================
+  
+  // Get all automation rules (admin)
+  app.get('/api/automation/rules', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const rules = await storage.getAllAbTestAutomationRules();
+      res.json(rules);
+    } catch (error) {
+      console.error("Error fetching automation rules:", error);
+      res.status(500).json({ message: "Failed to fetch automation rules" });
+    }
+  });
+
+  // Create automation rule (admin)
+  app.post('/api/automation/rules', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const rule = await storage.createAbTestAutomationRule(req.body);
+      res.json(rule);
+    } catch (error) {
+      console.error("Error creating automation rule:", error);
+      res.status(500).json({ message: "Failed to create automation rule" });
+    }
+  });
+
+  // Update automation rule (admin)
+  app.patch('/api/automation/rules/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const rule = await storage.updateAbTestAutomationRule(req.params.id, req.body);
+      if (!rule) {
+        return res.status(404).json({ message: "Automation rule not found" });
+      }
+      res.json(rule);
+    } catch (error) {
+      console.error("Error updating automation rule:", error);
+      res.status(500).json({ message: "Failed to update automation rule" });
+    }
+  });
+
+  // Delete automation rule (admin)
+  app.delete('/api/automation/rules/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteAbTestAutomationRule(req.params.id);
+      res.json({ message: "Automation rule deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting automation rule:", error);
+      res.status(500).json({ message: "Failed to delete automation rule" });
+    }
+  });
+
+  // Get automation run history (admin)
+  app.get('/api/automation/runs', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const runs = await storage.getAllAbTestAutomationRuns(limit);
+      res.json(runs);
+    } catch (error) {
+      console.error("Error fetching automation runs:", error);
+      res.status(500).json({ message: "Failed to fetch automation runs" });
+    }
+  });
+
+  // Get specific automation run (admin)
+  app.get('/api/automation/runs/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const run = await storage.getAbTestAutomationRun(req.params.id);
+      if (!run) {
+        return res.status(404).json({ message: "Automation run not found" });
+      }
+      res.json(run);
+    } catch (error) {
+      console.error("Error fetching automation run:", error);
+      res.status(500).json({ message: "Failed to fetch automation run" });
+    }
+  });
+
+  // Manually trigger automation evaluation (admin)
+  app.post('/api/automation/run', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      // Import automation scheduler service
+      const { AutomationSchedulerService } = await import('./services/automationScheduler');
+      const scheduler = new AutomationSchedulerService(storage);
+      
+      const result = await scheduler.runAutomationCycle();
+      res.json(result);
+    } catch (error) {
+      console.error("Error running automation:", error);
+      res.status(500).json({ 
+        message: "Failed to run automation",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Get safety limits (admin)
+  app.get('/api/automation/safety-limits', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const limits = await storage.getAbTestSafetyLimits();
+      res.json(limits || null);
+    } catch (error) {
+      console.error("Error fetching safety limits:", error);
+      res.status(500).json({ message: "Failed to fetch safety limits" });
+    }
+  });
+
+  // Update safety limits (admin)
+  app.patch('/api/automation/safety-limits', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const limits = await storage.upsertAbTestSafetyLimits(req.body);
+      res.json(limits);
+    } catch (error) {
+      console.error("Error updating safety limits:", error);
+      res.status(500).json({ message: "Failed to update safety limits" });
+    }
+  });
+
+  // Get all metric weight profiles (admin)
+  app.get('/api/automation/metric-weight-profiles', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const profiles = await storage.getAllMetricWeightProfiles();
+      res.json(profiles);
+    } catch (error) {
+      console.error("Error fetching metric weight profiles:", error);
+      res.status(500).json({ message: "Failed to fetch metric weight profiles" });
+    }
+  });
+
+  // Create metric weight profile (admin)
+  app.post('/api/automation/metric-weight-profiles', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const profile = await storage.createMetricWeightProfile(req.body);
+      res.json(profile);
+    } catch (error) {
+      console.error("Error creating metric weight profile:", error);
+      res.status(500).json({ message: "Failed to create metric weight profile" });
+    }
+  });
+
+  // Update metric weight profile (admin)
+  app.patch('/api/automation/metric-weight-profiles/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      const profile = await storage.updateMetricWeightProfile(req.params.id, req.body);
+      if (!profile) {
+        return res.status(404).json({ message: "Metric weight profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      console.error("Error updating metric weight profile:", error);
+      res.status(500).json({ message: "Failed to update metric weight profile" });
+    }
+  });
+
+  // Delete metric weight profile (admin)
+  app.delete('/api/automation/metric-weight-profiles/:id', isAuthenticated, isAdmin, async (req, res) => {
+    try {
+      await storage.deleteMetricWeightProfile(req.params.id);
+      res.json({ message: "Metric weight profile deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting metric weight profile:", error);
+      res.status(500).json({ message: "Failed to delete metric weight profile" });
+    }
+  });
+
   // Get performance metrics for recommendations (admin)
   app.get('/api/performance-metrics', isAuthenticated, isAdmin, async (req, res) => {
     try {
