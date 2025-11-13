@@ -24,7 +24,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Authenticated Donation System with Saved Payment Methods**: Secure payment processing via Stripe.
 -   **Email Automation System**: Transactional email delivery via SendGrid with AI-powered copywriting.
 -   **SMS Notification System**: Twilio-based template messaging with persona targeting and AI-powered copywriting.
--   **CRM Components**: Lead capture, Admin Dashboard for lead management, communication timeline, task management, pipeline management, AI copy generation, and bulk lead import.
+-   **CRM Components**: Lead capture, Admin Dashboard for lead management (with lead status filtering system), communication timeline, task management, pipeline management, AI copy generation, and bulk lead import.
 -   **Google Calendar Integration**: OAuth-authenticated integration for scheduling and event registration.
 -   **Volunteer Enrollment Tracking System**: Comprehensive system for managing volunteer activities.
 -   **Lead-Level Email Engagement Tracking**: Displays email analytics per lead, including summary metrics, opens, and clicks.
@@ -33,6 +33,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Email Unsubscribe Management**: CAN-SPAM compliant unsubscribe tracking with HMAC-secured tokens and integration with email sending.
 -   **SMS Unsubscribe Management (TCPA Compliance)**: Multi-channel opt-out system supporting SMS, email, and cross-channel unsubscribes, including Twilio webhook handling.
 -   **Hormozi Template Library ($100M Leads Integration)**: Production-ready template library incorporating Alex Hormozi's cold outreach frameworks adapted for nonprofit context, including 36 templates with comprehensive variable support and built-in compliance.
+-   **Lead Status Filtering System**: Four-status engagement tracking system (Active, Nurture, Disqualified, Unresponsive) with inline editing in LeadDetailsDialog, color-coded badges on lead cards, filter dropdown in AdminDashboard, analytics exclusion of disqualified/unresponsive leads, and type-safe schema validation using shared LeadStatus enum with .strict().partial() for security.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a three-tier RBAC system with audit logging. The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
