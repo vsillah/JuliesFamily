@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, UserCog, X } from "lucide-react";
+import { Loader2, Plus, Trash2, UserCog, X, Search } from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
@@ -16,15 +16,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { UserSearchCommand } from "@/components/UserSearchCommand";
 
 type Program = {
   id: string;
@@ -74,6 +68,7 @@ export default function AdminRoleProvisioning() {
   const [impersonationDialogOpen, setImpersonationDialogOpen] = useState(false);
   const [impersonatedUserId, setImpersonatedUserId] = useState("");
   const [impersonationReason, setImpersonationReason] = useState("");
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
 
   // Redirect if not admin
   if (user && !user.isAdmin) {
@@ -551,29 +546,47 @@ export default function AdminRoleProvisioning() {
                   <span className="text-sm text-muted-foreground">No users available</span>
                 </div>
               ) : (
-                <Select
-                  value={impersonatedUserId}
-                  onValueChange={setImpersonatedUserId}
-                  disabled={usersLoading || usersError}
-                >
-                  <SelectTrigger id="user-select" data-testid="select-user">
-                    <SelectValue placeholder="Select a user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem 
-                        key={user.id} 
-                        value={user.id}
-                        data-testid={`option-user-${user.id}`}
-                      >
-                        {user.name || user.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              {!impersonatedUserId && !usersLoading && !usersError && users.length > 0 && (
-                <p className="text-sm text-destructive">Please select a user</p>
+                <>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setUserSearchOpen(true)}
+                    disabled={usersLoading || usersError}
+                    data-testid="button-open-user-search"
+                  >
+                    <Search className="w-4 h-4 mr-2" />
+                    {impersonatedUserId ? (
+                      (() => {
+                        const selectedUser = users.find((u) => u.id === impersonatedUserId);
+                        return selectedUser 
+                          ? selectedUser.name || selectedUser.email
+                          : "Select a user";
+                      })()
+                    ) : (
+                      "Select a user"
+                    )}
+                  </Button>
+                  {!impersonatedUserId && (
+                    <p className="text-sm text-destructive">Please select a user</p>
+                  )}
+                  
+                  {/* User Search Dialog */}
+                  <UserSearchCommand
+                    users={users.map((u) => ({
+                      id: u.id,
+                      email: u.email,
+                      firstName: u.name?.split(' ')[0] || null,
+                      lastName: u.name?.split(' ').slice(1).join(' ') || null,
+                      profilePhotoUrl: null,
+                    }))}
+                    open={userSearchOpen}
+                    onOpenChange={setUserSearchOpen}
+                    onSelect={setImpersonatedUserId}
+                    selectedUserId={impersonatedUserId}
+                    placeholder="Search users by name or email..."
+                    emptyMessage="No users found matching your search."
+                  />
+                </>
               )}
             </div>
 

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown, X, CheckCircle2, UserCog, Users } from "lucide-react";
+import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown, X, CheckCircle2, UserCog, Users, Search } from "lucide-react";
 import { personaConfigs, usePersona, type Persona } from "@/contexts/PersonaContext";
 import { useAdminPreviewState } from "@/hooks/useAdminPreviewState";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -28,6 +28,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
+import { UserSearchCommand } from "@/components/UserSearchCommand";
 
 // Hook to detect mobile viewport (runtime check to prevent React hook violations)
 function useIsMobile(breakpoint = 768) {
@@ -256,6 +257,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   const [open, setOpen] = useState(false);
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
   const [impersonationUserId, setImpersonationUserId] = useState("");
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
   const { toast } = useToast();
   
   const {
@@ -869,21 +871,25 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                 <p className="text-[11px] text-muted-foreground mb-2">
                   View the site as a specific user for troubleshooting
                 </p>
-                <Select
-                  value={impersonationUserId}
-                  onValueChange={setImpersonationUserId}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full justify-start h-8 text-sm"
+                  onClick={() => setUserSearchOpen(true)}
+                  data-testid="button-open-user-search"
                 >
-                  <SelectTrigger className="h-8 text-sm" data-testid="select-impersonate-user">
-                    <SelectValue placeholder="Select user..." />
-                  </SelectTrigger>
-                  <SelectContent className="z-[99999]">
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.firstName} {user.lastName} ({user.email})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Search className="w-3 h-3 mr-2" />
+                  {impersonationUserId ? (
+                    (() => {
+                      const selectedUser = users.find((u) => u.id === impersonationUserId);
+                      return selectedUser 
+                        ? `${selectedUser.firstName} ${selectedUser.lastName}`
+                        : "Select user...";
+                    })()
+                  ) : (
+                    "Select user..."
+                  )}
+                </Button>
                 {impersonationUserId && (
                   <Button
                     size="sm"
@@ -898,6 +904,17 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                     Start Impersonation
                   </Button>
                 )}
+                
+                {/* User Search Dialog */}
+                <UserSearchCommand
+                  users={users}
+                  open={userSearchOpen}
+                  onOpenChange={setUserSearchOpen}
+                  onSelect={setImpersonationUserId}
+                  selectedUserId={impersonationUserId}
+                  placeholder="Search users by name or email..."
+                  emptyMessage="No users found matching your search."
+                />
               </div>
             )}
 
