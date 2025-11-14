@@ -309,6 +309,140 @@ export default function ProductLanding() {
               Most nonprofits cobble together multiple platforms at a total cost of $2,000+/month. Kinflo gives you everything in one place.
             </p>
           </div>
+          
+          {/* Tier Cost Comparison */}
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <Card className="border-2" data-testid="tier-basic-cost">
+              <CardHeader>
+                <CardTitle className="text-2xl">Basic Tier</CardTitle>
+                <CardDescription>Out-of-the-box essentials</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>CRM Platform</span>
+                    <span className="font-semibold">$125/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Email Marketing</span>
+                    <span className="font-semibold">$50/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Website Builder</span>
+                    <span className="font-semibold">$25/mo</span>
+                  </div>
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Monthly Cost</span>
+                      <span className="text-primary">$200/mo</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground mt-1">
+                      <span>Annual Cost</span>
+                      <span>$2,400/yr</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2 border-primary" data-testid="tier-pro-cost">
+              <CardHeader>
+                <CardTitle className="text-2xl">Pro Tier</CardTitle>
+                <CardDescription>Dynamic engagement tools</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>CRM Platform</span>
+                    <span className="font-semibold">$125/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Email Marketing</span>
+                    <span className="font-semibold">$50/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>SMS Platform</span>
+                    <span className="font-semibold">$45/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Fundraising Module</span>
+                    <span className="font-semibold">$42/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Website Builder</span>
+                    <span className="font-semibold">$25/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Calendar Scheduling</span>
+                    <span className="font-semibold">$15/mo</span>
+                  </div>
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Monthly Cost</span>
+                      <span className="text-primary">$302/mo</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground mt-1">
+                      <span>Annual Cost</span>
+                      <span>$3,624/yr</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-2" data-testid="tier-premium-cost">
+              <CardHeader>
+                <CardTitle className="text-2xl">Premium Tier</CardTitle>
+                <CardDescription>Full-featured platform</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>CRM Platform</span>
+                    <span className="font-semibold">$125/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Email Marketing</span>
+                    <span className="font-semibold">$50/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>SMS Platform</span>
+                    <span className="font-semibold">$45/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>A/B Testing Tool</span>
+                    <span className="font-semibold">$200/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>AI Copywriting</span>
+                    <span className="font-semibold">$50/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Fundraising Module</span>
+                    <span className="font-semibold">$42/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Website Builder</span>
+                    <span className="font-semibold">$25/mo</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Calendar Scheduling</span>
+                    <span className="font-semibold">$15/mo</span>
+                  </div>
+                  <div className="pt-3 border-t">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Monthly Cost</span>
+                      <span className="text-primary">$552/mo</span>
+                    </div>
+                    <div className="flex justify-between text-muted-foreground mt-1">
+                      <span>Annual Cost</span>
+                      <span>$6,624/yr</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
             {[
