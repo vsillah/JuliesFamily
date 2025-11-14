@@ -1406,6 +1406,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // DELETE endpoint for ending impersonation (RESTful)
+  app.delete('/api/admin/impersonation/end/:sessionId', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { sessionId } = req.params;
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // End the session
+      const result = await storage.endImpersonationSession(sessionId);
+      
+      if (!result) {
+        return res.status(404).json({ message: "Impersonation session not found" });
+      }
+      
+      res.json({ message: "Impersonation ended successfully" });
+    } catch (error) {
+      console.error("Error ending impersonation:", error);
+      res.status(500).json({ message: "Failed to end impersonation" });
+    }
+  });
+
   // User Persona Preference Route
   app.patch('/api/user/persona', isAuthenticated, async (req: any, res) => {
     try {
