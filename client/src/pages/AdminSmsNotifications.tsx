@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,10 +23,29 @@ export default function AdminSmsNotifications() {
   const [selectedTemplate, setSelectedTemplate] = useState<SmsTemplate | null>(null);
   const [showTemplateDialog, setShowTemplateDialog] = useState(false);
   const [showSendDialog, setShowSendDialog] = useState(false);
-  const [activeTab, setActiveTab] = useState<"templates" | "send" | "history">("templates");
+  const [activeTab, setActiveTab] = useState<"templates" | "send" | "bulk-send" | "history">("templates");
+  
+  // Bulk send state
+  const [bulkPersona, setBulkPersona] = useState<Persona | "">("");
+  const [bulkFunnelStage, setBulkFunnelStage] = useState<string>("");
+  const [bulkTemplateId, setBulkTemplateId] = useState<string>("");
+  const [bulkCustomMessage, setBulkCustomMessage] = useState("");
+  const [recipientPreview, setRecipientPreview] = useState<{ count: number; samples: any[] } | null>(null);
+  const [previewParams, setPreviewParams] = useState<{
+    persona: string;
+    funnelStage: string;
+    templateId: string;
+    customMessage: string;
+  } | null>(null);
 
   // State for AI-generated content
   const [messageText, setMessageText] = useState("");
+  
+  // Clear preview when bulk send inputs change to prevent stale preview
+  useEffect(() => {
+    setRecipientPreview(null);
+    setPreviewParams(null);
+  }, [bulkPersona, bulkFunnelStage, bulkTemplateId, bulkCustomMessage]);
 
   // Fetch all SMS templates
   const { data: templates = [], isLoading: templatesLoading } = useQuery<SmsTemplate[]>({
@@ -140,6 +159,66 @@ export default function AdminSmsNotifications() {
     },
   });
 
+  // Preview bulk SMS recipients
+  const previewBulkRecipientsMutation = useMutation({
+    mutationFn: async (data: { params: any; snapshot: any }) => {
+      const res = await apiRequest('POST', '/api/sms/bulk/preview', data.params);
+      const body = await res.json();
+      return { ...body, snapshot: data.snapshot };
+    },
+    onSuccess: (data) => {
+      // Only update preview if parameters still match current selections (prevent race condition)
+      if (
+        data.snapshot.persona === bulkPersona &&
+        data.snapshot.funnelStage === bulkFunnelStage &&
+        data.snapshot.templateId === bulkTemplateId &&
+        data.snapshot.customMessage === bulkCustomMessage
+      ) {
+        setRecipientPreview({ count: data.eligibleCount, samples: data.sampleLeads });
+        setPreviewParams(data.snapshot);
+        toast({
+          title: "Preview Ready",
+          description: `${data.eligibleCount} eligible recipients found`,
+        });
+      }
+      // If parameters don't match, silently discard stale preview
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to preview recipients",
+      });
+    },
+  });
+
+  // Send bulk SMS
+  const sendBulkSmsMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await apiRequest('POST', '/api/sms/bulk', data);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Bulk Send Started",
+        description: `Campaign started for ${data.recipientCount} recipients`,
+      });
+      // Reset bulk send form
+      setBulkPersona("");
+      setBulkFunnelStage("");
+      setBulkTemplateId("");
+      setBulkCustomMessage("");
+      setRecipientPreview(null);
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to send bulk SMS",
+      });
+    },
+  });
+
   const handleCreateTemplate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -200,6 +279,80 @@ export default function AdminSmsNotifications() {
     sendSmsMutation.mutate(data);
   };
 
+  const handlePreviewBulkRecipients = () => {
+    if (!bulkTemplateId && !bulkCustomMessage) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a template or enter a custom message",
+      });
+      return;
+    }
+
+    // Snapshot current parameters to validate response matches request
+    const snapshot = {
+      persona: bulkPersona,
+      funnelStage: bulkFunnelStage,
+      templateId: bulkTemplateId,
+      customMessage: bulkCustomMessage,
+    };
+
+    previewBulkRecipientsMutation.mutate({
+      params: {
+        templateId: bulkTemplateId || undefined,
+        customMessage: bulkCustomMessage || undefined,
+        personaFilter: bulkPersona || undefined,
+        funnelStageFilter: bulkFunnelStage || undefined,
+      },
+      snapshot,
+    });
+  };
+
+  const handleSendBulkSms = () => {
+    if (!recipientPreview || recipientPreview.count === 0) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please preview recipients first",
+      });
+      return;
+    }
+
+    if (!bulkTemplateId && !bulkCustomMessage) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a template or enter a custom message",
+      });
+      return;
+    }
+
+    // Validate preview parameters match current selections (prevent stale preview send)
+    if (
+      !previewParams ||
+      previewParams.persona !== bulkPersona ||
+      previewParams.funnelStage !== bulkFunnelStage ||
+      previewParams.templateId !== bulkTemplateId ||
+      previewParams.customMessage !== bulkCustomMessage
+    ) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Inputs changed since preview. Please preview again.",
+      });
+      setRecipientPreview(null);
+      setPreviewParams(null);
+      return;
+    }
+
+    sendBulkSmsMutation.mutate({
+      templateId: bulkTemplateId || undefined,
+      customMessage: bulkCustomMessage || undefined,
+      personaFilter: bulkPersona || undefined,
+      funnelStageFilter: bulkFunnelStage || undefined,
+    });
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
       <Breadcrumbs items={[
@@ -226,6 +379,10 @@ export default function AdminSmsNotifications() {
           <TabsTrigger value="send" data-testid="tab-send">
             <Send className="w-4 h-4 mr-2" />
             Send SMS
+          </TabsTrigger>
+          <TabsTrigger value="bulk-send" data-testid="tab-bulk-send">
+            <Send className="w-4 h-4 mr-2" />
+            Bulk Send
           </TabsTrigger>
           <TabsTrigger value="history" data-testid="tab-history">
             <Clock className="w-4 h-4 mr-2" />
@@ -445,6 +602,132 @@ export default function AdminSmsNotifications() {
                   )}
                 </Button>
               </form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="bulk-send" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Bulk Send SMS</CardTitle>
+              <CardDescription>
+                Send SMS to multiple leads filtered by persona and funnel stage
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="bulk-persona">Persona Filter (Optional)</Label>
+                  <Select value={bulkPersona} onValueChange={(v) => setBulkPersona(v as Persona | "")}>
+                    <SelectTrigger id="bulk-persona" data-testid="select-bulk-persona">
+                      <SelectValue placeholder="All personas" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All personas</SelectItem>
+                      <SelectItem value="student">Student</SelectItem>
+                      <SelectItem value="parent">Parent</SelectItem>
+                      <SelectItem value="provider">Provider</SelectItem>
+                      <SelectItem value="donor">Donor</SelectItem>
+                      <SelectItem value="volunteer">Volunteer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="bulk-funnel-stage">Funnel Stage Filter (Optional)</Label>
+                  <Select value={bulkFunnelStage} onValueChange={setBulkFunnelStage}>
+                    <SelectTrigger id="bulk-funnel-stage" data-testid="select-bulk-funnel-stage">
+                      <SelectValue placeholder="All stages" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All stages</SelectItem>
+                      <SelectItem value="awareness">Awareness</SelectItem>
+                      <SelectItem value="consideration">Consideration</SelectItem>
+                      <SelectItem value="decision">Decision</SelectItem>
+                      <SelectItem value="retention">Retention</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Message Content */}
+              <div className="space-y-2">
+                <Label htmlFor="bulk-template">Template (Optional)</Label>
+                <Select value={bulkTemplateId} onValueChange={setBulkTemplateId}>
+                  <SelectTrigger id="bulk-template" data-testid="select-bulk-template">
+                    <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No template (use custom message)</SelectItem>
+                    {templates.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {!bulkTemplateId && (
+                <div className="space-y-2">
+                  <Label htmlFor="bulk-custom-message">Custom Message</Label>
+                  <Textarea
+                    id="bulk-custom-message"
+                    data-testid="textarea-bulk-custom-message"
+                    placeholder="Enter custom message..."
+                    value={bulkCustomMessage}
+                    onChange={(e) => setBulkCustomMessage(e.target.value)}
+                    rows={4}
+                  />
+                </div>
+              )}
+
+              {/* Preview Button */}
+              <Button
+                onClick={handlePreviewBulkRecipients}
+                disabled={previewBulkRecipientsMutation.isPending}
+                variant="outline"
+                className="w-full"
+                data-testid="button-preview-bulk-recipients"
+              >
+                {previewBulkRecipientsMutation.isPending ? "Loading..." : "Preview Recipients"}
+              </Button>
+
+              {/* Recipient Preview */}
+              {recipientPreview && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-secondary rounded-lg">
+                    <h3 className="font-medium mb-2">Recipient Preview</h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      <strong data-testid="text-recipient-count">{recipientPreview.count}</strong> eligible recipients found
+                    </p>
+                    {recipientPreview.samples.length > 0 && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-2">Sample leads:</p>
+                        <div className="space-y-2">
+                          {recipientPreview.samples.map((lead, idx) => (
+                            <div key={idx} className="text-sm p-2 bg-background rounded" data-testid={`lead-sample-${idx}`}>
+                              <span className="font-medium">{lead.firstName} {lead.lastName}</span>
+                              {lead.phone && <span className="text-muted-foreground ml-2">• {lead.phone}</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Send Button */}
+                  <Button
+                    onClick={handleSendBulkSms}
+                    disabled={sendBulkSmsMutation.isPending || recipientPreview.count === 0}
+                    className="w-full"
+                    data-testid="button-send-bulk-sms"
+                  >
+                    {sendBulkSmsMutation.isPending ? "Sending..." : `Send to ${recipientPreview.count} Recipients`}
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
