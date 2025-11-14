@@ -4040,6 +4040,99 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  // SMS Bulk Campaign operations
+  async createSmsBulkCampaign(campaignData: InsertSmsBulkCampaign): Promise<SmsBulkCampaign> {
+    const [campaign] = await db.insert(smsBulkCampaigns).values(campaignData).returning();
+    return campaign;
+  }
+
+  async getSmsBulkCampaign(id: string): Promise<SmsBulkCampaign | undefined> {
+    const [campaign] = await db.select().from(smsBulkCampaigns).where(eq(smsBulkCampaigns.id, id));
+    return campaign;
+  }
+
+  async getAllSmsBulkCampaigns(limit: number = 50): Promise<SmsBulkCampaign[]> {
+    return await db
+      .select()
+      .from(smsBulkCampaigns)
+      .orderBy(desc(smsBulkCampaigns.createdAt))
+      .limit(limit);
+  }
+
+  async updateSmsBulkCampaign(id: string, updates: Partial<InsertSmsBulkCampaign>): Promise<SmsBulkCampaign | undefined> {
+    const [updated] = await db
+      .update(smsBulkCampaigns)
+      .set(updates)
+      .where(eq(smsBulkCampaigns.id, id))
+      .returning();
+    return updated;
+  }
+
+  async previewSmsBulkCampaignRecipients(
+    personaFilter?: string | null,
+    funnelStageFilter?: string | null
+  ): Promise<{ count: number; sampleLeads: Lead[] }> {
+    // Build query conditions for leads
+    const conditions = [];
+    
+    // Phone must exist
+    conditions.push(sql`${leads.phone} IS NOT NULL`);
+    
+    // Add persona filter if provided
+    if (personaFilter) {
+      conditions.push(eq(leads.persona, personaFilter));
+    }
+    
+    // Add funnel stage filter if provided
+    if (funnelStageFilter) {
+      conditions.push(eq(leads.funnelStage, funnelStageFilter));
+    }
+    
+    // Exact count of eligible leads (excludes unsubscribes) using NOT EXISTS
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(leads)
+      .where(
+        and(
+          ...conditions,
+          sql`NOT EXISTS (
+            SELECT 1 FROM ${emailUnsubscribes}
+            WHERE ${emailUnsubscribes.phone} = ${leads.phone}
+            AND ${emailUnsubscribes.isActive} = true
+            AND (${emailUnsubscribes.channel} = 'sms' OR ${emailUnsubscribes.channel} = 'all')
+          )`
+        )
+      );
+    
+    const eligibleCount = countResult?.count || 0;
+    
+    if (eligibleCount === 0) {
+      return { count: 0, sampleLeads: [] };
+    }
+    
+    // Fetch sample leads from the same eligible query (limit 10)
+    const sampleLeads = await db
+      .select()
+      .from(leads)
+      .where(
+        and(
+          ...conditions,
+          sql`NOT EXISTS (
+            SELECT 1 FROM ${emailUnsubscribes}
+            WHERE ${emailUnsubscribes.phone} = ${leads.phone}
+            AND ${emailUnsubscribes.isActive} = true
+            AND (${emailUnsubscribes.channel} = 'sms' OR ${emailUnsubscribes.channel} = 'all')
+          )`
+        )
+      )
+      .limit(10);
+    
+    return {
+      count: eligibleCount,
+      sampleLeads
+    };
+  }
+
   // Communication Log operations
   async createCommunicationLog(logData: InsertCommunicationLog): Promise<CommunicationLog> {
     const [log] = await db.insert(communicationLogs).values(logData).returning();

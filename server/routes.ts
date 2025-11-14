@@ -6304,7 +6304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Replace variables in template
         const { replaceVariables } = await import('./twilio');
-        messageContent = replaceVariables(template.messageContent, variables || {});
+        messageContent = replaceVariables(template.messageTemplate, variables || {});
         usedTemplateId = templateId;
       } else if (customMessage) {
         // Use custom message directly
@@ -6369,6 +6369,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching recent SMS sends:", error);
       res.status(500).json({ message: "Failed to fetch recent SMS sends" });
+    }
+  });
+
+  // Bulk SMS Campaign Routes
+  
+  // Preview bulk SMS campaign recipients (get count and sample leads)
+  app.post('/api/sms/bulk/preview', ...authWithImpersonation, isAdmin, async (req, res) => {
+    try {
+      const { personaFilter, funnelStageFilter } = req.body;
+      
+      const preview = await storage.previewSmsBulkCampaignRecipients(
+        personaFilter || null,
+        funnelStageFilter || null
+      );
+      
+      res.json(preview);
+    } catch (error) {
+      console.error("Error previewing bulk SMS campaign:", error);
+      res.status(500).json({ message: "Failed to preview bulk SMS campaign" });
+    }
+  });
+  
+  // Create and send bulk SMS campaign
+  app.post('/api/sms/bulk', ...authWithImpersonation, isAdmin, async (req: any, res) => {
+    try {
+      const {
+        name,
+        description,
+        personaFilter,
+        funnelStageFilter,
+        templateId,
+        customMessage,
+      } = req.body;
+      
+      // Get current user
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!currentUser) {
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Determine message content
+      let messageSnapshot: string;
+      if (templateId) {
+        const template = await storage.getSmsTemplateById(templateId);
+        if (!template) {
+          return res.status(404).json({ message: "SMS template not found" });
+        }
+        messageSnapshot = template.messageTemplate;
+      } else if (customMessage) {
+        messageSnapshot = customMessage;
+      } else {
+        return res.status(400).json({ message: "Either templateId or customMessage is required" });
+      }
+      
+      // Preview to get target count
+      const preview = await storage.previewSmsBulkCampaignRecipients(
+        personaFilter || null,
+        funnelStageFilter || null
+      );
+      
+      if (preview.count === 0) {
+        return res.status(400).json({ message: "No recipients match the selected filters" });
+      }
+      
+      if (preview.count > 5000) {
+        return res.status(400).json({ message: `Recipient count (${preview.count}) exceeds maximum of 5,000 per bulk send` });
+      }
+      
+      // Create bulk campaign record
+      const campaign = await storage.createSmsBulkCampaign({
+        name,
+        description: description || null,
+        personaFilter: personaFilter || null,
+        funnelStageFilter: funnelStageFilter || null,
+        templateId: templateId || null,
+        customMessage: customMessage || null,
+        messageSnapshot,
+        targetCount: preview.count,
+        status: 'processing',
+        createdBy: currentUser.id,
+        startedAt: new Date(),
+      });
+      
+      // Process bulk send asynchronously (queue for background processing)
+      // Import and call bulk SMS sender service
+      const { processBulkSmsCampaign } = await import('./bulkSmsSender');
+      
+      // Don't await - process in background
+      processBulkSmsCampaign(campaign.id).catch((error) => {
+        console.error(`[Bulk SMS] Campaign ${campaign.id} failed:`, error);
+      });
+      
+      res.json({
+        success: true,
+        campaign,
+        message: `Bulk SMS campaign created. Sending to ${preview.count} recipient(s)...`
+      });
+    } catch (error: any) {
+      console.error("Error creating bulk SMS campaign:", error);
+      res.status(500).json({ message: error.message || "Failed to create bulk SMS campaign" });
+    }
+  });
+  
+  // Get all bulk SMS campaigns
+  app.get('/api/sms/bulk', ...authWithImpersonation, isAdmin, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const campaigns = await storage.getAllSmsBulkCampaigns(limit);
+      res.json(campaigns);
+    } catch (error) {
+      console.error("Error fetching bulk SMS campaigns:", error);
+      res.status(500).json({ message: "Failed to fetch bulk SMS campaigns" });
+    }
+  });
+  
+  // Get specific bulk SMS campaign
+  app.get('/api/sms/bulk/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const campaign = await storage.getSmsBulkCampaign(id);
+      
+      if (!campaign) {
+        return res.status(404).json({ message: "Bulk SMS campaign not found" });
+      }
+      
+      res.json(campaign);
+    } catch (error) {
+      console.error("Error fetching bulk SMS campaign:", error);
+      res.status(500).json({ message: "Failed to fetch bulk SMS campaign" });
     }
   });
 

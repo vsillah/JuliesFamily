@@ -1374,6 +1374,59 @@ export const insertSmsSendSchema = createInsertSchema(smsSends).omit({
 export type InsertSmsSend = z.infer<typeof insertSmsSendSchema>;
 export type SmsSend = typeof smsSends.$inferSelect;
 
+// SMS Bulk Campaigns table for tracking bulk SMS sends
+export const smsBulkCampaigns = pgTable("sms_bulk_campaigns", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  description: text("description"),
+  
+  // Targeting filters (nullable = match all)
+  personaFilter: varchar("persona_filter"), // 'parent', 'student', 'donor', 'volunteer', 'job_seeker' or null for all
+  funnelStageFilter: varchar("funnel_stage_filter"), // 'awareness', 'consideration', 'retention', 'advocacy' or null for all
+  
+  // Future-proof filter storage (passion tags, custom segments, etc.)
+  filterConfig: jsonb("filter_config"), // Extended filter criteria for future use
+  
+  // Message content
+  templateId: varchar("template_id").references(() => smsTemplates.id, { onDelete: "set null" }),
+  customMessage: text("custom_message"), // If not using template
+  messageSnapshot: text("message_snapshot").notNull(), // Final message sent (for audit)
+  
+  // Metrics
+  targetCount: integer("target_count").notNull().default(0), // How many leads matched filters
+  sentCount: integer("sent_count").notNull().default(0), // Successfully sent
+  blockedCount: integer("blocked_count").notNull().default(0), // Skipped due to unsubscribe
+  failedCount: integer("failed_count").notNull().default(0), // Failed to send
+  
+  // Status tracking
+  status: varchar("status").notNull().default('draft'), // 'draft', 'processing', 'completed', 'failed', 'cancelled'
+  
+  // Error tracking
+  errorSummary: text("error_summary"), // Summary of errors if any
+  metadata: jsonb("metadata"), // Additional data (rate limit info, restart points, etc.)
+  
+  // Audit fields
+  createdBy: varchar("created_by").notNull().references(() => users.id),
+  cancelledBy: varchar("cancelled_by").references(() => users.id),
+  
+  // Timestamps
+  startedAt: timestamp("started_at"),
+  completedAt: timestamp("completed_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("sms_bulk_campaigns_created_by_idx").on(table.createdBy),
+  index("sms_bulk_campaigns_status_idx").on(table.status),
+  index("sms_bulk_campaigns_created_at_idx").on(table.createdAt),
+]);
+
+export const insertSmsBulkCampaignSchema = createInsertSchema(smsBulkCampaigns).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSmsBulkCampaign = z.infer<typeof insertSmsBulkCampaignSchema>;
+export type SmsBulkCampaign = typeof smsBulkCampaigns.$inferSelect;
+
 // Communication Logs table for unified timeline of all communications with leads
 export const communicationLogs = pgTable("communication_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
