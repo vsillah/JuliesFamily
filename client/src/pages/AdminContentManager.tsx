@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star, CheckCircle2, AlertTriangle, XCircle, Sparkles, Loader2, Clock, ChevronUp, ChevronDown, MoreVertical } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
@@ -113,6 +114,7 @@ function SortableContentCard({
   onMoveUp,
   onMoveDown,
   onJumpTo,
+  isReordering,
   getImageUrl 
 }: {
   item: ContentItem;
@@ -124,6 +126,7 @@ function SortableContentCard({
   onMoveUp: () => void;
   onMoveDown: () => void;
   onJumpTo: (position: number) => void;
+  isReordering: boolean;
   getImageUrl: (item: ContentItem | null) => string | null;
 }) {
   const {
@@ -141,6 +144,10 @@ function SortableContentCard({
     opacity: isDragging ? 0.5 : undefined,
   };
 
+  const position = index + 1; // 1-based position for display
+  const canMoveUp = index > 0;
+  const canMoveDown = index < totalItems - 1;
+
   return (
     <Card
       ref={setNodeRef}
@@ -149,6 +156,41 @@ function SortableContentCard({
     >
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
+          {/* Order Badge */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-1">
+            <Badge variant="outline" className="text-xs font-mono px-2 py-0.5" data-testid={`badge-order-${item.id}`}>
+              #{position}
+            </Badge>
+            {/* Arrow Buttons */}
+            <div className="flex flex-col gap-0.5">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onMoveUp}
+                disabled={!canMoveUp || isReordering}
+                className="h-6 w-6 p-0"
+                data-testid={`button-move-up-${item.id}`}
+                aria-label="Move up"
+                title="Move up"
+              >
+                <ChevronUp className="w-3 h-3" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={onMoveDown}
+                disabled={!canMoveDown || isReordering}
+                className="h-6 w-6 p-0"
+                data-testid={`button-move-down-${item.id}`}
+                aria-label="Move down"
+                title="Move down"
+              >
+                <ChevronDown className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+          
+          {/* Drag Handle */}
           <div
             className="flex-shrink-0 cursor-move hover-elevate p-2 rounded"
             data-testid={`drag-handle-${item.id}`}
@@ -289,6 +331,36 @@ function SortableContentCard({
                 >
                   <Trash2 className="w-4 h-4 text-destructive" />
                 </Button>
+                
+                {/* Jump to Position Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      disabled={isReordering}
+                      data-testid={`button-more-${item.id}`}
+                      aria-label="More actions"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Reorder</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {Array.from({ length: totalItems }, (_, i) => i + 1).map((targetPosition) => (
+                      <DropdownMenuItem
+                        key={targetPosition}
+                        onClick={() => onJumpTo(targetPosition)}
+                        disabled={targetPosition === position || isReordering}
+                        data-testid={`menu-jump-to-${targetPosition}-${item.id}`}
+                        className={targetPosition === position ? "font-semibold" : ""}
+                      >
+                        {targetPosition === position ? `Position ${targetPosition} (current)` : `Move to position ${targetPosition}`}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>
@@ -326,8 +398,8 @@ export default function AdminContentManager() {
   // Helper to create combo key from persona and stage
   const getComboKey = (persona: Persona, stage: FunnelStage) => `${persona}:${stage}`;
   
-  // Track reordering operations to prevent concurrent mutations
-  const [isReordering, setIsReordering] = useState(false);
+  // Track reordering operations per content type to prevent concurrent mutations
+  const [reorderingTypes, setReorderingTypes] = useState<Set<string>>(new Set());
 
   const { data: services = [], isLoading: servicesLoading} = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/service"],
@@ -661,6 +733,72 @@ export default function AdminContentManager() {
         title: "Sync Failed",
         description: error.message || "Failed to sync Google Reviews. Please try again.",
         variant: "destructive",
+      });
+    },
+  });
+
+  // Batch reorder content items mutation with optimistic updates
+  const reorderContentMutation = useMutation({
+    mutationFn: async ({ updates, contentType }: { updates: { id: string; order: number }[]; contentType: string }) => {
+      const response = await apiRequest("PATCH", "/api/content/reorder", { updates, contentType });
+      return response.json();
+    },
+    onMutate: async ({ updates, contentType }) => {
+      const queryKey = [`/api/content/type/${contentType}`];
+      
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey });
+      
+      // Snapshot previous value
+      const previousData = queryClient.getQueryData<ContentItem[]>(queryKey);
+      
+      // Optimistically update cache
+      if (previousData) {
+        const updatesMap = new Map(updates.map(u => [u.id, u.order]));
+        const optimisticData = previousData
+          .map(item => {
+            const newOrder = updatesMap.get(item.id);
+            return newOrder !== undefined ? { ...item, order: newOrder } : item;
+          })
+          .sort((a, b) => a.order - b.order);
+        
+        queryClient.setQueryData(queryKey, optimisticData);
+      }
+      
+      // Mark type as reordering
+      setReorderingTypes(prev => new Set(prev).add(contentType));
+      
+      return { previousData, contentType, queryKey };
+    },
+    onError: (error: any, variables, context) => {
+      // Rollback to previous data
+      if (context?.previousData) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
+      }
+      
+      toast({
+        title: "Reorder Failed",
+        description: error.message || "Failed to reorder items. Please try again.",
+        variant: "destructive",
+      });
+    },
+    onSuccess: (data, variables, context) => {
+      toast({
+        title: "Order Updated",
+        description: `${variables.contentType} order has been saved`,
+      });
+    },
+    onSettled: (data, error, variables, context) => {
+      // Invalidate and refetch
+      if (context?.queryKey) {
+        queryClient.invalidateQueries({ queryKey: context.queryKey });
+      }
+      
+      // Remove reordering flag
+      setReorderingTypes(prev => {
+        const next = new Set(prev);
+        next.delete(variables.contentType);
+        return next;
       });
     },
   });
@@ -1104,39 +1242,51 @@ export default function AdminContentManager() {
     })
   );
 
+  // Pure helper: compute reordered items and updates
+  const computeReorder = (items: ContentItem[], oldIndex: number, newIndex: number) => {
+    const reorderedItems = arrayMove(items, oldIndex, newIndex);
+    const updates = reorderedItems.map((item, index) => ({
+      id: item.id,
+      order: index,
+    }));
+    return { reorderedItems, updates };
+  };
+
   // Handle drag end
   const handleDragEnd = (event: DragEndEvent, items: ContentItem[], type: string) => {
     const { active, over } = event;
 
-    if (over && active.id !== over.id) {
+    if (over && active.id !== over.id && !reorderingTypes.has(type)) {
       const oldIndex = items.findIndex((item) => item.id === active.id);
       const newIndex = items.findIndex((item) => item.id === over.id);
 
-      const reorderedItems = arrayMove(items, oldIndex, newIndex);
+      const { updates } = computeReorder(items, oldIndex, newIndex);
+      reorderContentMutation.mutate({ updates, contentType: type });
+    }
+  };
 
-      // Update order values
-      const updates = reorderedItems.map((item, index) => ({
-        id: item.id,
-        order: index,
-      }));
+  // Move item up one position
+  const handleMoveUp = (items: ContentItem[], index: number, type: string) => {
+    if (index > 0 && !reorderingTypes.has(type)) {
+      const { updates } = computeReorder(items, index, index - 1);
+      reorderContentMutation.mutate({ updates, contentType: type });
+    }
+  };
 
-      // Batch update the orders
-      Promise.all(
-        updates.map(({ id, order }) =>
-          apiRequest("PATCH", `/api/content/${id}`, { order })
-        )
-      ).then(() => {
-        queryClient.invalidateQueries({
-          predicate: (query) => {
-            const key = query.queryKey[0] as string;
-            return key?.startsWith("/api/content/type");
-          }
-        });
-        toast({
-          title: "Order Updated",
-          description: `${type} order has been saved`,
-        });
-      });
+  // Move item down one position
+  const handleMoveDown = (items: ContentItem[], index: number, type: string) => {
+    if (index < items.length - 1 && !reorderingTypes.has(type)) {
+      const { updates } = computeReorder(items, index, index + 1);
+      reorderContentMutation.mutate({ updates, contentType: type });
+    }
+  };
+
+  // Jump item to specific position
+  const handleJumpTo = (items: ContentItem[], currentIndex: number, targetPosition: number, type: string) => {
+    const targetIndex = targetPosition - 1; // Convert 1-based to 0-based
+    if (targetIndex !== currentIndex && targetIndex >= 0 && targetIndex < items.length && !reorderingTypes.has(type)) {
+      const { updates } = computeReorder(items, currentIndex, targetIndex);
+      reorderContentMutation.mutate({ updates, contentType: type });
     }
   };
 
@@ -1149,6 +1299,8 @@ export default function AdminContentManager() {
       );
     }
 
+    const isReordering = reorderingTypes.has(type);
+
     return (
       <DndContext
         sensors={sensors}
@@ -1160,10 +1312,12 @@ export default function AdminContentManager() {
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-4">
-            {items.map((item) => (
+            {items.map((item, index) => (
               <SortableContentCard
                 key={item.id}
                 item={item}
+                index={index}
+                totalItems={items.length}
                 onToggleActive={() => toggleActiveMutation.mutate({ id: item.id, isActive: !item.isActive })}
                 onEdit={() => {
                   setEditingItem(item);
@@ -1174,6 +1328,10 @@ export default function AdminContentManager() {
                     deleteMutation.mutate(item.id);
                   }
                 }}
+                onMoveUp={() => handleMoveUp(items, index, type)}
+                onMoveDown={() => handleMoveDown(items, index, type)}
+                onJumpTo={(position) => handleJumpTo(items, index, position, type)}
+                isReordering={isReordering}
                 getImageUrl={getImageUrl}
               />
             ))}

@@ -3692,6 +3692,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Batch reorder content items (admin)
+  app.patch('/api/content/reorder', ...authWithImpersonation, isAdmin, async (req, res) => {
+    try {
+      const validatedData = batchContentReorderSchema.parse(req.body);
+      const updatedItems = await storage.updateContentOrders(
+        validatedData.updates,
+        validatedData.contentType
+      );
+      res.json(updatedItems);
+    } catch (error: any) {
+      console.error("Error batch reordering content items:", error);
+      
+      // Handle validation errors
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid request data",
+          errors: error.errors 
+        });
+      }
+      
+      // Handle storage-level validation errors
+      if (error.message?.startsWith('items_not_found')) {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.message?.startsWith('mixed_content_type') || 
+          error.message?.startsWith('content_type_mismatch') ||
+          error.message?.startsWith('duplicate_order')) {
+        return res.status(422).json({ message: error.message });
+      }
+      
+      res.status(500).json({ message: "Failed to reorder content items" });
+    }
+  });
+
   // Delete content item (admin)
   app.delete('/api/content/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
