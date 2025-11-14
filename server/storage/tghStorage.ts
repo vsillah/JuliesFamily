@@ -51,7 +51,12 @@ export function createTechGoesHomeStorage(): ITechGoesHomeStorage {
     
     async getTechGoesHomeEnrollmentByUserId(userId: string): Promise<TechGoesHomeEnrollment | undefined> {
       const [enrollment] = await db.select().from(techGoesHomeEnrollments)
-        .where(eq(techGoesHomeEnrollments.userId, userId))
+        .where(
+          and(
+            eq(techGoesHomeEnrollments.userId, userId),
+            eq(techGoesHomeEnrollments.status, 'active')
+          )
+        )
         .orderBy(desc(techGoesHomeEnrollments.createdAt))
         .limit(1);
       return enrollment;
