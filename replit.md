@@ -75,3 +75,65 @@ The backend uses Express.js on Node.js with TypeScript, exposing RESTful API end
 -   Stripe
 -   SendGrid
 -   Twilio
+
+## Technical Patterns & Known Issues
+
+### Radix UI Select Empty String Value Error
+
+**Issue Identification**: When using Radix UI's `<SelectItem>` component (from shadcn/ui Select), you'll encounter this runtime error if any SelectItem has an empty string value:
+```
+Error: A <Select.Item /> must have a value prop that is not an empty string.
+```
+
+**When This Occurs**:
+- Forms with optional select fields where "All" or "Any" options need to be represented
+- Dropdowns where the user can choose "no filter" or "all items"
+- Any Select component where you need to represent "empty" or "unselected" state
+
+**Resolution Pattern** (5-step conversion):
+1. **Change SelectItem value**: Replace `<SelectItem value="">` with `<SelectItem value="all">` (or another placeholder like "none", "any", etc.)
+2. **Initialize form state**: Set default values to `"all"` instead of `""` in useState/useForm
+3. **Submit conversion**: Convert `"all"` → `""` in form submit handlers before sending to backend
+4. **Load conversion**: Convert `""` → `"all"` when populating form from backend data
+5. **Reset function**: Update form reset logic to use `"all"` instead of `""`
+
+**Example Implementation**:
+```typescript
+// 1. SelectItem with placeholder value
+<SelectItem value="all">All Options</SelectItem>
+<SelectItem value="option1">Option 1</SelectItem>
+
+// 2. Form initialization
+const [formData, setFormData] = useState({
+  myField: "all"  // Not ""
+});
+
+// 3. Submit conversion
+const handleSubmit = () => {
+  const payload = {
+    ...formData,
+    myField: formData.myField === "all" ? "" : formData.myField
+  };
+  api.post("/endpoint", payload);
+};
+
+// 4. Load conversion
+const handleEdit = (data) => {
+  setFormData({
+    ...data,
+    myField: data.myField || "all"  // Convert empty to "all"
+  });
+};
+
+// 5. Reset function
+const resetForm = () => {
+  setFormData({
+    myField: "all"  // Not ""
+  });
+};
+```
+
+**Files Affected in This Project**:
+- `client/src/pages/AdminAutomationRules.tsx` - Target Persona, Target Funnel Stage, Content Type selects
+
+**Key Principle**: Radix UI Select requires non-empty string values. Use placeholder values in the UI layer and convert to/from empty strings at the data layer boundary.
