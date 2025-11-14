@@ -489,16 +489,21 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className={`md:hidden transition-colors duration-300 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                isScrolled ? "text-foreground" : "text-white"
-              }`}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              data-testid="button-mobile-menu"
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {/* Mobile: Admin Preview & Menu Buttons */}
+            <div className="md:hidden flex items-center gap-1">
+              {isAdmin && (
+                <AdminPreviewDropdown isScrolled={isScrolled} />
+              )}
+              <button
+                className={`transition-colors duration-300 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                  isScrolled ? "text-foreground" : "text-white"
+                }`}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                data-testid="button-mobile-menu"
+              >
+                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
         </div>
       </nav>
