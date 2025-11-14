@@ -6,8 +6,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Trash2, UserCog, X, Search } from "lucide-react";
+import { Loader2, Plus, Trash2, UserCog, X, Search, ArrowLeft } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 import {
   Dialog,
   DialogContent,
@@ -227,11 +228,24 @@ export default function AdminRoleProvisioning() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Admin Role Provisioning</h1>
-        <p className="text-muted-foreground">
-          Create temporary test enrollments and impersonate users for debugging
-        </p>
+      {/* Mobile Navigation Header */}
+      <div className="mb-6 flex items-center gap-3">
+        <Link href="/">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="md:hidden"
+            data-testid="button-back-mobile"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold mb-2">Admin Role Provisioning</h1>
+          <p className="text-muted-foreground">
+            Create temporary test enrollments and impersonate users for debugging
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
