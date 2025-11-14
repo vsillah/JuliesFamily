@@ -490,7 +490,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             </div>
 
             {/* Mobile: Admin Preview & Menu Buttons */}
-            <div className="md:hidden flex items-center gap-1">
+            <div className="flex md:hidden items-center gap-1">
               {isAdmin && (
                 <AdminPreviewDropdown isScrolled={isScrolled} />
               )}

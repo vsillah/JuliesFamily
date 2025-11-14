@@ -668,18 +668,18 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
       {isMobile ? (
         // Mobile-only button - no Radix UI, simple onClick handler
         <Button
-          variant={impersonatedUser ? "outline" : (isScrolled ? "outline" : "ghost")}
+          variant={impersonatedUser ? "default" : (isScrolled ? "outline" : "ghost")}
           size="sm"
           className={cn(
             "gap-2 relative",
             !isScrolled && !impersonatedUser && "border-white/30 text-white hover:bg-white/10",
-            impersonatedUser && "border-primary bg-primary/10"
+            impersonatedUser && "bg-primary text-primary-foreground"
           )}
           data-testid="button-admin-preview-dropdown"
           onClick={() => setShowMobileOverlay(true)}
         >
           {impersonatedUser ? (
-            <UserCog className="w-4 h-4 text-primary animate-pulse" />
+            <UserCog className="w-4 h-4 animate-pulse" />
           ) : (
             <Eye className={cn(
               "w-4 h-4",
@@ -687,7 +687,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             )} />
           )}
           {impersonatedUser ? (
-            <span className="text-xs font-medium text-primary">
+            <span className="text-xs font-medium">
               {impersonatedUser.firstName} {impersonatedUser.lastName}
             </span>
           ) : isPreviewActive ? (
@@ -705,17 +705,17 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <Button
-              variant={impersonatedUser ? "outline" : (isScrolled ? "outline" : "ghost")}
+              variant={impersonatedUser ? "default" : (isScrolled ? "outline" : "ghost")}
               size="sm"
               className={cn(
                 "gap-2 relative",
                 !isScrolled && !impersonatedUser && "border-white/30 text-white hover:bg-white/10",
-                impersonatedUser && "border-primary bg-primary/10"
+                impersonatedUser && "bg-primary text-primary-foreground"
               )}
               data-testid="button-admin-preview-dropdown"
             >
               {impersonatedUser ? (
-                <UserCog className="w-4 h-4 text-primary animate-pulse" />
+                <UserCog className="w-4 h-4 animate-pulse" />
               ) : (
                 <Eye className={cn(
                   "w-4 h-4",
@@ -723,7 +723,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                 )} />
               )}
               {impersonatedUser ? (
-                <span className="text-xs font-medium text-primary">
+                <span className="text-xs font-medium">
                   {impersonatedUser.firstName} {impersonatedUser.lastName}
                 </span>
               ) : isPreviewActive ? (
