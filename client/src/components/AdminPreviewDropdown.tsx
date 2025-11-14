@@ -562,21 +562,24 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             <p className="text-xs text-muted-foreground mb-3">
               View the site as a specific user for troubleshooting
             </p>
-            <Select
-              value={impersonationUserId}
-              onValueChange={setImpersonationUserId}
+            <Button
+              variant="outline"
+              className="w-full justify-start h-11 text-base"
+              onClick={() => setUserSearchOpen(true)}
+              data-testid="button-open-user-search"
             >
-              <SelectTrigger className="h-11 text-base" data-testid="select-impersonate-user">
-                <SelectValue placeholder="Select user..." />
-              </SelectTrigger>
-              <SelectContent className="z-[100000]">
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.firstName} {user.lastName} ({user.email})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              <Search className="w-4 h-4 mr-2" />
+              {impersonationUserId ? (
+                (() => {
+                  const selectedUser = users.find((u) => u.id === impersonationUserId);
+                  return selectedUser 
+                    ? `${selectedUser.firstName} ${selectedUser.lastName}`
+                    : "Select user...";
+                })()
+              ) : (
+                "Select user..."
+              )}
+            </Button>
             {impersonationUserId && (
               <Button
                 className="w-full h-11 text-base"
@@ -591,6 +594,17 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                 Start Impersonation
               </Button>
             )}
+            
+            {/* User Search Dialog */}
+            <UserSearchCommand
+              users={users}
+              open={userSearchOpen}
+              onOpenChange={setUserSearchOpen}
+              onSelect={setImpersonationUserId}
+              selectedUserId={impersonationUserId}
+              placeholder="Search users by name or email..."
+              emptyMessage="No users found matching your search."
+            />
           </div>
         )}
 
