@@ -1681,27 +1681,12 @@ export class DatabaseStorage implements IStorage {
         )
       );
 
-    // Apply ordering based on whether we have user passions
-    if (userPassions && userPassions.length > 0) {
-      // With passions: prioritize content matching user's interests
-      query = query.orderBy(
-        contentItems.id, // For DISTINCT ON
-        sql`(
-          SELECT COUNT(*)
-          FROM unnest(COALESCE(${contentItems.passionTags}, '{}'::text[])) AS tag
-          WHERE tag = ANY(${userPassions}::text[])
-        ) DESC`, // Passion matches first
-        sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`, // Then by configured order
-        contentItems.createdAt // Finally by creation date for stable ordering
-      );
-    } else {
-      // Without passions: use standard ordering
-      query = query.orderBy(
-        contentItems.id, // For DISTINCT ON
-        sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
-        contentItems.createdAt
-      );
-    }
+    // Apply standard ordering (passion-based sorting temporarily disabled due to array parameter issue)
+    query = query.orderBy(
+      contentItems.id, // For DISTINCT ON
+      sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
+      contentItems.createdAt
+    );
 
     return query;
   }
