@@ -9239,10 +9239,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's volunteer enrollments and hours (authenticated)
   app.get('/api/volunteer/my-enrollments', ...authWithImpersonation, async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const oidcSub = req.user?.claims?.sub;
+      if (!oidcSub) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUserByOidcSub(oidcSub);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
       
-      const enrollments = await storage.getUserEnrollments(userId);
-      const hours = await storage.getUserVolunteerHours(userId);
+      const enrollments = await storage.getUserEnrollments(user.id);
+      const hours = await storage.getUserVolunteerHours(user.id);
       
       res.json({ enrollments, hours });
     } catch (error: any) {
@@ -9254,37 +9262,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create volunteer enrollment (authenticated)
   app.post('/api/volunteer/enroll', ...authWithImpersonation, async (req: any, res) => {
     try {
+      const oidcSub = req.user?.claims?.sub;
+      if (!oidcSub) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUserByOidcSub(oidcSub);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       const { insertVolunteerEnrollmentSchema } = await import("@shared/schema");
       const enrollmentData = insertVolunteerEnrollmentSchema.parse({
         ...req.body,
-        userId: req.user.id,
+        userId: user.id,
       });
       
       const enrollment = await storage.createVolunteerEnrollment(enrollmentData);
       
       // Trigger funnel progression to retention stage
       try {
-        const user = await storage.getUserById(req.user.id);
-        if (user) {
-          // Get or create lead record for this volunteer
-          let lead = user.email ? await storage.getLeadByEmail(user.email) : null;
-          
-          if (!lead && user.email) {
-            // Create lead record if it doesn't exist
-            const leadData = {
-              email: user.email,
-              name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Volunteer',
-              persona: 'volunteer',
-              funnelStage: 'awareness',
-              source: 'volunteer_enrollment',
-            };
-            lead = await storage.createLead(leadData);
-          }
-          
-          if (lead) {
-            // Evaluate progression with volunteer enrollment event
-            await evaluateLeadProgression(lead.id, 'volunteer_enrolled' as EventType, req.user.id);
-          }
+        // Get or create lead record for this volunteer
+        let lead = user.email ? await storage.getLeadByEmail(user.email) : null;
+        
+        if (!lead && user.email) {
+          // Create lead record if it doesn't exist
+          const leadData = {
+            email: user.email,
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Volunteer',
+            persona: 'volunteer',
+            funnelStage: 'awareness',
+            source: 'volunteer_enrollment',
+          };
+          lead = await storage.createLead(leadData);
+        }
+        
+        if (lead) {
+          // Evaluate progression with volunteer enrollment event
+          await evaluateLeadProgression(lead.id, 'volunteer_enrolled' as EventType, user.id);
         }
       } catch (progressionError) {
         // Log but don't fail enrollment
