@@ -562,24 +562,37 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             <p className="text-xs text-muted-foreground mb-3">
               View the site as a specific user for troubleshooting
             </p>
-            <Button
-              variant="outline"
-              className="w-full justify-start h-11 text-base"
-              onClick={() => setUserSearchOpen(true)}
-              data-testid="button-open-user-search"
-            >
-              <Search className="w-4 h-4 mr-2" />
-              {impersonationUserId ? (
-                (() => {
-                  const selectedUser = users.find((u) => u.id === impersonationUserId);
-                  return selectedUser 
-                    ? `${selectedUser.firstName} ${selectedUser.lastName}`
-                    : "Select user...";
-                })()
-              ) : (
-                "Select user..."
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="flex-1 justify-start h-11 text-base"
+                onClick={() => setUserSearchOpen(true)}
+                data-testid="button-open-user-search"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                {impersonationUserId ? (
+                  (() => {
+                    const selectedUser = users.find((u) => u.id === impersonationUserId);
+                    return selectedUser 
+                      ? `${selectedUser.firstName} ${selectedUser.lastName}`
+                      : "Select user...";
+                  })()
+                ) : (
+                  "Select user..."
+                )}
+              </Button>
+              {impersonationUserId && (
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-11 w-11 shrink-0"
+                  onClick={() => setImpersonationUserId("")}
+                  data-testid="button-clear-user-selection"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               )}
-            </Button>
+            </div>
             {impersonationUserId && (
               <Button
                 className="w-full h-11 text-base"
@@ -885,25 +898,38 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                 <p className="text-[11px] text-muted-foreground mb-2">
                   View the site as a specific user for troubleshooting
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full justify-start h-8 text-sm"
-                  onClick={() => setUserSearchOpen(true)}
-                  data-testid="button-open-user-search"
-                >
-                  <Search className="w-3 h-3 mr-2" />
-                  {impersonationUserId ? (
-                    (() => {
-                      const selectedUser = users.find((u) => u.id === impersonationUserId);
-                      return selectedUser 
-                        ? `${selectedUser.firstName} ${selectedUser.lastName}`
-                        : "Select user...";
-                    })()
-                  ) : (
-                    "Select user..."
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 justify-start h-8 text-sm"
+                    onClick={() => setUserSearchOpen(true)}
+                    data-testid="button-open-user-search"
+                  >
+                    <Search className="w-3 h-3 mr-2" />
+                    {impersonationUserId ? (
+                      (() => {
+                        const selectedUser = users.find((u) => u.id === impersonationUserId);
+                        return selectedUser 
+                          ? `${selectedUser.firstName} ${selectedUser.lastName}`
+                          : "Select user...";
+                      })()
+                    ) : (
+                      "Select user..."
+                    )}
+                  </Button>
+                  {impersonationUserId && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-8 p-0 shrink-0"
+                      onClick={() => setImpersonationUserId("")}
+                      data-testid="button-clear-user-selection"
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
                   )}
-                </Button>
+                </div>
                 {impersonationUserId && (
                   <Button
                     size="sm"
