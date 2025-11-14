@@ -89,6 +89,7 @@ export default function AdminUserManagement() {
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
+    refetchOnMount: true, // Always refetch to handle auth/impersonation state changes
   });
 
   const { data: currentUser } = useQuery<User>({
@@ -383,6 +384,7 @@ export default function AdminUserManagement() {
                       <TableHead className="min-w-[150px]">Name</TableHead>
                       <TableHead className="min-w-[200px]">Email</TableHead>
                       <TableHead className="min-w-[140px]">Role</TableHead>
+                      <TableHead className="min-w-[120px]">Funnel Stage</TableHead>
                       <TableHead className="min-w-[200px]">Program Entitlements</TableHead>
                       {isSuperAdmin && <TableHead className="text-right min-w-[100px]">Actions</TableHead>}
                     </TableRow>
@@ -450,6 +452,39 @@ export default function AdminUserManagement() {
                                 (Cannot change own role)
                               </span>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            {(() => {
+                              const funnelStage = (user as any).funnelStage;
+                              if (!funnelStage) {
+                                return <Badge variant="secondary" className="text-xs">N/A</Badge>;
+                              }
+                              
+                              // Map funnel stages to badge variants
+                              const stageConfig: Record<string, { variant: "secondary" | "outline" | "default" | "destructive"; label: string }> = {
+                                awareness: { variant: "secondary", label: "Awareness" },
+                                consideration: { variant: "outline", label: "Consideration" },
+                                decision: { variant: "default", label: "Decision" },
+                                retention: { variant: "destructive", label: "Retention" },
+                              };
+                              
+                              const config = stageConfig[funnelStage] || { variant: "secondary", label: funnelStage };
+                              
+                              // Override retention to use success-like styling
+                              const badgeClass = funnelStage === 'retention' 
+                                ? 'text-xs bg-green-100 dark:bg-green-900 text-green-900 dark:text-green-100 border-green-200 dark:border-green-800'
+                                : 'text-xs';
+                              
+                              return (
+                                <Badge 
+                                  variant={funnelStage === 'retention' ? 'outline' : config.variant} 
+                                  className={badgeClass}
+                                  data-testid={`badge-funnel-${user.id}`}
+                                >
+                                  {config.label}
+                                </Badge>
+                              );
+                            })()}
                           </TableCell>
                           <TableCell>
                             {(() => {

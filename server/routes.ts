@@ -212,9 +212,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
       const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'super_admin');
       
+      // Get funnel stage from leads table if available
+      let funnelStage = "awareness"; // default
+      if (user?.email) {
+        const lead = await storage.getLeadByEmail(user.email);
+        if (lead?.funnelStage) {
+          funnelStage = lead.funnelStage;
+        }
+      }
+      
       res.json({
         ...user,
-        isAdminSession: isAdminSession || false
+        isAdminSession: isAdminSession || false,
+        funnelStage: funnelStage
       });
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -8837,6 +8847,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const enrollment = await storage.createTechGoesHomeEnrollment(enrollmentData);
       
+      // Trigger funnel progression to retention stage
+      try {
+        // Get or create lead record for this user
+        let lead = user.email ? await storage.getLeadByEmail(user.email) : null;
+        
+        if (!lead && user.email) {
+          // Create lead record if it doesn't exist
+          const leadData = {
+            email: user.email,
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Student',
+            persona: 'student',
+            funnelStage: 'awareness',
+            source: 'program_enrollment',
+          };
+          lead = await storage.createLead(leadData);
+        }
+        
+        if (lead) {
+          // Evaluate progression with enrollment event
+          await evaluateLeadProgression(lead.id, 'enrollment_submitted' as EventType, user.id);
+        }
+      } catch (progressionError) {
+        // Log but don't fail enrollment
+        console.error("Error triggering funnel progression for TGH enrollment:", progressionError);
+      }
+      
       res.json({
         message: "Successfully enrolled in Tech Goes Home program",
         enrollment
@@ -9190,6 +9226,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const enrollment = await storage.createVolunteerEnrollment(enrollmentData);
+      
+      // Trigger funnel progression to retention stage
+      try {
+        const user = await storage.getUserById(req.user.id);
+        if (user) {
+          // Get or create lead record for this volunteer
+          let lead = user.email ? await storage.getLeadByEmail(user.email) : null;
+          
+          if (!lead && user.email) {
+            // Create lead record if it doesn't exist
+            const leadData = {
+              email: user.email,
+              name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Volunteer',
+              persona: 'volunteer',
+              funnelStage: 'awareness',
+              source: 'volunteer_enrollment',
+            };
+            lead = await storage.createLead(leadData);
+          }
+          
+          if (lead) {
+            // Evaluate progression with volunteer enrollment event
+            await evaluateLeadProgression(lead.id, 'volunteer_enrolled' as EventType, req.user.id);
+          }
+        }
+      } catch (progressionError) {
+        // Log but don't fail enrollment
+        console.error("Error triggering funnel progression for volunteer enrollment:", progressionError);
+      }
+      
       res.json(enrollment);
     } catch (error: any) {
       console.error("Error creating enrollment:", error);

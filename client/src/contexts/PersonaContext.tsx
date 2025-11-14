@@ -143,7 +143,12 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     if (adminFunnelOverride && adminFunnelOverride !== "none") {
       setFunnelStage(adminFunnelOverride as FunnelStage);
     } else {
-      setFunnelStage("awareness");
+      // Use server-provided funnel stage for authenticated users
+      if (isAuthenticated && user && user.funnelStage) {
+        setFunnelStage(user.funnelStage as FunnelStage);
+      } else {
+        setFunnelStage("awareness");
+      }
     }
 
     // Mark persona as loaded

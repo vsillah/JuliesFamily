@@ -94,7 +94,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   getUser(id: string): Promise<User | undefined>;
   getUserByOidcSub(oidcSub: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getAllUsers(): Promise<User[]>;
+  getAllUsers(): Promise<(User & { funnelStage: string | null })[]>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(id: string, updates: Partial<UpsertUser>, actorId?: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
@@ -1012,8 +1012,18 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users).orderBy(desc(users.createdAt));
+  async getAllUsers(): Promise<(User & { funnelStage: string | null })[]> {
+    // Join with leads table to include funnel stage
+    const usersWithFunnelStage = await db
+      .select({
+        ...users,
+        funnelStage: leads.funnelStage,
+      })
+      .from(users)
+      .leftJoin(leads, eq(users.email, leads.email))
+      .orderBy(desc(users.createdAt));
+    
+    return usersWithFunnelStage as (User & { funnelStage: string | null })[];
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {

@@ -83,6 +83,43 @@ The backend uses Express.js on Node.js with TypeScript, exposing RESTful API end
 -   SendGrid
 -   Twilio
 
+## Recent Changes (November 2025)
+
+### Dashboard Card Visibility & Funnel Stage Implementation
+
+**Server-Side Changes**:
+- Extended `/api/auth/user` endpoint to include `funnelStage` (via LEFT JOIN with leads table)
+- Updated `getAllUsers()` storage method to LEFT JOIN leads table and return users with funnelStage
+- Added funnel progression triggers to TGH and volunteer enrollment handlers
+  - Both handlers create lead records if missing, then call `evaluateLeadProgression`
+  - Uses `EventType.enrollment_submitted` (TGH) and `EventType.volunteer_enrolled`
+  - Progression rule: enrollments advance users to "retention" stage
+
+**Client-Side Changes**:
+- Updated PersonaContext to use server-provided funnelStage (falls back to "awareness")
+- Fixed VolunteerEngagement to use persona/funnel-filtered content query (no enrollment gate)
+- Added Funnel Stage column to Admin User Management table with color-coded badges:
+  - Awareness: secondary (gray)
+  - Consideration: outline (white/black border)
+  - Decision: default (black/white)
+  - Retention: green (success styling with custom classes)
+
+**Architecture Lesson**: Funnel progression must be server-driven via funnelProgressionService, not client-side inference. Dashboard card queries should always be enabled when persona/funnelStage exist, regardless of enrollment status, to ensure content loads for all users.
+
+### Known Type Safety Issue
+
+**User Type Missing funnelStage**: The `User` type in `@shared/schema` doesn't include `funnelStage`, so AdminUserManagement uses `(user as any).funnelStage` to access it. This breaks type safety.
+
+**Why Not Fixed Yet**: Extending the shared User type is complex:
+1. The base `users` table in schema.ts doesn't include funnelStage (it's in leads)
+2. The `/api/admin/users` endpoint returns an extended type via LEFT JOIN
+3. Need to create a separate API response type or extend User at the API boundary
+
+**Recommended Fix** (for future iteration):
+1. Create API-specific response types in `@shared/schema` (e.g., `UserWithFunnelStage`)
+2. Update `/api/admin/users` endpoint to type response as `UserWithFunnelStage[]`
+3. Update AdminUserManagement to use typed `user.funnelStage` instead of `as any`
+
 ## Technical Patterns & Known Issues
 
 ### Radix UI Select Empty String Value Error

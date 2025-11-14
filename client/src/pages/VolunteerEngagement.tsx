@@ -5,16 +5,29 @@ import { Separator } from "@/components/ui/separator";
 import { Calendar, Clock, MapPin, Users, Award, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { VolunteerProgressCard } from "@/components/VolunteerProgressCard";
+import { usePersona } from "@/contexts/PersonaContext";
 import type { ContentItem, VolunteerDashboardCardMetadata } from "@shared/schema";
 
 export default function VolunteerEngagement() {
+  const { persona, funnelStage } = usePersona();
+  
   const { data, isLoading } = useQuery({
     queryKey: ['/api/volunteer/my-enrollments'],
   });
 
-  // Fetch volunteer dashboard card content for personalization
+  // Fetch volunteer dashboard card content for personalization (filtered by persona and funnel stage)
   const { data: volunteerCardContent } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/volunteer_dashboard_card"],
+    queryKey: ["/api/content/visible/volunteer_dashboard_card", { persona, funnelStage }],
+    queryFn: async () => {
+      if (!persona || !funnelStage) return [];
+      const params = new URLSearchParams();
+      params.append('persona', persona);
+      params.append('funnelStage', funnelStage);
+      const res = await fetch(`/api/content/visible/volunteer_dashboard_card?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch volunteer dashboard card content');
+      return res.json();
+    },
+    enabled: !!persona && !!funnelStage,
   });
 
   if (isLoading) {
