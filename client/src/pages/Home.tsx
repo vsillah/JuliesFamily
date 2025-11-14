@@ -17,6 +17,7 @@ import SchemaMarkup from "@/components/SchemaMarkup";
 import { usePersona } from "@/contexts/PersonaContext";
 import { CampaignImpactCard } from "@/components/CampaignImpactCard";
 import { StudentDashboard } from "@/components/StudentDashboard";
+import { VolunteerDashboard } from "@/components/VolunteerDashboard";
 import { useContentAvailability, type VisibleSections } from "@/hooks/useContentAvailability";
 import type { ContentItem } from "@shared/schema";
 
@@ -30,6 +31,7 @@ const DEFAULT_SECTIONS: VisibleSections = {
   events: true,
   donation: true,
   "student-dashboard": false,  // Only visible for enrolled students
+  "volunteer-dashboard": false,  // Only visible for enrolled volunteers
 };
 
 export default function Home() {
@@ -110,6 +112,9 @@ export default function Home() {
       
       {/* Student Dashboard - Only visible for enrolled students */}
       {sections["student-dashboard"] && <StudentDashboard />}
+      
+      {/* Volunteer Dashboard - Only visible for enrolled volunteers */}
+      {sections["volunteer-dashboard"] && <VolunteerDashboard />}
       
       {sections.services && (
         <section id="services" data-testid="section-services">
