@@ -100,11 +100,21 @@ export default function AdminUserManagement() {
     queryKey: ['/api/admin/programs', { isActive: 'true' }],
   });
 
+  // Fetch all entitlements to show counts in table
+  const { data: allEntitlements = [] } = useQuery<(Entitlement & { adminId: string })[]>({
+    queryKey: ['/api/admin/all-entitlements'],
+  });
+
   // Fetch entitlements for the selected user when dialog opens
   const { data: dialogUserEntitlements = [] } = useQuery<Entitlement[]>({
     queryKey: [`/api/admin/users/${entitlementDialogUserId}/entitlements`],
     enabled: !!entitlementDialogUserId,
   });
+
+  // Helper function to get entitlements for a user
+  const getUserEntitlements = (userId: string) => {
+    return allEntitlements.filter(e => e.adminId === userId && e.isActive);
+  };
 
   // Helper function to get role label
   const getRoleLabel = (role: UserRole): string => {
@@ -443,20 +453,44 @@ export default function AdminUserManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              {isSuperAdmin ? (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => setEntitlementDialogUserId(user.id)}
-                                  data-testid={`button-manage-entitlements-${user.id}`}
-                                  className="h-7"
-                                >
-                                  <Settings className="h-3 w-3 mr-1" />
-                                  Manage Programs
-                                </Button>
-                              ) : (
-                                <span className="text-xs text-muted-foreground">-</span>
-                              )}
+                              {(() => {
+                                const userEntitlements = getUserEntitlements(user.id);
+                                if (userEntitlements.length > 0) {
+                                  return (
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <span className="text-sm truncate" title={userEntitlements.map(e => e.program.name).join(', ')}>
+                                        {userEntitlements.map(e => e.program.name).join(', ')}
+                                      </span>
+                                      {isSuperAdmin && (
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => setEntitlementDialogUserId(user.id)}
+                                          data-testid={`button-manage-entitlements-${user.id}`}
+                                          className="h-7 flex-shrink-0"
+                                        >
+                                          <Settings className="h-3 w-3" />
+                                        </Button>
+                                      )}
+                                    </div>
+                                  );
+                                } else if (isSuperAdmin) {
+                                  return (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => setEntitlementDialogUserId(user.id)}
+                                      data-testid={`button-manage-entitlements-${user.id}`}
+                                      className="h-7"
+                                    >
+                                      <Settings className="h-3 w-3 mr-1" />
+                                      Manage Programs
+                                    </Button>
+                                  );
+                                } else {
+                                  return <span className="text-xs text-muted-foreground">-</span>;
+                                }
+                              })()}
                             </div>
                           </TableCell>
                           {isSuperAdmin && (

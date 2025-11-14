@@ -321,6 +321,20 @@ export function createAdminProvisioningStorage(db: NodePgDatabase<any>): IAdminP
         program: row.programs,
       }));
     },
+
+    async getAllAdminEntitlementsWithPrograms(): Promise<Array<AdminEntitlement & { program: Program }>> {
+      const results = await db
+        .select()
+        .from(adminEntitlements)
+        .innerJoin(programs, eq(adminEntitlements.programId, programs.id))
+        .where(eq(adminEntitlements.isActive, true))
+        .orderBy(desc(adminEntitlements.createdAt));
+      
+      return results.map(row => ({
+        ...row.admin_entitlements,
+        program: row.programs,
+      }));
+    },
     
     // ====================
     // Impersonation Sessions

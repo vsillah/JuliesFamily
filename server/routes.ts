@@ -1338,6 +1338,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to delete user entitlement" });
     }
   });
+
+  // Get all entitlements for all users (for admin user management view)
+  app.get('/api/admin/all-entitlements', ...authWithImpersonation, isAdmin, async (req: any, res) => {
+    try {
+      const entitlements = await storage.getAllAdminEntitlementsWithPrograms();
+      res.json(entitlements);
+    } catch (error) {
+      console.error("Error fetching all entitlements:", error);
+      res.status(500).json({ message: "Failed to fetch entitlements" });
+    }
+  });
   
   // Impersonation (use isAuthenticated not authWithImpersonation to allow ending while impersonating)
   app.get('/api/admin/impersonation/session', isAuthenticated, requireActualAdmin, async (req: any, res) => {

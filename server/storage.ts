@@ -821,6 +821,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   
   // Helper for UI - returns entitlements with joined program details
   getActiveAdminEntitlementsWithPrograms(adminId: string): Promise<Array<AdminEntitlement & { program: Program }>>;
+  getAllAdminEntitlementsWithPrograms(): Promise<Array<AdminEntitlement & { program: Program }>>;
   
   // Impersonation Session operations
   createImpersonationSession(session: InsertAdminImpersonationSession): Promise<AdminImpersonationSession>;
@@ -906,6 +907,7 @@ export class DatabaseStorage implements IStorage {
   updateAdminEntitlementStatus!: IAdminProvisioningStorage['updateAdminEntitlementStatus'];
   hasActiveEntitlement!: IAdminProvisioningStorage['hasActiveEntitlement'];
   getActiveAdminEntitlementsWithPrograms!: IAdminProvisioningStorage['getActiveAdminEntitlementsWithPrograms'];
+  getAllAdminEntitlementsWithPrograms!: IAdminProvisioningStorage['getAllAdminEntitlementsWithPrograms'];
   createImpersonationSession!: IAdminProvisioningStorage['createImpersonationSession'];
   getActiveImpersonationSession!: IAdminProvisioningStorage['getActiveImpersonationSession'];
   getImpersonationSessions!: IAdminProvisioningStorage['getImpersonationSessions'];
@@ -985,6 +987,7 @@ export class DatabaseStorage implements IStorage {
     this.updateAdminEntitlementStatus = this.adminProvisioningStorage.updateAdminEntitlementStatus.bind(this.adminProvisioningStorage);
     this.hasActiveEntitlement = this.adminProvisioningStorage.hasActiveEntitlement.bind(this.adminProvisioningStorage);
     this.getActiveAdminEntitlementsWithPrograms = this.adminProvisioningStorage.getActiveAdminEntitlementsWithPrograms.bind(this.adminProvisioningStorage);
+    this.getAllAdminEntitlementsWithPrograms = this.adminProvisioningStorage.getAllAdminEntitlementsWithPrograms.bind(this.adminProvisioningStorage);
     this.createImpersonationSession = this.adminProvisioningStorage.createImpersonationSession.bind(this.adminProvisioningStorage);
     this.getActiveImpersonationSession = this.adminProvisioningStorage.getActiveImpersonationSession.bind(this.adminProvisioningStorage);
     this.getImpersonationSessions = this.adminProvisioningStorage.getImpersonationSessions.bind(this.adminProvisioningStorage);
