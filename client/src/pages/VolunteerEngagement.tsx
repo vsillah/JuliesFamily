@@ -4,10 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Clock, MapPin, Users, Award, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
+import { VolunteerProgressCard } from "@/components/VolunteerProgressCard";
+import type { ContentItem, VolunteerDashboardCardMetadata } from "@shared/schema";
 
 export default function VolunteerEngagement() {
   const { data, isLoading } = useQuery({
     queryKey: ['/api/volunteer/my-enrollments'],
+  });
+
+  // Fetch volunteer dashboard card content for personalization
+  const { data: volunteerCardContent } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/volunteer_dashboard_card"],
   });
 
   if (isLoading) {
@@ -37,6 +44,22 @@ export default function VolunteerEngagement() {
   const ytdHours = Math.floor(hours.yearToDate / 60);
   const ytdMinutes = hours.yearToDate % 60;
 
+  // Calculate active enrollments (upcoming shifts with confirmed status)
+  const activeEnrollments = upcomingEnrollments.filter((e: any) => 
+    e.enrollment.enrollmentStatus === 'confirmed'
+  ).length;
+
+  // Extract volunteer card content from CMS
+  const firstCard = volunteerCardContent?.[0];
+  const cardContentData = firstCard ? {
+    title: firstCard.title,
+    description: firstCard.description || "Track your impact and commitment",
+    buttonText: (firstCard.metadata as VolunteerDashboardCardMetadata)?.buttonText || "View My Dashboard",
+    buttonLink: (firstCard.metadata as VolunteerDashboardCardMetadata)?.buttonLink || "/volunteer",
+    goalText: (firstCard.metadata as VolunteerDashboardCardMetadata)?.goalText,
+    motivationalText: (firstCard.metadata as VolunteerDashboardCardMetadata)?.motivationalText,
+  } : undefined;
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-5xl">
       <div className="mb-8">
@@ -44,6 +67,18 @@ export default function VolunteerEngagement() {
         <p className="text-muted-foreground">
           Track your volunteer commitments, hours, and impact
         </p>
+      </div>
+
+      {/* Volunteer Progress Dashboard Card */}
+      <div className="mb-8">
+        <VolunteerProgressCard
+          mode="summary"
+          data={{
+            totalHours: totalHours,
+            activeEnrollments: activeEnrollments,
+          }}
+          content={cardContentData}
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 mb-8">

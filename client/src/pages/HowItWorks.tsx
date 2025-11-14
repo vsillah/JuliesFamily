@@ -14,8 +14,27 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useQuery } from "@tanstack/react-query";
+import { VolunteerProgressCard } from "@/components/VolunteerProgressCard";
+import type { ContentItem, VolunteerDashboardCardMetadata } from "@shared/schema";
+import { Link } from "wouter";
 
 export default function HowItWorks() {
+  // Fetch volunteer dashboard card content for public demo
+  const { data: volunteerCardContent } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/volunteer_dashboard_card"],
+  });
+
+  // Extract volunteer card content from CMS
+  const firstCard = volunteerCardContent?.[0];
+  const cardContentData = firstCard ? {
+    title: firstCard.title,
+    description: firstCard.description || "Track your impact and commitment",
+    buttonText: (firstCard.metadata as VolunteerDashboardCardMetadata)?.buttonText || "View Volunteer Opportunities",
+    buttonLink: (firstCard.metadata as VolunteerDashboardCardMetadata)?.buttonLink || "/volunteer",
+    goalText: (firstCard.metadata as VolunteerDashboardCardMetadata)?.goalText,
+    motivationalText: (firstCard.metadata as VolunteerDashboardCardMetadata)?.motivationalText,
+  } : undefined;
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -252,7 +271,7 @@ export default function HowItWorks() {
                 <CardDescription>Make a difference in your community</CardDescription>
               </CardHeader>
               <CardContent>
-                <ol className="space-y-2 text-muted-foreground">
+                <ol className="space-y-2 text-muted-foreground mb-6">
                   <li className="flex items-start gap-2">
                     <ChevronRight className="w-4 h-4 mt-1 flex-shrink-0 text-primary" />
                     <span>Explore volunteer opportunities that match your interests</span>
@@ -266,6 +285,15 @@ export default function HowItWorks() {
                     <span>Fill out the volunteer application form</span>
                   </li>
                 </ol>
+
+                {/* Volunteer Recruitment Card */}
+                <div className="mt-6">
+                  <VolunteerProgressCard
+                    mode="demo"
+                    content={cardContentData}
+                    showGetStartedButton={true}
+                  />
+                </div>
               </CardContent>
             </Card>
 

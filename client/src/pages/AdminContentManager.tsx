@@ -358,6 +358,10 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/type/student_dashboard_card"],
   });
 
+  const { data: volunteerDashboardCards = [], isLoading: volunteerDashboardCardsLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/volunteer_dashboard_card"],
+  });
+
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
     queryKey: ["/api/google-reviews/all"],
   });
@@ -675,6 +679,15 @@ export default function AdminContentManager() {
         goalText: (editingItem.metadata as any)?.goalText?.trim() || undefined,
         motivationalText: (editingItem.metadata as any)?.motivationalText?.trim() || undefined
       };
+    } else if (editingItem.type === 'volunteer_dashboard_card') {
+      // Ensure required fields and clean optional fields
+      metadata = {
+        ...(editingItem.metadata || {}),
+        buttonText: (editingItem.metadata as any)?.buttonText || '',
+        buttonLink: (editingItem.metadata as any)?.buttonLink || '',
+        goalText: (editingItem.metadata as any)?.goalText?.trim() || undefined,
+        motivationalText: (editingItem.metadata as any)?.motivationalText?.trim() || undefined
+      };
     }
     
     const updates: any = {
@@ -746,6 +759,18 @@ export default function AdminContentManager() {
         }
       };
     } else if (newItem.type === 'student_dashboard_card') {
+      // Ensure required fields and clean optional fields
+      itemToCreate = {
+        ...itemToCreate,
+        metadata: {
+          ...itemToCreate.metadata,
+          buttonText: (itemToCreate.metadata as any)?.buttonText || '',
+          buttonLink: (itemToCreate.metadata as any)?.buttonLink || '',
+          goalText: (itemToCreate.metadata as any)?.goalText?.trim() || undefined,
+          motivationalText: (itemToCreate.metadata as any)?.motivationalText?.trim() || undefined
+        }
+      };
+    } else if (newItem.type === 'volunteer_dashboard_card') {
       // Ensure required fields and clean optional fields
       itemToCreate = {
         ...itemToCreate,
@@ -1176,6 +1201,7 @@ export default function AdminContentManager() {
                     <TabsTrigger value="googleReviews" data-testid="tab-google-reviews" className="whitespace-nowrap flex-shrink-0">Google Reviews ({googleReviews.length})</TabsTrigger>
                     <TabsTrigger value="lead_magnet" data-testid="tab-lead-magnets" className="whitespace-nowrap flex-shrink-0">Lead Magnets ({leadMagnets.length})</TabsTrigger>
                     <TabsTrigger value="student_dashboard_card" data-testid="tab-student-dashboard-card" className="whitespace-nowrap flex-shrink-0">Student Dashboard Card ({studentDashboardCards.length})</TabsTrigger>
+                    <TabsTrigger value="volunteer_dashboard_card" data-testid="tab-volunteer-dashboard-card" className="whitespace-nowrap flex-shrink-0">Volunteer Dashboard Card ({volunteerDashboardCards.length})</TabsTrigger>
                     <TabsTrigger value="student_project" data-testid="tab-student-projects" className="whitespace-nowrap flex-shrink-0">Student Projects ({studentProjects.length})</TabsTrigger>
                     <TabsTrigger value="student_testimonial" data-testid="tab-student-testimonials" className="whitespace-nowrap flex-shrink-0">Student Testimonials ({studentTestimonials.length})</TabsTrigger>
                   </TabsList>
@@ -1223,6 +1249,7 @@ export default function AdminContentManager() {
                     testimonial: testimonials,
                     lead_magnet: leadMagnets,
                     student_dashboard_card: studentDashboardCards,
+                    volunteer_dashboard_card: volunteerDashboardCards,
                   }}
                   visibilitySettings={allVisibilitySettings}
                   images={images}
@@ -1480,6 +1507,14 @@ export default function AdminContentManager() {
               <div className="text-center py-12 text-muted-foreground">Loading...</div>
             ) : (
               renderContentList(studentDashboardCards, "student dashboard card")
+            )}
+          </TabsContent>
+
+          <TabsContent value="volunteer_dashboard_card" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {volunteerDashboardCardsLoading ? (
+              <div className="text-center py-12 text-muted-foreground">Loading...</div>
+            ) : (
+              renderContentList(volunteerDashboardCards, "volunteer dashboard card")
             )}
           </TabsContent>
 
@@ -2434,6 +2469,77 @@ export default function AdminContentManager() {
                     rows={3}
                     placeholder="e.g., Keep up the great work! You're making excellent progress."
                     data-testid="input-edit-motivational-text"
+                  />
+                </>
+              )}
+
+              {/* Volunteer Dashboard Card specific fields */}
+              {editingItem.type === 'volunteer_dashboard_card' && (
+                <>
+                  <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                    <div className="flex items-start gap-2">
+                      <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <Label className="text-sm font-semibold">Dashboard Card Details</Label>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Configure the button and optional motivational content for enrolled volunteers' dashboard card.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-volunteer-button-text">Button Text *</Label>
+                    <Input
+                      id="edit-volunteer-button-text"
+                      value={(editingItem.metadata as any)?.buttonText || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), buttonText: e.target.value } })}
+                      placeholder="View My Volunteer Dashboard"
+                      data-testid="input-edit-volunteer-button-text"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Text displayed on the call-to-action button
+                    </p>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="edit-volunteer-button-link">Button URL *</Label>
+                    <Input
+                      id="edit-volunteer-button-link"
+                      value={(editingItem.metadata as any)?.buttonLink || ""}
+                      onChange={(e) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), buttonLink: e.target.value } })}
+                      placeholder="/volunteer"
+                      data-testid="input-edit-volunteer-button-link"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      URL or path where the button should navigate
+                    </p>
+                  </div>
+
+                  <AITextarea
+                    id="edit-volunteer-goal-text"
+                    label="Goal Text Override (Optional)"
+                    value={(editingItem.metadata as any)?.goalText || ""}
+                    onChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), goalText: value } })}
+                    fieldType="goalText"
+                    contentType="volunteer_dashboard_card"
+                    title={editingItem.title}
+                    rows={2}
+                    placeholder="e.g., Goal: Complete 20+ hours this quarter"
+                    data-testid="input-edit-volunteer-goal-text"
+                  />
+
+                  <AITextarea
+                    id="edit-volunteer-motivational-text"
+                    label="Motivational Text Override (Optional)"
+                    value={(editingItem.metadata as any)?.motivationalText || ""}
+                    onChange={(value) => setEditingItem({ ...editingItem, metadata: { ...(editingItem.metadata as any || {}), motivationalText: value } })}
+                    fieldType="motivationalText"
+                    contentType="volunteer_dashboard_card"
+                    title={editingItem.title}
+                    rows={3}
+                    placeholder="e.g., Your dedication makes a real difference. Thank you for your commitment!"
+                    data-testid="input-edit-volunteer-motivational-text"
                   />
                 </>
               )}
@@ -3464,6 +3570,77 @@ export default function AdminContentManager() {
                   rows={3}
                   placeholder="e.g., Keep up the great work! You're making excellent progress."
                   data-testid="input-create-motivational-text"
+                />
+              </>
+            )}
+
+            {/* Volunteer Dashboard Card specific fields for create */}
+            {activeTab === 'volunteer_dashboard_card' && (
+              <>
+                <div className="space-y-3 p-4 border border-border rounded-lg bg-muted/20">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <Label className="text-sm font-semibold">Dashboard Card Details</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Configure the button and optional motivational content for enrolled volunteers' dashboard card.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="create-volunteer-button-text">Button Text *</Label>
+                  <Input
+                    id="create-volunteer-button-text"
+                    value={(newItem.metadata as any)?.buttonText || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), buttonText: e.target.value } })}
+                    placeholder="View My Volunteer Dashboard"
+                    data-testid="input-create-volunteer-button-text"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Text displayed on the call-to-action button
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="create-volunteer-button-link">Button URL *</Label>
+                  <Input
+                    id="create-volunteer-button-link"
+                    value={(newItem.metadata as any)?.buttonLink || ""}
+                    onChange={(e) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), buttonLink: e.target.value } })}
+                    placeholder="/volunteer"
+                    data-testid="input-create-volunteer-button-link"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    URL or path where the button should navigate
+                  </p>
+                </div>
+
+                <AITextarea
+                  id="create-volunteer-goal-text"
+                  label="Goal Text Override (Optional)"
+                  value={(newItem.metadata as any)?.goalText || ""}
+                  onChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), goalText: value } })}
+                  fieldType="goalText"
+                  contentType="volunteer_dashboard_card"
+                  title={newItem.title}
+                  rows={2}
+                  placeholder="e.g., Goal: Complete 20+ hours this quarter"
+                  data-testid="input-create-volunteer-goal-text"
+                />
+
+                <AITextarea
+                  id="create-volunteer-motivational-text"
+                  label="Motivational Text Override (Optional)"
+                  value={(newItem.metadata as any)?.motivationalText || ""}
+                  onChange={(value) => setNewItem({ ...newItem, metadata: { ...(newItem.metadata as any || {}), motivationalText: value } })}
+                  fieldType="motivationalText"
+                  contentType="volunteer_dashboard_card"
+                  title={newItem.title}
+                  rows={3}
+                  placeholder="e.g., Your dedication makes a real difference. Thank you for your commitment!"
+                  data-testid="input-create-volunteer-motivational-text"
                 />
               </>
             )}
