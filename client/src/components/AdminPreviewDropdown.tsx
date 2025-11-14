@@ -281,6 +281,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   const appliedPersonaConfig = personaConfigs.find(p => p.id === appliedPersona);
   const appliedFunnelConfig = funnelStageConfigs.find(f => f.id === currentFunnel);
 
+  // Determine if variant selection UI should be shown (both persona and funnel must be selected)
+  const canShowVariants = activeTests && activeTests.length > 0 && 
+                          selectedPersona && selectedPersona !== "default" && 
+                          selectedFunnel !== "none";
+
   // Mobile full-screen overlay - portaled to document.body to escape stacking context
   const mobileOverlay = showMobileOverlay && typeof document !== 'undefined' && createPortal(
     <div 
@@ -357,7 +362,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         </div>
 
         {/* A/B Test Variants */}
-        {activeTests && activeTests.length > 0 && (
+        {canShowVariants && (
           <>
             <div className="h-px bg-border my-4" />
             <div className="py-2 space-y-2">
@@ -381,6 +386,27 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                   }
                 }}
               />
+            </div>
+          </>
+        )}
+
+        {/* A/B Test Count (when persona selected but no funnel) */}
+        {activeTests && activeTests.length > 0 && !canShowVariants && selectedPersona !== "default" && (
+          <>
+            <div className="h-px bg-border my-4" />
+            <div className="py-2 space-y-2">
+              <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                <TestTube2 className="w-4 h-4" />
+                A/B Tests
+              </label>
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" data-testid="badge-ab-test-count">
+                  {activeTests.length} {activeTests.length === 1 ? 'test' : 'tests'}
+                </Badge>
+                <p className="text-xs text-muted-foreground">
+                  Select a journey stage to configure variant overrides
+                </p>
+              </div>
             </div>
           </>
         )}
@@ -562,7 +588,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             </div>
 
             {/* A/B Test Variants */}
-            {activeTests && activeTests.length > 0 && (
+            {canShowVariants && (
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-2 space-y-2">
@@ -586,6 +612,27 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                       }
                     }}
                   />
+                </div>
+              </>
+            )}
+
+            {/* A/B Test Count (when persona selected but no funnel) */}
+            {activeTests && activeTests.length > 0 && !canShowVariants && selectedPersona !== "default" && (
+              <>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-2 space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    <TestTube2 className="w-3 h-3" />
+                    A/B Tests
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" data-testid="badge-ab-test-count">
+                      {activeTests.length} {activeTests.length === 1 ? 'test' : 'tests'}
+                    </Badge>
+                    <p className="text-[11px] text-muted-foreground">
+                      Select a journey stage to configure variant overrides
+                    </p>
+                  </div>
                 </div>
               </>
             )}

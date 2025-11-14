@@ -1773,15 +1773,35 @@ export class DatabaseStorage implements IStorage {
       )
     ];
     
-    // If no persona or funnelStage provided, return all active tests
-    if (!persona || !funnelStage) {
+    // If neither persona nor funnelStage provided, return all active tests
+    if (!persona && !funnelStage) {
       return await db
         .select()
         .from(abTests)
         .where(and(...baseFilters));
     }
     
-    // Return tests that target the specific persona:funnelStage combination
+    // Build target filters based on what's provided
+    const targetFilters = [];
+    
+    // Always filter by persona if provided
+    if (persona) {
+      targetFilters.push(eq(abTestTargets.persona, persona));
+    }
+    
+    // Handle funnelStage filtering:
+    // - If funnelStage provided: match that specific stage
+    // - If persona provided but no funnelStage: include tests where funnelStage IS NULL (persona-wide tests)
+    if (funnelStage) {
+      targetFilters.push(eq(abTestTargets.funnelStage, funnelStage));
+    } else if (persona) {
+      // When persona is provided but funnelStage is not, include:
+      // 1. Tests with specific funnel stages (any non-null value)
+      // 2. Tests with NULL funnel stage (persona-wide tests)
+      // This is already handled by not filtering funnelStage at all
+    }
+    
+    // Return tests that match the provided persona and/or funnelStage
     const tests = await db
       .selectDistinct({
         id: abTests.id,
@@ -1804,8 +1824,7 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           ...baseFilters,
-          eq(abTestTargets.persona, persona),
-          eq(abTestTargets.funnelStage, funnelStage)
+          ...targetFilters
         )
       );
     
