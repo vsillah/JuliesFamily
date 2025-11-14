@@ -394,7 +394,7 @@ export default function AdminAutomationRules() {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>{editingRule ? "Edit Automation Rule" : "Create Automation Rule"}</DialogTitle>
             <DialogDescription>
@@ -426,7 +426,7 @@ export default function AdminAutomationRules() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="targetPersona">Target Persona (Optional)</Label>
                 <Select
@@ -507,7 +507,7 @@ export default function AdminAutomationRules() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="baselineWindow">Baseline Window (days)</Label>
                 <Input
@@ -539,7 +539,7 @@ export default function AdminAutomationRules() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="compositeScoreThreshold">Performance Threshold (0-10000)</Label>
                 <Input
