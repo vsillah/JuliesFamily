@@ -668,12 +668,12 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
       {isMobile ? (
         // Mobile-only button - no Radix UI, simple onClick handler
         <Button
-          variant={isScrolled ? "outline" : "ghost"}
+          variant={impersonatedUser ? "outline" : (isScrolled ? "outline" : "ghost")}
           size="sm"
           className={cn(
             "gap-2 relative",
-            !isScrolled && "border-white/30 text-white hover:bg-white/10",
-            impersonatedUser && "border-primary/50 bg-primary/10"
+            !isScrolled && !impersonatedUser && "border-white/30 text-white hover:bg-white/10",
+            impersonatedUser && "border-primary bg-primary/10"
           )}
           data-testid="button-admin-preview-dropdown"
           onClick={() => setShowMobileOverlay(true)}
@@ -705,12 +705,12 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         <DropdownMenu open={open} onOpenChange={setOpen}>
           <DropdownMenuTrigger asChild>
             <Button
-              variant={isScrolled ? "outline" : "ghost"}
+              variant={impersonatedUser ? "outline" : (isScrolled ? "outline" : "ghost")}
               size="sm"
               className={cn(
                 "gap-2 relative",
-                !isScrolled && "border-white/30 text-white hover:bg-white/10",
-                impersonatedUser && "border-primary/50 bg-primary/10"
+                !isScrolled && !impersonatedUser && "border-white/30 text-white hover:bg-white/10",
+                impersonatedUser && "border-primary bg-primary/10"
               )}
               data-testid="button-admin-preview-dropdown"
             >
