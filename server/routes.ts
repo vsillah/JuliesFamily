@@ -212,18 +212,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
       const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'super_admin');
       
-      // Get funnel stage from leads table if available
+      // Get persona and funnel stage from leads table if available
       let funnelStage = "awareness"; // default
+      let persona = user?.persona || "default"; // fallback to user table or default
       if (user?.email) {
         const lead = await storage.getLeadByEmail(user.email);
-        if (lead?.funnelStage) {
-          funnelStage = lead.funnelStage;
+        if (lead) {
+          if (lead.funnelStage) {
+            funnelStage = lead.funnelStage;
+          }
+          if (lead.persona) {
+            persona = lead.persona; // Lead persona takes priority
+          }
         }
       }
       
       res.json({
         ...user,
         isAdminSession: isAdminSession || false,
+        persona: persona,
         funnelStage: funnelStage
       });
     } catch (error) {
