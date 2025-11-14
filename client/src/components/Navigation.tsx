@@ -18,6 +18,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { ObjectUploader } from "@/components/ObjectUploader";
 import { AdminPreviewDropdown } from "@/components/AdminPreviewDropdown";
 import { DevAdminButton } from "@/components/DevAdminButton";
+import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -178,6 +179,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
           paddingTop: 'max(env(safe-area-inset-top), 1rem)'
         }}
       >
+        <ImpersonationBanner />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-14 md:h-20 gap-2 md:gap-4">
             {/* Left: Brand */}

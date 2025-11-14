@@ -4,16 +4,20 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+import { useUserRole } from "@/hooks/useUserRole";
+
 export function ImpersonationBanner() {
   const { toast } = useToast();
+  const { isAdmin } = useUserRole();
 
-  // Fetch active impersonation session
+  // Fetch active impersonation session (only for admins)
   const { data: impersonationSession } = useQuery<{
     id: string;
     impersonatedUserId: string;
     isActive: boolean;
   } | null>({
     queryKey: ['/api/admin/impersonation/session'],
+    enabled: isAdmin,
   });
 
   // Fetch all users to get impersonated user details
@@ -61,7 +65,7 @@ export function ImpersonationBanner() {
     : 'Unknown User';
 
   return (
-    <div className="bg-yellow-500 dark:bg-yellow-600 text-yellow-950 dark:text-yellow-50 px-4 py-2 sticky top-0 z-[100000] shadow-md">
+    <div className="bg-yellow-500 dark:bg-yellow-600 text-yellow-950 dark:text-yellow-50 px-4 py-2 w-full shadow-md">
       <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <AlertCircle className="w-5 h-5 shrink-0" />
