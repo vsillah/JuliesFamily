@@ -769,6 +769,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   getVolunteerEnrollment(id: string): Promise<VolunteerEnrollment | undefined>;
   getShiftEnrollments(shiftId: string): Promise<VolunteerEnrollment[]>;
   getUserEnrollments(userId: string): Promise<any[]>; // Returns enriched data with event/shift info
+  getActiveVolunteerEnrollmentsByUserId(userId: string): Promise<VolunteerEnrollment[]>; // Returns active enrollments only
   getLeadEnrollmentsVolunteer(leadId: string): Promise<any[]>; // Returns enriched data
   updateVolunteerEnrollment(id: string, updates: Partial<InsertVolunteerEnrollment>): Promise<VolunteerEnrollment | undefined>;
   deleteVolunteerEnrollment(id: string): Promise<void>;
@@ -1687,7 +1688,7 @@ export class DatabaseStorage implements IStorage {
         contentItems.id, // For DISTINCT ON
         sql`(
           SELECT COUNT(*)
-          FROM jsonb_array_elements_text(COALESCE(${contentItems.passionTags}, '[]'::jsonb)) AS tag
+          FROM unnest(COALESCE(${contentItems.passionTags}, '{}'::text[])) AS tag
           WHERE tag = ANY(${userPassions}::text[])
         ) DESC`, // Passion matches first
         sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`, // Then by configured order
@@ -5523,6 +5524,21 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(volunteerShifts.shiftDate));
     
     return results;
+  }
+
+  async getActiveVolunteerEnrollmentsByUserId(userId: string): Promise<VolunteerEnrollment[]> {
+    // Active statuses: registered, confirmed, checked_in
+    // Exclude: cancelled, no_show, completed
+    const activeStatuses = ['registered', 'confirmed', 'checked_in'];
+    return await db
+      .select()
+      .from(volunteerEnrollments)
+      .where(
+        and(
+          eq(volunteerEnrollments.userId, userId),
+          inArray(volunteerEnrollments.enrollmentStatus, activeStatuses)
+        )
+      );
   }
 
   async getLeadEnrollmentsVolunteer(leadId: string): Promise<any[]> {

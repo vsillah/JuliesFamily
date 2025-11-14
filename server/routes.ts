@@ -3366,8 +3366,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userPassions: string[] | null = null;
       
       // First, try to get from authenticated user profile
-      if (req.session?.oidcSub) {
-        const user = await storage.getUserByOidcSub(req.session.oidcSub);
+      const oidcSub = req.user?.claims?.sub;
+      if (oidcSub) {
+        const user = await storage.getUserByOidcSub(oidcSub);
         if (user?.passions) {
           userPassions = user.passions as string[];
         }
@@ -3417,6 +3418,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper: Check dashboard visibility for persona-specific dashboards
+  // Centralizes logic: requires (1) specific persona, (2) retention stage, (3) active program enrollment
+  async function resolveDashboardVisibility(
+    req: any,
+    persona: string | undefined,
+    funnelStage: string | undefined
+  ): Promise<{ studentDashboard: boolean; volunteerDashboard: boolean }> {
+    const result = { studentDashboard: false, volunteerDashboard: false };
+    
+    // Only check for authenticated users in retention stage
+    if (funnelStage !== 'retention') return result;
+    
+    const oidcSub = req.user?.claims?.sub;
+    if (!oidcSub) return result;
+    
+    const user = await storage.getUserByOidcSub(oidcSub);
+    if (!user) return result;
+    
+    // Student dashboard: student persona + retention + active TGH enrollment
+    if (persona === 'student') {
+      const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+      result.studentDashboard = !!enrollment;
+      console.log('[student-dashboard] Visibility check:', { userId: user.id, enrollmentFound: !!enrollment });
+    }
+    
+    // Volunteer dashboard: volunteer persona + retention + active volunteer enrollments
+    if (persona === 'volunteer') {
+      const enrollments = await storage.getActiveVolunteerEnrollmentsByUserId(user.id);
+      result.volunteerDashboard = enrollments.length > 0;
+      console.log('[volunteer-dashboard] Visibility check:', { userId: user.id, enrollmentsFound: enrollments.length });
+    }
+    
+    return result;
+  }
+
   // Get visible sections for navigation (public, filtered by persona/funnel/passions)
   app.get('/api/content/visible-sections', async (req, res) => {
     try {
@@ -3427,8 +3463,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userPassions: string[] | null = null;
       
       // First, try to get from authenticated user profile
-      if (req.session?.oidcSub) {
-        const user = await storage.getUserByOidcSub(req.session.oidcSub);
+      const oidcSub = req.user?.claims?.sub;
+      if (oidcSub) {
+        const user = await storage.getUserByOidcSub(oidcSub);
         if (user?.passions) {
           userPassions = user.passions as string[];
         }
@@ -3451,6 +3488,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'events': false,
         'donation': false,
         'student-dashboard': false,
+        'volunteer-dashboard': false,
       };
       
       for (const type of sectionTypes) {
@@ -3487,23 +3525,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Impact stats are always visible (static component, not CMS-managed)
       visibleSections.impact = true;
       
-      // Student dashboard is visible only for students in retention stage who are enrolled in Tech Goes Home
-      // Three required conditions: (1) student persona, (2) retention stage, (3) TGH enrollment
-      const oidcSub = (req.user as any)?.claims?.sub;
-      console.log('[student-dashboard] Checking visibility:', { persona, funnelStage, hasOidcSub: !!oidcSub });
-      if (persona === 'student' && funnelStage === 'retention' && oidcSub) {
-        const user = await storage.getUserByOidcSub(oidcSub);
-        console.log('[student-dashboard] User lookup:', { oidcSub, userId: user?.id, found: !!user });
-        if (user) {
-          const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
-          console.log('[student-dashboard] Enrollment lookup:', { userId: user.id, enrollmentId: enrollment?.id, status: enrollment?.status, found: !!enrollment });
-          visibleSections['student-dashboard'] = !!enrollment;
-        } else {
-          visibleSections['student-dashboard'] = false;
-        }
-      } else {
-        visibleSections['student-dashboard'] = false;
-      }
+      // Resolve dashboard visibility using centralized helper
+      const dashboards = await resolveDashboardVisibility(req, persona as string | undefined, funnelStage as string | undefined);
+      visibleSections['student-dashboard'] = dashboards.studentDashboard;
+      visibleSections['volunteer-dashboard'] = dashboards.volunteerDashboard;
       
       console.log('[visible-sections] Returning sections:', visibleSections);
       res.json(visibleSections);
