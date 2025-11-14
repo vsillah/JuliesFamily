@@ -296,9 +296,9 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   // Start impersonation mutation
   const startImpersonationMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return await apiRequest('/api/admin/impersonation/start', {
-        method: 'POST',
-        body: JSON.stringify({ impersonatedUserId: userId, reason: 'Admin troubleshooting via preview mode' }),
+      return await apiRequest('POST', '/api/admin/impersonation/start', {
+        impersonatedUserId: userId,
+        reason: 'Admin troubleshooting via preview mode'
       });
     },
     onSuccess: () => {
@@ -322,9 +322,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   // End impersonation mutation
   const endImpersonationMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      return await apiRequest(`/api/admin/impersonation/end/${sessionId}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest('DELETE', `/api/admin/impersonation/end/${sessionId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/impersonation/session'] });
