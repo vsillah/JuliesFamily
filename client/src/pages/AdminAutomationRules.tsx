@@ -394,7 +394,7 @@ export default function AdminAutomationRules() {
           resetForm();
         }
       }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
+        <DialogContent className="w-screen h-[100dvh] max-w-none rounded-none p-4 overflow-y-auto sm:max-w-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg sm:p-6">
           <DialogHeader>
             <DialogTitle>{editingRule ? "Edit Automation Rule" : "Create Automation Rule"}</DialogTitle>
             <DialogDescription>
@@ -584,7 +584,7 @@ export default function AdminAutomationRules() {
               <Label htmlFor="isActive">Rule is active</Label>
             </div>
 
-            <div className="flex gap-2 justify-end pt-4 border-t">
+            <div className="flex flex-col sm:flex-row gap-2 justify-end pt-4 border-t">
               <Button
                 variant="outline"
                 onClick={() => {
@@ -593,6 +593,7 @@ export default function AdminAutomationRules() {
                   setEditingRule(null);
                   resetForm();
                 }}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
@@ -605,6 +606,7 @@ export default function AdminAutomationRules() {
                   updateRuleMutation.isPending
                 }
                 data-testid="button-save-rule"
+                className="w-full sm:w-auto"
               >
                 {createRuleMutation.isPending || updateRuleMutation.isPending
                   ? "Saving..."
