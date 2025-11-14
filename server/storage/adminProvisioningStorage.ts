@@ -47,6 +47,7 @@ export interface IAdminProvisioningStorage {
   updateAdminEntitlementStatus(id: string, isActive: boolean): Promise<AdminEntitlement | undefined>;
   hasActiveEntitlement(adminId: string, programId: string): Promise<boolean>;
   getActiveAdminEntitlementsWithPrograms(adminId: string): Promise<Array<AdminEntitlement & { program: Program }>>;
+  getAllAdminEntitlementsWithPrograms(): Promise<Array<AdminEntitlement & { program: Program }>>;
   
   // Impersonation Session operations
   createImpersonationSession(session: InsertAdminImpersonationSession): Promise<AdminImpersonationSession>;
