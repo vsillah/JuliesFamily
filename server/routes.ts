@@ -3785,6 +3785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const validatedData = insertAbTestSchema.parse({
         ...testData,
+        source: 'manual', // Explicit source for priority handling
         createdBy: currentUser?.id || null,
       });
       

@@ -45,7 +45,8 @@ export class TestLifecycleManagerService {
       status: 'draft',
       trafficAllocation: 100, // Full traffic allocation for automated tests
       startDate: new Date(),
-      isAutomated: true,
+      source: 'automated', // Explicit source for priority handling
+      isAutomated: true, // DEPRECATED: Use 'source' field instead
     });
 
     // Create control variant

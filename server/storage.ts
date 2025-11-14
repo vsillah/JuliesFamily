@@ -1773,7 +1773,7 @@ export class DatabaseStorage implements IStorage {
       )
     ];
     
-    // If neither persona nor funnelStage provided, return all active tests
+    // If neither persona nor funnelStage provided, return all active tests (no priority filtering needed)
     if (!persona && !funnelStage) {
       return await db
         .select()
@@ -1803,20 +1803,24 @@ export class DatabaseStorage implements IStorage {
         .where(and(...baseFilters));
     }
     
-    // First, get distinct test IDs that match the target criteria
-    // This prevents duplicate tests when a single test targets multiple funnel stages
-    const matchingTestIds = await db
-      .selectDistinct({ testId: abTestTargets.testId })
+    // Fetch all matching test IDs with their target combinations
+    // This allows us to group tests by persona×funnel for priority filtering
+    const matchingTargets = await db
+      .select({
+        testId: abTestTargets.testId,
+        persona: abTestTargets.persona,
+        funnelStage: abTestTargets.funnelStage,
+      })
       .from(abTestTargets)
       .where(and(...targetFilters));
     
-    if (matchingTestIds.length === 0) {
+    if (matchingTargets.length === 0) {
       return [];
     }
     
-    const testIds = matchingTestIds.map(row => row.testId);
+    const testIds = Array.from(new Set(matchingTargets.map(t => t.testId)));
     
-    // Then fetch the full test data for those IDs, filtered by active status
+    // Fetch the full test data for those IDs, filtered by active status
     const tests = await db
       .select()
       .from(abTests)
@@ -1827,7 +1831,69 @@ export class DatabaseStorage implements IStorage {
         )
       );
     
-    return tests;
+    // Apply priority filtering: manual tests override automated tests
+    // Group tests by persona×funnelStage combination
+    const testsByTarget = new Map<string, AbTest[]>();
+    
+    for (const target of matchingTargets) {
+      const key = `${target.persona}:${target.funnelStage}`;
+      const test = tests.find(t => t.id === target.testId);
+      
+      if (test) {
+        if (!testsByTarget.has(key)) {
+          testsByTarget.set(key, []);
+        }
+        testsByTarget.get(key)!.push(test);
+      }
+    }
+    
+    // For each persona×funnel combination, select the highest priority test
+    // Priority order: manual tests > automated tests
+    // If multiple tests of same priority, select most recent by startDate
+    const prioritizedTests = new Set<string>();
+    
+    for (const [key, testsForTarget] of testsByTarget.entries()) {
+      // Separate manual and automated tests
+      // Fallback to isAutomated field for legacy tests without source field
+      const manualTests = testsForTarget.filter(t => {
+        if (t.source === 'manual') return true;
+        if (t.source === 'automated') return false;
+        // Legacy: fall back to isAutomated field (explicit false check)
+        return t.isAutomated === false;
+      });
+      
+      const automatedTests = testsForTarget.filter(t => {
+        if (t.source === 'automated') return true;
+        if (t.source === 'manual') return false;
+        // Legacy: fall back to isAutomated field (explicit true check or null defaults to automated)
+        return t.isAutomated === true || t.isAutomated === null;
+      });
+      
+      let selectedTest: AbTest | null = null;
+      
+      if (manualTests.length > 0) {
+        // Prefer manual tests - select most recent by startDate (or createdAt if no startDate)
+        selectedTest = manualTests.sort((a, b) => {
+          const dateA = a.startDate || a.createdAt;
+          const dateB = b.startDate || b.createdAt;
+          return dateB.getTime() - dateA.getTime();
+        })[0];
+      } else if (automatedTests.length > 0) {
+        // Fall back to automated tests if no manual tests exist
+        selectedTest = automatedTests.sort((a, b) => {
+          const dateA = a.startDate || a.createdAt;
+          const dateB = b.startDate || b.createdAt;
+          return dateB.getTime() - dateA.getTime();
+        })[0];
+      }
+      
+      if (selectedTest) {
+        prioritizedTests.add(selectedTest.id);
+      }
+    }
+    
+    // Return only the prioritized tests (deduped across all target combinations)
+    return tests.filter(t => prioritizedTests.has(t.id));
   }
 
   async updateAbTest(id: string, updates: Partial<InsertAbTest>): Promise<AbTest | undefined> {

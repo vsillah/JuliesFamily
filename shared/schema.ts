@@ -845,6 +845,10 @@ export type AbTestSafetyLimit = typeof abTestSafetyLimits.$inferSelect;
 
 // ==================== END FOUNDATION TABLES ====================
 
+// A/B Test source enum for priority handling
+export const abTestSourceEnum = z.enum(['manual', 'automated']);
+export type AbTestSource = z.infer<typeof abTestSourceEnum>;
+
 // A/B Testing tables for experimentation and optimization
 export const abTests = pgTable("ab_tests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -860,7 +864,8 @@ export const abTests = pgTable("ab_tests", {
   winnerVariantId: varchar("winner_variant_id"), // ID of winning variant once determined
   
   // Automation fields
-  isAutomated: boolean("is_automated").default(false), // Was this test created by automation?
+  source: varchar("source").notNull().default('manual'), // 'manual' | 'automated' - explicit source for priority handling
+  isAutomated: boolean("is_automated").default(false), // DEPRECATED: Use 'source' field instead. Kept for backwards compatibility
   automationRuleId: varchar("automation_rule_id").references(() => abTestAutomationRules.id, { onDelete: "set null" }), // Link to automation rule if automated
   autoPromotedAt: timestamp("auto_promoted_at"), // When winner was automatically promoted
   
@@ -875,6 +880,8 @@ export const insertAbTestSchema = createInsertSchema(abTests).omit({
   targetFunnelStage: true, // Deprecated - use abTestTargets junction table
   createdAt: true,
   updatedAt: true,
+}).extend({
+  source: abTestSourceEnum.default('manual'), // Validate source field with enum
 });
 export type InsertAbTest = z.infer<typeof insertAbTestSchema>;
 export type AbTest = typeof abTests.$inferSelect;

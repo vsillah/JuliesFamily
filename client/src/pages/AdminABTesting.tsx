@@ -779,6 +779,21 @@ export default function AdminABTesting() {
     return <Badge variant={config.variant} data-testid={`badge-status-${status}`}>{config.label}</Badge>;
   };
 
+  const getSourceBadge = (source: string | undefined, isAutomated: boolean | null) => {
+    // Use source field if available, otherwise fall back to isAutomated for legacy tests
+    // Match backend logic: null isAutomated defaults to automated
+    const isAutomatedTest = source === 'automated' || (!source && (isAutomated === true || isAutomated === null));
+    
+    if (isAutomatedTest) {
+      return <Badge variant="secondary" data-testid="badge-source-automated">
+        <Zap className="w-3 h-3 mr-1" />
+        Automated
+      </Badge>;
+    } else {
+      return <Badge variant="outline" data-testid="badge-source-manual">Manual</Badge>;
+    }
+  };
+
   const testTypeLabels: Record<string, string> = {
     card_order: "Card Order",
     layout: "Layout",
@@ -933,6 +948,7 @@ export default function AdminABTesting() {
                         <CardTitle className="break-words">{test.name}</CardTitle>
                         {getStatusBadge(test.status)}
                         <Badge variant="outline">{testTypeLabels[test.type]}</Badge>
+                        {getSourceBadge(test.source, test.isAutomated)}
                       </div>
                       <CardDescription className="break-words">{test.description}</CardDescription>
                       <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 text-sm text-muted-foreground">
