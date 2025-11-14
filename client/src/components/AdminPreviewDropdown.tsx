@@ -671,23 +671,31 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           variant={isScrolled ? "outline" : "ghost"}
           size="sm"
           className={cn(
-            "gap-2",
-            !isScrolled && "border-white/30 text-white hover:bg-white/10"
+            "gap-2 relative",
+            !isScrolled && "border-white/30 text-white hover:bg-white/10",
+            impersonatedUser && "border-primary/50 bg-primary/10"
           )}
           data-testid="button-admin-preview-dropdown"
           onClick={() => setShowMobileOverlay(true)}
         >
-          <Eye className={cn(
-            "w-4 h-4",
-            isPreviewActive && "text-primary"
-          )} />
-          {isPreviewActive && (
+          {impersonatedUser ? (
+            <UserCog className="w-4 h-4 text-primary animate-pulse" />
+          ) : (
+            <Eye className={cn(
+              "w-4 h-4",
+              isPreviewActive && "text-primary"
+            )} />
+          )}
+          {impersonatedUser ? (
+            <span className="text-xs font-medium text-primary">
+              {impersonatedUser.firstName} {impersonatedUser.lastName}
+            </span>
+          ) : isPreviewActive ? (
             <span className="text-xs font-medium">
               {appliedPersonaConfig?.label || "Default"}
               {appliedFunnelConfig && ` • ${appliedFunnelConfig.label}`}
             </span>
-          )}
-          {!isPreviewActive && (
+          ) : (
             <span className="text-xs">Preview</span>
           )}
           <ChevronDown className="w-3 h-3 opacity-50" />
@@ -700,22 +708,30 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               variant={isScrolled ? "outline" : "ghost"}
               size="sm"
               className={cn(
-                "gap-2",
-                !isScrolled && "border-white/30 text-white hover:bg-white/10"
+                "gap-2 relative",
+                !isScrolled && "border-white/30 text-white hover:bg-white/10",
+                impersonatedUser && "border-primary/50 bg-primary/10"
               )}
               data-testid="button-admin-preview-dropdown"
             >
-              <Eye className={cn(
-                "w-4 h-4",
-                isPreviewActive && "text-primary"
-              )} />
-              {isPreviewActive && (
+              {impersonatedUser ? (
+                <UserCog className="w-4 h-4 text-primary animate-pulse" />
+              ) : (
+                <Eye className={cn(
+                  "w-4 h-4",
+                  isPreviewActive && "text-primary"
+                )} />
+              )}
+              {impersonatedUser ? (
+                <span className="text-xs font-medium text-primary">
+                  {impersonatedUser.firstName} {impersonatedUser.lastName}
+                </span>
+              ) : isPreviewActive ? (
                 <span className="text-xs font-medium">
                   {appliedPersonaConfig?.label || "Default"}
                   {appliedFunnelConfig && ` • ${appliedFunnelConfig.label}`}
                 </span>
-              )}
-              {!isPreviewActive && (
+              ) : (
                 <span className="text-xs">Preview</span>
               )}
               <ChevronDown className="w-3 h-3 opacity-50" />

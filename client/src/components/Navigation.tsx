@@ -311,18 +311,6 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
 
             {/* Right: Utilities */}
             <div className="hidden md:flex items-center gap-1.5 justify-end flex-shrink-0">
-              {/* Impersonation Indicator */}
-              {impersonatedUser && (
-                <Badge 
-                  variant="destructive" 
-                  className="gap-1 px-2 py-1 animate-pulse"
-                  data-testid="badge-impersonation-active"
-                >
-                  <UserCog className="w-3 h-3" />
-                  Viewing as: {impersonatedUser.firstName} {impersonatedUser.lastName}
-                </Badge>
-              )}
-              
               <Link href="/donate">
                 <Button variant="default" data-testid="button-donate">
                   Donate
