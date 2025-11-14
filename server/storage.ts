@@ -5591,7 +5591,7 @@ export class DatabaseStorage implements IStorage {
     const allSessions = await db
       .select()
       .from(volunteerSessionLogs)
-      .where(sql`${volunteerSessionLogs.enrollmentId} = ANY(${enrollmentIds})`);
+      .where(inArray(volunteerSessionLogs.enrollmentId, enrollmentIds));
     
     const ytdSessions = allSessions.filter(session => {
       const createdAt = new Date(session.createdAt!);
@@ -5627,7 +5627,7 @@ export class DatabaseStorage implements IStorage {
     const allSessions = await db
       .select()
       .from(volunteerSessionLogs)
-      .where(sql`${volunteerSessionLogs.enrollmentId} = ANY(${enrollmentIds})`);
+      .where(inArray(volunteerSessionLogs.enrollmentId, enrollmentIds));
     
     const ytdSessions = allSessions.filter(session => {
       const createdAt = new Date(session.createdAt!);
