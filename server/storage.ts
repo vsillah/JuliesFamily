@@ -1055,12 +1055,18 @@ export class DatabaseStorage implements IStorage {
       }
       // SECURITY: Never accept role from untrusted sources - preserve existing user's role
       
-      const [user] = await db
-        .update(users)
-        .set(updateData)
-        .where(eq(users.id, existingUser.id))
-        .returning();
-      return user;
+      try {
+        const [user] = await db
+          .update(users)
+          .set(updateData)
+          .where(eq(users.id, existingUser.id))
+          .returning();
+        return user;
+      } catch (updateError: any) {
+        console.error('[upsertUser] Update failed:', updateError.message);
+        // If update fails, return the existing user to prevent auth failure
+        return existingUser;
+      }
     } else {
       // Create new user with default 'client' role
       // SECURITY: Only super_admins can create users with elevated roles via API
@@ -1109,16 +1115,23 @@ export class DatabaseStorage implements IStorage {
               updateData.role = userData.role;
             }
             
-            const [user] = await db
-              .update(users)
-              .set(updateData)
-              .where(eq(users.id, existingUser.id))
-              .returning();
-            return user;
+            try {
+              const [user] = await db
+                .update(users)
+                .set(updateData)
+                .where(eq(users.id, existingUser.id))
+                .returning();
+              return user;
+            } catch (updateError: any) {
+              console.error('[upsertUser] Update failed after retry:', updateError.message);
+              // If update also fails, return the existing user as-is to prevent auth failure
+              return existingUser;
+            }
           }
         }
         
         // If it's not a unique constraint error or retry failed, rethrow
+        console.error('[upsertUser] Unhandled error:', error.message);
         throw error;
       }
     }
