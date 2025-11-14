@@ -3489,10 +3489,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Student dashboard is visible only for students in retention stage who are enrolled in Tech Goes Home
       // Three required conditions: (1) student persona, (2) retention stage, (3) TGH enrollment
-      if (persona === 'student' && funnelStage === 'retention' && req.session?.oidcSub) {
-        const user = await storage.getUserByOidcSub(req.session.oidcSub);
+      const oidcSub = (req.user as any)?.claims?.sub;
+      console.log('[student-dashboard] Checking visibility:', { persona, funnelStage, hasOidcSub: !!oidcSub });
+      if (persona === 'student' && funnelStage === 'retention' && oidcSub) {
+        const user = await storage.getUserByOidcSub(oidcSub);
+        console.log('[student-dashboard] User lookup:', { oidcSub, userId: user?.id, found: !!user });
         if (user) {
           const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+          console.log('[student-dashboard] Enrollment lookup:', { userId: user.id, enrollmentId: enrollment?.id, status: enrollment?.status, found: !!enrollment });
           visibleSections['student-dashboard'] = !!enrollment;
         } else {
           visibleSections['student-dashboard'] = false;
