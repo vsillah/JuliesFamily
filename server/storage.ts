@@ -83,7 +83,7 @@ import {
   type ProgramType,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, or, sql } from "drizzle-orm";
+import { eq, desc, and, or, sql, inArray } from "drizzle-orm";
 import { createCacLtgpStorage, type ICacLtgpStorage } from "./storage/cacLtgpStorage";
 import { createTechGoesHomeStorage, type ITechGoesHomeStorage } from "./storage/tghStorage";
 import { createAdminProvisioningStorage, type IAdminProvisioningStorage } from "./storage/adminProvisioningStorage";
@@ -1789,42 +1789,41 @@ export class DatabaseStorage implements IStorage {
       targetFilters.push(eq(abTestTargets.persona, persona));
     }
     
-    // Handle funnelStage filtering:
-    // - If funnelStage provided: match that specific stage
-    // - If persona provided but no funnelStage: include tests where funnelStage IS NULL (persona-wide tests)
+    // Handle funnelStage filtering
     if (funnelStage) {
       targetFilters.push(eq(abTestTargets.funnelStage, funnelStage));
-    } else if (persona) {
-      // When persona is provided but funnelStage is not, include:
-      // 1. Tests with specific funnel stages (any non-null value)
-      // 2. Tests with NULL funnel stage (persona-wide tests)
-      // This is already handled by not filtering funnelStage at all
     }
     
-    // Return tests that match the provided persona and/or funnelStage
+    // Safety check: ensure we have at least one filter
+    // This should never happen due to the early return above, but guards against edge cases
+    if (targetFilters.length === 0) {
+      return await db
+        .select()
+        .from(abTests)
+        .where(and(...baseFilters));
+    }
+    
+    // First, get distinct test IDs that match the target criteria
+    // This prevents duplicate tests when a single test targets multiple funnel stages
+    const matchingTestIds = await db
+      .selectDistinct({ testId: abTestTargets.testId })
+      .from(abTestTargets)
+      .where(and(...targetFilters));
+    
+    if (matchingTestIds.length === 0) {
+      return [];
+    }
+    
+    const testIds = matchingTestIds.map(row => row.testId);
+    
+    // Then fetch the full test data for those IDs, filtered by active status
     const tests = await db
-      .selectDistinct({
-        id: abTests.id,
-        name: abTests.name,
-        description: abTests.description,
-        type: abTests.type,
-        status: abTests.status,
-        targetPersona: abTests.targetPersona,
-        targetFunnelStage: abTests.targetFunnelStage,
-        trafficAllocation: abTests.trafficAllocation,
-        startDate: abTests.startDate,
-        endDate: abTests.endDate,
-        winnerVariantId: abTests.winnerVariantId,
-        createdBy: abTests.createdBy,
-        createdAt: abTests.createdAt,
-        updatedAt: abTests.updatedAt,
-      })
+      .select()
       .from(abTests)
-      .innerJoin(abTestTargets, eq(abTestTargets.testId, abTests.id))
       .where(
         and(
           ...baseFilters,
-          ...targetFilters
+          inArray(abTests.id, testIds)
         )
       );
     

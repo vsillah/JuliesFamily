@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona, type Persona } from "@/contexts/PersonaContext";
 import { queryClient } from "@/lib/queryClient";
@@ -21,6 +21,7 @@ export function useAdminPreviewState() {
   const prevPersona = useRef<Persona | null | undefined>(undefined);
   const prevFunnel = useRef<FunnelStage | "none" | undefined>(undefined);
   const isHydrating = useRef(true);
+  const hasHydrated = useRef(false);
 
   // Load initial state from sessionStorage (runs only once on mount)
   useEffect(() => {
@@ -37,18 +38,28 @@ export function useAdminPreviewState() {
     setSelectedFunnel(loadedFunnel);
 
     const savedVariants = sessionStorage.getItem(ADMIN_VARIANT_KEY);
+    console.log('[useAdminPreviewState] Hydration: loading variant from sessionStorage', { 
+      savedVariants,
+      hasValue: !!savedVariants 
+    });
+    
     if (savedVariants) {
       try {
         const parsed = JSON.parse(savedVariants);
+        console.log('[useAdminPreviewState] Parsed variant data:', parsed);
+        
         // Convert from old Record format to new single-selection format if needed
         if (typeof parsed === 'object' && parsed !== null) {
           const entries = Object.entries(parsed);
           if (entries.length > 0) {
             const [testId, variantId] = entries[0] as [string, string];
-            setSelectedVariant({ testId, variantId });
+            const variantToSet = { testId, variantId };
+            console.log('[useAdminPreviewState] Setting variant during hydration:', variantToSet);
+            setSelectedVariant(variantToSet);
           }
         }
       } catch (e) {
+        console.error('[useAdminPreviewState] Error parsing variant:', e);
         setSelectedVariant(null);
       }
     }
@@ -58,15 +69,35 @@ export function useAdminPreviewState() {
       prevPersona.current = loadedPersona;
       prevFunnel.current = loadedFunnel;
       isHydrating.current = false;
+      hasHydrated.current = true;
     });
   }, [persona]);
 
-  // Clear variant selection when persona or funnel ACTUALLY CHANGES (not during initial load)
-  useEffect(() => {
-    // Skip during hydration to preserve loaded variant
+  // Reset funnel and variant when persona changes; reset variant when funnel changes
+  // Using useLayoutEffect to ensure state updates complete synchronously before browser paints,
+  // preventing intermediate renders where AdminPreviewDropdown shows mismatched persona/funnel state
+  useLayoutEffect(() => {
+    console.log('[useAdminPreviewState] useLayoutEffect triggered', {
+      isHydrating: isHydrating.current,
+      hasHydrated: hasHydrated.current,
+      selectedPersona,
+      selectedFunnel,
+      selectedVariant,
+      prevPersona: prevPersona.current,
+      prevFunnel: prevFunnel.current,
+    });
+    
+    // Skip during hydration to preserve loaded variant and funnel from sessionStorage
     if (isHydrating.current) {
+      console.log('[useAdminPreviewState] Skipping (still hydrating)');
       prevPersona.current = selectedPersona;
       prevFunnel.current = selectedFunnel;
+      return;
+    }
+    
+    // Skip if we haven't hydrated yet (prevents reset during initial sessionStorage load)
+    if (!hasHydrated.current) {
+      console.log('[useAdminPreviewState] Skipping (not hydrated yet)');
       return;
     }
     
@@ -74,8 +105,20 @@ export function useAdminPreviewState() {
     const personaChanged = prevPersona.current !== undefined && prevPersona.current !== selectedPersona;
     const funnelChanged = prevFunnel.current !== undefined && prevFunnel.current !== selectedFunnel;
     
-    if (personaChanged || funnelChanged) {
+    console.log('[useAdminPreviewState] Change detection:', { personaChanged, funnelChanged });
+    
+    // When persona changes, reset funnel to "none" and clear variant
+    if (personaChanged) {
+      console.log('[useAdminPreviewState] Persona changed - clearing funnel and variant');
+      setSelectedFunnel("none");
       setSelectedVariant(null);
+    } 
+    // When only funnel changes (not persona), just clear variant
+    else if (funnelChanged) {
+      console.log('[useAdminPreviewState] Funnel changed - clearing variant');
+      setSelectedVariant(null);
+    } else {
+      console.log('[useAdminPreviewState] No changes detected - preserving variant');
     }
     
     // Update refs for next render
