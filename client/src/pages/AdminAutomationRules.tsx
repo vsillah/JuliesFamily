@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Plus, Trash2, Edit, Play, Pause, Zap, TrendingDown, Target } from "lucide-react";
+import { Settings, Plus, Trash2, Edit, Play, Pause, Zap, TrendingDown, Target, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -489,7 +490,20 @@ export default function AdminAutomationRules() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="metricProfileId">Metric Weight Profile</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="metricProfileId">Metric Weight Profile</Label>
+                <span className="text-destructive">*</span>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs">
+                      <p>Defines how different metrics (clicks, engagement, conversions) are weighted when calculating overall performance. Create profiles in the Configuration page.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <Select
                 value={ruleForm.metricWeightProfileId}
                 onValueChange={(value) => setRuleForm({ ...ruleForm, metricWeightProfileId: value })}
@@ -498,18 +512,47 @@ export default function AdminAutomationRules() {
                   <SelectValue placeholder="Select a metric profile..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {metricProfiles.map((profile: any) => (
-                    <SelectItem key={profile.id} value={profile.id}>
-                      {profile.name}
-                    </SelectItem>
-                  ))}
+                  {metricProfiles.length === 0 ? (
+                    <div className="px-2 py-4 text-sm text-muted-foreground text-center">
+                      No profiles available.{" "}
+                      <Link href="/admin/automation-config" className="text-primary underline">
+                        Create one first
+                      </Link>
+                    </div>
+                  ) : (
+                    metricProfiles.map((profile: any) => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
+              {!ruleForm.metricWeightProfileId && (
+                <p className="text-xs text-destructive">Required: Select a metric profile to enable the save button</p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="baselineWindow">Baseline Window (days)</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="baselineWindow">Baseline Window (days)</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p className="font-semibold mb-1">How many days of data to analyze</p>
+                        <ul className="text-xs space-y-1">
+                          <li>• <strong>7-14 days:</strong> Quick insights, less reliable</li>
+                          <li>• <strong>15-30 days:</strong> Balanced (recommended)</li>
+                          <li>• <strong>30-90 days:</strong> More reliable, slower to detect issues</li>
+                        </ul>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Input
                   id="baselineWindow"
                   type="number"
@@ -521,10 +564,31 @@ export default function AdminAutomationRules() {
                   }
                   data-testid="input-baseline-window"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Range: 7-90 days. Recommended: 20-30 days for balanced results
+                </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="minimumSampleSize">Minimum Sample Size</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="minimumSampleSize">Minimum Sample Size</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p className="font-semibold mb-1">Minimum events before triggering</p>
+                        <ul className="text-xs space-y-1">
+                          <li>• <strong>50-100:</strong> Low traffic content</li>
+                          <li>• <strong>100-500:</strong> Medium traffic (recommended)</li>
+                          <li>• <strong>500+:</strong> High traffic, very reliable data</li>
+                        </ul>
+                        <p className="mt-2 text-xs">Higher = more reliable but slower to trigger</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Input
                   id="minimumSampleSize"
                   type="number"
@@ -536,12 +600,34 @@ export default function AdminAutomationRules() {
                   }
                   data-testid="input-minimum-sample-size"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Range: 50-10,000 events. Recommended: 100-200 for most content
+                </p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="compositeScoreThreshold">Performance Threshold (0-10000)</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="compositeScoreThreshold">Performance Threshold (0-10000)</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p className="font-semibold mb-1">When to flag content as underperforming</p>
+                        <ul className="text-xs space-y-1">
+                          <li>• <strong>0-3,000:</strong> Very aggressive - flags most content</li>
+                          <li>• <strong>3,000-5,000:</strong> Moderate (recommended starting point)</li>
+                          <li>• <strong>5,000-7,000:</strong> Conservative - only flags poor performers</li>
+                          <li>• <strong>7,000+:</strong> Very selective - minimal flagging</li>
+                        </ul>
+                        <p className="mt-2 text-xs">Lower = more tests created, higher = fewer but more targeted tests</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Input
                   id="compositeScoreThreshold"
                   type="number"
@@ -554,12 +640,31 @@ export default function AdminAutomationRules() {
                   data-testid="input-composite-score-threshold"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Content scoring below this threshold will be flagged for testing
+                  Content scoring below this will be flagged. Start with 4000-5000 and adjust based on results
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="statisticalConfidence">Statistical Confidence (%)</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="statisticalConfidence">Statistical Confidence (%)</Label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="w-4 h-4 text-muted-foreground cursor-help" />
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p className="font-semibold mb-1">How sure you want to be before declaring a winner</p>
+                        <ul className="text-xs space-y-1">
+                          <li>• <strong>80-85%:</strong> Fast decisions, higher risk</li>
+                          <li>• <strong>90%:</strong> Balanced approach</li>
+                          <li>• <strong>95%:</strong> Industry standard (recommended)</li>
+                          <li>• <strong>99%:</strong> Very conservative, slower decisions</li>
+                        </ul>
+                        <p className="mt-2 text-xs">Higher = more reliable but takes longer to reach conclusion</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
                 <Input
                   id="statisticalConfidence"
                   type="number"
@@ -571,6 +676,9 @@ export default function AdminAutomationRules() {
                   }
                   data-testid="input-statistical-confidence"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Range: 80-99%. Recommended: 90-95% for most use cases
+                </p>
               </div>
             </div>
 
