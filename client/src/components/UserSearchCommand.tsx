@@ -18,6 +18,7 @@ interface UserSearchCommandProps {
   selectedUserId?: string;
   emptyMessage?: string;
   placeholder?: string;
+  className?: string;
 }
 
 export function UserSearchCommand({
@@ -28,6 +29,7 @@ export function UserSearchCommand({
   selectedUserId,
   emptyMessage = "No users found.",
   placeholder = "Search users...",
+  className,
 }: UserSearchCommandProps) {
   const handleSelect = (userId: string) => {
     onSelect(userId);
@@ -35,7 +37,7 @@ export function UserSearchCommand({
   };
 
   return (
-    <CommandDialog open={open} onOpenChange={onOpenChange}>
+    <CommandDialog open={open} onOpenChange={onOpenChange} className={className}>
       <CommandInput
         placeholder={placeholder}
         data-testid="input-search-users"
