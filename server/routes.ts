@@ -3454,7 +3454,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   }
 
   // Get visible sections for navigation (public, filtered by persona/funnel/passions)
-  app.get('/api/content/visible-sections', async (req, res) => {
+  // Uses applyImpersonation to support admin preview mode while remaining public
+  app.get('/api/content/visible-sections', applyImpersonation, async (req, res) => {
     try {
       const { persona, funnelStage, passions } = req.query;
       console.log('[visible-sections] Request params:', { persona, funnelStage, passions });
