@@ -29,13 +29,21 @@ export default function ConsolidatedVisibilityBadge({
     const previewWindow = window.open('/', '_blank');
     
     if (previewWindow) {
-      // Wait for window to load, then set sessionStorage (once only to prevent infinite reload)
-      previewWindow.addEventListener('load', () => {
+      // Helper to apply overrides and reload
+      const applyOverride = () => {
         previewWindow.sessionStorage.setItem('admin-persona-override', persona || 'none');
         previewWindow.sessionStorage.setItem('admin-funnel-override', funnelStage || 'none');
         // Reload to apply the preview mode
         previewWindow.location.reload();
-      }, { once: true });
+      };
+      
+      // If window is already loaded (cached), apply immediately
+      if (previewWindow.document.readyState === 'complete') {
+        applyOverride();
+      } else {
+        // Otherwise wait for load event
+        previewWindow.addEventListener('load', applyOverride, { once: true });
+      }
     }
   };
 
@@ -101,18 +109,21 @@ export default function ConsolidatedVisibilityBadge({
           {usage?.visibilityAssignments.map((assignment, index) => (
             <Tooltip key={index}>
               <TooltipTrigger asChild>
-                <Badge 
-                  variant="outline" 
-                  className="text-xs bg-accent/50 font-normal cursor-pointer hover-elevate transition-all group"
+                <button
+                  type="button"
+                  className="inline-flex items-center border border-border rounded-md px-2.5 py-0.5 text-xs bg-accent/50 font-normal cursor-pointer hover-elevate transition-all group"
                   onClick={(e) => {
                     e.stopPropagation();
                     openPreview(assignment.persona, assignment.funnelStage);
+                  }}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
                   }}
                   data-testid={`badge-assignment-${contentId}-${index}`}
                 >
                   {PERSONA_LABELS[assignment.persona as keyof typeof PERSONA_LABELS] || assignment.persona || 'All'} × {FUNNEL_STAGE_LABELS[assignment.funnelStage as keyof typeof FUNNEL_STAGE_LABELS] || assignment.funnelStage || 'All'}
                   <ExternalLink className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </Badge>
+                </button>
               </TooltipTrigger>
               <TooltipContent>
                 <p>Click to preview this combination</p>
