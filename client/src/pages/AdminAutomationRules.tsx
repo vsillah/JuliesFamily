@@ -564,9 +564,6 @@ export default function AdminAutomationRules() {
                   }
                   data-testid="input-baseline-window"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Range: 7-90 days. Recommended: 20-30 days for balanced results
-                </p>
               </div>
 
               <div className="space-y-2">
@@ -600,9 +597,6 @@ export default function AdminAutomationRules() {
                   }
                   data-testid="input-minimum-sample-size"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Range: 50-10,000 events. Recommended: 100-200 for most content
-                </p>
               </div>
             </div>
 
@@ -639,9 +633,6 @@ export default function AdminAutomationRules() {
                   }
                   data-testid="input-composite-score-threshold"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Content scoring below this will be flagged. Start with 4000-5000 and adjust based on results
-                </p>
               </div>
 
               <div className="space-y-2">
@@ -676,9 +667,6 @@ export default function AdminAutomationRules() {
                   }
                   data-testid="input-statistical-confidence"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Range: 80-99%. Recommended: 90-95% for most use cases
-                </p>
               </div>
             </div>
 
