@@ -557,6 +557,9 @@ export const metricWeightProfiles = pgTable("metric_weight_profiles", {
   contentType: varchar("content_type"), // Optional: 'hero', 'cta', 'card_order', 'layout', 'messaging' (null = general-purpose)
   persona: varchar("persona"), // Optional: specific persona optimization (null = all personas)
   description: text("description"),
+  clickThroughWeight: integer("click_through_weight").notNull().default(30), // Percentage: 0-100
+  engagementWeight: integer("engagement_weight").notNull().default(40), // Percentage: 0-100
+  conversionWeight: integer("conversion_weight").notNull().default(30), // Percentage: 0-100
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
