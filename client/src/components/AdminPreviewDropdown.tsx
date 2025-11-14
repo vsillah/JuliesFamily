@@ -309,8 +309,10 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
       setImpersonationUserId("");
       toast({
         title: "Impersonation started",
-        description: "You are now viewing the site as the selected user. Reload the page to see changes.",
+        description: "Reloading page to apply changes...",
       });
+      // Reload page to apply impersonation
+      setTimeout(() => window.location.reload(), 500);
     },
     onError: (error: Error) => {
       toast({
