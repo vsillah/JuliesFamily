@@ -542,8 +542,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               className="w-full h-11 text-base"
               onClick={() => {
                 if (impersonationSession) {
-                  endImpersonationMutation.mutate(impersonationSession.id);
-                  setShowMobileOverlay(false);
+                  endImpersonationMutation.mutate(impersonationSession.id, {
+                    onSuccess: () => {
+                      setShowMobileOverlay(false);
+                    }
+                  });
                 }
               }}
               disabled={endImpersonationMutation.isPending}
@@ -597,8 +600,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               <Button
                 className="w-full h-11 text-base"
                 onClick={() => {
-                  startImpersonationMutation.mutate(impersonationUserId);
-                  setShowMobileOverlay(false);
+                  startImpersonationMutation.mutate(impersonationUserId, {
+                    onSuccess: () => {
+                      setShowMobileOverlay(false);
+                    }
+                  });
                 }}
                 disabled={startImpersonationMutation.isPending}
                 data-testid="button-start-impersonation"
