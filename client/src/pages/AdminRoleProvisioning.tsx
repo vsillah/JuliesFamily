@@ -108,10 +108,7 @@ export default function AdminRoleProvisioning() {
   // Create entitlement mutation
   const createEntitlementMutation = useMutation({
     mutationFn: async (programId: string) => {
-      return await apiRequest('/api/admin/entitlements', {
-        method: 'POST',
-        body: JSON.stringify({ programId }),
-      });
+      return await apiRequest('POST', '/api/admin/entitlements', { programId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/entitlements'] });
@@ -135,9 +132,7 @@ export default function AdminRoleProvisioning() {
   // Delete entitlement mutation
   const deleteEntitlementMutation = useMutation({
     mutationFn: async (entitlementId: string) => {
-      return await apiRequest(`/api/admin/entitlements/${entitlementId}`, {
-        method: 'DELETE',
-      });
+      return await apiRequest('DELETE', `/api/admin/entitlements/${entitlementId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/entitlements'] });
@@ -159,9 +154,9 @@ export default function AdminRoleProvisioning() {
   // Start impersonation mutation
   const startImpersonationMutation = useMutation({
     mutationFn: async ({ userId, reason }: { userId: string; reason: string }) => {
-      return await apiRequest('/api/admin/impersonation/start', {
-        method: 'POST',
-        body: JSON.stringify({ impersonatedUserId: userId, reason }),
+      return await apiRequest('POST', '/api/admin/impersonation/start', {
+        impersonatedUserId: userId,
+        reason
       });
     },
     onSuccess: () => {
@@ -187,9 +182,7 @@ export default function AdminRoleProvisioning() {
   // End impersonation mutation
   const endImpersonationMutation = useMutation({
     mutationFn: async () => {
-      return await apiRequest('/api/admin/impersonation/end', {
-        method: 'POST',
-      });
+      return await apiRequest('POST', '/api/admin/impersonation/end');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/impersonation/session'] });
