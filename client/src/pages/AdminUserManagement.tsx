@@ -377,14 +377,14 @@ export default function AdminUserManagement() {
               </div>
             ) : (
               <div className="rounded-md border overflow-x-auto">
-                <Table>
+                <Table className="min-w-[800px]">
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Program Entitlements</TableHead>
-                      {isSuperAdmin && <TableHead className="text-right">Actions</TableHead>}
+                      <TableHead className="min-w-[150px]">Name</TableHead>
+                      <TableHead className="min-w-[200px]">Email</TableHead>
+                      <TableHead className="min-w-[140px]">Role</TableHead>
+                      <TableHead className="min-w-[200px]">Program Entitlements</TableHead>
+                      {isSuperAdmin && <TableHead className="text-right min-w-[100px]">Actions</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -452,46 +452,44 @@ export default function AdminUserManagement() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              {(() => {
-                                const userEntitlements = getUserEntitlements(user.id);
-                                if (userEntitlements.length > 0) {
-                                  return (
-                                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                                      <span className="text-sm truncate" title={userEntitlements.map(e => e.program.name).join(', ')}>
-                                        {userEntitlements.map(e => e.program.name).join(', ')}
-                                      </span>
-                                      {isSuperAdmin && (
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => setEntitlementDialogUserId(user.id)}
-                                          data-testid={`button-manage-entitlements-${user.id}`}
-                                          className="h-7 flex-shrink-0"
-                                        >
-                                          <Settings className="h-3 w-3" />
-                                        </Button>
-                                      )}
-                                    </div>
-                                  );
-                                } else if (isSuperAdmin) {
-                                  return (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => setEntitlementDialogUserId(user.id)}
-                                      data-testid={`button-manage-entitlements-${user.id}`}
-                                      className="h-7"
-                                    >
-                                      <Settings className="h-3 w-3 mr-1" />
-                                      Manage Programs
-                                    </Button>
-                                  );
-                                } else {
-                                  return <span className="text-xs text-muted-foreground">-</span>;
-                                }
-                              })()}
-                            </div>
+                            {(() => {
+                              const userEntitlements = getUserEntitlements(user.id);
+                              if (userEntitlements.length > 0) {
+                                return (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-sm flex-1" title={userEntitlements.map(e => e.program.name).join(', ')}>
+                                      {userEntitlements.map(e => e.program.name).join(', ')}
+                                    </span>
+                                    {isSuperAdmin && (
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setEntitlementDialogUserId(user.id)}
+                                        data-testid={`button-manage-entitlements-${user.id}`}
+                                        className="h-7 flex-shrink-0"
+                                      >
+                                        <Settings className="h-3 w-3" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                );
+                              } else if (isSuperAdmin) {
+                                return (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEntitlementDialogUserId(user.id)}
+                                    data-testid={`button-manage-entitlements-${user.id}`}
+                                    className="h-7"
+                                  >
+                                    <Settings className="h-3 w-3 mr-1" />
+                                    Manage Programs
+                                  </Button>
+                                );
+                              } else {
+                                return <span className="text-xs text-muted-foreground">-</span>;
+                              }
+                            })()}
                           </TableCell>
                           {isSuperAdmin && (
                             <TableCell className="text-right">
