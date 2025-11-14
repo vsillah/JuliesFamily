@@ -13,8 +13,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Mail, Clock, Users, ChevronRight } from "lucide-react";
-import type { EmailCampaign, EmailSequenceStep } from "@shared/schema";
+import { Plus, Edit, Trash2, Mail, Clock, Users, ChevronRight, Sparkles } from "lucide-react";
+import type { EmailCampaign, EmailSequenceStep, EmailTemplate } from "@shared/schema";
 import type { Persona } from "@shared/defaults/personas";
 import CopyVariantGenerator from "@/components/CopyVariantGenerator";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -33,10 +33,18 @@ export default function AdminEmailCampaigns() {
   // State for AI-generated content
   const [subjectText, setSubjectText] = useState("");
   const [bodyText, setBodyText] = useState("");
+  const [textBodyText, setTextBodyText] = useState("");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
 
   // Fetch all campaigns
   const { data: campaigns = [], isLoading } = useQuery<EmailCampaign[]>({
     queryKey: ['/api/email-campaigns'],
+  });
+
+  // Fetch email templates for template selector
+  const { data: emailTemplates = [] } = useQuery<EmailTemplate[]>({
+    queryKey: ['/api/hormozi-templates'],
+    enabled: showStepDialog, // Only fetch when step dialog is open
   });
 
   // Create campaign mutation
@@ -508,6 +516,8 @@ export default function AdminEmailCampaigns() {
                         setEditingStep(null);
                         setSubjectText("");
                         setBodyText("");
+                        setTextBodyText("");
+                        setSelectedTemplateId("");
                         setShowStepDialog(true);
                       }}
                       data-testid="button-add-step"
@@ -544,6 +554,8 @@ export default function AdminEmailCampaigns() {
                                     setEditingStep(step);
                                     setSubjectText(step.subject);
                                     setBodyText(step.htmlContent);
+                                    setTextBodyText(step.textContent || "");
+                                    setSelectedTemplateId(step.templateId || "");
                                     setShowStepDialog(true);
                                   }}
                                   data-testid={`button-edit-step-${step.id}`}
@@ -607,6 +619,56 @@ export default function AdminEmailCampaigns() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
+                <Label>Use Email Template (Optional)</Label>
+                <Badge variant="secondary" className="gap-1">
+                  <Sparkles className="w-3 h-3" />
+                  {emailTemplates.length} templates
+                </Badge>
+              </div>
+              <Select 
+                value={selectedTemplateId || "none"}
+                onValueChange={(templateId) => {
+                  // Normalize "none" to empty string for database storage
+                  const normalizedId = templateId === "none" ? "" : templateId;
+                  setSelectedTemplateId(normalizedId);
+                  
+                  if (normalizedId) {
+                    const template = emailTemplates.find(t => t.id === normalizedId);
+                    if (template) {
+                      setSubjectText(template.subject);
+                      setBodyText(template.htmlBody);
+                      setTextBodyText(template.textBody || "");
+                      toast({
+                        title: "Template Applied",
+                        description: `Loaded "${template.name}" - you can customize it below`,
+                      });
+                    }
+                  } else {
+                    // User selected "No Template" - optionally reset fields
+                    toast({
+                      title: "Custom Content Mode",
+                      description: "Write your own email content below",
+                    });
+                  }
+                }}
+              >
+                <SelectTrigger data-testid="select-email-template">
+                  <SelectValue placeholder="Choose a template or write custom content..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No Template (Custom Content)</SelectItem>
+                  {emailTemplates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.name || template.subject}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="templateId" value={selectedTemplateId || ''} />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <Label htmlFor="subject">Email Subject</Label>
                 <CopyVariantGenerator
                   originalContent={subjectText || editingStep?.subject || ""}
@@ -665,21 +727,11 @@ export default function AdminEmailCampaigns() {
               <Textarea
                 id="textContent"
                 name="textContent"
-                defaultValue={editingStep?.textContent || ''}
+                value={textBodyText}
+                onChange={(e) => setTextBodyText(e.target.value)}
                 placeholder="Enter plain text email content"
                 rows={4}
                 data-testid="input-text-content"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="templateId">Template ID (Optional)</Label>
-              <Input
-                id="templateId"
-                name="templateId"
-                defaultValue={editingStep?.templateId || ''}
-                placeholder="Link to email template"
-                data-testid="input-template-id"
               />
             </div>
 

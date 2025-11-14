@@ -4790,6 +4790,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/email-sequence-steps', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const validatedData = insertEmailSequenceStepSchema.parse(req.body);
+      
+      // Normalize empty string templateId to null
+      if ('templateId' in validatedData && validatedData.templateId === '') {
+        validatedData.templateId = null;
+      }
+      
       const step = await storage.createEmailSequenceStep(validatedData);
       res.json(step);
     } catch (error: any) {
@@ -4806,6 +4812,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const validatedData = insertEmailSequenceStepSchema.partial().parse(req.body);
+      
+      // Normalize empty string templateId to null
+      if ('templateId' in validatedData && validatedData.templateId === '') {
+        validatedData.templateId = null;
+      }
+      
       const updated = await storage.updateEmailSequenceStep(id, validatedData);
       
       if (!updated) {
