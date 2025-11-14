@@ -3674,35 +3674,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Update content item order (admin)
-  app.patch('/api/content/:id/order', ...authWithImpersonation, isAdmin, async (req, res) => {
-    try {
-      const { order } = req.body;
-      if (typeof order !== 'number') {
-        return res.status(400).json({ message: "Order must be a number" });
-      }
-      const item = await storage.updateContentItemOrder(req.params.id, order);
-      if (!item) {
-        return res.status(404).json({ message: "Content item not found" });
-      }
-      res.json(item);
-    } catch (error) {
-      console.error("Error updating content item order:", error);
-      res.status(500).json({ message: "Failed to update content item order" });
-    }
-  });
-
-  // Batch reorder content items (admin)
+  // Batch reorder content items (admin) - MUST be before parameterized routes
   app.patch('/api/content/reorder', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
+      console.log('[BATCH REORDER] Endpoint hit with body:', JSON.stringify(req.body));
       const validatedData = batchContentReorderSchema.parse(req.body);
       const updatedItems = await storage.updateContentOrders(
         validatedData.updates,
         validatedData.contentType
       );
+      console.log('[BATCH REORDER] Successfully updated', updatedItems.length, 'items');
       res.json(updatedItems);
     } catch (error: any) {
-      console.error("Error batch reordering content items:", error);
+      console.error("[BATCH REORDER] Error:", error);
       
       // Handle validation errors
       if (error.name === 'ZodError') {
@@ -3723,6 +3707,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.status(500).json({ message: "Failed to reorder content items" });
+    }
+  });
+
+  // Update content item order (admin)
+  app.patch('/api/content/:id/order', ...authWithImpersonation, isAdmin, async (req, res) => {
+    try {
+      console.log('[SINGLE ORDER] Endpoint hit for id:', req.params.id);
+      const { order } = req.body;
+      if (typeof order !== 'number') {
+        return res.status(400).json({ message: "Order must be a number" });
+      }
+      const item = await storage.updateContentItemOrder(req.params.id, order);
+      if (!item) {
+        return res.status(404).json({ message: "Content item not found" });
+      }
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating content item order:", error);
+      res.status(500).json({ message: "Failed to update content item order" });
     }
   });
 
