@@ -7,7 +7,9 @@ export function useUserRole() {
   const role = user?.role as UserRole | undefined;
   
   const isClient = role === "client" || !role;
-  const isAdmin = role === "admin" || role === "super_admin";
+  // Use isAdminSession to check if the real user (not impersonated user) is an admin
+  // This ensures admin controls remain visible during impersonation
+  const isAdmin = (user as any)?.isAdminSession || role === "admin" || role === "super_admin";
   const isSuperAdmin = role === "super_admin";
   
   const hasRole = (requiredRole: UserRole | UserRole[]) => {

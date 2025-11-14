@@ -205,7 +205,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const oidcSub = req.user.claims.sub;
       const user = await storage.getUserByOidcSub(oidcSub);
-      res.json(user);
+      
+      // When impersonating, check the real admin's role (not the impersonated user's role)
+      // This allows admin controls to remain visible during impersonation
+      const realUser = req.adminUser || req.user;
+      const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
+      const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'super_admin');
+      
+      res.json({
+        ...user,
+        isAdminSession: isAdminSession || false
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
