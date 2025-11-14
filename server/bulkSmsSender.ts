@@ -1,5 +1,5 @@
-import { db } from '../db';
-import { leads, smsBulkCampaigns, smsSends, emailUnsubscribes, smsTemplates, communicationLogs } from '../db/schema';
+import { db } from './db';
+import { leads, smsBulkCampaigns, smsSends, emailUnsubscribes, smsTemplates, communicationLogs } from '@db/schema';
 import { eq, and, or, sql, inArray } from 'drizzle-orm';
 import type { SmsBulkCampaign, Lead, SmsTemplate } from '@db/schema';
 
@@ -22,6 +22,11 @@ export async function processBulkSmsCampaign(campaignId: string): Promise<Proces
     errors: []
   };
   
+  // Track eligible leads count for failure metadata (avoid re-query in catch)
+  let eligibleLeadsTotal = 0;
+  let lastProcessedIndex = 0;
+  let campaignAcquired = false; // Track if this worker acquired the campaign
+  
   try {
     // Get campaign details
     const [campaign] = await db
@@ -33,11 +38,54 @@ export async function processBulkSmsCampaign(campaignId: string): Promise<Proces
       throw new Error(`Campaign ${campaignId} not found`);
     }
     
-    // Update status to processing
-    await db
+    // Prevent concurrent processing - return early without updating campaign status
+    // This ensures concurrent workers don't corrupt active campaign state
+    if (campaign.status === 'processing') {
+      console.log(`[BulkSmsSender] Campaign ${campaignId} is already being processed, skipping`);
+      return {
+        success: false,
+        sentCount: 0,
+        blockedCount: 0,
+        failedCount: 0,
+        errors: ['Campaign is already being processed by another worker']
+      };
+    }
+    
+    if (campaign.status === 'completed') {
+      console.log(`[BulkSmsSender] Campaign ${campaignId} is already completed, skipping`);
+      return {
+        success: true,
+        sentCount: 0,
+        blockedCount: 0,
+        failedCount: 0,
+        errors: []
+      };
+    }
+    
+    // Atomic state transition - only update if status is 'pending'
+    const updateResult = await db
       .update(smsBulkCampaigns)
       .set({ status: 'processing' })
-      .where(eq(smsBulkCampaigns.id, campaignId));
+      .where(and(
+        eq(smsBulkCampaigns.id, campaignId),
+        eq(smsBulkCampaigns.status, 'pending') // Compare-and-set
+      ))
+      .returning({ id: smsBulkCampaigns.id });
+    
+    // If update failed, another worker claimed the campaign - exit cleanly
+    if (!updateResult || updateResult.length === 0) {
+      console.log(`[BulkSmsSender] Campaign ${campaignId} claimed by another worker, skipping`);
+      return {
+        success: false,
+        sentCount: 0,
+        blockedCount: 0,
+        failedCount: 0,
+        errors: ['Campaign claimed by another worker']
+      };
+    }
+    
+    // This worker successfully acquired the campaign
+    campaignAcquired = true;
     
     // Get message content (template or custom)
     let messageContent: string;
@@ -88,7 +136,8 @@ export async function processBulkSmsCampaign(campaignId: string): Promise<Proces
         )
       );
     
-    console.log(`[BulkSmsSender] Found ${eligibleLeads.length} eligible leads`);
+    eligibleLeadsTotal = eligibleLeads.length;
+    console.log(`[BulkSmsSender] Found ${eligibleLeadsTotal} eligible leads`);
     
     // Process leads in batches to respect rate limits
     const BATCH_SIZE = 50; // Twilio default is 1 msg/sec, batch for efficiency
@@ -96,6 +145,7 @@ export async function processBulkSmsCampaign(campaignId: string): Promise<Proces
     
     for (let i = 0; i < eligibleLeads.length; i += BATCH_SIZE) {
       const batch = eligibleLeads.slice(i, i + BATCH_SIZE);
+      lastProcessedIndex = i + batch.length; // Track progress for resumability
       console.log(`[BulkSmsSender] Processing batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(eligibleLeads.length / BATCH_SIZE)}`);
       
       // Process batch sequentially with rate limiting
@@ -170,6 +220,7 @@ export async function processBulkSmsCampaign(campaignId: string): Promise<Proces
         progress: {
           processed: i + batch.length,
           total: eligibleLeads.length,
+          nextIndex: i + batch.length, // Resume pointer for retries
           sentCount: result.sentCount,
           blockedCount: result.blockedCount,
           failedCount: result.failedCount
@@ -211,14 +262,48 @@ export async function processBulkSmsCampaign(campaignId: string): Promise<Proces
   } catch (error: any) {
     console.error(`[BulkSmsSender] Campaign failed:`, error);
     
-    // Mark campaign as failed
-    await db
-      .update(smsBulkCampaigns)
-      .set({
-        status: 'failed',
-        errorSummary: error.message.slice(0, 500)
-      })
-      .where(eq(smsBulkCampaigns.id, campaignId));
+    // Only update campaign state if this worker acquired it
+    // Prevents concurrent workers from corrupting active campaign state
+    if (campaignAcquired) {
+      // Persist partial progress even on failure for resumability and accurate metrics
+      const [currentCampaign] = await db
+        .select({ metadata: smsBulkCampaigns.metadata })
+        .from(smsBulkCampaigns)
+        .where(eq(smsBulkCampaigns.id, campaignId));
+      
+      const existingMetadata = (currentCampaign?.metadata as Record<string, any>) || {};
+      const failureMetadata = {
+        ...existingMetadata,
+        progress: {
+          processed: result.sentCount + result.blockedCount + result.failedCount,
+          total: eligibleLeadsTotal,
+          nextIndex: lastProcessedIndex, // Resume pointer for retries
+          sentCount: result.sentCount,
+          blockedCount: result.blockedCount,
+          failedCount: result.failedCount
+        },
+        failure: {
+          error: error.message,
+          failedAt: new Date().toISOString(),
+          resumable: true
+        }
+      };
+      
+      // Mark campaign as failed with partial metrics and resume context
+      await db
+        .update(smsBulkCampaigns)
+        .set({
+          status: 'failed',
+          sentCount: result.sentCount,
+          blockedCount: result.blockedCount,
+          failedCount: result.failedCount,
+          errorSummary: error.message.slice(0, 500),
+          metadata: failureMetadata
+        })
+        .where(eq(smsBulkCampaigns.id, campaignId));
+    } else {
+      console.log(`[BulkSmsSender] Campaign ${campaignId} not acquired by this worker, skipping error update`);
+    }
     
     result.errors.push(error.message);
   }
