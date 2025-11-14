@@ -142,6 +142,11 @@ function UnifiedVariantSelector({
     });
   });
 
+  // Hide the entire variant section if there are no actual variants to choose from
+  if (allVariants.length === 0) {
+    return null;
+  }
+
   // Sort: control variants first, then by test name
   allVariants.sort((a, b) => {
     if (a.variant.isControl && !b.variant.isControl) return -1;
