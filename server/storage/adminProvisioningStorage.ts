@@ -151,7 +151,7 @@ export function createAdminProvisioningStorage(db: NodePgDatabase<any>): IAdminP
         let volunteerEnrollmentId: string | null = null;
         
         // 2. Create test enrollment based on program type
-        if (program.programType === 'student_program') {
+        if (program.programType === 'student_program' || program.programType === 'student_tgh') {
           // Create Tech Goes Home enrollment with auto-populated progress
           const autoConfig = program.autoPopulateConfig || {};
           const progressPercent = autoConfig.progressPercent || 50;
