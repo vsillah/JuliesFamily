@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Shield, ShieldCheck, User as UserIcon, UserPlus, Trash2, Crown } from "lucide-react";
+import { Search, Shield, ShieldCheck, User as UserIcon, UserPlus, Trash2, Crown, Settings, X, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -45,6 +45,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+// Type definitions for Programs and Entitlements
+type Program = {
+  id: string;
+  name: string;
+  description: string | null;
+  programType: 'student_program' | 'volunteer_opportunity';
+  isActive: boolean;
+  isAvailableForTesting: boolean;
+};
+
+type Entitlement = {
+  id: string;
+  adminId: string;
+  programId: string;
+  isActive: boolean;
+  createdAt: string;
+  program: Program;
+};
+
 export default function AdminUserManagement() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,6 +84,8 @@ export default function AdminUserManagement() {
     lastName: "",
     role: "client" as UserRole,
   });
+  const [entitlementDialogUserId, setEntitlementDialogUserId] = useState<string | null>(null);
+  const [selectedProgramId, setSelectedProgramId] = useState("");
 
   const { data: users = [], isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
@@ -74,19 +95,16 @@ export default function AdminUserManagement() {
     queryKey: ["/api/auth/user"],
   });
 
-  const { data: enrollments = [] } = useQuery<any[]>({
-    queryKey: ["/api/admin/enrollments"],
-    enabled: !!users.length,
+  // Fetch all available programs
+  const { data: programs = [] } = useQuery<Program[]>({
+    queryKey: ['/api/admin/programs', { isActive: 'true' }],
   });
 
-  // Create a map of userId -> enrollment status for efficient lookup
-  const enrollmentMap = new Map(
-    enrollments
-      .filter((e) => e.status === "active")
-      .map((e) => [e.userId, e])
-  );
-
-  const isUserEnrolled = (userId: string) => enrollmentMap.has(userId);
+  // Fetch entitlements for the selected user when dialog opens
+  const { data: dialogUserEntitlements = [] } = useQuery<Entitlement[]>({
+    queryKey: [`/api/admin/users/${entitlementDialogUserId}/entitlements`],
+    enabled: !!entitlementDialogUserId,
+  });
 
   // Helper function to get role label
   const getRoleLabel = (role: UserRole): string => {
@@ -185,45 +203,48 @@ export default function AdminUserManagement() {
     },
   });
 
-  const enrollUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      return apiRequest("POST", `/api/admin/users/${userId}/enrollment`, {});
+  const addEntitlementMutation = useMutation({
+    mutationFn: async ({ userId, programId }: { userId: string; programId: string }) => {
+      return apiRequest("POST", `/api/admin/users/${userId}/entitlements`, { programId });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/content/visible-sections"] });
+    onSuccess: async (data, variables) => {
+      // Invalidate queries to refetch entitlements
+      await queryClient.invalidateQueries({ queryKey: [`/api/admin/users/${variables.userId}/entitlements`] });
+      
       toast({
         title: "Success",
-        description: "User enrolled successfully",
+        description: "Program entitlement added successfully",
       });
+      
+      // Reset dialog state
+      setSelectedProgramId("");
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to enroll user",
+        description: error.message || "Failed to add program entitlement",
         variant: "destructive",
       });
     },
   });
 
-  const unenrollUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      return apiRequest("DELETE", `/api/admin/users/${userId}/enrollment`);
+  const removeEntitlementMutation = useMutation({
+    mutationFn: async ({ userId, entitlementId }: { userId: string; entitlementId: string }) => {
+      return apiRequest("DELETE", `/api/admin/users/${userId}/entitlements/${entitlementId}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/enrollments"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/content/visible-sections"] });
+    onSuccess: async (data, variables) => {
+      // Invalidate queries to refetch entitlements
+      await queryClient.invalidateQueries({ queryKey: [`/api/admin/users/${variables.userId}/entitlements`] });
+      
       toast({
         title: "Success",
-        description: "User enrollment withdrawn successfully",
+        description: "Program entitlement removed successfully",
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to withdraw enrollment",
+        description: error.message || "Failed to remove program entitlement",
         variant: "destructive",
       });
     },
@@ -352,7 +373,7 @@ export default function AdminUserManagement() {
                       <TableHead>Name</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
-                      <TableHead>Enrolled</TableHead>
+                      <TableHead>Program Entitlements</TableHead>
                       {isSuperAdmin && <TableHead className="text-right">Actions</TableHead>}
                     </TableRow>
                   </TableHeader>
@@ -422,22 +443,19 @@ export default function AdminUserManagement() {
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <Switch
-                                checked={isUserEnrolled(user.id)}
-                                onCheckedChange={(checked) => {
-                                  if (checked) {
-                                    enrollUserMutation.mutate(user.id);
-                                  } else {
-                                    unenrollUserMutation.mutate(user.id);
-                                  }
-                                }}
-                                disabled={enrollUserMutation.isPending || unenrollUserMutation.isPending}
-                                data-testid={`switch-enrollment-${user.id}`}
-                              />
-                              {isUserEnrolled(user.id) && (
-                                <Badge variant="outline" className="text-xs">
-                                  Tech Goes Home
-                                </Badge>
+                              {isSuperAdmin ? (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setEntitlementDialogUserId(user.id)}
+                                  data-testid={`button-manage-entitlements-${user.id}`}
+                                  className="h-7"
+                                >
+                                  <Settings className="h-3 w-3 mr-1" />
+                                  Manage Programs
+                                </Button>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">-</span>
                               )}
                             </div>
                           </TableCell>
@@ -617,6 +635,134 @@ export default function AdminUserManagement() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={!!entitlementDialogUserId} onOpenChange={() => {
+        setEntitlementDialogUserId(null);
+        setSelectedProgramId("");
+      }}>
+        <DialogContent className="max-w-2xl" data-testid="dialog-manage-entitlements">
+          <DialogHeader>
+            <DialogTitle>Manage Program Entitlements</DialogTitle>
+            <DialogDescription>
+              Add or remove program entitlements for{" "}
+              {entitlementDialogUserId && users.find(u => u.id === entitlementDialogUserId) && (
+                <strong>
+                  {users.find(u => u.id === entitlementDialogUserId)?.firstName}{" "}
+                  {users.find(u => u.id === entitlementDialogUserId)?.lastName}
+                </strong>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {/* Current Entitlements */}
+            <div className="space-y-2">
+              <Label>Current Programs</Label>
+              {dialogUserEntitlements.length === 0 ? (
+                <div className="text-sm text-muted-foreground p-4 border rounded-md">
+                  No program entitlements assigned
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {dialogUserEntitlements.map((entitlement) => (
+                    <div
+                      key={entitlement.id}
+                      className="flex items-center justify-between p-3 border rounded-md"
+                      data-testid={`entitlement-item-${entitlement.program.name}`}
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium">{entitlement.program.name}</div>
+                        {entitlement.program.description && (
+                          <div className="text-sm text-muted-foreground">
+                            {entitlement.program.description}
+                          </div>
+                        )}
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Type: {entitlement.program.programType === 'student_program' ? 'Student Program' : 'Volunteer Opportunity'}
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (entitlementDialogUserId) {
+                            removeEntitlementMutation.mutate({
+                              userId: entitlementDialogUserId,
+                              entitlementId: entitlement.id,
+                            });
+                          }
+                        }}
+                        disabled={removeEntitlementMutation.isPending}
+                        data-testid={`button-remove-${entitlement.program.name}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Add New Entitlement */}
+            <div className="space-y-2">
+              <Label htmlFor="program-select">Add Program</Label>
+              <div className="flex gap-2">
+                <Select
+                  value={selectedProgramId}
+                  onValueChange={setSelectedProgramId}
+                >
+                  <SelectTrigger id="program-select" data-testid="select-program">
+                    <SelectValue placeholder="Select a program..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {programs
+                      .filter(program => 
+                        !dialogUserEntitlements.some(e => e.programId === program.id)
+                      )
+                      .map(program => (
+                        <SelectItem 
+                          key={program.id} 
+                          value={program.id}
+                          data-testid={`option-program-${program.name}`}
+                        >
+                          {program.name} ({program.programType === 'student_program' ? 'Student' : 'Volunteer'})
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={() => {
+                    if (entitlementDialogUserId && selectedProgramId) {
+                      addEntitlementMutation.mutate({
+                        userId: entitlementDialogUserId,
+                        programId: selectedProgramId,
+                      });
+                    }
+                  }}
+                  disabled={!selectedProgramId || addEntitlementMutation.isPending}
+                  data-testid="button-add-program"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Add
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setEntitlementDialogUserId(null);
+                setSelectedProgramId("");
+              }}
+              data-testid="button-close-dialog"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

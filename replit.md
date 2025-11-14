@@ -20,7 +20,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations.
 -   **A/B Testing System**: A production-ready, configuration-based platform for testing presentation overrides, ensuring consistent variant assignment and providing an admin interface. Features auto-derived baseline reference from target audience selections for simplified UX.
 -   **Automated A/B Testing System**: AI-driven automation framework for content optimization with zero manual intervention, including metric weight profiles, automation rules, performance baselines, AI content generation via Google Gemini, automation run tracking, safety limits, and Bayesian statistical significance.
--   **User Management System**: Admin interface for user accounts, roles (three-tier RBAC), and audit logging.
+-   **User Management System**: Admin interface for user accounts, roles (three-tier RBAC), audit logging, and program entitlements management (allowing admins to grant users access to specific student programs or volunteer opportunities for testing).
 -   **Authenticated Donation System with Saved Payment Methods**: Secure payment processing via Stripe.
 -   **Email Automation System**: Transactional email delivery via SendGrid with AI-powered copywriting.
 -   **SMS Notification System**: Twilio-based template messaging with persona targeting and AI-powered copywriting.

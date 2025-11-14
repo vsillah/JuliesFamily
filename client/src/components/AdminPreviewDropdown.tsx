@@ -20,11 +20,13 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown, X, CheckCircle2 } from "lucide-react";
+import { Eye, Shield, TrendingUp, TestTube2, RotateCcw, ChevronDown, X, CheckCircle2, UserCog, Users } from "lucide-react";
 import { personaConfigs, usePersona, type Persona } from "@/contexts/PersonaContext";
 import { useAdminPreviewState } from "@/hooks/useAdminPreviewState";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 
 // Hook to detect mobile viewport (runtime check to prevent React hook violations)
@@ -253,6 +255,8 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   const isMobile = useIsMobile(768); // Runtime check for mobile viewport
   const [open, setOpen] = useState(false);
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
+  const [impersonationUserId, setImpersonationUserId] = useState("");
+  const { toast } = useToast();
   
   const {
     selectedPersona,
@@ -267,6 +271,77 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
     handleApply,
     handleReset,
   } = useAdminPreviewState();
+  
+  // Fetch all users for impersonation
+  const { data: users = [] } = useQuery<Array<{id: string; email: string; firstName: string | null; lastName: string | null}>>({
+    queryKey: ['/api/admin/users'],
+    enabled: isAdmin,
+  });
+  
+  // Fetch active impersonation session
+  const { data: impersonationSession } = useQuery<{
+    id: string;
+    impersonatedUserId: string;
+    isActive: boolean;
+  } | null>({
+    queryKey: ['/api/admin/impersonation/session'],
+    enabled: isAdmin,
+  });
+  
+  // Get impersonated user details
+  const impersonatedUser = impersonationSession?.impersonatedUserId 
+    ? users.find(u => u.id === impersonationSession.impersonatedUserId)
+    : null;
+  
+  // Start impersonation mutation
+  const startImpersonationMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return await apiRequest('/api/admin/impersonation/start', {
+        method: 'POST',
+        body: JSON.stringify({ impersonatedUserId: userId, reason: 'Admin troubleshooting via preview mode' }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/impersonation/session'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      setImpersonationUserId("");
+      toast({
+        title: "Impersonation started",
+        description: "You are now viewing the site as the selected user. Reload the page to see changes.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to start impersonation",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // End impersonation mutation
+  const endImpersonationMutation = useMutation({
+    mutationFn: async (sessionId: string) => {
+      return await apiRequest(`/api/admin/impersonation/end/${sessionId}`, {
+        method: 'DELETE',
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/impersonation/session'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({
+        title: "Impersonation ended",
+        description: "You are now viewing as yourself. Reload the page to see changes.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to end impersonation",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   // Lock body scroll when mobile overlay is open
   useEffect(() => {
@@ -449,8 +524,90 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
 
         <div className="h-px bg-border my-4" />
 
-        {/* Admin Dashboard Link & Sign Out */}
+        {/* User Impersonation Section */}
+        {impersonatedUser ? (
+          <div className="py-2 space-y-2">
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+              <UserCog className="w-4 h-4" />
+              Active Impersonation
+            </label>
+            <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
+              <p className="text-sm font-medium">
+                Viewing as: {impersonatedUser.firstName} {impersonatedUser.lastName}
+              </p>
+              <p className="text-xs text-muted-foreground">{impersonatedUser.email}</p>
+            </div>
+            <Button
+              variant="outline"
+              className="w-full h-11 text-base"
+              onClick={() => {
+                if (impersonationSession) {
+                  endImpersonationMutation.mutate(impersonationSession.id);
+                  setShowMobileOverlay(false);
+                }
+              }}
+              disabled={endImpersonationMutation.isPending}
+              data-testid="button-end-impersonation"
+            >
+              <X className="w-4 h-4 mr-2" />
+              End Impersonation
+            </Button>
+          </div>
+        ) : (
+          <div className="py-2 space-y-2">
+            <label className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+              <UserCog className="w-4 h-4" />
+              Impersonate User
+            </label>
+            <p className="text-xs text-muted-foreground mb-3">
+              View the site as a specific user for troubleshooting
+            </p>
+            <Select
+              value={impersonationUserId}
+              onValueChange={setImpersonationUserId}
+            >
+              <SelectTrigger className="h-11 text-base" data-testid="select-impersonate-user">
+                <SelectValue placeholder="Select user..." />
+              </SelectTrigger>
+              <SelectContent className="z-[100000]">
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.firstName} {user.lastName} ({user.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {impersonationUserId && (
+              <Button
+                className="w-full h-11 text-base"
+                onClick={() => {
+                  startImpersonationMutation.mutate(impersonationUserId);
+                  setShowMobileOverlay(false);
+                }}
+                disabled={startImpersonationMutation.isPending}
+                data-testid="button-start-impersonation"
+              >
+                <UserCog className="w-4 h-4 mr-2" />
+                Start Impersonation
+              </Button>
+            )}
+          </div>
+        )}
+
+        <div className="h-px bg-border my-4" />
+
+        {/* Admin Links */}
         <div className="space-y-2">
+          <Link href="/admin/role-provisioning">
+            <Button
+              variant="ghost"
+              className="w-full justify-start h-12 text-base"
+              data-testid="menu-admin-role-provisioning"
+            >
+              <Users className="w-5 h-5 mr-2" />
+              Role Provisioning
+            </Button>
+          </Link>
           <Link href="/admin">
             <Button
               variant="ghost"
@@ -676,7 +833,85 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
 
             <DropdownMenuSeparator />
 
-            {/* Admin Dashboard Link */}
+            {/* User Impersonation Section */}
+            {impersonatedUser ? (
+              <div className="px-2 py-2 space-y-2">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <UserCog className="w-3 h-3" />
+                  Active Impersonation
+                </label>
+                <div className="p-2 bg-primary/10 rounded-md border border-primary/20">
+                  <p className="text-xs font-medium">
+                    Viewing as: {impersonatedUser.firstName} {impersonatedUser.lastName}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">{impersonatedUser.email}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => {
+                    if (impersonationSession) {
+                      endImpersonationMutation.mutate(impersonationSession.id);
+                    }
+                  }}
+                  disabled={endImpersonationMutation.isPending}
+                  data-testid="button-end-impersonation"
+                >
+                  <X className="w-3 h-3 mr-2" />
+                  End Impersonation
+                </Button>
+              </div>
+            ) : (
+              <div className="px-2 py-2 space-y-2">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                  <UserCog className="w-3 h-3" />
+                  Impersonate User
+                </label>
+                <p className="text-[11px] text-muted-foreground mb-2">
+                  View the site as a specific user for troubleshooting
+                </p>
+                <Select
+                  value={impersonationUserId}
+                  onValueChange={setImpersonationUserId}
+                >
+                  <SelectTrigger className="h-8 text-sm" data-testid="select-impersonate-user">
+                    <SelectValue placeholder="Select user..." />
+                  </SelectTrigger>
+                  <SelectContent className="z-[99999]">
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.firstName} {user.lastName} ({user.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {impersonationUserId && (
+                  <Button
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      startImpersonationMutation.mutate(impersonationUserId);
+                    }}
+                    disabled={startImpersonationMutation.isPending}
+                    data-testid="button-start-impersonation"
+                  >
+                    <UserCog className="w-3 h-3 mr-2" />
+                    Start Impersonation
+                  </Button>
+                )}
+              </div>
+            )}
+
+            <DropdownMenuSeparator />
+
+            {/* Admin Links */}
+            <Link href="/admin/role-provisioning">
+              <DropdownMenuItem data-testid="menu-admin-role-provisioning">
+                <Users className="w-4 h-4 mr-2" />
+                Role Provisioning
+              </DropdownMenuItem>
+            </Link>
             <Link href="/admin">
               <DropdownMenuItem data-testid="menu-admin-dashboard-dropdown">
                 <Shield className="w-4 h-4 mr-2" />

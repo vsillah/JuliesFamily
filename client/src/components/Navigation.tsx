@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogIn, LogOut, Shield, Camera, Settings, Users } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut, Shield, Camera, Settings, Users, UserCog } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -23,6 +23,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
 import CloudinaryImage from "@/components/CloudinaryImage";
 import { useContentAvailability } from "@/hooks/useContentAvailability";
+import { useQuery } from "@tanstack/react-query";
 
 interface NavigationProps {
   heroImageLoaded?: boolean;
@@ -38,6 +39,27 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
   const { toast } = useToast();
   const navRef = useState<HTMLElement | null>(null)[0];
   const { data: visibleSections, isLoading: isLoadingVisibility } = useContentAvailability();
+  
+  // Fetch active impersonation session for admins
+  const { data: impersonationSession } = useQuery<{
+    id: string;
+    impersonatedUserId: string;
+    isActive: boolean;
+  } | null>({
+    queryKey: ['/api/admin/impersonation/session'],
+    enabled: isAdmin,
+  });
+  
+  // Fetch all users to get impersonated user details
+  const { data: users = [] } = useQuery<Array<{id: string; email: string; firstName: string | null; lastName: string | null}>>({
+    queryKey: ['/api/admin/users'],
+    enabled: isAdmin && !!impersonationSession,
+  });
+  
+  // Get impersonated user details
+  const impersonatedUser = impersonationSession?.impersonatedUserId 
+    ? users.find(u => u.id === impersonationSession.impersonatedUserId)
+    : null;
   
   // Default to showing all sections while loading to avoid flickering nav
   const sections = visibleSections || {
@@ -287,6 +309,18 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
 
             {/* Right: Utilities */}
             <div className="hidden md:flex items-center gap-1.5 justify-end flex-shrink-0">
+              {/* Impersonation Indicator */}
+              {impersonatedUser && (
+                <Badge 
+                  variant="destructive" 
+                  className="gap-1 px-2 py-1 animate-pulse"
+                  data-testid="badge-impersonation-active"
+                >
+                  <UserCog className="w-3 h-3" />
+                  Viewing as: {impersonatedUser.firstName} {impersonatedUser.lastName}
+                </Badge>
+              )}
+              
               <Link href="/donate">
                 <Button variant="default" data-testid="button-donate">
                   Donate

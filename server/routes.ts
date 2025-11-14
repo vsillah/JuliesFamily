@@ -1224,6 +1224,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // User-specific entitlements management (for managing other users' entitlements)
+  app.get('/api/admin/users/:userId/entitlements', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      console.log(`[AdminProvisioning] GET /api/admin/users/${userId}/entitlements`);
+      
+      // Verify user exists
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const entitlements = await storage.getActiveAdminEntitlementsWithPrograms(userId);
+      res.json(entitlements);
+    } catch (error) {
+      console.error("Error fetching user entitlements:", error);
+      res.status(500).json({ message: "Failed to fetch user entitlements" });
+    }
+  });
+  
+  app.post('/api/admin/users/:userId/entitlements', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId } = req.params;
+      console.log(`[AdminProvisioning] POST /api/admin/users/${userId}/entitlements`);
+      
+      // Verify user exists
+      const targetUser = await storage.getUser(userId);
+      if (!targetUser) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Validate request body
+      const bodySchema = z.object({
+        programId: z.string(),
+        metadata: z.record(z.any()).optional(),
+      });
+      
+      const validationResult = bodySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid entitlement data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      // Check if entitlement already exists
+      const hasEntitlement = await storage.hasActiveEntitlement(
+        userId, 
+        validationResult.data.programId
+      );
+      
+      if (hasEntitlement) {
+        return res.status(409).json({ message: "Entitlement already exists for this program" });
+      }
+      
+      // Create entitlement (transactional: creates entitlement + test enrollment + progress)
+      const result = await storage.createAdminEntitlement({
+        adminId: userId,
+        programId: validationResult.data.programId,
+        metadata: validationResult.data.metadata,
+      });
+      
+      res.status(201).json(result);
+    } catch (error) {
+      console.error("Error creating user entitlement:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to create user entitlement" 
+      });
+    }
+  });
+  
+  app.delete('/api/admin/users/:userId/entitlements/:entitlementId', isAuthenticated, isAdmin, async (req: any, res) => {
+    try {
+      const { userId, entitlementId } = req.params;
+      console.log(`[AdminProvisioning] DELETE /api/admin/users/${userId}/entitlements/${entitlementId}`);
+      
+      // Verify entitlement exists and belongs to specified user
+      const entitlement = await storage.getAdminEntitlement(entitlementId);
+      if (!entitlement) {
+        return res.status(404).json({ message: "Entitlement not found" });
+      }
+      
+      if (entitlement.adminId !== userId) {
+        return res.status(403).json({ message: "Entitlement does not belong to specified user" });
+      }
+      
+      // Deactivate entitlement with transactional cleanup (uses service layer)
+      const adminEntitlementService = new AdminEntitlementService(storage);
+      await adminEntitlementService.deactivateEntitlement(entitlementId);
+      res.json({ message: "Entitlement deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting user entitlement:", error);
+      res.status(500).json({ message: "Failed to delete user entitlement" });
+    }
+  });
+  
   // Impersonation
   app.get('/api/admin/impersonation/session', isAuthenticated, isAdmin, async (req: any, res) => {
     try {
