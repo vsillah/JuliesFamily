@@ -72,6 +72,8 @@ async function upsertUser(
   const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(' ')[0];
   const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(' ')[1];
   const persona = claims["persona"]; // Extract persona if provided (used for testing)
+  const passions = claims["passions"]; // Extract passions if provided (used for testing)
+  const funnelStage = claims["funnelStage"]; // Extract funnelStage if provided (used for testing)
   // Extract role if provided (only used in development/test)
   // Support both "role" (singular string) and "roles" (array - take first element)
   const role = claims["role"] || (Array.isArray(claims["roles"]) ? claims["roles"][0] : claims["roles"]);
@@ -83,6 +85,8 @@ async function upsertUser(
     lastName,
     profileImageUrl: claims["profile_image_url"] || claims["picture"],
     persona,
+    passions,
+    funnelStage,
     role: role || "(not provided - will use default/existing)",
   });
   
@@ -99,6 +103,8 @@ async function upsertUser(
     lastName: lastName,
     profileImageUrl: claims["profile_image_url"] || claims["picture"],
     persona: persona, // Include persona from claims if provided
+    passions: passions, // Include passions from claims if provided (for testing)
+    funnelStage: funnelStage, // Include funnelStage from claims if provided (for testing)
   };
   
   // Only allow role from claims in development/test environments

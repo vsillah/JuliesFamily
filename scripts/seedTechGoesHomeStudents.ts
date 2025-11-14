@@ -195,8 +195,22 @@ async function seedTechGoesHomeStudents() {
           }
         };
 
-        await storage.createContentItem(projectContent);
+        const createdProject = await storage.createContentItem(projectContent);
         console.log(`    ✓ Project content item created`);
+        
+        // 5. Create donor visibility for the project (so donors can see student work)
+        console.log("  → Creating donor visibility records...");
+        const donorFunnelStages = ["awareness", "consideration", "decision", "retention"];
+        for (const stage of donorFunnelStages) {
+          await storage.createContentVisibility({
+            contentItemId: createdProject.id,
+            persona: "donor",
+            funnelStage: stage,
+            isVisible: true,
+            order: 0,
+          });
+        }
+        console.log(`    ✓ Created visibility for donor persona (all stages)`);
         
       } catch (error) {
         console.error(`    ✗ Error creating project: ${error}`);

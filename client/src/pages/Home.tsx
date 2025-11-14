@@ -8,6 +8,7 @@ import ImpactStats from "@/components/ImpactStats";
 import OurStory from "@/components/OurStory";
 import Testimonials from "@/components/Testimonials";
 import { StudentStoriesCarousel } from "@/components/StudentStoriesCarousel";
+import { StudentProjectsCarousel } from "@/components/StudentProjectsCarousel";
 import SocialMediaCarousel from "@/components/SocialMediaCarousel";
 import Events from "@/components/Events";
 import DonationCTA from "@/components/DonationCTA";
@@ -153,6 +154,7 @@ export default function Home() {
       )}
       
       <StudentStoriesCarousel />
+      <StudentProjectsCarousel />
       <SocialMediaCarousel />
       
       {sections.events && (

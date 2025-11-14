@@ -7,6 +7,11 @@ import { type Persona, type FunnelStage as BaseFunnelStage } from "@shared/defau
 export type { Persona };
 export type FunnelStage = BaseFunnelStage | null;
 
+export interface PassionOption {
+  id: string;
+  label: string;
+}
+
 export interface PersonaConfig {
   id: Persona;
   label: string;
@@ -51,6 +56,7 @@ interface PersonaContextType {
   persona: Persona;
   setPersona: (persona: Persona) => Promise<void>;
   funnelStage: FunnelStage;
+  passions: PassionOption[] | null;
   showPersonaModal: boolean;
   setShowPersonaModal: (show: boolean) => void;
   isPersonaLoading: boolean;
@@ -81,6 +87,7 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
   
   const [persona, setPersonaState] = useState<Persona>(getInitialPersona);
   const [funnelStage, setFunnelStage] = useState<FunnelStage>(null);
+  const [passions, setPassions] = useState<PassionOption[] | null>(null);
   const [showPersonaModal, setShowPersonaModal] = useState(false);
   // If we have an admin override already, we're not loading
   const [isPersonaLoading, setIsPersonaLoading] = useState(() => {
@@ -151,6 +158,18 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       }
     }
 
+    // Load passions from authenticated user
+    if (isAuthenticated && user && user.passions) {
+      // Transform string[] to PassionOption[]
+      const passionOptions = user.passions.map((passionId: string) => ({
+        id: passionId,
+        label: passionId.charAt(0).toUpperCase() + passionId.slice(1)
+      }));
+      setPassions(passionOptions);
+    } else {
+      setPassions(null);
+    }
+
     // Mark persona as loaded
     setIsPersonaLoading(false);
   }, [isAuthenticated, user, isLoading, location]);
@@ -176,7 +195,7 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <PersonaContext.Provider value={{ persona, setPersona, funnelStage, showPersonaModal, setShowPersonaModal, isPersonaLoading }}>
+    <PersonaContext.Provider value={{ persona, setPersona, funnelStage, passions, showPersonaModal, setShowPersonaModal, isPersonaLoading }}>
       {children}
     </PersonaContext.Provider>
   );

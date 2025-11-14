@@ -1070,6 +1070,19 @@ export class DatabaseStorage implements IStorage {
       }
       // SECURITY: Never accept role from untrusted sources - preserve existing user's role
       
+      // Allow updating persona from OIDC claims (used for testing/demo purposes)
+      if (userData.persona !== undefined) {
+        updateData.persona = userData.persona;
+      }
+      // Allow updating passions from OIDC claims (used for testing/demo purposes)
+      if (userData.passions !== undefined) {
+        updateData.passions = userData.passions;
+      }
+      // Allow updating funnelStage from OIDC claims (used for testing/demo purposes)
+      if (userData.funnelStage !== undefined) {
+        updateData.funnelStage = userData.funnelStage;
+      }
+      
       try {
         const [user] = await db
           .update(users)
@@ -1128,6 +1141,18 @@ export class DatabaseStorage implements IStorage {
             }
             if (userData.role !== undefined) {
               updateData.role = userData.role;
+            }
+            // Allow updating persona from OIDC claims (used for testing/demo purposes)
+            if (userData.persona !== undefined) {
+              updateData.persona = userData.persona;
+            }
+            // Allow updating passions from OIDC claims (used for testing/demo purposes)
+            if (userData.passions !== undefined) {
+              updateData.passions = userData.passions;
+            }
+            // Allow updating funnelStage from OIDC claims (used for testing/demo purposes)
+            if (userData.funnelStage !== undefined) {
+              updateData.funnelStage = userData.funnelStage;
             }
             
             try {
