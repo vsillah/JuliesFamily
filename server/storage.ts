@@ -149,6 +149,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   updateContentItem(id: string, updates: Partial<InsertContentItem>): Promise<ContentItem | undefined>;
   deleteContentItem(id: string): Promise<void>;
   updateContentItemOrder(id: string, newOrder: number): Promise<ContentItem | undefined>;
+  updateContentOrders(updates: { id: string; order: number }[], contentType?: string): Promise<ContentItem[]>;
   getContentItemUsage(id: string): Promise<{
     visibilityAssignments: { persona: string | null; funnelStage: string | null; }[];
     abTests: { testId: string; testName: string; variantName: string; status: string; }[];
@@ -1538,6 +1539,60 @@ export class DatabaseStorage implements IStorage {
       .where(eq(contentItems.id, id))
       .returning();
     return item;
+  }
+
+  async updateContentOrders(updates: { id: string; order: number }[], contentType?: string): Promise<ContentItem[]> {
+    return await db.transaction(async (tx) => {
+      // Validate: Fetch all items to check existence and type consistency
+      const itemIds = updates.map(u => u.id);
+      const items = await tx
+        .select()
+        .from(contentItems)
+        .where(inArray(contentItems.id, itemIds));
+
+      // Check all IDs exist
+      if (items.length !== updates.length) {
+        const foundIds = new Set(items.map(i => i.id));
+        const missingIds = itemIds.filter(id => !foundIds.has(id));
+        throw new Error(`items_not_found: ${missingIds.join(', ')}`);
+      }
+
+      // Check all items are same content type
+      const types = new Set(items.map(i => i.type));
+      if (types.size > 1) {
+        throw new Error(`mixed_content_type: Found types ${Array.from(types).join(', ')}`);
+      }
+
+      // If contentType hint provided, validate it matches
+      if (contentType && items[0].type !== contentType) {
+        throw new Error(`content_type_mismatch: Expected ${contentType}, found ${items[0].type}`);
+      }
+
+      // Check for duplicate order values in the update payload
+      const orderValues = updates.map(u => u.order);
+      if (new Set(orderValues).size !== orderValues.length) {
+        throw new Error('duplicate_order: Order values must be unique');
+      }
+
+      // Build CASE expression for batch update
+      const now = new Date();
+      const caseStmt = sql<number>`(CASE ${contentItems.id} ${sql.join(
+        updates.map(u => sql`WHEN ${u.id} THEN ${u.order}`),
+        sql` `
+      )} END)`;
+
+      // Execute batch update with CASE
+      const updatedItems = await tx
+        .update(contentItems)
+        .set({
+          order: caseStmt,
+          updatedAt: now
+        })
+        .where(inArray(contentItems.id, itemIds))
+        .returning();
+
+      return updatedItems;
+    });
   }
 
   async getContentItemUsage(id: string): Promise<{

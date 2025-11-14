@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star, CheckCircle2, AlertTriangle, XCircle, Sparkles, Loader2, Clock } from "lucide-react";
+import { Pencil, Trash2, Plus, GripVertical, Eye, EyeOff, Image as ImageIcon, Upload, X, Grid3x3, Filter, Info, Instagram, Facebook, Linkedin, Video as VideoIcon, RefreshCw, Star, CheckCircle2, AlertTriangle, XCircle, Sparkles, Loader2, Clock, ChevronUp, ChevronDown, MoreVertical } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import PersonaMatrixGrid from "@/components/PersonaMatrixGrid";
 import ContentUsageIndicator from "@/components/ContentUsageIndicator";
@@ -103,11 +103,27 @@ function UrlValidationBadge({ url, persona, funnelStage }: {
 }
 
 // Sortable Item Component
-function SortableContentCard({ item, onToggleActive, onEdit, onDelete, getImageUrl }: {
+function SortableContentCard({ 
+  item, 
+  index, 
+  totalItems,
+  onToggleActive, 
+  onEdit, 
+  onDelete, 
+  onMoveUp,
+  onMoveDown,
+  onJumpTo,
+  getImageUrl 
+}: {
   item: ContentItem;
+  index: number;
+  totalItems: number;
   onToggleActive: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onJumpTo: (position: number) => void;
   getImageUrl: (item: ContentItem | null) => string | null;
 }) {
   const {
@@ -309,6 +325,9 @@ export default function AdminContentManager() {
   
   // Helper to create combo key from persona and stage
   const getComboKey = (persona: Persona, stage: FunnelStage) => `${persona}:${stage}`;
+  
+  // Track reordering operations to prevent concurrent mutations
+  const [isReordering, setIsReordering] = useState(false);
 
   const { data: services = [], isLoading: servicesLoading} = useQuery<ContentItem[]>({
     queryKey: ["/api/content/type/service"],

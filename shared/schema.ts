@@ -468,6 +468,20 @@ export const updateContentItemSchema = z.object({
 }).strict();
 export type UpdateContentItem = z.infer<typeof updateContentItemSchema>;
 
+// Batch content reorder schemas
+export const contentOrderUpdateSchema = z.object({
+  id: z.string(),
+  order: z.number().int().finite(),
+});
+
+export const batchContentReorderSchema = z.object({
+  updates: z.array(contentOrderUpdateSchema).min(1, "Must provide at least one item to reorder"),
+  contentType: z.string().optional(), // Optional type hint for validation
+});
+
+export type ContentOrderUpdate = z.infer<typeof contentOrderUpdateSchema>;
+export type BatchContentReorder = z.infer<typeof batchContentReorderSchema>;
+
 // Student submission schema - for students to submit projects and testimonials
 export const insertStudentSubmissionSchema = z.object({
   type: z.enum(['student_project', 'student_testimonial']),
