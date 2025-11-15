@@ -310,138 +310,250 @@ export default function ProductLanding() {
             </p>
           </div>
           
-          {/* Tier Cost Comparison */}
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <Card className="border-2" data-testid="tier-basic-cost">
-              <CardHeader>
-                <CardTitle className="text-2xl">Basic Tier</CardTitle>
-                <CardDescription>Out-of-the-box essentials</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>CRM Platform</span>
-                    <span className="font-semibold">$125/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Email Marketing</span>
-                    <span className="font-semibold">$50/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Website Builder</span>
-                    <span className="font-semibold">$25/mo</span>
-                  </div>
-                  <div className="pt-3 border-t">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total Monthly Cost</span>
-                      <span className="text-primary">$200/mo</span>
+          {/* Kinflo Usage-Based Pricing Tiers */}
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-center mb-6">Kinflo Usage-Based Pricing</h3>
+            <p className="text-center text-muted-foreground mb-6 max-w-3xl mx-auto">
+              Platform access is FREE for the first 5 nonprofits. You only pay for third-party service usage based on your organization's needs.
+            </p>
+            
+            <div className="grid md:grid-cols-3 gap-6 mb-12">
+              <Card className="border-2" data-testid="tier-low-usage">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Low Usage</CardTitle>
+                  <CardDescription>Small organizations, getting started</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>Email Sends</span>
+                      <span className="font-semibold">~500/mo</span>
                     </div>
-                    <div className="flex justify-between text-muted-foreground mt-1">
-                      <span>Annual Cost</span>
-                      <span>$2,400/yr</span>
+                    <div className="flex justify-between">
+                      <span>SMS Messages</span>
+                      <span className="font-semibold">~50/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>AI Generations</span>
+                      <span className="font-semibold">~10/mo</span>
+                    </div>
+                    <div className="pt-3 border-t">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Estimated Usage Cost</span>
+                        <span className="text-green-600">~$15/mo</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground mt-1">
+                        <span>Platform Fee</span>
+                        <span className="text-green-600 font-semibold">FREE*</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card className="border-2 border-primary" data-testid="tier-pro-cost">
-              <CardHeader>
-                <CardTitle className="text-2xl">Pro Tier</CardTitle>
-                <CardDescription>Dynamic engagement tools</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>CRM Platform</span>
-                    <span className="font-semibold">$125/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Email Marketing</span>
-                    <span className="font-semibold">$50/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>SMS Platform</span>
-                    <span className="font-semibold">$45/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Fundraising Module</span>
-                    <span className="font-semibold">$42/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Website Builder</span>
-                    <span className="font-semibold">$25/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Calendar Scheduling</span>
-                    <span className="font-semibold">$15/mo</span>
-                  </div>
-                  <div className="pt-3 border-t">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total Monthly Cost</span>
-                      <span className="text-primary">$302/mo</span>
+              <Card className="border-2 border-primary" data-testid="tier-medium-usage">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Medium Usage</CardTitle>
+                  <CardDescription>Growing organizations, active campaigns</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>Email Sends</span>
+                      <span className="font-semibold">~2,500/mo</span>
                     </div>
-                    <div className="flex justify-between text-muted-foreground mt-1">
-                      <span>Annual Cost</span>
-                      <span>$3,624/yr</span>
+                    <div className="flex justify-between">
+                      <span>SMS Messages</span>
+                      <span className="font-semibold">~250/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>AI Generations</span>
+                      <span className="font-semibold">~50/mo</span>
+                    </div>
+                    <div className="pt-3 border-t">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Estimated Usage Cost</span>
+                        <span className="text-green-600">~$75/mo</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground mt-1">
+                        <span>Platform Fee</span>
+                        <span className="text-green-600 font-semibold">FREE*</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
 
-            <Card className="border-2" data-testid="tier-premium-cost">
-              <CardHeader>
-                <CardTitle className="text-2xl">Premium Tier</CardTitle>
-                <CardDescription>Full-featured platform</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span>CRM Platform</span>
-                    <span className="font-semibold">$125/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Email Marketing</span>
-                    <span className="font-semibold">$50/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>SMS Platform</span>
-                    <span className="font-semibold">$45/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>A/B Testing Tool</span>
-                    <span className="font-semibold">$200/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>AI Copywriting</span>
-                    <span className="font-semibold">$50/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Fundraising Module</span>
-                    <span className="font-semibold">$42/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Website Builder</span>
-                    <span className="font-semibold">$25/mo</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Calendar Scheduling</span>
-                    <span className="font-semibold">$15/mo</span>
-                  </div>
-                  <div className="pt-3 border-t">
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total Monthly Cost</span>
-                      <span className="text-primary">$552/mo</span>
+              <Card className="border-2" data-testid="tier-high-usage">
+                <CardHeader>
+                  <CardTitle className="text-2xl">High Usage</CardTitle>
+                  <CardDescription>Established organizations, multiple campaigns</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>Email Sends</span>
+                      <span className="font-semibold">~10,000/mo</span>
                     </div>
-                    <div className="flex justify-between text-muted-foreground mt-1">
-                      <span>Annual Cost</span>
-                      <span>$6,624/yr</span>
+                    <div className="flex justify-between">
+                      <span>SMS Messages</span>
+                      <span className="font-semibold">~1,000/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>AI Generations</span>
+                      <span className="font-semibold">~200/mo</span>
+                    </div>
+                    <div className="pt-3 border-t">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Estimated Usage Cost</span>
+                        <span className="text-green-600">~$300/mo</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground mt-1">
+                        <span>Platform Fee</span>
+                        <span className="text-green-600 font-semibold">FREE*</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {/* Traditional CRM Tier Comparison */}
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-center mb-6">vs. Traditional CRM Costs</h3>
+            <div className="grid md:grid-cols-3 gap-6">
+              <Card className="border-2 opacity-60" data-testid="tier-basic-cost">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Basic Tier</CardTitle>
+                  <CardDescription>Out-of-the-box essentials</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>CRM Platform</span>
+                      <span className="font-semibold">$125/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Email Marketing</span>
+                      <span className="font-semibold">$50/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Website Builder</span>
+                      <span className="font-semibold">$25/mo</span>
+                    </div>
+                    <div className="pt-3 border-t">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Total Monthly Cost</span>
+                        <span className="text-primary">$200/mo</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground mt-1">
+                        <span>Annual Cost</span>
+                        <span>$2,400/yr</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 opacity-60" data-testid="tier-pro-cost">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Pro Tier</CardTitle>
+                  <CardDescription>Dynamic engagement tools</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>CRM Platform</span>
+                      <span className="font-semibold">$125/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Email Marketing</span>
+                      <span className="font-semibold">$50/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>SMS Platform</span>
+                      <span className="font-semibold">$45/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Fundraising Module</span>
+                      <span className="font-semibold">$42/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Website Builder</span>
+                      <span className="font-semibold">$25/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Calendar Scheduling</span>
+                      <span className="font-semibold">$15/mo</span>
+                    </div>
+                    <div className="pt-3 border-t">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Total Monthly Cost</span>
+                        <span className="text-primary">$302/mo</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground mt-1">
+                        <span>Annual Cost</span>
+                        <span>$3,624/yr</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="border-2 opacity-60" data-testid="tier-premium-cost">
+                <CardHeader>
+                  <CardTitle className="text-2xl">Premium Tier</CardTitle>
+                  <CardDescription>Full-featured platform</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span>CRM Platform</span>
+                      <span className="font-semibold">$125/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Email Marketing</span>
+                      <span className="font-semibold">$50/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>SMS Platform</span>
+                      <span className="font-semibold">$45/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>A/B Testing Tool</span>
+                      <span className="font-semibold">$200/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>AI Copywriting</span>
+                      <span className="font-semibold">$50/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Fundraising Module</span>
+                      <span className="font-semibold">$42/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Website Builder</span>
+                      <span className="font-semibold">$25/mo</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Calendar Scheduling</span>
+                      <span className="font-semibold">$15/mo</span>
+                    </div>
+                    <div className="pt-3 border-t">
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Total Monthly Cost</span>
+                        <span className="text-primary">$552/mo</span>
+                      </div>
+                      <div className="flex justify-between text-muted-foreground mt-1">
+                        <span>Annual Cost</span>
+                        <span>$6,624/yr</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
@@ -476,14 +588,17 @@ export default function ProductLanding() {
               <ArrowRight className="h-8 w-8 text-primary rotate-90 sm:rotate-0" />
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Kinflo All-Inclusive</div>
-                <div className="text-4xl sm:text-5xl font-bold text-green-600">FREE</div>
+                <div className="text-4xl sm:text-5xl font-bold text-green-600">FREE*</div>
               </div>
             </div>
             <p className="text-lg sm:text-xl font-semibold text-primary mb-2" data-testid="text-annual-savings">
               Save $24,120 per year
             </p>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto mb-4">
               Every feature you need is included. No hidden costs, no premium tiers, no per-user fees. Just one powerful platform built specifically for nonprofits.
+            </p>
+            <p className="text-xs text-muted-foreground max-w-2xl mx-auto pt-4 border-t border-muted">
+              *The first 5 nonprofits receive Kinflo completely free (platform access only). You'll only pay for third-party service usage costs (email/SMS sends, AI generation, etc.) based on your organization's usage tier. In return, we ask for feedback and testimonials to help us improve.
             </p>
           </div>
         </div>
