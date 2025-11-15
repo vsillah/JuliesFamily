@@ -16,6 +16,7 @@ import Sponsors from "@/components/Sponsors";
 import Footer from "@/components/Footer";
 import SchemaMarkup from "@/components/SchemaMarkup";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { CampaignImpactCard } from "@/components/CampaignImpactCard";
 import { StudentDashboard } from "@/components/StudentDashboard";
 import { VolunteerDashboard } from "@/components/VolunteerDashboard";
@@ -37,6 +38,7 @@ const DEFAULT_SECTIONS: VisibleSections = {
 
 export default function Home() {
   const { persona, funnelStage, isPersonaLoading } = usePersona();
+  const { currentOrg } = useOrganization();
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const { data: visibleSections } = useContentAvailability();
 
@@ -46,8 +48,8 @@ export default function Home() {
 
   // Fetch hero content to know when it's ready
   const { data: heroContent, isLoading: heroLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/visible/hero", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
-    enabled: !isPersonaLoading && !!persona,
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
+    enabled: !isPersonaLoading && !!persona && !!currentOrg,
   });
 
   // Also fetch hero image to ensure it's ready before rendering
@@ -59,7 +61,8 @@ export default function Home() {
 
   // Fetch lead magnet content from database
   const { data: leadMagnets = [] } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/visible/lead_magnet", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/lead_magnet", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
+    enabled: !!currentOrg,
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append('persona', effectivePersona);

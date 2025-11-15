@@ -16,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createOrganizationWizardSchema, type CreateOrganizationWizard } from "@shared/schema";
 import { useLocation } from "wouter";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 interface OrganizationMetrics {
   leadsCount: number;
@@ -44,6 +45,7 @@ export default function AdminOrganizations() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [, setLocation] = useLocation();
+  const { switchOrganization, clearOverride } = useOrganization();
 
   // Form with validation
   const form = useForm<CreateOrganizationWizard>({
@@ -64,20 +66,19 @@ export default function AdminOrganizations() {
     queryKey: ['/api/admin/organization/current'],
   });
 
-  // Switch organization mutation
+  // Switch organization using context (no page reload needed!)
   const switchOrgMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      const response = await apiRequest('POST', '/api/admin/organization/switch', { organizationId });
-      return response.json();
+      await switchOrganization(organizationId);
+      return { organizationId };
     },
-    onSuccess: async (data, variables, context) => {
+    onSuccess: async (data) => {
       toast({
         title: "Organization Switched",
         description: `Now viewing organization ${data.organizationId}`,
       });
-      // Force full page reload to bypass all browser caching and React Query cache
-      // This ensures fresh data is fetched with the new organization context
-      window.location.href = '/';
+      // Navigate to home - context will handle cache invalidation
+      setLocation('/');
     },
     onError: (error: any) => {
       toast({
@@ -88,20 +89,17 @@ export default function AdminOrganizations() {
     },
   });
 
-  // Clear override mutation
+  // Clear override using context (no page reload needed!)
   const clearOverrideMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('DELETE', '/api/admin/organization/switch');
-      return response.json();
+      await clearOverride();
     },
     onSuccess: () => {
       toast({
         title: "Override Cleared",
         description: "Returned to default organization detection",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/organization/current'] });
-      // Reload the page to refresh all org-scoped data
-      window.location.reload();
+      // Context handles cache invalidation automatically
     },
     onError: (error: any) => {
       toast({
