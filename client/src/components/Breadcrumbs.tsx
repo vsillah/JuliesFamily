@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { ChevronRight, Home } from "lucide-react";
+import { ChevronRight, Home, Building2 } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface BreadcrumbItem {
   label: string;
@@ -12,6 +13,7 @@ interface BreadcrumbsProps {
 }
 
 export default function Breadcrumbs({ items, variant = 'light' }: BreadcrumbsProps) {
+  const { isKinfloAdmin } = useUserRole();
   const isDark = variant === 'dark';
   const baseColor = isDark ? "text-white/70" : "text-muted-foreground";
   const hoverColor = isDark ? "hover:text-white" : "hover:text-foreground";
@@ -27,6 +29,21 @@ export default function Breadcrumbs({ items, variant = 'light' }: BreadcrumbsPro
         <Home className="w-4 h-4" />
         <span>Home</span>
       </Link>
+      
+      {/* Show Organizations link for KinFlo admins */}
+      {isKinfloAdmin && (
+        <>
+          <ChevronRight className={`w-4 h-4 ${baseColor}`} />
+          <Link 
+            href="/admin/organizations" 
+            className={`flex items-center gap-1 ${baseColor} ${hoverColor} transition-colors`}
+            data-testid="breadcrumb-organizations"
+          >
+            <Building2 className="w-4 h-4" />
+            <span>Organizations</span>
+          </Link>
+        </>
+      )}
       
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
