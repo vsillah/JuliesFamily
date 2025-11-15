@@ -35,7 +35,7 @@ export type SubscriptionStatus = z.infer<typeof subscriptionStatusEnum>;
 export const organizations = pgTable("organizations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
-  slug: varchar("slug").unique().notNull(), // URL-friendly identifier (e.g., 'red-cross')
+  slug: varchar("slug").unique(), // URL-friendly identifier (e.g., 'red-cross') - temporarily nullable for migration
   logo: varchar("logo"), // Logo URL or storage path
   primaryColor: varchar("primary_color").default('#3b82f6'), // Brand color
   domain: varchar("domain").unique(), // Optional custom domain (e.g., 'donate.redcross.org')
@@ -204,6 +204,7 @@ export type AdminPreferences = typeof adminPreferences.$inferSelect;
 // IMPORTANT: Foreign keys use SET NULL to preserve audit trail even after user deletion
 export const auditLogs = pgTable("audit_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   userId: varchar("user_id").references(() => users.id, { onDelete: "set null" }), // User who was affected (nullable to preserve audit trail)
   actorId: varchar("actor_id").references(() => users.id, { onDelete: "set null" }), // User who performed the action (nullable to preserve audit trail)
   action: varchar("action").notNull(), // role_changed, user_created, user_deleted
@@ -227,6 +228,7 @@ export type AuditLog = typeof auditLogs.$inferSelect;
 // CRM Leads table
 export const leads = pgTable("leads", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   email: varchar("email").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
@@ -304,6 +306,7 @@ export type UpdateLead = z.infer<typeof updateLeadSchema>;
 // Interactions table for tracking all lead activities
 export const interactions = pgTable("interactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   interactionType: varchar("interaction_type").notNull(), // quiz, download, form_submit, call_scheduled, etc
   contentEngaged: varchar("content_engaged"), // Name of the lead magnet or content
@@ -322,6 +325,7 @@ export type Interaction = typeof interactions.$inferSelect;
 // Pipeline Stages - defines the stages leads move through in the sales pipeline
 export const pipelineStages = pgTable("pipeline_stages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(), // New Lead, Contacted, Qualified, Nurturing, Converted, Lost
   slug: varchar("slug").notNull().unique(), // new_lead, contacted, qualified, etc. - canonical identifier for pipelineStage field
   description: text("description"),
@@ -343,6 +347,7 @@ export type PipelineStage = typeof pipelineStages.$inferSelect;
 // Lead Assignments - tracks which team member is assigned to each lead
 export const leadAssignments = pgTable("lead_assignments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   assignedTo: varchar("assigned_to").notNull().references(() => users.id, { onDelete: "cascade" }),
   assignedBy: varchar("assigned_by").references(() => users.id), // Who made the assignment
@@ -363,6 +368,7 @@ export type LeadAssignment = typeof leadAssignments.$inferSelect;
 // Tasks - follow-up tasks for leads
 export const tasks = pgTable("tasks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   assignedTo: varchar("assigned_to").notNull().references(() => users.id, { onDelete: "cascade" }),
   createdBy: varchar("created_by").references(() => users.id),
@@ -393,6 +399,7 @@ export type Task = typeof tasks.$inferSelect;
 // Pipeline History - tracks when leads move between pipeline stages
 export const pipelineHistory = pgTable("pipeline_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   fromStage: varchar("from_stage"), // Null for first entry
   toStage: varchar("to_stage").notNull(),
@@ -413,6 +420,7 @@ export type PipelineHistory = typeof pipelineHistory.$inferSelect;
 // Funnel Progression Rules - defines thresholds for automatic funnel stage advancement
 export const funnelProgressionRules = pgTable("funnel_progression_rules", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   persona: varchar("persona").notNull(), // student, provider, parent, donor, volunteer
   fromStage: varchar("from_stage").notNull(), // awareness, consideration, decision
   toStage: varchar("to_stage").notNull(), // consideration, decision, retention
@@ -449,6 +457,7 @@ export type FunnelProgressionRule = typeof funnelProgressionRules.$inferSelect;
 // Funnel Progression History - audit log of funnel stage changes
 export const funnelProgressionHistory = pgTable("funnel_progression_history", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   fromStage: varchar("from_stage"), // Null for initial stage assignment
   toStage: varchar("to_stage").notNull(),
@@ -477,6 +486,7 @@ export type FunnelProgressionHistory = typeof funnelProgressionHistory.$inferSel
 // Lead Magnets table for managing content offers
 export const leadMagnets = pgTable("lead_magnets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   type: varchar("type").notNull(), // quiz, calculator, pdf, webinar, assessment
   persona: varchar("persona").notNull(), // Which persona this is for
@@ -500,6 +510,7 @@ export type LeadMagnet = typeof leadMagnets.$inferSelect;
 // Image Assets table for managing Cloudinary uploads
 export const imageAssets = pgTable("image_assets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(), // Descriptive name (e.g., "Hero Background - Students")
   originalFilename: varchar("original_filename"), // Original file name from upload
   localPath: varchar("local_path"), // Original local path (e.g., @assets/...)
@@ -530,6 +541,7 @@ export type ImageAsset = typeof imageAssets.$inferSelect;
 // Content Items table for managing editable cards across the site
 export const contentItems = pgTable("content_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card'
   title: text("title").notNull(),
   description: text("description"),
@@ -647,6 +659,7 @@ export type ContentItemWithResolvedImage = ContentItem & {
 // Persona-specific visibility and ordering for content items
 export const contentVisibility = pgTable("content_visibility", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   contentItemId: varchar("content_item_id").notNull().references(() => contentItems.id, { onDelete: "cascade" }),
   persona: varchar("persona"), // null = applies to all personas
   funnelStage: varchar("funnel_stage"), // null = applies to all funnel stages
@@ -675,6 +688,7 @@ export type ContentVisibility = typeof contentVisibility.$inferSelect;
 // Metric Weight Profiles - Define how different metrics contribute to overall performance score
 export const metricWeightProfiles = pgTable("metric_weight_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull().unique(), // 'hero_default', 'cta_donor_focused', 'card_engagement'
   contentType: varchar("content_type"), // Optional: 'hero', 'cta', 'card_order', 'layout', 'messaging' (null = general-purpose)
   persona: varchar("persona"), // Optional: specific persona optimization (null = all personas)
@@ -701,6 +715,7 @@ export type MetricWeightProfile = typeof metricWeightProfiles.$inferSelect;
 // Metric Weight Profile Metrics - Individual metric configurations within a profile
 export const metricWeightProfileMetrics = pgTable("metric_weight_profile_metrics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   profileId: varchar("profile_id").notNull().references(() => metricWeightProfiles.id, { onDelete: "cascade" }),
   metricKey: varchar("metric_key").notNull(), // 'page_view', 'cta_click', 'dwell_time', 'scroll_depth', 'conversion'
   weight: integer("weight").notNull().default(100), // 0-1000 (multiply by 0.001 for percentage)
@@ -722,6 +737,7 @@ export type MetricWeightProfileMetric = typeof metricWeightProfileMetrics.$infer
 // A/B Test Automation Rules - Define when and how to automatically create tests
 export const abTestAutomationRules = pgTable("ab_test_automation_rules", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull().unique(),
   description: text("description"),
   
@@ -779,6 +795,7 @@ export type AbTestAutomationRule = typeof abTestAutomationRules.$inferSelect;
 // A/B Test Automation Rule Metrics - Metric-specific configuration for automation rules
 export const abTestAutomationRuleMetrics = pgTable("ab_test_automation_rule_metrics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   ruleId: varchar("rule_id").notNull().references(() => abTestAutomationRules.id, { onDelete: "cascade" }),
   metricKey: varchar("metric_key").notNull(), // 'cta_click', 'conversion', 'dwell_time', etc
   weight: integer("weight").notNull(), // Override default profile weight if needed
@@ -801,6 +818,7 @@ export type AbTestAutomationRuleMetric = typeof abTestAutomationRuleMetrics.$inf
 // A/B Test Performance Baselines - Rolling performance data for content
 export const abTestPerformanceBaselines = pgTable("ab_test_performance_baselines", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   contentType: varchar("content_type").notNull(),
   contentItemId: varchar("content_item_id").references(() => contentItems.id, { onDelete: "cascade" }),
   persona: varchar("persona"),
@@ -844,6 +862,7 @@ export type AbTestPerformanceBaseline = typeof abTestPerformanceBaselines.$infer
 // A/B Test Variant AI Generations - Track AI-generated content metadata
 export const abTestVariantAiGenerations = pgTable("ab_test_variant_ai_generations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   variantId: varchar("variant_id").notNull().unique(), // One generation record per variant
   
   // AI generation metadata
@@ -884,6 +903,7 @@ export type AbTestVariantAiGeneration = typeof abTestVariantAiGenerations.$infer
 // A/B Test Automation Runs - Audit trail of automation execution
 export const abTestAutomationRuns = pgTable("ab_test_automation_runs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   ruleId: varchar("rule_id").notNull().references(() => abTestAutomationRules.id, { onDelete: "cascade" }),
   
   // Run status
@@ -927,6 +947,7 @@ export type AbTestAutomationRun = typeof abTestAutomationRuns.$inferSelect;
 // A/B Test Safety Limits - Global safety guardrails for automation
 export const abTestSafetyLimits = pgTable("ab_test_safety_limits", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   scope: varchar("scope").notNull().unique().default('global'), // 'global' (singleton pattern)
   
   // Global limits
@@ -974,6 +995,7 @@ export type AbTestSource = z.infer<typeof abTestSourceEnum>;
 // A/B Testing tables for experimentation and optimization
 export const abTests = pgTable("ab_tests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   description: text("description"),
   type: varchar("type").notNull(), // 'card_order', 'layout', 'messaging', 'cta', 'hero'
@@ -1011,6 +1033,7 @@ export type AbTest = typeof abTests.$inferSelect;
 // Junction table for A/B test targeting - links tests to multiple persona×stage combinations
 export const abTestTargets = pgTable("ab_test_targets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
   persona: varchar("persona").notNull(), // Specific persona this test targets
   funnelStage: varchar("funnel_stage").notNull(), // Specific funnel stage this test targets
@@ -1031,6 +1054,7 @@ export type AbTestTarget = typeof abTestTargets.$inferSelect;
 // This allows testing different messaging/CTAs while maintaining personalization
 export const abTestVariants = pgTable("ab_test_variants", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(), // 'Control', 'Variant A', 'Variant B', etc
   description: text("description"),
@@ -1176,6 +1200,7 @@ export type AbTestVariantConfiguration = z.infer<typeof abTestVariantConfigurati
 // Track which variant each session/user sees (ensures consistency)
 export const abTestAssignments = pgTable("ab_test_assignments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
   variantId: varchar("variant_id").notNull().references(() => abTestVariants.id, { onDelete: "cascade" }),
   sessionId: varchar("session_id"), // Legacy session ID (from sessionStorage) - now nullable
@@ -1203,6 +1228,7 @@ export type AbTestAssignment = typeof abTestAssignments.$inferSelect;
 // Track events for A/B test analytics
 export const abTestEvents = pgTable("ab_test_events", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   testId: varchar("test_id").notNull().references(() => abTests.id, { onDelete: "cascade" }),
   variantId: varchar("variant_id").notNull().references(() => abTestVariants.id, { onDelete: "cascade" }),
   assignmentId: varchar("assignment_id").references(() => abTestAssignments.id, { onDelete: "cascade" }),
@@ -1224,6 +1250,7 @@ export type AbTestEvent = typeof abTestEvents.$inferSelect;
 // Google Reviews table for caching reviews from Google Places API
 export const googleReviews = pgTable("google_reviews", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   googleReviewId: varchar("google_review_id").unique().notNull(), // Unique ID from Google
   authorName: varchar("author_name").notNull(),
   authorPhotoUrl: varchar("author_photo_url"),
@@ -1248,6 +1275,7 @@ export type GoogleReview = typeof googleReviews.$inferSelect;
 // Reference: blueprint:javascript_stripe
 export const donations = pgTable("donations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").references(() => leads.id), // Link to lead/donor
   userId: varchar("user_id").references(() => users.id), // Link to authenticated user (optional)
   campaignId: varchar("campaign_id").references(() => donationCampaigns.id), // Link to donation campaign (if from campaign)
@@ -1281,6 +1309,7 @@ export type Donation = typeof donations.$inferSelect;
 // Wishlist Items table for specific donation needs
 export const wishlistItems = pgTable("wishlist_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   title: varchar("title").notNull(), // "School Supplies for 10 Students"
   description: text("description"), // Detailed description
   category: varchar("category").notNull(), // 'food', 'clothes', 'equipment', 'supplies', 'other'
@@ -1308,6 +1337,7 @@ export type WishlistItem = typeof wishlistItems.$inferSelect;
 // Extended to support Alex Hormozi's $100M Leads communication strategies
 export const emailTemplates = pgTable("email_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull().unique(), // 'donation_thank_you', 'warm_reconnect_parent_awareness', etc
   subject: varchar("subject").notNull(),
   htmlBody: text("html_body").notNull(), // HTML template with {{placeholders}}
@@ -1340,6 +1370,7 @@ export type EmailTemplate = typeof emailTemplates.$inferSelect;
 // AI Copy Generations table for tracking Value Equation-based copy generation
 export const aiCopyGenerations = pgTable("ai_copy_generations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id),
   originalContent: text("original_content").notNull(),
   contentType: varchar("content_type").notNull(), // hero, cta, service, event, testimonial, lead_magnet
@@ -1365,6 +1396,7 @@ export type AiCopyGeneration = typeof aiCopyGenerations.$inferSelect;
 // Email Campaigns table for drip campaign definitions
 export const emailCampaigns = pgTable("email_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   description: text("description"),
   persona: varchar("persona"), // Target persona or null for all
@@ -1388,6 +1420,7 @@ export type EmailCampaign = typeof emailCampaigns.$inferSelect;
 // Email Sequence Steps table for individual emails in a campaign
 export const emailSequenceSteps = pgTable("email_sequence_steps", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   campaignId: varchar("campaign_id").notNull().references(() => emailCampaigns.id, { onDelete: "cascade" }),
   stepNumber: integer("step_number").notNull(), // Order in sequence (1, 2, 3...)
   delayDays: integer("delay_days").notNull().default(0), // Days after trigger or previous email
@@ -1413,6 +1446,7 @@ export type EmailSequenceStep = typeof emailSequenceSteps.$inferSelect;
 // Email Campaign Enrollments table for tracking which leads are in which campaigns
 export const emailCampaignEnrollments = pgTable("email_campaign_enrollments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   campaignId: varchar("campaign_id").notNull().references(() => emailCampaigns.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   status: varchar("status").notNull().default('active'), // 'active', 'completed', 'unsubscribed', 'bounced'
@@ -1438,6 +1472,7 @@ export type EmailCampaignEnrollment = typeof emailCampaignEnrollments.$inferSele
 // SMS Templates table for Hormozi-style SMS messages
 export const smsTemplates = pgTable("sms_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   description: text("description"),
   messageTemplate: text("message_template").notNull(), // SMS template with {variable} placeholders (≤160 chars)
@@ -1462,6 +1497,7 @@ export type SmsTemplate = typeof smsTemplates.$inferSelect;
 // SMS Sends table for tracking sent SMS messages
 export const smsSends = pgTable("sms_sends", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   templateId: varchar("template_id").references(() => smsTemplates.id),
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
   campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }), // Links SMS to campaign
@@ -1490,6 +1526,7 @@ export type SmsSend = typeof smsSends.$inferSelect;
 // SMS Bulk Campaigns table for tracking bulk SMS sends
 export const smsBulkCampaigns = pgTable("sms_bulk_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   description: text("description"),
   
@@ -1543,6 +1580,7 @@ export type SmsBulkCampaign = typeof smsBulkCampaigns.$inferSelect;
 // Communication Logs table for unified timeline of all communications with leads
 export const communicationLogs = pgTable("communication_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   userId: varchar("user_id").references(() => users.id), // Admin who initiated, if manual
   communicationType: varchar("communication_type").notNull(), // 'email', 'sms', 'call', 'note', 'meeting'
@@ -1565,6 +1603,7 @@ export type CommunicationLog = typeof communicationLogs.$inferSelect;
 // Email Logs table for tracking sent emails (moved here to reference campaign tables)
 export const emailLogs = pgTable("email_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   templateId: varchar("template_id").references(() => emailTemplates.id),
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
   campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
@@ -1599,6 +1638,7 @@ export type EmailLog = typeof emailLogs.$inferSelect;
 // Email Opens table for tracking when emails are opened
 export const emailOpens = pgTable("email_opens", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   emailLogId: varchar("email_log_id").notNull().references(() => emailLogs.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
   campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
@@ -1624,6 +1664,7 @@ export type EmailOpen = typeof emailOpens.$inferSelect;
 // Email Links table - stores link tokens and target URLs server-side for security
 export const emailLinks = pgTable("email_links", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   emailLogId: varchar("email_log_id").notNull().references(() => emailLogs.id, { onDelete: "cascade" }),
   linkToken: varchar("link_token").notNull().unique(),
   targetUrl: text("target_url").notNull(),
@@ -1643,6 +1684,7 @@ export type EmailLink = typeof emailLinks.$inferSelect;
 // Email Clicks table for tracking link clicks in emails
 export const emailClicks = pgTable("email_clicks", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   emailLogId: varchar("email_log_id").notNull().references(() => emailLogs.id, { onDelete: "cascade" }),
   emailLinkId: varchar("email_link_id").references(() => emailLinks.id, { onDelete: "set null" }),
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
@@ -1672,6 +1714,7 @@ export type EmailClick = typeof emailClicks.$inferSelect;
 // Stores pre-computed engagement metrics by day-of-week and hour-of-day
 export const emailSendTimeInsights = pgTable("email_send_time_insights", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   scope: varchar("scope").notNull(), // 'global', 'campaign', 'persona'
   scopeId: varchar("scope_id"), // Campaign ID or persona value (null for global)
   dayOfWeek: integer("day_of_week").notNull(), // 0-6 where 0=Sunday
@@ -1705,6 +1748,7 @@ export type EmailSendTimeInsight = typeof emailSendTimeInsights.$inferSelect;
 // Allows admins to schedule recurring reports (daily/weekly/monthly) to be sent via email
 export const emailReportSchedules = pgTable("email_report_schedules", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull().unique(), // Unique name for the report schedule
   description: text("description"), // Optional description
   frequency: varchar("frequency").notNull(), // 'daily', 'weekly', 'monthly'
@@ -1757,6 +1801,7 @@ export type LeadEmailClick = EmailClick & {
 // SMS Logs table for tracking sent SMS messages
 export const smsLogs = pgTable("sms_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   templateId: varchar("template_id").references(() => smsTemplates.id),
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
   campaignId: varchar("campaign_id").references(() => donationCampaigns.id, { onDelete: "set null" }),
@@ -1783,6 +1828,7 @@ export type SmsLog = typeof smsLogs.$inferSelect;
 // Donation Campaigns table for passion-based fundraising campaigns
 export const donationCampaigns = pgTable("donation_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   slug: varchar("slug").notNull().unique(), // URL-friendly identifier
   description: text("description").notNull(),
@@ -1862,6 +1908,7 @@ export type DonationCampaign = typeof donationCampaigns.$inferSelect;
 // Campaign Communications - tracks what was sent for each campaign
 export const campaignCommunications = pgTable("campaign_communications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   campaignId: varchar("campaign_id").notNull().references(() => donationCampaigns.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   
@@ -1900,6 +1947,7 @@ export type CampaignCommunication = typeof campaignCommunications.$inferSelect;
 // Campaign Members - links users (parents, students, etc) to campaigns they can view/manage
 export const campaignMembers = pgTable("campaign_members", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   campaignId: varchar("campaign_id").notNull().references(() => donationCampaigns.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   
@@ -1936,6 +1984,7 @@ export type CampaignMember = typeof campaignMembers.$inferSelect;
 // Campaign Testimonials - testimonials submitted by campaign members to thank donors
 export const campaignTestimonials = pgTable("campaign_testimonials", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   campaignId: varchar("campaign_id").notNull().references(() => donationCampaigns.id, { onDelete: "cascade" }),
   memberId: varchar("member_id").notNull().references(() => campaignMembers.id, { onDelete: "cascade" }),
   
@@ -1978,6 +2027,7 @@ export type CampaignTestimonial = typeof campaignTestimonials.$inferSelect;
 // Outreach Emails - tracks all outbound prospecting emails sent to leads
 export const outreachEmails = pgTable("outreach_emails", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }),
   
   // Email content
@@ -2034,6 +2084,7 @@ export type OutreachEmail = typeof outreachEmails.$inferSelect;
 // ICP Criteria - stores the Ideal Customer Profile criteria for AI qualification
 export const icpCriteria = pgTable("icp_criteria", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(), // "MRI Decision Maker", "Education Director", etc
   description: text("description"), // Human-readable description of this ICP
   
@@ -2070,6 +2121,7 @@ export type IcpCriteria = typeof icpCriteria.$inferSelect;
 // Admin Chatbot Conversations - stores chat message history for AI assistant
 export const chatbotConversations = pgTable("chatbot_conversations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   
   // Message content
@@ -2099,6 +2151,7 @@ export type ChatbotConversation = typeof chatbotConversations.$inferSelect;
 // Admin Chatbot Issues - tracks escalated issues that need manual attention
 export const chatbotIssues = pgTable("chatbot_issues", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Issue details
   title: varchar("title").notNull(),
@@ -2141,6 +2194,7 @@ export type ChatbotIssue = typeof chatbotIssues.$inferSelect;
 // Database Backup Snapshots - tracks table-level backups for surgical restore capability
 export const backupSnapshots = pgTable("backup_snapshots", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Backup metadata
   tableName: varchar("table_name").notNull(), // Original table name (e.g., 'users', 'leads')
@@ -2172,6 +2226,7 @@ export type BackupSnapshot = typeof backupSnapshots.$inferSelect;
 // Database Backup Schedules - automatic scheduled table backups with retention
 export const backupSchedules = pgTable("backup_schedules", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Schedule target
   tableName: varchar("table_name").notNull(), // Table to backup (e.g., 'users', 'leads')
@@ -2227,6 +2282,7 @@ export type BackupSchedule = typeof backupSchedules.$inferSelect;
 // Acquisition Channels - tracks sources of donor/lead acquisition
 export const acquisitionChannels = pgTable("acquisition_channels", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull().unique(), // 'Google Ads', 'Facebook Ads', 'Organic Search', 'Referral', 'Event: Spring Gala', etc
   slug: varchar("slug").notNull().unique(), // 'google_ads', 'facebook_ads', 'organic_search', 'referral', etc
   channelType: varchar("channel_type").notNull(), // 'paid_ads', 'organic', 'referral', 'event', 'email', 'social', 'direct', 'partnership'
@@ -2263,6 +2319,7 @@ export type AcquisitionChannel = typeof acquisitionChannels.$inferSelect;
 // Marketing Campaigns - specific marketing initiatives with budgets
 export const marketingCampaigns = pgTable("marketing_campaigns", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(), // 'Q1 2024 Parent Outreach', 'Back to School Drive', etc
   channelId: varchar("channel_id").references(() => acquisitionChannels.id, { onDelete: "set null" }),
   description: text("description"),
@@ -2307,6 +2364,7 @@ export type MarketingCampaign = typeof marketingCampaigns.$inferSelect;
 // Lead Attribution - links leads to their acquisition source with costs
 export const leadAttribution = pgTable("lead_attribution", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }).unique(), // One attribution per lead
   
   // Attribution details
@@ -2360,6 +2418,7 @@ export type LeadAttribution = typeof leadAttribution.$inferSelect;
 // Donor Lifecycle Stages - tracks donor progression through giving stages
 export const donorLifecycleStages = pgTable("donor_lifecycle_stages", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }).unique(), // One lifecycle per lead
   
   // Link to acquisition source for per-channel lifecycle analysis
@@ -2418,6 +2477,7 @@ export type DonorLifecycleStage = typeof donorLifecycleStages.$inferSelect;
 // Critical for calculating CAC over time and cohort analysis
 export const channelSpendLedger = pgTable("channel_spend_ledger", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   channelId: varchar("channel_id").references(() => acquisitionChannels.id, { onDelete: "cascade" }),
   campaignId: varchar("campaign_id").references(() => marketingCampaigns.id, { onDelete: "cascade" }),
   
@@ -2462,6 +2522,7 @@ export type ChannelSpendLedger = typeof channelSpendLedger.$inferSelect;
 // Essential for calculating true LTGP (not just revenue)
 export const donorEconomics = pgTable("donor_economics", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   leadId: varchar("lead_id").notNull().references(() => leads.id, { onDelete: "cascade" }).unique(),
   
   // Lifetime value tracking
@@ -2505,6 +2566,7 @@ export type DonorEconomics = typeof donorEconomics.$inferSelect;
 // Organization-wide economics settings for calculating gross profit
 export const economicsSettings = pgTable("economics_settings", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Default delivery cost as percentage of donation (if not tracked per-donor)
   defaultDeliveryCostPercent: integer("default_delivery_cost_percent").default(20), // Default 20% of donation goes to stewardship
@@ -2537,6 +2599,7 @@ export type EconomicsSettings = typeof economicsSettings.$inferSelect;
 // Tech Goes Home Program Enrollments
 export const techGoesHomeEnrollments = pgTable("tech_goes_home_enrollments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   programName: varchar("program_name").notNull().default("Tech Goes Home"),
   enrollmentDate: timestamp("enrollment_date").notNull().defaultNow(),
@@ -2575,6 +2638,7 @@ export type TechGoesHomeEnrollment = typeof techGoesHomeEnrollments.$inferSelect
 // Tech Goes Home Class Attendance
 export const techGoesHomeAttendance = pgTable("tech_goes_home_attendance", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   enrollmentId: varchar("enrollment_id").notNull().references(() => techGoesHomeEnrollments.id, { onDelete: "cascade" }),
   classDate: timestamp("class_date").notNull(),
   classNumber: integer("class_number").notNull(), // 1-15 (or more if including make-ups)
@@ -2607,6 +2671,7 @@ export type TechGoesHomeAttendance = typeof techGoesHomeAttendance.$inferSelect;
 // Volunteer Events - organization-created volunteer opportunities
 export const volunteerEvents = pgTable("volunteer_events", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Event details
   name: varchar("name").notNull(), // "Adult Tutoring Program", "Community Event Support", etc.
@@ -2660,6 +2725,7 @@ export type VolunteerEvent = typeof volunteerEvents.$inferSelect;
 // Volunteer Shifts - specific date/time slots for volunteer events
 export const volunteerShifts = pgTable("volunteer_shifts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   eventId: varchar("event_id").notNull().references(() => volunteerEvents.id, { onDelete: "cascade" }),
   
   // Shift timing
@@ -2701,6 +2767,7 @@ export type VolunteerShift = typeof volunteerShifts.$inferSelect;
 // Volunteer Enrollments - links volunteers to specific shifts
 export const volunteerEnrollments = pgTable("volunteer_enrollments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   shiftId: varchar("shift_id").notNull().references(() => volunteerShifts.id, { onDelete: "cascade" }),
   
   // Volunteer (can be authenticated user or lead from CRM)
@@ -2755,6 +2822,7 @@ export type VolunteerEnrollment = typeof volunteerEnrollments.$inferSelect;
 // Volunteer Session Logs - tracks actual attendance and hours served
 export const volunteerSessionLogs = pgTable("volunteer_session_logs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   enrollmentId: varchar("enrollment_id").notNull().references(() => volunteerEnrollments.id, { onDelete: "cascade" }),
   
   // Attendance tracking
@@ -2794,6 +2862,7 @@ export type VolunteerSessionLog = typeof volunteerSessionLogs.$inferSelect;
 // Segments table for dynamic audience targeting
 export const segments = pgTable("segments", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   description: text("description"),
   
@@ -2849,6 +2918,7 @@ export type Segment = typeof segments.$inferSelect;
 // Communication Unsubscribes table for tracking opt-outs (CAN-SPAM & TCPA compliance)
 export const emailUnsubscribes = pgTable("email_unsubscribes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Lead reference (nullable for non-lead contacts)
   leadId: varchar("lead_id").references(() => leads.id, { onDelete: "set null" }),
@@ -2935,6 +3005,7 @@ export type ProgramType = 'student_program' | 'volunteer_opportunity';
 // Generic Programs Catalog - lists all testable programs/opportunities
 export const programs = pgTable("programs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Program identification
   name: varchar("name").notNull(), // "Tech Goes Home Spring 2024", "Adult Tutoring - Saturday Morning"
@@ -2978,6 +3049,7 @@ export type Program = typeof programs.$inferSelect;
 // Admin Entitlements - tracks which test enrollments each admin has activated
 export const adminEntitlements = pgTable("admin_entitlements", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
   
   // Which admin is testing
   adminId: varchar("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
