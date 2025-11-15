@@ -281,18 +281,29 @@ class OrgScopedImplementations {
 
   async getAllContentItems() {
     const { contentItems, imageAssets } = await import('@shared/schema');
-    const items = await db
-      .select()
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        imageUrl: imageAssets.cloudinarySecureUrl, // Legacy alias for resolvedImageUrl
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        organizationId: contentItems.organizationId,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+        imageAltText: imageAssets.name, // Use name as alt text fallback
+      })
       .from(contentItems)
-      .leftJoin(imageAssets, eq(contentItems.imageId, imageAssets.id))
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
       .where(eq(contentItems.organizationId, this.organizationId))
       .orderBy(contentItems.order);
-
-    return items.map(({ content_items, image_assets }) => ({
-      ...content_items,
-      imageUrl: image_assets?.url || null,
-      imageAltText: image_assets?.altText || null,
-    }));
+    
+    return results as any;
   }
 
   async getContentItem(id: string) {
@@ -309,21 +320,32 @@ class OrgScopedImplementations {
 
   async getContentItemsByType(type: string) {
     const { contentItems, imageAssets } = await import('@shared/schema');
-    const items = await db
-      .select()
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        imageUrl: imageAssets.cloudinarySecureUrl, // Legacy alias for resolvedImageUrl
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        organizationId: contentItems.organizationId,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+        imageAltText: imageAssets.name, // Use name as alt text fallback
+      })
       .from(contentItems)
-      .leftJoin(imageAssets, eq(contentItems.imageId, imageAssets.id))
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
       .where(and(
         eq(contentItems.type, type),
         eq(contentItems.organizationId, this.organizationId)
       ))
       .orderBy(contentItems.order);
-
-    return items.map(({ content_items, image_assets }) => ({
-      ...content_items,
-      imageUrl: image_assets?.url || null,
-      imageAltText: image_assets?.altText || null,
-    }));
+    
+    return results as any;
   }
 
   async updateContentItem(id: string, updates: Parameters<IStorage['updateContentItem']>[1]) {
