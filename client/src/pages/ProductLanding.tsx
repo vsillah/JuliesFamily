@@ -22,7 +22,7 @@ import {
   Globe,
   ArrowRight,
 } from "lucide-react";
-import Footer from "@/components/Footer";
+import ProductFooter from "@/components/ProductFooter";
 import heroImage from "@assets/generated_images/Families_using_nonprofit_platform_together_fed7c053.png";
 import logoImage from "@assets/generated_images/Kinflo_transparent_professional_logo_3695ae19.png";
 import laptopDashboard from "@assets/generated_images/Laptop_showing_CRM_dashboard_9926f587.png";
@@ -971,7 +971,7 @@ export default function ProductLanding() {
         </div>
       </section>
 
-      <Footer />
+      <ProductFooter />
     </div>
   );
 }
