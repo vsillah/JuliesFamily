@@ -1,4 +1,5 @@
 import twilio from 'twilio';
+import type { IStorage } from './storage';
 
 let connectionSettings: any;
 
@@ -52,6 +53,7 @@ export async function getTwilioFromPhoneNumber() {
  * Now includes TCPA compliance check for SMS opt-outs
  */
 export async function sendSMS(
+  storage: IStorage,
   to: string,
   message: string,
   metadata?: Record<string, any>
@@ -64,7 +66,6 @@ export async function sendSMS(
     }
 
     // TCPA Compliance: Check if recipient has opted out of SMS
-    const { storage } = await import('./storage');
     const isUnsubscribed = await storage.isSmsUnsubscribed(formattedNumber);
     
     if (isUnsubscribed) {

@@ -6447,7 +6447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send SMS via Twilio
       const { sendSMS } = await import('./twilio');
-      const result = await sendSMS(recipientPhone, messageContent, { leadId, templateId: usedTemplateId });
+      const result = await sendSMS(req.storage, recipientPhone, messageContent, { leadId, templateId: usedTemplateId });
       
       // Create SMS send record
       const smsSend = await req.storage.createSmsSend({
@@ -6863,7 +6863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send SMS via Twilio
       const { sendSMS } = await import('./twilio');
-      const result = await sendSMS(lead.phone, messageContent);
+      const result = await sendSMS(req.storage, lead.phone, messageContent);
       
       if (!result.success) {
         return res.status(500).json({ message: result.error || "Failed to send SMS" });
@@ -8267,6 +8267,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Send SMS (now includes TCPA compliance check)
               const result = await sendSMS(
+                req.storage,
                 lead.phone,
                 personalized.message,
                 { campaignId: campaign.id, leadId: lead.id, templateId: smsTemplate.id }
