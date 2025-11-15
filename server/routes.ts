@@ -1338,7 +1338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Deactivate entitlement with transactional cleanup (uses service layer)
-      const adminEntitlementService = new AdminEntitlementService(storage);
+      const adminEntitlementService = new AdminEntitlementService(req.storage);
       await adminEntitlementService.deactivateEntitlement(id);
       res.json({ message: "Entitlement deleted successfully" });
     } catch (error) {
@@ -1434,7 +1434,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Deactivate entitlement with transactional cleanup (uses service layer)
-      const adminEntitlementService = new AdminEntitlementService(storage);
+      const adminEntitlementService = new AdminEntitlementService(req.storage);
       await adminEntitlementService.deactivateEntitlement(entitlementId);
       res.json({ message: "Entitlement deleted successfully" });
     } catch (error) {
@@ -1774,7 +1774,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const lead = await req.storage.createLead(validatedData);
       
       // Automatically create a follow-up task for the new lead
-      await createTaskForNewLead(storage, lead);
+      await createTaskForNewLead(req.storage, lead);
       
       res.status(201).json(lead);
     } catch (error) {
@@ -2321,7 +2321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             const validatedData = insertLeadSchema.parse(newLeadData);
             const newLead = await req.storage.createLead(validatedData);
-            await createTaskForNewLead(storage, newLead);
+            await createTaskForNewLead(req.storage, newLead);
           }
           
           results.successful++;
@@ -2428,7 +2428,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
             const validatedData = insertLeadSchema.parse(newLeadData);
             const newLead = await req.storage.createLead(validatedData);
-            await createTaskForNewLead(storage, newLead);
+            await createTaskForNewLead(req.storage, newLead);
           }
           
           results.successful++;
@@ -2514,7 +2514,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       const newLead = await req.storage.createLead(validatedData);
-      await createTaskForNewLead(storage, newLead);
+      await createTaskForNewLead(req.storage, newLead);
 
       res.status(201).json({ 
         message: "Lead created successfully", 
@@ -2723,7 +2723,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Send email using existing SendGrid integration
       const { sendEmail } = await import('./email');
       
-      const sendResult = await sendEmail(storage, {
+      const sendResult = await sendEmail(req.storage, {
         to: lead.email,
         toName: `${lead.firstName} ${lead.lastName}`,
         subject: outreachEmail.subject,
@@ -4445,7 +4445,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Import automation scheduler service
       const { AutomationSchedulerService } = await import('./services/automationScheduler');
-      const scheduler = new AutomationSchedulerService(storage);
+      const scheduler = new AutomationSchedulerService(req.storage);
       
       const result = await scheduler.runAutomationCycle();
       res.json(result);
@@ -7287,7 +7287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Sync task to Google Calendar asynchronously (fire-and-forget)
       // Don't block task creation response on calendar sync
       if (task.dueDate) {
-        syncTaskToCalendar(storage, task).catch(error => {
+        syncTaskToCalendar(req.storage, task).catch(error => {
           console.error('Background calendar sync failed:', error);
         });
       }
@@ -7346,7 +7346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check for overdue tasks and create follow-up tasks (automated maintenance endpoint)
   app.post("/api/tasks/check-overdue", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      await createTasksForMissedFollowUps(storage);
+      await createTasksForMissedFollowUps(req.storage);
       res.json({ message: "Checked for overdue tasks and created follow-ups where needed" });
     } catch (error) {
       console.error("Error checking overdue tasks:", error);
@@ -7385,7 +7385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Automatically create appropriate task for new pipeline stage
       if (updatedLead) {
-        await createTaskForStageChange(storage, updatedLead, pipelineStage);
+        await createTaskForStageChange(req.storage, updatedLead, pipelineStage);
       }
 
       res.json(updatedLead);
@@ -7758,7 +7758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (!alreadySentThankYou) {
               console.log('Sending thank-you email to:', updatedDonation.donorEmail);
               const thankYouResult = await sendTemplatedEmail(
-                storage,
+                req.storage,
                 'donation_thank_you',
                 updatedDonation.donorEmail,
                 donorName,
@@ -7784,7 +7784,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (!alreadySentReceipt) {
               console.log('Sending receipt email to:', updatedDonation.donorEmail);
               const receiptResult = await sendTemplatedEmail(
-                storage,
+                req.storage,
                 'donation_receipt',
                 updatedDonation.donorEmail,
                 donorName,
@@ -7943,7 +7943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Import and process lifecycle update
               const { createDonorLifecycleService } = await import('./services/donorLifecycleService');
-              const lifecycleService = createDonorLifecycleService(storage);
+              const lifecycleService = createDonorLifecycleService(req.storage);
               await lifecycleService.processDonation(
                 updatedDonation.leadId,
                 updatedDonation.amount,
@@ -8229,7 +8229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               });
               
-              const result = await sendEmail(storage, {
+              const result = await sendEmail(req.storage, {
                 to: lead.email,
                 toName: lead.name,
                 subject: personalized.subject,
