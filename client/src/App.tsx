@@ -58,11 +58,27 @@ import VolunteerEngagement from "@/pages/VolunteerEngagement";
 import Unsubscribe from "@/pages/Unsubscribe";
 import SmsUnsubscribe from "@/pages/SmsUnsubscribe";
 import NotFound from "@/pages/not-found";
+import { useAuth } from "@/hooks/useAuth";
+import { Redirect } from "wouter";
+
+function DefaultRoute() {
+  const { user, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return null;
+  }
+  
+  if (user?.role === 'kinflo_admin' || user?.role === 'super_admin') {
+    return <Redirect to="/admin/organizations" />;
+  }
+  
+  return <Home />;
+}
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={DefaultRoute} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/virtual-tour" component={VirtualTour} />
       <Route path="/donate" component={Donate} />
