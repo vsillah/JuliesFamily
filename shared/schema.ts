@@ -19,6 +19,27 @@ export const sessions = pgTable(
 export const userRoleEnum = z.enum(['client', 'admin', 'super_admin']);
 export type UserRole = z.infer<typeof userRoleEnum>;
 
+// Organization tier enum for feature access control
+export const organizationTierEnum = z.enum(['basic', 'pro', 'premium']);
+export type OrganizationTier = z.infer<typeof organizationTierEnum>;
+
+// Organizations table - for multi-tenant tier-based feature access
+export const organizations = pgTable("organizations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  tier: varchar("tier").notNull().default('basic'), // basic, pro, premium
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertOrganizationSchema = createInsertSchema(organizations).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
+export type Organization = typeof organizations.$inferSelect;
+
 // User storage table for Replit Auth
 // Reference: blueprint:javascript_log_in_with_replit
 export const users = pgTable("users", {
@@ -33,6 +54,7 @@ export const users = pgTable("users", {
   role: varchar("role").notNull().default('client'), // client, admin, super_admin
   isAdmin: boolean("is_admin").default(false), // DEPRECATED: Use role instead. Kept for backward compatibility during migration.
   stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for saved payment methods
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "set null" }), // Organization membership for tier-based access
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
