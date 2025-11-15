@@ -57,6 +57,9 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getContentItemsByType',
   'updateContentItem',
   'deleteContentItem',
+  'getVisibleContentItems',
+  'getActiveGoogleReviews',
+  'getActiveAbTests',
   
   // Donation operations
   'createDonation',
@@ -369,6 +372,176 @@ class OrgScopedImplementations {
         eq(contentItems.id, id),
         eq(contentItems.organizationId, this.organizationId)
       ));
+  }
+
+  async getVisibleContentItems(
+    type: string,
+    persona?: string | null,
+    funnelStage?: string | null,
+    userPassions?: string[] | null
+  ) {
+    const { contentItems, contentVisibility } = await import('@shared/schema');
+    
+    // Build join conditions - only add persona/funnelStage filters when they're provided
+    const joinConditions = [eq(contentVisibility.contentItemId, contentItems.id)];
+    
+    // Only filter by persona if it's provided (not undefined)
+    if (persona !== undefined) {
+      joinConditions.push(
+        persona === null
+          ? sql`${contentVisibility.persona} IS NULL`
+          : or(
+              sql`${contentVisibility.persona} IS NULL`,
+              eq(contentVisibility.persona, persona)
+            )
+      );
+    }
+    
+    // Only filter by funnelStage if it's provided (not undefined)
+    if (funnelStage !== undefined) {
+      joinConditions.push(
+        funnelStage === null
+          ? sql`${contentVisibility.funnelStage} IS NULL`
+          : or(
+              sql`${contentVisibility.funnelStage} IS NULL`,
+              eq(contentVisibility.funnelStage, funnelStage)
+            )
+      );
+    }
+    
+    let query = db
+      .selectDistinctOn([contentItems.id], {
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        imageUrl: contentItems.imageUrl,
+        passionTags: contentItems.passionTags,
+        order: sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`.as('order'),
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+      })
+      .from(contentItems)
+      .innerJoin(
+        contentVisibility,
+        and(...joinConditions)
+      )
+      .where(
+        and(
+          eq(contentItems.type, type),
+          eq(contentItems.isActive, true),
+          eq(contentVisibility.isVisible, true),
+          eq(contentItems.organizationId, this.organizationId) // ORG SCOPING
+        )
+      )
+      .orderBy(sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`);
+    
+    // Add passion filtering if provided
+    if (userPassions && userPassions.length > 0) {
+      query = query.where(
+        or(
+          sql`${contentItems.passionTags} IS NULL`,
+          sql`${contentItems.passionTags} && ARRAY[${sql.join(userPassions.map(p => sql`${p}`), sql`, `)}]::text[]`
+        )
+      ) as any;
+    }
+    
+    const results = await query;
+    
+    // For hero content: if no persona-specific results and a specific persona was requested,
+    // fall back to the default hero (persona='default')
+    if (type === 'hero' && results.length === 0 && persona && persona !== 'default') {
+      return await this.getVisibleContentItems(type, 'default', funnelStage, userPassions);
+    }
+    
+    return results;
+  }
+
+  async getActiveGoogleReviews() {
+    const { googleReviews } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(googleReviews)
+      .where(and(
+        eq(googleReviews.isActive, true),
+        eq(googleReviews.organizationId, this.organizationId) // ORG SCOPING
+      ))
+      .orderBy(desc(googleReviews.time));
+  }
+
+  async getActiveAbTests(persona?: string | null, funnelStage?: string | null) {
+    const { abTests, abTestTargets } = await import('@shared/schema');
+    const now = new Date();
+    
+    // Build base active test filters with org scoping
+    const baseFilters = [
+      eq(abTests.organizationId, this.organizationId), // ORG SCOPING
+      eq(abTests.status, 'active'),
+      or(
+        sql`${abTests.startDate} IS NULL`,
+        sql`${abTests.startDate} <= ${now}`
+      ),
+      or(
+        sql`${abTests.endDate} IS NULL`,
+        sql`${abTests.endDate} >= ${now}`
+      )
+    ];
+    
+    // If neither persona nor funnelStage provided, return all active tests (no priority filtering needed)
+    if (!persona && !funnelStage) {
+      return await db
+        .select()
+        .from(abTests)
+        .where(and(...baseFilters))
+        .orderBy(desc(abTests.createdAt));
+    }
+    
+    // Fetch active tests for this org
+    const activeTests = await db
+      .select()
+      .from(abTests)
+      .where(and(...baseFilters));
+    
+    // Filter tests by target audience using abTestTargets junction table
+    const testsWithTargets = await Promise.all(
+      activeTests.map(async (test) => {
+        const targets = await db
+          .select()
+          .from(abTestTargets)
+          .where(eq(abTestTargets.abTestId, test.id));
+        
+        // Calculate priority based on matching persona/funnel
+        let priority = 0;
+        let hasMatch = false;
+        
+        for (const target of targets) {
+          const personaMatch = !persona || target.targetPersona === persona || target.targetPersona === null;
+          const funnelMatch = !funnelStage || target.targetFunnelStage === funnelStage || target.targetFunnelStage === null;
+          
+          if (personaMatch && funnelMatch) {
+            hasMatch = true;
+            // Both match = highest priority (2)
+            // One matches, one is null = medium priority (1)
+            // Both null = lowest priority (0)
+            const targetPriority = 
+              (target.targetPersona !== null ? 1 : 0) + 
+              (target.targetFunnelStage !== null ? 1 : 0);
+            priority = Math.max(priority, targetPriority);
+          }
+        }
+        
+        return { test, priority, hasMatch };
+      })
+    );
+    
+    // Filter to only tests with matches and sort by priority (highest first)
+    return testsWithTargets
+      .filter(({ hasMatch }) => hasMatch)
+      .sort((a, b) => b.priority - a.priority)
+      .map(({ test }) => test);
   }
 
   // ========================================
