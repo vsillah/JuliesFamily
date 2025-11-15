@@ -2,7 +2,6 @@
 // Reference: blueprint:javascript_log_in_with_replit, blueprint:javascript_object_storage
 import type { Express, RequestHandler, Request } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { applyImpersonation, requireActualAdmin } from "./impersonationMiddleware";
@@ -62,7 +61,7 @@ const requireRole = (...allowedRoles: UserRole[]): RequestHandler => {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       console.log("[requireRole] Found user:", user ? { id: user.id, email: user.email, role: user.role } : null);
       
       if (!user) {
@@ -109,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { token } = req.params;
       
       // Look up email log by tracking token
-      const emailLog = await storage.getEmailLogByTrackingToken(token);
+      const emailLog = await req.storage.getEmailLogByTrackingToken(token);
       
       if (!emailLog) {
         console.log(`[Email Tracking] Invalid tracking token: ${token}`);
@@ -122,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Record the open event (idempotent - multiple opens from same recipient are OK)
-      await storage.createEmailOpen({
+      await req.storage.createEmailOpen({
         emailLogId: emailLog.id,
         leadId: emailLog.leadId,
         userAgent: req.get('user-agent') || null,
@@ -154,7 +153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { linkToken } = req.params;
       
       // Look up email link by link token to get target URL
-      const emailLink = await storage.getEmailLinkByToken(linkToken);
+      const emailLink = await req.storage.getEmailLinkByToken(linkToken);
       
       if (!emailLink) {
         console.log(`[Email Tracking] Invalid link token: ${linkToken}`);
@@ -177,10 +176,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Look up email log for additional context
-      const emailLog = await storage.getEmailLog(emailLink.emailLogId);
+      const emailLog = await req.storage.getEmailLog(emailLink.emailLogId);
       
       // Record the click event asynchronously (don't block redirect)
-      storage.createEmailClick({
+      req.storage.createEmailClick({
         emailLogId: emailLink.emailLogId,
         emailLinkId: emailLink.id,
         leadId: emailLog?.leadId || null,
@@ -206,19 +205,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', ...authWithImpersonation, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       
       // When impersonating, check the real admin's role (not the impersonated user's role)
       // This allows admin controls to remain visible during impersonation
       const realUser = req.adminUser || req.user;
-      const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
+      const realUserData = realUser.claims ? await req.storage.getUserByOidcSub(realUser.claims.sub) : null;
       const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'super_admin');
       
       // Get persona and funnel stage from leads table if available
       let funnelStage = "awareness"; // default
       let persona = user?.persona || "default"; // fallback to user table or default
       if (user?.email) {
-        const lead = await storage.getLeadByEmail(user.email);
+        const lead = await req.storage.getLeadByEmail(user.email);
         if (lead) {
           if (lead.funnelStage) {
             funnelStage = lead.funnelStage;
@@ -256,13 +255,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`[Test Helper] Setting role for oidcSub ${oidcSub} to ${role}`);
         
         // Get current user
-        const user = await storage.getUserByOidcSub(oidcSub);
+        const user = await req.storage.getUserByOidcSub(oidcSub);
         if (!user) {
           return res.status(404).json({ message: "User not found" });
         }
         
         // Update role using updateUser (requires actorId for audit logging)
-        const updated = await storage.updateUser(user.id, { role }, user.id);
+        const updated = await req.storage.updateUser(user.id, { role }, user.id);
         console.log(`[Test Helper] Successfully updated user role to ${updated.role}`);
         
         res.json({ success: true, user: updated });
@@ -277,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/user/profile', ...authWithImpersonation, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -295,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update user profile with audit logging
-      const updatedUser = await storage.updateUser(user.id, validation.data, user.id);
+      const updatedUser = await req.storage.updateUser(user.id, validation.data, user.id);
       
       if (!updatedUser) {
         return res.status(500).json({ message: "Failed to update profile" });
@@ -312,7 +311,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/users', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       console.log('[AdminProvisioning] GET /api/admin/users');
-      const users = await storage.getAllUsers();
+      const users = await req.storage.getAllUsers();
       res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -334,7 +333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get current user
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       // Prevent super admins from demoting themselves
       if (currentUser && userId === currentUser.id && newRole !== 'super_admin') {
@@ -342,14 +341,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get the user to update
-      const userToUpdate = await storage.getUser(userId);
+      const userToUpdate = await req.storage.getUser(userId);
       if (!userToUpdate) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Prevent demoting the last super_admin
       if (userToUpdate.role === 'super_admin' && newRole !== 'super_admin') {
-        const allUsers = await storage.getAllUsers();
+        const allUsers = await req.storage.getAllUsers();
         const superAdminCount = allUsers.filter(u => u.role === 'super_admin').length;
         if (superAdminCount <= 1) {
           return res.status(400).json({ message: "Cannot demote the last super admin" });
@@ -359,11 +358,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Store previous role for audit log
       const previousRole = userToUpdate.role;
       
-      const updatedUser = await storage.updateUser(userId, { role: newRole }, currentUser!.id);
+      const updatedUser = await req.storage.updateUser(userId, { role: newRole }, currentUser!.id);
       
       // Create audit log entry
       if (currentUser) {
-        await storage.createAuditLog({
+        await req.storage.createAuditLog({
           userId: userId,
           actorId: currentUser.id,
           action: 'role_changed',
@@ -409,16 +408,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check for duplicate email before creating
-      const existingUser = await storage.getUserByEmail(email.trim());
+      const existingUser = await req.storage.getUserByEmail(email.trim());
       if (existingUser) {
         return res.status(409).json({ message: "A user with this email already exists" });
       }
       
       // Get current user for audit log
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
-      const newUser = await storage.createUser({
+      const newUser = await req.storage.createUser({
         email: email.trim(),
         firstName: firstName.trim(),
         lastName: lastName.trim(),
@@ -427,7 +426,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create audit log entry
       if (currentUser) {
-        await storage.createAuditLog({
+        await req.storage.createAuditLog({
           userId: newUser.id,
           actorId: currentUser.id,
           action: 'user_created',
@@ -451,7 +450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/organization/tier', ...authWithImpersonation, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -463,7 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let organizationName = null;
 
       if (user.organizationId) {
-        const organization = await storage.getOrganization(user.organizationId);
+        const organization = await req.storage.getOrganization(user.organizationId);
         if (organization) {
           tier = organization.tier;
           organizationId = organization.id;
@@ -480,7 +479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/organizations', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const organizations = await storage.getAllOrganizations();
+      const organizations = await req.storage.getAllOrganizations();
       res.json(organizations);
     } catch (error) {
       console.error("Error fetching organizations:", error);
@@ -502,7 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (tier !== undefined) updates.tier = tier;
       if (name !== undefined) updates.name = name;
 
-      const organization = await storage.updateOrganization(id, updates);
+      const organization = await req.storage.updateOrganization(id, updates);
       
       if (!organization) {
         return res.status(404).json({ message: "Organization not found" });
@@ -510,9 +509,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create audit log entry
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       if (currentUser) {
-        await storage.createAuditLog({
+        await req.storage.createAuditLog({
           userId: currentUser.id,
           actorId: currentUser.id,
           action: 'organization_updated',
@@ -539,20 +538,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Prevent super admins from deleting their own account
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       if (currentUser && userId === currentUser.id) {
         return res.status(400).json({ message: "You cannot delete your own account" });
       }
       
       // Check if user exists
-      const userToDelete = await storage.getUser(userId);
+      const userToDelete = await req.storage.getUser(userId);
       if (!userToDelete) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Prevent deleting the last super_admin
       if (userToDelete.role === 'super_admin') {
-        const allUsers = await storage.getAllUsers();
+        const allUsers = await req.storage.getAllUsers();
         const superAdminCount = allUsers.filter(u => u.role === 'super_admin').length;
         if (superAdminCount <= 1) {
           return res.status(400).json({ message: "Cannot delete the last super admin" });
@@ -561,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Create audit log entry before deletion
       if (currentUser) {
-        await storage.createAuditLog({
+        await req.storage.createAuditLog({
           userId: userToDelete.id,
           actorId: currentUser.id,
           action: 'user_deleted',
@@ -575,7 +574,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      await storage.deleteUser(userId);
+      await req.storage.deleteUser(userId);
       res.json({ message: "User deleted successfully" });
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -587,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all active enrollments
   app.get('/api/admin/enrollments', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const enrollments = await storage.getActiveTechGoesHomeEnrollments();
+      const enrollments = await req.storage.getActiveTechGoesHomeEnrollments();
       res.json(enrollments);
     } catch (error) {
       console.error("Error fetching enrollments:", error);
@@ -598,7 +597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get enrollment status for a user
   app.get('/api/admin/users/:userId/enrollment', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(req.params.userId);
+      const enrollment = await req.storage.getTechGoesHomeEnrollmentByUserId(req.params.userId);
       res.json({ isEnrolled: !!enrollment, enrollment });
     } catch (error) {
       console.error("Error checking enrollment:", error);
@@ -612,18 +611,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.params;
       
       // Check if user exists
-      const user = await storage.getUser(userId);
+      const user = await req.storage.getUser(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Check if enrollment exists (including withdrawn)
-      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(userId);
+      const existingEnrollment = await req.storage.getTechGoesHomeEnrollmentByUserId(userId);
       
       if (existingEnrollment) {
         // If enrollment exists but is withdrawn, reactivate it
         if (existingEnrollment.status === "withdrawn") {
-          const reactivatedEnrollment = await storage.updateTechGoesHomeEnrollment(
+          const reactivatedEnrollment = await req.storage.updateTechGoesHomeEnrollment(
             existingEnrollment.id, 
             { status: "active" }
           );
@@ -635,7 +634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create new enrollment
-      const enrollment = await storage.createTechGoesHomeEnrollment({
+      const enrollment = await req.storage.createTechGoesHomeEnrollment({
         userId,
         programName: "Tech Goes Home",
         status: "active",
@@ -652,13 +651,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Remove user enrollment
   app.delete('/api/admin/users/:userId/enrollment', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(req.params.userId);
+      const enrollment = await req.storage.getTechGoesHomeEnrollmentByUserId(req.params.userId);
       if (!enrollment) {
         return res.status(404).json({ message: "User is not enrolled" });
       }
       
       // For now, we'll update the status to withdrawn instead of deleting
-      await storage.updateTechGoesHomeEnrollment(enrollment.id, { status: "withdrawn" });
+      await req.storage.updateTechGoesHomeEnrollment(enrollment.id, { status: "withdrawn" });
       res.json({ message: "User enrollment withdrawn successfully" });
     } catch (error) {
       console.error("Error removing enrollment:", error);
@@ -677,7 +676,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (action) filters.action = action as string;
       if (limit) filters.limit = parseInt(limit as string, 10);
       
-      const auditLogs = await storage.getAuditLogs(filters);
+      const auditLogs = await req.storage.getAuditLogs(filters);
       res.json(auditLogs);
     } catch (error) {
       console.error("Error fetching audit logs:", error);
@@ -689,17 +688,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/preferences', ...authWithImpersonation, isAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      let preferences = await storage.getAdminPreferences(currentUser.id);
+      let preferences = await req.storage.getAdminPreferences(currentUser.id);
       
       // If no preferences exist, create defaults
       if (!preferences) {
-        preferences = await storage.upsertAdminPreferences(currentUser.id, {});
+        preferences = await req.storage.upsertAdminPreferences(currentUser.id, {});
       }
       
       res.json(preferences);
@@ -712,7 +711,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/preferences', ...authWithImpersonation, isAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
@@ -728,7 +727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const updates = validationResult.data;
-      const updatedPreferences = await storage.upsertAdminPreferences(currentUser.id, updates);
+      const updatedPreferences = await req.storage.upsertAdminPreferences(currentUser.id, updates);
       
       res.json(updatedPreferences);
     } catch (error) {
@@ -781,7 +780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/chatbot/message', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
@@ -793,7 +792,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message and sessionId are required" });
       }
       
-      const conversationHistory = await storage.getChatbotConversationsBySession(sessionId);
+      const conversationHistory = await req.storage.getChatbotConversationsBySession(sessionId);
       
       const { processChatMessage } = await import('./services/chatbotService');
       const result = await processChatMessage(
@@ -803,14 +802,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         conversationHistory
       );
       
-      await storage.createChatbotConversation({
+      await req.storage.createChatbotConversation({
         userId: currentUser.id,
         sessionId,
         role: 'user',
         content: message
       });
       
-      await storage.createChatbotConversation({
+      await req.storage.createChatbotConversation({
         userId: currentUser.id,
         sessionId,
         role: 'assistant',
@@ -826,7 +825,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           { role: 'assistant', content: result.response }
         ];
         
-        const issue = await storage.createChatbotIssue({
+        const issue = await req.storage.createChatbotIssue({
           title: result.escalationData.title,
           description: result.escalationData.description,
           severity: result.escalationData.severity,
@@ -839,7 +838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { notifyIssue } = await import('./services/notificationService');
         const notificationResult = await notifyIssue(issue);
         
-        await storage.updateChatbotIssue(issue.id, {
+        await req.storage.updateChatbotIssue(issue.id, {
           notificationSent: notificationResult.sms.success,
           notificationSentAt: notificationResult.sms.success ? new Date() : undefined
         });
@@ -858,7 +857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/chatbot/history/:sessionId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const { sessionId } = req.params;
-      const history = await storage.getChatbotConversationsBySession(sessionId);
+      const history = await req.storage.getChatbotConversationsBySession(sessionId);
       res.json(history);
     } catch (error) {
       console.error("Error fetching chatbot history:", error);
@@ -869,7 +868,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/chatbot/session/:sessionId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const { sessionId } = req.params;
-      await storage.deleteChatbotSession(sessionId);
+      await req.storage.deleteChatbotSession(sessionId);
       res.json({ message: "Session cleared successfully" });
     } catch (error) {
       console.error("Error deleting chatbot session:", error);
@@ -880,7 +879,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/chatbot/issues', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const { status, severity, limit } = req.query;
-      const issues = await storage.getChatbotIssues({
+      const issues = await req.storage.getChatbotIssues({
         status: status as string,
         severity: severity as string,
         limit: limit ? parseInt(limit as string) : undefined
@@ -896,7 +895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
@@ -909,7 +908,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updates.resolvedAt = new Date();
       }
       
-      const updated = await storage.updateChatbotIssue(id, updates);
+      const updated = await req.storage.updateChatbotIssue(id, updates);
       
       if (!updated) {
         return res.status(404).json({ message: "Issue not found" });
@@ -926,7 +925,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get list of available tables for backup
   app.get('/api/admin/backups/tables', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const tables = await storage.getAvailableTables();
+      const tables = await req.storage.getAvailableTables();
       res.json(tables);
     } catch (error) {
       console.error("Error fetching available tables:", error);
@@ -938,7 +937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/backups/create', ...authWithImpersonation, isAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
@@ -961,7 +960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { tableName, backupName, description } = validationResult.data;
 
-      const result = await storage.createTableBackup(
+      const result = await req.storage.createTableBackup(
         tableName,
         currentUser.id,
         backupName,
@@ -980,7 +979,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // List all backups
   app.get('/api/admin/backups', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const backups = await storage.getAllBackupSnapshots();
+      const backups = await req.storage.getAllBackupSnapshots();
       res.json(backups);
     } catch (error) {
       console.error("Error fetching backups:", error);
@@ -992,7 +991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/backups/table/:tableName', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const { tableName } = req.params;
-      const backups = await storage.getBackupSnapshotsByTable(tableName);
+      const backups = await req.storage.getBackupSnapshotsByTable(tableName);
       res.json(backups);
     } catch (error) {
       console.error("Error fetching backups for table:", error);
@@ -1022,7 +1021,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { mode } = validationResult.data;
 
-      const result = await storage.restoreFromBackup(id, mode);
+      const result = await req.storage.restoreFromBackup(id, mode);
       res.json(result);
     } catch (error) {
       console.error("Error restoring from backup:", error);
@@ -1038,12 +1037,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // Verify backup exists before attempting deletion
-      const backup = await storage.getBackupSnapshot(id);
+      const backup = await req.storage.getBackupSnapshot(id);
       if (!backup) {
         return res.status(404).json({ message: "Backup not found" });
       }
 
-      await storage.deleteBackup(id);
+      await req.storage.deleteBackup(id);
       res.json({ message: "Backup deleted successfully" });
     } catch (error) {
       console.error("Error deleting backup:", error);
@@ -1058,7 +1057,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all backup schedules
   app.get('/api/admin/backup-schedules', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const schedules = await storage.getAllBackupSchedules();
+      const schedules = await req.storage.getAllBackupSchedules();
       res.json(schedules);
     } catch (error) {
       console.error("Error fetching backup schedules:", error);
@@ -1070,7 +1069,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/backup-schedules', ...authWithImpersonation, isAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
@@ -1085,7 +1084,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const schedule = await storage.createBackupSchedule({
+      const schedule = await req.storage.createBackupSchedule({
         ...validationResult.data,
         createdBy: currentUser.id,
       });
@@ -1113,7 +1112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const updated = await storage.updateBackupSchedule(id, validationResult.data);
+      const updated = await req.storage.updateBackupSchedule(id, validationResult.data);
       if (!updated) {
         return res.status(404).json({ message: "Schedule not found" });
       }
@@ -1131,12 +1130,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // Verify schedule exists
-      const schedule = await storage.getBackupSchedule(id);
+      const schedule = await req.storage.getBackupSchedule(id);
       if (!schedule) {
         return res.status(404).json({ message: "Schedule not found" });
       }
 
-      await storage.deleteBackupSchedule(id);
+      await req.storage.deleteBackupSchedule(id);
       res.json({ message: "Schedule deleted successfully" });
     } catch (error) {
       console.error("Error deleting backup schedule:", error);
@@ -1147,7 +1146,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get database storage metrics
   app.get('/api/admin/backup-storage-metrics', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const metrics = await storage.getDatabaseStorageMetrics();
+      const metrics = await req.storage.getDatabaseStorageMetrics();
       res.json(metrics);
     } catch (error) {
       console.error("Error fetching storage metrics:", error);
@@ -1165,13 +1164,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('[AdminProvisioning] GET /api/admin/programs - query:', req.query);
       const { programType, isActive, isAvailableForTesting } = req.query;
       
-      const filters: Parameters<typeof storage.getAllPrograms>[0] = {};
+      const filters: Parameters<typeof req.storage.getAllPrograms>[0] = {};
       if (programType) filters.programType = programType;
       if (isActive !== undefined) filters.isActive = isActive === 'true';
       if (isAvailableForTesting !== undefined) filters.isAvailableForTesting = isAvailableForTesting === 'true';
       
       console.log('[AdminProvisioning] Filters:', filters);
-      const programs = await storage.getAllPrograms(filters);
+      const programs = await req.storage.getAllPrograms(filters);
       console.log('[AdminProvisioning] Found programs:', programs.length);
       res.json(programs);
     } catch (error) {
@@ -1183,7 +1182,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/programs', ...authWithImpersonation, requireSuperAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
@@ -1198,7 +1197,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const program = await storage.createProgram(validationResult.data);
+      const program = await req.storage.createProgram(validationResult.data);
       res.status(201).json(program);
     } catch (error) {
       console.error("Error creating program:", error);
@@ -1220,7 +1219,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const updated = await storage.updateProgram(id, validationResult.data);
+      const updated = await req.storage.updateProgram(id, validationResult.data);
       if (!updated) {
         return res.status(404).json({ message: "Program not found" });
       }
@@ -1237,12 +1236,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // Verify program exists
-      const program = await storage.getProgram(id);
+      const program = await req.storage.getProgram(id);
       if (!program) {
         return res.status(404).json({ message: "Program not found" });
       }
       
-      await storage.deleteProgram(id); // Soft delete
+      await req.storage.deleteProgram(id); // Soft delete
       res.json({ message: "Program deleted successfully" });
     } catch (error) {
       console.error("Error deleting program:", error);
@@ -1255,13 +1254,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('[AdminProvisioning] GET /api/admin/entitlements');
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
       }
       
-      const entitlements = await storage.getActiveAdminEntitlementsWithPrograms(currentUser.id);
+      const entitlements = await req.storage.getActiveAdminEntitlementsWithPrograms(currentUser.id);
       res.json(entitlements);
     } catch (error) {
       console.error("Error fetching entitlements:", error);
@@ -1272,7 +1271,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/entitlements', ...authWithImpersonation, isAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
@@ -1293,7 +1292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if entitlement already exists
-      const hasEntitlement = await storage.hasActiveEntitlement(
+      const hasEntitlement = await req.storage.hasActiveEntitlement(
         currentUser.id, 
         validationResult.data.programId
       );
@@ -1303,7 +1302,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create entitlement (transactional: creates entitlement + test enrollment + progress)
-      const result = await storage.createAdminEntitlement({
+      const result = await req.storage.createAdminEntitlement({
         adminId: currentUser.id,
         programId: validationResult.data.programId,
         metadata: validationResult.data.metadata,
@@ -1322,14 +1321,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
       }
       
       // Verify entitlement exists and belongs to current user
-      const entitlement = await storage.getAdminEntitlement(id);
+      const entitlement = await req.storage.getAdminEntitlement(id);
       if (!entitlement) {
         return res.status(404).json({ message: "Entitlement not found" });
       }
@@ -1355,12 +1354,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[AdminProvisioning] GET /api/admin/users/${userId}/entitlements`);
       
       // Verify user exists
-      const targetUser = await storage.getUser(userId);
+      const targetUser = await req.storage.getUser(userId);
       if (!targetUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const entitlements = await storage.getActiveAdminEntitlementsWithPrograms(userId);
+      const entitlements = await req.storage.getActiveAdminEntitlementsWithPrograms(userId);
       res.json(entitlements);
     } catch (error) {
       console.error("Error fetching user entitlements:", error);
@@ -1374,7 +1373,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[AdminProvisioning] POST /api/admin/users/${userId}/entitlements`);
       
       // Verify user exists
-      const targetUser = await storage.getUser(userId);
+      const targetUser = await req.storage.getUser(userId);
       if (!targetUser) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -1394,7 +1393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if entitlement already exists
-      const hasEntitlement = await storage.hasActiveEntitlement(
+      const hasEntitlement = await req.storage.hasActiveEntitlement(
         userId, 
         validationResult.data.programId
       );
@@ -1404,7 +1403,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create entitlement (transactional: creates entitlement + test enrollment + progress)
-      const result = await storage.createAdminEntitlement({
+      const result = await req.storage.createAdminEntitlement({
         adminId: userId,
         programId: validationResult.data.programId,
         metadata: validationResult.data.metadata,
@@ -1425,7 +1424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[AdminProvisioning] DELETE /api/admin/users/${userId}/entitlements/${entitlementId}`);
       
       // Verify entitlement exists and belongs to specified user
-      const entitlement = await storage.getAdminEntitlement(entitlementId);
+      const entitlement = await req.storage.getAdminEntitlement(entitlementId);
       if (!entitlement) {
         return res.status(404).json({ message: "Entitlement not found" });
       }
@@ -1447,7 +1446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all entitlements for all users (for admin user management view)
   app.get('/api/admin/all-entitlements', ...authWithImpersonation, isAdmin, async (req: any, res) => {
     try {
-      const entitlements = await storage.getAllAdminEntitlementsWithPrograms();
+      const entitlements = await req.storage.getAllAdminEntitlementsWithPrograms();
       res.json(entitlements);
     } catch (error) {
       console.error("Error fetching all entitlements:", error);
@@ -1460,13 +1459,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('[AdminProvisioning] GET /api/admin/impersonation/session');
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
       }
       
-      const session = await storage.getActiveImpersonationSession(currentUser.id);
+      const session = await req.storage.getActiveImpersonationSession(currentUser.id);
       res.json(session || null);
     } catch (error) {
       console.error("Error fetching impersonation session:", error);
@@ -1477,7 +1476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/impersonation/start', isAuthenticated, requireActualAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
@@ -1498,13 +1497,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Verify impersonated user exists
-      const targetUser = await storage.getUser(validationResult.data.impersonatedUserId);
+      const targetUser = await req.storage.getUser(validationResult.data.impersonatedUserId);
       if (!targetUser) {
         return res.status(404).json({ message: "Target user not found" });
       }
       
       // Create impersonation session (transactionally ends existing session)
-      const session = await storage.createImpersonationSession({
+      const session = await req.storage.createImpersonationSession({
         adminId: currentUser.id,
         impersonatedUserId: validationResult.data.impersonatedUserId,
         reason: validationResult.data.reason,
@@ -1520,20 +1519,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/impersonation/end', isAuthenticated, requireActualAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
       }
       
       // Get active session
-      const session = await storage.getActiveImpersonationSession(currentUser.id);
+      const session = await req.storage.getActiveImpersonationSession(currentUser.id);
       if (!session) {
         return res.status(404).json({ message: "No active impersonation session" });
       }
       
       // End session
-      await storage.endImpersonationSession(session.id);
+      await req.storage.endImpersonationSession(session.id);
       res.json({ message: "Impersonation ended successfully" });
     } catch (error) {
       console.error("Error ending impersonation:", error);
@@ -1546,14 +1545,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { sessionId } = req.params;
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
       }
       
       // End the session
-      const result = await storage.endImpersonationSession(sessionId);
+      const result = await req.storage.endImpersonationSession(sessionId);
       
       if (!result) {
         return res.status(404).json({ message: "Impersonation session not found" });
@@ -1578,12 +1577,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid persona value" });
       }
       
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const updatedUser = await storage.updateUser(currentUser.id, { persona }, currentUser.id);
+      const updatedUser = await req.storage.updateUser(currentUser.id, { persona }, currentUser.id);
       res.json(updatedUser);
     } catch (error) {
       console.error("Error updating user persona:", error);
@@ -1732,7 +1731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       uploadTokenCache.delete(uploadToken);
 
       // Get current user's UUID
-      const currentUser = await storage.getUserByOidcSub(userId);
+      const currentUser = await req.storage.getUserByOidcSub(userId);
       if (!currentUser) {
         return res.status(404).json({ error: "User not found" });
       }
@@ -1747,7 +1746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       // Update user profile in database with UUID
-      await storage.updateUser(currentUser.id, { profileImageUrl: objectPath }, currentUser.id);
+      await req.storage.updateUser(currentUser.id, { profileImageUrl: objectPath }, currentUser.id);
 
       res.status(200).json({
         objectPath: objectPath,
@@ -1765,14 +1764,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertLeadSchema.parse(req.body);
       
       // Check if lead already exists
-      const existingLead = await storage.getLeadByEmail(validatedData.email);
+      const existingLead = await req.storage.getLeadByEmail(validatedData.email);
       if (existingLead) {
         // Update existing lead
-        const updated = await storage.updateLead(existingLead.id, validatedData);
+        const updated = await req.storage.updateLead(existingLead.id, validatedData);
         return res.json(updated);
       }
       
-      const lead = await storage.createLead(validatedData);
+      const lead = await req.storage.createLead(validatedData);
       
       // Automatically create a follow-up task for the new lead
       await createTaskForNewLead(storage, lead);
@@ -1791,7 +1790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/interactions', async (req, res) => {
     try {
       const validatedData = insertInteractionSchema.parse(req.body);
-      const interaction = await storage.createInteraction(validatedData);
+      const interaction = await req.storage.createInteraction(validatedData);
       
       // If interaction has a leadId and interactionType, update engagement score and evaluate progression
       if (validatedData.leadId && validatedData.interactionType) {
@@ -1801,11 +1800,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Update lead's engagement score and lastInteractionDate (even if delta is 0)
           // This ensures conversion events (donation_completed, etc.) are tracked
-          const lead = await storage.getLeadById(validatedData.leadId);
+          const lead = await req.storage.getLeadById(validatedData.leadId);
           
           if (lead) {
             const newScore = (lead.engagementScore || 0) + engagementDelta;
-            await storage.updateLead(validatedData.leadId, {
+            await req.storage.updateLead(validatedData.leadId, {
               engagementScore: newScore,
               lastInteractionDate: new Date(),
             });
@@ -2148,7 +2147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { persona, funnelStage, engagement, leadStatus } = req.query;
       
       // Use new combined filtering method
-      const leads = await storage.getFilteredLeads({
+      const leads = await req.storage.getFilteredLeads({
         persona: persona as string | undefined,
         funnelStage: funnelStage as string | undefined,
         engagement: engagement as string | undefined,
@@ -2204,7 +2203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/leads/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const lead = await storage.getLead(req.params.id);
+      const lead = await req.storage.getLead(req.params.id);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -2219,7 +2218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Validate request body against updateLeadSchema
       const validatedData = updateLeadSchema.parse(req.body);
-      const lead = await storage.updateLead(req.params.id, validatedData);
+      const lead = await req.storage.updateLead(req.params.id, validatedData);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -2238,7 +2237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/leads/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      await storage.deleteLead(req.params.id);
+      await req.storage.deleteLead(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting lead:", error);
@@ -2290,7 +2289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error('Email is required');
           }
 
-          const existingLead = await storage.getLeadByEmail(email);
+          const existingLead = await req.storage.getLeadByEmail(email);
           
           if (existingLead) {
             // For updates: only include fields that are actually provided in the spreadsheet
@@ -2305,7 +2304,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (row['Lead Source'] || row.leadSource) updateData.leadSource = row['Lead Source'] || row.leadSource;
             if (row.Notes || row.notes) updateData.notes = row.Notes || row.notes;
             
-            await storage.updateLead(existingLead.id, updateData);
+            await req.storage.updateLead(existingLead.id, updateData);
           } else {
             // For new leads: apply defaults for required fields
             const newLeadData = {
@@ -2321,7 +2320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             const validatedData = insertLeadSchema.parse(newLeadData);
-            const newLead = await storage.createLead(validatedData);
+            const newLead = await req.storage.createLead(validatedData);
             await createTaskForNewLead(storage, newLead);
           }
           
@@ -2397,7 +2396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             throw new Error('Email is required');
           }
 
-          const existingLead = await storage.getLeadByEmail(email);
+          const existingLead = await req.storage.getLeadByEmail(email);
           
           if (existingLead) {
             // For updates: only include fields that are actually provided in the spreadsheet
@@ -2412,7 +2411,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (row['Lead Source'] || row.leadSource) updateData.leadSource = row['Lead Source'] || row.leadSource;
             if (row.Notes || row.notes) updateData.notes = row.Notes || row.notes;
             
-            await storage.updateLead(existingLead.id, updateData);
+            await req.storage.updateLead(existingLead.id, updateData);
           } else {
             // For new leads: apply defaults for required fields
             const newLeadData = {
@@ -2428,7 +2427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             };
 
             const validatedData = insertLeadSchema.parse(newLeadData);
-            const newLead = await storage.createLead(validatedData);
+            const newLead = await req.storage.createLead(validatedData);
             await createTaskForNewLead(storage, newLead);
           }
           
@@ -2487,7 +2486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check for duplicate by email
-      const existingLead = await storage.getLeadByEmail(leadData.email);
+      const existingLead = await req.storage.getLeadByEmail(leadData.email);
       if (existingLead) {
         return res.status(200).json({ 
           message: "Lead already exists", 
@@ -2514,7 +2513,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         enrichmentData: leadData.enrichmentData || leadData.metadata || null,
       });
       
-      const newLead = await storage.createLead(validatedData);
+      const newLead = await req.storage.createLead(validatedData);
       await createTaskForNewLead(storage, newLead);
 
       res.status(201).json({ 
@@ -2543,9 +2542,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get ICP criteria (use default if not specified)
       let icp;
       if (icpCriteriaId) {
-        icp = await storage.getIcpCriteria(icpCriteriaId);
+        icp = await req.storage.getIcpCriteria(icpCriteriaId);
       } else {
-        icp = await storage.getDefaultIcpCriteria();
+        icp = await req.storage.getDefaultIcpCriteria();
       }
 
       if (!icp) {
@@ -2554,7 +2553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get leads to qualify
       const leadsToQualify = await Promise.all(
-        leadIds.map(id => storage.getLead(id))
+        leadIds.map(id => req.storage.getLead(id))
       );
       
       const validLeads = leadsToQualify.filter(l => l !== undefined) as any[];
@@ -2572,7 +2571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update leads with qualification results
       const updatedLeads = [];
       for (const [leadId, result] of results.entries()) {
-        const updated = await storage.updateLead(leadId, {
+        const updated = await req.storage.updateLead(leadId, {
           qualificationScore: result.score,
           qualificationStatus: result.status,
           qualificationInsights: result.insights,
@@ -2606,7 +2605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Lead Sourcing: Generate outreach email for a lead
   app.post('/api/admin/leads/:id/generate-outreach', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const lead = await storage.getLead(req.params.id);
+      const lead = await req.storage.getLead(req.params.id);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -2625,7 +2624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const email = await generateOutreachEmail(lead, qualificationResult);
       
       // Create draft outreach email record
-      const outreachEmail = await storage.createOutreachEmail({
+      const outreachEmail = await req.storage.createOutreachEmail({
         leadId: lead.id,
         subject: email.subject,
         bodyHtml: email.bodyHtml,
@@ -2636,7 +2635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Update lead outreach status
-      await storage.updateLead(lead.id, {
+      await req.storage.updateLead(lead.id, {
         outreachStatus: 'draft_ready',
       });
 
@@ -2660,12 +2659,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid outreach status" });
       }
       
-      const lead = await storage.getLeadById(id);
+      const lead = await req.storage.getLeadById(id);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
       
-      await storage.updateLead(id, { outreachStatus: status });
+      await req.storage.updateLead(id, { outreachStatus: status });
       
       res.json({ message: "Outreach status updated successfully" });
     } catch (error) {
@@ -2688,7 +2687,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       for (const id of leadIds) {
-        await storage.updateLead(id, { outreachStatus: status });
+        await req.storage.updateLead(id, { outreachStatus: status });
       }
       
       res.json({ message: `Updated ${leadIds.length} leads to ${status}` });
@@ -2707,12 +2706,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "outreachEmailId is required" });
       }
 
-      const lead = await storage.getLead(req.params.id);
+      const lead = await req.storage.getLead(req.params.id);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
 
-      const outreachEmail = await storage.getOutreachEmail(outreachEmailId);
+      const outreachEmail = await req.storage.getOutreachEmail(outreachEmailId);
       if (!outreachEmail) {
         return res.status(404).json({ message: "Outreach email not found" });
       }
@@ -2739,7 +2738,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (sendResult.success) {
         // Update outreach email status
-        await storage.updateOutreachEmail(outreachEmail.id, {
+        await req.storage.updateOutreachEmail(outreachEmail.id, {
           status: 'sent',
           sentAt: new Date(),
           sentBy: (req as any).user?.id,
@@ -2747,7 +2746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Update lead outreach status
-        await storage.updateLead(lead.id, {
+        await req.storage.updateLead(lead.id, {
           outreachStatus: 'sent',
           lastOutreachAt: new Date(),
         });
@@ -2758,7 +2757,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } else {
         // Update with error
-        await storage.updateOutreachEmail(outreachEmail.id, {
+        await req.storage.updateOutreachEmail(outreachEmail.id, {
           status: 'failed',
           errorMessage: sendResult.error,
           retryCount: (outreachEmail.retryCount || 0) + 1,
@@ -2778,7 +2777,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Lead Interactions
   app.get('/api/admin/leads/:id/interactions', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const interactions = await storage.getLeadInteractions(req.params.id);
+      const interactions = await req.storage.getLeadInteractions(req.params.id);
       res.json(interactions);
     } catch (error) {
       console.error("Error fetching interactions:", error);
@@ -2793,8 +2792,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch opens and clicks
       const [opens, clicks] = await Promise.all([
-        storage.getLeadEmailOpens(leadId),
-        storage.getLeadEmailClicks(leadId),
+        req.storage.getLeadEmailOpens(leadId),
+        req.storage.getLeadEmailClicks(leadId),
       ]);
 
       // Compute summary metrics
@@ -2827,8 +2826,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { persona } = req.query;
       const magnets = persona 
-        ? await storage.getLeadMagnetsByPersona(persona as string)
-        : await storage.getAllLeadMagnets();
+        ? await req.storage.getLeadMagnetsByPersona(persona as string)
+        : await req.storage.getAllLeadMagnets();
       res.json(magnets);
     } catch (error) {
       console.error("Error fetching lead magnets:", error);
@@ -2839,7 +2838,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/lead-magnets', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const validatedData = insertLeadMagnetSchema.parse(req.body);
-      const magnet = await storage.createLeadMagnet(validatedData);
+      const magnet = await req.storage.createLeadMagnet(validatedData);
       res.status(201).json(magnet);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -2852,7 +2851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/lead-magnets/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const magnet = await storage.updateLeadMagnet(req.params.id, req.body);
+      const magnet = await req.storage.updateLeadMagnet(req.params.id, req.body);
       if (!magnet) {
         return res.status(404).json({ message: "Lead magnet not found" });
       }
@@ -2865,7 +2864,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/lead-magnets/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      await storage.deleteLeadMagnet(req.params.id);
+      await req.storage.deleteLeadMagnet(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting lead magnet:", error);
@@ -2876,7 +2875,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ICP Criteria Management
   app.get('/api/admin/icp-criteria', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const criteria = await storage.getAllIcpCriteria();
+      const criteria = await req.storage.getAllIcpCriteria();
       res.json(criteria);
     } catch (error) {
       console.error("Error fetching ICP criteria:", error);
@@ -2886,7 +2885,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/icp-criteria/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const criteria = await storage.getIcpCriteria(req.params.id);
+      const criteria = await req.storage.getIcpCriteria(req.params.id);
       if (!criteria) {
         return res.status(404).json({ message: "ICP criteria not found" });
       }
@@ -2904,7 +2903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: (req as any).user?.id,
       });
       
-      const criteria = await storage.createIcpCriteria(validatedData);
+      const criteria = await req.storage.createIcpCriteria(validatedData);
       res.status(201).json(criteria);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -2917,7 +2916,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch('/api/admin/icp-criteria/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const criteria = await storage.updateIcpCriteria(req.params.id, req.body);
+      const criteria = await req.storage.updateIcpCriteria(req.params.id, req.body);
       if (!criteria) {
         return res.status(404).json({ message: "ICP criteria not found" });
       }
@@ -2930,7 +2929,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/icp-criteria/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      await storage.deleteIcpCriteria(req.params.id);
+      await req.storage.deleteIcpCriteria(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting ICP criteria:", error);
@@ -2942,7 +2941,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/outreach-emails', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const { status, limit } = req.query;
-      const emails = await storage.getAllOutreachEmails({
+      const emails = await req.storage.getAllOutreachEmails({
         status: status as string,
         limit: limit ? parseInt(limit as string) : undefined,
       });
@@ -2955,7 +2954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/leads/:leadId/outreach-emails', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const emails = await storage.getLeadOutreachEmails(req.params.leadId);
+      const emails = await req.storage.getLeadOutreachEmails(req.params.leadId);
       res.json(emails);
     } catch (error) {
       console.error("Error fetching lead outreach emails:", error);
@@ -2966,7 +2965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Analytics endpoint
   app.get('/api/admin/analytics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const allLeads = await storage.getAllLeads();
+      const allLeads = await req.storage.getAllLeads();
       
       // Filter to only active leads (exclude disqualified and unresponsive)
       // Analytics should reflect active pipeline health
@@ -3003,11 +3002,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // CAC:LTGP Analytics (Alex Hormozi's $100M Leads Framework)
-  const cacAnalytics = createCacLtgpAnalyticsService(storage);
-
+  
   // CAC:LTGP Overview
   app.get('/api/admin/cac-ltgp/overview', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
       const overview = await cacAnalytics.getCACLTGPOverview();
       res.json(overview);
     } catch (error) {
@@ -3019,6 +3018,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Channel Performance
   app.get('/api/admin/cac-ltgp/channels', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
       const channels = await cacAnalytics.getChannelPerformance();
       res.json(channels);
     } catch (error) {
@@ -3030,6 +3030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Campaign Performance
   app.get('/api/admin/cac-ltgp/campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
       const campaigns = await cacAnalytics.getCampaignPerformance();
       res.json(campaigns);
     } catch (error) {
@@ -3041,6 +3042,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cohort Analysis
   app.get('/api/admin/cac-ltgp/cohorts', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
       const periodType = (req.query.periodType as 'week' | 'month') || 'month';
       const cohorts = await cacAnalytics.getCohortAnalysis(periodType);
       res.json(cohorts);
@@ -3057,7 +3059,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 25;
       
-      const result = await storage.listLifecycleWithLeads({ stage, page, limit });
+      const result = await req.storage.listLifecycleWithLeads({ stage, page, limit });
       
       res.json({
         donors: result.donors,
@@ -3076,7 +3078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/admin/donors/lifecycle/stats', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const stageCounts = await storage.countLifecycleByStage();
+      const stageCounts = await req.storage.countLifecycleByStage();
       res.json(stageCounts);
     } catch (error) {
       console.error("Error fetching lifecycle stats:", error);
@@ -3087,7 +3089,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Acquisition Channels Management
   app.get('/api/admin/acquisition-channels', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const channels = await storage.getAllAcquisitionChannels();
+      const channels = await req.storage.getAllAcquisitionChannels();
       res.json(channels);
     } catch (error) {
       console.error("Error fetching acquisition channels:", error);
@@ -3098,7 +3100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/acquisition-channels', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const validated = insertAcquisitionChannelSchema.parse(req.body);
-      const channel = await storage.createAcquisitionChannel(validated);
+      const channel = await req.storage.createAcquisitionChannel(validated);
       res.json(channel);
     } catch (error) {
       console.error("Error creating acquisition channel:", error);
@@ -3109,7 +3111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/acquisition-channels/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const validated = insertAcquisitionChannelSchema.partial().parse(req.body);
-      const channel = await storage.updateAcquisitionChannel(req.params.id, validated);
+      const channel = await req.storage.updateAcquisitionChannel(req.params.id, validated);
       if (!channel) {
         return res.status(404).json({ message: "Channel not found" });
       }
@@ -3123,7 +3125,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Marketing Campaigns Management
   app.get('/api/admin/marketing-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const campaigns = await storage.getAllMarketingCampaigns();
+      const campaigns = await req.storage.getAllMarketingCampaigns();
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching marketing campaigns:", error);
@@ -3134,7 +3136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/marketing-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const validated = insertMarketingCampaignSchema.parse(req.body);
-      const campaign = await storage.createMarketingCampaign(validated);
+      const campaign = await req.storage.createMarketingCampaign(validated);
       res.json(campaign);
     } catch (error) {
       console.error("Error creating marketing campaign:", error);
@@ -3145,7 +3147,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/marketing-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const validated = insertMarketingCampaignSchema.partial().parse(req.body);
-      const campaign = await storage.updateMarketingCampaign(req.params.id, validated);
+      const campaign = await req.storage.updateMarketingCampaign(req.params.id, validated);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
@@ -3160,7 +3162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all channel spend entries
   app.get('/api/admin/channel-spend', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const entries = await storage.getAllSpendEntries();
+      const entries = await req.storage.getAllSpendEntries();
       res.json(entries);
     } catch (error) {
       console.error("Error fetching spend entries:", error);
@@ -3171,7 +3173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/channel-spend', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const validated = insertChannelSpendLedgerSchema.parse(req.body);
-      const entry = await storage.createSpendEntry(validated);
+      const entry = await req.storage.createSpendEntry(validated);
       res.json(entry);
     } catch (error) {
       console.error("Error creating spend entry:", error);
@@ -3182,7 +3184,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Economics Settings
   app.get('/api/admin/economics-settings', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const settings = await storage.getEconomicsSettings();
+      const settings = await req.storage.getEconomicsSettings();
       res.json(settings || {});
     } catch (error) {
       console.error("Error fetching economics settings:", error);
@@ -3193,7 +3195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/economics-settings', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const validated = insertEconomicsSettingsSchema.partial().parse(req.body);
-      const settings = await storage.updateEconomicsSettings(validated);
+      const settings = await req.storage.updateEconomicsSettings(validated);
       res.json(settings);
     } catch (error) {
       console.error("Error updating economics settings:", error);
@@ -3232,7 +3234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get current user's UUID
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       // Auto-rename if duplicate name exists
       // Helper to create slug exactly as Cloudinary will, to prevent collisions
@@ -3240,7 +3242,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         str.toLowerCase().trim().replace(/\s+/g, '-');
       
       let uniqueName = name.trim();
-      const existingImages = await storage.getAllImageAssets();
+      const existingImages = await req.storage.getAllImageAssets();
       
       // Create slug-based map for collision detection (matches Cloudinary public ID logic)
       const existingSlugsMap = new Map<string, string>();
@@ -3268,7 +3270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Save to database
-      const imageAsset = await storage.createImageAsset({
+      const imageAsset = await req.storage.createImageAsset({
         name: uniqueName,
         originalFilename: req.file.originalname,
         localPath: localPath || null,
@@ -3294,7 +3296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all image assets
   app.get('/api/admin/images', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const images = await storage.getAllImageAssets();
+      const images = await req.storage.getAllImageAssets();
       res.json(images);
     } catch (error) {
       console.error("Error fetching images:", error);
@@ -3305,7 +3307,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get image assets by usage
   app.get('/api/admin/images/usage/:usage', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const images = await storage.getImageAssetsByUsage(req.params.usage);
+      const images = await req.storage.getImageAssetsByUsage(req.params.usage);
       res.json(images);
     } catch (error) {
       console.error("Error fetching images by usage:", error);
@@ -3316,7 +3318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get single image asset
   app.get('/api/admin/images/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const image = await storage.getImageAsset(req.params.id);
+      const image = await req.storage.getImageAsset(req.params.id);
       if (!image) {
         return res.status(404).json({ message: "Image not found" });
       }
@@ -3331,7 +3333,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/admin/images/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const validatedData = insertImageAssetSchema.partial().parse(req.body);
-      const image = await storage.updateImageAsset(req.params.id, validatedData);
+      const image = await req.storage.updateImageAsset(req.params.id, validatedData);
       if (!image) {
         return res.status(404).json({ message: "Image not found" });
       }
@@ -3345,7 +3347,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete image asset (also deletes from Cloudinary)
   app.delete('/api/admin/images/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const image = await storage.getImageAsset(req.params.id);
+      const image = await req.storage.getImageAsset(req.params.id);
       if (!image) {
         return res.status(404).json({ message: "Image not found" });
       }
@@ -3354,7 +3356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await deleteFromCloudinary(image.cloudinaryPublicId);
 
       // Delete from database
-      await storage.deleteImageAsset(req.params.id);
+      await req.storage.deleteImageAsset(req.params.id);
 
       res.status(204).send();
     } catch (error) {
@@ -3385,7 +3387,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public endpoint to get image asset by name (no auth required)
   app.get('/api/images/by-name/:name', async (req, res) => {
     try {
-      const images = await storage.getAllImageAssets();
+      const images = await req.storage.getAllImageAssets();
       const image = images.find(img => 
         img.name.toLowerCase() === decodeURIComponent(req.params.name).toLowerCase() && 
         img.isActive
@@ -3407,7 +3409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all content items (admin)
   app.get('/api/content', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const items = await storage.getAllContentItems();
+      const items = await req.storage.getAllContentItems();
       res.json(items);
     } catch (error) {
       console.error("Error fetching content items:", error);
@@ -3418,7 +3420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get content items by type (public - needed for matrix grid display)
   app.get('/api/content/type/:type', async (req, res) => {
     try {
-      const items = await storage.getContentItemsByType(req.params.type);
+      const items = await req.storage.getContentItemsByType(req.params.type);
       res.json(items);
     } catch (error) {
       console.error("Error fetching content items by type:", error);
@@ -3434,12 +3436,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
 
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
 
-      const project = await storage.getStudentProjectByUserId(user.id);
+      const project = await req.storage.getStudentProjectByUserId(user.id);
       
       if (!project) {
         return res.status(404).json({ message: "No project found" });
@@ -3463,7 +3465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // First, try to get from authenticated user profile
       const oidcSub = req.user?.claims?.sub;
       if (oidcSub) {
-        const user = await storage.getUserByOidcSub(oidcSub);
+        const user = await req.storage.getUserByOidcSub(oidcSub);
         if (user?.passions) {
           userPassions = user.passions as string[];
         }
@@ -3474,7 +3476,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userPassions = typeof passions === 'string' ? passions.split(',') : passions as string[];
       }
       
-      const items = await storage.getVisibleContentItems(
+      const items = await req.storage.getVisibleContentItems(
         req.params.type,
         persona as string | undefined,
         funnelStage as string | undefined,
@@ -3499,7 +3501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get testimonials with passion-aware filtering built-in
-      const testimonials = await storage.getVisibleContentItems(
+      const testimonials = await req.storage.getVisibleContentItems(
         'testimonial',
         persona as string | undefined,
         funnelStage as string | undefined,
@@ -3528,19 +3530,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const oidcSub = req.user?.claims?.sub;
     if (!oidcSub) return result;
     
-    const user = await storage.getUserByOidcSub(oidcSub);
+    const user = await req.storage.getUserByOidcSub(oidcSub);
     if (!user) return result;
     
     // Student dashboard: student persona + retention + active TGH enrollment
     if (persona === 'student') {
-      const enrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+      const enrollment = await req.storage.getTechGoesHomeEnrollmentByUserId(user.id);
       result.studentDashboard = !!enrollment;
       console.log('[student-dashboard] Visibility check:', { userId: user.id, enrollmentFound: !!enrollment });
     }
     
     // Volunteer dashboard: volunteer persona + retention + active volunteer enrollments
     if (persona === 'volunteer') {
-      const enrollments = await storage.getActiveVolunteerEnrollmentsByUserId(user.id);
+      const enrollments = await req.storage.getActiveVolunteerEnrollmentsByUserId(user.id);
       result.volunteerDashboard = enrollments.length > 0;
       console.log('[volunteer-dashboard] Visibility check:', { userId: user.id, enrollmentsFound: enrollments.length });
     }
@@ -3561,7 +3563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // First, try to get from authenticated user profile
       const oidcSub = req.user?.claims?.sub;
       if (oidcSub) {
-        const user = await storage.getUserByOidcSub(oidcSub);
+        const user = await req.storage.getUserByOidcSub(oidcSub);
         if (user?.passions) {
           userPassions = user.passions as string[];
         }
@@ -3588,7 +3590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       for (const type of sectionTypes) {
-        const items = await storage.getVisibleContentItems(
+        const items = await req.storage.getVisibleContentItems(
           type,
           persona as string | undefined,
           funnelStage as string | undefined,
@@ -3637,7 +3639,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get available persona×stage combinations (admin) - for A/B test targeting
   app.get('/api/content/available-combinations', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const combinations = await storage.getAvailablePersonaStageCombinations();
+      const combinations = await req.storage.getAvailablePersonaStageCombinations();
       res.json(combinations);
     } catch (error) {
       console.error("Error fetching available combinations:", error);
@@ -3650,14 +3652,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { persona, funnelStage, visibilityCombos, ...contentData } = req.body;
       const validatedData = insertContentItemSchema.parse(contentData);
-      const item = await storage.createContentItem(validatedData);
+      const item = await req.storage.createContentItem(validatedData);
       
       // Create multiple visibility records from visibilityCombos array for all content types
       if (visibilityCombos && Array.isArray(visibilityCombos) && visibilityCombos.length > 0) {
         try {
           for (const combo of visibilityCombos) {
             if (combo.persona && combo.funnelStage) {
-              await storage.createContentVisibility({
+              await req.storage.createContentVisibility({
                 contentItemId: item.id,
                 persona: combo.persona,
                 funnelStage: combo.funnelStage,
@@ -3673,7 +3675,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Fallback: create single visibility record if persona and funnelStage provided (backward compatibility)
       else if (persona && funnelStage) {
         try {
-          await storage.createContentVisibility({
+          await req.storage.createContentVisibility({
             contentItemId: item.id,
             persona,
             funnelStage,
@@ -3699,7 +3701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/content/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const { persona, funnelStage, visibilityCombos, ...contentData } = req.body;
-      const item = await storage.updateContentItem(req.params.id, contentData);
+      const item = await req.storage.updateContentItem(req.params.id, contentData);
       if (!item) {
         return res.status(404).json({ message: "Content item not found" });
       }
@@ -3708,16 +3710,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (visibilityCombos && Array.isArray(visibilityCombos)) {
         try {
           // Delete all existing visibility records for this content item
-          const allVis = await storage.getAllContentVisibility();
+          const allVis = await req.storage.getAllContentVisibility();
           const existingVis = allVis.filter((v: any) => v.contentItemId === req.params.id);
           for (const vis of existingVis) {
-            await storage.deleteContentVisibility(vis.id);
+            await req.storage.deleteContentVisibility(vis.id);
           }
           
           // Create new visibility records from visibilityCombos array
           for (const combo of visibilityCombos) {
             if (combo.persona && combo.funnelStage) {
-              await storage.createContentVisibility({
+              await req.storage.createContentVisibility({
                 contentItemId: req.params.id,
                 persona: combo.persona,
                 funnelStage: combo.funnelStage,
@@ -3734,15 +3736,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       else if (persona && funnelStage) {
         try {
           // Check if visibility record already exists for this combo
-          const allVis = await storage.getAllContentVisibility();
+          const allVis = await req.storage.getAllContentVisibility();
           const existingVis = allVis.find(
             (v: any) => v.contentItemId === req.params.id && v.persona === persona && v.funnelStage === funnelStage
           );
           
           if (existingVis) {
-            await storage.updateContentVisibility(existingVis.id, { isVisible: true });
+            await req.storage.updateContentVisibility(existingVis.id, { isVisible: true });
           } else {
-            await storage.createContentVisibility({
+            await req.storage.createContentVisibility({
               contentItemId: req.params.id,
               persona,
               funnelStage,
@@ -3767,7 +3769,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log('[BATCH REORDER] Endpoint hit with body:', JSON.stringify(req.body));
       const validatedData = batchContentReorderSchema.parse(req.body);
-      const updatedItems = await storage.updateContentOrders(
+      const updatedItems = await req.storage.updateContentOrders(
         validatedData.updates,
         validatedData.contentType
       );
@@ -3806,7 +3808,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (typeof order !== 'number') {
         return res.status(400).json({ message: "Order must be a number" });
       }
-      const item = await storage.updateContentItemOrder(req.params.id, order);
+      const item = await req.storage.updateContentItemOrder(req.params.id, order);
       if (!item) {
         return res.status(404).json({ message: "Content item not found" });
       }
@@ -3820,7 +3822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete content item (admin)
   app.delete('/api/content/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      await storage.deleteContentItem(req.params.id);
+      await req.storage.deleteContentItem(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting content item:", error);
@@ -3831,7 +3833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get content item usage (admin) - shows where content is being used
   app.get('/api/content/:id/usage', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const usage = await storage.getContentItemUsage(req.params.id);
+      const usage = await req.storage.getContentItemUsage(req.params.id);
       res.json(usage);
     } catch (error) {
       console.error("Error fetching content item usage:", error);
@@ -3842,7 +3844,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all content visibility settings (admin)
   app.get('/api/content/visibility', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const allVisibility = await storage.getAllContentVisibility();
+      const allVisibility = await req.storage.getAllContentVisibility();
       res.json(allVisibility);
     } catch (error) {
       console.error("Error fetching all content visibility:", error);
@@ -3854,7 +3856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/content/:contentItemId/visibility', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const { persona, funnelStage } = req.query;
-      const visibility = await storage.getContentVisibility(
+      const visibility = await req.storage.getContentVisibility(
         req.params.contentItemId,
         persona as string | undefined,
         funnelStage as string | undefined
@@ -3870,7 +3872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/content/visibility', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const validatedData = insertContentVisibilitySchema.parse(req.body);
-      const visibility = await storage.createContentVisibility(validatedData);
+      const visibility = await req.storage.createContentVisibility(validatedData);
       res.status(201).json(visibility);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -3884,7 +3886,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update content visibility setting (admin)
   app.patch('/api/content/visibility/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const visibility = await storage.updateContentVisibility(req.params.id, req.body);
+      const visibility = await req.storage.updateContentVisibility(req.params.id, req.body);
       if (!visibility) {
         return res.status(404).json({ message: "Content visibility setting not found" });
       }
@@ -3898,7 +3900,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete content visibility setting (admin)
   app.delete('/api/content/visibility/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      await storage.deleteContentVisibility(req.params.id);
+      await req.storage.deleteContentVisibility(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting content visibility:", error);
@@ -3909,7 +3911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get content visibility matrix for all persona×stage combinations (admin)
   app.get('/api/content/:contentItemId/visibility-matrix', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const visibility = await storage.getContentVisibility(req.params.contentItemId);
+      const visibility = await req.storage.getContentVisibility(req.params.contentItemId);
       res.json(visibility);
     } catch (error) {
       console.error("Error fetching content visibility matrix:", error);
@@ -3920,7 +3922,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Reset persona×stage overrides to defaults (admin)
   app.post('/api/content/visibility/:id/reset', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const visibility = await storage.updateContentVisibility(req.params.id, {
+      const visibility = await req.storage.updateContentVisibility(req.params.id, {
         titleOverride: null,
         descriptionOverride: null,
         imageNameOverride: null,
@@ -3942,7 +3944,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get current user
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
@@ -3952,7 +3954,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertStudentSubmissionSchema.parse(req.body);
       
       // Create content item with student submission metadata
-      const contentItem = await storage.createContentItem({
+      const contentItem = await req.storage.createContentItem({
         type: validatedData.type,
         title: validatedData.title,
         description: validatedData.description,
@@ -3984,14 +3986,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Get current user
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Get all student submissions
-      const allContent = await storage.getAllContentItems();
+      const allContent = await req.storage.getAllContentItems();
       
       // Filter to student submissions by this user
       const userSubmissions = allContent.filter((item: any) => 
@@ -4018,20 +4020,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get current user
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Get the content item
-      const item = await storage.getContentItem(id);
+      const item = await req.storage.getContentItem(id);
       if (!item) {
         return res.status(404).json({ message: "Submission not found" });
       }
       
       // Update the submission
-      const updatedItem = await storage.updateContentItem(id, {
+      const updatedItem = await req.storage.updateContentItem(id, {
         isActive: status === 'approved',
         metadata: {
           ...item.metadata,
@@ -4069,7 +4071,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ? rawFunnelStage 
         : undefined;
       
-      const tests = await storage.getActiveAbTests(persona, funnelStage);
+      const tests = await req.storage.getActiveAbTests(persona, funnelStage);
       res.json(tests);
     } catch (error) {
       console.error("Error fetching active A/B tests:", error);
@@ -4080,7 +4082,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all A/B tests (admin)
   app.get('/api/ab-tests', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const tests = await storage.getAllAbTestsWithVariants();
+      const tests = await req.storage.getAllAbTestsWithVariants();
       res.json(tests);
     } catch (error) {
       console.error("Error fetching A/B tests:", error);
@@ -4091,7 +4093,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get specific A/B test (admin)
   app.get('/api/ab-tests/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const test = await storage.getAbTest(req.params.id);
+      const test = await req.storage.getAbTest(req.params.id);
       if (!test) {
         return res.status(404).json({ message: "A/B test not found" });
       }
@@ -4106,7 +4108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ab-tests', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       // Extract selectedCombinations (array of "persona:stage" strings) from request
       const { selectedCombinations = [], ...testData } = req.body;
@@ -4117,11 +4119,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: currentUser?.id || null,
       });
       
-      const test = await storage.createAbTest(validatedData);
+      const test = await req.storage.createAbTest(validatedData);
       
       // Create abTestTargets entries for each selected combination
       if (Array.isArray(selectedCombinations) && selectedCombinations.length > 0) {
-        await storage.createAbTestTargets(test.id, selectedCombinations);
+        await req.storage.createAbTestTargets(test.id, selectedCombinations);
       }
       
       res.status(201).json(test);
@@ -4137,7 +4139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update A/B test (admin)
   app.patch('/api/ab-tests/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const test = await storage.updateAbTest(req.params.id, req.body);
+      const test = await req.storage.updateAbTest(req.params.id, req.body);
       if (!test) {
         return res.status(404).json({ message: "A/B test not found" });
       }
@@ -4151,7 +4153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete A/B test (admin)
   app.delete('/api/ab-tests/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      await storage.deleteAbTest(req.params.id);
+      await req.storage.deleteAbTest(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting A/B test:", error);
@@ -4162,7 +4164,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get variants for a test (admin)
   app.get('/api/ab-tests/:testId/variants', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const variants = await storage.getAbTestVariants(req.params.testId);
+      const variants = await req.storage.getAbTestVariants(req.params.testId);
       res.json(variants);
     } catch (error) {
       console.error("Error fetching A/B test variants:", error);
@@ -4177,7 +4179,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...req.body,
         testId: req.params.testId,
       });
-      const variant = await storage.createAbTestVariant(validatedData);
+      const variant = await req.storage.createAbTestVariant(validatedData);
       res.status(201).json(variant);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -4191,7 +4193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update variant (admin)
   app.patch('/api/ab-tests/variants/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const variant = await storage.updateAbTestVariant(req.params.id, req.body);
+      const variant = await req.storage.updateAbTestVariant(req.params.id, req.body);
       if (!variant) {
         return res.status(404).json({ message: "A/B test variant not found" });
       }
@@ -4205,7 +4207,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete variant (admin)
   app.delete('/api/ab-tests/variants/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      await storage.deleteAbTestVariant(req.params.id);
+      await req.storage.deleteAbTestVariant(req.params.id);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting A/B test variant:", error);
@@ -4225,21 +4227,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user UUID if authenticated
       let userId = null;
       if (req.user?.claims?.sub) {
-        const currentUser = await storage.getUserByOidcSub(req.user.claims.sub);
+        const currentUser = await req.storage.getUserByOidcSub(req.user.claims.sub);
         userId = currentUser?.id || null;
       }
 
       // Check if assignment already exists (prioritize userId > visitorId > sessionId)
-      let assignment = await storage.getAssignmentPersistent(testId, userId, visitorId, sessionId);
+      let assignment = await req.storage.getAssignmentPersistent(testId, userId, visitorId, sessionId);
       
       if (!assignment) {
         // Get test and variants
-        const test = await storage.getAbTest(testId);
+        const test = await req.storage.getAbTest(testId);
         if (!test || test.status !== 'active') {
           return res.status(404).json({ message: "Active test not found" });
         }
 
-        const variants = await storage.getAbTestVariants(testId);
+        const variants = await req.storage.getAbTestVariants(testId);
         if (variants.length === 0) {
           return res.status(400).json({ message: "Test has no variants" });
         }
@@ -4257,7 +4259,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
         
-        assignment = await storage.createAbTestAssignment({
+        assignment = await req.storage.createAbTestAssignment({
           testId,
           variantId: selectedVariant.id,
           visitorId,
@@ -4268,7 +4270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } else if (userId && !assignment.userId) {
         // Identifier promotion: User logged in, promote visitor assignment to user assignment
-        assignment = await storage.updateAbTestAssignment(assignment.id, { userId }) || assignment;
+        assignment = await req.storage.updateAbTestAssignment(assignment.id, { userId }) || assignment;
       }
 
       res.json(assignment);
@@ -4282,7 +4284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/ab-tests/track', async (req, res) => {
     try {
       const validatedData = insertAbTestEventSchema.parse(req.body);
-      const event = await storage.trackEvent(validatedData);
+      const event = await req.storage.trackEvent(validatedData);
       res.status(201).json(event);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -4296,7 +4298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get test analytics (admin)
   app.get('/api/ab-tests/:testId/analytics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const analytics = await storage.getTestAnalytics(req.params.testId);
+      const analytics = await req.storage.getTestAnalytics(req.params.testId);
       res.json(analytics);
     } catch (error) {
       console.error("Error fetching A/B test analytics:", error);
@@ -4315,7 +4317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const config = await storage.getCurrentBaselineConfiguration(
+      const config = await req.storage.getCurrentBaselineConfiguration(
         persona as string,
         funnelStage as string,
         testType as string
@@ -4339,7 +4341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const results = await storage.getHistoricalTestResults(
+      const results = await req.storage.getHistoricalTestResults(
         persona as string,
         funnelStage as string,
         testType as string
@@ -4355,7 +4357,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get test events (admin)
   app.get('/api/ab-tests/:testId/events', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const events = await storage.getTestEvents(req.params.testId);
+      const events = await req.storage.getTestEvents(req.params.testId);
       res.json(events);
     } catch (error) {
       console.error("Error fetching A/B test events:", error);
@@ -4368,7 +4370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all automation rules (admin)
   app.get('/api/automation/rules', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const rules = await storage.getAllAbTestAutomationRules();
+      const rules = await req.storage.getAllAbTestAutomationRules();
       res.json(rules);
     } catch (error) {
       console.error("Error fetching automation rules:", error);
@@ -4379,7 +4381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create automation rule (admin)
   app.post('/api/automation/rules', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const rule = await storage.createAbTestAutomationRule(req.body);
+      const rule = await req.storage.createAbTestAutomationRule(req.body);
       res.json(rule);
     } catch (error) {
       console.error("Error creating automation rule:", error);
@@ -4390,7 +4392,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update automation rule (admin)
   app.patch('/api/automation/rules/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const rule = await storage.updateAbTestAutomationRule(req.params.id, req.body);
+      const rule = await req.storage.updateAbTestAutomationRule(req.params.id, req.body);
       if (!rule) {
         return res.status(404).json({ message: "Automation rule not found" });
       }
@@ -4404,7 +4406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete automation rule (admin)
   app.delete('/api/automation/rules/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      await storage.deleteAbTestAutomationRule(req.params.id);
+      await req.storage.deleteAbTestAutomationRule(req.params.id);
       res.json({ message: "Automation rule deleted successfully" });
     } catch (error) {
       console.error("Error deleting automation rule:", error);
@@ -4416,7 +4418,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/automation/runs', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-      const runs = await storage.getAllAbTestAutomationRuns(limit);
+      const runs = await req.storage.getAllAbTestAutomationRuns(limit);
       res.json(runs);
     } catch (error) {
       console.error("Error fetching automation runs:", error);
@@ -4427,7 +4429,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get specific automation run (admin)
   app.get('/api/automation/runs/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const run = await storage.getAbTestAutomationRun(req.params.id);
+      const run = await req.storage.getAbTestAutomationRun(req.params.id);
       if (!run) {
         return res.status(404).json({ message: "Automation run not found" });
       }
@@ -4459,7 +4461,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get safety limits (admin)
   app.get('/api/automation/safety-limits', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const limits = await storage.getAbTestSafetyLimits();
+      const limits = await req.storage.getAbTestSafetyLimits();
       res.json(limits || null);
     } catch (error) {
       console.error("Error fetching safety limits:", error);
@@ -4470,7 +4472,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update safety limits (admin)
   app.patch('/api/automation/safety-limits', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const limits = await storage.upsertAbTestSafetyLimits(req.body);
+      const limits = await req.storage.upsertAbTestSafetyLimits(req.body);
       res.json(limits);
     } catch (error) {
       console.error("Error updating safety limits:", error);
@@ -4481,7 +4483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all metric weight profiles (admin)
   app.get('/api/automation/metric-weight-profiles', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const profiles = await storage.getAllMetricWeightProfiles();
+      const profiles = await req.storage.getAllMetricWeightProfiles();
       res.json(profiles);
     } catch (error) {
       console.error("Error fetching metric weight profiles:", error);
@@ -4492,7 +4494,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create metric weight profile (admin)
   app.post('/api/automation/metric-weight-profiles', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const profile = await storage.createMetricWeightProfile(req.body);
+      const profile = await req.storage.createMetricWeightProfile(req.body);
       res.json(profile);
     } catch (error) {
       console.error("Error creating metric weight profile:", error);
@@ -4503,7 +4505,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update metric weight profile (admin)
   app.patch('/api/automation/metric-weight-profiles/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const profile = await storage.updateMetricWeightProfile(req.params.id, req.body);
+      const profile = await req.storage.updateMetricWeightProfile(req.params.id, req.body);
       if (!profile) {
         return res.status(404).json({ message: "Metric weight profile not found" });
       }
@@ -4517,7 +4519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete metric weight profile (admin)
   app.delete('/api/automation/metric-weight-profiles/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      await storage.deleteMetricWeightProfile(req.params.id);
+      await req.storage.deleteMetricWeightProfile(req.params.id);
       res.json({ message: "Metric weight profile deleted successfully" });
     } catch (error) {
       console.error("Error deleting metric weight profile:", error);
@@ -4528,7 +4530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get performance metrics for recommendations (admin)
   app.get('/api/performance-metrics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const metrics = await storage.getPerformanceMetrics();
+      const metrics = await req.storage.getPerformanceMetrics();
       res.json(metrics);
     } catch (error) {
       console.error("Error fetching performance metrics:", error);
@@ -4761,7 +4763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: true,
         };
 
-        const synced = await storage.upsertGoogleReview(reviewData);
+        const synced = await req.storage.upsertGoogleReview(reviewData);
         syncedReviews.push(synced);
       }
 
@@ -4780,7 +4782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all Google reviews (public)
   app.get('/api/google-reviews', async (req, res) => {
     try {
-      const reviews = await storage.getActiveGoogleReviews();
+      const reviews = await req.storage.getActiveGoogleReviews();
       res.json(reviews);
     } catch (error) {
       console.error("Error fetching Google reviews:", error);
@@ -4791,7 +4793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all reviews including inactive (admin only)
   app.get('/api/google-reviews/all', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const reviews = await storage.getGoogleReviews();
+      const reviews = await req.storage.getGoogleReviews();
       res.json(reviews);
     } catch (error) {
       console.error("Error fetching all Google reviews:", error);
@@ -4805,7 +4807,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { isActive } = req.body;
 
-      const updated = await storage.updateGoogleReviewVisibility(id, isActive);
+      const updated = await req.storage.updateGoogleReviewVisibility(id, isActive);
       if (!updated) {
         return res.status(404).json({ message: "Review not found" });
       }
@@ -4822,7 +4824,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all email campaigns
   app.get('/api/email-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const campaigns = await storage.getAllEmailCampaigns();
+      const campaigns = await req.storage.getAllEmailCampaigns();
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching email campaigns:", error);
@@ -4833,7 +4835,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get active email campaigns
   app.get('/api/email-campaigns/active', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const campaigns = await storage.getActiveCampaigns();
+      const campaigns = await req.storage.getActiveCampaigns();
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching active email campaigns:", error);
@@ -4845,14 +4847,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const campaign = await storage.getEmailCampaign(id);
+      const campaign = await req.storage.getEmailCampaign(id);
       
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
 
       // Get sequence steps for this campaign
-      const steps = await storage.getCampaignSteps(id);
+      const steps = await req.storage.getCampaignSteps(id);
       
       res.json({ ...campaign, steps });
     } catch (error) {
@@ -4865,7 +4867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/email-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const validatedData = insertEmailCampaignSchema.parse(req.body);
-      const campaign = await storage.createEmailCampaign(validatedData);
+      const campaign = await req.storage.createEmailCampaign(validatedData);
       res.json(campaign);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -4881,7 +4883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const validatedData = insertEmailCampaignSchema.partial().parse(req.body);
-      const updated = await storage.updateEmailCampaign(id, validatedData);
+      const updated = await req.storage.updateEmailCampaign(id, validatedData);
       
       if (!updated) {
         return res.status(404).json({ message: "Campaign not found" });
@@ -4901,7 +4903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteEmailCampaign(id);
+      await req.storage.deleteEmailCampaign(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email campaign:", error);
@@ -4921,7 +4923,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validatedData.templateId = null;
       }
       
-      const step = await storage.createEmailSequenceStep(validatedData);
+      const step = await req.storage.createEmailSequenceStep(validatedData);
       res.json(step);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -4943,7 +4945,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         validatedData.templateId = null;
       }
       
-      const updated = await storage.updateEmailSequenceStep(id, validatedData);
+      const updated = await req.storage.updateEmailSequenceStep(id, validatedData);
       
       if (!updated) {
         return res.status(404).json({ message: "Sequence step not found" });
@@ -4963,7 +4965,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/email-sequence-steps/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteEmailSequenceStep(id);
+      await req.storage.deleteEmailSequenceStep(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email sequence step:", error);
@@ -4979,7 +4981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertEmailCampaignEnrollmentSchema.parse(req.body);
       
       // Check if already enrolled
-      const existing = await storage.getEnrollment(
+      const existing = await req.storage.getEnrollment(
         validatedData.campaignId,
         validatedData.leadId
       );
@@ -4988,7 +4990,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Lead already enrolled in this campaign" });
       }
       
-      const enrollment = await storage.createEnrollment(validatedData);
+      const enrollment = await req.storage.createEnrollment(validatedData);
       res.json(enrollment);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -5003,7 +5005,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/email-enrollments/lead/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
-      const enrollments = await storage.getLeadEnrollments(leadId);
+      const enrollments = await req.storage.getLeadEnrollments(leadId);
       res.json(enrollments);
     } catch (error) {
       console.error("Error fetching lead enrollments:", error);
@@ -5015,7 +5017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/email-enrollments/campaign/:campaignId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { campaignId } = req.params;
-      const enrollments = await storage.getCampaignEnrollments(campaignId);
+      const enrollments = await req.storage.getCampaignEnrollments(campaignId);
       res.json(enrollments);
     } catch (error) {
       console.error("Error fetching campaign enrollments:", error);
@@ -5028,7 +5030,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const validatedData = insertEmailCampaignEnrollmentSchema.partial().parse(req.body);
-      const updated = await storage.updateEnrollment(id, validatedData);
+      const updated = await req.storage.updateEnrollment(id, validatedData);
       
       if (!updated) {
         return res.status(404).json({ message: "Enrollment not found" });
@@ -5069,7 +5071,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
       
       // Get ALL enrollments for this campaign to calculate aggregate stats
-      const allEnrollments = await storage.getCampaignEnrollments(campaignId);
+      const allEnrollments = await req.storage.getCampaignEnrollments(campaignId);
       
       // Calculate aggregate stats from full dataset
       const stats = {
@@ -5084,7 +5086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Batch fetch all leads for the paginated enrollments
       const leadIds = paginatedEnrollments.map(e => e.leadId);
-      const leads = await Promise.all(leadIds.map(id => storage.getLead(id)));
+      const leads = await Promise.all(leadIds.map(id => req.storage.getLead(id)));
       
       // Build a map of leadId -> lead for quick lookup
       const leadMap = new Map(leads.filter(l => l !== undefined).map(l => [l!.id, l!]));
@@ -5137,7 +5139,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Set createdBy
       (validatedData as any).createdBy = req.user!.id;
       
-      const schedule = await storage.createEmailReportSchedule(validatedData as any);
+      const schedule = await req.storage.createEmailReportSchedule(validatedData as any);
       res.json(schedule);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -5154,7 +5156,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all email report schedules
   app.get('/api/email-report-schedules', ...authWithImpersonation, requireSuperAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const schedules = await storage.getAllEmailReportSchedules();
+      const schedules = await req.storage.getAllEmailReportSchedules();
       res.json(schedules);
     } catch (error) {
       console.error("Error fetching email report schedules:", error);
@@ -5166,7 +5168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/email-report-schedules/:id', ...authWithImpersonation, requireSuperAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const schedule = await storage.getEmailReportSchedule(id);
+      const schedule = await req.storage.getEmailReportSchedule(id);
       
       if (!schedule) {
         return res.status(404).json({ message: "Schedule not found" });
@@ -5197,7 +5199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Next run time must be in the future" });
       }
       
-      const updated = await storage.updateEmailReportSchedule(id, validatedData as any);
+      const updated = await req.storage.updateEmailReportSchedule(id, validatedData as any);
       
       if (!updated) {
         return res.status(404).json({ message: "Schedule not found" });
@@ -5222,12 +5224,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // Verify schedule exists first
-      const schedule = await storage.getEmailReportSchedule(id);
+      const schedule = await req.storage.getEmailReportSchedule(id);
       if (!schedule) {
         return res.status(404).json({ message: "Schedule not found" });
       }
       
-      await storage.deleteEmailReportSchedule(id);
+      await req.storage.deleteEmailReportSchedule(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting email report schedule:", error);
@@ -5268,7 +5270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/segments', ...authWithImpersonation, requireSuperAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const validatedData = insertSegmentSchema.parse(req.body);
-      const segment = await storage.createSegment({
+      const segment = await req.storage.createSegment({
         ...validatedData,
         createdBy: req.user!.id
       });
@@ -5285,7 +5287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all segments
   app.get('/api/segments', ...authWithImpersonation, requireSuperAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const segments = await storage.getAllSegments();
+      const segments = await req.storage.getAllSegments();
       res.json(segments);
     } catch (error) {
       console.error("Error fetching segments:", error);
@@ -5297,7 +5299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/segments/:id', ...authWithImpersonation, requireSuperAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const segment = await storage.getSegment(id);
+      const segment = await req.storage.getSegment(id);
       
       if (!segment) {
         return res.status(404).json({ message: "Segment not found" });
@@ -5316,7 +5318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
       
-      const segment = await storage.getSegment(id);
+      const segment = await req.storage.getSegment(id);
       if (!segment) {
         return res.status(404).json({ message: "Segment not found" });
       }
@@ -5342,7 +5344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      const segment = await storage.getSegment(id);
+      const segment = await req.storage.getSegment(id);
       if (!segment) {
         return res.status(404).json({ message: "Segment not found" });
       }
@@ -5368,7 +5370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const validatedData = updateSegmentSchema.parse(req.body);
       
-      const updated = await storage.updateSegment(id, validatedData);
+      const updated = await req.storage.updateSegment(id, validatedData);
       
       if (!updated) {
         return res.status(404).json({ message: "Segment not found" });
@@ -5389,12 +5391,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      const segment = await storage.getSegment(id);
+      const segment = await req.storage.getSegment(id);
       if (!segment) {
         return res.status(404).json({ message: "Segment not found" });
       }
       
-      await storage.deleteSegment(id);
+      await req.storage.deleteSegment(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting segment:", error);
@@ -5465,24 +5467,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // For 'all' channel, check both email and phone
       if (validatedData.channel === 'all') {
-        const emailExists = validatedData.email ? await storage.getEmailUnsubscribe(validatedData.email) : null;
-        const phoneExists = validatedData.phone ? await storage.getSmsUnsubscribe(validatedData.phone) : null;
+        const emailExists = validatedData.email ? await req.storage.getEmailUnsubscribe(validatedData.email) : null;
+        const phoneExists = validatedData.phone ? await req.storage.getSmsUnsubscribe(validatedData.phone) : null;
         existing = emailExists || phoneExists;
       } 
       // For 'email' channel, check email only
       else if (validatedData.channel === 'email' && validatedData.email) {
-        existing = await storage.getEmailUnsubscribe(validatedData.email);
+        existing = await req.storage.getEmailUnsubscribe(validatedData.email);
       }
       // For 'sms' channel, check phone only
       else if (validatedData.channel === 'sms' && validatedData.phone) {
-        existing = await storage.getSmsUnsubscribe(validatedData.phone);
+        existing = await req.storage.getSmsUnsubscribe(validatedData.phone);
       }
       
       if (existing) {
         return res.status(409).json({ message: "Contact already unsubscribed for this channel" });
       }
       
-      const unsubscribe = await storage.createEmailUnsubscribe(validatedData);
+      const unsubscribe = await req.storage.createEmailUnsubscribe(validatedData);
       res.status(201).json(unsubscribe);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -5496,7 +5498,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all unsubscribes (admin only)
   app.get('/api/email-unsubscribes', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
-      const unsubscribes = await storage.getAllEmailUnsubscribes();
+      const unsubscribes = await req.storage.getAllEmailUnsubscribes();
       res.json(unsubscribes);
     } catch (error) {
       console.error("Error fetching unsubscribes:", error);
@@ -5508,7 +5510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/email-unsubscribes/:id', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.removeUnsubscribe(id);
+      await req.storage.removeUnsubscribe(id);
       res.json({ message: "Unsubscribe record removed successfully" });
     } catch (error: any) {
       console.error("Error deleting unsubscribe:", error);
@@ -5520,7 +5522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/email-unsubscribes/check/:email', async (req, res) => {
     try {
       const { email } = req.params;
-      const isUnsubscribed = await storage.isEmailUnsubscribed(email);
+      const isUnsubscribed = await req.storage.isEmailUnsubscribed(email);
       res.json({ email, isUnsubscribed });
     } catch (error) {
       console.error("Error checking unsubscribe status:", error);
@@ -5599,7 +5601,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if already unsubscribed
-      const existing = await storage.getEmailUnsubscribe(email);
+      const existing = await req.storage.getEmailUnsubscribe(email);
       if (existing) {
         return res.json({ 
           success: true, 
@@ -5609,7 +5611,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Find lead by email (if exists)
-      const lead = await storage.getLeadByEmail(email);
+      const lead = await req.storage.getLeadByEmail(email);
       
       // Create unsubscribe record
       const unsubscribeData = {
@@ -5621,7 +5623,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const validatedData = insertEmailUnsubscribeSchema.parse(unsubscribeData);
-      await storage.createEmailUnsubscribe(validatedData);
+      await req.storage.createEmailUnsubscribe(validatedData);
       
       console.log('[Unsubscribe] Successfully unsubscribed:', { 
         email, 
@@ -5727,7 +5729,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if already unsubscribed
-      const existing = await storage.getSmsUnsubscribe(phone);
+      const existing = await req.storage.getSmsUnsubscribe(phone);
       if (existing) {
         return res.json({ 
           success: true, 
@@ -5737,7 +5739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Find lead by phone (if exists)
-      const lead = await storage.getLeadByPhone(phone);
+      const lead = await req.storage.getLeadByPhone(phone);
       
       // Create unsubscribe record for SMS channel
       // Explicitly set email to undefined for SMS-only unsubscribes
@@ -5752,7 +5754,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
       
       const validatedData = insertEmailUnsubscribeSchema.parse(unsubscribeData);
-      await storage.createEmailUnsubscribe(validatedData);
+      await req.storage.createEmailUnsubscribe(validatedData);
       
       console.log('[SMS Unsubscribe] Successfully unsubscribed:', { 
         phone, 
@@ -5795,16 +5797,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const offset = req.query.offset ? parseInt(req.query.offset as string) : 0;
       
       // Get all enrollments to build email -> lead mapping
-      const enrollments = await storage.getCampaignEnrollments(campaignId);
+      const enrollments = await req.storage.getCampaignEnrollments(campaignId);
       const leadIds = enrollments.map(e => e.leadId);
       
       // Batch fetch all leads
-      const leads = await Promise.all(leadIds.map(id => storage.getLead(id)));
+      const leads = await Promise.all(leadIds.map(id => req.storage.getLead(id)));
       const leadMap = new Map(leads.filter(l => l !== undefined).map(l => [l!.email, l!]));
       
       // Get all email logs for all enrolled leads' emails
       const emails = Array.from(leadMap.keys()).filter(e => e);
-      const allLogsPromises = emails.map(email => storage.getEmailLogsByRecipient(email));
+      const allLogsPromises = emails.map(email => req.storage.getEmailLogsByRecipient(email));
       const allLogsArrays = await Promise.all(allLogsPromises);
       
       // Flatten and filter logs by campaign metadata
@@ -5859,7 +5861,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id: campaignId } = req.params;
       
       // Get all email logs for this campaign
-      const emailLogs = await storage.getEmailLogsByCampaign(campaignId);
+      const emailLogs = await req.storage.getEmailLogsByCampaign(campaignId);
       
       if (emailLogs.length === 0) {
         return res.json({
@@ -5876,10 +5878,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Get all email opens for this campaign
-      const emailOpens = await storage.getEmailOpensByCampaign(campaignId);
+      const emailOpens = await req.storage.getEmailOpensByCampaign(campaignId);
       
       // Get all email clicks for this campaign
-      const emailClicks = await storage.getEmailClicksByCampaign(campaignId);
+      const emailClicks = await req.storage.getEmailClicksByCampaign(campaignId);
       
       // Calculate metrics
       const totalSent = emailLogs.length;
@@ -5926,7 +5928,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id: campaignId } = req.params;
       
-      const linkPerformance = await storage.getCampaignLinkPerformance(campaignId);
+      const linkPerformance = await req.storage.getCampaignLinkPerformance(campaignId);
       
       res.json(linkPerformance);
     } catch (error) {
@@ -5965,7 +5967,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid endDate format" });
       }
       
-      const timeSeries = await storage.getCampaignTimeSeries(
+      const timeSeries = await req.storage.getCampaignTimeSeries(
         campaignId,
         metric as 'opens' | 'clicks' | 'sends',
         interval as 'hour' | 'day' | 'week',
@@ -5986,15 +5988,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id: campaignId } = req.params;
       
       // Fetch campaign details
-      const campaign = await storage.getEmailCampaign(campaignId);
+      const campaign = await req.storage.getEmailCampaign(campaignId);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
       
       // Fetch analytics summary
-      const emailLogs = await storage.getEmailLogsByCampaign(campaignId);
-      const emailOpens = await storage.getEmailOpensByCampaign(campaignId);
-      const emailClicks = await storage.getEmailClicksByCampaign(campaignId);
+      const emailLogs = await req.storage.getEmailLogsByCampaign(campaignId);
+      const emailOpens = await req.storage.getEmailOpensByCampaign(campaignId);
+      const emailClicks = await req.storage.getEmailClicksByCampaign(campaignId);
       
       // Calculate metrics
       const totalSent = emailLogs.length;
@@ -6065,16 +6067,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id: campaignId } = req.params;
       
       // Fetch campaign details
-      const campaign = await storage.getEmailCampaign(campaignId);
+      const campaign = await req.storage.getEmailCampaign(campaignId);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
       
       // Fetch analytics data
-      const emailLogs = await storage.getEmailLogsByCampaign(campaignId);
-      const emailOpens = await storage.getEmailOpensByCampaign(campaignId);
-      const emailClicks = await storage.getEmailClicksByCampaign(campaignId);
-      const linkPerformance = await storage.getCampaignLinkPerformance(campaignId);
+      const emailLogs = await req.storage.getEmailLogsByCampaign(campaignId);
+      const emailOpens = await req.storage.getEmailOpensByCampaign(campaignId);
+      const emailClicks = await req.storage.getEmailClicksByCampaign(campaignId);
+      const linkPerformance = await req.storage.getCampaignLinkPerformance(campaignId);
       
       // Calculate metrics
       const totalSent = emailLogs.length;
@@ -6319,7 +6321,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Parse forceRecalculate as boolean
       const shouldForceRecalculate = forceRecalculate === 'true' || forceRecalculate === '1';
       
-      const insights = await storage.getSendTimeInsights(
+      const insights = await req.storage.getSendTimeInsights(
         scope as 'global' | 'campaign' | 'persona',
         scopeId as string | undefined,
         shouldForceRecalculate
@@ -6337,7 +6339,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all SMS templates
   app.get('/api/sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const templates = await storage.getAllSmsTemplates();
+      const templates = await req.storage.getAllSmsTemplates();
       res.json(templates);
     } catch (error) {
       console.error("Error fetching SMS templates:", error);
@@ -6349,7 +6351,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const template = await storage.getSmsTemplateById(id);
+      const template = await req.storage.getSmsTemplateById(id);
       
       if (!template) {
         return res.status(404).json({ message: "SMS template not found" });
@@ -6366,7 +6368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const validatedData = insertSmsTemplateSchema.parse(req.body);
-      const template = await storage.createSmsTemplate(validatedData);
+      const template = await req.storage.createSmsTemplate(validatedData);
       res.json(template);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -6382,7 +6384,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const validatedData = insertSmsTemplateSchema.partial().parse(req.body);
-      const updated = await storage.updateSmsTemplate(id, validatedData);
+      const updated = await req.storage.updateSmsTemplate(id, validatedData);
       
       if (!updated) {
         return res.status(404).json({ message: "SMS template not found" });
@@ -6402,7 +6404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteSmsTemplate(id);
+      await req.storage.deleteSmsTemplate(id);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting SMS template:", error);
@@ -6422,7 +6424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // If using a template, fetch and render it
       if (templateId) {
-        const template = await storage.getSmsTemplateById(templateId);
+        const template = await req.storage.getSmsTemplateById(templateId);
         if (!template) {
           return res.status(404).json({ message: "SMS template not found" });
         }
@@ -6448,7 +6450,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await sendSMS(recipientPhone, messageContent, { leadId, templateId: usedTemplateId });
       
       // Create SMS send record
-      const smsSend = await storage.createSmsSend({
+      const smsSend = await req.storage.createSmsSend({
         templateId: usedTemplateId,
         leadId: leadId || null,
         recipientPhone,
@@ -6477,7 +6479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/sms/lead/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
-      const sends = await storage.getSmsSendsByLead(leadId);
+      const sends = await req.storage.getSmsSendsByLead(leadId);
       res.json(sends);
     } catch (error) {
       console.error("Error fetching SMS sends:", error);
@@ -6489,7 +6491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/sms/recent', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-      const sends = await storage.getRecentSmsSends(limit);
+      const sends = await req.storage.getRecentSmsSends(limit);
       res.json(sends);
     } catch (error) {
       console.error("Error fetching recent SMS sends:", error);
@@ -6504,7 +6506,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { personaFilter, funnelStageFilter } = req.body;
       
-      const preview = await storage.previewSmsBulkCampaignRecipients(
+      const preview = await req.storage.previewSmsBulkCampaignRecipients(
         personaFilter || null,
         funnelStageFilter || null
       );
@@ -6530,7 +6532,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Get current user
       const oidcSub = req.user.claims.sub;
-      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!currentUser) {
         return res.status(401).json({ message: "User not found" });
@@ -6539,7 +6541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Determine message content
       let messageSnapshot: string;
       if (templateId) {
-        const template = await storage.getSmsTemplateById(templateId);
+        const template = await req.storage.getSmsTemplateById(templateId);
         if (!template) {
           return res.status(404).json({ message: "SMS template not found" });
         }
@@ -6551,7 +6553,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Preview to get target count
-      const preview = await storage.previewSmsBulkCampaignRecipients(
+      const preview = await req.storage.previewSmsBulkCampaignRecipients(
         personaFilter || null,
         funnelStageFilter || null
       );
@@ -6565,7 +6567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create bulk campaign record
-      const campaign = await storage.createSmsBulkCampaign({
+      const campaign = await req.storage.createSmsBulkCampaign({
         name,
         description: description || null,
         personaFilter: personaFilter || null,
@@ -6603,7 +6605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/sms/bulk', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
-      const campaigns = await storage.getAllSmsBulkCampaigns(limit);
+      const campaigns = await req.storage.getAllSmsBulkCampaigns(limit);
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching bulk SMS campaigns:", error);
@@ -6615,7 +6617,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/sms/bulk/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const campaign = await storage.getSmsBulkCampaign(id);
+      const campaign = await req.storage.getSmsBulkCampaign(id);
       
       if (!campaign) {
         return res.status(404).json({ message: "Bulk SMS campaign not found" });
@@ -6634,7 +6636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/hormozi-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { persona, funnelStage, outreachType, templateCategory } = req.query;
-      const templates = await storage.getHormoziEmailTemplates({
+      const templates = await req.storage.getHormoziEmailTemplates({
         persona: persona as string | undefined,
         funnelStage: funnelStage as string | undefined,
         outreachType: outreachType as string | undefined,
@@ -6651,7 +6653,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/hormozi-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const template = await storage.getHormoziEmailTemplate(id);
+      const template = await req.storage.getHormoziEmailTemplate(id);
       
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
@@ -6675,9 +6677,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch template and lead data
       const [template, lead, recentInteractions] = await Promise.all([
-        storage.getHormoziEmailTemplate(templateId),
-        storage.getLead(leadId),
-        storage.getLeadInteractions(leadId, 5) // Get last 5 interactions
+        req.storage.getHormoziEmailTemplate(templateId),
+        req.storage.getLead(leadId),
+        req.storage.getLeadInteractions(leadId, 5) // Get last 5 interactions
       ]);
       
       if (!template) {
@@ -6725,7 +6727,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Fetch lead
-      const lead = await storage.getLead(leadId);
+      const lead = await req.storage.getLead(leadId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -6745,7 +6747,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Create interaction record
-      await storage.createInteraction({
+      await req.storage.createInteraction({
         leadId,
         interactionType: 'email_sent',
         contentEngaged: `Personalized email: ${subject}`,
@@ -6754,7 +6756,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Update lead's last interaction date
-      await storage.updateLead(leadId, {
+      await req.storage.updateLead(leadId, {
         lastInteractionDate: new Date()
       });
       
@@ -6771,7 +6773,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/hormozi-sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { persona, funnelStage, outreachType, templateCategory } = req.query;
-      const templates = await storage.getHormoziSmsTemplates({
+      const templates = await req.storage.getHormoziSmsTemplates({
         persona: persona as string | undefined,
         funnelStage: funnelStage as string | undefined,
         outreachType: outreachType as string | undefined,
@@ -6788,7 +6790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/hormozi-sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const template = await storage.getHormoziSmsTemplate(id);
+      const template = await req.storage.getHormoziSmsTemplate(id);
       
       if (!template) {
         return res.status(404).json({ message: "Template not found" });
@@ -6812,9 +6814,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Fetch template and lead data
       const [template, lead, recentInteractions] = await Promise.all([
-        storage.getHormoziSmsTemplate(templateId),
-        storage.getLead(leadId),
-        storage.getLeadInteractions(leadId, 5) // Get last 5 interactions
+        req.storage.getHormoziSmsTemplate(templateId),
+        req.storage.getLead(leadId),
+        req.storage.getLeadInteractions(leadId, 5) // Get last 5 interactions
       ]);
       
       if (!template) {
@@ -6850,7 +6852,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Fetch lead
-      const lead = await storage.getLead(leadId);
+      const lead = await req.storage.getLead(leadId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
@@ -6868,7 +6870,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create SMS send record
-      await storage.createSmsSend({
+      await req.storage.createSmsSend({
         leadId,
         recipientPhone: lead.phone,
         recipientName: `${lead.firstName || ''} ${lead.lastName || ''}`.trim(),
@@ -6881,7 +6883,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Create interaction record
-      await storage.createInteraction({
+      await req.storage.createInteraction({
         leadId,
         interactionType: 'sms_sent',
         contentEngaged: `Personalized SMS: ${messageContent.substring(0, 50)}...`,
@@ -6890,7 +6892,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       // Update lead's last interaction date
-      await storage.updateLead(leadId, {
+      await req.storage.updateLead(leadId, {
         lastInteractionDate: new Date()
       });
       
@@ -6980,13 +6982,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // STOP keyword - create SMS unsubscribe record
         try {
           // Check if already unsubscribed
-          const existingUnsubscribe = await storage.getSmsUnsubscribe(fromPhone);
+          const existingUnsubscribe = await req.storage.getSmsUnsubscribe(fromPhone);
           
           if (existingUnsubscribe) {
             responseMessage = "You're already unsubscribed. You won't receive any more messages from us.";
           } else {
             // Create SMS unsubscribe record
-            await storage.createEmailUnsubscribe({
+            await req.storage.createEmailUnsubscribe({
               phone: fromPhone,
               channel: 'sms',
               source: 'keyword',
@@ -7003,13 +7005,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (message === 'START' || message === 'UNSTOP' || message === 'SUBSCRIBE') {
         // START keyword - resubscribe (remove unsubscribe)
         try {
-          const existingUnsubscribe = await storage.getSmsUnsubscribe(fromPhone);
+          const existingUnsubscribe = await req.storage.getSmsUnsubscribe(fromPhone);
           
           if (!existingUnsubscribe) {
             responseMessage = "You're already subscribed. You will receive messages from us.";
           } else {
             // Remove the unsubscribe (soft delete - marks as inactive)
-            await storage.removeUnsubscribe(existingUnsubscribe.id);
+            await req.storage.removeUnsubscribe(existingUnsubscribe.id);
             
             responseMessage = "You have been resubscribed. You will now receive messages from Julie's Family Learning Program.";
           }
@@ -7046,17 +7048,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { leadId } = req.params;
       
       // Fetch lead to get email for email logs
-      const lead = await storage.getLead(leadId);
+      const lead = await req.storage.getLead(leadId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
       
       // Fetch all communication types
       const [interactions, smsSends, enrollments, emailLogs] = await Promise.all([
-        storage.getLeadInteractions(leadId),
-        storage.getSmsSendsByLead(leadId),
-        storage.getLeadEnrollments(leadId),
-        lead.email ? storage.getEmailLogsByRecipient(lead.email) : Promise.resolve([])
+        req.storage.getLeadInteractions(leadId),
+        req.storage.getSmsSendsByLead(leadId),
+        req.storage.getLeadEnrollments(leadId),
+        lead.email ? req.storage.getEmailLogsByRecipient(lead.email) : Promise.resolve([])
       ]);
       
       // Transform to unified timeline format
@@ -7152,7 +7154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all pipeline stages
   app.get("/api/pipeline/stages", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const stages = await storage.getPipelineStages();
+      const stages = await req.storage.getPipelineStages();
       res.json(stages);
     } catch (error) {
       console.error("Error fetching pipeline stages:", error);
@@ -7164,7 +7166,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/leads/:leadId/assignment", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
-      const assignment = await storage.getLeadAssignment(leadId);
+      const assignment = await req.storage.getLeadAssignment(leadId);
       
       if (!assignment) {
         return res.status(404).json({ message: "No assignment found for this lead" });
@@ -7181,7 +7183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/leads/:leadId/assignments", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
-      const assignments = await storage.getLeadAssignments({ leadId });
+      const assignments = await req.storage.getLeadAssignments({ leadId });
       res.json(assignments);
     } catch (error) {
       console.error("Error fetching lead assignments:", error);
@@ -7202,13 +7204,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if lead exists
-      const lead = await storage.getLeadById(leadId);
+      const lead = await req.storage.getLeadById(leadId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
 
       // Create assignment
-      const assignment = await storage.createLeadAssignment({
+      const assignment = await req.storage.createLeadAssignment({
         leadId,
         assignedTo,
         assignedBy: userId,
@@ -7228,7 +7230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { assignedTo, leadId } = req.query;
       
-      const assignments = await storage.getLeadAssignments({
+      const assignments = await req.storage.getLeadAssignments({
         assignedTo: assignedTo as string | undefined,
         leadId: leadId as string | undefined,
       });
@@ -7245,7 +7247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { leadId, assignedTo, status } = req.query;
       
-      const tasks = await storage.getTasks({
+      const tasks = await req.storage.getTasks({
         leadId: leadId as string | undefined,
         assignedTo: assignedTo as string | undefined,
         status: status as string | undefined,
@@ -7280,7 +7282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         taskData.completedAt = new Date(taskData.completedAt);
       }
 
-      const task = await storage.createTask(taskData);
+      const task = await req.storage.createTask(taskData);
       
       // Sync task to Google Calendar asynchronously (fire-and-forget)
       // Don't block task creation response on calendar sync
@@ -7316,7 +7318,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updates.completedAt = new Date(updates.completedAt);
       }
 
-      const task = await storage.updateTask(taskId, updates);
+      const task = await req.storage.updateTask(taskId, updates);
       
       if (!task) {
         return res.status(404).json({ message: "Task not found" });
@@ -7333,7 +7335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/tasks/:taskId", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { taskId } = req.params;
-      await storage.deleteTask(taskId);
+      await req.storage.deleteTask(taskId);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting task:", error);
@@ -7364,16 +7366,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get current lead to track history
-      const lead = await storage.getLeadById(leadId);
+      const lead = await req.storage.getLeadById(leadId);
       if (!lead) {
         return res.status(404).json({ message: "Lead not found" });
       }
 
       // Update lead's pipeline stage
-      const updatedLead = await storage.updateLead(leadId, { pipelineStage });
+      const updatedLead = await req.storage.updateLead(leadId, { pipelineStage });
 
       // Create pipeline history entry
-      await storage.createPipelineHistory({
+      await req.storage.createPipelineHistory({
         leadId,
         fromStage: lead.pipelineStage || null,
         toStage: pipelineStage,
@@ -7397,7 +7399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/leads/:leadId/pipeline-history", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
-      const history = await storage.getPipelineHistory(leadId);
+      const history = await req.storage.getPipelineHistory(leadId);
       res.json(history);
     } catch (error) {
       console.error("Error fetching pipeline history:", error);
@@ -7408,8 +7410,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get leads grouped by pipeline stage (for kanban board)
   app.get("/api/pipeline/board", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const leads = await storage.getAllLeads();
-      const stages = await storage.getPipelineStages();
+      const leads = await req.storage.getAllLeads();
+      const stages = await req.storage.getPipelineStages();
       
       // Group leads by pipeline stage slug (canonical identifier)
       const leadsByStage: Record<string, any[]> = {};
@@ -7444,8 +7446,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pipeline analytics (conversion rates, time in stage, bottlenecks)
   app.get("/api/pipeline/analytics", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const stages = await storage.getPipelineStages();
-      const leads = await storage.getAllLeads();
+      const stages = await req.storage.getPipelineStages();
+      const leads = await req.storage.getAllLeads();
       const allHistory = await db.select().from(pipelineHistory).orderBy(pipelineHistory.createdAt);
 
       // Calculate analytics for each stage
@@ -7549,7 +7551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create or update donor lead record with passions
       let lead;
       if (donorEmail) {
-        const existingLead = await storage.getLeadByEmail(donorEmail);
+        const existingLead = await req.storage.getLeadByEmail(donorEmail);
         
         if (existingLead) {
           // Update existing lead with new passions (merge with existing)
@@ -7557,7 +7559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const newPassions = passions || [];
           const mergedPassions = Array.from(new Set([...existingPassions, ...newPassions]));
           
-          lead = await storage.updateLead(existingLead.id, {
+          lead = await req.storage.updateLead(existingLead.id, {
             firstName: donorName?.split(' ')[0] || existingLead.firstName,
             lastName: donorName?.split(' ').slice(1).join(' ') || existingLead.lastName,
             phone: donorPhone || existingLead.phone,
@@ -7566,7 +7568,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         } else {
           // Create new donor lead
-          lead = await storage.createLead({
+          lead = await req.storage.createLead({
             email: donorEmail,
             firstName: donorName?.split(' ')[0] || '',
             lastName: donorName?.split(' ').slice(1).join(' ') || '',
@@ -7613,7 +7615,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create donation record in pending state
-      const donation = await storage.createDonation({
+      const donation = await req.storage.createDonation({
         leadId: lead?.id || null,
         stripePaymentIntentId: paymentIntent.id,
         amount: amountInCents,
@@ -7683,7 +7685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('Payment succeeded:', paymentIntent.id);
           
           // Get current donation to check if already processed (idempotency)
-          const donation = await storage.getDonationByStripeId(paymentIntent.id);
+          const donation = await req.storage.getDonationByStripeId(paymentIntent.id);
           if (donation && donation.status === 'succeeded') {
             console.log('Payment already processed:', paymentIntent.id);
             return res.json({ received: true, note: 'Already processed' });
@@ -7692,13 +7694,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Update donation status
           // Note: charges might need to be expanded in webhook, so use optional chaining
           const receiptUrl = (paymentIntent as any).charges?.data?.[0]?.receipt_url || null;
-          await storage.updateDonationByStripeId(paymentIntent.id, {
+          await req.storage.updateDonationByStripeId(paymentIntent.id, {
             status: 'succeeded',
             receiptUrl,
           });
           
           // Get updated donation with recipient details
-          const updatedDonation = await storage.getDonationByStripeId(paymentIntent.id);
+          const updatedDonation = await req.storage.getDonationByStripeId(paymentIntent.id);
           if (!updatedDonation) {
             console.error('Donation not found after update:', paymentIntent.id);
             break;
@@ -7711,7 +7713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (updatedDonation.donorEmail) {
             try {
-              const existingEmails = await storage.getEmailLogsByRecipient(updatedDonation.donorEmail);
+              const existingEmails = await req.storage.getEmailLogsByRecipient(updatedDonation.donorEmail);
               
               // Check for already-sent emails using metadata
               // Note: This system is new and all emails will have proper metadata.
@@ -7810,14 +7812,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Notify campaign members if this donation is for a campaign
           if (updatedDonation.campaignId) {
             try {
-              const campaignMembers = await storage.getCampaignMembers(updatedDonation.campaignId);
-              const campaign = await storage.getDonationCampaign(updatedDonation.campaignId);
+              const campaignMembers = await req.storage.getCampaignMembers(updatedDonation.campaignId);
+              const campaign = await req.storage.getDonationCampaign(updatedDonation.campaignId);
               
               if (campaign && campaignMembers.length > 0) {
                 const membersToNotify = campaignMembers.filter(m => m.notifyOnDonation && m.isActive);
                 
                 for (const member of membersToNotify) {
-                  const user = await storage.getUser(member.userId);
+                  const user = await req.storage.getUser(member.userId);
                   if (!user || !user.email) continue;
                   
                   const channels = (member.notificationChannels as string[]) || ['email'];
@@ -7854,7 +7856,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     // Atomic idempotency: Try to create pending log entry first
                     // If unique constraint fails, notification was already sent by concurrent webhook
                     try {
-                      await storage.createEmailLog({
+                      await req.storage.createEmailLog({
                         recipientEmail: user.email,
                         subject: emailSubject,
                         htmlBody: emailHtml,
@@ -7905,7 +7907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     }
                     
                     // Update the log entry with final status
-                    const existingLogs = await storage.getEmailLogsByRecipient(user.email);
+                    const existingLogs = await req.storage.getEmailLogsByRecipient(user.email);
                     const pendingLog = existingLogs.find(log => {
                       const meta = log.metadata as any;
                       return log.status === 'pending' &&
@@ -8000,13 +8002,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log('Payment failed:', paymentIntent.id);
           
           // Get current donation to check if already processed
-          const donation = await storage.getDonationByStripeId(paymentIntent.id);
+          const donation = await req.storage.getDonationByStripeId(paymentIntent.id);
           if (donation && donation.status === 'failed') {
             console.log('Payment failure already processed:', paymentIntent.id);
             return res.json({ received: true, note: 'Already processed' });
           }
           
-          await storage.updateDonationByStripeId(paymentIntent.id, {
+          await req.storage.updateDonationByStripeId(paymentIntent.id, {
             status: 'failed',
           });
           break;
@@ -8026,7 +8028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all donations (admin only)
   app.get('/api/donations', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const donations = await storage.getAllDonations();
+      const donations = await req.storage.getAllDonations();
       res.json(donations);
     } catch (error) {
       console.error("Error fetching donations:", error);
@@ -8038,7 +8040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/donations/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const donation = await storage.getDonationById(id);
+      const donation = await req.storage.getDonationById(id);
       
       if (!donation) {
         return res.status(404).json({ message: "Donation not found" });
@@ -8057,7 +8059,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/donation-campaigns/by-slug/:slug', async (req, res) => {
     try {
       const { slug } = req.params;
-      const campaign = await storage.getDonationCampaignBySlug(slug);
+      const campaign = await req.storage.getDonationCampaignBySlug(slug);
       
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
@@ -8078,7 +8080,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all donation campaigns (admin only)
   app.get('/api/donation-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const campaigns = await storage.getAllDonationCampaigns();
+      const campaigns = await req.storage.getAllDonationCampaigns();
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching donation campaigns:", error);
@@ -8089,7 +8091,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get active donation campaigns (public - for homepage campaign cards)
   app.get('/api/donation-campaigns/active', async (req, res) => {
     try {
-      const campaigns = await storage.getActiveDonationCampaigns();
+      const campaigns = await req.storage.getActiveDonationCampaigns();
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching active donation campaigns:", error);
@@ -8101,7 +8103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/donation-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const campaign = await storage.getDonationCampaign(id);
+      const campaign = await req.storage.getDonationCampaign(id);
       
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
@@ -8118,7 +8120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/donation-campaigns/:id/donations', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const donations = await storage.getCampaignDonations(id);
+      const donations = await req.storage.getCampaignDonations(id);
       res.json(donations);
     } catch (error) {
       console.error("Error fetching campaign donations:", error);
@@ -8130,7 +8132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/donation-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const parsed = insertDonationCampaignSchema.parse(req.body);
-      const campaign = await storage.createDonationCampaign(parsed);
+      const campaign = await req.storage.createDonationCampaign(parsed);
       res.json(campaign);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -8150,7 +8152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const partialSchema = insertDonationCampaignSchema.partial();
       const validated = partialSchema.parse(req.body);
       
-      const campaign = await storage.updateDonationCampaign(id, validated);
+      const campaign = await req.storage.updateDonationCampaign(id, validated);
       
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
@@ -8170,7 +8172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/donation-campaigns/:id/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const campaign = await storage.getDonationCampaign(id);
+      const campaign = await req.storage.getDonationCampaign(id);
       
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
@@ -8181,7 +8183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Find leads with matching passions using array overlap
-      const allLeads = await storage.getAllLeads();
+      const allLeads = await req.storage.getAllLeads();
       const matchedLeads = allLeads.filter(lead => {
         if (!lead.passions || lead.passions.length === 0) return false;
         if (!campaign.passionTags || campaign.passionTags.length === 0) return true; // Target all if no passions specified
@@ -8213,7 +8215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send email if template specified
         if (campaign.emailTemplateId && lead.email) {
           try {
-            const emailTemplate = await storage.getEmailTemplate(campaign.emailTemplateId);
+            const emailTemplate = await req.storage.getEmailTemplate(campaign.emailTemplateId);
             if (emailTemplate) {
               const personalized = await personalizeEmailTemplate({
                 lead,
@@ -8251,7 +8253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Send SMS if template specified
         if (campaign.smsTemplateId && lead.phone) {
           try {
-            const smsTemplate = await storage.getSmsTemplate(campaign.smsTemplateId);
+            const smsTemplate = await req.storage.getSmsTemplate(campaign.smsTemplateId);
             if (smsTemplate) {
               const personalized = await personalizeSmsTemplate({
                 lead,
@@ -8273,7 +8275,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               if (result.success) {
                 results.smsSent++;
                 // Create SMS send record
-                await storage.createSmsSend({
+                await req.storage.createSmsSend({
                   templateId: smsTemplate.id,
                   leadId: lead.id,
                   recipientPhone: lead.phone,
@@ -8315,7 +8317,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper: Get or create Stripe Customer for authenticated user
   // Returns customer ID, creates if needed, stores in user profile
   async function getOrCreateStripeCustomer(oidcSubId: string): Promise<string> {
-    const user = await storage.getUserByOidcSub(oidcSubId);
+    const user = await req.storage.getUserByOidcSub(oidcSubId);
     if (!user) throw new Error('User not found');
     
     // Return existing if present
@@ -8325,7 +8327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const existing = await stripe.customers.list({ email: user.email, limit: 1 });
     if (existing.data.length > 0) {
       const customerId = existing.data[0].id;
-      await storage.updateUser(user.id, { stripeCustomerId: customerId });
+      await req.storage.updateUser(user.id, { stripeCustomerId: customerId });
       return customerId;
     }
     
@@ -8336,7 +8338,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       metadata: { oidcSubId }
     });
     
-    await storage.updateUser(user.id, { stripeCustomerId: customer.id });
+    await req.storage.updateUser(user.id, { stripeCustomerId: customer.id });
     return customer.id;
   }
 
@@ -8403,7 +8405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/my-campaigns', ...authWithImpersonation, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const campaigns = await storage.getUserCampaigns(userId);
+      const campaigns = await req.storage.getUserCampaigns(userId);
       res.json(campaigns);
     } catch (error) {
       console.error("Error fetching user campaigns:", error);
@@ -8417,12 +8419,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { campaignId } = req.params;
       
-      const isMember = await storage.isCampaignMember(campaignId, userId);
+      const isMember = await req.storage.isCampaignMember(campaignId, userId);
       if (!isMember) {
         return res.status(403).json({ message: "Not authorized to view this campaign" });
       }
       
-      const campaign = await storage.getDonationCampaign(campaignId);
+      const campaign = await req.storage.getDonationCampaign(campaignId);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
@@ -8440,12 +8442,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { campaignId } = req.params;
       
-      const isMember = await storage.isCampaignMember(campaignId, userId);
+      const isMember = await req.storage.isCampaignMember(campaignId, userId);
       if (!isMember) {
         return res.status(403).json({ message: "Not authorized to view this campaign" });
       }
       
-      const donations = await storage.getCampaignDonations(campaignId);
+      const donations = await req.storage.getCampaignDonations(campaignId);
       res.json(donations);
     } catch (error) {
       console.error("Error fetching campaign donations:", error);
@@ -8459,13 +8461,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { memberId } = req.params;
       
-      const member = await storage.getCampaignMember(memberId);
+      const member = await req.storage.getCampaignMember(memberId);
       if (!member || member.userId !== userId) {
         return res.status(403).json({ message: "Not authorized to update these preferences" });
       }
       
       const { notifyOnDonation, notificationChannels } = req.body;
-      const updated = await storage.updateCampaignMember(memberId, {
+      const updated = await req.storage.updateCampaignMember(memberId, {
         notifyOnDonation,
         notificationChannels,
       });
@@ -8483,13 +8485,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { campaignId } = req.params;
       
-      const isMember = await storage.isCampaignMember(campaignId, userId);
+      const isMember = await req.storage.isCampaignMember(campaignId, userId);
       if (!isMember) {
         return res.status(403).json({ message: "Not authorized to submit testimonial for this campaign" });
       }
       
       // Find the member record
-      const members = await storage.getCampaignMembers(campaignId);
+      const members = await req.storage.getCampaignMembers(campaignId);
       const member = members.find(m => m.userId === userId);
       
       if (!member) {
@@ -8502,7 +8504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message and author name are required" });
       }
       
-      const testimonial = await storage.createCampaignTestimonial({
+      const testimonial = await req.storage.createCampaignTestimonial({
         campaignId,
         memberId: member.id,
         title,
@@ -8527,13 +8529,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       
       // Get all campaigns for this user
-      const campaigns = await storage.getUserCampaigns(userId);
+      const campaigns = await req.storage.getUserCampaigns(userId);
       const memberIds = campaigns.map(c => c.id);
       
       // Get testimonials for all member records
       const allTestimonials = [];
       for (const memberId of memberIds) {
-        const testimonials = await storage.getMemberTestimonials(memberId);
+        const testimonials = await req.storage.getMemberTestimonials(memberId);
         allTestimonials.push(...testimonials);
       }
       
@@ -8556,7 +8558,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User ID is required" });
       }
       
-      const member = await storage.createCampaignMember({
+      const member = await req.storage.createCampaignMember({
         campaignId,
         userId,
         role: role || 'beneficiary',
@@ -8576,7 +8578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/donation-campaigns/:campaignId/members', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { campaignId } = req.params;
-      const members = await storage.getCampaignMembers(campaignId);
+      const members = await req.storage.getCampaignMembers(campaignId);
       res.json(members);
     } catch (error) {
       console.error("Error fetching campaign members:", error);
@@ -8589,7 +8591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { campaignId } = req.params;
       const { status } = req.query;
-      const testimonials = await storage.getCampaignTestimonials(campaignId, status as string);
+      const testimonials = await req.storage.getCampaignTestimonials(campaignId, status as string);
       res.json(testimonials);
     } catch (error) {
       console.error("Error fetching testimonials:", error);
@@ -8603,7 +8605,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const adminId = req.user.claims.sub;
       
-      const updated = await storage.updateCampaignTestimonial(id, {
+      const updated = await req.storage.updateCampaignTestimonial(id, {
         status: 'approved',
         approvedBy: adminId,
         approvedAt: new Date(),
@@ -8625,7 +8627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      const testimonial = await storage.getCampaignTestimonial(id);
+      const testimonial = await req.storage.getCampaignTestimonial(id);
       if (!testimonial) {
         return res.status(404).json({ message: "Testimonial not found" });
       }
@@ -8634,13 +8636,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Testimonial must be approved before sending" });
       }
       
-      const campaign = await storage.getDonationCampaign(testimonial.campaignId);
+      const campaign = await req.storage.getDonationCampaign(testimonial.campaignId);
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
       
       // Get all donors for this campaign
-      const donations = await storage.getCampaignDonations(testimonial.campaignId);
+      const donations = await req.storage.getCampaignDonations(testimonial.campaignId);
       const donors = donations.filter(d => d.status === 'succeeded' && d.amount && d.amount > 0);
       
       // Get unique donor emails
@@ -8667,7 +8669,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           `;
           
           // Log the email
-          await storage.createEmailLog({
+          await req.storage.createEmailLog({
             recipientEmail: donorEmail,
             subject: emailSubject,
             htmlBody: emailHtml,
@@ -8688,7 +8690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Update testimonial as sent
-      await storage.updateCampaignTestimonial(id, {
+      await req.storage.updateCampaignTestimonial(id, {
         wasSentToDonors: true,
         sentToDonorsAt: new Date(),
         recipientCount: sentCount,
@@ -8711,7 +8713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get active wishlist items (public)
   app.get('/api/wishlist', async (req, res) => {
     try {
-      const items = await storage.getActiveWishlistItems();
+      const items = await req.storage.getActiveWishlistItems();
       res.json(items);
     } catch (error) {
       console.error("Error fetching wishlist items:", error);
@@ -8722,7 +8724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all wishlist items (admin only)
   app.get('/api/wishlist/all', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const items = await storage.getAllWishlistItems();
+      const items = await req.storage.getAllWishlistItems();
       res.json(items);
     } catch (error) {
       console.error("Error fetching all wishlist items:", error);
@@ -8734,7 +8736,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/wishlist', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const parsed = insertWishlistItemSchema.parse(req.body);
-      const item = await storage.createWishlistItem(parsed);
+      const item = await req.storage.createWishlistItem(parsed);
       res.json(item);
     } catch (error: any) {
       if (error.name === 'ZodError') {
@@ -8749,7 +8751,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/wishlist/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const updated = await storage.updateWishlistItem(id, req.body);
+      const updated = await req.storage.updateWishlistItem(id, req.body);
       
       if (!updated) {
         return res.status(404).json({ message: "Wishlist item not found" });
@@ -8766,7 +8768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/wishlist/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const deleted = await storage.deleteWishlistItem(id);
+      const deleted = await req.storage.deleteWishlistItem(id);
       
       if (!deleted) {
         return res.status(404).json({ message: "Wishlist item not found" });
@@ -9077,13 +9079,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tgh/progress', ...authWithImpersonation, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const progress = await storage.getStudentProgress(user.id);
+      const progress = await req.storage.getStudentProgress(user.id);
       
       if (!progress) {
         return res.json({
@@ -9130,14 +9132,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/tgh/enroll', ...authWithImpersonation, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Check if already enrolled
-      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+      const existingEnrollment = await req.storage.getTechGoesHomeEnrollmentByUserId(user.id);
       if (existingEnrollment) {
         return res.status(400).json({ 
           message: "Already enrolled in Tech Goes Home program",
@@ -9155,12 +9157,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         totalClassesRequired: 15,
       });
       
-      const enrollment = await storage.createTechGoesHomeEnrollment(enrollmentData);
+      const enrollment = await req.storage.createTechGoesHomeEnrollment(enrollmentData);
       
       // Trigger funnel progression to retention stage
       try {
         // Get or create lead record for this user
-        let lead = user.email ? await storage.getLeadByEmail(user.email) : null;
+        let lead = user.email ? await req.storage.getLeadByEmail(user.email) : null;
         
         if (!lead && user.email) {
           // Create lead record if it doesn't exist
@@ -9171,7 +9173,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             funnelStage: 'awareness',
             source: 'program_enrollment',
           };
-          lead = await storage.createLead(leadData);
+          lead = await req.storage.createLead(leadData);
         }
         
         if (lead) {
@@ -9197,17 +9199,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/admin/tgh/demo-enrollment', ...authWithImpersonation, isAdmin, async (req: any, res) => {
     try {
       const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
       // Delete existing enrollment for this user if any
-      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(user.id);
+      const existingEnrollment = await req.storage.getTechGoesHomeEnrollmentByUserId(user.id);
       if (existingEnrollment) {
         // Note: Attendance will be cascade deleted due to foreign key constraint
-        await storage.updateTechGoesHomeEnrollment(existingEnrollment.id, { 
+        await req.storage.updateTechGoesHomeEnrollment(existingEnrollment.id, { 
           status: 'withdrawn' as any 
         });
       }
@@ -9226,7 +9228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         internetActivated: false,
       });
       
-      const enrollment = await storage.createTechGoesHomeEnrollment(enrollmentData);
+      const enrollment = await req.storage.createTechGoesHomeEnrollment(enrollmentData);
       
       // Create 6 sample attendance records (with varied dates and some makeup classes)
       const attendanceRecords = [
@@ -9283,12 +9285,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const attendance = await Promise.all(
         attendanceRecords.map(record => 
-          storage.createTechGoesHomeAttendance(insertTechGoesHomeAttendanceSchema.parse(record))
+          req.storage.createTechGoesHomeAttendance(insertTechGoesHomeAttendanceSchema.parse(record))
         )
       );
       
       // Get the progress to return
-      const progress = await storage.getStudentProgress(user.id);
+      const progress = await req.storage.getStudentProgress(user.id);
       
       res.json({
         message: "Demo enrollment created successfully",
@@ -9308,13 +9310,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin TGH Enrollment Management - List all enrollments
   app.get('/api/admin/tgh/enrollments', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
-      const enrollments = await storage.getAllTechGoesHomeEnrollments();
+      const enrollments = await req.storage.getAllTechGoesHomeEnrollments();
       
       // Enrich with user information and progress
       const enrichedEnrollments = await Promise.all(
         enrollments.map(async (enrollment) => {
-          const user = await storage.getUser(enrollment.userId);
-          const progress = await storage.getStudentProgress(enrollment.userId);
+          const user = await req.storage.getUser(enrollment.userId);
+          const progress = await req.storage.getStudentProgress(enrollment.userId);
           
           return {
             ...enrollment,
@@ -9340,15 +9342,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/tgh/enrollments/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const { id } = req.params;
-      const enrollment = await storage.getTechGoesHomeEnrollment(id);
+      const enrollment = await req.storage.getTechGoesHomeEnrollment(id);
       
       if (!enrollment) {
         return res.status(404).json({ message: "Enrollment not found" });
       }
       
-      const attendance = await storage.getTechGoesHomeAttendance(id);
-      const user = await storage.getUser(enrollment.userId);
-      const progress = await storage.getStudentProgress(enrollment.userId);
+      const attendance = await req.storage.getTechGoesHomeAttendance(id);
+      const user = await req.storage.getUser(enrollment.userId);
+      const progress = await req.storage.getStudentProgress(enrollment.userId);
       
       res.json({
         ...enrollment,
@@ -9373,14 +9375,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const enrollmentData = insertTechGoesHomeEnrollmentSchema.parse(req.body);
       
       // Check if user already has an active enrollment
-      const existingEnrollment = await storage.getTechGoesHomeEnrollmentByUserId(enrollmentData.userId);
+      const existingEnrollment = await req.storage.getTechGoesHomeEnrollmentByUserId(enrollmentData.userId);
       if (existingEnrollment && existingEnrollment.status === 'active') {
         return res.status(400).json({ 
           message: "User already has an active enrollment. Please complete or withdraw the existing enrollment first." 
         });
       }
       
-      const enrollment = await storage.createTechGoesHomeEnrollment(enrollmentData);
+      const enrollment = await req.storage.createTechGoesHomeEnrollment(enrollmentData);
       res.json(enrollment);
     } catch (error: any) {
       console.error("Error creating enrollment:", error);
@@ -9394,7 +9396,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       
-      const enrollment = await storage.updateTechGoesHomeEnrollment(id, updates);
+      const enrollment = await req.storage.updateTechGoesHomeEnrollment(id, updates);
       
       if (!enrollment) {
         return res.status(404).json({ message: "Enrollment not found" });
@@ -9413,13 +9415,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       
       // First check if enrollment exists
-      const enrollment = await storage.getTechGoesHomeEnrollment(id);
+      const enrollment = await req.storage.getTechGoesHomeEnrollment(id);
       if (!enrollment) {
         return res.status(404).json({ message: "Enrollment not found" });
       }
       
       // Mark as withdrawn instead of hard delete to preserve data
-      await storage.updateTechGoesHomeEnrollment(id, { status: 'withdrawn' as any });
+      await req.storage.updateTechGoesHomeEnrollment(id, { status: 'withdrawn' as any });
       
       res.json({ message: "Enrollment withdrawn successfully" });
     } catch (error: any) {
@@ -9437,7 +9439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         markedByAdminId: req.user.id,
       });
       
-      const attendance = await storage.createTechGoesHomeAttendance(attendanceData);
+      const attendance = await req.storage.createTechGoesHomeAttendance(attendanceData);
       res.json(attendance);
     } catch (error: any) {
       console.error("Error creating attendance:", error);
@@ -9451,7 +9453,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       
-      const attendance = await storage.updateTechGoesHomeAttendance(id, updates);
+      const attendance = await req.storage.updateTechGoesHomeAttendance(id, updates);
       
       if (!attendance) {
         return res.status(404).json({ message: "Attendance record not found" });
@@ -9469,7 +9471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       
-      await storage.deleteTechGoesHomeAttendance(id);
+      await req.storage.deleteTechGoesHomeAttendance(id);
       res.json({ message: "Attendance record deleted successfully" });
     } catch (error: any) {
       console.error("Error deleting attendance:", error);
@@ -9484,7 +9486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all volunteer events (public)
   app.get('/api/volunteer/events', async (req, res) => {
     try {
-      const events = await storage.getActiveVolunteerEvents();
+      const events = await req.storage.getActiveVolunteerEvents();
       res.json(events);
     } catch (error: any) {
       console.error("Error fetching volunteer events:", error);
@@ -9496,13 +9498,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/volunteer/events/:id', async (req, res) => {
     try {
       const { id } = req.params;
-      const event = await storage.getVolunteerEvent(id);
+      const event = await req.storage.getVolunteerEvent(id);
       
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
       }
       
-      const shifts = await storage.getEventShifts(id);
+      const shifts = await req.storage.getEventShifts(id);
       
       res.json({ event, shifts });
     } catch (error: any) {
@@ -9519,13 +9521,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
       
-      const enrollments = await storage.getUserEnrollments(user.id);
-      const hours = await storage.getUserVolunteerHours(user.id);
+      const enrollments = await req.storage.getUserEnrollments(user.id);
+      const hours = await req.storage.getUserVolunteerHours(user.id);
       
       res.json({ enrollments, hours });
     } catch (error: any) {
@@ -9542,7 +9544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const user = await storage.getUserByOidcSub(oidcSub);
+      const user = await req.storage.getUserByOidcSub(oidcSub);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -9553,12 +9555,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId: user.id,
       });
       
-      const enrollment = await storage.createVolunteerEnrollment(enrollmentData);
+      const enrollment = await req.storage.createVolunteerEnrollment(enrollmentData);
       
       // Trigger funnel progression to retention stage
       try {
         // Get or create lead record for this volunteer
-        let lead = user.email ? await storage.getLeadByEmail(user.email) : null;
+        let lead = user.email ? await req.storage.getLeadByEmail(user.email) : null;
         
         if (!lead && user.email) {
           // Create lead record if it doesn't exist
@@ -9569,7 +9571,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             funnelStage: 'awareness',
             source: 'volunteer_enrollment',
           };
-          lead = await storage.createLead(leadData);
+          lead = await req.storage.createLead(leadData);
         }
         
         if (lead) {
@@ -9595,7 +9597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin - Get all volunteer events
   app.get('/api/admin/volunteer/events', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const events = await storage.getAllVolunteerEvents();
+      const events = await req.storage.getAllVolunteerEvents();
       res.json(events);
     } catch (error: any) {
       console.error("Error fetching events:", error);
@@ -9612,7 +9614,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdBy: (req as any).user.id,
       });
       
-      const event = await storage.createVolunteerEvent(eventData);
+      const event = await req.storage.createVolunteerEvent(eventData);
       res.json(event);
     } catch (error: any) {
       console.error("Error creating event:", error);
@@ -9626,7 +9628,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       
-      const event = await storage.updateVolunteerEvent(id, updates);
+      const event = await req.storage.updateVolunteerEvent(id, updates);
       
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
@@ -9643,7 +9645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/volunteer/events/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteVolunteerEvent(id);
+      await req.storage.deleteVolunteerEvent(id);
       res.json({ message: "Event deleted successfully" });
     } catch (error: any) {
       console.error("Error deleting event:", error);
@@ -9657,7 +9659,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { insertVolunteerShiftSchema } = await import("@shared/schema");
       const shiftData = insertVolunteerShiftSchema.parse(req.body);
       
-      const shift = await storage.createVolunteerShift(shiftData);
+      const shift = await req.storage.createVolunteerShift(shiftData);
       res.json(shift);
     } catch (error: any) {
       console.error("Error creating shift:", error);
@@ -9671,7 +9673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       
-      const shift = await storage.updateVolunteerShift(id, updates);
+      const shift = await req.storage.updateVolunteerShift(id, updates);
       
       if (!shift) {
         return res.status(404).json({ message: "Shift not found" });
@@ -9688,7 +9690,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/admin/volunteer/shifts/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      await storage.deleteVolunteerShift(id);
+      await req.storage.deleteVolunteerShift(id);
       res.json({ message: "Shift deleted successfully" });
     } catch (error: any) {
       console.error("Error deleting shift:", error);
@@ -9703,7 +9705,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let enrollments;
       if (shiftId) {
-        enrollments = await storage.getShiftEnrollments(shiftId as string);
+        enrollments = await req.storage.getShiftEnrollments(shiftId as string);
       } else {
         // For now, return all enrollments - could add pagination later
         enrollments = [];
@@ -9722,7 +9724,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const updates = req.body;
       
-      const enrollment = await storage.updateVolunteerEnrollment(id, updates);
+      const enrollment = await req.storage.updateVolunteerEnrollment(id, updates);
       
       if (!enrollment) {
         return res.status(404).json({ message: "Enrollment not found" });
@@ -9744,7 +9746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         loggedBy: req.user.id,
       });
       
-      const session = await storage.createVolunteerSessionLog(sessionData);
+      const session = await req.storage.createVolunteerSessionLog(sessionData);
       res.json(session);
     } catch (error: any) {
       console.error("Error creating session log:", error);
@@ -9756,7 +9758,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/admin/volunteer/sessions/:enrollmentId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { enrollmentId } = req.params;
-      const sessions = await storage.getEnrollmentSessions(enrollmentId);
+      const sessions = await req.storage.getEnrollmentSessions(enrollmentId);
       res.json(sessions);
     } catch (error: any) {
       console.error("Error fetching sessions:", error);
