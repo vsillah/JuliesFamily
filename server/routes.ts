@@ -105,6 +105,13 @@ const authWithImpersonation: RequestHandler[] = [isAuthenticated, applyImpersona
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
+  
+  // Organization detection and storage middleware MUST run AFTER setupAuth
+  // so that req.session and req.user are available for override detection
+  const { detectOrganization } = await import('./orgMiddleware');
+  const { attachOrgStorage } = await import('./orgStorageMiddleware');
+  app.use(detectOrganization);
+  app.use(attachOrgStorage);
 
   // Public Email Tracking Endpoints (no auth required)
   // Tracking pixel endpoint for email opens

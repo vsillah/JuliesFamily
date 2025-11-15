@@ -34,6 +34,8 @@ const GLOBAL_METHODS = new Set([
   'getOrganizationByUserId',
   'getAllOrganizations',
   'updateOrganization',
+  'getChatbotConversationsBySession',  // Session-based, not org-specific
+  'getActiveImpersonationSession',     // Platform-level feature
 ]);
 
 /**

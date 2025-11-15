@@ -6,8 +6,6 @@ import { initBackupScheduler, shutdownBackupScheduler } from "./services/backupS
 import { initDonorLifecycleScheduler, shutdownDonorLifecycleScheduler } from "./services/donorLifecycleScheduler";
 import { initEmailReportScheduler, shutdownEmailReportScheduler } from "./services/emailReportScheduler";
 import { helmetConfig, globalLimiter } from "./security";
-import { detectOrganization } from "./orgMiddleware";
-import { attachOrgStorage } from "./orgStorageMiddleware";
 import { validateOrgStorageCoverage } from "./orgScopedStorage";
 import { storage } from "./storage";
 
@@ -32,12 +30,6 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
-
-// Detect organization from custom domain
-app.use(detectOrganization);
-
-// Attach organization-scoped storage to request
-app.use(attachOrgStorage);
 
 app.use((req, res, next) => {
   const start = Date.now();
