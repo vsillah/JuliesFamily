@@ -76,7 +76,7 @@ export default function Footer() {
           <p>&copy; {new Date().getFullYear()} Julie's Family Learning Program. All rights reserved.</p>
           <p className="mt-2">
             Powered by{" "}
-            <a href="https://replit.com/@vsillah/Kinflo" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+            <a href="/product" className="text-primary hover:underline">
               Kinflo
             </a>
           </p>
