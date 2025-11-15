@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TrendingUp, Users, Target, Zap, ArrowRight, Clock } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { format } from "date-fns";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 interface ProgressionHistory {
   id: string;
@@ -106,7 +108,8 @@ export default function AdminFunnelAnalytics() {
   const stages = ["awareness", "consideration", "decision", "retention"];
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <TierGate requiredTier={TIERS.PREMIUM} featureName="Funnel Analytics">
+      <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <Breadcrumbs
           items={[
@@ -369,5 +372,6 @@ export default function AdminFunnelAnalytics() {
         </Tabs>
       </div>
     </div>
+    </TierGate>
   );
 }

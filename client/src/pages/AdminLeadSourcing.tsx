@@ -27,6 +27,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Mail, Send, CheckCircle, XCircle, AlertCircle, Target, Plus, Eye } from "lucide-react";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 interface Lead {
   id: string;
@@ -295,7 +297,8 @@ export default function AdminLeadSourcing() {
   ).length;
 
   return (
-    <div className="p-6 space-y-6">
+    <TierGate requiredTier={TIERS.PREMIUM} featureName="AI Lead Sourcing">
+      <div className="p-6 space-y-6">
       <div className="flex flex-wrap justify-between items-start gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-2" data-testid="heading-lead-sourcing">Lead Sourcing</h1>
@@ -742,5 +745,6 @@ export default function AdminLeadSourcing() {
         </Card>
       )}
     </div>
+    </TierGate>
   );
 }

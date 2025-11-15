@@ -13,6 +13,8 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 export default function AdminAutomationRuns() {
   const { user } = useAuth();
@@ -101,7 +103,8 @@ export default function AdminAutomationRuns() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+    <TierGate requiredTier={TIERS.PREMIUM} featureName="Automation History">
+      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       <Breadcrumbs items={breadcrumbItems} />
 
       <div className="flex items-center justify-between mb-6 mt-4">
@@ -327,5 +330,6 @@ export default function AdminAutomationRuns() {
         </div>
       )}
     </div>
+    </TierGate>
   );
 }

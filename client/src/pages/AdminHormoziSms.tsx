@@ -15,6 +15,8 @@ import type { SmsTemplate, Lead } from "@shared/schema";
 import { PERSONA_LABELS, FUNNEL_STAGE_LABELS, type Persona, type FunnelStage } from "@shared/defaults/personas";
 import { OUTREACH_TYPE_LABELS, TEMPLATE_CATEGORY_LABELS } from "@shared/hormoziEmailTemplates";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 export default function AdminHormoziSms() {
   const { toast } = useToast();
@@ -138,7 +140,8 @@ export default function AdminHormoziSms() {
   const activeFiltersCount = [personaFilter, funnelStageFilter, outreachTypeFilter, templateCategoryFilter].filter(f => f !== "all").length;
 
   return (
-    <div className="min-h-screen p-6 bg-background">
+    <TierGate requiredTier={TIERS.PREMIUM} featureName="SMS Templates">
+      <div className="min-h-screen p-6 bg-background">
       <Breadcrumbs 
         items={[
           { label: "Admin", href: "/admin" },
@@ -463,5 +466,6 @@ export default function AdminHormoziSms() {
         </DialogContent>
       </Dialog>
     </div>
+    </TierGate>
   );
 }

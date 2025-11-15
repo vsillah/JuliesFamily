@@ -35,6 +35,8 @@ import { ABTestWizard, type TestConfiguration } from "@/components/ABTestWizard"
 import { getConfigDefinition, createDefaultConfigForType } from "@/components/ab-test-config/registry";
 import type { AbTestVariantConfiguration } from "@shared/schema";
 import { UniversalSearch } from "@/components/UniversalSearch";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 export default function AdminABTesting() {
   const { user } = useAuth();
@@ -826,11 +828,12 @@ export default function AdminABTesting() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "A/B Testing" }]} />
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <TierGate requiredTier={TIERS.PREMIUM} featureName="A/B Testing">
+      <div className="min-h-screen bg-background">
+        <div className="border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "A/B Testing" }]} />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-primary flex items-center gap-2">
                 <FlaskConical className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
@@ -1943,6 +1946,7 @@ export default function AdminABTesting() {
         onOpenChange={setIsWizardOpen}
         onComplete={handleWizardComplete}
       />
-    </div>
+      </div>
+    </TierGate>
   );
 }
