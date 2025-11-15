@@ -63,6 +63,63 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getAllDonations',
   'getDonationById',
   'getDonationsByLeadId',
+  
+  // Email campaign operations
+  'createEmailCampaign',
+  'getAllEmailCampaigns',
+  'getEmailCampaign',
+  'updateEmailCampaign',
+  'deleteEmailCampaign',
+  
+  // Email template operations
+  'createEmailTemplate',
+  'getAllEmailTemplates',
+  'getEmailTemplate',
+  'updateEmailTemplate',
+  'deleteEmailTemplate',
+  
+  // SMS campaign operations
+  'createSmsBulkCampaign',
+  'getAllSmsBulkCampaigns',
+  'getSmsBulkCampaign',
+  'updateSmsBulkCampaign',
+  
+  // SMS template operations
+  'createSmsTemplate',
+  'getAllSmsTemplates',
+  'getSmsTemplate',
+  'updateSmsTemplate',
+  'deleteSmsTemplate',
+  
+  // Email tracking operations
+  'createEmailOpen',
+  'createEmailClick',
+  'createEmailUnsubscribe',
+  'getEmailOpens',
+  'getEmailClicks',
+  'getEmailUnsubscribes',
+  
+  // Communication log operations
+  'createCommunicationLog',
+  'getCommunicationLogsByLeadId',
+  
+  // Interaction operations
+  'createInteraction',
+  'getInteractionsByLeadId',
+  
+  // Segment operations
+  'createSegment',
+  'getAllSegments',
+  'getSegment',
+  'updateSegment',
+  'deleteSegment',
+  
+  // Image asset operations
+  'createImageAsset',
+  'getAllImageAssets',
+  'getImageAsset',
+  'updateImageAsset',
+  'deleteImageAsset',
 ]);
 
 /**
@@ -288,6 +345,433 @@ class OrgScopedImplementations {
         eq(donations.organizationId, this.organizationId)
       ))
       .orderBy(desc(donations.createdAt));
+  }
+
+  // ========================================
+  // EMAIL CAMPAIGN OPERATIONS
+  // ========================================
+  
+  async createEmailCampaign(campaignData: Parameters<IStorage['createEmailCampaign']>[0]) {
+    return this.baseStorage.createEmailCampaign({
+      ...campaignData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllEmailCampaigns() {
+    const { emailCampaigns } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailCampaigns)
+      .where(eq(emailCampaigns.organizationId, this.organizationId))
+      .orderBy(desc(emailCampaigns.createdAt));
+  }
+
+  async getEmailCampaign(id: string) {
+    const { emailCampaigns } = await import('@shared/schema');
+    const [campaign] = await db
+      .select()
+      .from(emailCampaigns)
+      .where(and(
+        eq(emailCampaigns.id, id),
+        eq(emailCampaigns.organizationId, this.organizationId)
+      ));
+    return campaign;
+  }
+
+  async updateEmailCampaign(id: string, updates: Parameters<IStorage['updateEmailCampaign']>[1]) {
+    const { emailCampaigns } = await import('@shared/schema');
+    const [campaign] = await db
+      .update(emailCampaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(emailCampaigns.id, id),
+        eq(emailCampaigns.organizationId, this.organizationId)
+      ))
+      .returning();
+    return campaign;
+  }
+
+  async deleteEmailCampaign(id: string) {
+    const { emailCampaigns } = await import('@shared/schema');
+    await db
+      .delete(emailCampaigns)
+      .where(and(
+        eq(emailCampaigns.id, id),
+        eq(emailCampaigns.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // EMAIL TEMPLATE OPERATIONS
+  // ========================================
+  
+  async createEmailTemplate(templateData: Parameters<IStorage['createEmailTemplate']>[0]) {
+    return this.baseStorage.createEmailTemplate({
+      ...templateData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllEmailTemplates() {
+    const { emailTemplates } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.organizationId, this.organizationId))
+      .orderBy(desc(emailTemplates.createdAt));
+  }
+
+  async getEmailTemplate(id: string) {
+    const { emailTemplates } = await import('@shared/schema');
+    const [template] = await db
+      .select()
+      .from(emailTemplates)
+      .where(and(
+        eq(emailTemplates.id, id),
+        eq(emailTemplates.organizationId, this.organizationId)
+      ));
+    return template;
+  }
+
+  async updateEmailTemplate(id: string, updates: Parameters<IStorage['updateEmailTemplate']>[1]) {
+    const { emailTemplates } = await import('@shared/schema');
+    const [template] = await db
+      .update(emailTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(emailTemplates.id, id),
+        eq(emailTemplates.organizationId, this.organizationId)
+      ))
+      .returning();
+    return template;
+  }
+
+  async deleteEmailTemplate(id: string) {
+    const { emailTemplates } = await import('@shared/schema');
+    await db
+      .delete(emailTemplates)
+      .where(and(
+        eq(emailTemplates.id, id),
+        eq(emailTemplates.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // SMS CAMPAIGN OPERATIONS
+  // ========================================
+  
+  async createSmsBulkCampaign(campaignData: Parameters<IStorage['createSmsBulkCampaign']>[0]) {
+    return this.baseStorage.createSmsBulkCampaign({
+      ...campaignData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllSmsBulkCampaigns() {
+    const { smsBulkCampaigns } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(smsBulkCampaigns)
+      .where(eq(smsBulkCampaigns.organizationId, this.organizationId))
+      .orderBy(desc(smsBulkCampaigns.createdAt));
+  }
+
+  async getSmsBulkCampaign(id: string) {
+    const { smsBulkCampaigns } = await import('@shared/schema');
+    const [campaign] = await db
+      .select()
+      .from(smsBulkCampaigns)
+      .where(and(
+        eq(smsBulkCampaigns.id, id),
+        eq(smsBulkCampaigns.organizationId, this.organizationId)
+      ));
+    return campaign;
+  }
+
+  async updateSmsBulkCampaign(id: string, updates: Parameters<IStorage['updateSmsBulkCampaign']>[1]) {
+    const { smsBulkCampaigns } = await import('@shared/schema');
+    const [campaign] = await db
+      .update(smsBulkCampaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(smsBulkCampaigns.id, id),
+        eq(smsBulkCampaigns.organizationId, this.organizationId)
+      ))
+      .returning();
+    return campaign;
+  }
+
+  // ========================================
+  // SMS TEMPLATE OPERATIONS
+  // ========================================
+  
+  async createSmsTemplate(templateData: Parameters<IStorage['createSmsTemplate']>[0]) {
+    return this.baseStorage.createSmsTemplate({
+      ...templateData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllSmsTemplates() {
+    const { smsTemplates } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(smsTemplates)
+      .where(eq(smsTemplates.organizationId, this.organizationId))
+      .orderBy(desc(smsTemplates.createdAt));
+  }
+
+  async getSmsTemplate(id: string) {
+    const { smsTemplates } = await import('@shared/schema');
+    const [template] = await db
+      .select()
+      .from(smsTemplates)
+      .where(and(
+        eq(smsTemplates.id, id),
+        eq(smsTemplates.organizationId, this.organizationId)
+      ));
+    return template;
+  }
+
+  async updateSmsTemplate(id: string, updates: Parameters<IStorage['updateSmsTemplate']>[1]) {
+    const { smsTemplates } = await import('@shared/schema');
+    const [template] = await db
+      .update(smsTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(smsTemplates.id, id),
+        eq(smsTemplates.organizationId, this.organizationId)
+      ))
+      .returning();
+    return template;
+  }
+
+  async deleteSmsTemplate(id: string) {
+    const { smsTemplates } = await import('@shared/schema');
+    await db
+      .delete(smsTemplates)
+      .where(and(
+        eq(smsTemplates.id, id),
+        eq(smsTemplates.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // EMAIL TRACKING OPERATIONS
+  // ========================================
+  
+  async createEmailOpen(openData: Parameters<IStorage['createEmailOpen']>[0]) {
+    return this.baseStorage.createEmailOpen({
+      ...openData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async createEmailClick(clickData: Parameters<IStorage['createEmailClick']>[0]) {
+    return this.baseStorage.createEmailClick({
+      ...clickData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async createEmailUnsubscribe(unsubscribeData: Parameters<IStorage['createEmailUnsubscribe']>[0]) {
+    return this.baseStorage.createEmailUnsubscribe({
+      ...unsubscribeData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getEmailOpens(leadId: string) {
+    const { emailOpens } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailOpens)
+      .where(and(
+        eq(emailOpens.leadId, leadId),
+        eq(emailOpens.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(emailOpens.openedAt));
+  }
+
+  async getEmailClicks(leadId: string) {
+    const { emailClicks } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailClicks)
+      .where(and(
+        eq(emailClicks.leadId, leadId),
+        eq(emailClicks.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(emailClicks.clickedAt));
+  }
+
+  async getEmailUnsubscribes(leadId: string) {
+    const { emailUnsubscribes } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailUnsubscribes)
+      .where(and(
+        eq(emailUnsubscribes.leadId, leadId),
+        eq(emailUnsubscribes.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(emailUnsubscribes.unsubscribedAt));
+  }
+
+  // ========================================
+  // COMMUNICATION LOG OPERATIONS
+  // ========================================
+  
+  async createCommunicationLog(logData: Parameters<IStorage['createCommunicationLog']>[0]) {
+    return this.baseStorage.createCommunicationLog({
+      ...logData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getCommunicationLogsByLeadId(leadId: string) {
+    const { communicationLogs } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(communicationLogs)
+      .where(and(
+        eq(communicationLogs.leadId, leadId),
+        eq(communicationLogs.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(communicationLogs.createdAt));
+  }
+
+  // ========================================
+  // INTERACTION OPERATIONS
+  // ========================================
+  
+  async createInteraction(interactionData: Parameters<IStorage['createInteraction']>[0]) {
+    return this.baseStorage.createInteraction({
+      ...interactionData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getInteractionsByLeadId(leadId: string) {
+    const { interactions } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(interactions)
+      .where(and(
+        eq(interactions.leadId, leadId),
+        eq(interactions.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(interactions.createdAt));
+  }
+
+  // ========================================
+  // SEGMENT OPERATIONS
+  // ========================================
+  
+  async createSegment(segmentData: Parameters<IStorage['createSegment']>[0]) {
+    return this.baseStorage.createSegment({
+      ...segmentData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllSegments() {
+    const { segments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(segments)
+      .where(eq(segments.organizationId, this.organizationId))
+      .orderBy(desc(segments.createdAt));
+  }
+
+  async getSegment(id: string) {
+    const { segments } = await import('@shared/schema');
+    const [segment] = await db
+      .select()
+      .from(segments)
+      .where(and(
+        eq(segments.id, id),
+        eq(segments.organizationId, this.organizationId)
+      ));
+    return segment;
+  }
+
+  async updateSegment(id: string, updates: Parameters<IStorage['updateSegment']>[1]) {
+    const { segments } = await import('@shared/schema');
+    const [segment] = await db
+      .update(segments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(segments.id, id),
+        eq(segments.organizationId, this.organizationId)
+      ))
+      .returning();
+    return segment;
+  }
+
+  async deleteSegment(id: string) {
+    const { segments } = await import('@shared/schema');
+    await db
+      .delete(segments)
+      .where(and(
+        eq(segments.id, id),
+        eq(segments.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // IMAGE ASSET OPERATIONS
+  // ========================================
+  
+  async createImageAsset(assetData: Parameters<IStorage['createImageAsset']>[0]) {
+    return this.baseStorage.createImageAsset({
+      ...assetData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllImageAssets() {
+    const { imageAssets } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(imageAssets)
+      .where(eq(imageAssets.organizationId, this.organizationId))
+      .orderBy(desc(imageAssets.createdAt));
+  }
+
+  async getImageAsset(id: string) {
+    const { imageAssets } = await import('@shared/schema');
+    const [asset] = await db
+      .select()
+      .from(imageAssets)
+      .where(and(
+        eq(imageAssets.id, id),
+        eq(imageAssets.organizationId, this.organizationId)
+      ));
+    return asset;
+  }
+
+  async updateImageAsset(id: string, updates: Parameters<IStorage['updateImageAsset']>[1]) {
+    const { imageAssets } = await import('@shared/schema');
+    const [asset] = await db
+      .update(imageAssets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(imageAssets.id, id),
+        eq(imageAssets.organizationId, this.organizationId)
+      ))
+      .returning();
+    return asset;
+  }
+
+  async deleteImageAsset(id: string) {
+    const { imageAssets } = await import('@shared/schema');
+    await db
+      .delete(imageAssets)
+      .where(and(
+        eq(imageAssets.id, id),
+        eq(imageAssets.organizationId, this.organizationId)
+      ));
   }
 }
 
