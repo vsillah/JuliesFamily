@@ -7,12 +7,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import type { ContentItem } from "@shared/schema";
 
 export default function TechGoesHomeLanding() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { persona, funnelStage } = usePersona();
+  const { currentOrg } = useOrganization();
 
   // Fetch current user to check auth status
   const { data: user } = useQuery<any>({ 
@@ -35,7 +37,7 @@ export default function TechGoesHomeLanding() {
 
   // Fetch student dashboard card content for personalization
   const { data: dashboardCardContent = [] } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/visible/student_dashboard_card", { persona, funnelStage }],
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/student_dashboard_card", { persona, funnelStage }],
     queryFn: async () => {
       if (!persona || !funnelStage) return [];
       const params = new URLSearchParams();
@@ -45,7 +47,7 @@ export default function TechGoesHomeLanding() {
       if (!res.ok) throw new Error('Failed to fetch student dashboard card content');
       return res.json();
     },
-    enabled: !!persona && !!funnelStage && !!studentProgress?.enrolled,
+    enabled: !!currentOrg && !!persona && !!funnelStage && !!studentProgress?.enrolled,
   });
 
   // Normalize first content item for the card (if available)

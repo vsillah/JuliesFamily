@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import { useABTestTracking } from "@/hooks/useABTestTracking";
 import { useHeroEngagement } from "@/hooks/useViewportTracking";
 import { applyABVariantOverrides } from "@/lib/abTestUtils";
 import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
-import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
+import { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 interface HeroProps {
   onImageLoaded: (loaded: boolean) => void;
@@ -16,6 +17,7 @@ interface HeroProps {
 
 export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   const { persona, funnelStage } = usePersona();
+  const { currentOrg } = useOrganization();
   const [scrollScale, setScrollScale] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -40,8 +42,8 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   // Fetch visible hero content filtered by persona + journey stage + passion tags
   // CRITICAL: Don't fetch until persona is determined to prevent flash
   const { data: heroContent, isLoading: contentLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/visible/hero", { persona, funnelStage }],
-    enabled: !isPersonaLoading && !!persona,
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", { persona, funnelStage }],
+    enabled: !!currentOrg && !isPersonaLoading && !!persona,
   });
   
   // Select first hero content (already filtered by persona×journey matrix and ordered by passion tags)

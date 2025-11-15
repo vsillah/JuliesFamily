@@ -1,4 +1,5 @@
 import { usePersona } from "@/contexts/PersonaContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { useQuery } from "@tanstack/react-query";
 import StudentReadinessQuiz from "./StudentReadinessQuiz";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -42,6 +43,7 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 
 export default function PersonalizedLeadMagnet() {
   const { persona, funnelStage } = usePersona();
+  const { currentOrg } = useOrganization();
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [quizStep, setQuizStep] = useState(0);
@@ -49,7 +51,7 @@ export default function PersonalizedLeadMagnet() {
 
   // Query visible lead magnets for current persona + funnel stage
   const { data: leadMagnets = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/visible/lead_magnet", { persona, funnelStage }],
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/lead_magnet", { persona, funnelStage }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (persona) params.append('persona', persona);
@@ -58,7 +60,7 @@ export default function PersonalizedLeadMagnet() {
       if (!res.ok) throw new Error('Failed to fetch lead magnets');
       return res.json();
     },
-    enabled: !!persona, // Only require persona - funnel stage is optional
+    enabled: !!currentOrg && !!persona, // Only require persona - funnel stage is optional
   });
 
   if (isLoading) {

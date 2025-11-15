@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import type { ContentItem } from '@shared/schema';
 import { VideoEmbed } from '@/components/VideoEmbed';
 import { Building2, Heart, Users, BookOpen, Video as VideoIcon, Home } from 'lucide-react';
@@ -7,8 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 
 export default function VirtualTour() {
+  const { currentOrg } = useOrganization();
   const { data: videos, isLoading } = useQuery<ContentItem[]>({
-    queryKey: ['/api/content/visible/video'],
+    queryKey: [currentOrg?.organizationId, '/api/content/visible/video'],
+    enabled: !!currentOrg,
   });
 
   const virtualTourVideos = videos?.filter((video) => {

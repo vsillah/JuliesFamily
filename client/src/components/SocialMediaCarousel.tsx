@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight, Instagram, Facebook, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ContentItemWithResolvedImage } from "@shared/schema";
 
 export default function SocialMediaCarousel() {
+  const { currentOrg } = useOrganization();
   const { data: allPosts = [], isLoading } = useQuery<ContentItemWithResolvedImage[]>({
-    queryKey: ["/api/content/type/socialMedia"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/socialMedia"],
+    enabled: !!currentOrg,
   });
 
   // Filter out posts with missing critical data and inactive posts

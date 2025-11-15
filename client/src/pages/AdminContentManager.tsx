@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import type { ContentItem, ImageAsset, ContentVisibility, AbTest, GoogleReview } from "@shared/schema";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,8 +62,10 @@ function UrlValidationBadge({ url, persona, funnelStage }: {
   funnelStage: string | undefined;
 }) {
   // Use TanStack Query for automatic caching and deduplication
+  // Note: This is inside UrlValidationBadge component, needs its own hook
+  const { currentOrg: badgeOrg } = useOrganization();
   const { data: visibleSections } = useQuery({
-    queryKey: ['/api/content/visible-sections', persona, funnelStage],
+    queryKey: [badgeOrg?.organizationId, '/api/content/visible-sections', persona, funnelStage],
     queryFn: async () => {
       const params = new URLSearchParams();
       params.append("persona", persona!);
@@ -71,7 +74,7 @@ function UrlValidationBadge({ url, persona, funnelStage }: {
       if (!response.ok) throw new Error('Failed to fetch visible sections');
       return response.json();
     },
-    enabled: !!persona && !!funnelStage,
+    enabled: !!badgeOrg && !!persona && !!funnelStage,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
   
@@ -372,6 +375,7 @@ function SortableContentCard({
 
 export default function AdminContentManager() {
   const { toast } = useToast();
+  const { currentOrg } = useOrganization();
   const [activeTab, setActiveTab] = useState("matrix");
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -402,59 +406,73 @@ export default function AdminContentManager() {
   const [reorderingTypes, setReorderingTypes] = useState<Set<string>>(new Set());
 
   const { data: services = [], isLoading: servicesLoading} = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/service"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/service"],
+    enabled: !!currentOrg,
   });
 
   const { data: events = [], isLoading: eventsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/event"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/event"],
+    enabled: !!currentOrg,
   });
 
   const { data: testimonials = [], isLoading: testimonialsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/testimonial"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/testimonial"],
+    enabled: !!currentOrg,
   });
 
   const { data: leadMagnets = [], isLoading: leadMagnetsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/lead_magnet"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/lead_magnet"],
+    enabled: !!currentOrg,
   });
 
   const { data: heroContent = [], isLoading: heroLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/hero"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/hero"],
+    enabled: !!currentOrg,
   });
 
   const { data: ctaContent = [], isLoading: ctaLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/cta"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/cta"],
+    enabled: !!currentOrg,
   });
 
   const { data: socialMediaPosts = [], isLoading: socialMediaLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/socialMedia"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/socialMedia"],
+    enabled: !!currentOrg,
   });
 
   const { data: videos = [], isLoading: videosLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/video"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/video"],
+    enabled: !!currentOrg,
   });
 
   const { data: programDetails = [], isLoading: programDetailsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/program_detail"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/program_detail"],
+    enabled: !!currentOrg,
   });
 
   const { data: studentProjects = [], isLoading: studentProjectsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/student_project"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/student_project"],
+    enabled: !!currentOrg,
   });
 
   const { data: studentTestimonials = [], isLoading: studentTestimonialsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/student_testimonial"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/student_testimonial"],
+    enabled: !!currentOrg,
   });
 
   const { data: studentDashboardCards = [], isLoading: studentDashboardCardsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/student_dashboard_card"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/student_dashboard_card"],
+    enabled: !!currentOrg,
   });
 
   const { data: volunteerDashboardCards = [], isLoading: volunteerDashboardCardsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/volunteer_dashboard_card"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/volunteer_dashboard_card"],
+    enabled: !!currentOrg,
   });
 
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
-    queryKey: ["/api/google-reviews/all"],
+    queryKey: [currentOrg?.organizationId, "/api/google-reviews/all"],
+    enabled: !!currentOrg,
   });
 
   const { data: images = [] } = useQuery<ImageAsset[]>({
@@ -463,7 +481,8 @@ export default function AdminContentManager() {
 
   // Fetch all visibility settings (needed for editing content from any tab)
   const { data: allVisibilitySettings = [] } = useQuery<ContentVisibility[]>({
-    queryKey: ["/api/content/visibility"],
+    queryKey: [currentOrg?.organizationId, "/api/content/visibility"],
+    enabled: !!currentOrg,
   });
   
   // Load visibility settings when editing any content item
@@ -486,8 +505,8 @@ export default function AdminContentManager() {
 
   // Fetch all A/B tests for matrix view
   const { data: allAbTests = [] } = useQuery<AbTest[]>({
-    queryKey: ["/api/admin/ab-tests"],
-    enabled: activeTab === "matrix",
+    queryKey: [currentOrg?.organizationId, "/api/admin/ab-tests"],
+    enabled: !!currentOrg && activeTab === "matrix",
   });
 
   const [uploadingImage, setUploadingImage] = useState(false);

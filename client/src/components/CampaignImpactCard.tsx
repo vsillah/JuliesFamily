@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { useLocation } from "wouter";
 import { DonationCampaign, User } from "@shared/schema";
 import { Heart, TrendingUp } from "lucide-react";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 interface CampaignImpactCardProps {
   // No props needed - we'll fetch user data internally
@@ -13,15 +14,19 @@ interface CampaignImpactCardProps {
 
 export function CampaignImpactCard() {
   const [, navigate] = useLocation();
+  const { currentOrg } = useOrganization();
+  const orgKey = currentOrg?.organizationId ?? 'no-org';
 
   // Fetch current user to get their passions
   const { data: user } = useQuery<User>({
-    queryKey: ['/api/auth/user'],
+    queryKey: [orgKey, '/api/auth/user'],
+    enabled: !!currentOrg,
   });
 
   // Fetch active donation campaigns
   const { data: campaigns, isLoading } = useQuery<DonationCampaign[]>({
-    queryKey: ['/api/donation-campaigns/active'],
+    queryKey: [orgKey, '/api/donation-campaigns/active'],
+    enabled: !!currentOrg,
   });
 
   if (isLoading) {

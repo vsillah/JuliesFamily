@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import type { ContentItem } from '@shared/schema';
 import { VideoEmbed } from './VideoEmbed';
 import { Video as VideoIcon } from 'lucide-react';
 import { ContentCarousel } from './ContentCarousel';
 
 export function StudentStoriesCarousel() {
+  const { currentOrg } = useOrganization();
   const { data: videos, isLoading } = useQuery<ContentItem[]>({
-    queryKey: ['/api/content/visible/video'],
+    queryKey: [currentOrg?.organizationId, '/api/content/visible/video'],
+    enabled: !!currentOrg,
   });
 
   // Filter for student story videos

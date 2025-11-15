@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
 import { useABTestTracking } from "@/hooks/useABTestTracking";
 import { useViewportTracking } from "@/hooks/useViewportTracking";
@@ -11,6 +12,7 @@ import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 export default function DonationCTA() {
   const { persona, funnelStage } = usePersona();
+  const { currentOrg } = useOrganization();
   const [scale, setScale] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -38,7 +40,8 @@ export default function DonationCTA() {
   
   // Fetch visible CTA content filtered by persona + journey stage + passion tags
   const { data: ctaContent } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/visible/cta", { persona, funnelStage }],
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/cta", { persona, funnelStage }],
+    enabled: !!currentOrg,
   });
   
   // Select first CTA content (already filtered by persona×journey matrix and ordered by passion tags)

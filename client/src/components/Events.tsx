@@ -1,5 +1,6 @@
 import EventCard from "./EventCard";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { useQuery } from "@tanstack/react-query";
 import { useABTestTracking } from "@/hooks/useABTestTracking";
 import type { ContentItemWithResolvedImage } from "@shared/schema";
@@ -29,6 +30,7 @@ const headlineContent: Record<string, { title: string; description: string }> = 
 
 export default function Events() {
   const { persona, funnelStage } = usePersona();
+  const { currentOrg } = useOrganization();
   const headline = headlineContent[persona || "donor"];
   
   // Check for active A/B test for event card order with integrated tracking
@@ -38,7 +40,8 @@ export default function Events() {
   });
   
   const { data: allEvents = [], isLoading } = useQuery<ContentItemWithResolvedImage[]>({
-    queryKey: ["/api/content/type/event"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/event"],
+    enabled: !!currentOrg,
   });
 
   const events = allEvents.filter(e => e.isActive);

@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,28 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Building2, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
-
-interface Organization {
-  id: string;
-  name: string;
-  slug: string;
-  tier: string;
-  primaryDomain: string | null;
-  createdAt: string;
-}
-
-interface CurrentOrganization {
-  organizationId: string;
-  organization: Organization;
-  isOverride: boolean;
-}
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 export function OrganizationSwitcher() {
   const [, setLocation] = useLocation();
-  
-  const { data: currentOrg } = useQuery<CurrentOrganization>({
-    queryKey: ['/api/admin/organization/current'],
-  });
+  const { currentOrg } = useOrganization();
 
   if (!currentOrg) {
     return null;

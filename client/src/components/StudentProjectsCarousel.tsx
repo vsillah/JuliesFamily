@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { useOrganization } from '@/contexts/OrganizationContext';
 import type { ContentItem } from '@shared/schema';
 import { BookOpen, Award, FileText } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardFooter } from './ui/card';
@@ -16,6 +17,7 @@ interface StudentProjectMetadata {
 
 export function StudentProjectsCarousel() {
   const { persona, funnelStage, passions } = usePersona();
+  const { currentOrg } = useOrganization();
   
   // Only show for donor persona (this content is specifically for donors)
   if (persona !== 'donor') {
@@ -36,7 +38,7 @@ export function StudentProjectsCarousel() {
   
   // Fetch student projects with server-side passion filtering
   const { data: projects, isLoading } = useQuery<ContentItem[]>({
-    queryKey: ['/api/content/visible/student_project', { persona, funnelStage }],
+    queryKey: [currentOrg?.organizationId, '/api/content/visible/student_project', { persona, funnelStage }],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (persona) params.append('persona', persona);
@@ -47,6 +49,7 @@ export function StudentProjectsCarousel() {
       if (!res.ok) throw new Error('Failed to fetch student projects');
       return res.json();
     },
+    enabled: !!currentOrg,
   });
 
   // Get the passion tag label for display

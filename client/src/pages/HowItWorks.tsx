@@ -15,14 +15,17 @@ import {
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { VolunteerProgressCard } from "@/components/VolunteerProgressCard";
 import type { ContentItem, VolunteerDashboardCardMetadata } from "@shared/schema";
 import { Link } from "wouter";
 
 export default function HowItWorks() {
+  const { currentOrg } = useOrganization();
   // Fetch volunteer dashboard card content for public demo
   const { data: volunteerCardContent } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/volunteer_dashboard_card"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/volunteer_dashboard_card"],
+    enabled: !!currentOrg,
   });
 
   // Extract volunteer card content from CMS

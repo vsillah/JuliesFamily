@@ -41,6 +41,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       return response.json();
     },
     onSuccess: async (data) => {
+      const newOrgKey = data.organizationId;
+      const oldOrgKey = currentOrg?.organizationId ?? 'no-org';
+      
       // Update local state immediately
       setCurrentOrg({
         organizationId: data.organizationId,
@@ -48,9 +51,14 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         isOverride: true,
       });
       
-      // Invalidate all queries to force refetch with new org context
-      // React Query will automatically refetch active queries
-      await queryClient.invalidateQueries();
+      // Targeted invalidation: invalidate queries with org keys (including 'no-org' fallback)
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          // Invalidate if first segment is an org ID (old, new, or fallback)
+          return Array.isArray(key) && (key[0] === oldOrgKey || key[0] === newOrgKey || key[0] === 'no-org');
+        },
+      });
     },
   });
 
@@ -61,14 +69,23 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       return response.json();
     },
     onSuccess: async (data) => {
+      const newOrgKey = data.organizationId;
+      const oldOrgKey = currentOrg?.organizationId ?? 'no-org';
+      
       setCurrentOrg({
         organizationId: data.organizationId,
         organizationName: data.organizationName || data.organizationId,
         isOverride: false,
       });
       
-      // Invalidate all queries
-      await queryClient.invalidateQueries();
+      // Targeted invalidation: invalidate queries with org keys (including 'no-org' fallback)
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey;
+          // Invalidate if first segment is an org ID (old, new, or fallback)
+          return Array.isArray(key) && (key[0] === oldOrgKey || key[0] === newOrgKey || key[0] === 'no-org');
+        },
+      });
     },
   });
 

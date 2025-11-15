@@ -45,7 +45,7 @@ export default function AdminOrganizations() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [, setLocation] = useLocation();
-  const { switchOrganization, clearOverride } = useOrganization();
+  const { currentOrg, switchOrganization, clearOverride } = useOrganization();
 
   // Form with validation
   const form = useForm<CreateOrganizationWizard>({
@@ -59,11 +59,6 @@ export default function AdminOrganizations() {
   // Fetch all organizations
   const { data: organizations, isLoading: orgsLoading, error: orgsError } = useQuery<Organization[]>({
     queryKey: ['/api/admin/organizations'],
-  });
-
-  // Fetch current organization context
-  const { data: currentOrg, isLoading: currentLoading } = useQuery<CurrentOrganization>({
-    queryKey: ['/api/admin/organization/current'],
   });
 
   // Switch organization using context (no page reload needed!)

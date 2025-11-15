@@ -2,6 +2,7 @@ import { useState } from "react";
 import ServiceCard from "./ServiceCard";
 import ProgramDetailDialog from "./ProgramDetailDialog";
 import { usePersona } from "@/contexts/PersonaContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { useQuery } from "@tanstack/react-query";
 import { useABTestTracking } from "@/hooks/useABTestTracking";
 import type { ContentItem } from "@shared/schema";
@@ -25,6 +26,7 @@ interface ProgramDetail {
 
 export default function Services() {
   const { persona, funnelStage } = usePersona();
+  const { currentOrg } = useOrganization();
   const [selectedProgram, setSelectedProgram] = useState<ProgramDetail | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   
@@ -35,11 +37,13 @@ export default function Services() {
   });
   
   const { data: allServices = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/service"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/service"],
+    enabled: !!currentOrg,
   });
 
   const { data: programDetails = [] } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/program_detail"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/program_detail"],
+    enabled: !!currentOrg,
   });
 
   const activeServices = allServices.filter(s => s.isActive);

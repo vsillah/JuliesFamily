@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { X, FlaskConical, Upload, Image as ImageIcon } from "lucide-react";
 import { PERSONA_LABELS, FUNNEL_STAGE_LABELS } from "@shared/defaults/personas";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 interface MatrixEditPanelProps {
   selectedCard: SelectedCard;
@@ -30,11 +31,14 @@ export default function MatrixEditPanel({
   onClose,
 }: MatrixEditPanelProps) {
   const { toast } = useToast();
+  const { currentOrg } = useOrganization();
+  const orgKey = currentOrg?.organizationId ?? 'no-org';
   const { persona, stage, contentType, contentItem } = selectedCard;
 
   // Query visibility settings directly to always have the latest data
   const { data: latestVisibilitySettings = [] } = useQuery<ContentVisibility[]>({
-    queryKey: ["/api/content/visibility"],
+    queryKey: [orgKey, "/api/content/visibility"],
+    enabled: !!currentOrg,
   });
 
   // Find existing visibility setting from latest data
@@ -77,8 +81,8 @@ export default function MatrixEditPanel({
 
   // Fetch active A/B tests for this permutation and content type
   const { data: activeTests = [] } = useQuery<AbTest[]>({
-    queryKey: ["/api/admin/ab-tests", persona, stage, contentType, contentItem?.id],
-    enabled: !!contentItem,
+    queryKey: [orgKey, "/api/admin/ab-tests", persona, stage, contentType, contentItem?.id],
+    enabled: !!contentItem && !!currentOrg,
     select: (tests) => tests.filter(
       t => t.status === 'active' && 
            t.targetPersona === persona && 
@@ -122,7 +126,7 @@ export default function MatrixEditPanel({
 
       // Refetch visibility settings to ensure we have the latest data
       const latestVisibility = await queryClient.fetchQuery<ContentVisibility[]>({
-        queryKey: ["/api/content/visibility"],
+        queryKey: [orgKey, "/api/content/visibility"],
       });
 
       // Find if visibility record exists with latest data

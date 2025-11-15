@@ -6,6 +6,7 @@ import { Calendar, BookOpen, Award, Laptop, Clock, CheckCircle2, AlertCircle } f
 import { format } from "date-fns";
 import { StudentSubmissionForm } from "@/components/StudentSubmissionForm";
 import { VolunteerEnrollmentCard } from "@/components/VolunteerEnrollmentCard";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 interface TGHProgress {
   enrolled: boolean;
@@ -35,8 +36,12 @@ interface TGHProgress {
 }
 
 export function StudentDashboard() {
+  const { currentOrg } = useOrganization();
+  const orgKey = currentOrg?.organizationId ?? 'no-org';
+
   const { data: progress, isLoading, error } = useQuery<TGHProgress>({
-    queryKey: ["/api/tgh/progress"],
+    queryKey: [orgKey, "/api/tgh/progress"],
+    enabled: !!currentOrg,
   });
 
   if (isLoading) {

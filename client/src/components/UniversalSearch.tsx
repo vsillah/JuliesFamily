@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { Lead, Task, EmailCampaign, ContentItem } from "@shared/schema";
 import Fuse from "fuse.js";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 interface DynamicSearchResult {
   id: string;
@@ -42,6 +43,8 @@ export function UniversalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [, navigate] = useLocation();
+  const { currentOrg } = useOrganization();
+  const orgKey = currentOrg?.organizationId ?? 'no-org';
 
   // Memoize static Fuse instance based on registry contents to handle edits and additions
   // Include all searchable fields (title, description, keywords) in dependency to catch any edits
@@ -79,29 +82,29 @@ export function UniversalSearch() {
 
   // Prefetch dynamic data when search is open (not gated on query length)
   // This ensures data is available when user starts typing
-  const shouldFetchDynamic = open;
+  const shouldFetchDynamic = open && !!currentOrg;
 
   // Dynamic loaders - use default queryFn from query client for consistent auth handling
   const { data: leads = [], isLoading: leadsLoading } = useQuery<Lead[]>({
-    queryKey: ["/api/admin/leads"],
+    queryKey: [orgKey, "/api/admin/leads"],
     enabled: shouldFetchDynamic,
     staleTime: 60000, // Cache for 1 minute
   });
 
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: ["/api/tasks"],
+    queryKey: [orgKey, "/api/tasks"],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });
 
   const { data: emailCampaigns = [], isLoading: campaignsLoading } = useQuery<EmailCampaign[]>({
-    queryKey: ["/api/email-campaigns"],
+    queryKey: [orgKey, "/api/email-campaigns"],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });
 
   const { data: content = [], isLoading: contentLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content"],
+    queryKey: [orgKey, "/api/content"],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });

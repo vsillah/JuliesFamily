@@ -1,14 +1,18 @@
 import UnifiedTestimonialsCarousel from "./UnifiedTestimonialsCarousel";
 import { useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import type { ContentItemWithResolvedImage, GoogleReview } from "@shared/schema";
 
 export default function Testimonials() {
+  const { currentOrg } = useOrganization();
   const { data: allTestimonials = [], isLoading: loadingCms } = useQuery<ContentItemWithResolvedImage[]>({
-    queryKey: ["/api/content/type/testimonial"],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/testimonial"],
+    enabled: !!currentOrg,
   });
 
   const { data: googleReviews = [], isLoading: loadingGoogle } = useQuery<GoogleReview[]>({
-    queryKey: ["/api/google-reviews"],
+    queryKey: [currentOrg?.organizationId, "/api/google-reviews"],
+    enabled: !!currentOrg,
   });
 
   const testimonials = allTestimonials.filter(t => t.isActive);

@@ -61,18 +61,13 @@ import SmsUnsubscribe from "@/pages/SmsUnsubscribe";
 import NotFound from "@/pages/not-found";
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 function DefaultRoute() {
   const { user, isLoading } = useAuth();
+  const { currentOrg } = useOrganization();
   
-  // Fetch current organization context for kinflo admins
-  const { data: currentOrg, isLoading: orgLoading } = useQuery({
-    queryKey: ['/api/admin/organization/current'],
-    enabled: !!(user && (user.role === 'kinflo_admin' || user.role === 'super_admin')),
-  });
-  
-  if (isLoading || orgLoading) {
+  if (isLoading) {
     return null;
   }
   
