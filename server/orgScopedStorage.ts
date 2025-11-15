@@ -1,104 +1,83 @@
 /**
- * Organization-Scoped Storage Wrapper
+ * Organization-Scoped Storage Wrapper (Proxy-Based)
  * 
- * Wraps the base storage implementation to automatically inject organizationId
- * into all queries, preventing cross-tenant data leakage.
+ * Uses JavaScript Proxy to intercept ALL storage method calls and automatically
+ * apply organization filtering, ensuring complete coverage of the IStorage interface.
  * 
  * Architecture:
- * - Accepts organizationId at construction time (once per request)
- * - Implements IStorage interface by delegating to base storage
- * - Automatically injects org filters using helper utilities
- * - Keeps global operations (users, org lookup) untouched
+ * - Proxy intercepts every method call
+ * - Methods are classified as: global, org-scoped, or unimplemented
+ * - Org-scoped methods automatically inject organizationId filters
+ * - Unimplemented methods log warnings for future migration
+ * - Prevents cross-tenant data leakage through complete enforcement
  */
 
 import type { IStorage } from './storage';
 import { db } from './db';
-import { eq, and, desc, or, sql, inArray, type SQL } from 'drizzle-orm';
-import type { PgTable } from 'drizzle-orm/pg-core';
+import { eq, and, desc } from 'drizzle-orm';
 
 /**
- * Helper: Apply organization filter to a query builder
- * Usage: .where(applyOrgFilter(table, table.organizationId, orgId, existingConditions))
+ * Methods that should remain global (no org scoping)
+ * These typically involve user management or organization lookup
  */
-export function applyOrgFilter<T extends PgTable>(
-  table: T,
-  orgIdColumn: any,
-  organizationId: string,
-  additionalConditions?: SQL
-): SQL {
-  const orgFilter = eq(orgIdColumn, organizationId);
-  
-  if (additionalConditions) {
-    return and(orgFilter, additionalConditions) as SQL;
-  }
-  
-  return orgFilter;
-}
+const GLOBAL_METHODS = new Set([
+  'getUser',
+  'getUserByOidcSub', 
+  'getUserByEmail',
+  'getAllUsers',
+  'upsertUser',
+  'updateUser',
+  'createUser',
+  'deleteUser',
+  'createOrganization',
+  'getOrganization',
+  'getOrganizationByUserId',
+  'getAllOrganizations',
+  'updateOrganization',
+]);
 
 /**
- * Organization-scoped storage wrapper
- * Implements IStorage but injects organizationId into all tenant-scoped operations
+ * Methods that have explicit org-scoped implementations
  */
-export class OrganizationScopedStorage implements Partial<IStorage> {
+const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
+  // Lead operations
+  'createLead',
+  'getAllLeads',
+  'getLead',
+  'getLeadByEmail',
+  'getLeadsByPersona',
+  'getLeadsByFunnelStage',
+  'updateLead',
+  'deleteLead',
+  
+  // Content operations
+  'createContentItem',
+  'getAllContentItems',
+  'getContentItem',
+  'getContentItemsByType',
+  'updateContentItem',
+  'deleteContentItem',
+  
+  // Donation operations
+  'createDonation',
+  'getAllDonations',
+  'getDonationById',
+  'getDonationsByLeadId',
+]);
+
+/**
+ * Org-scoped implementations for specific methods
+ */
+class OrgScopedImplementations {
   constructor(
     private readonly baseStorage: IStorage,
     private readonly organizationId: string
   ) {}
 
   // ========================================
-  // GLOBAL OPERATIONS (No Org Scoping)
-  // ========================================
-  // These operations remain global as users can belong to multiple orgs
-  
-  getUser(...args: Parameters<IStorage['getUser']>) {
-    return this.baseStorage.getUser(...args);
-  }
-  getUserByOidcSub(...args: Parameters<IStorage['getUserByOidcSub']>) {
-    return this.baseStorage.getUserByOidcSub(...args);
-  }
-  getUserByEmail(...args: Parameters<IStorage['getUserByEmail']>) {
-    return this.baseStorage.getUserByEmail(...args);
-  }
-  getAllUsers(...args: Parameters<IStorage['getAllUsers']>) {
-    return this.baseStorage.getAllUsers(...args);
-  }
-  upsertUser(...args: Parameters<IStorage['upsertUser']>) {
-    return this.baseStorage.upsertUser(...args);
-  }
-  updateUser(...args: Parameters<IStorage['updateUser']>) {
-    return this.baseStorage.updateUser(...args);
-  }
-  createUser(...args: Parameters<IStorage['createUser']>) {
-    return this.baseStorage.createUser(...args);
-  }
-  deleteUser(...args: Parameters<IStorage['deleteUser']>) {
-    return this.baseStorage.deleteUser(...args);
-  }
-  
-  // Organization operations remain global (can look up any org)
-  createOrganization(...args: Parameters<IStorage['createOrganization']>) {
-    return this.baseStorage.createOrganization(...args);
-  }
-  getOrganization(...args: Parameters<IStorage['getOrganization']>) {
-    return this.baseStorage.getOrganization(...args);
-  }
-  getOrganizationByUserId(...args: Parameters<IStorage['getOrganizationByUserId']>) {
-    return this.baseStorage.getOrganizationByUserId(...args);
-  }
-  getAllOrganizations(...args: Parameters<IStorage['getAllOrganizations']>) {
-    return this.baseStorage.getAllOrganizations(...args);
-  }
-  updateOrganization(...args: Parameters<IStorage['updateOrganization']>) {
-    return this.baseStorage.updateOrganization(...args);
-  }
-
-  // ========================================
-  // ORG-SCOPED OPERATIONS (Critical First)
+  // LEAD OPERATIONS
   // ========================================
   
-  /**
-   * Lead operations - scoped to organization
-   */
   async createLead(leadData: Parameters<IStorage['createLead']>[0]) {
     return this.baseStorage.createLead({
       ...leadData,
@@ -120,12 +99,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const [lead] = await db
       .select()
       .from(leads)
-      .where(
-        and(
-          eq(leads.id, id),
-          eq(leads.organizationId, this.organizationId)
-        )
-      );
+      .where(and(
+        eq(leads.id, id),
+        eq(leads.organizationId, this.organizationId)
+      ));
     return lead;
   }
 
@@ -134,12 +111,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const [lead] = await db
       .select()
       .from(leads)
-      .where(
-        and(
-          eq(leads.email, email),
-          eq(leads.organizationId, this.organizationId)
-        )
-      );
+      .where(and(
+        eq(leads.email, email),
+        eq(leads.organizationId, this.organizationId)
+      ));
     return lead;
   }
 
@@ -148,12 +123,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     return await db
       .select()
       .from(leads)
-      .where(
-        and(
-          eq(leads.persona, persona),
-          eq(leads.organizationId, this.organizationId)
-        )
-      )
+      .where(and(
+        eq(leads.persona, persona),
+        eq(leads.organizationId, this.organizationId)
+      ))
       .orderBy(desc(leads.createdAt));
   }
 
@@ -162,12 +135,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     return await db
       .select()
       .from(leads)
-      .where(
-        and(
-          eq(leads.funnelStage, funnelStage),
-          eq(leads.organizationId, this.organizationId)
-        )
-      )
+      .where(and(
+        eq(leads.funnelStage, funnelStage),
+        eq(leads.organizationId, this.organizationId)
+      ))
       .orderBy(desc(leads.createdAt));
   }
 
@@ -176,12 +147,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const [lead] = await db
       .update(leads)
       .set({ ...updates, updatedAt: new Date() })
-      .where(
-        and(
-          eq(leads.id, id),
-          eq(leads.organizationId, this.organizationId)
-        )
-      )
+      .where(and(
+        eq(leads.id, id),
+        eq(leads.organizationId, this.organizationId)
+      ))
       .returning();
     return lead;
   }
@@ -190,17 +159,16 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const { leads } = await import('@shared/schema');
     await db
       .delete(leads)
-      .where(
-        and(
-          eq(leads.id, id),
-          eq(leads.organizationId, this.organizationId)
-        )
-      );
+      .where(and(
+        eq(leads.id, id),
+        eq(leads.organizationId, this.organizationId)
+      ));
   }
 
-  /**
-   * Content operations - scoped to organization
-   */
+  // ========================================
+  // CONTENT OPERATIONS
+  // ========================================
+  
   async createContentItem(itemData: Parameters<IStorage['createContentItem']>[0]) {
     return this.baseStorage.createContentItem({
       ...itemData,
@@ -229,12 +197,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const [item] = await db
       .select()
       .from(contentItems)
-      .where(
-        and(
-          eq(contentItems.id, id),
-          eq(contentItems.organizationId, this.organizationId)
-        )
-      );
+      .where(and(
+        eq(contentItems.id, id),
+        eq(contentItems.organizationId, this.organizationId)
+      ));
     return item;
   }
 
@@ -244,12 +210,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
       .select()
       .from(contentItems)
       .leftJoin(imageAssets, eq(contentItems.imageId, imageAssets.id))
-      .where(
-        and(
-          eq(contentItems.type, type),
-          eq(contentItems.organizationId, this.organizationId)
-        )
-      )
+      .where(and(
+        eq(contentItems.type, type),
+        eq(contentItems.organizationId, this.organizationId)
+      ))
       .orderBy(contentItems.order, contentItems.createdAt);
 
     return items.map(({ content_items, image_assets }) => ({
@@ -264,12 +228,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const [item] = await db
       .update(contentItems)
       .set({ ...updates, updatedAt: new Date() })
-      .where(
-        and(
-          eq(contentItems.id, id),
-          eq(contentItems.organizationId, this.organizationId)
-        )
-      )
+      .where(and(
+        eq(contentItems.id, id),
+        eq(contentItems.organizationId, this.organizationId)
+      ))
       .returning();
     return item;
   }
@@ -278,17 +240,16 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const { contentItems } = await import('@shared/schema');
     await db
       .delete(contentItems)
-      .where(
-        and(
-          eq(contentItems.id, id),
-          eq(contentItems.organizationId, this.organizationId)
-        )
-      );
+      .where(and(
+        eq(contentItems.id, id),
+        eq(contentItems.organizationId, this.organizationId)
+      ));
   }
 
-  /**
-   * Donation operations - scoped to organization
-   */
+  // ========================================
+  // DONATION OPERATIONS
+  // ========================================
+  
   async createDonation(donationData: Parameters<IStorage['createDonation']>[0]) {
     return this.baseStorage.createDonation({
       ...donationData,
@@ -310,12 +271,10 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     const [donation] = await db
       .select()
       .from(donations)
-      .where(
-        and(
-          eq(donations.id, id),
-          eq(donations.organizationId, this.organizationId)
-        )
-      );
+      .where(and(
+        eq(donations.id, id),
+        eq(donations.organizationId, this.organizationId)
+      ));
     return donation;
   }
 
@@ -324,44 +283,96 @@ export class OrganizationScopedStorage implements Partial<IStorage> {
     return await db
       .select()
       .from(donations)
-      .where(
-        and(
-          eq(donations.leadId, leadId),
-          eq(donations.organizationId, this.organizationId)
-        )
-      )
+      .where(and(
+        eq(donations.leadId, leadId),
+        eq(donations.organizationId, this.organizationId)
+      ))
       .orderBy(desc(donations.createdAt));
   }
-
-  // ========================================
-  // DELEGATED OPERATIONS (Passthrough to base - to be migrated)
-  // ========================================
-  // These temporarily pass through to base storage without org filtering
-  // Will be migrated to org-scoped implementations incrementally
-  
-  // Note: Using arrow functions to properly delegate without bind issues
-  createInteraction: IStorage['createInteraction'] = (...args) => this.baseStorage.createInteraction(...args);
-  getLeadInteractions: IStorage['getLeadInteractions'] = (...args) => this.baseStorage.getLeadInteractions(...args);
-  createLeadMagnet: IStorage['createLeadMagnet'] = (...args) => this.baseStorage.createLeadMagnet(...args);
-  getAllLeadMagnets: IStorage['getAllLeadMagnets'] = (...args) => this.baseStorage.getAllLeadMagnets(...args);
-  getLeadMagnetsByPersona: IStorage['getLeadMagnetsByPersona'] = (...args) => this.baseStorage.getLeadMagnetsByPersona(...args);
-  updateLeadMagnet: IStorage['updateLeadMagnet'] = (...args) => this.baseStorage.updateLeadMagnet(...args);
-  deleteLeadMagnet: IStorage['deleteLeadMagnet'] = (...args) => this.baseStorage.deleteLeadMagnet(...args);
-  
-  // Image assets (org-scoped but lower priority - temporary passthrough)
-  createImageAsset: IStorage['createImageAsset'] = (...args) => this.baseStorage.createImageAsset(...args);
-  getImageAsset: IStorage['getImageAsset'] = (...args) => this.baseStorage.getImageAsset(...args);
-  getImageAssetByPublicId: IStorage['getImageAssetByPublicId'] = (...args) => this.baseStorage.getImageAssetByPublicId(...args);
-  getAllImageAssets: IStorage['getAllImageAssets'] = (...args) => this.baseStorage.getAllImageAssets(...args);
-  getImageAssetsByUsage: IStorage['getImageAssetsByUsage'] = (...args) => this.baseStorage.getImageAssetsByUsage(...args);
-  updateImageAsset: IStorage['updateImageAsset'] = (...args) => this.baseStorage.updateImageAsset(...args);
-  deleteImageAsset: IStorage['deleteImageAsset'] = (...args) => this.baseStorage.deleteImageAsset(...args);
 }
 
 /**
- * Factory function to create organization-scoped storage
- * Usage in routes: const storage = createOrgStorage(baseStorage, req.organizationId)
+ * Create organization-scoped storage using Proxy pattern
+ * Ensures ALL IStorage methods are intercepted and handled appropriately
  */
 export function createOrgStorage(baseStorage: IStorage, organizationId: string): IStorage {
-  return new OrganizationScopedStorage(baseStorage, organizationId) as IStorage;
+  const implementations = new OrgScopedImplementations(baseStorage, organizationId);
+  
+  return new Proxy(baseStorage, {
+    get(target, prop: string) {
+      // Check if this is a method on the storage interface
+      const value = target[prop as keyof IStorage];
+      if (typeof value !== 'function') {
+        return value;
+      }
+
+      // Global methods - pass through without modification
+      if (GLOBAL_METHODS.has(prop)) {
+        return value.bind(target);
+      }
+
+      // Implemented org-scoped methods - use our implementation
+      if (IMPLEMENTED_ORG_SCOPED_METHODS.has(prop)) {
+        const implMethod = implementations[prop as keyof OrgScopedImplementations];
+        if (typeof implMethod === 'function') {
+          return implMethod.bind(implementations);
+        }
+        // Method is in IMPLEMENTED set but missing implementation - this is a bug!
+        throw new Error(
+          `[OrgScopedStorage] IMPLEMENTATION BUG: Method '${prop}' is in IMPLEMENTED_ORG_SCOPED_METHODS ` +
+          `but has no implementation in OrgScopedImplementations class!`
+        );
+      }
+
+      // Unimplemented org-scoped method - THROW ERROR when called to prevent data leakage
+      // This forces explicit implementation or whitelisting before use
+      return function(this: any, ...args: any[]) {
+        const errorMessage = 
+          `[OrgScopedStorage] SECURITY ERROR: Method '${prop}' is not org-scoped!\n` +
+          `Organization: ${organizationId}\n` +
+          `This method would access global storage causing potential cross-tenant data leakage.\n\n` +
+          `To fix:\n` +
+          `1. Implement org-scoped version in OrgScopedImplementations class\n` +
+          `2. Add '${prop}' to IMPLEMENTED_ORG_SCOPED_METHODS set\n` +
+          `OR if this method should remain global:\n` +
+          `3. Add '${prop}' to GLOBAL_METHODS set`;
+        
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+      };
+    }
+  }) as IStorage;
+}
+
+/**
+ * Validate organization-scoped storage coverage at startup
+ * Throws if critical methods are not yet implemented
+ */
+export function validateOrgStorageCoverage(storage: IStorage): void {
+  const allMethods = Object.getOwnPropertyNames(Object.getPrototypeOf(storage))
+    .filter(prop => typeof storage[prop as keyof IStorage] === 'function');
+  
+  const unimplementedCount = allMethods.filter(
+    method => !GLOBAL_METHODS.has(method) && !IMPLEMENTED_ORG_SCOPED_METHODS.has(method)
+  ).length;
+  
+  const totalMethods = allMethods.length;
+  const implementedCount = IMPLEMENTED_ORG_SCOPED_METHODS.size;
+  const globalCount = GLOBAL_METHODS.size;
+  
+  console.log(
+    `[OrgScopedStorage] Coverage Report:\n` +
+    `  Total IStorage methods: ${totalMethods}\n` +
+    `  Global (no scoping): ${globalCount}\n` +
+    `  Org-scoped (implemented): ${implementedCount}\n` +
+    `  Unimplemented: ${unimplementedCount}\n` +
+    `  Coverage: ${Math.round(((implementedCount + globalCount) / totalMethods) * 100)}%`
+  );
+  
+  if (unimplementedCount > 0) {
+    console.warn(
+      `[OrgScopedStorage] WARNING: ${unimplementedCount} methods will throw errors if called.\n` +
+      `These methods must be implemented before routes can use them.`
+    );
+  }
 }

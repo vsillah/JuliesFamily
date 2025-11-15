@@ -8,6 +8,8 @@ import { initEmailReportScheduler, shutdownEmailReportScheduler } from "./servic
 import { helmetConfig, globalLimiter } from "./security";
 import { detectOrganization } from "./orgMiddleware";
 import { attachOrgStorage } from "./orgStorageMiddleware";
+import { validateOrgStorageCoverage } from "./orgScopedStorage";
+import { storage } from "./storage";
 
 const app = express();
 
@@ -112,6 +114,9 @@ app.use((req, res, next) => {
   
   // Initialize email report scheduler (sends scheduled email reports)
   initEmailReportScheduler();
+
+  // Validate organization-scoped storage coverage
+  validateOrgStorageCoverage(storage);
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
