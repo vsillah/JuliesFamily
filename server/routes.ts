@@ -445,6 +445,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Organization Tier Routes
+  app.get('/api/organization/tier', ...authWithImpersonation, async (req: any, res) => {
+    try {
+      const oidcSub = req.user.claims.sub;
+      const user = await storage.getUserByOidcSub(oidcSub);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Default to Basic tier if no organization
+      let tier = 'basic';
+      let organizationId = null;
+      let organizationName = null;
+
+      if (user.organizationId) {
+        const organization = await storage.getOrganization(user.organizationId);
+        if (organization) {
+          tier = organization.tier;
+          organizationId = organization.id;
+          organizationName = organization.name;
+        }
+      }
+
+      res.json({ tier, organizationId, organizationName });
+    } catch (error) {
+      console.error("Error fetching organization tier:", error);
+      res.status(500).json({ message: "Failed to fetch organization tier" });
+    }
+  });
+
+  app.get('/api/organizations', ...authWithImpersonation, isAdmin, async (req, res) => {
+    try {
+      const organizations = await storage.getAllOrganizations();
+      res.json(organizations);
+    } catch (error) {
+      console.error("Error fetching organizations:", error);
+      res.status(500).json({ message: "Failed to fetch organizations" });
+    }
+  });
+
+  app.patch('/api/organizations/:id', ...authWithImpersonation, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const { tier, name } = req.body;
+      
+      // Validate tier if provided
+      if (tier && !['basic', 'pro', 'premium'].includes(tier)) {
+        return res.status(400).json({ message: "Invalid tier. Must be 'basic', 'pro', or 'premium'" });
+      }
+
+      const updates: any = {};
+      if (tier !== undefined) updates.tier = tier;
+      if (name !== undefined) updates.name = name;
+
+      const organization = await storage.updateOrganization(id, updates);
+      
+      if (!organization) {
+        return res.status(404).json({ message: "Organization not found" });
+      }
+
+      // Create audit log entry
+      const oidcSub = req.user.claims.sub;
+      const currentUser = await storage.getUserByOidcSub(oidcSub);
+      if (currentUser) {
+        await storage.createAuditLog({
+          userId: currentUser.id,
+          actorId: currentUser.id,
+          action: 'organization_updated',
+          metadata: {
+            organizationId: id,
+            organizationName: organization.name,
+            updates,
+            actorEmail: currentUser.email,
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+
+      res.json(organization);
+    } catch (error) {
+      console.error("Error updating organization:", error);
+      res.status(500).json({ message: "Failed to update organization" });
+    }
+  });
+
   app.delete('/api/admin/users/:userId', ...authWithImpersonation, requireSuperAdmin, async (req: any, res) => {
     try {
       const { userId } = req.params;
