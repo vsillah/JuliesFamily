@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus } from "lucide-react";
+import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus, ExternalLink } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -15,6 +15,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createOrganizationWizardSchema, type CreateOrganizationWizard } from "@shared/schema";
+import { useLocation } from "wouter";
 
 interface OrganizationMetrics {
   leadsCount: number;
@@ -42,6 +43,7 @@ interface CurrentOrganization {
 export default function AdminOrganizations() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   // Form with validation
   const form = useForm<CreateOrganizationWizard>({
@@ -157,6 +159,31 @@ export default function AdminOrganizations() {
 
   const handleCreateOrg = (data: CreateOrganizationWizard) => {
     createOrgMutation.mutate(data);
+  };
+
+  const handleViewWebsite = async (orgId: string) => {
+    // If not the current org, switch to it first
+    if (currentOrg?.organizationId !== orgId) {
+      try {
+        await apiRequest('POST', '/api/admin/organization/switch', { organizationId: orgId });
+        // Invalidate queries to reflect the switch
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/organization/current'] });
+        toast({
+          title: "Organization Switched",
+          description: "Navigating to website...",
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error",
+          description: error.message || "Failed to switch organization",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
+    // Navigate to home page to view the website
+    setLocation('/');
   };
 
   if (orgsLoading || currentLoading) {
@@ -314,18 +341,30 @@ export default function AdminOrganizations() {
                   </div>
                 )}
 
-                {/* Switch Button */}
-                {!isCurrentOrg && (
+                {/* Action Buttons */}
+                <div className="space-y-2">
+                  {!isCurrentOrg && (
+                    <Button
+                      onClick={() => handleSwitchOrg(org.id)}
+                      disabled={switchOrgMutation.isPending}
+                      className="w-full"
+                      data-testid={`button-switch-${org.id}`}
+                    >
+                      Switch to this Organization
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  )}
+                  
                   <Button
-                    onClick={() => handleSwitchOrg(org.id)}
-                    disabled={switchOrgMutation.isPending}
+                    variant="outline"
+                    onClick={() => handleViewWebsite(org.id)}
                     className="w-full"
-                    data-testid={`button-switch-${org.id}`}
+                    data-testid={`button-view-website-${org.id}`}
                   >
-                    Switch to this Organization
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    View Website
+                    <ExternalLink className="ml-2 h-4 w-4" />
                   </Button>
-                )}
+                </div>
               </CardContent>
             </Card>
           );
