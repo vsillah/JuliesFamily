@@ -20,7 +20,9 @@ export function requireTier(requiredTier: Tier) {
   return async (req: TierRequest, res: Response, next: NextFunction) => {
     try {
       // Get authenticated user ID from session
-      const userId = req.session?.userId || req.session?.passport?.user;
+      // Passport stores user in req.user, check there first
+      const sessionUser = (req as any).user;
+      const userId = sessionUser?.id || req.session?.userId || req.session?.passport?.user;
       
       if (!userId) {
         return res.status(401).json({ 
