@@ -19,6 +19,7 @@ import { ObjectUploader } from "@/components/ObjectUploader";
 import { AdminPreviewDropdown } from "@/components/AdminPreviewDropdown";
 import { DevAdminButton } from "@/components/DevAdminButton";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
+import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -318,6 +319,10 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
               </Link>
               
               {!isAdmin && isAuthenticated && <DevAdminButton />}
+              
+              {isSuperAdmin && (
+                <OrganizationSwitcher />
+              )}
               
               {isAdmin && (
                 <AdminPreviewDropdown isScrolled={isScrolled} />
