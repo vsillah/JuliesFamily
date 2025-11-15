@@ -7,6 +7,7 @@ import { initDonorLifecycleScheduler, shutdownDonorLifecycleScheduler } from "./
 import { initEmailReportScheduler, shutdownEmailReportScheduler } from "./services/emailReportScheduler";
 import { helmetConfig, globalLimiter } from "./security";
 import { detectOrganization } from "./orgMiddleware";
+import { attachOrgStorage } from "./orgStorageMiddleware";
 
 const app = express();
 
@@ -32,6 +33,9 @@ app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
 // Detect organization from custom domain
 app.use(detectOrganization);
+
+// Attach organization-scoped storage to request
+app.use(attachOrgStorage);
 
 app.use((req, res, next) => {
   const start = Date.now();
