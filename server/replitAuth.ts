@@ -118,6 +118,7 @@ async function upsertUser(
   console.log("[OIDC Claims] Calling upsertUser with:", JSON.stringify(upsertData, null, 2));
   const result = await storage.upsertUser(upsertData);
   console.log("[OIDC Claims] upsertUser returned user with role:", result.role);
+  return result;
 }
 
 export async function setupAuth(app: Express) {
