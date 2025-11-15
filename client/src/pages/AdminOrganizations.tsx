@@ -70,13 +70,14 @@ export default function AdminOrganizations() {
       const response = await apiRequest('POST', '/api/admin/organization/switch', { organizationId });
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data, variables, context) => {
       toast({
         title: "Organization Switched",
         description: `Now viewing organization ${data.organizationId}`,
       });
-      // Invalidate ALL queries to refetch org-scoped data
-      queryClient.invalidateQueries();
+      // Force full page reload to bypass all browser caching and React Query cache
+      // This ensures fresh data is fetched with the new organization context
+      window.location.href = '/';
     },
     onError: (error: any) => {
       toast({
@@ -161,14 +162,9 @@ export default function AdminOrganizations() {
   };
 
   const handleViewWebsite = (orgId: string) => {
-    // If not the current org, switch to it first then navigate
+    // If not the current org, switch to it first (mutation handles navigation)
     if (currentOrg?.organizationId !== orgId) {
-      switchOrgMutation.mutate(orgId, {
-        onSuccess: () => {
-          // Navigate after successful switch
-          setLocation('/');
-        }
-      });
+      switchOrgMutation.mutate(orgId);
     } else {
       // Already on this org, just navigate
       setLocation('/');

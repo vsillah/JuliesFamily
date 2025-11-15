@@ -3613,6 +3613,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { persona, funnelStage, passions } = req.query;
       
+      // DEBUG: Log organization context
+      console.log(`[/api/content/visible/:type] Request for type=${req.params.type}, org=${req.organizationId}, persona=${persona}, funnel=${funnelStage}`);
+      
       // Priority: user profile passions > query string passions > null
       let userPassions: string[] | null = null;
       
@@ -3636,6 +3639,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         funnelStage as string | undefined,
         userPassions
       );
+      
+      // DEBUG: Log results
+      console.log(`[/api/content/visible/:type] Returned ${items.length} items for org=${req.organizationId}`);
+      if (items.length > 0 && req.params.type === 'hero') {
+        console.log(`[/api/content/visible/:type] Hero title: "${items[0].title}"`);
+      }
+      
       res.json(items);
     } catch (error) {
       console.error("Error fetching visible content items:", error);

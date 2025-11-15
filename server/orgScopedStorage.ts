@@ -442,7 +442,8 @@ class OrgScopedImplementations {
           eq(contentItems.type, type),
           eq(contentItems.isActive, true),
           eq(contentVisibility.isVisible, true),
-          eq(contentItems.organizationId, this.organizationId) // ORG SCOPING
+          eq(contentItems.organizationId, this.organizationId), // ORG SCOPING
+          eq(contentVisibility.organizationId, this.organizationId) // ORG SCOPING FOR VISIBILITY
         )
       )
       .orderBy(contentItems.id, sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`);

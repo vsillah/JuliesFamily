@@ -160,6 +160,12 @@ export async function detectOrganization(
       console.log(`[OrgMiddleware] Trusted domain ${hostname} -> Default Org ${DEFAULT_ORG_ID}`);
     }
     
+    // Set cache-control headers to prevent browser HTTP caching of org-specific content
+    // This ensures fresh data is fetched when organization context changes
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     next();
   } catch (error) {
     console.error('[OrgMiddleware] Error detecting organization:', error);
