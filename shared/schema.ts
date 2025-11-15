@@ -15,9 +15,20 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// User role enum for RBAC
-export const userRoleEnum = z.enum(['client', 'admin', 'super_admin']);
+// Platform-level role enum for RBAC
+// - client: Regular user with no platform-level privileges
+// - admin: DEPRECATED - use organization-level roles instead
+// - kinflo_admin: KinFlo platform super admin - can manage all organizations and switch between them
+export const userRoleEnum = z.enum(['client', 'admin', 'kinflo_admin']);
 export type UserRole = z.infer<typeof userRoleEnum>;
+
+// Organization-level role enum for per-organization permissions
+// - viewer: Read-only access to organization data
+// - editor: Can create and edit content within the organization
+// - org_admin: Organization super admin - full control within their organization (Julie's Family Learning Program, etc.)
+// - owner: Primary owner of the organization
+export const organizationRoleEnum = z.enum(['viewer', 'editor', 'org_admin', 'owner']);
+export type OrganizationRole = z.infer<typeof organizationRoleEnum>;
 
 // Organization tier enum for feature access control
 export const organizationTierEnum = z.enum(['basic', 'pro', 'premium']);
@@ -61,7 +72,7 @@ export const organizationUsers = pgTable("organization_users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   organizationId: varchar("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
-  role: varchar("role").notNull().default('viewer'), // owner, admin, editor, viewer
+  role: varchar("role").notNull().default('viewer'), // Organization-level: viewer, editor, org_admin, owner
   joinedAt: timestamp("joined_at").defaultNow(),
   invitedBy: varchar("invited_by").references(() => users.id, { onDelete: "set null" }),
 }, (table) => [
@@ -128,7 +139,7 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   persona: varchar("persona"), // Stored persona preference: student, provider, parent, donor, volunteer
   passions: jsonb("passions"), // Array of passion tags: ['literacy', 'stem', 'arts', 'nutrition', 'community']
-  role: varchar("role").notNull().default('client'), // client, admin, super_admin
+  role: varchar("role").notNull().default('client'), // Platform-level: client, admin (deprecated), kinflo_admin
   isAdmin: boolean("is_admin").default(false), // DEPRECATED: Use role instead. Kept for backward compatibility during migration.
   stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for saved payment methods
   organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "set null" }), // Organization membership for tier-based access

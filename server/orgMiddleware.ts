@@ -77,7 +77,7 @@ export async function detectOrganization(
           .where(eq(users.oidcSub, currentOidcSub))
           .limit(1);
         
-        if (user && user.role === 'super_admin') {
+        if (user && user.role === 'kinflo_admin') {
           req.organizationId = req.session.organizationIdOverride;
           
           // Load organization details

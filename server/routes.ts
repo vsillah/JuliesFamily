@@ -86,11 +86,13 @@ const requireRole = (...allowedRoles: UserRole[]): RequestHandler => {
   };
 };
 
-// Admin middleware - allows both admin and super_admin
-const requireAdmin: RequestHandler = requireRole('admin', 'super_admin');
+// Admin middleware - allows both admin and kinflo_admin
+const requireAdmin: RequestHandler = requireRole('admin', 'kinflo_admin');
 
-// Super admin middleware - only allows super_admin
-const requireSuperAdmin: RequestHandler = requireRole('super_admin');
+// KinFlo admin middleware - only allows kinflo_admin (platform super admin)
+const requireKinfloAdmin: RequestHandler = requireRole('kinflo_admin');
+// Backward compatibility alias
+const requireSuperAdmin: RequestHandler = requireKinfloAdmin;
 
 // DEPRECATED: Use requireAdmin instead. Kept for backward compatibility.
 const isAdmin: RequestHandler = requireAdmin;
@@ -213,7 +215,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // This allows admin controls to remain visible during impersonation
       const realUser = req.adminUser || req.user;
       const realUserData = realUser.claims ? await req.storage.getUserByOidcSub(realUser.claims.sub) : null;
-      const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'super_admin');
+      const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'kinflo_admin');
       
       // Get persona and funnel stage from leads table if available
       let funnelStage = "awareness"; // default
@@ -250,8 +252,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const oidcSub = req.user.claims.sub;
         const { role } = req.body;
         
-        if (!role || !['client', 'admin', 'super_admin'].includes(role)) {
-          return res.status(400).json({ message: "Invalid role. Must be client, admin, or super_admin" });
+        if (!role || !['client', 'admin', 'kinflo_admin'].includes(role)) {
+          return res.status(400).json({ message: "Invalid role. Must be client, admin, or kinflo_admin" });
         }
         
         console.log(`[Test Helper] Setting role for oidcSub ${oidcSub} to ${role}`);
@@ -429,15 +431,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate role value
       const validationResult = userRoleEnum.safeParse(newRole);
       if (!validationResult.success) {
-        return res.status(400).json({ message: "Invalid role value. Must be 'client', 'admin', or 'super_admin'" });
+        return res.status(400).json({ message: "Invalid role value. Must be 'client', 'admin', or 'kinflo_admin'" });
       }
       
       // Get current user
       const oidcSub = req.user.claims.sub;
       const currentUser = await req.storage.getUserByOidcSub(oidcSub);
       
-      // Prevent super admins from demoting themselves
-      if (currentUser && userId === currentUser.id && newRole !== 'super_admin') {
+      // Prevent KinFlo admins from demoting themselves
+      if (currentUser && userId === currentUser.id && newRole !== 'kinflo_admin') {
         return res.status(400).json({ message: "You cannot change your own role" });
       }
       
@@ -447,12 +449,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Prevent demoting the last super_admin
-      if (userToUpdate.role === 'super_admin' && newRole !== 'super_admin') {
+      // Prevent demoting the last kinflo_admin
+      if (userToUpdate.role === 'kinflo_admin' && newRole !== 'kinflo_admin') {
         const allUsers = await req.storage.getAllUsers();
-        const superAdminCount = allUsers.filter(u => u.role === 'super_admin').length;
-        if (superAdminCount <= 1) {
-          return res.status(400).json({ message: "Cannot demote the last super admin" });
+        const kinfloAdminCount = allUsers.filter(u => u.role === 'kinflo_admin').length;
+        if (kinfloAdminCount <= 1) {
+          return res.status(400).json({ message: "Cannot demote the last KinFlo admin" });
         }
       }
       
@@ -505,7 +507,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userRole = role || 'client';
       const validationResult = userRoleEnum.safeParse(userRole);
       if (!validationResult.success) {
-        return res.status(400).json({ message: "Invalid role value. Must be 'client', 'admin', or 'super_admin'" });
+        return res.status(400).json({ message: "Invalid role value. Must be 'client', 'admin', or 'kinflo_admin'" });
       }
       
       // Check for duplicate email before creating
@@ -650,12 +652,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
       
-      // Prevent deleting the last super_admin
-      if (userToDelete.role === 'super_admin') {
+      // Prevent deleting the last kinflo_admin
+      if (userToDelete.role === 'kinflo_admin') {
         const allUsers = await req.storage.getAllUsers();
-        const superAdminCount = allUsers.filter(u => u.role === 'super_admin').length;
-        if (superAdminCount <= 1) {
-          return res.status(400).json({ message: "Cannot delete the last super admin" });
+        const kinfloAdminCount = allUsers.filter(u => u.role === 'kinflo_admin').length;
+        if (kinfloAdminCount <= 1) {
+          return res.status(400).json({ message: "Cannot delete the last KinFlo admin" });
         }
       }
       
