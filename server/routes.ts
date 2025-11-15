@@ -86,11 +86,12 @@ const requireRole = (...allowedRoles: UserRole[]): RequestHandler => {
   };
 };
 
-// Admin middleware - allows both admin and kinflo_admin
-const requireAdmin: RequestHandler = requireRole('admin', 'kinflo_admin');
+// Admin middleware - allows both admin and kinflo_admin (and super_admin for backward compatibility)
+const requireAdmin: RequestHandler = requireRole('admin', 'kinflo_admin', 'super_admin');
 
 // KinFlo admin middleware - only allows kinflo_admin (platform super admin)
-const requireKinfloAdmin: RequestHandler = requireRole('kinflo_admin');
+// Note: super_admin is treated as kinflo_admin for backward compatibility during migration
+const requireKinfloAdmin: RequestHandler = requireRole('kinflo_admin', 'super_admin');
 // Backward compatibility alias
 const requireSuperAdmin: RequestHandler = requireKinfloAdmin;
 
@@ -215,7 +216,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // This allows admin controls to remain visible during impersonation
       const realUser = req.adminUser || req.user;
       const realUserData = realUser.claims ? await req.storage.getUserByOidcSub(realUser.claims.sub) : null;
-      const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'kinflo_admin');
+      const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'kinflo_admin' || realUserData.role === 'super_admin');
       
       // Get persona and funnel stage from leads table if available
       let funnelStage = "awareness"; // default
