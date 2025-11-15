@@ -3292,7 +3292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all image assets
-  app.get('/api/admin/images', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/admin/images', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const images = await storage.getAllImageAssets();
       res.json(images);
@@ -3303,7 +3303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get image assets by usage
-  app.get('/api/admin/images/usage/:usage', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/admin/images/usage/:usage', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const images = await storage.getImageAssetsByUsage(req.params.usage);
       res.json(images);
@@ -3314,7 +3314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single image asset
-  app.get('/api/admin/images/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/admin/images/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const image = await storage.getImageAsset(req.params.id);
       if (!image) {
@@ -3328,7 +3328,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update image asset metadata
-  app.patch('/api/admin/images/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/admin/images/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const validatedData = insertImageAssetSchema.partial().parse(req.body);
       const image = await storage.updateImageAsset(req.params.id, validatedData);
@@ -3343,7 +3343,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete image asset (also deletes from Cloudinary)
-  app.delete('/api/admin/images/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/admin/images/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const image = await storage.getImageAsset(req.params.id);
       if (!image) {
@@ -3405,7 +3405,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============ CONTENT MANAGEMENT ROUTES ============
   
   // Get all content items (admin)
-  app.get('/api/content', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/content', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const items = await storage.getAllContentItems();
       res.json(items);
@@ -3635,7 +3635,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get available persona×stage combinations (admin) - for A/B test targeting
-  app.get('/api/content/available-combinations', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/content/available-combinations', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const combinations = await storage.getAvailablePersonaStageCombinations();
       res.json(combinations);
@@ -3646,7 +3646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create content item (admin)
-  app.post('/api/content', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/content', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const { persona, funnelStage, visibilityCombos, ...contentData } = req.body;
       const validatedData = insertContentItemSchema.parse(contentData);
@@ -3696,7 +3696,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update content item (admin)
-  app.patch('/api/content/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/content/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const { persona, funnelStage, visibilityCombos, ...contentData } = req.body;
       const item = await storage.updateContentItem(req.params.id, contentData);
@@ -3763,7 +3763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Batch reorder content items (admin) - MUST be before parameterized routes
-  app.patch('/api/content/reorder', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/content/reorder', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       console.log('[BATCH REORDER] Endpoint hit with body:', JSON.stringify(req.body));
       const validatedData = batchContentReorderSchema.parse(req.body);
@@ -3799,7 +3799,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update content item order (admin)
-  app.patch('/api/content/:id/order', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/content/:id/order', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       console.log('[SINGLE ORDER] Endpoint hit for id:', req.params.id);
       const { order } = req.body;
@@ -3818,7 +3818,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete content item (admin)
-  app.delete('/api/content/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/content/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       await storage.deleteContentItem(req.params.id);
       res.status(204).send();
@@ -3829,7 +3829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get content item usage (admin) - shows where content is being used
-  app.get('/api/content/:id/usage', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/content/:id/usage', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const usage = await storage.getContentItemUsage(req.params.id);
       res.json(usage);
@@ -3840,7 +3840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all content visibility settings (admin)
-  app.get('/api/content/visibility', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/content/visibility', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const allVisibility = await storage.getAllContentVisibility();
       res.json(allVisibility);
@@ -3851,7 +3851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get content visibility settings for specific item (admin)
-  app.get('/api/content/:contentItemId/visibility', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/content/:contentItemId/visibility', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const { persona, funnelStage } = req.query;
       const visibility = await storage.getContentVisibility(
@@ -3867,7 +3867,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create content visibility setting (admin)
-  app.post('/api/content/visibility', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/content/visibility', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const validatedData = insertContentVisibilitySchema.parse(req.body);
       const visibility = await storage.createContentVisibility(validatedData);
@@ -3882,7 +3882,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update content visibility setting (admin)
-  app.patch('/api/content/visibility/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/content/visibility/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const visibility = await storage.updateContentVisibility(req.params.id, req.body);
       if (!visibility) {
@@ -3896,7 +3896,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete content visibility setting (admin)
-  app.delete('/api/content/visibility/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/content/visibility/:id', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       await storage.deleteContentVisibility(req.params.id);
       res.status(204).send();
@@ -3907,7 +3907,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get content visibility matrix for all persona×stage combinations (admin)
-  app.get('/api/content/:contentItemId/visibility-matrix', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/content/:contentItemId/visibility-matrix', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const visibility = await storage.getContentVisibility(req.params.contentItemId);
       res.json(visibility);
@@ -3918,7 +3918,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Reset persona×stage overrides to defaults (admin)
-  app.post('/api/content/visibility/:id/reset', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/content/visibility/:id/reset', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const visibility = await storage.updateContentVisibility(req.params.id, {
         titleOverride: null,
@@ -4526,7 +4526,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get performance metrics for recommendations (admin)
-  app.get('/api/performance-metrics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/performance-metrics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const metrics = await storage.getPerformanceMetrics();
       res.json(metrics);
@@ -4537,7 +4537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI-Powered Social Media Screenshot Analysis (admin only)
-  app.post('/api/analyze-social-post', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/analyze-social-post', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { imageBase64 } = req.body;
 
@@ -4564,7 +4564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI-Powered YouTube Video Analysis (admin only)
-  app.post('/api/analyze-youtube-video', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/analyze-youtube-video', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { youtubeUrl } = req.body;
 
@@ -4649,7 +4649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI-Powered Image Naming Analysis (admin only)
-  app.post('/api/analyze-image-for-naming', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/analyze-image-for-naming', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { uploadToken, originalFilename } = req.body;
 
@@ -4718,7 +4718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Google Reviews Routes
   
   // Sync reviews from Google Places API (admin only)
-  app.post('/api/google-reviews/sync', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/google-reviews/sync', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { placeId } = req.body;
       
@@ -4789,7 +4789,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all reviews including inactive (admin only)
-  app.get('/api/google-reviews/all', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/google-reviews/all', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const reviews = await storage.getGoogleReviews();
       res.json(reviews);
@@ -4800,7 +4800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update review visibility (admin only)
-  app.patch('/api/google-reviews/:id/visibility', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/google-reviews/:id/visibility', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const { isActive } = req.body;
@@ -4820,7 +4820,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email Campaign Routes (admin only)
   
   // Get all email campaigns
-  app.get('/api/email-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const campaigns = await storage.getAllEmailCampaigns();
       res.json(campaigns);
@@ -4831,7 +4831,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get active email campaigns
-  app.get('/api/email-campaigns/active', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns/active', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const campaigns = await storage.getActiveCampaigns();
       res.json(campaigns);
@@ -4842,7 +4842,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single email campaign with sequence steps
-  app.get('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const campaign = await storage.getEmailCampaign(id);
@@ -4862,7 +4862,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create email campaign
-  app.post('/api/email-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/email-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const validatedData = insertEmailCampaignSchema.parse(req.body);
       const campaign = await storage.createEmailCampaign(validatedData);
@@ -4877,7 +4877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update email campaign
-  app.patch('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertEmailCampaignSchema.partial().parse(req.body);
@@ -4898,7 +4898,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete email campaign
-  app.delete('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/email-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteEmailCampaign(id);
@@ -4912,7 +4912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email Sequence Step Routes
   
   // Create email sequence step
-  app.post('/api/email-sequence-steps', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/email-sequence-steps', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const validatedData = insertEmailSequenceStepSchema.parse(req.body);
       
@@ -4933,7 +4933,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update email sequence step
-  app.patch('/api/email-sequence-steps/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/email-sequence-steps/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertEmailSequenceStepSchema.partial().parse(req.body);
@@ -4960,7 +4960,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete email sequence step
-  app.delete('/api/email-sequence-steps/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/email-sequence-steps/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteEmailSequenceStep(id);
@@ -5788,7 +5788,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get email logs for a campaign (independent pagination from enrollments)
-  app.get('/api/email-logs/campaign/:campaignId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-logs/campaign/:campaignId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { campaignId } = req.params;
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
@@ -5854,7 +5854,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get email campaign analytics
-  app.get('/api/email-campaigns/:id/analytics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns/:id/analytics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id: campaignId } = req.params;
       
@@ -5922,7 +5922,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get email campaign link performance
-  app.get('/api/email-campaigns/:id/link-performance', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns/:id/link-performance', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id: campaignId } = req.params;
       
@@ -5936,7 +5936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get email campaign time-series analytics
-  app.get('/api/email-campaigns/:id/time-series', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns/:id/time-series', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id: campaignId } = req.params;
       const { metric = 'opens', interval = 'day', startDate, endDate } = req.query;
@@ -5981,7 +5981,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export campaign analytics as CSV
-  app.get('/api/email-campaigns/:id/export/csv', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns/:id/export/csv', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id: campaignId } = req.params;
       
@@ -6060,7 +6060,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Export campaign analytics as Excel with multiple formatted sheets
-  app.get('/api/email-campaigns/:id/export/excel', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-campaigns/:id/export/excel', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id: campaignId } = req.params;
       
@@ -6297,7 +6297,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Email Insights Routes
   
   // Get best send time insights with scope filtering
-  app.get('/api/email-insights/best-send-times', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/email-insights/best-send-times', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { scope = 'global', scopeId, forceRecalculate } = req.query;
       
@@ -6335,7 +6335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // SMS Template Routes
   
   // Get all SMS templates
-  app.get('/api/sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const templates = await storage.getAllSmsTemplates();
       res.json(templates);
@@ -6346,7 +6346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get SMS template by ID
-  app.get('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const template = await storage.getSmsTemplateById(id);
@@ -6363,7 +6363,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create SMS template
-  app.post('/api/sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const validatedData = insertSmsTemplateSchema.parse(req.body);
       const template = await storage.createSmsTemplate(validatedData);
@@ -6378,7 +6378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update SMS template
-  app.patch('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const validatedData = insertSmsTemplateSchema.partial().parse(req.body);
@@ -6399,7 +6399,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete SMS template
-  app.delete('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteSmsTemplate(id);
@@ -6413,7 +6413,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Send SMS Routes
   
   // Send SMS to a lead using a template
-  app.post('/api/sms/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/sms/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId, templateId, customMessage, recipientPhone, recipientName, variables } = req.body;
       
@@ -6474,7 +6474,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get SMS sends for a lead
-  app.get('/api/sms/lead/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/sms/lead/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
       const sends = await storage.getSmsSendsByLead(leadId);
@@ -6486,7 +6486,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get recent SMS sends
-  app.get('/api/sms/recent', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/sms/recent', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
       const sends = await storage.getRecentSmsSends(limit);
@@ -6500,7 +6500,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bulk SMS Campaign Routes
   
   // Preview bulk SMS campaign recipients (get count and sample leads)
-  app.post('/api/sms/bulk/preview', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/sms/bulk/preview', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { personaFilter, funnelStageFilter } = req.body;
       
@@ -6600,7 +6600,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get all bulk SMS campaigns
-  app.get('/api/sms/bulk', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/sms/bulk', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
       const campaigns = await storage.getAllSmsBulkCampaigns(limit);
@@ -6612,7 +6612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Get specific bulk SMS campaign
-  app.get('/api/sms/bulk/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/sms/bulk/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const campaign = await storage.getSmsBulkCampaign(id);
@@ -6631,7 +6631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Hormozi Email Template Routes (Alex Hormozi's $100M Leads Framework)
   
   // Get all Hormozi email templates with filtering
-  app.get('/api/hormozi-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/hormozi-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { persona, funnelStage, outreachType, templateCategory } = req.query;
       const templates = await storage.getHormoziEmailTemplates({
@@ -6648,7 +6648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single Hormozi email template by ID
-  app.get('/api/hormozi-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/hormozi-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const template = await storage.getHormoziEmailTemplate(id);
@@ -6665,7 +6665,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Personalize email template using AI for a specific lead
-  app.post('/api/hormozi-templates/personalize', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/hormozi-templates/personalize', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { templateId, leadId } = req.body;
       
@@ -6716,7 +6716,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send personalized Hormozi email to a lead
-  app.post('/api/hormozi-templates/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/hormozi-templates/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId, subject, htmlBody, textBody } = req.body;
       
@@ -6768,7 +6768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Hormozi SMS Template Routes (Alex Hormozi's $100M Leads Framework for SMS)
   
   // Get all Hormozi SMS templates with filtering
-  app.get('/api/hormozi-sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/hormozi-sms-templates', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { persona, funnelStage, outreachType, templateCategory } = req.query;
       const templates = await storage.getHormoziSmsTemplates({
@@ -6785,7 +6785,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single Hormozi SMS template by ID
-  app.get('/api/hormozi-sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/hormozi-sms-templates/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const template = await storage.getHormoziSmsTemplate(id);
@@ -6802,7 +6802,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Personalize SMS template using AI for a specific lead
-  app.post('/api/hormozi-sms-templates/personalize', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/hormozi-sms-templates/personalize', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { templateId, leadId } = req.body;
       
@@ -6841,7 +6841,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send personalized Hormozi SMS to a lead
-  app.post('/api/hormozi-sms-templates/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/hormozi-sms-templates/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId, messageContent } = req.body;
       
@@ -7041,7 +7041,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get communication timeline for a lead
-  app.get('/api/leads/:leadId/timeline', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/leads/:leadId/timeline', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
       
@@ -7150,7 +7150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========================================
 
   // Get all pipeline stages
-  app.get("/api/pipeline/stages", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/pipeline/stages", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const stages = await storage.getPipelineStages();
       res.json(stages);
@@ -7161,7 +7161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get current assignment for a lead
-  app.get("/api/leads/:leadId/assignment", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/leads/:leadId/assignment", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
       const assignment = await storage.getLeadAssignment(leadId);
@@ -7178,7 +7178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all assignments for a lead (assignment history)
-  app.get("/api/leads/:leadId/assignments", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/leads/:leadId/assignments", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
       const assignments = await storage.getLeadAssignments({ leadId });
@@ -7224,7 +7224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all assignments with filters
-  app.get("/api/admin/assignments", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/admin/assignments", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { assignedTo, leadId } = req.query;
       
@@ -7241,7 +7241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all tasks with filters
-  app.get("/api/tasks", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/tasks", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId, assignedTo, status } = req.query;
       
@@ -7298,7 +7298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update a task
-  app.patch("/api/tasks/:taskId", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch("/api/tasks/:taskId", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { taskId } = req.params;
       const updates = req.body;
@@ -7330,7 +7330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete a task
-  app.delete("/api/tasks/:taskId", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete("/api/tasks/:taskId", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { taskId } = req.params;
       await storage.deleteTask(taskId);
@@ -7342,7 +7342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Check for overdue tasks and create follow-up tasks (automated maintenance endpoint)
-  app.post("/api/tasks/check-overdue", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post("/api/tasks/check-overdue", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       await createTasksForMissedFollowUps(storage);
       res.json({ message: "Checked for overdue tasks and created follow-ups where needed" });
@@ -7394,7 +7394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get pipeline history for a lead
-  app.get("/api/leads/:leadId/pipeline-history", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/leads/:leadId/pipeline-history", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { leadId } = req.params;
       const history = await storage.getPipelineHistory(leadId);
@@ -7406,7 +7406,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get leads grouped by pipeline stage (for kanban board)
-  app.get("/api/pipeline/board", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/pipeline/board", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const leads = await storage.getAllLeads();
       const stages = await storage.getPipelineStages();
@@ -7442,7 +7442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get pipeline analytics (conversion rates, time in stage, bottlenecks)
-  app.get("/api/pipeline/analytics", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get("/api/pipeline/analytics", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const stages = await storage.getPipelineStages();
       const leads = await storage.getAllLeads();
@@ -8024,7 +8024,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all donations (admin only)
-  app.get('/api/donations', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/donations', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const donations = await storage.getAllDonations();
       res.json(donations);
@@ -8035,7 +8035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get donation by ID (admin only)
-  app.get('/api/donations/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/donations/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const donation = await storage.getDonationById(id);
@@ -8076,7 +8076,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all donation campaigns (admin only)
-  app.get('/api/donation-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/donation-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const campaigns = await storage.getAllDonationCampaigns();
       res.json(campaigns);
@@ -8098,7 +8098,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get single donation campaign (admin only)
-  app.get('/api/donation-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/donation-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const campaign = await storage.getDonationCampaign(id);
@@ -8115,7 +8115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get campaign donations (admin only)
-  app.get('/api/donation-campaigns/:id/donations', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/donation-campaigns/:id/donations', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const donations = await storage.getCampaignDonations(id);
@@ -8127,7 +8127,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create donation campaign (admin only)
-  app.post('/api/donation-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/donation-campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const parsed = insertDonationCampaignSchema.parse(req.body);
       const campaign = await storage.createDonationCampaign(parsed);
@@ -8142,7 +8142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update donation campaign (admin only)
-  app.patch('/api/donation-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/donation-campaigns/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -8167,7 +8167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send donation campaign (admin only)
-  app.post('/api/donation-campaigns/:id/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/donation-campaigns/:id/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const campaign = await storage.getDonationCampaign(id);
@@ -8547,7 +8547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin routes for campaign members
   
   // Add member to campaign (admin only)
-  app.post('/api/donation-campaigns/:campaignId/members', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/donation-campaigns/:campaignId/members', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { campaignId } = req.params;
       const { userId, role, notifyOnDonation, notificationChannels, metadata } = req.body;
@@ -8573,7 +8573,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get campaign members (admin only)
-  app.get('/api/donation-campaigns/:campaignId/members', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/donation-campaigns/:campaignId/members', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { campaignId } = req.params;
       const members = await storage.getCampaignMembers(campaignId);
@@ -8585,7 +8585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get campaign testimonials (admin only)
-  app.get('/api/donation-campaigns/:campaignId/testimonials', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/donation-campaigns/:campaignId/testimonials', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { campaignId } = req.params;
       const { status } = req.query;
@@ -8621,7 +8621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Send testimonial to donors (admin only)
-  app.post('/api/campaign-testimonials/:id/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/campaign-testimonials/:id/send', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -8720,7 +8720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all wishlist items (admin only)
-  app.get('/api/wishlist/all', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/wishlist/all', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const items = await storage.getAllWishlistItems();
       res.json(items);
@@ -8731,7 +8731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create wishlist item (admin only)
-  app.post('/api/wishlist', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/wishlist', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const parsed = insertWishlistItemSchema.parse(req.body);
       const item = await storage.createWishlistItem(parsed);
@@ -8746,7 +8746,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update wishlist item (admin only)
-  app.patch('/api/wishlist/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/wishlist/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const updated = await storage.updateWishlistItem(id, req.body);
@@ -8763,7 +8763,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete wishlist item (admin only)
-  app.delete('/api/wishlist/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/wishlist/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const deleted = await storage.deleteWishlistItem(id);
@@ -8782,7 +8782,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI Copy Generation Routes (Admin only)
   
   // Generate Value Equation-based copy variants
-  app.post('/api/ai/generate-copy', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/ai/generate-copy', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const response = await generateValueEquationCopy(req.body);
       res.json(response);
@@ -8795,7 +8795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate descriptive name and description for A/B test variant
-  app.post('/api/ai/suggest-variant-name', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/ai/suggest-variant-name', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { testType, configuration, persona, funnelStage } = req.body;
       
@@ -8850,7 +8850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Generate text for form fields (description, overview, etc.)
-  app.post('/api/ai/generate-field-text', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/ai/generate-field-text', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { fieldType, contentType, currentValue, title, persona } = req.body;
       
@@ -9060,7 +9060,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete calendar event
-  app.delete('/api/calendar/events/:eventId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/calendar/events/:eventId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { eventId } = req.params;
       const result = await CalendarService.deleteEvent(eventId);
@@ -9389,7 +9389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin TGH Enrollment Management - Update enrollment
-  app.patch('/api/admin/tgh/enrollments/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/admin/tgh/enrollments/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -9408,7 +9408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin TGH Enrollment Management - Delete enrollment (and cascade delete attendance)
-  app.delete('/api/admin/tgh/enrollments/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/admin/tgh/enrollments/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -9446,7 +9446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin TGH Attendance Management - Update attendance record
-  app.patch('/api/admin/tgh/attendance/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/admin/tgh/attendance/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -9465,7 +9465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin TGH Attendance Management - Delete attendance record
-  app.delete('/api/admin/tgh/attendance/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/admin/tgh/attendance/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       
@@ -9593,7 +9593,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============================================================================
 
   // Admin - Get all volunteer events
-  app.get('/api/admin/volunteer/events', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/admin/volunteer/events', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const events = await storage.getAllVolunteerEvents();
       res.json(events);
@@ -9604,7 +9604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Create volunteer event
-  app.post('/api/admin/volunteer/events', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/admin/volunteer/events', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { insertVolunteerEventSchema } = await import("@shared/schema");
       const eventData = insertVolunteerEventSchema.parse({
@@ -9621,7 +9621,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Update volunteer event
-  app.patch('/api/admin/volunteer/events/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/admin/volunteer/events/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -9640,7 +9640,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Delete volunteer event
-  app.delete('/api/admin/volunteer/events/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/admin/volunteer/events/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteVolunteerEvent(id);
@@ -9652,7 +9652,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Create volunteer shift
-  app.post('/api/admin/volunteer/shifts', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.post('/api/admin/volunteer/shifts', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { insertVolunteerShiftSchema } = await import("@shared/schema");
       const shiftData = insertVolunteerShiftSchema.parse(req.body);
@@ -9666,7 +9666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Update volunteer shift
-  app.patch('/api/admin/volunteer/shifts/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/admin/volunteer/shifts/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -9685,7 +9685,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Delete volunteer shift
-  app.delete('/api/admin/volunteer/shifts/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.delete('/api/admin/volunteer/shifts/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       await storage.deleteVolunteerShift(id);
@@ -9697,7 +9697,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Get all enrollments with filters
-  app.get('/api/admin/volunteer/enrollments', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/admin/volunteer/enrollments', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { shiftId } = req.query;
       
@@ -9717,7 +9717,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Update enrollment status
-  app.patch('/api/admin/volunteer/enrollments/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.patch('/api/admin/volunteer/enrollments/:id', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
       const updates = req.body;
@@ -9753,7 +9753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin - Get volunteer's session logs
-  app.get('/api/admin/volunteer/sessions/:enrollmentId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/admin/volunteer/sessions/:enrollmentId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { enrollmentId } = req.params;
       const sessions = await storage.getEnrollmentSessions(enrollmentId);

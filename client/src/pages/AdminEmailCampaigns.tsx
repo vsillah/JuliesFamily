@@ -18,12 +18,15 @@ import type { EmailCampaign, EmailSequenceStep, EmailTemplate } from "@shared/sc
 import type { Persona } from "@shared/defaults/personas";
 import CopyVariantGenerator from "@/components/CopyVariantGenerator";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 interface CampaignWithSteps extends EmailCampaign {
   steps?: EmailSequenceStep[];
 }
 
-export default function AdminEmailCampaigns() {
+// Inner component with all data fetching - only mounts after TierGate allows access
+function EmailCampaignsContent() {
   const { toast } = useToast();
   const [selectedCampaign, setSelectedCampaign] = useState<CampaignWithSteps | null>(null);
   const [showCampaignDialog, setShowCampaignDialog] = useState(false);
@@ -792,5 +795,14 @@ export default function AdminEmailCampaigns() {
       </Dialog>
       </div>
     </div>
+  );
+}
+
+// Outer component - wraps TierGate with render prop to prevent premature hook execution
+export default function AdminEmailCampaigns() {
+  return (
+    <TierGate requiredTier={TIERS.PRO} featureName="Email Campaigns">
+      {() => <EmailCampaignsContent />}
+    </TierGate>
   );
 }

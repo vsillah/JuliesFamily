@@ -14,6 +14,8 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import CampaignTimeSeriesChart from "@/components/CampaignTimeSeriesChart";
 import BestSendTimeInsights from "@/components/BestSendTimeInsights";
 import type { EmailCampaign } from "@shared/schema";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 interface EnrollmentDetail {
   enrollment: {
@@ -59,9 +61,8 @@ interface CampaignAnalytics {
   uniqueEngagementRate: number;
 }
 
-export default function AdminEmailCampaignDetails() {
-  const [, params] = useRoute("/admin/email-campaigns/:id");
-  const campaignId = params?.id;
+// Inner component with all data fetching - only mounts after TierGate allows access
+function CampaignDetailsContent({ campaignId }: { campaignId: string }) {
   const { toast } = useToast();
   const [enrollmentPage, setEnrollmentPage] = useState(0);
   const [logPage, setLogPage] = useState(0);
@@ -141,10 +142,6 @@ export default function AdminEmailCampaignDetails() {
       });
     },
   });
-
-  if (!campaignId) {
-    return <div className="p-6">Invalid campaign ID</div>;
-  }
 
   if (campaignLoading) {
     return (
@@ -744,5 +741,21 @@ export default function AdminEmailCampaignDetails() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+// Outer component - wraps TierGate with render prop to prevent premature hook execution
+export default function AdminEmailCampaignDetails() {
+  const [, params] = useRoute("/admin/email-campaigns/:id");
+  const campaignId = params?.id;
+
+  if (!campaignId) {
+    return <div className="p-6">Invalid campaign ID</div>;
+  }
+
+  return (
+    <TierGate requiredTier={TIERS.PRO} featureName="Email Campaign Analytics">
+      {() => <CampaignDetailsContent campaignId={campaignId} />}
+    </TierGate>
   );
 }

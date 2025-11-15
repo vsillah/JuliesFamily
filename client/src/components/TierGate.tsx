@@ -8,7 +8,7 @@ import { Lock, Sparkles, Crown, Zap } from 'lucide-react';
 interface TierGateProps {
   requiredTier: Tier;
   featureName: string;
-  children: ReactNode;
+  children: ReactNode | (() => ReactNode);
   fallback?: ReactNode;
   showUpgradePrompt?: boolean;
 }
@@ -32,10 +32,21 @@ export function TierGate({
   fallback,
   showUpgradePrompt = true 
 }: TierGateProps) {
-  const { hasAccess, tier: currentTier } = useTierAccess();
+  const { hasAccess, tier: currentTier, isLoading } = useTierAccess();
+
+  // Show loading state while tier is being determined
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   if (hasAccess(requiredTier)) {
-    return <>{children}</>;
+    // If children is a function, call it to render content (render prop pattern)
+    // Otherwise, render children directly (backward compatibility)
+    return <>{typeof children === 'function' ? children() : children}</>;
   }
 
   if (fallback !== undefined) {

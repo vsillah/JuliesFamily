@@ -30,6 +30,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,7 +79,8 @@ const emailReportFormSchema = insertEmailReportScheduleSchema.omit({ recipients:
 
 type EmailReportFormValues = z.infer<typeof emailReportFormSchema>;
 
-export default function AdminEmailReports() {
+// Inner component with all data fetching - only mounts after TierGate allows access
+function EmailReportsContent() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editSchedule, setEditSchedule] = useState<EmailReportSchedule | null>(null);
@@ -278,7 +281,7 @@ export default function AdminEmailReports() {
 
   return (
     <div className="min-h-screen">
-      <Breadcrumbs 
+        <Breadcrumbs 
         items={[
           { label: "Admin", href: "/admin" },
           { label: "Email Report Schedules", href: "/admin/email-reports" }
@@ -802,5 +805,14 @@ export default function AdminEmailReports() {
         </AlertDialog>
       )}
     </div>
+  );
+}
+
+// Outer component - wraps TierGate with render prop to prevent premature hook execution
+export default function AdminEmailReports() {
+  return (
+    <TierGate requiredTier={TIERS.PRO} featureName="Scheduled Email Reports">
+      {() => <EmailReportsContent />}
+    </TierGate>
   );
 }

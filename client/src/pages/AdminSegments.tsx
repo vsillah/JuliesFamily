@@ -14,6 +14,8 @@ import { Plus, Edit, Trash2, Users, Filter } from "lucide-react";
 import type { Segment, Lead } from "@shared/schema";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Checkbox } from "@/components/ui/checkbox";
+import { TierGate } from "@/components/TierGate";
+import { TIERS } from "@shared/tiers";
 
 const PERSONA_OPTIONS = [
   { value: "donor", label: "Donor" },
@@ -56,7 +58,8 @@ interface SegmentWithPreview extends Segment {
   preview?: { count: number; leads: Lead[] };
 }
 
-export default function AdminSegments() {
+// Inner component with all data fetching - only mounts after TierGate allows access
+function SegmentsContent() {
   const { toast } = useToast();
   const [selectedSegment, setSelectedSegment] = useState<Segment | null>(null);
   const [showSegmentDialog, setShowSegmentDialog] = useState(false);
@@ -269,7 +272,7 @@ export default function AdminSegments() {
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <Breadcrumbs items={[
+        <Breadcrumbs items={[
         { label: "Admin", href: "/admin" },
         { label: "Segments" }
       ]} />
@@ -656,5 +659,14 @@ export default function AdminSegments() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+// Outer component - wraps TierGate with render prop to prevent premature hook execution
+export default function AdminSegments() {
+  return (
+    <TierGate requiredTier={TIERS.PRO} featureName="Advanced Segmentation">
+      {() => <SegmentsContent />}
+    </TierGate>
   );
 }
