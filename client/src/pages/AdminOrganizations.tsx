@@ -47,11 +47,8 @@ export default function AdminOrganizations() {
   // Switch organization mutation
   const switchOrgMutation = useMutation({
     mutationFn: async (organizationId: string) => {
-      return apiRequest<{ message: string; organizationId: string }>({
-        method: 'POST',
-        url: '/api/admin/organization/switch',
-        data: { organizationId }
-      });
+      const response = await apiRequest('POST', '/api/admin/organization/switch', { organizationId });
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -74,10 +71,8 @@ export default function AdminOrganizations() {
   // Clear override mutation
   const clearOverrideMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest<{ message: string }>({
-        method: 'DELETE',
-        url: '/api/admin/organization/switch',
-      });
+      const response = await apiRequest('DELETE', '/api/admin/organization/switch');
+      return response.json();
     },
     onSuccess: () => {
       toast({
