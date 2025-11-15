@@ -1,4 +1,6 @@
 import { storage } from '../storage';
+import { createOrgStorage } from '../orgScopedStorage';
+import type { IStorage } from '../storage';
 import { BackupSchedule } from '@shared/schema';
 import { add, set } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
@@ -57,7 +59,7 @@ export async function shutdownBackupScheduler(): Promise<void> {
 }
 
 /**
- * Main polling loop - checks for due schedules and executes them
+ * Main polling loop - checks for due schedules across all organizations
  */
 async function poll(): Promise<void> {
   if (isRunning) {
@@ -70,18 +72,40 @@ async function poll(): Promise<void> {
   try {
     const now = new Date();
     
-    // Get schedules that are due (including a 1-minute lookahead)
-    const schedules = await storage.getDueBackupSchedules(now, 1);
+    // Get all active organizations
+    const organizations = await storage.getAllOrganizations();
+    console.log(`[BackupScheduler] Processing ${organizations.length} organization(s)`);
     
-    if (schedules.length === 0) {
-      return;
+    let totalProcessed = 0;
+    
+    // Process each organization independently
+    for (const org of organizations) {
+      try {
+        // Create org-scoped storage for tenant isolation
+        const orgStorage = createOrgStorage(storage, org.id);
+        
+        // Get schedules that are due for this organization (including a 1-minute lookahead)
+        const schedules = await orgStorage.getDueBackupSchedules(now, 1);
+        
+        if (schedules.length === 0) {
+          continue;
+        }
+        
+        console.log(`[BackupScheduler] Org ${org.id} (${org.name}): Found ${schedules.length} due schedule(s)`);
+        
+        // Process each schedule sequentially to avoid overload
+        for (const schedule of schedules) {
+          await executeSchedule(orgStorage, schedule, now);
+          totalProcessed++;
+        }
+      } catch (error) {
+        console.error(`[BackupScheduler] Error processing org ${org.id}:`, error);
+        // Continue with next organization
+      }
     }
     
-    console.log(`[BackupScheduler] Found ${schedules.length} due schedule(s)`);
-    
-    // Process each schedule sequentially to avoid overload
-    for (const schedule of schedules) {
-      await executeSchedule(schedule, now);
+    if (totalProcessed > 0) {
+      console.log(`[BackupScheduler] Processed ${totalProcessed} schedule(s) across ${organizations.length} organization(s)`);
     }
   } catch (error) {
     console.error('[BackupScheduler] Poll error:', error);
@@ -91,13 +115,13 @@ async function poll(): Promise<void> {
 }
 
 /**
- * Execute a single backup schedule
+ * Execute a single backup schedule using org-scoped storage
  */
-async function executeSchedule(schedule: BackupSchedule, now: Date): Promise<void> {
+async function executeSchedule(orgStorage: IStorage, schedule: BackupSchedule, now: Date): Promise<void> {
   const lockUntil = new Date(now.getTime() + MAX_EXECUTION_TIME_MS);
   
-  // Try to acquire lock
-  const locked = await storage.markScheduleRunning(schedule.id, lockUntil);
+  // Try to acquire lock (org-scoped)
+  const locked = await orgStorage.markScheduleRunning(schedule.id, lockUntil);
   if (!locked) {
     console.log(`[BackupScheduler] Schedule ${schedule.id} already running or locked, skipping`);
     return;
@@ -106,8 +130,8 @@ async function executeSchedule(schedule: BackupSchedule, now: Date): Promise<voi
   console.log(`[BackupScheduler] Executing schedule ${schedule.id} (table: ${schedule.tableName})`);
   
   try {
-    // Create the backup
-    const result = await storage.createTableBackup(
+    // Create the backup (org-scoped)
+    const result = await orgStorage.createTableBackup(
       schedule.tableName,
       schedule.createdBy,
       `Scheduled: ${schedule.scheduleName || schedule.tableName}`,
@@ -116,9 +140,9 @@ async function executeSchedule(schedule: BackupSchedule, now: Date): Promise<voi
     
     console.log(`[BackupScheduler] Backup created: ${result.snapshotId} (${result.rowCount} rows)`);
     
-    // Enforce retention policy if specified
+    // Enforce retention policy if specified (org-scoped)
     if (schedule.retentionCount && schedule.retentionCount > 0) {
-      const deleted = await storage.cleanupOldBackupsBySchedule(
+      const deleted = await orgStorage.cleanupOldBackupsBySchedule(
         schedule.tableName,
         schedule.retentionCount
       );
@@ -131,8 +155,8 @@ async function executeSchedule(schedule: BackupSchedule, now: Date): Promise<voi
     // Calculate next run time
     const nextRun = computeNextRun(schedule, now);
     
-    // Mark as complete
-    await storage.completeSchedule(schedule.id, {
+    // Mark as complete (org-scoped)
+    await orgStorage.completeSchedule(schedule.id, {
       success: true,
       nextRun,
     });
@@ -145,8 +169,8 @@ async function executeSchedule(schedule: BackupSchedule, now: Date): Promise<voi
     // Calculate next run even on failure
     const nextRun = computeNextRun(schedule, now);
     
-    // Mark as complete with error
-    await storage.completeSchedule(schedule.id, {
+    // Mark as complete with error (org-scoped)
+    await orgStorage.completeSchedule(schedule.id, {
       success: false,
       error: errorMessage,
       nextRun,

@@ -1,4 +1,6 @@
 import { storage } from '../storage';
+import { createOrgStorage } from '../orgScopedStorage';
+import type { IStorage } from '../storage';
 import { EmailReportSchedule } from '@shared/schema';
 import { add, set, startOfDay, endOfDay, subDays, format } from 'date-fns';
 import { toZonedTime, fromZonedTime } from 'date-fns-tz';
@@ -63,7 +65,7 @@ export async function shutdownEmailReportScheduler(): Promise<void> {
 }
 
 /**
- * Main polling loop - checks for due schedules and executes them
+ * Main polling loop - checks for due schedules across all organizations
  */
 async function poll(): Promise<void> {
   if (isRunning) {
@@ -74,18 +76,40 @@ async function poll(): Promise<void> {
   isRunning = true;
   
   try {
-    // Get schedules that are due
-    const schedules = await storage.getSchedulesDueForExecution();
+    // Get all active organizations
+    const organizations = await storage.getAllOrganizations();
+    console.log(`[EmailReportScheduler] Processing ${organizations.length} organization(s)`);
     
-    if (schedules.length === 0) {
-      return;
+    let totalProcessed = 0;
+    
+    // Process each organization independently
+    for (const org of organizations) {
+      try {
+        // Create org-scoped storage for tenant isolation
+        const orgStorage = createOrgStorage(storage, org.id);
+        
+        // Get schedules that are due for this organization
+        const schedules = await orgStorage.getSchedulesDueForExecution();
+        
+        if (schedules.length === 0) {
+          continue;
+        }
+        
+        console.log(`[EmailReportScheduler] Org ${org.id} (${org.name}): Found ${schedules.length} due schedule(s)`);
+        
+        // Process each schedule sequentially to avoid overload
+        for (const schedule of schedules) {
+          await executeSchedule(orgStorage, schedule);
+          totalProcessed++;
+        }
+      } catch (error) {
+        console.error(`[EmailReportScheduler] Error processing org ${org.id}:`, error);
+        // Continue with next organization
+      }
     }
     
-    console.log(`[EmailReportScheduler] Found ${schedules.length} due schedule(s)`);
-    
-    // Process each schedule sequentially to avoid overload
-    for (const schedule of schedules) {
-      await executeSchedule(schedule);
+    if (totalProcessed > 0) {
+      console.log(`[EmailReportScheduler] Processed ${totalProcessed} schedule(s) across ${organizations.length} organization(s)`);
     }
   } catch (error) {
     console.error('[EmailReportScheduler] Poll error:', error);
@@ -97,7 +121,7 @@ async function poll(): Promise<void> {
 /**
  * Execute a single email report schedule
  */
-async function executeSchedule(schedule: EmailReportSchedule): Promise<void> {
+async function executeSchedule(orgStorage: IStorage, schedule: EmailReportSchedule): Promise<void> {
   console.log(`[EmailReportScheduler] Executing schedule ${schedule.id} (${schedule.name})`);
   
   const now = new Date();
@@ -109,8 +133,8 @@ async function executeSchedule(schedule: EmailReportSchedule): Promise<void> {
       return; // Don't update next_run_at - will retry once configured
     }
     
-    // Generate report data based on report type
-    const reportData = await generateReportData(schedule.reportType, schedule.frequency);
+    // Generate report data based on report type (org-scoped)
+    const reportData = await generateReportData(orgStorage, schedule.reportType, schedule.frequency);
     
     // Create email content
     const { subject, html } = formatReportEmail(schedule, reportData);
@@ -130,8 +154,8 @@ async function executeSchedule(schedule: EmailReportSchedule): Promise<void> {
     // Calculate next run time
     const nextRun = computeNextRun(schedule, now);
     
-    // Update schedule with success
-    await storage.updateEmailReportSchedule(schedule.id, {
+    // Update schedule with success (using org-scoped storage)
+    await orgStorage.updateEmailReportSchedule(schedule.id, {
       lastRunAt: now,
       nextRunAt: nextRun,
     });
@@ -145,8 +169,8 @@ async function executeSchedule(schedule: EmailReportSchedule): Promise<void> {
     // This prevents indefinite retries for permanent failures
     const nextRun = computeNextRun(schedule, now);
     
-    // Update schedule with failure
-    await storage.updateEmailReportSchedule(schedule.id, {
+    // Update schedule with failure (using org-scoped storage)
+    await orgStorage.updateEmailReportSchedule(schedule.id, {
       lastRunAt: now,
       nextRunAt: nextRun,
     });
@@ -154,9 +178,9 @@ async function executeSchedule(schedule: EmailReportSchedule): Promise<void> {
 }
 
 /**
- * Generate report data based on report type
+ * Generate report data based on report type (org-scoped)
  */
-async function generateReportData(reportType: string, frequency: string): Promise<any> {
+async function generateReportData(orgStorage: IStorage, reportType: string, frequency: string): Promise<any> {
   const now = new Date();
   
   // Determine date range based on frequency
@@ -177,13 +201,13 @@ async function generateReportData(reportType: string, frequency: string): Promis
   
   const dateTo = now;
   
-  // Get all campaigns
-  const campaigns = await storage.getAllEmailCampaigns();
+  // Get all campaigns (org-scoped)
+  const campaigns = await orgStorage.getAllEmailCampaigns();
   
-  // Get campaign performance data
+  // Get campaign performance data (org-scoped)
   const campaignStats = await Promise.all(
     campaigns.map(async (campaign) => {
-      const performance = await storage.getEmailCampaignPerformance(campaign.id);
+      const performance = await orgStorage.getEmailCampaignPerformance(campaign.id);
       return {
         name: campaign.name,
         ...performance,
@@ -219,8 +243,8 @@ async function generateReportData(reportType: string, frequency: string): Promis
       };
     
     case 'engagement_summary':
-      // Get recent email logs for engagement tracking
-      const recentLogs = await storage.getRecentEmailLogs(100);
+      // Get recent email logs for engagement tracking (org-scoped)
+      const recentLogs = await orgStorage.getRecentEmailLogs(100);
       const uniqueLeads = new Set(recentLogs.map(log => log.leadId).filter(Boolean));
       
       return {
@@ -234,7 +258,7 @@ async function generateReportData(reportType: string, frequency: string): Promis
       };
     
     case 'full_analytics':
-      const recentEmailLogs = await storage.getRecentEmailLogs(100);
+      const recentEmailLogs = await orgStorage.getRecentEmailLogs(100);
       const uniqueLeadsEmailed = new Set(recentEmailLogs.map(log => log.leadId).filter(Boolean));
       
       return {
@@ -577,17 +601,20 @@ export function computeInitialNextRun(frequency: string, referenceDate: Date = n
 /**
  * Manually execute a schedule immediately
  * Used by API routes for manual/on-demand report generation
+ * @param orgStorage - Org-scoped storage instance (injected from API route via req.storage)
+ * @param scheduleId - ID of the schedule to execute
+ * @param actorId - Optional ID of the user triggering the execution
  */
-export async function executeScheduleNow(scheduleId: string, actorId?: string): Promise<void> {
+export async function executeScheduleNow(orgStorage: IStorage, scheduleId: string, actorId?: string): Promise<void> {
   console.log(`[EmailReportScheduler] Manual execution requested for schedule ${scheduleId} by actor ${actorId || 'unknown'}`);
   
-  const schedule = await storage.getEmailReportSchedule(scheduleId);
+  const schedule = await orgStorage.getEmailReportSchedule(scheduleId);
   if (!schedule) {
     throw new Error(`Schedule ${scheduleId} not found`);
   }
   
-  // Execute the schedule (reuses the same execution pipeline)
-  await executeSchedule(schedule);
+  // Execute the schedule using org-scoped storage
+  await executeSchedule(orgStorage, schedule);
   
   console.log(`[EmailReportScheduler] Manual execution completed for schedule ${scheduleId}`);
 }

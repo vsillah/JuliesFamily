@@ -5243,8 +5243,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { executeScheduleNow } = await import('./services/emailReportScheduler');
       
-      // Execute the schedule immediately
-      await executeScheduleNow(id, req.user!.id);
+      // Execute the schedule immediately using org-scoped storage
+      await executeScheduleNow(req.storage, id, req.user!.id);
       
       res.json({ success: true, message: "Report sent successfully" });
     } catch (error: any) {

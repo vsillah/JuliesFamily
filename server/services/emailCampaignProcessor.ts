@@ -11,6 +11,8 @@ import {
 import { eq, and, lte, isNull, sql } from "drizzle-orm";
 import { sendEmail, renderTemplate } from "../email";
 import { storage } from "../storage";
+import { createOrgStorage } from "../orgScopedStorage";
+import type { IStorage } from "../storage";
 
 /**
  * Email Campaign Processor Service
@@ -31,7 +33,7 @@ export class EmailCampaignProcessor {
   private isProcessing = false;
 
   /**
-   * Process all pending emails for active campaign enrollments
+   * Process all pending emails across all organizations
    */
   async processPendingEmails(): Promise<{
     processed: number;
@@ -50,26 +52,47 @@ export class EmailCampaignProcessor {
     try {
       console.log("[EmailProcessor] Starting email campaign processing...");
 
-      // Find enrollments that need to send their next email
-      const pendingEnrollments = await this.getPendingEnrollments();
-      console.log(`[EmailProcessor] Found ${pendingEnrollments.length} enrollments ready to send`);
+      // Get all active organizations
+      const organizations = await storage.getAllOrganizations();
+      console.log(`[EmailProcessor] Processing ${organizations.length} organization(s)`);
 
-      // Process each enrollment
-      for (const item of pendingEnrollments) {
-        results.processed++;
-        
+      // Process each organization independently
+      for (const org of organizations) {
         try {
-          await this.sendCampaignEmail(item);
-          results.sent++;
+          // Create org-scoped storage for tenant isolation
+          const orgStorage = createOrgStorage(storage, org.id);
+
+          // Find enrollments that need to send their next email for this organization
+          const pendingEnrollments = await this.getPendingEnrollments(org.id);
+          
+          if (pendingEnrollments.length === 0) {
+            continue;
+          }
+          
+          console.log(`[EmailProcessor] Org ${org.id} (${org.name}): Found ${pendingEnrollments.length} enrollments ready to send`);
+
+          // Process each enrollment
+          for (const item of pendingEnrollments) {
+            results.processed++;
+            
+            try {
+              await this.sendCampaignEmail(orgStorage, item);
+              results.sent++;
+            } catch (error: any) {
+              results.failed++;
+              const errorMsg = `Failed to send email for enrollment ${item.enrollment.id}: ${error.message}`;
+              results.errors.push(errorMsg);
+              console.error(errorMsg);
+            }
+          }
         } catch (error: any) {
-          results.failed++;
-          const errorMsg = `Failed to send email for enrollment ${item.enrollment.id}: ${error.message}`;
-          results.errors.push(errorMsg);
-          console.error(errorMsg);
+          console.error(`[EmailProcessor] Error processing org ${org.id}:`, error);
+          results.errors.push(`Org ${org.id} error: ${error.message}`);
+          // Continue with next organization
         }
       }
 
-      console.log(`[EmailProcessor] Processing complete: ${results.sent} sent, ${results.failed} failed`);
+      console.log(`[EmailProcessor] Processing complete: ${results.sent} sent, ${results.failed} failed across ${organizations.length} organization(s)`);
       
     } catch (error: any) {
       console.error("[EmailProcessor] Fatal error during processing:", error);
@@ -82,18 +105,19 @@ export class EmailCampaignProcessor {
   }
 
   /**
-   * Get enrollments that are ready to send their next email
+   * Get enrollments that are ready to send their next email for a specific organization
    */
-  private async getPendingEnrollments(): Promise<EmailToSend[]> {
+  private async getPendingEnrollments(organizationId: string): Promise<EmailToSend[]> {
     const now = new Date();
 
-    // Find active enrollments that need to send
+    // Find active enrollments that need to send for this organization
     // Include both NULL lastEmailSentAt (new enrollments) and those with lastEmailSentAt <= now
     const enrollments = await db
       .select()
       .from(emailCampaignEnrollments)
       .where(
         and(
+          eq(emailCampaignEnrollments.organizationId, organizationId),
           eq(emailCampaignEnrollments.status, 'active'),
           sql`(${emailCampaignEnrollments.lastEmailSentAt} IS NULL OR ${emailCampaignEnrollments.lastEmailSentAt} <= ${now})`
         )
@@ -102,7 +126,7 @@ export class EmailCampaignProcessor {
     const emailsToSend: EmailToSend[] = [];
 
     for (const enrollment of enrollments) {
-      // Get the next step to send
+      // Get the next step to send - VALIDATE organizationId for tenant isolation
       const nextStepNumber = enrollment.currentStepNumber + 1;
       
       const [step] = await db
@@ -110,6 +134,7 @@ export class EmailCampaignProcessor {
         .from(emailSequenceSteps)
         .where(
           and(
+            eq(emailSequenceSteps.organizationId, organizationId),
             eq(emailSequenceSteps.campaignId, enrollment.campaignId),
             eq(emailSequenceSteps.stepNumber, nextStepNumber),
             eq(emailSequenceSteps.isActive, true)
@@ -117,14 +142,19 @@ export class EmailCampaignProcessor {
         );
 
       if (!step) {
-        // No more steps - mark enrollment as completed
+        // No more steps - mark enrollment as completed (org-scoped update)
         await db
           .update(emailCampaignEnrollments)
           .set({
             status: 'completed',
             completedAt: new Date(),
           })
-          .where(eq(emailCampaignEnrollments.id, enrollment.id));
+          .where(
+            and(
+              eq(emailCampaignEnrollments.id, enrollment.id),
+              eq(emailCampaignEnrollments.organizationId, organizationId)
+            )
+          );
         
         console.log(`[EmailProcessor] Enrollment ${enrollment.id} completed all steps`);
         continue;
@@ -139,16 +169,21 @@ export class EmailCampaignProcessor {
 
       // Check if it's time to send
       if (sendAt <= now) {
-        // Get lead info
+        // Get lead info - VALIDATE organizationId for tenant isolation
         const [lead] = await db
           .select()
           .from(leads)
-          .where(eq(leads.id, enrollment.leadId));
+          .where(
+            and(
+              eq(leads.id, enrollment.leadId),
+              eq(leads.organizationId, organizationId)
+            )
+          );
 
         if (lead && lead.email) {
           emailsToSend.push({ enrollment, step, lead });
         } else {
-          console.warn(`[EmailProcessor] Lead ${enrollment.leadId} not found or has no email`);
+          console.warn(`[EmailProcessor] Lead ${enrollment.leadId} not found or has no email for org ${organizationId}`);
         }
       }
     }
@@ -159,7 +194,7 @@ export class EmailCampaignProcessor {
   /**
    * Send a campaign email to a specific enrollment
    */
-  private async sendCampaignEmail(item: EmailToSend): Promise<void> {
+  private async sendCampaignEmail(orgStorage: IStorage, item: EmailToSend): Promise<void> {
     const { enrollment, step, lead } = item;
 
     console.log(`[EmailProcessor] Sending step ${step.stepNumber} to ${lead.email}...`);
@@ -178,9 +213,9 @@ export class EmailCampaignProcessor {
     const textBody = step.textContent ? renderTemplate(step.textContent, variables) : undefined;
     const subject = renderTemplate(step.subject, variables);
 
-    // Send email
+    // Send email using org-scoped storage
     const recipientName = variables.fullName !== 'Friend' ? variables.fullName : undefined;
-    const result = await sendEmail(storage, {
+    const result = await sendEmail(orgStorage, {
       to: lead.email,
       toName: recipientName,
       subject,
@@ -199,28 +234,68 @@ export class EmailCampaignProcessor {
       throw new Error(result.error || 'Unknown error sending email');
     }
 
-    // Update enrollment progress
+    // Update enrollment progress - VALIDATE organizationId for tenant isolation
     await db
       .update(emailCampaignEnrollments)
       .set({
         currentStepNumber: step.stepNumber,
         lastEmailSentAt: new Date(),
       })
-      .where(eq(emailCampaignEnrollments.id, enrollment.id));
+      .where(
+        and(
+          eq(emailCampaignEnrollments.id, enrollment.id),
+          eq(emailCampaignEnrollments.organizationId, enrollment.organizationId)
+        )
+      );
 
     console.log(`[EmailProcessor] Successfully sent step ${step.stepNumber} to ${lead.email}`);
   }
 
   /**
-   * Enroll a lead in a campaign
+   * Enroll a lead in a campaign (org-scoped)
+   * @param orgStorage - Org-scoped storage instance for tenant isolation
+   * @param organizationId - Organization ID for validation
+   * @param leadId - Lead ID to enroll
+   * @param campaignId - Campaign ID to enroll in
    */
-  async enrollLead(leadId: string, campaignId: string): Promise<string> {
-    // Check if already enrolled
+  async enrollLead(orgStorage: IStorage, organizationId: string, leadId: string, campaignId: string): Promise<string> {
+    // Verify lead belongs to this organization - CRITICAL for tenant isolation
+    const [lead] = await db
+      .select()
+      .from(leads)
+      .where(
+        and(
+          eq(leads.id, leadId),
+          eq(leads.organizationId, organizationId)
+        )
+      );
+    
+    if (!lead) {
+      throw new Error('Lead not found or does not belong to this organization');
+    }
+
+    // Verify campaign belongs to this organization - CRITICAL for tenant isolation
+    const [campaign] = await db
+      .select()
+      .from(emailCampaigns)
+      .where(
+        and(
+          eq(emailCampaigns.id, campaignId),
+          eq(emailCampaigns.organizationId, organizationId)
+        )
+      );
+    
+    if (!campaign) {
+      throw new Error('Campaign not found or does not belong to this organization');
+    }
+
+    // Check if already enrolled - VALIDATE organizationId
     const [existing] = await db
       .select()
       .from(emailCampaignEnrollments)
       .where(
         and(
+          eq(emailCampaignEnrollments.organizationId, organizationId),
           eq(emailCampaignEnrollments.leadId, leadId),
           eq(emailCampaignEnrollments.campaignId, campaignId)
         )
@@ -233,10 +308,11 @@ export class EmailCampaignProcessor {
       return existing.id;
     }
 
-    // Create new enrollment
+    // Create new enrollment with organizationId
     const [enrollment] = await db
       .insert(emailCampaignEnrollments)
       .values({
+        organizationId,
         campaignId,
         leadId,
         status: 'active',
@@ -245,24 +321,32 @@ export class EmailCampaignProcessor {
       })
       .returning();
 
-    console.log(`[EmailProcessor] Enrolled lead ${leadId} in campaign ${campaignId}`);
+    console.log(`[EmailProcessor] Enrolled lead ${leadId} in campaign ${campaignId} for org ${organizationId}`);
 
     return enrollment.id;
   }
 
   /**
-   * Unenroll a lead from a campaign
+   * Unenroll a lead from a campaign (org-scoped)
+   * @param organizationId - Organization ID for validation
+   * @param enrollmentId - Enrollment ID to unenroll
    */
-  async unenrollLead(enrollmentId: string): Promise<void> {
+  async unenrollLead(organizationId: string, enrollmentId: string): Promise<void> {
+    // VALIDATE organizationId to prevent cross-tenant unenrollment
     await db
       .update(emailCampaignEnrollments)
       .set({
         status: 'unsubscribed',
         unsubscribedAt: new Date(),
       })
-      .where(eq(emailCampaignEnrollments.id, enrollmentId));
+      .where(
+        and(
+          eq(emailCampaignEnrollments.id, enrollmentId),
+          eq(emailCampaignEnrollments.organizationId, organizationId)
+        )
+      );
 
-    console.log(`[EmailProcessor] Unenrolled enrollment ${enrollmentId}`);
+    console.log(`[EmailProcessor] Unenrolled enrollment ${enrollmentId} for org ${organizationId}`);
   }
 }
 

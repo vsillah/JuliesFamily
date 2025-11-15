@@ -1,4 +1,6 @@
 import { storage } from "../storage";
+import { createOrgStorage } from "../orgScopedStorage";
+import type { IStorage } from "../storage";
 import { createDonorLifecycleService } from "./donorLifecycleService";
 
 /**
@@ -68,7 +70,7 @@ export async function shutdownDonorLifecycleScheduler(): Promise<void> {
 }
 
 /**
- * Poll for lapsed donors and mark them
+ * Poll for lapsed donors across all organizations
  */
 async function pollLapsedDonors(): Promise<void> {
   if (isRunning) {
@@ -82,13 +84,36 @@ async function pollLapsedDonors(): Promise<void> {
     const now = new Date();
     console.log(`[DonorLifecycleScheduler] Starting lapsed donor detection at ${now.toISOString()}`);
     
-    const lifecycleService = createDonorLifecycleService(storage);
-    const lapsedCount = await lifecycleService.detectLapsedDonors();
+    // Get all active organizations
+    const organizations = await storage.getAllOrganizations();
+    console.log(`[DonorLifecycleScheduler] Processing ${organizations.length} organization(s)`);
     
-    if (lapsedCount > 0) {
-      console.log(`[DonorLifecycleScheduler] ✅ Marked ${lapsedCount} donor(s) as lapsed`);
+    let totalLapsed = 0;
+    
+    // Process each organization independently
+    for (const org of organizations) {
+      try {
+        // Create org-scoped storage for tenant isolation
+        const orgStorage = createOrgStorage(storage, org.id);
+        
+        // Detect lapsed donors for this organization
+        const lifecycleService = createDonorLifecycleService(orgStorage);
+        const lapsedCount = await lifecycleService.detectLapsedDonors();
+        
+        if (lapsedCount > 0) {
+          console.log(`[DonorLifecycleScheduler] Org ${org.id} (${org.name}): Marked ${lapsedCount} donor(s) as lapsed`);
+          totalLapsed += lapsedCount;
+        }
+      } catch (error) {
+        console.error(`[DonorLifecycleScheduler] Error processing org ${org.id}:`, error);
+        // Continue with next organization
+      }
+    }
+    
+    if (totalLapsed > 0) {
+      console.log(`[DonorLifecycleScheduler] ✅ Marked ${totalLapsed} donor(s) as lapsed across ${organizations.length} organization(s)`);
     } else {
-      console.log(`[DonorLifecycleScheduler] ✅ No new lapsed donors detected`);
+      console.log(`[DonorLifecycleScheduler] ✅ No new lapsed donors detected across ${organizations.length} organization(s)`);
     }
   } catch (error) {
     console.error('[DonorLifecycleScheduler] Poll error:', error);
@@ -99,11 +124,12 @@ async function pollLapsedDonors(): Promise<void> {
 
 /**
  * Manual trigger for lapsed donor detection (useful for testing/admin actions)
+ * @param orgStorage - Org-scoped storage instance (injected from API route via req.storage)
  */
-export async function triggerLapsedDonorDetection(): Promise<number> {
+export async function triggerLapsedDonorDetection(orgStorage: IStorage): Promise<number> {
   console.log('[DonorLifecycleScheduler] Manual trigger for lapsed donor detection');
   
-  const lifecycleService = createDonorLifecycleService(storage);
+  const lifecycleService = createDonorLifecycleService(orgStorage);
   const lapsedCount = await lifecycleService.detectLapsedDonors();
   
   console.log(`[DonorLifecycleScheduler] Manual detection complete: ${lapsedCount} donors marked as lapsed`);
