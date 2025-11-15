@@ -1,7 +1,14 @@
 # Julie's Family Learning Program Website (Powered by Kinflo)
 
 ## Overview
-Julie's Family Learning Program website is a non-profit, full-stack web application showcasing educational programs, impact, testimonials, and events. It facilitates donations and volunteering. The project serves as a demonstration platform for **Kinflo**, a relationship-first CRM for nonprofits, highlighting its capabilities in persona-based personalization, lead management, and communication automation. The goal is to create a welcoming online presence and drive engagement and support for family learning initiatives.
+Julie's Family Learning Program website is a non-profit, full-stack web application showcasing educational programs, impact, testimonials, and events. It facilitates donations and volunteering. The project serves as a demonstration platform for **Kinflo**, a relationship-first CRM for nonprofits, highlighting its capabilities in persona-based personalization, lead management, and communication automation. 
+
+**Multi-Tenant SaaS Platform**: The system has been transformed into a multi-tenant SaaS platform enabling rapid deployment of customized demo sites for multiple nonprofits. Each organization operates in complete isolation with:
+- **Custom Domain Support**: Organizations can use their own domains (e.g., donate.redcross.org) verified through DNS
+- **Cross-Organization Access**: Consultants can access multiple organizations with different role permissions
+- **Shared Template Library**: Common templates available across all organizations
+- **Secure Domain Detection**: Host header validation prevents tenant spoofing attacks
+- **Dual Provisioning Workflows**: Supports both self-service signup and manual admin provisioning
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -41,6 +48,13 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a three-tier RBAC system with audit logging. The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
+
+**Multi-Tenant Architecture**: 
+- **Database Schema**: Added nullable `organizationId` column to 72 existing tables for tenant isolation. Created 4 new multi-tenant tables: `organizations`, `organization_users` (many-to-many with role support), `custom_domains` (DNS-verified custom domains), and `shared_templates` (cross-organization template sharing).
+- **Domain Detection Middleware** (`server/orgMiddleware.ts`): Securely detects organization context from request hostname with Host header validation against trusted domains (.replit.dev, .replit.app, localhost). Rejects unknown domains with 404 to prevent tenant spoofing. Custom domains require DNS verification (via `verified` flag in `custom_domains` table).
+- **Data Migration**: Default organization "Julie's Family Learning Program" (ID: 1) created with 401 existing records migrated. Migration script: `scripts/migrate-to-multi-tenant.ts`.
+- **Security Features**: Hostname normalization (case-insensitive), trusted domain validation, custom domain verification requirement, error rejection (no unsafe defaults), request logging for security monitoring.
+
 **Content Visibility Architecture**: The system uses a persona×funnel stage matrix (6 personas × 4 stages = 24 combinations) for granular content control. The `buildVisibilityQuery` method in `server/storage.ts` conditionally applies persona/funnelStage filters only when explicitly provided, returning all active visible content without restrictions when undefined.
 
 ## External Dependencies

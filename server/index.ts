@@ -6,6 +6,7 @@ import { initBackupScheduler, shutdownBackupScheduler } from "./services/backupS
 import { initDonorLifecycleScheduler, shutdownDonorLifecycleScheduler } from "./services/donorLifecycleScheduler";
 import { initEmailReportScheduler, shutdownEmailReportScheduler } from "./services/emailReportScheduler";
 import { helmetConfig, globalLimiter } from "./security";
+import { detectOrganization } from "./orgMiddleware";
 
 const app = express();
 
@@ -28,6 +29,9 @@ app.use(express.json({
   }
 }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
+
+// Detect organization from custom domain
+app.use(detectOrganization);
 
 app.use((req, res, next) => {
   const start = Date.now();
