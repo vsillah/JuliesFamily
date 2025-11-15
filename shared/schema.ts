@@ -23,11 +23,26 @@ export type UserRole = z.infer<typeof userRoleEnum>;
 export const organizationTierEnum = z.enum(['basic', 'pro', 'premium']);
 export type OrganizationTier = z.infer<typeof organizationTierEnum>;
 
+// Organization status enum
+export const organizationStatusEnum = z.enum(['active', 'suspended', 'pending']);
+export type OrganizationStatus = z.infer<typeof organizationStatusEnum>;
+
+// Subscription status enum
+export const subscriptionStatusEnum = z.enum(['active', 'canceled', 'past_due', 'trialing', 'none']);
+export type SubscriptionStatus = z.infer<typeof subscriptionStatusEnum>;
+
 // Organizations table - for multi-tenant tier-based feature access
 export const organizations = pgTable("organizations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: varchar("name").notNull(),
+  slug: varchar("slug").unique().notNull(), // URL-friendly identifier (e.g., 'red-cross')
+  logo: varchar("logo"), // Logo URL or storage path
+  primaryColor: varchar("primary_color").default('#3b82f6'), // Brand color
+  domain: varchar("domain").unique(), // Optional custom domain (e.g., 'donate.redcross.org')
+  status: varchar("status").notNull().default('active'), // active, suspended, pending
   tier: varchar("tier").notNull().default('basic'), // basic, pro, premium
+  stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for billing
+  subscriptionStatus: varchar("subscription_status").default('none'), // active, canceled, past_due, trialing, none
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -39,6 +54,68 @@ export const insertOrganizationSchema = createInsertSchema(organizations).omit({
 });
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
 export type Organization = typeof organizations.$inferSelect;
+
+// Organization Users table - many-to-many relationship between users and organizations
+// A user can belong to multiple organizations with different roles in each
+export const organizationUsers = pgTable("organization_users", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  organizationId: varchar("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  role: varchar("role").notNull().default('viewer'), // owner, admin, editor, viewer
+  joinedAt: timestamp("joined_at").defaultNow(),
+  invitedBy: varchar("invited_by").references(() => users.id, { onDelete: "set null" }),
+}, (table) => [
+  uniqueIndex("unique_user_org").on(table.userId, table.organizationId),
+]);
+
+export const insertOrganizationUserSchema = createInsertSchema(organizationUsers).omit({
+  id: true,
+  joinedAt: true,
+});
+export type InsertOrganizationUser = z.infer<typeof insertOrganizationUserSchema>;
+export type OrganizationUser = typeof organizationUsers.$inferSelect;
+
+// Custom Domains table - organizations can have custom domains
+export const customDomains = pgTable("custom_domains", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  domain: varchar("domain").unique().notNull(), // e.g., 'donate.nonprofit.org'
+  organizationId: varchar("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  verified: boolean("verified").default(false), // DNS verification status
+  sslEnabled: boolean("ssl_enabled").default(false), // SSL certificate status
+  createdAt: timestamp("created_at").defaultNow(),
+  verifiedAt: timestamp("verified_at"),
+});
+
+export const insertCustomDomainSchema = createInsertSchema(customDomains).omit({
+  id: true,
+  createdAt: true,
+  verifiedAt: true,
+});
+export type InsertCustomDomain = z.infer<typeof insertCustomDomainSchema>;
+export type CustomDomain = typeof customDomains.$inferSelect;
+
+// Shared Templates table - platform-wide templates available to all organizations
+export const sharedTemplates = pgTable("shared_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: varchar("type").notNull(), // email, sms, content, funnel
+  category: varchar("category").notNull(), // welcome, donation, event, etc.
+  name: varchar("name").notNull(),
+  description: text("description"),
+  content: jsonb("content").notNull(), // Template content (varies by type)
+  isPublic: boolean("is_public").default(true), // Available to all organizations
+  createdBy: varchar("created_by"), // 'platform' or organizationId
+  previewImage: varchar("preview_image"), // Template preview
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertSharedTemplateSchema = createInsertSchema(sharedTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSharedTemplate = z.infer<typeof insertSharedTemplateSchema>;
+export type SharedTemplate = typeof sharedTemplates.$inferSelect;
 
 // User storage table for Replit Auth
 // Reference: blueprint:javascript_log_in_with_replit
