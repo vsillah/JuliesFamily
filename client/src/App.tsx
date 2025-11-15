@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PersonaProvider } from "@/contexts/PersonaContext";
+import { OrganizationProvider } from "@/contexts/OrganizationContext";
 import PersonaSelectionModal from "@/components/PersonaSelectionModal";
 import { ChatbotWidget } from "@/components/ChatbotWidget";
 import Home from "@/pages/Home";
@@ -154,12 +155,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <PersonaProvider>
-          <Toaster />
-          <PersonaSelectionModal />
-          <ChatbotWidget />
-          <Router />
-        </PersonaProvider>
+        <OrganizationProvider>
+          <PersonaProvider>
+            <Toaster />
+            <PersonaSelectionModal />
+            <ChatbotWidget />
+            <Router />
+          </PersonaProvider>
+        </OrganizationProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
