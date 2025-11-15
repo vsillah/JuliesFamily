@@ -4,9 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw } from "lucide-react";
+import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createOrganizationWizardSchema, type CreateOrganizationWizard } from "@shared/schema";
 
 interface OrganizationMetrics {
   leadsCount: number;
@@ -33,6 +41,16 @@ interface CurrentOrganization {
 
 export default function AdminOrganizations() {
   const { toast } = useToast();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
+  // Form with validation
+  const form = useForm<CreateOrganizationWizard>({
+    resolver: zodResolver(createOrganizationWizardSchema),
+    defaultValues: {
+      name: "",
+      tier: "basic",
+    },
+  });
 
   // Fetch all organizations
   const { data: organizations, isLoading: orgsLoading, error: orgsError } = useQuery<Organization[]>({
@@ -92,12 +110,53 @@ export default function AdminOrganizations() {
     },
   });
 
+  // Create organization mutation
+  const createOrgMutation = useMutation({
+    mutationFn: async (data: CreateOrganizationWizard) => {
+      const response = await apiRequest('POST', '/api/admin/organizations', data);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Organization Created",
+        description: `Successfully created ${data.name}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });
+      setCreateDialogOpen(false);
+      form.reset();
+    },
+    onError: (error: any) => {
+      // Surface backend validation errors as inline form errors
+      if (error.errors && Array.isArray(error.errors)) {
+        error.errors.forEach((err: any) => {
+          if (err.path && err.path.length > 0) {
+            form.setError(err.path[0] as any, {
+              type: "manual",
+              message: err.message,
+            });
+          }
+        });
+      }
+      
+      // Also show toast for general errors
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create organization",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSwitchOrg = (orgId: string) => {
     switchOrgMutation.mutate(orgId);
   };
 
   const handleClearOverride = () => {
     clearOverrideMutation.mutate();
+  };
+
+  const handleCreateOrg = (data: CreateOrganizationWizard) => {
+    createOrgMutation.mutate(data);
   };
 
   if (orgsLoading || currentLoading) {
@@ -134,17 +193,26 @@ export default function AdminOrganizations() {
             Manage and switch between organizations
           </p>
         </div>
-        {currentOrg?.isOverride && (
+        <div className="flex gap-2">
+          {currentOrg?.isOverride && (
+            <Button
+              onClick={handleClearOverride}
+              variant="outline"
+              disabled={clearOverrideMutation.isPending}
+              data-testid="button-clear-override"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Clear Override
+            </Button>
+          )}
           <Button
-            onClick={handleClearOverride}
-            variant="outline"
-            disabled={clearOverrideMutation.isPending}
-            data-testid="button-clear-override"
+            onClick={() => setCreateDialogOpen(true)}
+            data-testid="button-create-org"
           >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Clear Override
+            <Plus className="h-4 w-4 mr-2" />
+            Create Organization
           </Button>
-        )}
+        </div>
       </div>
 
       {/* Current Organization Badge */}
@@ -273,6 +341,91 @@ export default function AdminOrganizations() {
           </CardContent>
         </Card>
       )}
+
+      {/* Create Organization Dialog */}
+      <Dialog 
+        open={createDialogOpen} 
+        onOpenChange={(open) => {
+          setCreateDialogOpen(open);
+          if (!open) {
+            form.reset();
+            createOrgMutation.reset();
+          }
+        }}
+      >
+        <DialogContent data-testid="dialog-create-org">
+          <DialogHeader>
+            <DialogTitle data-testid="text-dialog-title">Create New Organization</DialogTitle>
+            <DialogDescription data-testid="text-dialog-description">
+              Set up a new organization for KinFlo platform demos
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleCreateOrg)} className="space-y-4 py-4" data-testid="form-create-org">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel data-testid="label-org-name">Organization Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="e.g., MENTOR Rhode Island"
+                        {...field}
+                        data-testid="input-org-name"
+                      />
+                    </FormControl>
+                    <FormMessage data-testid="error-org-name" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tier"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel data-testid="label-org-tier">Tier</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-org-tier">
+                          <SelectValue placeholder="Select a tier" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent data-testid="select-org-tier-content">
+                        <SelectItem value="basic" data-testid="select-tier-basic">Basic</SelectItem>
+                        <SelectItem value="pro" data-testid="select-tier-pro">Pro</SelectItem>
+                        <SelectItem value="premium" data-testid="select-tier-premium">Premium</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage data-testid="error-org-tier" />
+                  </FormItem>
+                )}
+              />
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setCreateDialogOpen(false);
+                    form.reset();
+                    createOrgMutation.reset();
+                  }}
+                  data-testid="button-cancel-create"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={createOrgMutation.isPending}
+                  data-testid="button-submit-create"
+                >
+                  {createOrgMutation.isPending ? "Creating..." : "Create Organization"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

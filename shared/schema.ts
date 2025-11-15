@@ -66,6 +66,14 @@ export const insertOrganizationSchema = createInsertSchema(organizations).omit({
 export type InsertOrganization = z.infer<typeof insertOrganizationSchema>;
 export type Organization = typeof organizations.$inferSelect;
 
+// Simplified schema for the organization creation wizard
+// Only requires name and tier - other fields use database defaults
+export const createOrganizationWizardSchema = z.object({
+  name: z.string().min(1, "Organization name is required"),
+  tier: organizationTierEnum.default('basic'),
+});
+export type CreateOrganizationWizard = z.infer<typeof createOrganizationWizardSchema>;
+
 // Organization Users table - many-to-many relationship between users and organizations
 // A user can belong to multiple organizations with different roles in each
 export const organizationUsers = pgTable("organization_users", {

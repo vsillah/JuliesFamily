@@ -354,6 +354,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new organization (super admin only)
+  app.post('/api/admin/organizations', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      // Validate request body using wizard schema (simpler, only name + tier)
+      const { createOrganizationWizardSchema } = await import("@shared/schema");
+      const validation = createOrganizationWizardSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid organization data",
+          errors: validation.error.errors 
+        });
+      }
+      
+      // Convert wizard data to full InsertOrganization with proper defaults
+      const orgData = {
+        name: validation.data.name,
+        tier: validation.data.tier,
+        status: 'active' as const,
+        subscriptionStatus: 'none' as const,
+      };
+      
+      // Create organization with complete data
+      const newOrg = await storage.createOrganization(orgData);
+      
+      console.log(`[Organizations] Super admin created new organization: ${newOrg.name} (${newOrg.id})`);
+      res.status(201).json(newOrg);
+    } catch (error: any) {
+      console.error('[Organizations] Error creating organization:', error);
+      
+      // Check for common database errors
+      if (error.code === '23505') {  // Unique constraint violation
+        return res.status(409).json({ 
+          message: 'An organization with this name or slug already exists' 
+        });
+      }
+      
+      res.status(500).json({ 
+        message: error.message || 'Failed to create organization' 
+      });
+    }
+  });
+
   // Get current organization context (for super admins)
   app.get('/api/admin/organization/current', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
