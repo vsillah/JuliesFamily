@@ -27,7 +27,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Persona×Journey Matrix Grid**: A visual interface for configuring content visibility across 120 permutations.
 -   **A/B Testing System**: A production-ready, configuration-based platform for testing presentation overrides, with auto-derived baseline reference from target audience selections.
 -   **Automated A/B Testing System**: AI-driven automation framework for content optimization using Google Gemini, including metric weight profiles, automation rules, and Bayesian statistical significance.
--   **User Management System**: Admin interface for user accounts, roles (three-tier RBAC), audit logging, and program entitlements management. Features mobile-friendly user search with keyboard navigation and fuzzy search for impersonation flows.
+-   **User Management System**: Admin interface for user accounts, roles (two-tier RBAC), audit logging, and program entitlements management. Features mobile-friendly user search with keyboard navigation and fuzzy search for impersonation flows.
 -   **Admin Impersonation System**: Production-ready user impersonation with full context-switching middleware, session tracking, and visual indicators. Allows admins to preview the site as any user for troubleshooting while maintaining admin permissions.
 -   **Authenticated Donation System with Saved Payment Methods**: Secure payment processing via Stripe.
 -   **Email Automation System**: Transactional email delivery via SendGrid with AI-powered copywriting.
@@ -47,7 +47,22 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Student Projects Carousel with Passion Badges**: Passion-filtered carousel showcasing student work to donors via complete passion-based personalization. Features OIDC passions persistence (`server/storage.ts` upsertUser), PersonaContext integration (transforms `user.passions` string[] to PassionOption[]), and visual passion badges on project cards displaying readable labels (e.g., "Nutrition", "Literacy"). Backend persists passions from OIDC claims; frontend normalizes and filters matching badges for display via `StudentProjectsCarousel` component.
 
 ### System Design Choices
-The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a three-tier RBAC system with audit logging. The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
+The backend uses Express.js on Node.js with TypeScript, exposing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are managed by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a **two-tier RBAC system** with audit logging:
+
+**Two-Tier Role-Based Access Control (RBAC)**:
+- **Platform-Level Roles** (`users.role` column): Controls access across the entire KinFlo platform
+  - `client`: Regular user with no platform-level privileges
+  - `admin`: DEPRECATED - use organization-level roles instead
+  - `kinflo_admin`: **KinFlo Platform Super Admin** - Can manage all organizations, switch between organizations via session override, access platform-wide features
+- **Organization-Level Roles** (`organization_users.role` column): Controls access within a specific organization (e.g., Julie's Family Learning Program)
+  - `viewer`: Read-only access to organization data
+  - `editor`: Can create and edit content within the organization
+  - `org_admin`: **Organization Super Admin** - Full control within their organization (manages leads, campaigns, users, content, settings)
+  - `owner`: Primary owner of the organization
+
+**Organization Switching for KinFlo Admins**: Users with `kinflo_admin` role can override the detected organization via session (`req.session.organizationIdOverride`). The `detectOrganization` middleware checks for this override FIRST before hostname-based detection, enabling platform admins to preview and manage any organization. Session override persists across requests until explicitly cleared.
+
+The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
 
 **Multi-Tenant Architecture**: 
 - **Database Schema**: Added nullable `organizationId` column to existing tables for tenant isolation. Created 4 new multi-tenant tables: `organizations`, `organization_users` (many-to-many with role support), `custom_domains` (DNS-verified custom domains), and `shared_templates` (cross-organization template sharing).
