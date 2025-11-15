@@ -161,29 +161,19 @@ export default function AdminOrganizations() {
     createOrgMutation.mutate(data);
   };
 
-  const handleViewWebsite = async (orgId: string) => {
-    // If not the current org, switch to it first
+  const handleViewWebsite = (orgId: string) => {
+    // If not the current org, switch to it first then navigate
     if (currentOrg?.organizationId !== orgId) {
-      try {
-        await apiRequest('POST', '/api/admin/organization/switch', { organizationId: orgId });
-        // Invalidate queries to reflect the switch
-        queryClient.invalidateQueries({ queryKey: ['/api/admin/organization/current'] });
-        toast({
-          title: "Organization Switched",
-          description: "Navigating to website...",
-        });
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to switch organization",
-          variant: "destructive",
-        });
-        return;
-      }
+      switchOrgMutation.mutate(orgId, {
+        onSuccess: () => {
+          // Navigate after successful switch
+          setLocation('/');
+        }
+      });
+    } else {
+      // Already on this org, just navigate
+      setLocation('/');
     }
-    
-    // Navigate to home page to view the website
-    setLocation('/');
   };
 
   if (orgsLoading || currentLoading) {
