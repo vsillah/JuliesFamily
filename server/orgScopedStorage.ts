@@ -14,7 +14,7 @@
 
 import type { IStorage } from './storage';
 import { db } from './db';
-import { eq, and, desc } from 'drizzle-orm';
+import { eq, and, desc, sql, or } from 'drizzle-orm';
 
 /**
  * Methods that should remain global (no org scoping)
