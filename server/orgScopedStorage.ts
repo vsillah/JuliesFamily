@@ -120,6 +120,52 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getImageAsset',
   'updateImageAsset',
   'deleteImageAsset',
+  
+  // Volunteer event operations
+  'createVolunteerEvent',
+  'getAllVolunteerEvents',
+  'getVolunteerEvent',
+  'updateVolunteerEvent',
+  'deleteVolunteerEvent',
+  
+  // Volunteer enrollment operations
+  'createVolunteerEnrollment',
+  'getVolunteerEnrollmentsByUserId',
+  'getVolunteerEnrollmentsByEventId',
+  'getActiveVolunteerEnrollmentsByUserId',
+  'deleteVolunteerEnrollment',
+  
+  // Volunteer shift operations
+  'createVolunteerShift',
+  'getVolunteerShiftsByEventId',
+  'deleteVolunteerShift',
+  
+  // Volunteer session log operations
+  'createVolunteerSessionLog',
+  'getVolunteerSessionLogsByEnrollmentId',
+  'deleteVolunteerSessionLog',
+  
+  // Lead assignment operations
+  'createLeadAssignment',
+  'getLeadAssignmentsByLeadId',
+  'getLeadAssignmentsByUserId',
+  
+  // Outreach email operations
+  'createOutreachEmail',
+  'getOutreachEmailsByLeadId',
+  'updateOutreachEmail',
+  
+  // Campaign member operations
+  'createCampaignMember',
+  'getCampaignMembersByCampaignId',
+  'deleteCampaignMember',
+  
+  // Scheduled report operations
+  'createEmailReportSchedule',
+  'getAllEmailReportSchedules',
+  'getEmailReportSchedule',
+  'updateEmailReportSchedule',
+  'deleteEmailReportSchedule',
 ]);
 
 /**
@@ -771,6 +817,343 @@ class OrgScopedImplementations {
       .where(and(
         eq(imageAssets.id, id),
         eq(imageAssets.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // VOLUNTEER EVENT OPERATIONS
+  // ========================================
+  
+  async createVolunteerEvent(eventData: Parameters<IStorage['createVolunteerEvent']>[0]) {
+    return this.baseStorage.createVolunteerEvent({
+      ...eventData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllVolunteerEvents() {
+    const { volunteerEvents } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(volunteerEvents)
+      .where(eq(volunteerEvents.organizationId, this.organizationId))
+      .orderBy(desc(volunteerEvents.startDate));
+  }
+
+  async getVolunteerEvent(id: string) {
+    const { volunteerEvents } = await import('@shared/schema');
+    const [event] = await db
+      .select()
+      .from(volunteerEvents)
+      .where(and(
+        eq(volunteerEvents.id, id),
+        eq(volunteerEvents.organizationId, this.organizationId)
+      ));
+    return event;
+  }
+
+  async updateVolunteerEvent(id: string, updates: Parameters<IStorage['updateVolunteerEvent']>[1]) {
+    const { volunteerEvents } = await import('@shared/schema');
+    const [event] = await db
+      .update(volunteerEvents)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(volunteerEvents.id, id),
+        eq(volunteerEvents.organizationId, this.organizationId)
+      ))
+      .returning();
+    return event;
+  }
+
+  async deleteVolunteerEvent(id: string) {
+    const { volunteerEvents } = await import('@shared/schema');
+    await db
+      .delete(volunteerEvents)
+      .where(and(
+        eq(volunteerEvents.id, id),
+        eq(volunteerEvents.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // VOLUNTEER ENROLLMENT OPERATIONS
+  // ========================================
+  
+  async createVolunteerEnrollment(enrollmentData: Parameters<IStorage['createVolunteerEnrollment']>[0]) {
+    return this.baseStorage.createVolunteerEnrollment({
+      ...enrollmentData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getVolunteerEnrollmentsByUserId(userId: string) {
+    const { volunteerEnrollments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(volunteerEnrollments)
+      .where(and(
+        eq(volunteerEnrollments.userId, userId),
+        eq(volunteerEnrollments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(volunteerEnrollments.enrolledAt));
+  }
+
+  async getVolunteerEnrollmentsByEventId(eventId: string) {
+    const { volunteerEnrollments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(volunteerEnrollments)
+      .where(and(
+        eq(volunteerEnrollments.eventId, eventId),
+        eq(volunteerEnrollments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(volunteerEnrollments.enrolledAt));
+  }
+
+  async getActiveVolunteerEnrollmentsByUserId(userId: string) {
+    const { volunteerEnrollments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(volunteerEnrollments)
+      .where(and(
+        eq(volunteerEnrollments.userId, userId),
+        eq(volunteerEnrollments.status, 'active'),
+        eq(volunteerEnrollments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(volunteerEnrollments.enrolledAt));
+  }
+
+  async deleteVolunteerEnrollment(id: string) {
+    const { volunteerEnrollments } = await import('@shared/schema');
+    await db
+      .delete(volunteerEnrollments)
+      .where(and(
+        eq(volunteerEnrollments.id, id),
+        eq(volunteerEnrollments.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // VOLUNTEER SHIFT OPERATIONS
+  // ========================================
+  
+  async createVolunteerShift(shiftData: Parameters<IStorage['createVolunteerShift']>[0]) {
+    return this.baseStorage.createVolunteerShift({
+      ...shiftData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getVolunteerShiftsByEventId(eventId: string) {
+    const { volunteerShifts } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(volunteerShifts)
+      .where(and(
+        eq(volunteerShifts.eventId, eventId),
+        eq(volunteerShifts.organizationId, this.organizationId)
+      ))
+      .orderBy(volunteerShifts.startTime);
+  }
+
+  async deleteVolunteerShift(id: string) {
+    const { volunteerShifts } = await import('@shared/schema');
+    await db
+      .delete(volunteerShifts)
+      .where(and(
+        eq(volunteerShifts.id, id),
+        eq(volunteerShifts.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // VOLUNTEER SESSION LOG OPERATIONS
+  // ========================================
+  
+  async createVolunteerSessionLog(logData: Parameters<IStorage['createVolunteerSessionLog']>[0]) {
+    return this.baseStorage.createVolunteerSessionLog({
+      ...logData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getVolunteerSessionLogsByEnrollmentId(enrollmentId: string) {
+    const { volunteerSessionLogs } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(volunteerSessionLogs)
+      .where(and(
+        eq(volunteerSessionLogs.enrollmentId, enrollmentId),
+        eq(volunteerSessionLogs.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(volunteerSessionLogs.sessionDate));
+  }
+
+  async deleteVolunteerSessionLog(id: string) {
+    const { volunteerSessionLogs } = await import('@shared/schema');
+    await db
+      .delete(volunteerSessionLogs)
+      .where(and(
+        eq(volunteerSessionLogs.id, id),
+        eq(volunteerSessionLogs.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // LEAD ASSIGNMENT OPERATIONS
+  // ========================================
+  
+  async createLeadAssignment(assignmentData: Parameters<IStorage['createLeadAssignment']>[0]) {
+    return this.baseStorage.createLeadAssignment({
+      ...assignmentData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getLeadAssignmentsByLeadId(leadId: string) {
+    const { leadAssignments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(leadAssignments)
+      .where(and(
+        eq(leadAssignments.leadId, leadId),
+        eq(leadAssignments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(leadAssignments.assignedAt));
+  }
+
+  async getLeadAssignmentsByUserId(userId: string) {
+    const { leadAssignments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(leadAssignments)
+      .where(and(
+        eq(leadAssignments.userId, userId),
+        eq(leadAssignments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(leadAssignments.assignedAt));
+  }
+
+  // ========================================
+  // OUTREACH EMAIL OPERATIONS
+  // ========================================
+  
+  async createOutreachEmail(emailData: Parameters<IStorage['createOutreachEmail']>[0]) {
+    return this.baseStorage.createOutreachEmail({
+      ...emailData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getOutreachEmailsByLeadId(leadId: string) {
+    const { outreachEmails } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(outreachEmails)
+      .where(and(
+        eq(outreachEmails.leadId, leadId),
+        eq(outreachEmails.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(outreachEmails.sentAt));
+  }
+
+  async updateOutreachEmail(id: string, updates: Parameters<IStorage['updateOutreachEmail']>[1]) {
+    const { outreachEmails } = await import('@shared/schema');
+    const [email] = await db
+      .update(outreachEmails)
+      .set(updates)
+      .where(and(
+        eq(outreachEmails.id, id),
+        eq(outreachEmails.organizationId, this.organizationId)
+      ))
+      .returning();
+    return email;
+  }
+
+  // ========================================
+  // CAMPAIGN MEMBER OPERATIONS
+  // ========================================
+  
+  async createCampaignMember(memberData: Parameters<IStorage['createCampaignMember']>[0]) {
+    return this.baseStorage.createCampaignMember({
+      ...memberData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getCampaignMembersByCampaignId(campaignId: string) {
+    const { campaignMembers } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(campaignMembers)
+      .where(and(
+        eq(campaignMembers.campaignId, campaignId),
+        eq(campaignMembers.organizationId, this.organizationId)
+      ));
+  }
+
+  async deleteCampaignMember(id: string) {
+    const { campaignMembers } = await import('@shared/schema');
+    await db
+      .delete(campaignMembers)
+      .where(and(
+        eq(campaignMembers.id, id),
+        eq(campaignMembers.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // SCHEDULED REPORT OPERATIONS
+  // ========================================
+  
+  async createEmailReportSchedule(scheduleData: Parameters<IStorage['createEmailReportSchedule']>[0]) {
+    return this.baseStorage.createEmailReportSchedule({
+      ...scheduleData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAllEmailReportSchedules() {
+    const { emailReportSchedules } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailReportSchedules)
+      .where(eq(emailReportSchedules.organizationId, this.organizationId))
+      .orderBy(desc(emailReportSchedules.createdAt));
+  }
+
+  async getEmailReportSchedule(id: string) {
+    const { emailReportSchedules } = await import('@shared/schema');
+    const [schedule] = await db
+      .select()
+      .from(emailReportSchedules)
+      .where(and(
+        eq(emailReportSchedules.id, id),
+        eq(emailReportSchedules.organizationId, this.organizationId)
+      ));
+    return schedule;
+  }
+
+  async updateEmailReportSchedule(id: string, updates: Parameters<IStorage['updateEmailReportSchedule']>[1]) {
+    const { emailReportSchedules } = await import('@shared/schema');
+    const [schedule] = await db
+      .update(emailReportSchedules)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(emailReportSchedules.id, id),
+        eq(emailReportSchedules.organizationId, this.organizationId)
+      ))
+      .returning();
+    return schedule;
+  }
+
+  async deleteEmailReportSchedule(id: string) {
+    const { emailReportSchedules } = await import('@shared/schema');
+    await db
+      .delete(emailReportSchedules)
+      .where(and(
+        eq(emailReportSchedules.id, id),
+        eq(emailReportSchedules.organizationId, this.organizationId)
       ));
   }
 }
