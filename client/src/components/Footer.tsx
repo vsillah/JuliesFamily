@@ -7,11 +7,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div>
             <h3 className="text-lg font-serif font-semibold mb-4">
-              Julie's Family Learning Program
+              Kinflo
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              A family support, wellness, and education center committed to building strong,
-              stable, healthy families.
+              AI-powered nonprofit CRM and fundraising platform designed to help organizations maximize their impact.
             </p>
           </div>
 
@@ -19,39 +18,34 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#services" className="text-muted-foreground hover:text-primary transition-colors">
-                  Our Services
+                <a href="#features" className="text-muted-foreground hover:text-primary transition-colors">
+                  Features
                 </a>
               </li>
               <li>
-                <a href="#impact" className="text-muted-foreground hover:text-primary transition-colors">
-                  Our Impact
+                <a href="#pricing" className="text-muted-foreground hover:text-primary transition-colors">
+                  Pricing
                 </a>
               </li>
               <li>
-                <a href="#testimonials" className="text-muted-foreground hover:text-primary transition-colors">
-                  Testimonials
+                <a href="#demo" className="text-muted-foreground hover:text-primary transition-colors">
+                  Request Demo
                 </a>
               </li>
               <li>
-                <a href="#events" className="text-muted-foreground hover:text-primary transition-colors">
-                  Events
-                </a>
-              </li>
-              <li>
-                <a href="/kinflo" className="text-muted-foreground hover:text-primary transition-colors" data-testid="link-kinflo">
-                  Powered by Kinflo
+                <a href="/" className="text-muted-foreground hover:text-primary transition-colors">
+                  Live Example (JFLP)
                 </a>
               </li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Programs</h4>
+            <h4 className="font-semibold mb-4">Solutions</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Family Development Services</li>
-              <li>Adult Basic Education (ABE)/Career Services</li>
-              <li>Tech Goes Home</li>
+              <li>Donor Management</li>
+              <li>Campaign Tracking</li>
+              <li>AI Content Generation</li>
             </ul>
           </div>
 
@@ -59,23 +53,23 @@ export default function Footer() {
             <h4 className="font-semibold mb-4">Contact</h4>
             <ul className="space-y-3 text-sm">
               <li className="flex items-start gap-2 text-muted-foreground">
-                <MapPin size={16} className="mt-1 flex-shrink-0" />
-                <span>133 Dorchester St. Boston, MA 02127</span>
+                <Phone size={16} className="mt-1 flex-shrink-0" />
+                <span>Vambah Sillah</span>
               </li>
               <li className="flex items-center gap-2 text-muted-foreground">
                 <Phone size={16} className="flex-shrink-0" />
-                <span>(617) 269-6663</span>
+                <span>(617) 967-7448</span>
               </li>
               <li className="flex items-center gap-2 text-muted-foreground">
                 <Mail size={16} className="flex-shrink-0" />
-                <span>info@juliesfamily.org</span>
+                <span>vsillah@gmail.com</span>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="pt-8 border-t border-card-border text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Julie's Family Learning Program. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Kinflo. All rights reserved.</p>
         </div>
       </div>
     </footer>
