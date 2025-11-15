@@ -5,6 +5,8 @@ import { createServer, type Server } from "http";
 import { db } from "./db";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { applyImpersonation, requireActualAdmin } from "./impersonationMiddleware";
+import { storage } from "./storage";
+import { createOrgStorage } from "./orgScopedStorage";
 import { requireTier } from "./tierMiddleware";
 import { TIERS } from "@shared/tiers";
 import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, batchContentReorderSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema, insertProgramSchema } from "@shared/schema";
@@ -304,6 +306,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Super Admin Organization Management Routes
+  // Get all organizations with diagnostics
+  app.get('/api/admin/organizations', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const orgs = await storage.getAllOrganizations();
+      
+      // Get metrics for each organization
+      const orgsWithMetrics = await Promise.all(orgs.map(async (org) => {
+        const orgStorage = createOrgStorage(storage, org.id);
+        
+        // Get counts for key metrics
+        const [leads, donations, campaigns] = await Promise.all([
+          orgStorage.getAllLeads(),
+          orgStorage.getAllDonations(),
+          orgStorage.getAllEmailCampaigns()
+        ]);
+        
+        return {
+          ...org,
+          metrics: {
+            leadsCount: leads.length,
+            donationsCount: donations.length,
+            campaignsCount: campaigns.length,
+            totalDonationAmount: donations.reduce((sum, d) => sum + parseFloat(d.amount), 0)
+          }
+        };
+      }));
+      
+      res.json(orgsWithMetrics);
+    } catch (error) {
+      console.error('[Organizations] Error fetching organizations:', error);
+      res.status(500).json({ message: 'Failed to fetch organizations' });
+    }
+  });
+
+  // Get current organization context (for super admins)
+  app.get('/api/admin/organization/current', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const organizationId = req.organizationId || '1';
+      const isOverride = !!req.session?.organizationIdOverride;
+      
+      const org = await storage.getOrganization(organizationId);
+      
+      res.json({
+        organizationId,
+        organization: org,
+        isOverride
+      });
+    } catch (error) {
+      console.error('[Organizations] Error fetching current organization:', error);
+      res.status(500).json({ message: 'Failed to fetch current organization' });
+    }
+  });
+
+  // Switch organization (super admin only)
+  app.post('/api/admin/organization/switch', ...authWithImpersonation, requireSuperAdmin, async (req: any, res) => {
+    try {
+      const { organizationId } = req.body;
+      
+      if (!organizationId) {
+        return res.status(400).json({ message: 'Organization ID is required' });
+      }
+      
+      // Verify organization exists
+      const org = await storage.getOrganization(organizationId);
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+      
+      // Set session override
+      req.session.organizationIdOverride = organizationId;
+      await req.session.save();
+      
+      console.log(`[Organizations] Super admin switched to org ${organizationId}`);
+      res.json({ 
+        message: 'Organization switched successfully',
+        organizationId,
+        organization: org
+      });
+    } catch (error) {
+      console.error('[Organizations] Error switching organization:', error);
+      res.status(500).json({ message: 'Failed to switch organization' });
+    }
+  });
+
+  // Clear organization override (return to default detection)
+  app.delete('/api/admin/organization/switch', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      delete req.session?.organizationIdOverride;
+      await req.session?.save();
+      
+      console.log('[Organizations] Super admin cleared organization override');
+      res.json({ message: 'Organization override cleared' });
+    } catch (error) {
+      console.error('[Organizations] Error clearing organization override:', error);
+      res.status(500).json({ message: 'Failed to clear organization override' });
     }
   });
 

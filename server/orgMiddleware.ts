@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { db } from './db';
-import { customDomains, organizations } from '../shared/schema';
+import { customDomains, organizations, users } from '../shared/schema';
 import { eq, and } from 'drizzle-orm';
 
 // Default organization ID for Julie's Family Learning Program
@@ -15,6 +15,13 @@ const TRUSTED_BASE_DOMAINS = [
   'localhost',
   '127.0.0.1'
 ];
+
+// Extended Express Session to include organization override
+declare module 'express-session' {
+  interface SessionData {
+    organizationIdOverride?: string;
+  }
+}
 
 // Extended Express Request to include organization context
 declare global {
@@ -59,6 +66,43 @@ export async function detectOrganization(
   next: NextFunction
 ) {
   try {
+    // PRIORITY 1: Check for super admin organization override in session
+    if (req.session?.organizationIdOverride && req.user) {
+      // Verify user is super admin before applying override
+      const currentOidcSub = (req.user as any).claims?.sub;
+      if (currentOidcSub) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.oidcSub, currentOidcSub))
+          .limit(1);
+        
+        if (user && user.role === 'super_admin') {
+          req.organizationId = req.session.organizationIdOverride;
+          
+          // Load organization details
+          const [org] = await db
+            .select()
+            .from(organizations)
+            .where(eq(organizations.id, req.session.organizationIdOverride))
+            .limit(1);
+          
+          if (org) {
+            req.organization = org;
+            console.log(`[OrgMiddleware] Super admin override -> Org ${req.organizationId}`);
+            return next();
+          } else {
+            // Invalid org ID in override, clear it
+            delete req.session.organizationIdOverride;
+          }
+        } else {
+          // User is not super admin, clear override
+          delete req.session.organizationIdOverride;
+        }
+      }
+    }
+    
+    // PRIORITY 2: Detect from hostname
     // Extract and normalize hostname (prevent case sensitivity issues)
     const hostname = req.hostname.toLowerCase();
     

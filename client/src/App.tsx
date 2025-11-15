@@ -47,6 +47,7 @@ import AdminAutomationRules from "@/pages/AdminAutomationRules";
 import AdminAutomationRuns from "@/pages/AdminAutomationRuns";
 import AdminAutomationConfig from "@/pages/AdminAutomationConfig";
 import AdminRoleProvisioning from "@/pages/AdminRoleProvisioning";
+import AdminOrganizations from "@/pages/AdminOrganizations";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import ImageComparison from "@/pages/ImageComparison";
@@ -103,6 +104,7 @@ function Router() {
       <Route path="/admin/automation-runs" component={AdminAutomationRuns} />
       <Route path="/admin/automation-config" component={AdminAutomationConfig} />
       <Route path="/admin/role-provisioning" component={AdminRoleProvisioning} />
+      <Route path="/admin/organizations" component={AdminOrganizations} />
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />
