@@ -45,6 +45,10 @@ externalPort = 4200
 [env]
 PORT = "5000"
 
+[interpreter]
+[interpreter.env]
+REPL_HOME = "/home/runner/${REPL_SLUG}"
+
 [workflows]
 runButton = "Start application"
 
