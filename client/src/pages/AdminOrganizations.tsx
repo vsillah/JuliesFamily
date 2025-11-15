@@ -45,7 +45,7 @@ export default function AdminOrganizations() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [, setLocation] = useLocation();
-  const { currentOrg, switchOrganization, clearOverride } = useOrganization();
+  const { currentOrg, isLoading: currentLoading, switchOrganization, clearOverride } = useOrganization();
 
   // Form with validation
   const form = useForm<CreateOrganizationWizard>({
