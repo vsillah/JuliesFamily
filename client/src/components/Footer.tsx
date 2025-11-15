@@ -74,6 +74,12 @@ export default function Footer() {
 
         <div className="pt-8 border-t border-card-border text-center text-sm text-muted-foreground">
           <p>&copy; {new Date().getFullYear()} Julie's Family Learning Program. All rights reserved.</p>
+          <p className="mt-2">
+            Powered by{" "}
+            <a href="/product" className="text-primary hover:underline">
+              Kinflo
+            </a>
+          </p>
         </div>
       </div>
     </footer>
