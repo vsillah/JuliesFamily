@@ -286,7 +286,7 @@ class OrgScopedImplementations {
       .from(contentItems)
       .leftJoin(imageAssets, eq(contentItems.imageId, imageAssets.id))
       .where(eq(contentItems.organizationId, this.organizationId))
-      .orderBy(contentItems.order, contentItems.createdAt);
+      .orderBy(contentItems.order);
 
     return items.map(({ content_items, image_assets }) => ({
       ...content_items,
@@ -317,7 +317,7 @@ class OrgScopedImplementations {
         eq(contentItems.type, type),
         eq(contentItems.organizationId, this.organizationId)
       ))
-      .orderBy(contentItems.order, contentItems.createdAt);
+      .orderBy(contentItems.order);
 
     return items.map(({ content_items, image_assets }) => ({
       ...content_items,
