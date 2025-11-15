@@ -437,7 +437,7 @@ class OrgScopedImplementations {
           eq(contentItems.organizationId, this.organizationId) // ORG SCOPING
         )
       )
-      .orderBy(sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`);
+      .orderBy(contentItems.id, sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`);
     
     // Add passion filtering if provided
     if (userPassions && userPassions.length > 0) {
@@ -511,24 +511,25 @@ class OrgScopedImplementations {
         const targets = await db
           .select()
           .from(abTestTargets)
-          .where(eq(abTestTargets.abTestId, test.id));
+          .where(and(
+            eq(abTestTargets.testId, test.id),
+            eq(abTestTargets.organizationId, this.organizationId) // ORG SCOPING
+          ));
         
         // Calculate priority based on matching persona/funnel
         let priority = 0;
         let hasMatch = false;
         
         for (const target of targets) {
-          const personaMatch = !persona || target.targetPersona === persona || target.targetPersona === null;
-          const funnelMatch = !funnelStage || target.targetFunnelStage === funnelStage || target.targetFunnelStage === null;
+          const personaMatch = !persona || target.persona === persona;
+          const funnelMatch = !funnelStage || target.funnelStage === funnelStage;
           
           if (personaMatch && funnelMatch) {
             hasMatch = true;
-            // Both match = highest priority (2)
-            // One matches, one is null = medium priority (1)
-            // Both null = lowest priority (0)
+            // Both match = priority 2, one match = priority 1
             const targetPriority = 
-              (target.targetPersona !== null ? 1 : 0) + 
-              (target.targetFunnelStage !== null ? 1 : 0);
+              (personaMatch ? 1 : 0) + 
+              (funnelMatch ? 1 : 0);
             priority = Math.max(priority, targetPriority);
           }
         }
