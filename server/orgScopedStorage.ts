@@ -171,6 +171,12 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getEmailReportSchedule',
   'updateEmailReportSchedule',
   'deleteEmailReportSchedule',
+  
+  // Backup schedule operations
+  'getDueBackupSchedules',
+  
+  // Email sequence schedule operations
+  'getSchedulesDueForExecution',
 ]);
 
 /**
@@ -1353,6 +1359,51 @@ class OrgScopedImplementations {
         eq(emailReportSchedules.id, id),
         eq(emailReportSchedules.organizationId, this.organizationId)
       ));
+  }
+
+  // ========================================
+  // BACKUP SCHEDULE OPERATIONS
+  // ========================================
+
+  async getDueBackupSchedules(now: Date, lookaheadMinutes: number = 1) {
+    const { backupSchedules } = await import('@shared/schema');
+    const lookahead = new Date(now.getTime() + lookaheadMinutes * 60 * 1000);
+    
+    return await db
+      .select()
+      .from(backupSchedules)
+      .where(
+        and(
+          eq(backupSchedules.organizationId, this.organizationId),
+          eq(backupSchedules.isActive, true),
+          eq(backupSchedules.isRunning, false),
+          sql`${backupSchedules.nextRun} <= ${lookahead}`
+        )
+      )
+      .orderBy(backupSchedules.nextRun);
+  }
+
+  // ========================================
+  // EMAIL SEQUENCE SCHEDULE OPERATIONS
+  // ========================================
+
+  async getSchedulesDueForExecution() {
+    const { emailReportSchedules } = await import('@shared/schema');
+    const now = new Date();
+    return await db
+      .select()
+      .from(emailReportSchedules)
+      .where(
+        and(
+          eq(emailReportSchedules.organizationId, this.organizationId),
+          eq(emailReportSchedules.isActive, true),
+          or(
+            sql`${emailReportSchedules.nextRunAt} IS NULL`,
+            sql`${emailReportSchedules.nextRunAt} <= ${now}`
+          )
+        )
+      )
+      .orderBy(emailReportSchedules.nextRunAt);
   }
 }
 

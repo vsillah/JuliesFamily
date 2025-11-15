@@ -75,9 +75,8 @@ export default function AdminOrganizations() {
         title: "Organization Switched",
         description: `Now viewing organization ${data.organizationId}`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/organization/current'] });
-      // Reload the page to refresh all org-scoped data
-      window.location.reload();
+      // Invalidate ALL queries to refetch org-scoped data
+      queryClient.invalidateQueries();
     },
     onError: (error: any) => {
       toast({
