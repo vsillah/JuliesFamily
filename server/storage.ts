@@ -1,7 +1,7 @@
 // Database storage implementation for Replit Auth and CRM
 // Reference: blueprint:javascript_log_in_with_replit and blueprint:javascript_database
 import { 
-  users, leads, interactions, leadMagnets, imageAssets,
+  users, organizations, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
   metricWeightProfiles, metricWeightProfileMetrics,
   abTestAutomationRules, abTestAutomationRuleMetrics,
@@ -20,7 +20,8 @@ import {
   volunteerEvents, volunteerShifts, volunteerEnrollments, volunteerSessionLogs,
   segments, emailUnsubscribes,
   programs, adminEntitlements, adminImpersonationSessions,
-  type User, type UpsertUser, 
+  type User, type UpsertUser,
+  type Organization, type InsertOrganization, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
   type LeadMagnet, type InsertLeadMagnet,
@@ -99,6 +100,13 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   updateUser(id: string, updates: Partial<UpsertUser>, actorId?: string): Promise<User | undefined>;
   createUser(user: UpsertUser): Promise<User>;
   deleteUser(id: string): Promise<void>;
+  
+  // Organization operations for tier-based access control
+  createOrganization(org: InsertOrganization): Promise<Organization>;
+  getOrganization(id: string): Promise<Organization | undefined>;
+  getOrganizationByUserId(userId: string): Promise<Organization | undefined>;
+  getAllOrganizations(): Promise<Organization[]>;
+  updateOrganization(id: string, updates: Partial<InsertOrganization>): Promise<Organization | undefined>;
   
   // Admin Preferences operations
   getAdminPreferences(userId: string): Promise<AdminPreferences | undefined>;
@@ -1237,6 +1245,38 @@ export class DatabaseStorage implements IStorage {
 
   async deleteUser(id: string): Promise<void> {
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  // Organization operations for tier-based access control
+  async createOrganization(orgData: InsertOrganization): Promise<Organization> {
+    const [org] = await db.insert(organizations).values(orgData).returning();
+    return org;
+  }
+
+  async getOrganization(id: string): Promise<Organization | undefined> {
+    const [org] = await db.select().from(organizations).where(eq(organizations.id, id));
+    return org;
+  }
+
+  async getOrganizationByUserId(userId: string): Promise<Organization | undefined> {
+    const user = await this.getUser(userId);
+    if (!user?.organizationId) {
+      return undefined;
+    }
+    return this.getOrganization(user.organizationId);
+  }
+
+  async getAllOrganizations(): Promise<Organization[]> {
+    return await db.select().from(organizations).orderBy(desc(organizations.createdAt));
+  }
+
+  async updateOrganization(id: string, updates: Partial<InsertOrganization>): Promise<Organization | undefined> {
+    const [org] = await db
+      .update(organizations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(organizations.id, id))
+      .returning();
+    return org;
   }
 
   // Admin Preferences operations
