@@ -60,15 +60,29 @@ import SmsUnsubscribe from "@/pages/SmsUnsubscribe";
 import NotFound from "@/pages/not-found";
 import { useAuth } from "@/hooks/useAuth";
 import { Redirect } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 
 function DefaultRoute() {
   const { user, isLoading } = useAuth();
   
-  if (isLoading) {
+  // Fetch current organization context for kinflo admins
+  const { data: currentOrg, isLoading: orgLoading } = useQuery({
+    queryKey: ['/api/admin/organization/current'],
+    enabled: !!(user && (user.role === 'kinflo_admin' || user.role === 'super_admin')),
+  });
+  
+  if (isLoading || orgLoading) {
     return null;
   }
   
+  // If kinflo_admin has switched to a specific organization, show public site
+  // Otherwise redirect to organizations dashboard
   if (user?.role === 'kinflo_admin' || user?.role === 'super_admin') {
+    // If there's an active organization override, show the public website
+    if (currentOrg?.organizationId) {
+      return <Home />;
+    }
+    // Otherwise redirect to the organizations admin page
     return <Redirect to="/admin/organizations" />;
   }
   
