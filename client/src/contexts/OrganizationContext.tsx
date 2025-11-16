@@ -117,15 +117,17 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
         clearOverride,
       }}
     >
-      {isSwitching ? (
-        <div className="flex items-center justify-center min-h-screen" data-testid="org-switching-loader">
+      {children}
+      {isSwitching && (
+        <div 
+          className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50" 
+          data-testid="org-switching-loader"
+        >
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-muted-foreground">Switching organizations...</p>
           </div>
         </div>
-      ) : (
-        children
       )}
     </OrganizationContext.Provider>
   );
