@@ -80,6 +80,9 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     queryKey: ["/api/ab-tests/active", { persona, funnelStage }],
     enabled,
     retry: false,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Find matching test for this type

@@ -4,6 +4,9 @@ import type { GoogleReview } from "@shared/schema";
 export default function SchemaMarkup() {
   const { data: googleReviews = [] } = useQuery<GoogleReview[]>({
     queryKey: ["/api/google-reviews"],
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   if (googleReviews.length === 0) {

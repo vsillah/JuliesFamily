@@ -104,6 +104,9 @@ export function useAdminPreviewState() {
       persona: selectedPersona || undefined, 
       funnelStage: selectedFunnel !== "none" ? selectedFunnel : undefined 
     }],
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Check if preview mode is currently active

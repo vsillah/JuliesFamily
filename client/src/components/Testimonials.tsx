@@ -8,11 +8,17 @@ export default function Testimonials() {
   const { data: allTestimonials = [], isLoading: loadingCms } = useQuery<ContentItemWithResolvedImage[]>({
     queryKey: [currentOrg?.organizationId, "/api/content/type/testimonial"],
     enabled: !!currentOrg,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const { data: googleReviews = [], isLoading: loadingGoogle } = useQuery<GoogleReview[]>({
     queryKey: [currentOrg?.organizationId, "/api/google-reviews"],
     enabled: !!currentOrg,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   const testimonials = allTestimonials.filter(t => t.isActive);
