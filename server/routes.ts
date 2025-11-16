@@ -9,7 +9,7 @@ import { storage } from "./storage";
 import { createOrgStorage } from "./orgScopedStorage";
 import { requireTier } from "./tierMiddleware";
 import { TIERS } from "@shared/tiers";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, batchContentReorderSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema, insertProgramSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, batchContentReorderSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema, insertProgramSchema, customDomains } from "@shared/schema";
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
 import { AdminEntitlementService } from "./services/adminEntitlementService";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter, unsubscribeVerifyLimiter, unsubscribeProcessLimiter } from "./security";
@@ -407,7 +407,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         organizationId,
-        organization: org,
+        organizationName: org?.name || organizationId,
         isOverride
       });
     } catch (error) {
@@ -439,7 +439,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ 
         message: 'Organization switched successfully',
         organizationId,
-        organization: org
+        organizationName: org.name || organizationId
       });
     } catch (error) {
       console.error('[Organizations] Error switching organization:', error);
@@ -453,8 +453,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       delete req.session?.organizationIdOverride;
       await req.session?.save();
       
-      console.log('[Organizations] Super admin cleared organization override');
-      res.json({ message: 'Organization override cleared' });
+      // Recompute the default organization after clearing override
+      // Check hostname to determine if this is a custom domain or trusted domain
+      const hostname = req.hostname.toLowerCase();
+      
+      // For custom domains, find the organization
+      // For trusted Replit domains, default to '1'
+      let organizationId = '1';  // Default for trusted domains
+      
+      // Check if this might be a custom domain (non-Replit domain)
+      const isTrustedDomain = hostname.includes('.replit.') || hostname.includes('.repl.co');
+      
+      if (!isTrustedDomain) {
+        // Try to find custom domain mapping
+        const [customDomainRecord] = await db
+          .select()
+          .from(customDomains)
+          .where(and(
+            eq(customDomains.domain, hostname),
+            eq(customDomains.verified, true)
+          ))
+          .limit(1);
+        
+        if (customDomainRecord) {
+          organizationId = customDomainRecord.organizationId;
+        }
+      }
+      
+      const org = await storage.getOrganization(organizationId);
+      
+      console.log(`[Organizations] Super admin cleared organization override, defaulting to org ${organizationId}`);
+      res.json({ 
+        message: 'Organization override cleared',
+        organizationId,
+        organizationName: org?.name || organizationId
+      });
     } catch (error) {
       console.error('[Organizations] Error clearing organization override:', error);
       res.status(500).json({ message: 'Failed to clear organization override' });
