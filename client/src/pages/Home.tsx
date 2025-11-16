@@ -50,6 +50,9 @@ export default function Home() {
   const { data: heroContent, isLoading: heroLoading } = useQuery<ContentItem[]>({
     queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
     enabled: !isPersonaLoading && !!persona && !!currentOrg,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Also fetch hero image to ensure it's ready before rendering
@@ -57,6 +60,9 @@ export default function Home() {
   const { data: heroImageAsset, isLoading: heroImageLoading } = useQuery({
     queryKey: ["/api/images/by-name/" + heroImageName],
     enabled: !isPersonaLoading && !!heroContent?.[0],
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch lead magnet content from database
@@ -71,6 +77,9 @@ export default function Home() {
       if (!res.ok) throw new Error('Failed to fetch lead magnets');
       return res.json();
     },
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Get first lead magnet for title/description

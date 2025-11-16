@@ -62,7 +62,14 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       return response.json();
     },
     onSuccess: async (data) => {
-      // Update local state immediately with cached org during transition
+      // CRITICAL FIX: Refetch session FIRST to confirm backend update, THEN update local state
+      // This prevents the infinite loop caused by invalidating before backend confirms the change
+      
+      // Step 1: Refetch the session to get the updated org ID from backend
+      await queryClient.refetchQueries({ queryKey: ['/api/organization/session'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/admin/organization/current'] });
+      
+      // Step 2: NOW update local state (backend has confirmed the switch)
       setCurrentOrg({
         organizationId: data.organizationId,
         organizationName: data.organizationName || data.organizationId,
@@ -70,25 +77,24 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       });
       setCachedOrgId(data.organizationId);
       
-      // Targeted invalidation: Only invalidate org session and org details
-      // Do NOT invalidate all queries - let them refetch naturally when components need them
-      await queryClient.invalidateQueries({ queryKey: ['/api/organization/session'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/organization/current'] });
-      
-      // Invalidate specific org-dependent queries by pattern
+      // Step 3: Invalidate org-dependent queries AFTER state is stable
       // Only invalidate queries that explicitly depend on organization data
       await queryClient.invalidateQueries({
         predicate: (query) => {
           const key = query.queryKey;
           if (!Array.isArray(key)) return false;
           
-          // Invalidate queries that start with /api/admin/ (org-specific admin data)
           const firstKey = key[0];
+          // Invalidate admin queries (org-specific admin data)
           if (typeof firstKey === 'string' && firstKey.startsWith('/api/admin/')) {
+            // Don't invalidate session/current - we just refetched those
+            if (firstKey === '/api/organization/session' || firstKey === '/api/admin/organization/current') {
+              return false;
+            }
             return true;
           }
           
-          // Invalidate queries that start with /api/content/ (org-specific content)
+          // Invalidate content queries (org-specific content)
           if (typeof firstKey === 'string' && firstKey.startsWith('/api/content/')) {
             return true;
           }
@@ -106,6 +112,13 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       return response.json();
     },
     onSuccess: async (data) => {
+      // Same pattern: refetch FIRST, then update state, then invalidate
+      
+      // Step 1: Refetch the session to get the updated org ID from backend
+      await queryClient.refetchQueries({ queryKey: ['/api/organization/session'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/admin/organization/current'] });
+      
+      // Step 2: Update local state after backend confirms
       setCurrentOrg({
         organizationId: data.organizationId,
         organizationName: data.organizationName || data.organizationId,
@@ -113,10 +126,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       });
       setCachedOrgId(data.organizationId);
       
-      // Same targeted invalidation as switch
-      await queryClient.invalidateQueries({ queryKey: ['/api/organization/session'] });
-      await queryClient.invalidateQueries({ queryKey: ['/api/admin/organization/current'] });
-      
+      // Step 3: Invalidate org-dependent queries
       await queryClient.invalidateQueries({
         predicate: (query) => {
           const key = query.queryKey;
@@ -124,6 +134,10 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
           
           const firstKey = key[0];
           if (typeof firstKey === 'string' && firstKey.startsWith('/api/admin/')) {
+            // Don't invalidate session/current - we just refetched those
+            if (firstKey === '/api/organization/session' || firstKey === '/api/admin/organization/current') {
+              return false;
+            }
             return true;
           }
           

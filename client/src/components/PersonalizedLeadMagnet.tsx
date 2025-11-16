@@ -61,6 +61,9 @@ export default function PersonalizedLeadMagnet() {
       return res.json();
     },
     enabled: !!currentOrg && !!persona, // Only require persona - funnel stage is optional
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   if (isLoading) {
