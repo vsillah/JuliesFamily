@@ -71,14 +71,9 @@ function DefaultRoute() {
     return null;
   }
   
-  // If kinflo_admin has switched to a specific organization, show public site
-  // Otherwise redirect to organizations dashboard
+  // KinFlo admins default to the organizations dashboard
+  // They can navigate to any page including the public site
   if (user?.role === 'kinflo_admin' || user?.role === 'super_admin') {
-    // If there's an active organization override, show the public website
-    if (currentOrg?.organizationId) {
-      return <Home />;
-    }
-    // Otherwise redirect to the organizations admin page
     return <Redirect to="/admin/organizations" />;
   }
   
