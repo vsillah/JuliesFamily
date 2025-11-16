@@ -67,14 +67,6 @@ function DefaultRoute() {
   const { user, isLoading } = useAuth();
   const { currentOrg, isLoading: orgLoading, isSwitching } = useOrganization();
   
-  console.log('[DefaultRoute] Debug:', { 
-    user: user?.role, 
-    currentOrg, 
-    isLoading, 
-    orgLoading, 
-    isSwitching 
-  });
-  
   // Show loading screen while auth or organization context is loading
   if (isLoading || orgLoading || isSwitching) {
     return (
@@ -91,18 +83,14 @@ function DefaultRoute() {
   // - If they have an organization override set, show the public website
   // - If no override, redirect to organizations dashboard
   if (user?.role === 'kinflo_admin' || user?.role === 'super_admin') {
-    console.log('[DefaultRoute] Super admin detected, isOverride:', currentOrg?.isOverride);
     if (currentOrg?.isOverride) {
       // Admin has selected an organization to preview - show public site
-      console.log('[DefaultRoute] Rendering Home for super admin with override');
       return <Home />;
     }
     // No organization selected - redirect to organizations dashboard
-    console.log('[DefaultRoute] Redirecting super admin to /admin/organizations');
     return <Redirect to="/admin/organizations" />;
   }
   
-  console.log('[DefaultRoute] Regular user - rendering Home');
   return <Home />;
 }
 

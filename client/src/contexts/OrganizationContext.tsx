@@ -45,7 +45,8 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     ...STANDARD_QUERY_OPTIONS,
   });
 
-  const isLoading = isSessionLoading || isDetailsLoading;
+  // Consider loading if either query is loading OR if we have query data but haven't set state yet
+  const isLoading = isSessionLoading || isDetailsLoading || (!!orgDetails && !currentOrg);
 
   // Update local state when query data changes
   useEffect(() => {
