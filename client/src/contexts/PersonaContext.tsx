@@ -102,9 +102,10 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // Don't show persona modal on Kinflo product landing pages
+    // Don't show persona modal on Kinflo product landing pages or admin routes
     // Use startsWith to handle query strings and trailing slashes
     const isKinfloPage = location.startsWith('/kinflo') || location.startsWith('/product');
+    const isAdminRoute = location.startsWith('/admin');
 
     const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
     
@@ -116,7 +117,13 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       if (user.persona) {
         setPersonaState(user.persona as Persona);
       }
-      // Don't show modal for authenticated users
+      // Close any lingering modal and clear persisted state when user authenticates
+      setShowPersonaModal(false);
+      sessionStorage.removeItem(PERSONA_MODAL_SHOWN_KEY);
+    } else if (isAdminRoute) {
+      // Never show persona modal on admin routes
+      setPersonaState('default');
+      setShowPersonaModal(false);
     } else {
       // For unauthenticated users, use session storage
       const storedPersona = sessionStorage.getItem(PERSONA_STORAGE_KEY);
