@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { queryClient, apiRequest } from '@/lib/queryClient';
+import { useQuery } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useOrgMutation, invalidateOrgQueries } from '@/hooks/useOrgMutation';
+import { STANDARD_QUERY_OPTIONS } from '@/lib/queryOptions';
 
 interface OrgSession {
   organizationId: string;
@@ -29,20 +31,18 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [cachedOrgId, setCachedOrgId] = useState<string | null>(null);
 
   // Fetch current organization using the new session endpoint
+  // Uses centralized query options to enforce consistent behavior
   const { data: orgSession, isLoading: isSessionLoading } = useQuery<OrgSession>({
     queryKey: ['/api/organization/session'],
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
+    ...STANDARD_QUERY_OPTIONS,
   });
 
   // Fetch organization details only when we have a stable org ID
+  // Uses centralized query options to enforce consistent behavior
   const { data: orgDetails, isLoading: isDetailsLoading } = useQuery<Organization>({
     queryKey: ['/api/admin/organization/current'],
     enabled: !!orgSession?.organizationId,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000,
+    ...STANDARD_QUERY_OPTIONS,
   });
 
   const isLoading = isSessionLoading || isDetailsLoading;
@@ -56,20 +56,14 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   }, [orgDetails]);
 
   // Switch organization mutation
-  const switchMutation = useMutation({
+  // Uses enforcement hook to guarantee refetch-first pattern
+  const switchMutation = useOrgMutation<{ organizationId: string; organizationName: string }, string>({
     mutationFn: async (organizationId: string) => {
       const response = await apiRequest('POST', '/api/admin/organization/switch', { organizationId });
       return response.json();
     },
-    onSuccess: async (data) => {
-      // CRITICAL FIX: Refetch session FIRST to confirm backend update, THEN update local state
-      // This prevents the infinite loop caused by invalidating before backend confirms the change
-      
-      // Step 1: Refetch the session to get the updated org ID from backend
-      await queryClient.refetchQueries({ queryKey: ['/api/organization/session'] });
-      await queryClient.refetchQueries({ queryKey: ['/api/admin/organization/current'] });
-      
-      // Step 2: NOW update local state (backend has confirmed the switch)
+    onSuccessCallback: async (data) => {
+      // useOrgMutation already refetched session queries - state update is now safe
       setCurrentOrg({
         organizationId: data.organizationId,
         organizationName: data.organizationName || data.organizationId,
@@ -77,48 +71,20 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       });
       setCachedOrgId(data.organizationId);
       
-      // Step 3: Invalidate org-dependent queries AFTER state is stable
-      // Only invalidate queries that explicitly depend on organization data
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          if (!Array.isArray(key)) return false;
-          
-          const firstKey = key[0];
-          // Invalidate admin queries (org-specific admin data)
-          if (typeof firstKey === 'string' && firstKey.startsWith('/api/admin/')) {
-            // Don't invalidate session/current - we just refetched those
-            if (firstKey === '/api/organization/session' || firstKey === '/api/admin/organization/current') {
-              return false;
-            }
-            return true;
-          }
-          
-          // Invalidate content queries (org-specific content)
-          if (typeof firstKey === 'string' && firstKey.startsWith('/api/content/')) {
-            return true;
-          }
-          
-          return false;
-        },
-      });
+      // Invalidate org-dependent queries using centralized helper
+      await invalidateOrgQueries();
     },
   });
 
   // Clear override mutation
-  const clearMutation = useMutation({
+  // Uses enforcement hook to guarantee refetch-first pattern
+  const clearMutation = useOrgMutation<{ organizationId: string; organizationName: string }, void>({
     mutationFn: async () => {
       const response = await apiRequest('DELETE', '/api/admin/organization/switch');
       return response.json();
     },
-    onSuccess: async (data) => {
-      // Same pattern: refetch FIRST, then update state, then invalidate
-      
-      // Step 1: Refetch the session to get the updated org ID from backend
-      await queryClient.refetchQueries({ queryKey: ['/api/organization/session'] });
-      await queryClient.refetchQueries({ queryKey: ['/api/admin/organization/current'] });
-      
-      // Step 2: Update local state after backend confirms
+    onSuccessCallback: async (data) => {
+      // useOrgMutation already refetched session queries - state update is now safe
       setCurrentOrg({
         organizationId: data.organizationId,
         organizationName: data.organizationName || data.organizationId,
@@ -126,28 +92,8 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       });
       setCachedOrgId(data.organizationId);
       
-      // Step 3: Invalidate org-dependent queries
-      await queryClient.invalidateQueries({
-        predicate: (query) => {
-          const key = query.queryKey;
-          if (!Array.isArray(key)) return false;
-          
-          const firstKey = key[0];
-          if (typeof firstKey === 'string' && firstKey.startsWith('/api/admin/')) {
-            // Don't invalidate session/current - we just refetched those
-            if (firstKey === '/api/organization/session' || firstKey === '/api/admin/organization/current') {
-              return false;
-            }
-            return true;
-          }
-          
-          if (typeof firstKey === 'string' && firstKey.startsWith('/api/content/')) {
-            return true;
-          }
-          
-          return false;
-        },
-      });
+      // Invalidate org-dependent queries using centralized helper
+      await invalidateOrgQueries();
     },
   });
 
