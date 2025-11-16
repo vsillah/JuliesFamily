@@ -67,8 +67,16 @@ function DefaultRoute() {
   const { user, isLoading } = useAuth();
   const { currentOrg, isLoading: orgLoading, isSwitching } = useOrganization();
   
+  // Show loading screen while auth or organization context is loading
   if (isLoading || orgLoading || isSwitching) {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen" data-testid="default-route-loader">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
   
   // KinFlo admins routing logic:

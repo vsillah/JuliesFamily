@@ -18,6 +18,9 @@ export function ImpersonationBanner() {
   } | null>({
     queryKey: ['/api/admin/impersonation/session'],
     enabled: isAdmin,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // Fetch all users to get impersonated user details
@@ -29,6 +32,9 @@ export function ImpersonationBanner() {
   }>>({
     queryKey: ['/api/admin/users'],
     enabled: !!impersonationSession,
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 
   // End impersonation mutation

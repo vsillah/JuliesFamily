@@ -278,6 +278,9 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   const { data: users = [] } = useQuery<Array<{id: string; email: string; firstName: string | null; lastName: string | null}>>({
     queryKey: ['/api/admin/users'],
     enabled: isAdmin,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
   
   // Fetch active impersonation session
@@ -288,6 +291,9 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   } | null>({
     queryKey: ['/api/admin/impersonation/session'],
     enabled: isAdmin,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
   
   // Get impersonated user details

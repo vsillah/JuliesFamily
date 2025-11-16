@@ -631,6 +631,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Organization Session API - Returns stable organization context
+  app.get('/api/organization/session', async (req: any, res) => {
+    try {
+      // Organization ID comes from detectOrganization middleware
+      const organizationId = req.organizationId || '1';
+      const organizationIdOverride = req.session?.organizationIdOverride;
+      
+      res.json({
+        organizationId,
+        hasOverride: !!organizationIdOverride,
+        ready: true
+      });
+    } catch (error) {
+      console.error("Error fetching organization session:", error);
+      res.status(500).json({ message: "Failed to fetch organization session" });
+    }
+  });
+
   app.get('/api/organizations', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const organizations = await req.storage.getAllOrganizations();
