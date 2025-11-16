@@ -11,6 +11,7 @@ interface Organization {
 interface OrganizationContextType {
   currentOrg: Organization | null;
   isLoading: boolean;
+  isSwitching: boolean;
   switchOrganization: (organizationId: string) => Promise<void>;
   clearOverride: () => Promise<void>;
 }
@@ -102,6 +103,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       value={{
         currentOrg,
         isLoading,
+        isSwitching: switchMutation.isPending || clearMutation.isPending,
         switchOrganization,
         clearOverride,
       }}

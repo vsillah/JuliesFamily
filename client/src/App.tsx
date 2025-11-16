@@ -65,9 +65,9 @@ import { useOrganization } from "@/contexts/OrganizationContext";
 
 function DefaultRoute() {
   const { user, isLoading } = useAuth();
-  const { currentOrg, isLoading: orgLoading } = useOrganization();
+  const { currentOrg, isLoading: orgLoading, isSwitching } = useOrganization();
   
-  if (isLoading || orgLoading) {
+  if (isLoading || orgLoading || isSwitching) {
     return null;
   }
   
