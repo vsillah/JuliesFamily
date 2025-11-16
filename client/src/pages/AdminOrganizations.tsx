@@ -44,6 +44,7 @@ interface CurrentOrganization {
 export default function AdminOrganizations() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [isSwitching, setIsSwitching] = useState(false);
   const [, setLocation] = useLocation();
   const { currentOrg, isLoading: currentLoading, switchOrganization, clearOverride } = useOrganization();
 
@@ -59,50 +60,6 @@ export default function AdminOrganizations() {
   // Fetch all organizations
   const { data: organizations, isLoading: orgsLoading, error: orgsError } = useQuery<Organization[]>({
     queryKey: ['/api/admin/organizations'],
-  });
-
-  // Switch organization using context (no page reload needed!)
-  const switchOrgMutation = useMutation({
-    mutationFn: async (organizationId: string) => {
-      await switchOrganization(organizationId);
-      return { organizationId };
-    },
-    onSuccess: async (data) => {
-      toast({
-        title: "Organization Switched",
-        description: `Now viewing organization ${data.organizationId}`,
-      });
-      // Navigate to home - context will handle cache invalidation
-      setLocation('/');
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to switch organization",
-        variant: "destructive",
-      });
-    },
-  });
-
-  // Clear override using context (no page reload needed!)
-  const clearOverrideMutation = useMutation({
-    mutationFn: async () => {
-      await clearOverride();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Override Cleared",
-        description: "Returned to default organization detection",
-      });
-      // Context handles cache invalidation automatically
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to clear override",
-        variant: "destructive",
-      });
-    },
   });
 
   // Create organization mutation
@@ -142,25 +99,70 @@ export default function AdminOrganizations() {
     },
   });
 
-  const handleSwitchOrg = (orgId: string) => {
-    switchOrgMutation.mutate(orgId);
+  const handleSwitchOrg = async (orgId: string) => {
+    setIsSwitching(true);
+    try {
+      await switchOrganization(orgId);
+      toast({
+        title: "Organization Switched",
+        description: "Now viewing this organization",
+      });
+      // Stay on admin page to see the updated "Current" badge
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to switch organization",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSwitching(false);
+    }
   };
 
-  const handleClearOverride = () => {
-    clearOverrideMutation.mutate();
+  const handleClearOverride = async () => {
+    setIsSwitching(true);
+    try {
+      await clearOverride();
+      toast({
+        title: "Override Cleared",
+        description: "Returned to default organization detection",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to clear override",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSwitching(false);
+    }
   };
 
   const handleCreateOrg = (data: CreateOrganizationWizard) => {
     createOrgMutation.mutate(data);
   };
 
-  const handleViewWebsite = (orgId: string) => {
-    // If not the current org, switch to it first (mutation handles navigation)
-    if (currentOrg?.organizationId !== orgId) {
-      switchOrgMutation.mutate(orgId);
-    } else {
-      // Already on this org, just navigate
+  const handleViewWebsite = async (orgId: string) => {
+    setIsSwitching(true);
+    try {
+      // If not the current org, switch to it first
+      if (currentOrg?.organizationId !== orgId) {
+        await switchOrganization(orgId);
+        toast({
+          title: "Organization Switched",
+          description: "Now viewing the website for this organization",
+        });
+      }
+      // Navigate to website (works for both switch and direct navigation)
       setLocation('/');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to switch organization",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSwitching(false);
     }
   };
 
@@ -203,11 +205,11 @@ export default function AdminOrganizations() {
             <Button
               onClick={handleClearOverride}
               variant="outline"
-              disabled={clearOverrideMutation.isPending}
+              disabled={isSwitching}
               data-testid="button-clear-override"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Clear Override
+              <RefreshCw className={`h-4 w-4 mr-2 ${isSwitching ? 'animate-spin' : ''}`} />
+              {isSwitching ? "Clearing..." : "Clear Override"}
             </Button>
           )}
           <Button
@@ -324,23 +326,24 @@ export default function AdminOrganizations() {
                   {!isCurrentOrg && (
                     <Button
                       onClick={() => handleSwitchOrg(org.id)}
-                      disabled={switchOrgMutation.isPending}
+                      disabled={isSwitching}
                       className="w-full"
                       data-testid={`button-switch-${org.id}`}
                     >
-                      Switch to this Organization
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      {isSwitching ? "Switching..." : "Switch to this Organization"}
+                      {!isSwitching && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                   )}
                   
                   <Button
                     variant="outline"
                     onClick={() => handleViewWebsite(org.id)}
+                    disabled={isSwitching}
                     className="w-full"
                     data-testid={`button-view-website-${org.id}`}
                   >
-                    View Website
-                    <ExternalLink className="ml-2 h-4 w-4" />
+                    {isSwitching ? "Loading..." : "View Website"}
+                    {!isSwitching && <ExternalLink className="ml-2 h-4 w-4" />}
                   </Button>
                 </div>
               </CardContent>
