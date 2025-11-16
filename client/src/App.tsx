@@ -65,15 +65,21 @@ import { useOrganization } from "@/contexts/OrganizationContext";
 
 function DefaultRoute() {
   const { user, isLoading } = useAuth();
-  const { currentOrg } = useOrganization();
+  const { currentOrg, isLoading: orgLoading } = useOrganization();
   
-  if (isLoading) {
+  if (isLoading || orgLoading) {
     return null;
   }
   
-  // KinFlo admins default to the organizations dashboard
-  // They can navigate to any page including the public site
+  // KinFlo admins routing logic:
+  // - If they have an organization override set, show the public website
+  // - If no override, redirect to organizations dashboard
   if (user?.role === 'kinflo_admin' || user?.role === 'super_admin') {
+    if (currentOrg?.isOverride) {
+      // Admin has selected an organization to preview - show public site
+      return <Home />;
+    }
+    // No organization selected - redirect to organizations dashboard
     return <Redirect to="/admin/organizations" />;
   }
   
