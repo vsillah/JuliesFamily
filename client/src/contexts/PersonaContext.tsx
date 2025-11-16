@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
@@ -73,6 +73,9 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [location] = useLocation();
   
+  // Track whether user has ever been authenticated in this session to prevent modal during navigation race condition
+  const hasBeenAuthenticatedRef = useRef(false);
+  
   // Initialize persona from session storage to avoid flash
   const getInitialPersona = (): Persona => {
     const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
@@ -102,6 +105,11 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    // Track if user has been authenticated to prevent modal during revalidation cycles
+    if (isAuthenticated && user) {
+      hasBeenAuthenticatedRef.current = true;
+    }
+
     // Don't show persona modal on Kinflo product landing pages or admin routes
     // Use startsWith to handle query strings and trailing slashes
     const isKinfloPage = location.startsWith('/kinflo') || location.startsWith('/product');
@@ -124,7 +132,9 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       // Never show persona modal on admin routes
       setPersonaState('default');
       setShowPersonaModal(false);
-    } else {
+    } else if (!hasBeenAuthenticatedRef.current) {
+      // Only handle unauthenticated users if they have NEVER been authenticated
+      // This prevents the modal from showing during React Query revalidation cycles
       // For unauthenticated users, use session storage
       const storedPersona = sessionStorage.getItem(PERSONA_STORAGE_KEY);
       const modalShown = sessionStorage.getItem(PERSONA_MODAL_SHOWN_KEY);
@@ -140,6 +150,8 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       if (storedPersona && storedPersona !== "null") {
         console.log('[PersonaContext] Using stored persona:', storedPersona);
         setPersonaState(storedPersona as Persona);
+        // Don't show modal if we already have a stored persona
+        setShowPersonaModal(false);
       } else if (!modalShown && !adminOverride && !isKinfloPage) {
         // Set default persona for explorers before showing modal
         console.log('[PersonaContext] First visit detected - showing persona modal');
@@ -150,6 +162,7 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
         // If modal was already shown but no persona selected, keep default
         console.log('[PersonaContext] Modal already shown or admin override active');
         setPersonaState('default');
+        setShowPersonaModal(false);
       }
     }
     
