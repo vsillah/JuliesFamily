@@ -202,6 +202,31 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
 ]);
 
 /**
+ * Reusable query builder helpers for org-scoped filtering
+ */
+function withOrgFilter<T extends Record<string, any>>(
+  table: T,
+  organizationId: string,
+  ...additionalFilters: any[]
+): any {
+  const filters = [eq((table as any).organizationId, organizationId)];
+  if (additionalFilters.length > 0) {
+    filters.push(...additionalFilters.filter(f => f !== undefined));
+  }
+  return filters.length === 1 ? filters[0] : and(...filters);
+}
+
+/**
+ * Creates org-scoped insert data by adding organizationId
+ */
+function withOrgId<T>(data: T, organizationId: string): T & { organizationId: string } {
+  return {
+    ...data,
+    organizationId,
+  };
+}
+
+/**
  * Org-scoped implementations for specific methods
  */
 class OrgScopedImplementations {
