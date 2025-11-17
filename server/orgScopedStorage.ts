@@ -365,6 +365,48 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getAutomationReadyTests',
   'getCurrentBaselineConfiguration',
   'getHistoricalTestResults',
+  
+  // ===========================================
+  // PRIORITY 4: ANALYTICS & CAC:LTGP (SKIPPED - tables not in schema)
+  // ===========================================
+  // These 50 analytics methods require tables that don't exist yet:
+  // analyticsChannels, cacLtgpData, conversionMetrics, donorLifecycleMetrics,
+  // cohortAnalysis, attributionData
+  // Will implement when analytics schema is added
+  
+  // ===========================================
+  // PRIORITY 5: REMAINING OPERATIONS (20 methods)
+  // ===========================================
+  
+  // Content ordering & usage (4 methods)
+  'updateContentItemOrder',
+  'updateContentOrders',
+  'getContentItemUsage',
+  'getAvailablePersonaStageCombinations',
+  
+  // Student projects (1 method)
+  'getStudentProjectByUserId',
+  
+  // Google reviews (4 methods)
+  'upsertGoogleReview',
+  'getGoogleReviews',
+  'getActiveGoogleReviews',
+  'updateGoogleReviewVisibility',
+  
+  // Backup operations (6 methods)
+  'createTableBackup',
+  'getAllBackupSnapshots',
+  'getBackupSnapshotsByTable',
+  'getBackupSnapshot',
+  'restoreFromBackup',
+  'deleteBackupSnapshot',
+  
+  // Additional content operations (5 methods)
+  'getAllContentItems',
+  'getContentItemsByType',
+  'getVisibleContentItems',
+  'updateContentVisibility',
+  'getContentVisibilityRules',
 ]);
 
 /**
@@ -4014,6 +4056,993 @@ class OrgScopedImplementations {
     }
     
     return Array.from(testMap.values());
+  }
+
+  // ===========================================
+  // PRIORITY 4: ANALYTICS & CAC:LTGP (50 methods)
+  // ===========================================
+
+  // ========================================
+  // ANALYTICS CHANNEL OPERATIONS (8 methods)
+  // ========================================
+
+  async createAnalyticsChannel(data: any) {
+    // Placeholder: Analytics channel table not yet in schema
+    // Will use: db.insert(analyticsChannels).values(withOrgId(data, this.organizationId)).returning()
+    throw new Error('createAnalyticsChannel not yet implemented - analytics tables pending');
+  }
+
+  async getAnalyticsChannels() {
+    // Placeholder: Will query analyticsChannels with organizationId filter
+    throw new Error('getAnalyticsChannels not yet implemented - analytics tables pending');
+  }
+
+  async getAnalyticsChannel(id: string) {
+    // Placeholder: Will query by id and organizationId
+    throw new Error('getAnalyticsChannel not yet implemented - analytics tables pending');
+  }
+
+  async updateAnalyticsChannel(id: string, updates: any) {
+    // Placeholder: Will update with organizationId filter
+    throw new Error('updateAnalyticsChannel not yet implemented - analytics tables pending');
+  }
+
+  async deleteAnalyticsChannel(id: string) {
+    // Placeholder: Will delete with organizationId filter
+    throw new Error('deleteAnalyticsChannel not yet implemented - analytics tables pending');
+  }
+
+  async getChannelPerformance(channelId?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Complex analytics aggregation across channels
+    throw new Error('getChannelPerformance not yet implemented - analytics tables pending');
+  }
+
+  async getChannelsByDateRange(startDate: Date, endDate: Date) {
+    // Placeholder: Will query by date range and organizationId
+    throw new Error('getChannelsByDateRange not yet implemented - analytics tables pending');
+  }
+
+  async getTopPerformingChannels(limit?: number, metric?: string) {
+    // Placeholder: Will aggregate performance metrics with organizationId filter
+    throw new Error('getTopPerformingChannels not yet implemented - analytics tables pending');
+  }
+
+  // ========================================
+  // CAC:LTGP ECONOMICS (8 methods)
+  // ========================================
+
+  async createCacLtgpData(data: any) {
+    // Placeholder: CAC:LTGP metrics table not yet in schema
+    // Will use: db.insert(cacLtgpMetrics).values(withOrgId(data, this.organizationId)).returning()
+    throw new Error('createCacLtgpData not yet implemented - CAC:LTGP tables pending');
+  }
+
+  async getCacLtgpData(id: string) {
+    // Placeholder: Will query by id and organizationId
+    throw new Error('getCacLtgpData not yet implemented - CAC:LTGP tables pending');
+  }
+
+  async getCacLtgpDataByDateRange(startDate: Date, endDate: Date) {
+    // Placeholder: Will query by date range and organizationId
+    throw new Error('getCacLtgpDataByDateRange not yet implemented - CAC:LTGP tables pending');
+  }
+
+  async getAllCacLtgpData() {
+    // Placeholder: Will query all with organizationId filter
+    throw new Error('getAllCacLtgpData not yet implemented - CAC:LTGP tables pending');
+  }
+
+  async updateCacLtgpData(id: string, updates: any) {
+    // Placeholder: Will update with organizationId filter
+    throw new Error('updateCacLtgpData not yet implemented - CAC:LTGP tables pending');
+  }
+
+  async deleteCacLtgpData(id: string) {
+    // Placeholder: Will delete with organizationId filter
+    throw new Error('deleteCacLtgpData not yet implemented - CAC:LTGP tables pending');
+  }
+
+  async getLatestCacLtgpMetrics() {
+    // Placeholder: Will query latest metrics with organizationId filter
+    throw new Error('getLatestCacLtgpMetrics not yet implemented - CAC:LTGP tables pending');
+  }
+
+  async getCacLtgpTrends(startDate?: Date, endDate?: Date, interval?: string) {
+    // Placeholder: Complex time-series aggregation with organizationId filter
+    throw new Error('getCacLtgpTrends not yet implemented - CAC:LTGP tables pending');
+  }
+
+  // ========================================
+  // CONVERSION METRICS (6 methods)
+  // ========================================
+
+  async createConversionMetrics(data: any) {
+    // Placeholder: Conversion metrics table not yet in schema
+    // Will use: db.insert(conversionMetrics).values(withOrgId(data, this.organizationId)).returning()
+    throw new Error('createConversionMetrics not yet implemented - conversion metrics tables pending');
+  }
+
+  async getConversionMetrics(id: string) {
+    // Placeholder: Will query by id and organizationId
+    throw new Error('getConversionMetrics not yet implemented - conversion metrics tables pending');
+  }
+
+  async getConversionMetricsByDateRange(startDate: Date, endDate: Date) {
+    // Placeholder: Will query by date range and organizationId
+    throw new Error('getConversionMetricsByDateRange not yet implemented - conversion metrics tables pending');
+  }
+
+  async updateConversionMetrics(id: string, updates: any) {
+    // Placeholder: Will update with organizationId filter
+    throw new Error('updateConversionMetrics not yet implemented - conversion metrics tables pending');
+  }
+
+  async deleteConversionMetrics(id: string) {
+    // Placeholder: Will delete with organizationId filter
+    throw new Error('deleteConversionMetrics not yet implemented - conversion metrics tables pending');
+  }
+
+  async getConversionFunnelData(funnelType?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Complex funnel analysis with organizationId filter
+    throw new Error('getConversionFunnelData not yet implemented - conversion metrics tables pending');
+  }
+
+  // ========================================
+  // DONOR LIFECYCLE METRICS (6 methods)
+  // ========================================
+
+  async createDonorLifecycleMetrics(data: any) {
+    // Placeholder: Donor lifecycle metrics table not yet in schema
+    // Will use: db.insert(donorLifecycleMetrics).values(withOrgId(data, this.organizationId)).returning()
+    throw new Error('createDonorLifecycleMetrics not yet implemented - donor lifecycle metrics tables pending');
+  }
+
+  async getDonorLifecycleMetrics(id: string) {
+    // Placeholder: Will query by id and organizationId
+    throw new Error('getDonorLifecycleMetrics not yet implemented - donor lifecycle metrics tables pending');
+  }
+
+  async getDonorLifecycleMetricsByDateRange(startDate: Date, endDate: Date) {
+    // Placeholder: Will query by date range and organizationId
+    throw new Error('getDonorLifecycleMetricsByDateRange not yet implemented - donor lifecycle metrics tables pending');
+  }
+
+  async updateDonorLifecycleMetrics(id: string, updates: any) {
+    // Placeholder: Will update with organizationId filter
+    throw new Error('updateDonorLifecycleMetrics not yet implemented - donor lifecycle metrics tables pending');
+  }
+
+  async deleteDonorLifecycleMetrics(id: string) {
+    // Placeholder: Will delete with organizationId filter
+    throw new Error('deleteDonorLifecycleMetrics not yet implemented - donor lifecycle metrics tables pending');
+  }
+
+  async getDonorRetentionAnalysis(cohortDate?: Date, segmentBy?: string) {
+    // Placeholder: Complex retention cohort analysis with organizationId filter
+    throw new Error('getDonorRetentionAnalysis not yet implemented - donor lifecycle metrics tables pending');
+  }
+
+  // ========================================
+  // COHORT ANALYSIS (5 methods)
+  // ========================================
+
+  async createCohortAnalysis(data: any) {
+    // Placeholder: Cohort analysis table not yet in schema
+    // Will use: db.insert(cohortAnalysis).values(withOrgId(data, this.organizationId)).returning()
+    throw new Error('createCohortAnalysis not yet implemented - cohort analysis tables pending');
+  }
+
+  async getCohortAnalysis(id: string) {
+    // Placeholder: Will query by id and organizationId
+    throw new Error('getCohortAnalysis not yet implemented - cohort analysis tables pending');
+  }
+
+  async getCohortAnalysesByDateRange(startDate: Date, endDate: Date) {
+    // Placeholder: Will query by date range and organizationId
+    throw new Error('getCohortAnalysesByDateRange not yet implemented - cohort analysis tables pending');
+  }
+
+  async updateCohortAnalysis(id: string, updates: any) {
+    // Placeholder: Will update with organizationId filter
+    throw new Error('updateCohortAnalysis not yet implemented - cohort analysis tables pending');
+  }
+
+  async deleteCohortAnalysis(id: string) {
+    // Placeholder: Will delete with organizationId filter
+    throw new Error('deleteCohortAnalysis not yet implemented - cohort analysis tables pending');
+  }
+
+  // ========================================
+  // ATTRIBUTION DATA (7 methods)
+  // ========================================
+
+  async createAttributionData(data: any) {
+    // Placeholder: Attribution data table not yet in schema
+    // Will use: db.insert(attributionData).values(withOrgId(data, this.organizationId)).returning()
+    throw new Error('createAttributionData not yet implemented - attribution data tables pending');
+  }
+
+  async getAttributionData(id: string) {
+    // Placeholder: Will query by id and organizationId
+    throw new Error('getAttributionData not yet implemented - attribution data tables pending');
+  }
+
+  async getAttributionDataByDateRange(startDate: Date, endDate: Date) {
+    // Placeholder: Will query by date range and organizationId
+    throw new Error('getAttributionDataByDateRange not yet implemented - attribution data tables pending');
+  }
+
+  async getAttributionDataByChannel(channelId: string) {
+    // Placeholder: Will query by channel and organizationId
+    throw new Error('getAttributionDataByChannel not yet implemented - attribution data tables pending');
+  }
+
+  async updateAttributionData(id: string, updates: any) {
+    // Placeholder: Will update with organizationId filter
+    throw new Error('updateAttributionData not yet implemented - attribution data tables pending');
+  }
+
+  async deleteAttributionData(id: string) {
+    // Placeholder: Will delete with organizationId filter
+    throw new Error('deleteAttributionData not yet implemented - attribution data tables pending');
+  }
+
+  async getMultiTouchAttributionReport(model?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Complex multi-touch attribution analysis with organizationId filter
+    // Will aggregate across leads, touchpoints, and conversions
+    throw new Error('getMultiTouchAttributionReport not yet implemented - attribution data tables pending');
+  }
+
+  // ========================================
+  // ADDITIONAL ANALYTICS (10 methods)
+  // ========================================
+
+  async getEngagementMetrics(entityType?: string, entityId?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Complex engagement metrics aggregation
+    // Will query leads, interactions, events with organizationId filter
+    throw new Error('getEngagementMetrics not yet implemented - analytics aggregation pending');
+  }
+
+  async getLeadSourceAnalysis(startDate?: Date, endDate?: Date) {
+    // Placeholder: Lead source performance analysis
+    // Will aggregate leads by source with organizationId filter
+    throw new Error('getLeadSourceAnalysis not yet implemented - analytics aggregation pending');
+  }
+
+  async getCampaignROIAnalysis(campaignId?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Campaign ROI calculation
+    // Will aggregate spend vs revenue with organizationId filter
+    throw new Error('getCampaignROIAnalysis not yet implemented - analytics aggregation pending');
+  }
+
+  async getVolunteerEngagementMetrics(startDate?: Date, endDate?: Date) {
+    // Placeholder: Volunteer engagement analysis
+    // Will aggregate volunteer sessions, hours with organizationId filter
+    throw new Error('getVolunteerEngagementMetrics not yet implemented - analytics aggregation pending');
+  }
+
+  async getEmailPerformanceMetrics(campaignId?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Email performance metrics
+    // Will aggregate opens, clicks, conversions with organizationId filter
+    throw new Error('getEmailPerformanceMetrics not yet implemented - analytics aggregation pending');
+  }
+
+  async getSMSPerformanceMetrics(campaignId?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: SMS performance metrics
+    // Will aggregate sends, deliveries, responses with organizationId filter
+    throw new Error('getSMSPerformanceMetrics not yet implemented - analytics aggregation pending');
+  }
+
+  async getDonationTrends(interval?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Donation trends time-series
+    // Will aggregate donations over time with organizationId filter
+    throw new Error('getDonationTrends not yet implemented - analytics aggregation pending');
+  }
+
+  async getProgramEnrollmentTrends(programType?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Program enrollment trends
+    // Will aggregate enrollments over time with organizationId filter
+    throw new Error('getProgramEnrollmentTrends not yet implemented - analytics aggregation pending');
+  }
+
+  async getUserActivityMetrics(userId?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: User activity metrics
+    // Will aggregate user actions, sessions with organizationId filter
+    throw new Error('getUserActivityMetrics not yet implemented - analytics aggregation pending');
+  }
+
+  async getContentEngagementMetrics(contentType?: string, contentId?: string, startDate?: Date, endDate?: Date) {
+    // Placeholder: Content engagement metrics
+    // Will aggregate views, interactions, conversions with organizationId filter
+    throw new Error('getContentEngagementMetrics not yet implemented - analytics aggregation pending');
+  }
+
+  // ========================================
+  // PRIORITY 5: REMAINING OPERATIONS (20 methods)
+  // ========================================
+
+  // ------------------
+  // Content Ordering & Usage (4 methods)
+  // ------------------
+
+  async updateContentItemOrder(id: string, newOrder: number) {
+    const { contentItems } = await import('@shared/schema');
+    const [item] = await db
+      .update(contentItems)
+      .set({ order: newOrder, updatedAt: new Date() })
+      .where(and(
+        eq(contentItems.id, id),
+        eq(contentItems.organizationId, this.organizationId)
+      ))
+      .returning();
+    return item;
+  }
+
+  async updateContentOrders(updates: { id: string; order: number }[], contentType?: string) {
+    const { contentItems } = await import('@shared/schema');
+    const { inArray } = await import('drizzle-orm');
+    
+    return await db.transaction(async (tx) => {
+      // Validate: Fetch all items to check existence, type consistency, and organizationId
+      const itemIds = updates.map(u => u.id);
+      const items = await tx
+        .select()
+        .from(contentItems)
+        .where(and(
+          inArray(contentItems.id, itemIds),
+          eq(contentItems.organizationId, this.organizationId)
+        ));
+
+      // Check all IDs exist in this organization
+      if (items.length !== updates.length) {
+        const foundIds = new Set(items.map(i => i.id));
+        const missingIds = itemIds.filter(id => !foundIds.has(id));
+        throw new Error(`items_not_found_or_wrong_org: ${missingIds.join(', ')}`);
+      }
+
+      // Check all items are same content type
+      const types = new Set(items.map(i => i.type));
+      if (types.size > 1) {
+        throw new Error(`mixed_content_type: Found types ${Array.from(types).join(', ')}`);
+      }
+
+      // If contentType hint provided, validate it matches
+      if (contentType && items[0].type !== contentType) {
+        throw new Error(`content_type_mismatch: Expected ${contentType}, found ${items[0].type}`);
+      }
+
+      // Check for duplicate order values in the update payload
+      const orderValues = updates.map(u => u.order);
+      if (new Set(orderValues).size !== orderValues.length) {
+        throw new Error('duplicate_order: Order values must be unique');
+      }
+
+      // Build CASE expression for batch update
+      const now = new Date();
+      const caseStmt = sql<number>`(CASE ${contentItems.id} ${sql.join(
+        updates.map(u => sql`WHEN ${u.id} THEN ${u.order}`),
+        sql` `
+      )} END)`;
+
+      // Execute batch update with CASE
+      const updatedItems = await tx
+        .update(contentItems)
+        .set({
+          order: caseStmt,
+          updatedAt: now
+        })
+        .where(and(
+          inArray(contentItems.id, itemIds),
+          eq(contentItems.organizationId, this.organizationId)
+        ))
+        .returning();
+
+      return updatedItems;
+    });
+  }
+
+  async getContentItemUsage(id: string) {
+    const { contentItems, contentVisibility, abTests, abTestVariants } = await import('@shared/schema');
+    
+    // Verify content item exists and belongs to this organization
+    const [item] = await db
+      .select()
+      .from(contentItems)
+      .where(and(
+        eq(contentItems.id, id),
+        eq(contentItems.organizationId, this.organizationId)
+      ));
+    
+    if (!item) {
+      return {
+        visibilityAssignments: [],
+        abTests: []
+      };
+    }
+
+    // Get visibility assignments (already filtered by contentItemId)
+    const visibilityAssignments = await db
+      .select({
+        persona: contentVisibility.persona,
+        funnelStage: contentVisibility.funnelStage,
+      })
+      .from(contentVisibility)
+      .where(and(
+        eq(contentVisibility.contentItemId, id),
+        eq(contentVisibility.organizationId, this.organizationId)
+      ));
+
+    // Get A/B test usage
+    const abTestUsage = await db
+      .select({
+        testId: abTests.id,
+        testName: abTests.name,
+        variantName: abTestVariants.name,
+        status: abTests.status,
+      })
+      .from(abTestVariants)
+      .innerJoin(abTests, eq(abTestVariants.testId, abTests.id))
+      .where(and(
+        eq(abTestVariants.contentItemId, id),
+        eq(abTests.organizationId, this.organizationId),
+        eq(abTestVariants.organizationId, this.organizationId)
+      ));
+
+    return {
+      visibilityAssignments,
+      abTests: abTestUsage,
+    };
+  }
+
+  async getAvailablePersonaStageCombinations() {
+    const { contentVisibility, contentItems } = await import('@shared/schema');
+    
+    const combinations = await db
+      .selectDistinct({
+        persona: contentVisibility.persona,
+        funnelStage: contentVisibility.funnelStage,
+      })
+      .from(contentVisibility)
+      .innerJoin(contentItems, eq(contentVisibility.contentItemId, contentItems.id))
+      .where(and(
+        eq(contentVisibility.isVisible, true),
+        eq(contentItems.isActive, true),
+        eq(contentVisibility.organizationId, this.organizationId),
+        eq(contentItems.organizationId, this.organizationId),
+        sql`${contentVisibility.persona} IS NOT NULL`,
+        sql`${contentVisibility.funnelStage} IS NOT NULL`
+      ));
+    
+    return combinations.filter((c): c is { persona: string; funnelStage: string } => 
+      c.persona !== null && c.funnelStage !== null
+    );
+  }
+
+  // ------------------
+  // Student Projects (1 method)
+  // ------------------
+
+  async getStudentProjectByUserId(userId: string) {
+    const { contentItems, imageAssets } = await import('@shared/schema');
+    
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        imageUrl: contentItems.imageUrl,
+        passionTags: contentItems.passionTags,
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+      })
+      .from(contentItems)
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
+      .where(and(
+        eq(contentItems.type, 'student_project'),
+        eq(contentItems.organizationId, this.organizationId),
+        sql<boolean>`${contentItems.metadata}->>'submittingUserId' = ${userId}`
+      ))
+      .limit(1);
+    
+    return results.length > 0 ? (results[0] as any) : undefined;
+  }
+
+  // ------------------
+  // Google Reviews (4 methods)
+  // ------------------
+
+  async upsertGoogleReview(reviewData: any) {
+    const { googleReviews } = await import('@shared/schema');
+    
+    // Check if review exists for this organization
+    const existingReview = await db
+      .select()
+      .from(googleReviews)
+      .where(and(
+        eq(googleReviews.googleReviewId, reviewData.googleReviewId),
+        eq(googleReviews.organizationId, this.organizationId)
+      ));
+
+    if (existingReview.length > 0) {
+      const [updated] = await db
+        .update(googleReviews)
+        .set({ ...reviewData, organizationId: this.organizationId, updatedAt: new Date() })
+        .where(and(
+          eq(googleReviews.googleReviewId, reviewData.googleReviewId),
+          eq(googleReviews.organizationId, this.organizationId)
+        ))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db
+      .insert(googleReviews)
+      .values({ ...reviewData, organizationId: this.organizationId })
+      .returning();
+    return created;
+  }
+
+  async getGoogleReviews() {
+    const { googleReviews } = await import('@shared/schema');
+    
+    return await db
+      .select()
+      .from(googleReviews)
+      .where(eq(googleReviews.organizationId, this.organizationId))
+      .orderBy(desc(googleReviews.time));
+  }
+
+  async updateGoogleReviewVisibility(id: string, isActive: boolean) {
+    const { googleReviews } = await import('@shared/schema');
+    
+    const [updated] = await db
+      .update(googleReviews)
+      .set({ isActive, updatedAt: new Date() })
+      .where(and(
+        eq(googleReviews.id, id),
+        eq(googleReviews.organizationId, this.organizationId)
+      ))
+      .returning();
+    return updated;
+  }
+
+  // ------------------
+  // Backup Operations (6 methods)
+  // ------------------
+
+  // Helper method to validate table names (same as base storage)
+  private validateTableName(tableName: string): void {
+    const VALID_TABLES = [
+      'users', 'leads', 'interactions', 'lead_magnets', 'image_assets',
+      'content_items', 'content_visibility', 'ab_tests', 'ab_test_targets',
+      'ab_test_variants', 'ab_test_assignments', 'ab_test_events',
+      'google_reviews', 'donations', 'wishlist_items', 'donation_campaigns',
+      'campaign_members', 'campaign_testimonials', 'email_templates',
+      'email_logs', 'sms_templates', 'sms_sends', 'communication_logs',
+      'email_campaigns', 'email_sequence_steps', 'email_campaign_enrollments',
+      'pipeline_stages', 'lead_assignments', 'tasks', 'pipeline_history',
+      'admin_preferences', 'audit_logs', 'outreach_emails', 'icp_criteria',
+      'chatbot_conversations', 'chatbot_issues'
+    ];
+
+    if (!VALID_TABLES.includes(tableName)) {
+      throw new Error(`Invalid table name: ${tableName}. Table not eligible for backup.`);
+    }
+  }
+
+  // Helper method to safely quote SQL identifiers (same as base storage)
+  private quoteIdentifier(identifier: string): string {
+    return `"${identifier.replace(/"/g, '""')}"`;
+  }
+
+  async createTableBackup(tableName: string, userId: string, backupName?: string, description?: string) {
+    const { backupSnapshots } = await import('@shared/schema');
+    
+    // Validate table name against allow-list
+    this.validateTableName(tableName);
+
+    // Generate unique backup table name with timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').split('Z')[0];
+    const backupTableName = `backup_${tableName}_${timestamp}`;
+
+    try {
+      // Use properly quoted identifiers to prevent SQL injection
+      const quotedBackupTable = this.quoteIdentifier(backupTableName);
+      const quotedOriginalTable = this.quoteIdentifier(tableName);
+
+      // CRITICAL: Create backup table with organization filter
+      // Only backup data belonging to this organization
+      await db.execute(sql.raw(
+        `CREATE TABLE ${quotedBackupTable} AS SELECT * FROM ${quotedOriginalTable} WHERE organization_id = '${this.organizationId}'`
+      ));
+
+      // Get row count from backup table
+      const countResult = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${quotedBackupTable}`));
+      const rowCount = parseInt(countResult.rows[0]?.count || '0');
+
+      // Create snapshot metadata record with organizationId
+      const [snapshot] = await db.insert(backupSnapshots).values({
+        organizationId: this.organizationId,
+        tableName,
+        backupTableName,
+        backupName: backupName || `${tableName} backup ${timestamp}`,
+        rowCount,
+        createdBy: userId,
+        description
+      }).returning();
+
+      return {
+        backupTableName: snapshot.backupTableName,
+        rowCount: snapshot.rowCount,
+        snapshotId: snapshot.id
+      };
+    } catch (error) {
+      // Clean up backup table if metadata insert failed
+      try {
+        await db.execute(sql.raw(`DROP TABLE IF EXISTS ${this.quoteIdentifier(backupTableName)}`));
+      } catch (cleanupError) {
+        console.error('Failed to cleanup backup table after error:', cleanupError);
+      }
+      
+      throw new Error(`Failed to create backup: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async getAllBackupSnapshots() {
+    const { backupSnapshots } = await import('@shared/schema');
+    
+    return await db
+      .select()
+      .from(backupSnapshots)
+      .where(eq(backupSnapshots.organizationId, this.organizationId))
+      .orderBy(desc(backupSnapshots.createdAt));
+  }
+
+  async getBackupSnapshotsByTable(tableName: string) {
+    const { backupSnapshots } = await import('@shared/schema');
+    
+    return await db
+      .select()
+      .from(backupSnapshots)
+      .where(and(
+        eq(backupSnapshots.tableName, tableName),
+        eq(backupSnapshots.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(backupSnapshots.createdAt));
+  }
+
+  async getBackupSnapshot(id: string) {
+    const { backupSnapshots } = await import('@shared/schema');
+    
+    const [snapshot] = await db
+      .select()
+      .from(backupSnapshots)
+      .where(and(
+        eq(backupSnapshots.id, id),
+        eq(backupSnapshots.organizationId, this.organizationId)
+      ));
+    return snapshot;
+  }
+
+  async restoreFromBackup(backupId: string, mode: 'replace' | 'merge') {
+    const { backupSnapshots } = await import('@shared/schema');
+    
+    // Get backup snapshot metadata - verify it belongs to this organization
+    const snapshot = await this.getBackupSnapshot(backupId);
+    if (!snapshot) {
+      throw new Error('Backup snapshot not found or does not belong to this organization');
+    }
+
+    const { tableName, backupTableName } = snapshot;
+
+    // Validate table name against allow-list
+    this.validateTableName(tableName);
+
+    const quotedTable = this.quoteIdentifier(tableName);
+    const quotedBackupTable = this.quoteIdentifier(backupTableName);
+
+    try {
+      // Use transaction for atomicity - rollback on failure
+      await db.execute(sql.raw(`BEGIN`));
+
+      if (mode === 'replace') {
+        // Replace mode: Delete only this organization's rows from original table, then insert from backup
+        await db.execute(sql.raw(
+          `DELETE FROM ${quotedTable} WHERE organization_id = '${this.organizationId}'`
+        ));
+        await db.execute(sql.raw(`INSERT INTO ${quotedTable} SELECT * FROM ${quotedBackupTable}`));
+      } else {
+        // Merge mode: Insert rows from backup that don't exist in original table
+        // This assumes the table has an 'id' column as primary key
+        await db.execute(sql.raw(`
+          INSERT INTO ${quotedTable} 
+          SELECT * FROM ${quotedBackupTable} 
+          WHERE id NOT IN (
+            SELECT id FROM ${quotedTable} 
+            WHERE organization_id = '${this.organizationId}'
+          )
+          ON CONFLICT (id) DO NOTHING
+        `));
+      }
+
+      // Get count of rows in restored table for this organization
+      const countResult = await db.execute(sql.raw(
+        `SELECT COUNT(*) as count FROM ${quotedTable} WHERE organization_id = '${this.organizationId}'`
+      ));
+      const rowsRestored = parseInt(countResult.rows[0]?.count || '0');
+
+      // Commit transaction
+      await db.execute(sql.raw(`COMMIT`));
+
+      return {
+        tableName,
+        rowsRestored
+      };
+    } catch (error) {
+      // Rollback transaction on error
+      try {
+        await db.execute(sql.raw(`ROLLBACK`));
+      } catch (rollbackError) {
+        console.error('Failed to rollback transaction:', rollbackError);
+      }
+
+      throw new Error(`Failed to restore from backup: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  async deleteBackupSnapshot(id: string) {
+    const { backupSnapshots } = await import('@shared/schema');
+    
+    // Get backup snapshot metadata - verify it belongs to this organization
+    const snapshot = await this.getBackupSnapshot(id);
+    if (!snapshot) {
+      throw new Error('Backup snapshot not found or does not belong to this organization');
+    }
+
+    const quotedBackupTable = this.quoteIdentifier(snapshot.backupTableName);
+
+    try {
+      // Use transaction for atomicity
+      await db.execute(sql.raw(`BEGIN`));
+
+      // Drop the backup table
+      await db.execute(sql.raw(`DROP TABLE IF EXISTS ${quotedBackupTable}`));
+
+      // Delete snapshot metadata
+      await db.delete(backupSnapshots).where(and(
+        eq(backupSnapshots.id, id),
+        eq(backupSnapshots.organizationId, this.organizationId)
+      ));
+
+      // Commit transaction
+      await db.execute(sql.raw(`COMMIT`));
+    } catch (error) {
+      // Rollback transaction on error
+      try {
+        await db.execute(sql.raw(`ROLLBACK`));
+      } catch (rollbackError) {
+        console.error('Failed to rollback transaction:', rollbackError);
+      }
+
+      throw new Error(`Failed to delete backup: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  // ------------------
+  // Additional Content Operations (5 methods)
+  // ------------------
+
+  async getAllContentItems() {
+    const { contentItems, imageAssets } = await import('@shared/schema');
+    
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+      })
+      .from(contentItems)
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
+      .where(eq(contentItems.organizationId, this.organizationId))
+      .orderBy(contentItems.order);
+    
+    return results as any[];
+  }
+
+  async getContentItemsByType(type: string) {
+    const { contentItems, imageAssets } = await import('@shared/schema');
+    
+    const results = await db
+      .select({
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        order: contentItems.order,
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+        resolvedImageUrl: imageAssets.cloudinarySecureUrl,
+      })
+      .from(contentItems)
+      .leftJoin(imageAssets, eq(contentItems.imageName, imageAssets.name))
+      .where(and(
+        eq(contentItems.type, type),
+        eq(contentItems.organizationId, this.organizationId)
+      ))
+      .orderBy(contentItems.order);
+    
+    return results as any[];
+  }
+
+  async getVisibleContentItems(
+    type: string,
+    persona?: string | null,
+    funnelStage?: string | null,
+    userPassions?: string[] | null
+  ) {
+    const { contentItems, contentVisibility } = await import('@shared/schema');
+    
+    // Build join conditions - only add persona/funnelStage filters when they're provided
+    const joinConditions = [eq(contentVisibility.contentItemId, contentItems.id)];
+    
+    // Only filter by persona if it's provided (not undefined)
+    if (persona !== undefined) {
+      joinConditions.push(
+        persona === null
+          ? sql`${contentVisibility.persona} IS NULL`
+          : or(
+              sql`${contentVisibility.persona} IS NULL`,
+              eq(contentVisibility.persona, persona)
+            )!
+      );
+    }
+    
+    // Only filter by funnelStage if it's provided (not undefined)
+    if (funnelStage !== undefined) {
+      joinConditions.push(
+        funnelStage === null
+          ? sql`${contentVisibility.funnelStage} IS NULL`
+          : or(
+              sql`${contentVisibility.funnelStage} IS NULL`,
+              eq(contentVisibility.funnelStage, funnelStage)
+            )!
+      );
+    }
+    
+    let query = db
+      .selectDistinctOn([contentItems.id], {
+        id: contentItems.id,
+        type: contentItems.type,
+        title: contentItems.title,
+        description: contentItems.description,
+        imageName: contentItems.imageName,
+        imageUrl: contentItems.imageUrl,
+        passionTags: contentItems.passionTags,
+        order: sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`.as('order'),
+        isActive: contentItems.isActive,
+        metadata: contentItems.metadata,
+        createdAt: contentItems.createdAt,
+        updatedAt: contentItems.updatedAt,
+      })
+      .from(contentItems)
+      .innerJoin(
+        contentVisibility,
+        and(...joinConditions)
+      )
+      .where(and(
+        eq(contentItems.type, type),
+        eq(contentItems.isActive, true),
+        eq(contentVisibility.isVisible, true),
+        eq(contentItems.organizationId, this.organizationId),
+        eq(contentVisibility.organizationId, this.organizationId)
+      ));
+
+    // Apply standard ordering
+    query = query.orderBy(
+      contentItems.id, // For DISTINCT ON
+      sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
+      contentItems.createdAt
+    );
+
+    const results = await query;
+
+    // For hero content: if no persona-specific results and a specific persona was requested,
+    // fall back to the default hero (persona='default')
+    if (type === 'hero' && results.length === 0 && persona && persona !== 'default') {
+      const defaultJoinConditions = [
+        eq(contentVisibility.contentItemId, contentItems.id),
+        eq(contentVisibility.persona, 'default')
+      ];
+      
+      if (funnelStage !== undefined) {
+        defaultJoinConditions.push(
+          funnelStage === null
+            ? sql`${contentVisibility.funnelStage} IS NULL`
+            : or(
+                sql`${contentVisibility.funnelStage} IS NULL`,
+                eq(contentVisibility.funnelStage, funnelStage)
+              )!
+        );
+      }
+
+      const defaultResults = await db
+        .selectDistinctOn([contentItems.id], {
+          id: contentItems.id,
+          type: contentItems.type,
+          title: contentItems.title,
+          description: contentItems.description,
+          imageName: contentItems.imageName,
+          imageUrl: contentItems.imageUrl,
+          passionTags: contentItems.passionTags,
+          order: sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`.as('order'),
+          isActive: contentItems.isActive,
+          metadata: contentItems.metadata,
+          createdAt: contentItems.createdAt,
+          updatedAt: contentItems.updatedAt,
+        })
+        .from(contentItems)
+        .innerJoin(contentVisibility, and(...defaultJoinConditions))
+        .where(and(
+          eq(contentItems.type, type),
+          eq(contentItems.isActive, true),
+          eq(contentVisibility.isVisible, true),
+          eq(contentItems.organizationId, this.organizationId),
+          eq(contentVisibility.organizationId, this.organizationId)
+        ))
+        .orderBy(
+          contentItems.id,
+          sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
+          contentItems.createdAt
+        );
+      
+      return defaultResults;
+    }
+
+    return results;
+  }
+
+  async updateContentVisibility(id: string, updates: any) {
+    const { contentVisibility } = await import('@shared/schema');
+    
+    const [visibility] = await db
+      .update(contentVisibility)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(contentVisibility.id, id),
+        eq(contentVisibility.organizationId, this.organizationId)
+      ))
+      .returning();
+    return visibility;
+  }
+
+  async getContentVisibilityRules(contentItemId: string) {
+    const { contentVisibility } = await import('@shared/schema');
+    
+    return await db
+      .select()
+      .from(contentVisibility)
+      .where(and(
+        eq(contentVisibility.contentItemId, contentItemId),
+        eq(contentVisibility.organizationId, this.organizationId)
+      ))
+      .orderBy(contentVisibility.order);
   }
 }
 
