@@ -1,0 +1,100 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+/~:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+/~:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+/~:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+ Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+z @ ed1e693c96a75807.js:2
+workspace_iframe.html?initialPath=%2F&id=%3Ar67%3A:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+client:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+@react-refresh:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/contexts/OrganizationContext.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/toaster.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/tooltip.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/contexts/PersonaContext.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ChatbotWidget.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/Home.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/Donate.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/VirtualTour.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/Profile.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/HowItWorks.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminImages.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminContentManager.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminDashboard.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminGuide.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/DonateSuccess.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailCampaigns.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailCampaignDetails.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailReports.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailUnsubscribes.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminABTesting.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminBackups.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminSmsNotifications.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminHormoziEmails.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminHormoziSms.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminDonationCampaigns.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/MemberCampaignDashboard.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminTasks.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminPreferences.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminCohortAnalysis.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminCacLtgpDashboard.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminLeadSourcing.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminChannelManagement.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminDonorLifecycle.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminVolunteerManagement.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminStudentEnrollments.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminSegments.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminFunnelAnalytics.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminAutomationConfig.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminOrganizations.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminRoleProvisioning.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AppointmentScheduling.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/TechGoesHomeLanding.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/ImageComparison.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/ProductLanding.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/TechGoesHomeStudentDashboard.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/StudentDashboard.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/VolunteerEngagement.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/Unsubscribe.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/not-found.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/SmsUnsubscribe.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+workspace_iframe.html?initialPath=%2F&id=%3Ar67%3A:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+client:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)
+main.tsx:1  Failed to load resource: the server responded with a status of 429 (Too Many Requests)

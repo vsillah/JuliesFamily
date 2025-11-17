@@ -18,7 +18,7 @@ export const globalLimiter = rateLimit({
 // Applied to /api/login, /api/callback to prevent brute force attacks
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // Limit each IP to 10 login attempts per window
+  max: 100, // Temporarily increased for debugging
   message: 'Too many login attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
