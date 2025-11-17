@@ -42,6 +42,8 @@ export default function Home() {
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const { data: visibleSections } = useContentAvailability();
 
+  console.log('[Home] Render state:', { persona, funnelStage, isPersonaLoading, currentOrg });
+
   // Use actual persona values - no fallback to prevent flash
   const effectivePersona = persona;
   const effectiveFunnelStage = funnelStage;
