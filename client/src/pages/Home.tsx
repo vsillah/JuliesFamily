@@ -94,9 +94,11 @@ export default function Home() {
     ...(visibleSections ?? {}),
   };
 
+  // TEMPORARY: Bypass content ready check to test if page renders
   // Don't render anything until persona and hero content queries complete (to prevent flash)
   // Note: We wait for loading to finish, not for content to exist (it might not exist for some personas)
-  const isContentReady = !isPersonaLoading && !heroLoading && (!heroImageLoading || !heroContent?.[0]);
+  // const isContentReady = !isPersonaLoading && !heroLoading && (!heroImageLoading || !heroContent?.[0]);
+  const isContentReady = !isPersonaLoading; // SIMPLIFIED - just wait for persona
   
   console.log('[Home] Content ready check:', { 
     isPersonaLoading, 
