@@ -199,6 +199,64 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'endImpersonationSession',
   'getCurrentlyImpersonatedUser',
   'hasActiveImpersonation',
+  
+  // ===========================================
+  // PRIORITY 1: FINANCIAL & COMMUNICATION (50 methods)
+  // ===========================================
+  
+  // Donation campaign operations (24 methods)
+  'createDonationCampaign',
+  'getDonationCampaign',
+  'getDonationCampaignBySlug',
+  'getAllDonationCampaigns',
+  'getActiveDonationCampaigns',
+  'updateDonationCampaign',
+  'getCampaignDonations',
+  'getDonationByStripeId',
+  'updateDonationByStripeId',
+  'getCampaignMember',
+  'getCampaignMembers',
+  'isCampaignMember',
+  'updateCampaignMember',
+  'createCampaignTestimonial',
+  'getCampaignTestimonial',
+  'getCampaignTestimonials',
+  'updateCampaignTestimonial',
+  'deleteCampaignTestimonial',
+  'createWishlistItem',
+  'getAllWishlistItems',
+  'getActiveWishlistItems',
+  'updateWishlistItem',
+  'deleteWishlistItem',
+  'getDonationStats',
+  
+  // Email tracking operations (26 methods)
+  'createEmailLog',
+  'getEmailLog',
+  'getEmailLogByTrackingToken',
+  'getEmailLogsByRecipient',
+  'getEmailLogsByCampaign',
+  'getRecentEmailLogs',
+  'createEmailLink',
+  'getEmailLinkByToken',
+  'getEmailLinksByEmailLog',
+  'getEmailOpensByToken',
+  'getEmailOpensByCampaign',
+  'getEmailClicksByToken',
+  'getEmailClicksByCampaign',
+  'getCampaignLinkPerformance',
+  'getCampaignTimeSeries',
+  'computeSendTimeInsights',
+  'getSendTimeInsights',
+  'getLeadEmailOpens',
+  'getLeadEmailClicks',
+  'getEmailTemplateByName',
+  'getHormoziEmailTemplates',
+  'getHormoziEmailTemplate',
+  'getHormoziSmsTemplates',
+  'getHormoziSmsTemplate',
+  'markOutreachEmailOpened',
+  'markOutreachEmailClicked',
 ]);
 
 /**
@@ -1775,6 +1833,894 @@ class OrgScopedImplementations {
       ));
     
     return (result?.count ?? 0) > 0;
+  }
+
+  // ========================================
+  // DONATION CAMPAIGN OPERATIONS (24 methods)
+  // ========================================
+
+  async createDonationCampaign(campaign: Parameters<IStorage['createDonationCampaign']>[0]) {
+    return this.baseStorage.createDonationCampaign(withOrgId(campaign, this.organizationId));
+  }
+
+  async getDonationCampaign(id: string) {
+    const { donationCampaigns } = await import('@shared/schema');
+    const [campaign] = await db
+      .select()
+      .from(donationCampaigns)
+      .where(withOrgFilter(donationCampaigns, this.organizationId, eq(donationCampaigns.id, id)));
+    return campaign;
+  }
+
+  async getDonationCampaignBySlug(slug: string) {
+    const { donationCampaigns } = await import('@shared/schema');
+    const [campaign] = await db
+      .select()
+      .from(donationCampaigns)
+      .where(withOrgFilter(donationCampaigns, this.organizationId, eq(donationCampaigns.slug, slug)));
+    return campaign;
+  }
+
+  async getAllDonationCampaigns() {
+    const { donationCampaigns } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(donationCampaigns)
+      .where(eq(donationCampaigns.organizationId, this.organizationId))
+      .orderBy(desc(donationCampaigns.createdAt));
+  }
+
+  async getActiveDonationCampaigns() {
+    const { donationCampaigns } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(donationCampaigns)
+      .where(withOrgFilter(donationCampaigns, this.organizationId, eq(donationCampaigns.status, 'active')))
+      .orderBy(desc(donationCampaigns.createdAt));
+  }
+
+  async updateDonationCampaign(id: string, updates: Parameters<IStorage['updateDonationCampaign']>[1]) {
+    const { donationCampaigns } = await import('@shared/schema');
+    const [updated] = await db
+      .update(donationCampaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(withOrgFilter(donationCampaigns, this.organizationId, eq(donationCampaigns.id, id)))
+      .returning();
+    return updated;
+  }
+
+  async getCampaignDonations(campaignId: string) {
+    const { donations } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(donations)
+      .where(withOrgFilter(donations, this.organizationId, eq(donations.campaignId, campaignId)))
+      .orderBy(desc(donations.createdAt));
+  }
+
+  async getDonationByStripeId(stripePaymentIntentId: string) {
+    const { donations } = await import('@shared/schema');
+    const [donation] = await db
+      .select()
+      .from(donations)
+      .where(withOrgFilter(donations, this.organizationId, eq(donations.stripePaymentIntentId, stripePaymentIntentId)));
+    return donation;
+  }
+
+  async updateDonationByStripeId(stripePaymentIntentId: string, updates: Parameters<IStorage['updateDonationByStripeId']>[1]) {
+    const { donations } = await import('@shared/schema');
+    const [updated] = await db
+      .update(donations)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(withOrgFilter(donations, this.organizationId, eq(donations.stripePaymentIntentId, stripePaymentIntentId)))
+      .returning();
+    return updated;
+  }
+
+  async getCampaignMember(id: string) {
+    const { campaignMembers } = await import('@shared/schema');
+    const [member] = await db
+      .select()
+      .from(campaignMembers)
+      .where(withOrgFilter(campaignMembers, this.organizationId, eq(campaignMembers.id, id)));
+    return member;
+  }
+
+  async getCampaignMembers(campaignId: string) {
+    const { campaignMembers } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(campaignMembers)
+      .where(withOrgFilter(campaignMembers, this.organizationId, eq(campaignMembers.campaignId, campaignId)))
+      .orderBy(desc(campaignMembers.createdAt));
+  }
+
+  async isCampaignMember(campaignId: string, userId: string) {
+    const { campaignMembers } = await import('@shared/schema');
+    const [result] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(campaignMembers)
+      .where(and(
+        eq(campaignMembers.organizationId, this.organizationId),
+        eq(campaignMembers.campaignId, campaignId),
+        eq(campaignMembers.userId, userId)
+      ));
+    return (result?.count ?? 0) > 0;
+  }
+
+  async updateCampaignMember(id: string, updates: Parameters<IStorage['updateCampaignMember']>[1]) {
+    const { campaignMembers } = await import('@shared/schema');
+    const [updated] = await db
+      .update(campaignMembers)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(withOrgFilter(campaignMembers, this.organizationId, eq(campaignMembers.id, id)))
+      .returning();
+    return updated;
+  }
+
+  async createCampaignTestimonial(testimonial: Parameters<IStorage['createCampaignTestimonial']>[0]) {
+    return this.baseStorage.createCampaignTestimonial(withOrgId(testimonial, this.organizationId));
+  }
+
+  async getCampaignTestimonial(id: string) {
+    const { campaignTestimonials } = await import('@shared/schema');
+    const [testimonial] = await db
+      .select()
+      .from(campaignTestimonials)
+      .where(withOrgFilter(campaignTestimonials, this.organizationId, eq(campaignTestimonials.id, id)));
+    return testimonial;
+  }
+
+  async getCampaignTestimonials(campaignId: string, status?: string) {
+    const { campaignTestimonials } = await import('@shared/schema');
+    const filters = [
+      eq(campaignTestimonials.organizationId, this.organizationId),
+      eq(campaignTestimonials.campaignId, campaignId)
+    ];
+    if (status) {
+      filters.push(eq(campaignTestimonials.status, status));
+    }
+    return await db
+      .select()
+      .from(campaignTestimonials)
+      .where(and(...filters))
+      .orderBy(desc(campaignTestimonials.createdAt));
+  }
+
+  async updateCampaignTestimonial(id: string, updates: Parameters<IStorage['updateCampaignTestimonial']>[1]) {
+    const { campaignTestimonials } = await import('@shared/schema');
+    const [updated] = await db
+      .update(campaignTestimonials)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(withOrgFilter(campaignTestimonials, this.organizationId, eq(campaignTestimonials.id, id)))
+      .returning();
+    return updated;
+  }
+
+  async deleteCampaignTestimonial(id: string) {
+    const { campaignTestimonials } = await import('@shared/schema');
+    await db
+      .delete(campaignTestimonials)
+      .where(withOrgFilter(campaignTestimonials, this.organizationId, eq(campaignTestimonials.id, id)));
+  }
+
+  async createWishlistItem(item: Parameters<IStorage['createWishlistItem']>[0]) {
+    return this.baseStorage.createWishlistItem(withOrgId(item, this.organizationId));
+  }
+
+  async getAllWishlistItems() {
+    const { wishlistItems } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(wishlistItems)
+      .where(eq(wishlistItems.organizationId, this.organizationId))
+      .orderBy(wishlistItems.order);
+  }
+
+  async getActiveWishlistItems() {
+    const { wishlistItems } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(wishlistItems)
+      .where(withOrgFilter(wishlistItems, this.organizationId, eq(wishlistItems.isActive, true)))
+      .orderBy(wishlistItems.order);
+  }
+
+  async updateWishlistItem(id: string, updates: Parameters<IStorage['updateWishlistItem']>[1]) {
+    const { wishlistItems } = await import('@shared/schema');
+    const [updated] = await db
+      .update(wishlistItems)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(withOrgFilter(wishlistItems, this.organizationId, eq(wishlistItems.id, id)))
+      .returning();
+    return updated;
+  }
+
+  async deleteWishlistItem(id: string) {
+    const { wishlistItems } = await import('@shared/schema');
+    const result = await db
+      .delete(wishlistItems)
+      .where(withOrgFilter(wishlistItems, this.organizationId, eq(wishlistItems.id, id)))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getDonationStats(filters?: { daysBack?: number }) {
+    const { donations, donationCampaigns } = await import('@shared/schema');
+    const now = new Date();
+    const daysBack = filters?.daysBack || 30;
+    const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
+
+    const totals = await db.select({
+      count: sql<number>`cast(count(*) as int)`,
+      sum: sql<number>`cast(sum(${donations.amount}) as int)`,
+      avg: sql<number>`cast(avg(${donations.amount}) as int)`
+    })
+      .from(donations)
+      .where(eq(donations.organizationId, this.organizationId))
+      .then(r => r[0] || { count: 0, sum: 0, avg: 0 });
+
+    const byType = await db.select({
+      type: donations.donationType,
+      count: sql<number>`cast(count(*) as int)`,
+      amount: sql<number>`cast(sum(${donations.amount}) as int)`
+    })
+      .from(donations)
+      .where(eq(donations.organizationId, this.organizationId))
+      .groupBy(donations.donationType);
+
+    const byStatus = await db.select({
+      status: donations.status,
+      count: sql<number>`cast(count(*) as int)`
+    })
+      .from(donations)
+      .where(eq(donations.organizationId, this.organizationId))
+      .groupBy(donations.status);
+
+    const recentDonations = await db.select({
+      count: sql<number>`cast(count(*) as int)`,
+      amount: sql<number>`cast(sum(${donations.amount}) as int)`
+    })
+      .from(donations)
+      .where(and(
+        eq(donations.organizationId, this.organizationId),
+        sql`${donations.createdAt} >= ${cutoffDate}`
+      ))
+      .then(r => r[0] || { count: 0, amount: 0 });
+
+    const [totalCampaigns, activeCampaigns] = await Promise.all([
+      db.select({ count: sql<number>`cast(count(*) as int)` })
+        .from(donationCampaigns)
+        .where(eq(donationCampaigns.organizationId, this.organizationId))
+        .then(r => r[0]?.count || 0),
+      db.select({ count: sql<number>`cast(count(*) as int)` })
+        .from(donationCampaigns)
+        .where(withOrgFilter(donationCampaigns, this.organizationId, eq(donationCampaigns.status, 'active')))
+        .then(r => r[0]?.count || 0)
+    ]);
+
+    return {
+      generatedAt: now.toISOString(),
+      appliedFilters: { daysBack },
+      totals: {
+        totalDonations: totals.count,
+        totalAmount: totals.sum,
+        avgDonation: Math.round(totals.avg),
+        byType: byType.map(t => ({ type: t.type, count: t.count, amount: t.amount })),
+        byStatus: byStatus.map(s => ({ status: s.status, count: s.count }))
+      },
+      recentDonations: {
+        count: recentDonations.count,
+        amount: recentDonations.amount,
+        period: (daysBack === 7 ? 'last7Days' : daysBack === 30 ? 'last30Days' : 'custom') as 'last7Days' | 'last30Days' | 'custom'
+      },
+      campaigns: {
+        total: totalCampaigns,
+        active: activeCampaigns
+      }
+    };
+  }
+
+  // ========================================
+  // EMAIL TRACKING OPERATIONS (26 methods)
+  // ========================================
+
+  async createEmailLog(log: Parameters<IStorage['createEmailLog']>[0]) {
+    return this.baseStorage.createEmailLog(withOrgId(log, this.organizationId));
+  }
+
+  async getEmailLog(id: string) {
+    const { emailLogs } = await import('@shared/schema');
+    const [log] = await db
+      .select()
+      .from(emailLogs)
+      .where(withOrgFilter(emailLogs, this.organizationId, eq(emailLogs.id, id)));
+    return log;
+  }
+
+  async getEmailLogByTrackingToken(trackingToken: string) {
+    const { emailLogs } = await import('@shared/schema');
+    const [log] = await db
+      .select()
+      .from(emailLogs)
+      .where(withOrgFilter(emailLogs, this.organizationId, eq(emailLogs.trackingToken, trackingToken)));
+    return log;
+  }
+
+  async getEmailLogsByRecipient(recipientEmail: string) {
+    const { emailLogs } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailLogs)
+      .where(withOrgFilter(emailLogs, this.organizationId, eq(emailLogs.recipientEmail, recipientEmail)))
+      .orderBy(desc(emailLogs.sentAt));
+  }
+
+  async getEmailLogsByCampaign(campaignId: string) {
+    const { emailLogs } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailLogs)
+      .where(withOrgFilter(emailLogs, this.organizationId, eq(emailLogs.campaignId, campaignId)))
+      .orderBy(desc(emailLogs.sentAt));
+  }
+
+  async getRecentEmailLogs(limit: number = 50) {
+    const { emailLogs } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailLogs)
+      .where(eq(emailLogs.organizationId, this.organizationId))
+      .orderBy(desc(emailLogs.sentAt))
+      .limit(limit);
+  }
+
+  async createEmailLink(link: Parameters<IStorage['createEmailLink']>[0]) {
+    return this.baseStorage.createEmailLink(withOrgId(link, this.organizationId));
+  }
+
+  async getEmailLinkByToken(linkToken: string) {
+    const { emailLinks } = await import('@shared/schema');
+    const [link] = await db
+      .select()
+      .from(emailLinks)
+      .where(withOrgFilter(emailLinks, this.organizationId, eq(emailLinks.linkToken, linkToken)));
+    return link;
+  }
+
+  async getEmailLinksByEmailLog(emailLogId: string) {
+    const { emailLinks } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailLinks)
+      .where(withOrgFilter(emailLinks, this.organizationId, eq(emailLinks.emailLogId, emailLogId)))
+      .orderBy(desc(emailLinks.createdAt));
+  }
+
+  async getEmailOpensByToken(trackingToken: string) {
+    const { emailOpens } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailOpens)
+      .where(withOrgFilter(emailOpens, this.organizationId, eq(emailOpens.trackingToken, trackingToken)))
+      .orderBy(desc(emailOpens.openedAt));
+  }
+
+  async getEmailOpensByCampaign(campaignId: string) {
+    const { emailOpens } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailOpens)
+      .where(withOrgFilter(emailOpens, this.organizationId, eq(emailOpens.campaignId, campaignId)))
+      .orderBy(desc(emailOpens.openedAt));
+  }
+
+  async getEmailClicksByToken(trackingToken: string) {
+    const { emailClicks } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailClicks)
+      .where(withOrgFilter(emailClicks, this.organizationId, eq(emailClicks.trackingToken, trackingToken)))
+      .orderBy(desc(emailClicks.clickedAt));
+  }
+
+  async getEmailClicksByCampaign(campaignId: string) {
+    const { emailClicks } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(emailClicks)
+      .where(withOrgFilter(emailClicks, this.organizationId, eq(emailClicks.campaignId, campaignId)))
+      .orderBy(desc(emailClicks.clickedAt));
+  }
+
+  async getCampaignLinkPerformance(campaignId: string): Promise<Array<{
+    url: string;
+    totalClicks: number;
+    uniqueClicks: number;
+    ctr: number;
+  }>> {
+    const { emailLogs, emailClicks } = await import('@shared/schema');
+    
+    const sendCountResult = await db.execute<{ count: number }>(sql`
+      SELECT COUNT(DISTINCT id) as count
+      FROM email_logs
+      WHERE campaign_id = ${campaignId}
+        AND organization_id = ${this.organizationId}
+        AND status IN ('sent', 'delivered', 'queued')
+    `);
+    const totalSends = Number(sendCountResult.rows[0]?.count || 0);
+
+    const results = await db.execute<{
+      url: string;
+      total_clicks: number;
+      unique_clicks: number;
+    }>(sql`
+      SELECT 
+        target_url as url,
+        COUNT(*) as total_clicks,
+        COUNT(DISTINCT email_log_id) as unique_clicks
+      FROM email_clicks
+      WHERE campaign_id = ${campaignId}
+        AND organization_id = ${this.organizationId}
+      GROUP BY target_url
+      ORDER BY total_clicks DESC
+    `);
+
+    return results.rows.map(row => ({
+      url: row.url,
+      totalClicks: Number(row.total_clicks),
+      uniqueClicks: Number(row.unique_clicks),
+      ctr: totalSends > 0 ? (Number(row.unique_clicks) / totalSends) * 100 : 0
+    }));
+  }
+
+  async getCampaignTimeSeries(
+    campaignId: string,
+    metric: 'opens' | 'clicks' | 'sends',
+    interval: 'hour' | 'day' | 'week',
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<Array<{ timestamp: string; count: number }>> {
+    const tableConfig = {
+      opens: { table: 'email_opens', timestampCol: 'opened_at' },
+      clicks: { table: 'email_clicks', timestampCol: 'clicked_at' },
+      sends: { table: 'email_logs', timestampCol: 'sent_at' }
+    };
+    
+    const { table, timestampCol } = tableConfig[metric];
+    
+    let dateFilter = '';
+    if (startDate && endDate) {
+      dateFilter = `AND ${timestampCol} >= '${startDate.toISOString()}' AND ${timestampCol} <= '${endDate.toISOString()}'`;
+    } else if (startDate) {
+      dateFilter = `AND ${timestampCol} >= '${startDate.toISOString()}'`;
+    } else if (endDate) {
+      dateFilter = `AND ${timestampCol} <= '${endDate.toISOString()}'`;
+    }
+    
+    const statusFilter = metric === 'sends' 
+      ? `AND status IN ('sent', 'delivered', 'queued')`
+      : '';
+    
+    const results = await db.execute<{
+      bucket: string;
+      count: number;
+    }>(sql.raw(`
+      SELECT 
+        date_trunc('${interval}', ${timestampCol}) as bucket,
+        COUNT(*) as count
+      FROM ${table}
+      WHERE campaign_id = $1
+        AND organization_id = $2
+        ${statusFilter}
+        ${dateFilter}
+      GROUP BY bucket
+      ORDER BY bucket ASC
+    `, [campaignId, this.organizationId]));
+
+    return results.rows.map(row => ({
+      timestamp: row.bucket,
+      count: Number(row.count)
+    }));
+  }
+
+  async computeSendTimeInsights(
+    scope: 'global' | 'campaign' | 'persona',
+    scopeId?: string,
+    options?: { minSampleSize?: number }
+  ) {
+    const minSampleSize = options?.minSampleSize || 10;
+    const { leads, emailLogs, emailOpens, emailClicks, emailSendTimeInsights } = await import('@shared/schema');
+    
+    try {
+      let scopeFilter = '';
+      const params: string[] = [this.organizationId];
+      
+      if (scope === 'campaign' && scopeId) {
+        scopeFilter = 'AND el.campaign_id = $2';
+        params.push(scopeId);
+      } else if (scope === 'persona' && scopeId) {
+        scopeFilter = 'AND COALESCE(el.persona, l.persona) = $2';
+        params.push(scopeId);
+      }
+      
+      const results = await db.execute<{
+        day_of_week: number;
+        hour_of_day: number;
+        send_count: number;
+        open_count: number;
+        unique_opens: number;
+        click_count: number;
+        median_seconds_to_open: number | null;
+        max_sent_at_ny: string;
+        baseline_open_rate: number;
+        baseline_send_count: number;
+      }>(sql.raw(`
+        WITH sends AS (
+          SELECT 
+            el.id as log_id,
+            el.sent_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York' as sent_at_ny,
+            el.lead_id
+          FROM email_logs el
+          LEFT JOIN leads l ON l.id = el.lead_id
+          WHERE el.organization_id = $1
+            AND el.sent_at IS NOT NULL
+            AND el.status IN ('sent', 'delivered')
+            ${scopeFilter}
+        ),
+        open_stats AS (
+          SELECT 
+            eo.email_log_id,
+            COUNT(*) as open_count_per_send,
+            COUNT(DISTINCT eo.lead_id) as unique_openers,
+            MIN(eo.opened_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York') as first_opened_at_ny
+          FROM email_opens eo
+          WHERE eo.organization_id = $1
+            AND EXISTS (SELECT 1 FROM sends s WHERE s.log_id = eo.email_log_id)
+          GROUP BY eo.email_log_id
+        ),
+        click_stats AS (
+          SELECT 
+            ec.email_log_id,
+            COUNT(*) as click_count_per_send
+          FROM email_clicks ec
+          WHERE ec.organization_id = $1
+            AND EXISTS (SELECT 1 FROM sends s WHERE s.log_id = ec.email_log_id)
+          GROUP BY ec.email_log_id
+        ),
+        baseline AS (
+          SELECT
+            COUNT(DISTINCT s.log_id) as total_sends,
+            COUNT(DISTINCT CASE WHEN o.email_log_id IS NOT NULL THEN s.lead_id END) as total_unique_opens
+          FROM sends s
+          LEFT JOIN open_stats o ON o.email_log_id = s.log_id
+        ),
+        aggregated AS (
+          SELECT
+            EXTRACT(DOW FROM s.sent_at_ny)::integer as day_of_week,
+            EXTRACT(HOUR FROM s.sent_at_ny)::integer as hour_of_day,
+            COUNT(*) as send_count,
+            SUM(COALESCE(o.open_count_per_send, 0)) as open_count,
+            SUM(COALESCE(o.unique_openers, 0)) as unique_opens,
+            SUM(COALESCE(c.click_count_per_send, 0)) as click_count,
+            percentile_cont(0.5) WITHIN GROUP (
+              ORDER BY EXTRACT(EPOCH FROM (o.first_opened_at_ny - s.sent_at_ny))
+            ) FILTER (WHERE o.first_opened_at_ny IS NOT NULL) as median_seconds_to_open,
+            MAX(s.sent_at_ny) as max_sent_at_ny
+          FROM sends s
+          LEFT JOIN open_stats o ON o.email_log_id = s.log_id
+          LEFT JOIN click_stats c ON c.email_log_id = s.log_id
+          GROUP BY day_of_week, hour_of_day
+          HAVING COUNT(*) >= ${minSampleSize}
+        )
+        SELECT 
+          a.*,
+          CASE 
+            WHEN b.total_sends > 0 
+            THEN ROUND((b.total_unique_opens::numeric / b.total_sends::numeric) * 10000)
+            ELSE 0 
+          END as baseline_open_rate,
+          b.total_sends as baseline_send_count
+        FROM aggregated a
+        CROSS JOIN baseline b
+        ORDER BY a.day_of_week, a.hour_of_day
+      `, params));
+      
+      const now = new Date();
+      const insights: any[] = results.rows.map(row => {
+        const sendCount = Number(row.send_count);
+        const openCount = Number(row.open_count);
+        const uniqueOpens = Number(row.unique_opens);
+        const clickCount = Number(row.click_count);
+        const baselineOpenRate = Number(row.baseline_open_rate);
+        
+        const openRate = sendCount > 0 ? Math.round((uniqueOpens / sendCount) * 10000) : 0;
+        const clickRate = sendCount > 0 ? Math.round((clickCount / sendCount) * 10000) : 0;
+        
+        let baseConfidence = 0;
+        if (sendCount <= 20) baseConfidence = 25;
+        else if (sendCount <= 50) baseConfidence = 50;
+        else if (sendCount <= 100) baseConfidence = 70;
+        else baseConfidence = 90;
+        
+        let adjustedConfidence = baseConfidence;
+        if (openRate > baselineOpenRate * 1.2) adjustedConfidence = Math.min(100, baseConfidence + 10);
+        if (openRate < baselineOpenRate * 0.8) adjustedConfidence = Math.max(0, baseConfidence - 10);
+        
+        const recencyDate = row.max_sent_at_ny ? new Date(row.max_sent_at_ny) : null;
+        const daysSinceLastSend = recencyDate 
+          ? Math.floor((now.getTime() - recencyDate.getTime()) / (1000 * 60 * 60 * 24))
+          : 999;
+        
+        if (daysSinceLastSend > 90) adjustedConfidence = Math.max(0, adjustedConfidence - 20);
+        else if (daysSinceLastSend > 30) adjustedConfidence = Math.max(0, adjustedConfidence - 10);
+        
+        return {
+          organizationId: this.organizationId,
+          scope,
+          scopeId: scopeId || null,
+          dayOfWeek: Number(row.day_of_week),
+          hourOfDay: Number(row.hour_of_day),
+          sendCount,
+          openCount,
+          uniqueOpens,
+          clickCount,
+          openRate,
+          clickRate,
+          medianSecondsToOpen: row.median_seconds_to_open ? Number(row.median_seconds_to_open) : null,
+          confidenceScore: adjustedConfidence,
+          lastUpdated: now
+        };
+      });
+      
+      if (insights.length === 0) {
+        return [];
+      }
+      
+      await db.transaction(async (tx) => {
+        await tx
+          .delete(emailSendTimeInsights)
+          .where(and(
+            eq(emailSendTimeInsights.organizationId, this.organizationId),
+            eq(emailSendTimeInsights.scope, scope),
+            scopeId ? eq(emailSendTimeInsights.scopeId, scopeId) : sql`scope_id IS NULL`
+          ));
+        
+        await tx.insert(emailSendTimeInsights).values(insights);
+      });
+      
+      return insights;
+    } catch (error) {
+      console.error('[computeSendTimeInsights] Error:', error);
+      return [];
+    }
+  }
+
+  async getSendTimeInsights(
+    scope: 'global' | 'campaign' | 'persona',
+    scopeId?: string,
+    options?: {
+      refreshIfStale?: boolean;
+      staleThresholdHours?: number;
+    }
+  ) {
+    const { emailSendTimeInsights } = await import('@shared/schema');
+    const refreshIfStale = options?.refreshIfStale ?? true;
+    const staleThresholdHours = options?.staleThresholdHours ?? 24;
+    
+    const existing = await db
+      .select()
+      .from(emailSendTimeInsights)
+      .where(and(
+        eq(emailSendTimeInsights.organizationId, this.organizationId),
+        eq(emailSendTimeInsights.scope, scope),
+        scopeId ? eq(emailSendTimeInsights.scopeId, scopeId) : sql`scope_id IS NULL`
+      ))
+      .orderBy(emailSendTimeInsights.dayOfWeek, emailSendTimeInsights.hourOfDay);
+    
+    if (existing.length === 0 && refreshIfStale) {
+      const insights = await this.computeSendTimeInsights(scope, scopeId);
+      return insights;
+    }
+    
+    if (refreshIfStale && existing.length > 0) {
+      const lastUpdated = existing[0].lastUpdated;
+      const now = new Date();
+      const hoursSinceUpdate = (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60);
+      
+      if (hoursSinceUpdate > staleThresholdHours) {
+        const insights = await this.computeSendTimeInsights(scope, scopeId);
+        return insights;
+      }
+    }
+    
+    return existing;
+  }
+
+  async getLeadEmailOpens(leadId: string, limit?: number) {
+    const results = await db.execute<any>(sql`
+      SELECT 
+        eo.id,
+        eo.email_log_id as "emailLogId",
+        eo.lead_id as "leadId",
+        eo.campaign_id as "campaignId",
+        eo.tracking_token as "trackingToken",
+        eo.ip_address as "ipAddress",
+        eo.user_agent as "userAgent",
+        eo.metadata,
+        eo.opened_at as "openedAt",
+        ec.name as "campaignName"
+      FROM email_opens eo
+      LEFT JOIN email_campaigns ec ON eo.campaign_id = ec.id
+      WHERE eo.lead_id = ${leadId}
+        AND eo.organization_id = ${this.organizationId}
+      ORDER BY eo.opened_at DESC
+      ${limit ? sql`LIMIT ${limit}` : sql``}
+    `);
+    return results.rows;
+  }
+
+  async getLeadEmailClicks(leadId: string, limit?: number) {
+    const results = await db.execute<any>(sql`
+      SELECT 
+        ec.id,
+        ec.email_log_id as "emailLogId",
+        ec.email_link_id as "emailLinkId",
+        ec.lead_id as "leadId",
+        ec.campaign_id as "campaignId",
+        ec.tracking_token as "trackingToken",
+        ec.target_url as "targetUrl",
+        ec.ip_address as "ipAddress",
+        ec.user_agent as "userAgent",
+        ec.metadata,
+        ec.clicked_at as "clickedAt",
+        ecamp.name as "campaignName",
+        ec.target_url as "linkUrl"
+      FROM email_clicks ec
+      LEFT JOIN email_campaigns ecamp ON ec.campaign_id = ecamp.id
+      WHERE ec.lead_id = ${leadId}
+        AND ec.organization_id = ${this.organizationId}
+      ORDER BY ec.clicked_at DESC
+      ${limit ? sql`LIMIT ${limit}` : sql``}
+    `);
+    return results.rows;
+  }
+
+  async getEmailTemplateByName(name: string) {
+    const { emailTemplates } = await import('@shared/schema');
+    const [template] = await db
+      .select()
+      .from(emailTemplates)
+      .where(withOrgFilter(emailTemplates, this.organizationId, eq(emailTemplates.name, name)));
+    return template;
+  }
+
+  async getHormoziEmailTemplates(filters?: {
+    category?: string;
+    stage?: string;
+    searchTerm?: string;
+  }) {
+    const { emailTemplates } = await import('@shared/schema');
+    
+    const conditions = [
+      eq(emailTemplates.organizationId, this.organizationId),
+      eq(emailTemplates.isHormoziFramework, true)
+    ];
+    
+    if (filters?.category) {
+      conditions.push(eq(emailTemplates.category, filters.category));
+    }
+    if (filters?.stage) {
+      conditions.push(eq(emailTemplates.hormoziStage, filters.stage));
+    }
+    if (filters?.searchTerm) {
+      conditions.push(
+        or(
+          sql`${emailTemplates.name} ILIKE ${`%${filters.searchTerm}%`}`,
+          sql`${emailTemplates.description} ILIKE ${`%${filters.searchTerm}%`}`
+        ) as any
+      );
+    }
+    
+    return await db
+      .select()
+      .from(emailTemplates)
+      .where(and(...conditions))
+      .orderBy(emailTemplates.category, emailTemplates.name);
+  }
+
+  async getHormoziEmailTemplate(id: string) {
+    const { emailTemplates } = await import('@shared/schema');
+    const [template] = await db
+      .select()
+      .from(emailTemplates)
+      .where(withOrgFilter(emailTemplates, this.organizationId, 
+        and(
+          eq(emailTemplates.id, id),
+          eq(emailTemplates.isHormoziFramework, true)
+        ) as any
+      ));
+    return template;
+  }
+
+  async getHormoziSmsTemplates(filters?: {
+    category?: string;
+    stage?: string;
+    searchTerm?: string;
+  }) {
+    const { smsTemplates } = await import('@shared/schema');
+    
+    const conditions = [
+      eq(smsTemplates.organizationId, this.organizationId),
+      eq(smsTemplates.isHormoziFramework, true)
+    ];
+    
+    if (filters?.category) {
+      conditions.push(eq(smsTemplates.category, filters.category));
+    }
+    if (filters?.stage) {
+      conditions.push(eq(smsTemplates.hormoziStage, filters.stage));
+    }
+    if (filters?.searchTerm) {
+      conditions.push(
+        or(
+          sql`${smsTemplates.name} ILIKE ${`%${filters.searchTerm}%`}`,
+          sql`${smsTemplates.description} ILIKE ${`%${filters.searchTerm}%`}`
+        ) as any
+      );
+    }
+    
+    return await db
+      .select()
+      .from(smsTemplates)
+      .where(and(...conditions))
+      .orderBy(smsTemplates.category, smsTemplates.name);
+  }
+
+  async getHormoziSmsTemplate(id: string) {
+    const { smsTemplates } = await import('@shared/schema');
+    const [template] = await db
+      .select()
+      .from(smsTemplates)
+      .where(withOrgFilter(smsTemplates, this.organizationId,
+        and(
+          eq(smsTemplates.id, id),
+          eq(smsTemplates.isHormoziFramework, true)
+        ) as any
+      ));
+    return template;
+  }
+
+  async markOutreachEmailOpened(id: string) {
+    const { outreachEmails } = await import('@shared/schema');
+    const now = new Date();
+    const [updated] = await db
+      .update(outreachEmails)
+      .set({
+        opened: true,
+        openedAt: now,
+        lastOpenedAt: now,
+        updatedAt: now
+      })
+      .where(withOrgFilter(outreachEmails, this.organizationId, eq(outreachEmails.id, id)))
+      .returning();
+    return updated;
+  }
+
+  async markOutreachEmailClicked(id: string) {
+    const { outreachEmails } = await import('@shared/schema');
+    const now = new Date();
+    const [updated] = await db
+      .update(outreachEmails)
+      .set({
+        clicked: true,
+        clickedAt: now,
+        lastClickedAt: now,
+        updatedAt: now
+      })
+      .where(withOrgFilter(outreachEmails, this.organizationId, eq(outreachEmails.id, id)))
+      .returning();
+    return updated;
   }
 }
 
