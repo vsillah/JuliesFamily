@@ -388,9 +388,6 @@ class OrgScopedImplementations {
     funnelStage?: string | null,
     userPassions?: string[] | null
   ) {
-    // DEBUG: Verify org-scoped implementation is being called
-    console.log(`[OrgScopedStorage.getVisibleContentItems] CALLED with org=${this.organizationId}, type=${type}, persona=${persona}, funnel=${funnelStage}`);
-    
     const { contentItems, contentVisibility } = await import('@shared/schema');
     
     // Build join conditions - only add persona/funnelStage filters when they're provided
@@ -465,16 +462,9 @@ class OrgScopedImplementations {
     
     const results = await query;
     
-    // DEBUG: Log query results
-    console.log(`[OrgScopedStorage.getVisibleContentItems] Query returned ${results.length} items for org=${this.organizationId}`);
-    if (results.length > 0 && type === 'hero') {
-      console.log(`[OrgScopedStorage.getVisibleContentItems] First hero title: "${results[0].title}"`);
-    }
-    
     // For hero content: if no persona-specific results and a specific persona was requested,
     // fall back to the default hero (persona='default')
     if (type === 'hero' && results.length === 0 && persona && persona !== 'default') {
-      console.log(`[OrgScopedStorage.getVisibleContentItems] No results for persona=${persona}, falling back to default`);
       return await this.getVisibleContentItems(type, 'default', funnelStage, userPassions);
     }
     
