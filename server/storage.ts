@@ -109,6 +109,13 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   getAllOrganizations(): Promise<Organization[]>;
   updateOrganization(id: string, updates: Partial<InsertOrganization>): Promise<Organization | undefined>;
   
+  // Organization Features operations - per-org feature toggles
+  upsertOrganizationFeature(featureData: InsertOrganizationFeature): Promise<OrganizationFeature>;
+  getOrganizationFeature(organizationId: string, featureKey: string): Promise<OrganizationFeature | undefined>;
+  getOrganizationFeatures(organizationId: string): Promise<OrganizationFeature[]>;
+  deleteOrganizationFeature(organizationId: string, featureKey: string): Promise<void>;
+  isFeatureEnabled(organizationId: string, featureKey: string): Promise<boolean>;
+  
   // Admin Preferences operations
   getAdminPreferences(userId: string): Promise<AdminPreferences | undefined>;
   upsertAdminPreferences(userId: string, preferences: Partial<InsertAdminPreferences>): Promise<AdminPreferences>;
@@ -1278,6 +1285,56 @@ export class DatabaseStorage implements IStorage {
       .where(eq(organizations.id, id))
       .returning();
     return org;
+  }
+
+  // Organization Features operations - per-org feature toggles
+  async upsertOrganizationFeature(featureData: InsertOrganizationFeature): Promise<OrganizationFeature> {
+    const [feature] = await db
+      .insert(organizationFeatures)
+      .values(featureData)
+      .onConflictDoUpdate({
+        target: [organizationFeatures.organizationId, organizationFeatures.featureKey],
+        set: { isEnabled: featureData.isEnabled, updatedAt: new Date() },
+      })
+      .returning();
+    return feature;
+  }
+
+  async getOrganizationFeature(organizationId: string, featureKey: string): Promise<OrganizationFeature | undefined> {
+    const [feature] = await db
+      .select()
+      .from(organizationFeatures)
+      .where(
+        and(
+          eq(organizationFeatures.organizationId, organizationId),
+          eq(organizationFeatures.featureKey, featureKey)
+        )
+      );
+    return feature;
+  }
+
+  async getOrganizationFeatures(organizationId: string): Promise<OrganizationFeature[]> {
+    return await db
+      .select()
+      .from(organizationFeatures)
+      .where(eq(organizationFeatures.organizationId, organizationId))
+      .orderBy(organizationFeatures.featureKey);
+  }
+
+  async deleteOrganizationFeature(organizationId: string, featureKey: string): Promise<void> {
+    await db
+      .delete(organizationFeatures)
+      .where(
+        and(
+          eq(organizationFeatures.organizationId, organizationId),
+          eq(organizationFeatures.featureKey, featureKey)
+        )
+      );
+  }
+
+  async isFeatureEnabled(organizationId: string, featureKey: string): Promise<boolean> {
+    const feature = await this.getOrganizationFeature(organizationId, featureKey);
+    return feature?.isEnabled ?? false;
   }
 
   // Admin Preferences operations

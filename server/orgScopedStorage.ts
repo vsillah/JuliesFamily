@@ -407,6 +407,13 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getVisibleContentItems',
   'updateContentVisibility',
   'getContentVisibilityRules',
+  
+  // Organization Features (5 methods)
+  'upsertOrganizationFeature',
+  'getOrganizationFeature',
+  'getOrganizationFeatures',
+  'deleteOrganizationFeature',
+  'isFeatureEnabled',
 ]);
 
 /**
@@ -5043,6 +5050,33 @@ class OrgScopedImplementations {
         eq(contentVisibility.organizationId, this.organizationId)
       ))
       .orderBy(contentVisibility.order);
+  }
+
+  // ========================================
+  // ORGANIZATION FEATURES (Feature Toggles)
+  // ========================================
+
+  async upsertOrganizationFeature(featureData: Parameters<IStorage['upsertOrganizationFeature']>[0]) {
+    return this.baseStorage.upsertOrganizationFeature({
+      ...featureData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getOrganizationFeature(featureKey: string) {
+    return this.baseStorage.getOrganizationFeature(this.organizationId, featureKey);
+  }
+
+  async getOrganizationFeatures() {
+    return this.baseStorage.getOrganizationFeatures(this.organizationId);
+  }
+
+  async deleteOrganizationFeature(featureKey: string) {
+    return this.baseStorage.deleteOrganizationFeature(this.organizationId, featureKey);
+  }
+
+  async isFeatureEnabled(featureKey: string) {
+    return this.baseStorage.isFeatureEnabled(this.organizationId, featureKey);
   }
 }
 

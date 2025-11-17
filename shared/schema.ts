@@ -113,6 +113,26 @@ export const insertCustomDomainSchema = createInsertSchema(customDomains).omit({
 export type InsertCustomDomain = z.infer<typeof insertCustomDomainSchema>;
 export type CustomDomain = typeof customDomains.$inferSelect;
 
+// Organization Features table - per-organization feature toggles
+export const organizationFeatures = pgTable("organization_features", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+  featureKey: varchar("feature_key").notNull(), // e.g., 'analytics', 'ab_testing', 'crm_advanced'
+  isEnabled: boolean("is_enabled").notNull().default(false), // Opt-in by default
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  uniqueIndex("unique_org_feature").on(table.organizationId, table.featureKey),
+]);
+
+export const insertOrganizationFeatureSchema = createInsertSchema(organizationFeatures).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertOrganizationFeature = z.infer<typeof insertOrganizationFeatureSchema>;
+export type OrganizationFeature = typeof organizationFeatures.$inferSelect;
+
 // Shared Templates table - platform-wide templates available to all organizations
 export const sharedTemplates = pgTable("shared_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
