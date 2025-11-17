@@ -5,8 +5,9 @@ import type { ContentItemWithResolvedImage, GoogleReview } from "@shared/schema"
 
 export default function Testimonials() {
   const { currentOrg } = useOrganization();
-  const { data: allTestimonials = [], isLoading: loadingCms } = useQuery<ContentItemWithResolvedImage[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/testimonial"],
+  
+  const { data: allTestimonials = [] , isLoading: loadingCms } = useQuery<ContentItemWithResolvedImage[]>({
+    queryKey: ["/api/content/type/testimonial"],
     enabled: !!currentOrg,
     staleTime: 5 * 60 * 1000,
     refetchOnMount: false,
@@ -14,7 +15,7 @@ export default function Testimonials() {
   });
 
   const { data: googleReviews = [], isLoading: loadingGoogle } = useQuery<GoogleReview[]>({
-    queryKey: [currentOrg?.organizationId, "/api/google-reviews"],
+    queryKey: ["/api/google-reviews"],
     enabled: !!currentOrg,
     staleTime: 5 * 60 * 1000,
     refetchOnMount: false,

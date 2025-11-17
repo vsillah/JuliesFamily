@@ -8,36 +8,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Multi-Tenant Data Migration Complete (November 17, 2025)
-**Critical Achievement**: Successfully migrated all tenant data with complete isolation guarantee.
+### Multi-Tenant Migration & A/B Test Fix Complete (November 17, 2025)
+**Critical Achievement**: Multi-tenant data migration complete with A/B testing system fully operational.
 
 **Final Migration Statistics**:
 - **74/75 tables passing (98.7% pass rate)** - MIGRATION COMPLETE ✓
-- Fixed 22 tables with NULL organization_id values totaling 465+ rows:
-  - tech_goes_home_attendance: 172 rows
-  - volunteer_shifts: 74 rows
-  - sms_templates: 38 rows
-  - audit_logs: 20 rows
-  - funnel_progression_history: 19 rows
-  - tech_goes_home_enrollments: 18 rows
-  - donation_campaigns: 8 rows
-  - admin_entitlements: 7 rows
-  - volunteer_session_logs: 7 rows
-  - volunteer_events: 7 rows
-  - email_campaign_enrollments: 6 rows
-  - email_sequence_steps: 6 rows
-  - pipeline_stages: 6 rows
-  - email_logs: 5 rows
-  - acquisition_channels: 5 rows
-  - campaign_members: 5 rows
-  - email_report_schedules: 4 rows
-  - sms_sends: 4 rows
-  - marketing_campaigns: 3 rows
-  - channel_spend_ledger: 3 rows
-  - email_links: 2 rows
-  - ab_test_automation_rules: 1 row
-  - ab_test_safety_limits: 1 row
-- **A/B Testing System Fully Restored**: 6 active tests with all related tables migrated (ab_test_targets, ab_test_variants, ab_test_events, ab_test_automation_rules, ab_test_safety_limits)
+- Fixed 22 tables with NULL organization_id values totaling 465+ rows
+- **A/B Testing System Fully Operational**: 
+  - 6 active tests with all related tables migrated
+  - Fixed missing org-scoped methods: `getAbTest`, `createAbTestAssignment`, `getAssignmentPersistent`, `getAbTestVariants`, `trackEvent`
+  - React Query URL construction bug fixed (removed organizationId concatenation with absolute paths)
+  - Org-scoped storage coverage: **97 methods (34%)**
+- **Content Visibility Fix**: Added 28 visibility records for 'default' persona (7 testimonials × 4 funnel stages) to ensure testimonials display when users click "I'll explore on my own"
 - **Intentional NULL values** (by design for platform-level entities):
   - users: 24 platform administrators with `kinflo_admin` role who manage multiple organizations
 

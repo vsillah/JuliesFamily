@@ -398,6 +398,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get current organization context (for super admins)
+  // Public organization endpoint - accessible to all users
+  app.get('/api/organization/current', async (req, res) => {
+    try {
+      const organizationId = req.organizationId || '1';
+      const isOverride = !!req.session?.organizationIdOverride;
+      
+      const org = await storage.getOrganization(organizationId);
+      
+      res.json({
+        organizationId,
+        organizationName: org?.name || organizationId,
+        isOverride
+      });
+    } catch (error) {
+      console.error('[Organizations] Error fetching current organization:', error);
+      res.status(500).json({ message: 'Failed to fetch current organization' });
+    }
+  });
+
+  // Admin-only organization endpoint (deprecated - use /api/organization/current instead)
   app.get('/api/admin/organization/current', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
       const organizationId = req.organizationId || '1';

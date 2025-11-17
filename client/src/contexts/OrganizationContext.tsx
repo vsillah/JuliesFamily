@@ -39,8 +39,9 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
   // Fetch organization details only when we have a stable org ID
   // Uses centralized query options to enforce consistent behavior
+  // Uses public endpoint accessible to all authenticated users
   const { data: orgDetails, isLoading: isDetailsLoading } = useQuery<Organization>({
-    queryKey: ['/api/admin/organization/current'],
+    queryKey: ['/api/organization/current'],
     enabled: !!orgSession?.organizationId,
     ...STANDARD_QUERY_OPTIONS,
   });

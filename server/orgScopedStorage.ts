@@ -62,6 +62,11 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getVisibleContentItems',
   'getActiveGoogleReviews',
   'getActiveAbTests',
+  'getAbTest',
+  'createAbTestAssignment',
+  'getAssignmentPersistent',
+  'getAbTestVariants',
+  'trackEvent',
   
   // Donation operations
   'createDonation',
@@ -554,6 +559,109 @@ class OrgScopedImplementations {
       .filter(({ hasMatch }) => hasMatch)
       .sort((a, b) => b.priority - a.priority)
       .map(({ test }) => test);
+  }
+
+  // Org-scoped A/B test retrieval by ID
+  async getAbTest(id: string) {
+    const { abTests } = await import('@shared/schema');
+    const [test] = await db
+      .select()
+      .from(abTests)
+      .where(and(
+        eq(abTests.id, id),
+        eq(abTests.organizationId, this.organizationId) // ORG SCOPING
+      ));
+    return test;
+  }
+
+  // Org-scoped A/B test assignment creation
+  async createAbTestAssignment(assignmentData: Parameters<IStorage['createAbTestAssignment']>[0]) {
+    const { abTestAssignments } = await import('@shared/schema');
+    const [assignment] = await db
+      .insert(abTestAssignments)
+      .values({
+        ...assignmentData,
+        organizationId: this.organizationId, // ORG SCOPING
+      })
+      .returning();
+    return assignment;
+  }
+
+  // Org-scoped A/B test assignment lookup with priority: userId > visitorId > sessionId
+  async getAssignmentPersistent(
+    testId: string,
+    userId?: string,
+    visitorId?: string,
+    sessionId?: string
+  ) {
+    const { abTestAssignments } = await import('@shared/schema');
+    
+    // Priority 1: Look up by userId (authenticated user)
+    if (userId) {
+      const [assignment] = await db
+        .select()
+        .from(abTestAssignments)
+        .where(and(
+          eq(abTestAssignments.organizationId, this.organizationId), // ORG SCOPING
+          eq(abTestAssignments.testId, testId),
+          eq(abTestAssignments.userId, userId)
+        ));
+      if (assignment) return assignment;
+    }
+
+    // Priority 2: Look up by visitorId (persistent anonymous)
+    if (visitorId) {
+      const [assignment] = await db
+        .select()
+        .from(abTestAssignments)
+        .where(and(
+          eq(abTestAssignments.organizationId, this.organizationId), // ORG SCOPING
+          eq(abTestAssignments.testId, testId),
+          eq(abTestAssignments.visitorId, visitorId)
+        ));
+      if (assignment) return assignment;
+    }
+
+    // Priority 3: Look up by sessionId (legacy fallback)
+    if (sessionId) {
+      const [assignment] = await db
+        .select()
+        .from(abTestAssignments)
+        .where(and(
+          eq(abTestAssignments.organizationId, this.organizationId), // ORG SCOPING
+          eq(abTestAssignments.testId, testId),
+          eq(abTestAssignments.sessionId, sessionId)
+        ));
+      if (assignment) return assignment;
+    }
+
+    return undefined;
+  }
+
+  // Org-scoped A/B test variants retrieval
+  async getAbTestVariants(testId: string) {
+    const { abTestVariants } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(abTestVariants)
+      .where(and(
+        eq(abTestVariants.organizationId, this.organizationId), // ORG SCOPING
+        eq(abTestVariants.testId, testId)
+      ))
+      .orderBy(desc(abTestVariants.isControl));
+  }
+
+  // Org-scoped A/B test event tracking
+  async trackEvent(eventData: Parameters<IStorage['trackEvent']>[0]) {
+    const { abTestEvents } = await import('@shared/schema');
+    const [event] = await db
+      .insert(abTestEvents)
+      .values({
+        ...eventData,
+        organizationId: this.organizationId, // ORG SCOPING
+      })
+      .returning();
+    return event;
   }
 
   // ========================================
