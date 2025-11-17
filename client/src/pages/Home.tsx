@@ -47,8 +47,9 @@ export default function Home() {
   const effectiveFunnelStage = funnelStage;
 
   // Fetch hero content to know when it's ready
+  // CRITICAL: Use primitive values in queryKey to avoid infinite loop
   const { data: heroContent, isLoading: heroLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", effectivePersona, effectiveFunnelStage],
     enabled: !isPersonaLoading && !!persona && !!currentOrg,
     staleTime: 5 * 60 * 1000,
     refetchOnMount: false,
@@ -66,8 +67,9 @@ export default function Home() {
   });
 
   // Fetch lead magnet content from database
+  // CRITICAL: Use primitive values in queryKey to avoid infinite loop
   const { data: leadMagnets = [] } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/visible/lead_magnet", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/lead_magnet", effectivePersona, effectiveFunnelStage],
     enabled: !!currentOrg,
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -97,8 +99,6 @@ export default function Home() {
   // Logic: If there is hero content, wait for image to load; otherwise proceed immediately
   const hasHeroContent = !!heroContent?.[0];
   const isContentReady = !isPersonaLoading && !heroLoading && (!hasHeroContent || !heroImageLoading);
-  
-  console.log('[Home DEBUG]', { isPersonaLoading, heroLoading, hasHeroContent, heroImageLoading, isContentReady });
   
   if (!isContentReady) {
     return null;
