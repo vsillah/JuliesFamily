@@ -1,7 +1,7 @@
 // Database storage implementation for Replit Auth and CRM
 // Reference: blueprint:javascript_log_in_with_replit and blueprint:javascript_database
 import { 
-  users, organizations, leads, interactions, leadMagnets, imageAssets,
+  users, organizations, organizationFeatures, leads, interactions, leadMagnets, imageAssets,
   contentItems, contentVisibility,
   metricWeightProfiles, metricWeightProfileMetrics,
   abTestAutomationRules, abTestAutomationRuleMetrics,
@@ -21,7 +21,7 @@ import {
   segments, emailUnsubscribes,
   programs, adminEntitlements, adminImpersonationSessions,
   type User, type UpsertUser,
-  type Organization, type InsertOrganization, 
+  type Organization, type InsertOrganization, type OrganizationFeature, type InsertOrganizationFeature, 
   type Lead, type InsertLead,
   type Interaction, type InsertInteraction,
   type LeadMagnet, type InsertLeadMagnet,
