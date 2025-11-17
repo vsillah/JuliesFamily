@@ -98,9 +98,20 @@ export default function Home() {
   // Note: We wait for loading to finish, not for content to exist (it might not exist for some personas)
   const isContentReady = !isPersonaLoading && !heroLoading && (!heroImageLoading || !heroContent?.[0]);
   
+  console.log('[Home] Content ready check:', { 
+    isPersonaLoading, 
+    heroLoading, 
+    heroImageLoading, 
+    heroContentExists: !!heroContent?.[0],
+    isContentReady 
+  });
+  
   if (!isContentReady) {
+    console.log('[Home] Returning null - content not ready');
     return null;
   }
+  
+  console.log('[Home] Rendering full page!');
 
   return (
     <div className="min-h-screen">
