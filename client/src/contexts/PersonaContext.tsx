@@ -99,11 +99,8 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    console.log('[PersonaContext] useEffect triggered:', { isLoading, isAuthenticated, userPersona: user?.persona, location });
-    
     // Don't do anything while auth is loading
     if (isLoading) {
-      console.log('[PersonaContext] Auth still loading, keeping isPersonaLoading=true');
       setIsPersonaLoading(true);
       return;
     }
@@ -119,15 +116,12 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     const isAdminRoute = location.startsWith('/admin');
 
     const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
-    console.log('[PersonaContext] Processing persona logic:', { adminOverride, isAuthenticated, isAdminRoute, isKinfloPage });
     
     if (adminOverride && adminOverride !== "none") {
       // Admin override takes priority
-      console.log('[PersonaContext] Using admin override:', adminOverride);
       setPersonaState(adminOverride as Persona);
     } else if (isAuthenticated && user) {
       // For authenticated users, load persona from database
-      console.log('[PersonaContext] Authenticated user, persona from DB:', user.persona);
       if (user.persona) {
         setPersonaState(user.persona as Persona);
       }
@@ -136,7 +130,6 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       sessionStorage.removeItem(PERSONA_MODAL_SHOWN_KEY);
     } else if (isAdminRoute) {
       // Never show persona modal on admin routes
-      console.log('[PersonaContext] Admin route detected, using default persona');
       setPersonaState('default');
       setShowPersonaModal(false);
     } else if (!hasBeenAuthenticatedRef.current) {
@@ -146,28 +139,17 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       const storedPersona = sessionStorage.getItem(PERSONA_STORAGE_KEY);
       const modalShown = sessionStorage.getItem(PERSONA_MODAL_SHOWN_KEY);
       
-      console.log('[PersonaContext] Unauthenticated user persona check:', {
-        storedPersona,
-        modalShown,
-        adminOverride,
-        isKinfloPage,
-        location
-      });
-      
       if (storedPersona && storedPersona !== "null") {
-        console.log('[PersonaContext] Using stored persona:', storedPersona);
         setPersonaState(storedPersona as Persona);
         // Don't show modal if we already have a stored persona
         setShowPersonaModal(false);
       } else if (!modalShown && !adminOverride && !isKinfloPage) {
         // Set default persona for explorers before showing modal
-        console.log('[PersonaContext] First visit detected - showing persona modal');
         setPersonaState('default');
         // Show modal immediately for unauthenticated users on Julie's pages (not Kinflo)
         setShowPersonaModal(true);
       } else {
         // If modal was already shown but no persona selected, keep default
-        console.log('[PersonaContext] Modal already shown or admin override active');
         setPersonaState('default');
         setShowPersonaModal(false);
       }
@@ -198,7 +180,6 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     }
 
     // Mark persona as loaded
-    console.log('[PersonaContext] Setting isPersonaLoading=false');
     setIsPersonaLoading(false);
   }, [isAuthenticated, user, isLoading, location]);
 

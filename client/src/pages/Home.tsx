@@ -42,8 +42,6 @@ export default function Home() {
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const { data: visibleSections } = useContentAvailability();
 
-  console.log('[Home] Render state:', { persona, funnelStage, isPersonaLoading, currentOrg });
-
   // Use actual persona values - no fallback to prevent flash
   const effectivePersona = persona;
   const effectiveFunnelStage = funnelStage;
@@ -94,26 +92,15 @@ export default function Home() {
     ...(visibleSections ?? {}),
   };
 
-  // TEMPORARY: Bypass content ready check to test if page renders
   // Don't render anything until persona and hero content queries complete (to prevent flash)
   // Note: We wait for loading to finish, not for content to exist (it might not exist for some personas)
-  // const isContentReady = !isPersonaLoading && !heroLoading && (!heroImageLoading || !heroContent?.[0]);
-  const isContentReady = !isPersonaLoading; // SIMPLIFIED - just wait for persona
-  
-  console.log('[Home] Content ready check:', { 
-    isPersonaLoading, 
-    heroLoading, 
-    heroImageLoading, 
-    heroContentExists: !!heroContent?.[0],
-    isContentReady 
-  });
+  // Logic: If there is hero content, wait for image to load; otherwise proceed immediately
+  const hasHeroContent = !!heroContent?.[0];
+  const isContentReady = !isPersonaLoading && !heroLoading && (!hasHeroContent || !heroImageLoading);
   
   if (!isContentReady) {
-    console.log('[Home] Returning null - content not ready');
     return null;
   }
-  
-  console.log('[Home] Rendering full page!');
 
   return (
     <div className="min-h-screen">
