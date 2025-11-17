@@ -1,0 +1,145 @@
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+KinFlo-CRM:1 The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+KinFlo-CRM:1 The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+KinFlo-CRM:1 The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+ed1e693c96a75807.js:2 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+z @ ed1e693c96a75807.js:2
+workspace_iframe.html?initialPath=%2F&id=%3Ar94%3A:32 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/organization/current 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ queryClient.ts:53
+fetchFn @ @tanstack_react-query.js?v=9160b6dd:840
+run @ @tanstack_react-query.js?v=9160b6dd:494
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+setOptions @ @tanstack_react-query.js?v=9160b6dd:1955
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3032
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763355430653_av06hrf8zs8 401 (Unauthorized)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
