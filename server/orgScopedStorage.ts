@@ -156,6 +156,15 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getVolunteerSessionLogsByEnrollmentId',
   'deleteVolunteerSessionLog',
   
+  // Tech Goes Home enrollment operations
+  'createTechGoesHomeEnrollment',
+  'getTechGoesHomeEnrollment',
+  'getTechGoesHomeEnrollmentByUserId',
+  'getAllTechGoesHomeEnrollments',
+  'getActiveTechGoesHomeEnrollments',
+  'updateTechGoesHomeEnrollment',
+  'getStudentProgress',
+  
   // Lead assignment operations
   'createLeadAssignment',
   'getLeadAssignmentsByLeadId',
@@ -1334,6 +1343,114 @@ class OrgScopedImplementations {
         eq(volunteerSessionLogs.id, id),
         eq(volunteerSessionLogs.organizationId, this.organizationId)
       ));
+  }
+
+  // ========================================
+  // TECH GOES HOME ENROLLMENT OPERATIONS
+  // ========================================
+  
+  async createTechGoesHomeEnrollment(enrollmentData: Parameters<IStorage['createTechGoesHomeEnrollment']>[0]) {
+    return this.baseStorage.createTechGoesHomeEnrollment({
+      ...enrollmentData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getTechGoesHomeEnrollment(id: string) {
+    const { techGoesHomeEnrollments } = await import('@shared/schema');
+    const [enrollment] = await db
+      .select()
+      .from(techGoesHomeEnrollments)
+      .where(and(
+        eq(techGoesHomeEnrollments.id, id),
+        eq(techGoesHomeEnrollments.organizationId, this.organizationId)
+      ));
+    return enrollment;
+  }
+
+  async getTechGoesHomeEnrollmentByUserId(userId: string) {
+    const { techGoesHomeEnrollments } = await import('@shared/schema');
+    const [enrollment] = await db
+      .select()
+      .from(techGoesHomeEnrollments)
+      .where(and(
+        eq(techGoesHomeEnrollments.userId, userId),
+        eq(techGoesHomeEnrollments.status, 'active'),
+        eq(techGoesHomeEnrollments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(techGoesHomeEnrollments.createdAt))
+      .limit(1);
+    return enrollment;
+  }
+
+  async getAllTechGoesHomeEnrollments() {
+    const { techGoesHomeEnrollments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(techGoesHomeEnrollments)
+      .where(eq(techGoesHomeEnrollments.organizationId, this.organizationId))
+      .orderBy(desc(techGoesHomeEnrollments.enrollmentDate));
+  }
+
+  async getActiveTechGoesHomeEnrollments() {
+    const { techGoesHomeEnrollments } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(techGoesHomeEnrollments)
+      .where(and(
+        eq(techGoesHomeEnrollments.status, 'active'),
+        eq(techGoesHomeEnrollments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(techGoesHomeEnrollments.enrollmentDate));
+  }
+
+  async updateTechGoesHomeEnrollment(id: string, updates: Parameters<IStorage['updateTechGoesHomeEnrollment']>[1]) {
+    const { techGoesHomeEnrollments } = await import('@shared/schema');
+    const [updated] = await db
+      .update(techGoesHomeEnrollments)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(techGoesHomeEnrollments.id, id),
+        eq(techGoesHomeEnrollments.organizationId, this.organizationId)
+      ))
+      .returning();
+    return updated;
+  }
+
+  async getStudentProgress(userId: string) {
+    // Get the org-scoped enrollment first
+    const enrollment = await this.getTechGoesHomeEnrollmentByUserId(userId);
+    
+    if (!enrollment) {
+      return null;
+    }
+    
+    // Now use the base storage to get the full progress (attendance is org-scoped through enrollment relationship)
+    const { techGoesHomeAttendance } = await import('@shared/schema');
+    const attendance = await db
+      .select()
+      .from(techGoesHomeAttendance)
+      .where(eq(techGoesHomeAttendance.enrollmentId, enrollment.id))
+      .orderBy(techGoesHomeAttendance.classDate);
+    
+    // Calculate progress metrics
+    const totalRequired = enrollment.totalClassesRequired || 15;
+    const completedRecords = attendance.filter(a => a.status === 'completed');
+    const classesCompleted = completedRecords.length;
+    const classesRemaining = Math.max(0, totalRequired - classesCompleted);
+    const hoursCompleted = completedRecords.reduce((sum, a) => sum + (a.hoursAttended || 0), 0);
+    const percentComplete = Math.round((classesCompleted / totalRequired) * 100);
+    const isEligibleForRewards = percentComplete >= 80 && enrollment.chromebookReceived === false;
+    
+    return {
+      enrollment,
+      attendance,
+      classesCompleted,
+      classesRemaining,
+      hoursCompleted,
+      percentComplete,
+      isEligibleForRewards,
+    };
   }
 
   // ========================================

@@ -8,8 +8,8 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-### Multi-Tenant Migration & Impersonation Feature Complete (November 17, 2025)
-**Critical Achievements**: Multi-tenant data migration complete, A/B testing operational, impersonation feature fully tenant-isolated and accessible from user management.
+### Multi-Tenant Migration & Enrollment Systems Complete (November 17, 2025)
+**Critical Achievements**: Multi-tenant data migration complete, A/B testing operational, impersonation feature fully tenant-isolated, and student/volunteer enrollment systems migrated.
 
 **Final Migration Statistics**:
 - **74/75 tables passing (98.7% pass rate)** - MIGRATION COMPLETE ✓
@@ -22,7 +22,10 @@ Preferred communication style: Simple, everyday language.
   - Added `organization_id` column to `admin_impersonation_sessions` table
   - Implemented org-scoped methods: `createImpersonationSession`, `getImpersonationSessions`, `endImpersonationSession`, `getCurrentlyImpersonatedUser`, `hasActiveImpersonation`
   - Added impersonation button to user management table for one-click impersonation
-  - Org-scoped storage coverage: **103 methods (34%)**
+- **Enrollment Systems Migrated**:
+  - **Tech Goes Home**: 18 enrollments fully migrated with 7 org-scoped methods (`createTechGoesHomeEnrollment`, `getTechGoesHomeEnrollment`, `getTechGoesHomeEnrollmentByUserId`, `getAllTechGoesHomeEnrollments`, `getActiveTechGoesHomeEnrollments`, `updateTechGoesHomeEnrollment`, `getStudentProgress`)
+  - **Volunteer Enrollments**: 14 enrollments fully migrated with 5 org-scoped methods (already implemented)
+  - Org-scoped storage coverage: **110 methods (38%)**
 - **Content Visibility Fix**: Added 28 visibility records for 'default' persona (7 testimonials × 4 funnel stages) to ensure testimonials display when users click "I'll explore on my own"
 - **Intentional NULL values** (by design for platform-level entities):
   - users: 24 platform administrators with `kinflo_admin` role who manage multiple organizations
