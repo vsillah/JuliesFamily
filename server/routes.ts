@@ -514,6 +514,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Organization Feature Toggle Routes
+  
+  // Get all features for an organization (admin only)
+  app.get('/api/admin/organizations/:orgId/features', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { orgId } = req.params;
+      
+      // Verify organization exists
+      const org = await storage.getOrganization(orgId);
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+      
+      const features = await storage.getOrganizationFeatures(orgId);
+      res.json(features);
+    } catch (error) {
+      console.error('[FeatureToggles] Error fetching organization features:', error);
+      res.status(500).json({ message: 'Failed to fetch organization features' });
+    }
+  });
+
+  // Create or update a feature toggle (admin only)
+  app.post('/api/admin/organizations/:orgId/features', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { orgId } = req.params;
+      const { insertOrganizationFeatureSchema } = await import("@shared/schema");
+      
+      // Verify organization exists
+      const org = await storage.getOrganization(orgId);
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+      
+      // Validate request body
+      const validation = insertOrganizationFeatureSchema.safeParse({
+        ...req.body,
+        organizationId: orgId
+      });
+      
+      if (!validation.success) {
+        return res.status(400).json({
+          message: 'Invalid feature data',
+          errors: validation.error.errors
+        });
+      }
+      
+      const feature = await storage.upsertOrganizationFeature(validation.data);
+      
+      console.log(`[FeatureToggles] Feature '${feature.featureKey}' ${feature.isEnabled ? 'enabled' : 'disabled'} for org ${orgId}`);
+      res.json(feature);
+    } catch (error: any) {
+      console.error('[FeatureToggles] Error upserting feature:', error);
+      
+      if (error.code === '23503') {  // Foreign key violation
+        return res.status(400).json({ message: 'Invalid organization ID' });
+      }
+      
+      res.status(500).json({ message: 'Failed to update feature toggle' });
+    }
+  });
+
+  // Delete a feature toggle (admin only)
+  app.delete('/api/admin/organizations/:orgId/features/:featureKey', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { orgId, featureKey } = req.params;
+      
+      // Verify organization exists
+      const org = await storage.getOrganization(orgId);
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+      
+      await storage.deleteOrganizationFeature(orgId, featureKey);
+      
+      console.log(`[FeatureToggles] Feature '${featureKey}' deleted for org ${orgId}`);
+      res.json({ message: 'Feature toggle deleted successfully' });
+    } catch (error) {
+      console.error('[FeatureToggles] Error deleting feature:', error);
+      res.status(500).json({ message: 'Failed to delete feature toggle' });
+    }
+  });
+
+  // Check if a feature is enabled (any authenticated user, uses current org)
+  app.get('/api/features/:featureKey', ...authWithImpersonation, async (req, res) => {
+    try {
+      const { featureKey } = req.params;
+      
+      const isEnabled = await req.storage.isFeatureEnabled(featureKey);
+      
+      res.json({ 
+        featureKey,
+        isEnabled,
+        organizationId: req.organizationId
+      });
+    } catch (error) {
+      console.error('[FeatureToggles] Error checking feature status:', error);
+      res.status(500).json({ message: 'Failed to check feature status' });
+    }
+  });
+
   // Admin User Management Routes
   app.get('/api/admin/users', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
