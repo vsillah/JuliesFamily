@@ -41,9 +41,18 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   
   // Fetch visible hero content filtered by persona + journey stage + passion tags
   // CRITICAL: Don't fetch until persona is determined to prevent flash
+  // CRITICAL: Use primitive values in queryKey to avoid infinite loop
   const { data: heroContent, isLoading: contentLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", { persona, funnelStage }],
+    queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", persona, funnelStage],
     enabled: !!currentOrg && !isPersonaLoading && !!persona,
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (persona) params.append('persona', persona);
+      if (funnelStage) params.append('funnelStage', funnelStage);
+      const res = await fetch(`/api/content/visible/hero?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch hero content');
+      return res.json();
+    },
   });
   
   // Select first hero content (already filtered by persona×journey matrix and ordered by passion tags)
