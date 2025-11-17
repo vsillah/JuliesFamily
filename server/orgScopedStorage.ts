@@ -310,6 +310,61 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   // Lead assignment operations (2 methods)
   'getLeadAssignment',
   'getLeadAssignments',
+  
+  // ===========================================
+  // PRIORITY 3: A/B TESTING & AUTOMATION (40 methods)
+  // ===========================================
+  
+  // A/B test variant operations (4 methods)
+  'createAbTestVariant',
+  'updateAbTestVariant',
+  'deleteAbTestVariant',
+  'createAbTestTargets',
+  'deleteAbTestTargets',
+  'getAbTestTargets',
+  
+  // Metric weight profiles (8 methods)
+  'createMetricWeightProfile',
+  'getMetricWeightProfile',
+  'getAllMetricWeightProfiles',
+  'getMetricWeightProfilesByContentType',
+  'updateMetricWeightProfile',
+  'deleteMetricWeightProfile',
+  'createMetricWeightProfileMetric',
+  'getMetricWeightProfileMetrics',
+  'deleteMetricWeightProfileMetric',
+  'deleteMetricWeightProfileMetricsByProfileId',
+  
+  // A/B test automation rules (9 methods)
+  'createAbTestAutomationRule',
+  'getAbTestAutomationRule',
+  'getAllAbTestAutomationRules',
+  'getActiveAbTestAutomationRules',
+  'updateAbTestAutomationRule',
+  'deleteAbTestAutomationRule',
+  'createAbTestAutomationRuleMetric',
+  'getAbTestAutomationRuleMetrics',
+  'updateAbTestAutomationRuleMetric',
+  'deleteAbTestAutomationRuleMetric',
+  
+  // A/B test performance & automation (10 methods)
+  'upsertAbTestPerformanceBaseline',
+  'getAbTestPerformanceBaselines',
+  'getLatestBaseline',
+  'createAbTestVariantAiGeneration',
+  'getAbTestVariantAiGeneration',
+  'getAllAbTestVariantAiGenerations',
+  'createAbTestAutomationRun',
+  'getAbTestAutomationRun',
+  'getAbTestAutomationRuns',
+  'updateAbTestAutomationRun',
+  'getAbTestSafetyLimits',
+  'upsertAbTestSafetyLimits',
+  
+  // A/B test query helpers (3 methods)
+  'getAutomationReadyTests',
+  'getCurrentBaselineConfiguration',
+  'getHistoricalTestResults',
 ]);
 
 /**
@@ -3233,6 +3288,732 @@ class OrgScopedImplementations {
       .from(leadAssignments)
       .where(and(...conditions))
       .orderBy(desc(leadAssignments.createdAt));
+  }
+
+  // ===========================================
+  // PRIORITY 3: A/B TESTING & AUTOMATION (40 methods)
+  // ===========================================
+
+  // ========================================
+  // A/B TEST VARIANT OPERATIONS (6 methods)
+  // ========================================
+
+  async createAbTestVariant(variantData: Parameters<IStorage['createAbTestVariant']>[0]) {
+    const { abTestVariants } = await import('@shared/schema');
+    const [variant] = await db
+      .insert(abTestVariants)
+      .values(withOrgId(variantData, this.organizationId))
+      .returning();
+    return variant;
+  }
+
+  async updateAbTestVariant(id: string, updates: Parameters<IStorage['updateAbTestVariant']>[1]) {
+    const { abTestVariants } = await import('@shared/schema');
+    const [variant] = await db
+      .update(abTestVariants)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(abTestVariants.id, id),
+        eq(abTestVariants.organizationId, this.organizationId)
+      ))
+      .returning();
+    return variant;
+  }
+
+  async deleteAbTestVariant(id: string) {
+    const { abTestVariants } = await import('@shared/schema');
+    await db
+      .delete(abTestVariants)
+      .where(and(
+        eq(abTestVariants.id, id),
+        eq(abTestVariants.organizationId, this.organizationId)
+      ));
+  }
+
+  async createAbTestTargets(testId: string, combinations: string[]) {
+    const { abTestTargets } = await import('@shared/schema');
+    
+    // Parse combinations like "student:awareness" into persona and funnelStage
+    const targets = combinations.map(combo => {
+      const [persona, funnelStage] = combo.split(':');
+      return withOrgId({
+        testId,
+        persona,
+        funnelStage,
+      }, this.organizationId);
+    });
+    
+    await db.insert(abTestTargets).values(targets);
+  }
+
+  async deleteAbTestTargets(testId: string) {
+    const { abTestTargets } = await import('@shared/schema');
+    await db
+      .delete(abTestTargets)
+      .where(and(
+        eq(abTestTargets.testId, testId),
+        eq(abTestTargets.organizationId, this.organizationId)
+      ));
+  }
+
+  async getAbTestTargets(testId: string) {
+    const { abTestTargets } = await import('@shared/schema');
+    const targets = await db
+      .select()
+      .from(abTestTargets)
+      .where(and(
+        eq(abTestTargets.testId, testId),
+        eq(abTestTargets.organizationId, this.organizationId)
+      ));
+    
+    return targets.map(t => ({ persona: t.persona, funnelStage: t.funnelStage }));
+  }
+
+  // ========================================
+  // METRIC WEIGHT PROFILES (10 methods)
+  // ========================================
+
+  async createMetricWeightProfile(profileData: Parameters<IStorage['createMetricWeightProfile']>[0]) {
+    const { metricWeightProfiles } = await import('@shared/schema');
+    const [profile] = await db
+      .insert(metricWeightProfiles)
+      .values(withOrgId(profileData, this.organizationId))
+      .returning();
+    return profile;
+  }
+
+  async getMetricWeightProfile(id: string) {
+    const { metricWeightProfiles } = await import('@shared/schema');
+    const [profile] = await db
+      .select()
+      .from(metricWeightProfiles)
+      .where(and(
+        eq(metricWeightProfiles.id, id),
+        eq(metricWeightProfiles.organizationId, this.organizationId)
+      ));
+    return profile;
+  }
+
+  async getAllMetricWeightProfiles() {
+    const { metricWeightProfiles } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(metricWeightProfiles)
+      .where(eq(metricWeightProfiles.organizationId, this.organizationId))
+      .orderBy(desc(metricWeightProfiles.createdAt));
+  }
+
+  async getMetricWeightProfilesByContentType(contentType: string) {
+    const { metricWeightProfiles } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(metricWeightProfiles)
+      .where(and(
+        eq(metricWeightProfiles.contentType, contentType),
+        eq(metricWeightProfiles.organizationId, this.organizationId),
+        eq(metricWeightProfiles.isActive, true)
+      ))
+      .orderBy(desc(metricWeightProfiles.createdAt));
+  }
+
+  async updateMetricWeightProfile(id: string, updates: Parameters<IStorage['updateMetricWeightProfile']>[1]) {
+    const { metricWeightProfiles } = await import('@shared/schema');
+    const [profile] = await db
+      .update(metricWeightProfiles)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(metricWeightProfiles.id, id),
+        eq(metricWeightProfiles.organizationId, this.organizationId)
+      ))
+      .returning();
+    return profile;
+  }
+
+  async deleteMetricWeightProfile(id: string) {
+    const { metricWeightProfiles } = await import('@shared/schema');
+    await db
+      .delete(metricWeightProfiles)
+      .where(and(
+        eq(metricWeightProfiles.id, id),
+        eq(metricWeightProfiles.organizationId, this.organizationId)
+      ));
+  }
+
+  async createMetricWeightProfileMetric(metricData: Parameters<IStorage['createMetricWeightProfileMetric']>[0]) {
+    const { metricWeightProfileMetrics } = await import('@shared/schema');
+    const [metric] = await db
+      .insert(metricWeightProfileMetrics)
+      .values(withOrgId(metricData, this.organizationId))
+      .returning();
+    return metric;
+  }
+
+  async getMetricWeightProfileMetrics(profileId: string) {
+    const { metricWeightProfileMetrics } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(metricWeightProfileMetrics)
+      .where(and(
+        eq(metricWeightProfileMetrics.profileId, profileId),
+        eq(metricWeightProfileMetrics.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(metricWeightProfileMetrics.weight));
+  }
+
+  async deleteMetricWeightProfileMetric(id: string) {
+    const { metricWeightProfileMetrics } = await import('@shared/schema');
+    await db
+      .delete(metricWeightProfileMetrics)
+      .where(and(
+        eq(metricWeightProfileMetrics.id, id),
+        eq(metricWeightProfileMetrics.organizationId, this.organizationId)
+      ));
+  }
+
+  async deleteMetricWeightProfileMetricsByProfileId(profileId: string) {
+    const { metricWeightProfileMetrics } = await import('@shared/schema');
+    await db
+      .delete(metricWeightProfileMetrics)
+      .where(and(
+        eq(metricWeightProfileMetrics.profileId, profileId),
+        eq(metricWeightProfileMetrics.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // A/B TEST AUTOMATION RULES (10 methods)
+  // ========================================
+
+  async createAbTestAutomationRule(ruleData: Parameters<IStorage['createAbTestAutomationRule']>[0]) {
+    const { abTestAutomationRules } = await import('@shared/schema');
+    const [rule] = await db
+      .insert(abTestAutomationRules)
+      .values(withOrgId(ruleData, this.organizationId))
+      .returning();
+    return rule;
+  }
+
+  async getAbTestAutomationRule(id: string) {
+    const { abTestAutomationRules } = await import('@shared/schema');
+    const [rule] = await db
+      .select()
+      .from(abTestAutomationRules)
+      .where(and(
+        eq(abTestAutomationRules.id, id),
+        eq(abTestAutomationRules.organizationId, this.organizationId)
+      ));
+    return rule;
+  }
+
+  async getAllAbTestAutomationRules() {
+    const { abTestAutomationRules } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(abTestAutomationRules)
+      .where(eq(abTestAutomationRules.organizationId, this.organizationId))
+      .orderBy(desc(abTestAutomationRules.createdAt));
+  }
+
+  async getActiveAbTestAutomationRules() {
+    const { abTestAutomationRules } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(abTestAutomationRules)
+      .where(and(
+        eq(abTestAutomationRules.organizationId, this.organizationId),
+        eq(abTestAutomationRules.isActive, true)
+      ))
+      .orderBy(desc(abTestAutomationRules.lastRunAt));
+  }
+
+  async updateAbTestAutomationRule(id: string, updates: Parameters<IStorage['updateAbTestAutomationRule']>[1]) {
+    const { abTestAutomationRules } = await import('@shared/schema');
+    const [rule] = await db
+      .update(abTestAutomationRules)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(abTestAutomationRules.id, id),
+        eq(abTestAutomationRules.organizationId, this.organizationId)
+      ))
+      .returning();
+    return rule;
+  }
+
+  async deleteAbTestAutomationRule(id: string) {
+    const { abTestAutomationRules } = await import('@shared/schema');
+    await db
+      .delete(abTestAutomationRules)
+      .where(and(
+        eq(abTestAutomationRules.id, id),
+        eq(abTestAutomationRules.organizationId, this.organizationId)
+      ));
+  }
+
+  async createAbTestAutomationRuleMetric(metricData: Parameters<IStorage['createAbTestAutomationRuleMetric']>[0]) {
+    const { abTestAutomationRuleMetrics } = await import('@shared/schema');
+    const [metric] = await db
+      .insert(abTestAutomationRuleMetrics)
+      .values(withOrgId(metricData, this.organizationId))
+      .returning();
+    return metric;
+  }
+
+  async getAbTestAutomationRuleMetrics(ruleId: string) {
+    const { abTestAutomationRuleMetrics } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(abTestAutomationRuleMetrics)
+      .where(and(
+        eq(abTestAutomationRuleMetrics.ruleId, ruleId),
+        eq(abTestAutomationRuleMetrics.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(abTestAutomationRuleMetrics.weight));
+  }
+
+  async updateAbTestAutomationRuleMetric(id: string, updates: Parameters<IStorage['updateAbTestAutomationRuleMetric']>[1]) {
+    const { abTestAutomationRuleMetrics } = await import('@shared/schema');
+    const [metric] = await db
+      .update(abTestAutomationRuleMetrics)
+      .set(updates)
+      .where(and(
+        eq(abTestAutomationRuleMetrics.id, id),
+        eq(abTestAutomationRuleMetrics.organizationId, this.organizationId)
+      ))
+      .returning();
+    return metric;
+  }
+
+  async deleteAbTestAutomationRuleMetric(id: string) {
+    const { abTestAutomationRuleMetrics } = await import('@shared/schema');
+    await db
+      .delete(abTestAutomationRuleMetrics)
+      .where(and(
+        eq(abTestAutomationRuleMetrics.id, id),
+        eq(abTestAutomationRuleMetrics.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // A/B TEST PERFORMANCE & AUTOMATION (12 methods)
+  // ========================================
+
+  async upsertAbTestPerformanceBaseline(baselineData: Parameters<IStorage['upsertAbTestPerformanceBaseline']>[0]) {
+    const { abTestPerformanceBaselines } = await import('@shared/schema');
+    const [baseline] = await db
+      .insert(abTestPerformanceBaselines)
+      .values(withOrgId(baselineData, this.organizationId))
+      .onConflictDoUpdate({
+        target: [
+          abTestPerformanceBaselines.contentType,
+          abTestPerformanceBaselines.contentItemId,
+          abTestPerformanceBaselines.persona,
+          abTestPerformanceBaselines.funnelStage,
+          abTestPerformanceBaselines.windowStart,
+        ],
+        set: {
+          windowEnd: sql`EXCLUDED.window_end`,
+          totalViews: sql`EXCLUDED.total_views`,
+          uniqueViews: sql`EXCLUDED.unique_views`,
+          totalEvents: sql`EXCLUDED.total_events`,
+          compositeScore: sql`EXCLUDED.composite_score`,
+          metricBreakdown: sql`EXCLUDED.metric_breakdown`,
+          sampleSize: sql`EXCLUDED.sample_size`,
+          variance: sql`EXCLUDED.variance`,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return baseline;
+  }
+
+  async getAbTestPerformanceBaselines(filters: Parameters<IStorage['getAbTestPerformanceBaselines']>[0]) {
+    const { abTestPerformanceBaselines } = await import('@shared/schema');
+    const conditions = [eq(abTestPerformanceBaselines.organizationId, this.organizationId)];
+    
+    if (filters.contentType) {
+      conditions.push(eq(abTestPerformanceBaselines.contentType, filters.contentType));
+    }
+    
+    if (filters.contentItemId) {
+      conditions.push(eq(abTestPerformanceBaselines.contentItemId, filters.contentItemId));
+    }
+    
+    if (filters.persona) {
+      conditions.push(eq(abTestPerformanceBaselines.persona, filters.persona));
+    }
+    
+    if (filters.funnelStage) {
+      conditions.push(eq(abTestPerformanceBaselines.funnelStage, filters.funnelStage));
+    }
+    
+    return await db
+      .select()
+      .from(abTestPerformanceBaselines)
+      .where(and(...conditions))
+      .orderBy(desc(abTestPerformanceBaselines.windowEnd));
+  }
+
+  async getLatestBaseline(contentType: string, persona?: string | null, funnelStage?: string | null) {
+    const { abTestPerformanceBaselines } = await import('@shared/schema');
+    const conditions = [
+      eq(abTestPerformanceBaselines.organizationId, this.organizationId),
+      eq(abTestPerformanceBaselines.contentType, contentType),
+    ];
+    
+    if (persona !== undefined) {
+      if (persona === null) {
+        conditions.push(sql`${abTestPerformanceBaselines.persona} IS NULL`);
+      } else {
+        conditions.push(eq(abTestPerformanceBaselines.persona, persona));
+      }
+    }
+    
+    if (funnelStage !== undefined) {
+      if (funnelStage === null) {
+        conditions.push(sql`${abTestPerformanceBaselines.funnelStage} IS NULL`);
+      } else {
+        conditions.push(eq(abTestPerformanceBaselines.funnelStage, funnelStage));
+      }
+    }
+    
+    const [baseline] = await db
+      .select()
+      .from(abTestPerformanceBaselines)
+      .where(and(...conditions))
+      .orderBy(desc(abTestPerformanceBaselines.windowEnd))
+      .limit(1);
+    
+    return baseline;
+  }
+
+  async createAbTestVariantAiGeneration(generationData: Parameters<IStorage['createAbTestVariantAiGeneration']>[0]) {
+    const { abTestVariantAiGenerations } = await import('@shared/schema');
+    const [generation] = await db
+      .insert(abTestVariantAiGenerations)
+      .values(withOrgId(generationData, this.organizationId))
+      .returning();
+    return generation;
+  }
+
+  async getAbTestVariantAiGeneration(variantId: string) {
+    const { abTestVariantAiGenerations } = await import('@shared/schema');
+    const [generation] = await db
+      .select()
+      .from(abTestVariantAiGenerations)
+      .where(and(
+        eq(abTestVariantAiGenerations.variantId, variantId),
+        eq(abTestVariantAiGenerations.organizationId, this.organizationId)
+      ));
+    return generation;
+  }
+
+  async getAllAbTestVariantAiGenerations(filters?: Parameters<IStorage['getAllAbTestVariantAiGenerations']>[0]) {
+    const { abTestVariantAiGenerations } = await import('@shared/schema');
+    const conditions = [eq(abTestVariantAiGenerations.organizationId, this.organizationId)];
+    
+    if (filters?.status) {
+      conditions.push(eq(abTestVariantAiGenerations.generationStatus, filters.status));
+    }
+    
+    if (filters?.provider) {
+      conditions.push(eq(abTestVariantAiGenerations.aiProvider, filters.provider));
+    }
+    
+    return await db
+      .select()
+      .from(abTestVariantAiGenerations)
+      .where(and(...conditions))
+      .orderBy(desc(abTestVariantAiGenerations.createdAt));
+  }
+
+  async createAbTestAutomationRun(runData: Parameters<IStorage['createAbTestAutomationRun']>[0]) {
+    const { abTestAutomationRuns } = await import('@shared/schema');
+    const [run] = await db
+      .insert(abTestAutomationRuns)
+      .values(withOrgId(runData, this.organizationId))
+      .returning();
+    return run;
+  }
+
+  async getAbTestAutomationRun(id: string) {
+    const { abTestAutomationRuns } = await import('@shared/schema');
+    const [run] = await db
+      .select()
+      .from(abTestAutomationRuns)
+      .where(and(
+        eq(abTestAutomationRuns.id, id),
+        eq(abTestAutomationRuns.organizationId, this.organizationId)
+      ));
+    return run;
+  }
+
+  async getAbTestAutomationRuns(filters: Parameters<IStorage['getAbTestAutomationRuns']>[0]) {
+    const { abTestAutomationRuns } = await import('@shared/schema');
+    const conditions = [eq(abTestAutomationRuns.organizationId, this.organizationId)];
+    
+    if (filters.ruleId) {
+      conditions.push(eq(abTestAutomationRuns.ruleId, filters.ruleId));
+    }
+    
+    if (filters.status) {
+      conditions.push(eq(abTestAutomationRuns.status, filters.status));
+    }
+    
+    let query = db
+      .select()
+      .from(abTestAutomationRuns)
+      .where(and(...conditions))
+      .orderBy(desc(abTestAutomationRuns.createdAt));
+    
+    if (filters.limit) {
+      query = query.limit(filters.limit);
+    }
+    
+    return await query;
+  }
+
+  async updateAbTestAutomationRun(id: string, updates: Parameters<IStorage['updateAbTestAutomationRun']>[1]) {
+    const { abTestAutomationRuns } = await import('@shared/schema');
+    const [run] = await db
+      .update(abTestAutomationRuns)
+      .set(updates)
+      .where(and(
+        eq(abTestAutomationRuns.id, id),
+        eq(abTestAutomationRuns.organizationId, this.organizationId)
+      ))
+      .returning();
+    return run;
+  }
+
+  async getAbTestSafetyLimits() {
+    const { abTestSafetyLimits } = await import('@shared/schema');
+    const [limits] = await db
+      .select()
+      .from(abTestSafetyLimits)
+      .where(and(
+        eq(abTestSafetyLimits.organizationId, this.organizationId),
+        eq(abTestSafetyLimits.scope, 'global')
+      ));
+    return limits;
+  }
+
+  async upsertAbTestSafetyLimits(limitsData: Parameters<IStorage['upsertAbTestSafetyLimits']>[0]) {
+    const { abTestSafetyLimits } = await import('@shared/schema');
+    const [limits] = await db
+      .insert(abTestSafetyLimits)
+      .values(withOrgId({ ...limitsData, scope: 'global' }, this.organizationId))
+      .onConflictDoUpdate({
+        target: [abTestSafetyLimits.scope],
+        set: {
+          maxConcurrentAutomatedTests: sql`EXCLUDED.max_concurrent_automated_tests`,
+          maxTestsPerDay: sql`EXCLUDED.max_tests_per_day`,
+          maxTestsPerPersona: sql`EXCLUDED.max_tests_per_persona`,
+          maxTrafficAllocation: sql`EXCLUDED.max_traffic_allocation`,
+          degradationThreshold: sql`EXCLUDED.degradation_threshold`,
+          degradationCheckWindowMinutes: sql`EXCLUDED.degradation_check_window_minutes`,
+          globalCooldownHours: sql`EXCLUDED.global_cooldown_hours`,
+          perContentCooldownDays: sql`EXCLUDED.per_content_cooldown_days`,
+          automationEnabled: sql`EXCLUDED.automation_enabled`,
+          requireAdminApproval: sql`EXCLUDED.require_admin_approval`,
+          notifyOnTestCreation: sql`EXCLUDED.notify_on_test_creation`,
+          notifyOnWinnerPromotion: sql`EXCLUDED.notify_on_winner_promotion`,
+          notifyOnFailure: sql`EXCLUDED.notify_on_failure`,
+          updatedAt: new Date(),
+          updatedBy: sql`EXCLUDED.updated_by`,
+        },
+      })
+      .returning();
+    return limits;
+  }
+
+  // ========================================
+  // A/B TEST QUERY HELPERS (3 methods)
+  // ========================================
+
+  async getAutomationReadyTests(filters: Parameters<IStorage['getAutomationReadyTests']>[0]) {
+    const { abTests, abTestVariants, abTestEvents } = await import('@shared/schema');
+    
+    // Build conditions for active automated tests
+    const conditions = [
+      eq(abTests.organizationId, this.organizationId),
+      eq(abTests.status, 'active'),
+      eq(abTests.source, 'automated'),
+    ];
+    
+    if (filters.contentType) {
+      conditions.push(eq(abTests.type, filters.contentType));
+    }
+    
+    if (filters.persona) {
+      // Would need to join with abTestTargets to filter by persona
+      // For now, include all tests - can be filtered in post-processing
+    }
+    
+    if (filters.funnelStage) {
+      // Same as persona - would need join with abTestTargets
+    }
+    
+    // Get tests with their variants and event counts
+    const tests = await db
+      .select({
+        test: abTests,
+        variantCount: sql<number>`COUNT(DISTINCT ${abTestVariants.id})`,
+        totalEvents: sql<number>`COUNT(${abTestEvents.id})`,
+      })
+      .from(abTests)
+      .leftJoin(abTestVariants, and(
+        eq(abTestVariants.testId, abTests.id),
+        eq(abTestVariants.organizationId, this.organizationId)
+      ))
+      .leftJoin(abTestEvents, and(
+        eq(abTestEvents.testId, abTests.id),
+        eq(abTestEvents.organizationId, this.organizationId)
+      ))
+      .where(and(...conditions))
+      .groupBy(abTests.id)
+      .having(sql`COUNT(DISTINCT ${abTestVariants.id}) > 0`);
+    
+    return tests.map(t => ({
+      ...t.test,
+      variantCount: Number(t.variantCount),
+      totalEvents: Number(t.totalEvents),
+    })) as any;
+  }
+
+  async getCurrentBaselineConfiguration(persona: string, funnelStage: string, testType: string) {
+    const { abTests, abTestVariants, contentItems } = await import('@shared/schema');
+    const now = new Date();
+    
+    // Find active control variant for this persona×journey×type combination
+    const [activeControl] = await db
+      .select({
+        test: abTests,
+        variant: abTestVariants,
+        contentItem: contentItems,
+      })
+      .from(abTests)
+      .innerJoin(abTestVariants, and(
+        eq(abTestVariants.testId, abTests.id),
+        eq(abTestVariants.organizationId, this.organizationId),
+        eq(abTestVariants.isControl, true)
+      ))
+      .leftJoin(contentItems, and(
+        eq(contentItems.id, abTestVariants.contentItemId),
+        eq(contentItems.organizationId, this.organizationId)
+      ))
+      .where(and(
+        eq(abTests.organizationId, this.organizationId),
+        eq(abTests.type, testType),
+        eq(abTests.status, 'active'),
+        or(
+          sql`${abTests.startDate} IS NULL`,
+          sql`${abTests.startDate} <= ${now}`
+        ),
+        or(
+          sql`${abTests.endDate} IS NULL`,
+          sql`${abTests.endDate} >= ${now}`
+        )
+      ))
+      .limit(1);
+    
+    if (activeControl) {
+      return {
+        source: 'active_test_control',
+        testId: activeControl.test.id,
+        testName: activeControl.test.name,
+        variantId: activeControl.variant.id,
+        variantName: activeControl.variant.name,
+        configuration: activeControl.variant.configuration,
+        contentItem: activeControl.contentItem,
+      };
+    }
+    
+    // Fall back to most recent baseline performance data
+    const baseline = await this.getLatestBaseline(testType, persona, funnelStage);
+    
+    if (baseline) {
+      return {
+        source: 'baseline_performance',
+        baselineId: baseline.id,
+        contentItemId: baseline.contentItemId,
+        compositeScore: baseline.compositeScore,
+        metricBreakdown: baseline.metricBreakdown,
+        windowStart: baseline.windowStart,
+        windowEnd: baseline.windowEnd,
+      };
+    }
+    
+    return {
+      source: 'no_baseline',
+      message: 'No active test or baseline data found for this combination',
+    };
+  }
+
+  async getHistoricalTestResults(persona: string, funnelStage: string, testType: string) {
+    const { abTests, abTestVariants, abTestEvents } = await import('@shared/schema');
+    
+    // Get completed tests for this persona×journey×type with their results
+    const results = await db
+      .select({
+        testId: abTests.id,
+        testName: abTests.name,
+        status: abTests.status,
+        startDate: abTests.startDate,
+        endDate: abTests.endDate,
+        winnerVariantId: abTests.winnerVariantId,
+        autoPromotedAt: abTests.autoPromotedAt,
+        variantId: abTestVariants.id,
+        variantName: abTestVariants.name,
+        isControl: abTestVariants.isControl,
+        configuration: abTestVariants.configuration,
+        eventCount: sql<number>`COUNT(${abTestEvents.id})`,
+        uniqueSessions: sql<number>`COUNT(DISTINCT ${abTestEvents.sessionId})`,
+      })
+      .from(abTests)
+      .innerJoin(abTestVariants, and(
+        eq(abTestVariants.testId, abTests.id),
+        eq(abTestVariants.organizationId, this.organizationId)
+      ))
+      .leftJoin(abTestEvents, and(
+        eq(abTestEvents.variantId, abTestVariants.id),
+        eq(abTestEvents.organizationId, this.organizationId)
+      ))
+      .where(and(
+        eq(abTests.organizationId, this.organizationId),
+        eq(abTests.type, testType),
+        eq(abTests.status, 'completed')
+      ))
+      .groupBy(abTests.id, abTestVariants.id)
+      .orderBy(desc(abTests.endDate));
+    
+    // Group by test
+    const testMap = new Map();
+    
+    for (const row of results) {
+      if (!testMap.has(row.testId)) {
+        testMap.set(row.testId, {
+          testId: row.testId,
+          testName: row.testName,
+          status: row.status,
+          startDate: row.startDate,
+          endDate: row.endDate,
+          winnerVariantId: row.winnerVariantId,
+          autoPromotedAt: row.autoPromotedAt,
+          variants: [],
+        });
+      }
+      
+      testMap.get(row.testId).variants.push({
+        variantId: row.variantId,
+        variantName: row.variantName,
+        isControl: row.isControl,
+        configuration: row.configuration,
+        eventCount: Number(row.eventCount),
+        uniqueSessions: Number(row.uniqueSessions),
+      });
+    }
+    
+    return Array.from(testMap.values());
   }
 }
 
