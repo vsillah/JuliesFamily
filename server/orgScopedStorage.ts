@@ -257,6 +257,59 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getHormoziSmsTemplate',
   'markOutreachEmailOpened',
   'markOutreachEmailClicked',
+  
+  // ===========================================
+  // PRIORITY 2: CRM OPERATIONS (40 methods)
+  // ===========================================
+  
+  // Lead magnet operations (6 methods)
+  'createLeadMagnet',
+  'getAllLeadMagnets',
+  'getLeadMagnetsByPersona',
+  'updateLeadMagnet',
+  'deleteLeadMagnet',
+  'getLeadInteractions',
+  
+  // Pipeline operations (5 methods)
+  'getPipelineStages',
+  'getPipelineStage',
+  'createPipelineHistory',
+  'getPipelineHistory',
+  'getLeadById',
+  
+  // Task operations (4 methods)
+  'createTask',
+  'getTasks',
+  'updateTask',
+  'deleteTask',
+  
+  // ICP criteria operations (7 methods)
+  'createIcpCriteria',
+  'getIcpCriteria',
+  'getAllIcpCriteria',
+  'getActiveIcpCriteria',
+  'getDefaultIcpCriteria',
+  'updateIcpCriteria',
+  'deleteIcpCriteria',
+  
+  // Lead sourcing operations (4 methods)
+  'getLeadsForQualification',
+  'getQualifiedLeads',
+  'getLeadsForOutreach',
+  'bulkCreateLeads',
+  
+  // Unsubscribe management operations (7 methods)
+  'createEmailUnsubscribe',
+  'getEmailUnsubscribe',
+  'getSmsUnsubscribe',
+  'getAllEmailUnsubscribes',
+  'isEmailUnsubscribed',
+  'isSmsUnsubscribed',
+  'removeUnsubscribe',
+  
+  // Lead assignment operations (2 methods)
+  'getLeadAssignment',
+  'getLeadAssignments',
 ]);
 
 /**
@@ -2721,6 +2774,465 @@ class OrgScopedImplementations {
       .where(withOrgFilter(outreachEmails, this.organizationId, eq(outreachEmails.id, id)))
       .returning();
     return updated;
+  }
+
+  // ===========================================
+  // PRIORITY 2: CRM OPERATIONS (35 methods)
+  // ===========================================
+
+  // ========================================
+  // LEAD MAGNET OPERATIONS (6 methods)
+  // ========================================
+
+  async createLeadMagnet(magnetData: Parameters<IStorage['createLeadMagnet']>[0]) {
+    const { leadMagnets } = await import('@shared/schema');
+    const [magnet] = await db
+      .insert(leadMagnets)
+      .values(withOrgId(magnetData, this.organizationId))
+      .returning();
+    return magnet;
+  }
+
+  async getAllLeadMagnets() {
+    const { leadMagnets } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(leadMagnets)
+      .where(eq(leadMagnets.organizationId, this.organizationId))
+      .orderBy(desc(leadMagnets.createdAt));
+  }
+
+  async getLeadMagnetsByPersona(persona: string) {
+    const { leadMagnets } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(leadMagnets)
+      .where(and(
+        eq(leadMagnets.persona, persona),
+        eq(leadMagnets.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(leadMagnets.createdAt));
+  }
+
+  async updateLeadMagnet(id: string, updates: Parameters<IStorage['updateLeadMagnet']>[1]) {
+    const { leadMagnets } = await import('@shared/schema');
+    const [magnet] = await db
+      .update(leadMagnets)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(leadMagnets.id, id),
+        eq(leadMagnets.organizationId, this.organizationId)
+      ))
+      .returning();
+    return magnet;
+  }
+
+  async deleteLeadMagnet(id: string) {
+    const { leadMagnets } = await import('@shared/schema');
+    await db
+      .delete(leadMagnets)
+      .where(and(
+        eq(leadMagnets.id, id),
+        eq(leadMagnets.organizationId, this.organizationId)
+      ));
+  }
+
+  async getLeadInteractions(leadId: string, limit?: number) {
+    const { interactions } = await import('@shared/schema');
+    let query = db
+      .select()
+      .from(interactions)
+      .where(and(
+        eq(interactions.leadId, leadId),
+        eq(interactions.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(interactions.createdAt));
+    
+    if (limit) {
+      query = query.limit(limit) as any;
+    }
+    
+    return await query;
+  }
+
+  // ========================================
+  // PIPELINE OPERATIONS (5 methods)
+  // ========================================
+
+  async getPipelineStages() {
+    const { pipelineStages } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(pipelineStages)
+      .where(and(
+        eq(pipelineStages.isActive, true),
+        eq(pipelineStages.organizationId, this.organizationId)
+      ))
+      .orderBy(pipelineStages.position);
+  }
+
+  async getPipelineStage(id: string) {
+    const { pipelineStages } = await import('@shared/schema');
+    const [stage] = await db
+      .select()
+      .from(pipelineStages)
+      .where(and(
+        eq(pipelineStages.id, id),
+        eq(pipelineStages.organizationId, this.organizationId)
+      ));
+    return stage;
+  }
+
+  async createPipelineHistory(historyData: Parameters<IStorage['createPipelineHistory']>[0]) {
+    const { pipelineHistory } = await import('@shared/schema');
+    const [history] = await db
+      .insert(pipelineHistory)
+      .values(withOrgId(historyData, this.organizationId))
+      .returning();
+    return history;
+  }
+
+  async getPipelineHistory(leadId: string) {
+    const { pipelineHistory } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(pipelineHistory)
+      .where(and(
+        eq(pipelineHistory.leadId, leadId),
+        eq(pipelineHistory.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(pipelineHistory.createdAt));
+  }
+
+  async getLeadById(id: string) {
+    const { leads } = await import('@shared/schema');
+    const [lead] = await db
+      .select()
+      .from(leads)
+      .where(and(
+        eq(leads.id, id),
+        eq(leads.organizationId, this.organizationId)
+      ));
+    return lead;
+  }
+
+  // ========================================
+  // TASK OPERATIONS (4 methods)
+  // ========================================
+
+  async createTask(taskData: Parameters<IStorage['createTask']>[0]) {
+    const { tasks } = await import('@shared/schema');
+    const [task] = await db
+      .insert(tasks)
+      .values(withOrgId(taskData, this.organizationId))
+      .returning();
+    return task;
+  }
+
+  async getTasks(filters: Parameters<IStorage['getTasks']>[0]) {
+    const { tasks } = await import('@shared/schema');
+    const conditions = [eq(tasks.organizationId, this.organizationId)];
+    
+    if (filters.leadId) {
+      conditions.push(eq(tasks.leadId, filters.leadId));
+    }
+    
+    if (filters.assignedTo) {
+      conditions.push(eq(tasks.assignedTo, filters.assignedTo));
+    }
+    
+    if (filters.status) {
+      conditions.push(eq(tasks.status, filters.status));
+    }
+    
+    return await db
+      .select()
+      .from(tasks)
+      .where(and(...conditions))
+      .orderBy(desc(tasks.createdAt));
+  }
+
+  async updateTask(id: string, updates: Parameters<IStorage['updateTask']>[1]) {
+    const { tasks } = await import('@shared/schema');
+    const [task] = await db
+      .update(tasks)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(tasks.id, id),
+        eq(tasks.organizationId, this.organizationId)
+      ))
+      .returning();
+    return task;
+  }
+
+  async deleteTask(id: string) {
+    const { tasks } = await import('@shared/schema');
+    await db
+      .delete(tasks)
+      .where(and(
+        eq(tasks.id, id),
+        eq(tasks.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // ICP CRITERIA OPERATIONS (7 methods)
+  // ========================================
+
+  async createIcpCriteria(criteriaData: Parameters<IStorage['createIcpCriteria']>[0]) {
+    const { icpCriteria } = await import('@shared/schema');
+    const [criteria] = await db
+      .insert(icpCriteria)
+      .values(withOrgId(criteriaData, this.organizationId))
+      .returning();
+    return criteria;
+  }
+
+  async getIcpCriteria(id: string) {
+    const { icpCriteria } = await import('@shared/schema');
+    const [criteria] = await db
+      .select()
+      .from(icpCriteria)
+      .where(and(
+        eq(icpCriteria.id, id),
+        eq(icpCriteria.organizationId, this.organizationId)
+      ));
+    return criteria;
+  }
+
+  async getAllIcpCriteria() {
+    const { icpCriteria } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(icpCriteria)
+      .where(eq(icpCriteria.organizationId, this.organizationId))
+      .orderBy(desc(icpCriteria.createdAt));
+  }
+
+  async getActiveIcpCriteria() {
+    const { icpCriteria } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(icpCriteria)
+      .where(and(
+        eq(icpCriteria.isActive, true),
+        eq(icpCriteria.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(icpCriteria.createdAt));
+  }
+
+  async getDefaultIcpCriteria() {
+    const { icpCriteria } = await import('@shared/schema');
+    const [criteria] = await db
+      .select()
+      .from(icpCriteria)
+      .where(and(
+        eq(icpCriteria.isDefault, true),
+        eq(icpCriteria.organizationId, this.organizationId)
+      ))
+      .limit(1);
+    return criteria;
+  }
+
+  async updateIcpCriteria(id: string, updates: Parameters<IStorage['updateIcpCriteria']>[1]) {
+    const { icpCriteria } = await import('@shared/schema');
+    const [criteria] = await db
+      .update(icpCriteria)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(icpCriteria.id, id),
+        eq(icpCriteria.organizationId, this.organizationId)
+      ))
+      .returning();
+    return criteria;
+  }
+
+  async deleteIcpCriteria(id: string) {
+    const { icpCriteria } = await import('@shared/schema');
+    await db
+      .delete(icpCriteria)
+      .where(and(
+        eq(icpCriteria.id, id),
+        eq(icpCriteria.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // LEAD SOURCING OPERATIONS (4 methods)
+  // ========================================
+
+  async getLeadsForQualification(limit: number = 50) {
+    const { leads } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(leads)
+      .where(and(
+        eq(leads.qualificationStatus, 'pending'),
+        eq(leads.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(leads.createdAt))
+      .limit(limit);
+  }
+
+  async getQualifiedLeads(minScore: number = 70) {
+    const { leads } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(leads)
+      .where(and(
+        eq(leads.qualificationStatus, 'qualified'),
+        sql`${leads.qualificationScore} >= ${minScore}`,
+        eq(leads.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(leads.qualificationScore), desc(leads.createdAt));
+  }
+
+  async getLeadsForOutreach(limit: number = 50) {
+    const { leads } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(leads)
+      .where(and(
+        eq(leads.qualificationStatus, 'qualified'),
+        or(
+          eq(leads.outreachStatus, 'pending'),
+          eq(leads.outreachStatus, 'draft_ready')
+        ),
+        eq(leads.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(leads.qualificationScore), desc(leads.createdAt))
+      .limit(limit);
+  }
+
+  async bulkCreateLeads(leadsData: Parameters<IStorage['bulkCreateLeads']>[0]) {
+    const { leads } = await import('@shared/schema');
+    const leadsWithOrg = leadsData.map(lead => withOrgId(lead, this.organizationId));
+    const created = await db.insert(leads).values(leadsWithOrg).returning();
+    return created;
+  }
+
+  // ========================================
+  // UNSUBSCRIBE MANAGEMENT (7 methods)
+  // ========================================
+
+  async createEmailUnsubscribe(unsubscribeData: Parameters<IStorage['createEmailUnsubscribe']>[0]) {
+    return this.baseStorage.createEmailUnsubscribe(withOrgId(unsubscribeData, this.organizationId));
+  }
+
+  async getEmailUnsubscribe(email: string) {
+    const { emailUnsubscribes } = await import('@shared/schema');
+    const [unsubscribe] = await db
+      .select()
+      .from(emailUnsubscribes)
+      .where(and(
+        eq(emailUnsubscribes.email, email),
+        eq(emailUnsubscribes.isActive, true),
+        or(
+          eq(emailUnsubscribes.channel, 'email'),
+          eq(emailUnsubscribes.channel, 'all')
+        ),
+        eq(emailUnsubscribes.organizationId, this.organizationId)
+      ));
+    return unsubscribe;
+  }
+
+  async getSmsUnsubscribe(phone: string) {
+    const { emailUnsubscribes } = await import('@shared/schema');
+    const [unsubscribe] = await db
+      .select()
+      .from(emailUnsubscribes)
+      .where(and(
+        eq(emailUnsubscribes.phone, phone),
+        eq(emailUnsubscribes.isActive, true),
+        or(
+          eq(emailUnsubscribes.channel, 'sms'),
+          eq(emailUnsubscribes.channel, 'all')
+        ),
+        eq(emailUnsubscribes.organizationId, this.organizationId)
+      ));
+    return unsubscribe;
+  }
+
+  async getAllEmailUnsubscribes(includeInactive: boolean = false) {
+    const { emailUnsubscribes } = await import('@shared/schema');
+    const conditions = [eq(emailUnsubscribes.organizationId, this.organizationId)];
+    
+    if (!includeInactive) {
+      conditions.push(eq(emailUnsubscribes.isActive, true));
+    }
+    
+    return await db
+      .select()
+      .from(emailUnsubscribes)
+      .where(and(...conditions))
+      .orderBy(desc(emailUnsubscribes.unsubscribedAt));
+  }
+
+  async isEmailUnsubscribed(email: string) {
+    const unsubscribe = await this.getEmailUnsubscribe(email);
+    return !!unsubscribe;
+  }
+
+  async isSmsUnsubscribed(phone: string) {
+    const unsubscribe = await this.getSmsUnsubscribe(phone);
+    return !!unsubscribe;
+  }
+
+  async removeUnsubscribe(id: string) {
+    const { emailUnsubscribes } = await import('@shared/schema');
+    const [result] = await db
+      .update(emailUnsubscribes)
+      .set({ 
+        isActive: false, 
+        resubscribedAt: new Date() 
+      })
+      .where(and(
+        eq(emailUnsubscribes.id, id),
+        eq(emailUnsubscribes.isActive, true),
+        eq(emailUnsubscribes.organizationId, this.organizationId)
+      ))
+      .returning();
+    
+    if (!result) {
+      throw new Error('Unsubscribe record not found or already inactive');
+    }
+  }
+
+  // ========================================
+  // LEAD ASSIGNMENT OPERATIONS (2 methods)
+  // ========================================
+
+  async getLeadAssignment(leadId: string) {
+    const { leadAssignments } = await import('@shared/schema');
+    const [assignment] = await db
+      .select()
+      .from(leadAssignments)
+      .where(and(
+        eq(leadAssignments.leadId, leadId),
+        eq(leadAssignments.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(leadAssignments.createdAt))
+      .limit(1);
+    return assignment;
+  }
+
+  async getLeadAssignments(filters: Parameters<IStorage['getLeadAssignments']>[0]) {
+    const { leadAssignments } = await import('@shared/schema');
+    const conditions = [eq(leadAssignments.organizationId, this.organizationId)];
+    
+    if (filters.assignedTo) {
+      conditions.push(eq(leadAssignments.assignedTo, filters.assignedTo));
+    }
+    
+    if (filters.leadId) {
+      conditions.push(eq(leadAssignments.leadId, filters.leadId));
+    }
+    
+    return await db
+      .select()
+      .from(leadAssignments)
+      .where(and(...conditions))
+      .orderBy(desc(leadAssignments.createdAt));
   }
 }
 
