@@ -388,6 +388,9 @@ class OrgScopedImplementations {
     funnelStage?: string | null,
     userPassions?: string[] | null
   ) {
+    // DEBUG: Verify org-scoped implementation is being called
+    console.log(`[OrgScopedStorage.getVisibleContentItems] CALLED with org=${this.organizationId}, type=${type}, persona=${persona}, funnel=${funnelStage}`);
+    
     const { contentItems, contentVisibility } = await import('@shared/schema');
     
     // Build join conditions - only add persona/funnelStage filters when they're provided
@@ -417,7 +420,27 @@ class OrgScopedImplementations {
       );
     }
     
-    let query = db
+    // Build WHERE clause conditions - must include ALL filters in a single and() call
+    // because Drizzle's .where() replaces previous .where() calls instead of ANDing them!
+    const whereConditions = [
+      eq(contentItems.type, type),
+      eq(contentItems.isActive, true),
+      eq(contentVisibility.isVisible, true),
+      eq(contentItems.organizationId, this.organizationId), // CRITICAL ORG SCOPING
+      eq(contentVisibility.organizationId, this.organizationId) // CRITICAL ORG SCOPING FOR VISIBILITY
+    ];
+    
+    // Add passion filtering if provided
+    if (userPassions && userPassions.length > 0) {
+      whereConditions.push(
+        or(
+          sql`${contentItems.passionTags} IS NULL`,
+          sql`${contentItems.passionTags} && ARRAY[${sql.join(userPassions.map(p => sql`${p}`), sql`, `)}]::text[]`
+        )
+      );
+    }
+    
+    const query = db
       .selectDistinctOn([contentItems.id], {
         id: contentItems.id,
         type: contentItems.type,
@@ -437,32 +460,21 @@ class OrgScopedImplementations {
         contentVisibility,
         and(...joinConditions)
       )
-      .where(
-        and(
-          eq(contentItems.type, type),
-          eq(contentItems.isActive, true),
-          eq(contentVisibility.isVisible, true),
-          eq(contentItems.organizationId, this.organizationId), // ORG SCOPING
-          eq(contentVisibility.organizationId, this.organizationId) // ORG SCOPING FOR VISIBILITY
-        )
-      )
+      .where(and(...whereConditions)) // Single .where() call with all conditions
       .orderBy(contentItems.id, sql<number>`COALESCE(${contentVisibility.order}, ${contentItems.order})`);
     
-    // Add passion filtering if provided
-    if (userPassions && userPassions.length > 0) {
-      query = query.where(
-        or(
-          sql`${contentItems.passionTags} IS NULL`,
-          sql`${contentItems.passionTags} && ARRAY[${sql.join(userPassions.map(p => sql`${p}`), sql`, `)}]::text[]`
-        )
-      ) as any;
-    }
-    
     const results = await query;
+    
+    // DEBUG: Log query results
+    console.log(`[OrgScopedStorage.getVisibleContentItems] Query returned ${results.length} items for org=${this.organizationId}`);
+    if (results.length > 0 && type === 'hero') {
+      console.log(`[OrgScopedStorage.getVisibleContentItems] First hero title: "${results[0].title}"`);
+    }
     
     // For hero content: if no persona-specific results and a specific persona was requested,
     // fall back to the default hero (persona='default')
     if (type === 'hero' && results.length === 0 && persona && persona !== 'default') {
+      console.log(`[OrgScopedStorage.getVisibleContentItems] No results for persona=${persona}, falling back to default`);
       return await this.getVisibleContentItems(type, 'default', funnelStage, userPassions);
     }
     

@@ -1747,6 +1747,10 @@ export class DatabaseStorage implements IStorage {
     funnelStage: string | null | undefined,
     userPassions: string[] | null | undefined
   ) {
+    // CRITICAL TENANT ISOLATION: Get current organizationId from this instance
+    // This enforces tenant boundaries when called through org-scoped storage
+    const currentOrgId = (this as any).organizationId;
+    
     // Build join conditions - only add persona/funnelStage filters when they're provided
     const joinConditions = [eq(contentVisibility.contentItemId, contentItems.id)];
     
@@ -1798,7 +1802,9 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(contentItems.type, type),
           eq(contentItems.isActive, true),
-          eq(contentVisibility.isVisible, true)
+          eq(contentVisibility.isVisible, true),
+          // CRITICAL: Explicitly filter by organizationId to prevent tenant isolation breach
+          currentOrgId ? eq(contentItems.organizationId, currentOrgId) : sql`1=1`
         )
       );
 
