@@ -64,6 +64,7 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getActiveAbTests',
   'getAbTest',
   'createAbTestAssignment',
+  'updateAbTestAssignment',
   'getAssignmentPersistent',
   'getAbTestVariants',
   'trackEvent',
@@ -182,6 +183,13 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   
   // Email sequence schedule operations
   'getSchedulesDueForExecution',
+  
+  // Impersonation session operations
+  'createImpersonationSession',
+  'getImpersonationSessions',
+  'endImpersonationSession',
+  'getCurrentlyImpersonatedUser',
+  'hasActiveImpersonation',
 ]);
 
 /**
@@ -583,6 +591,20 @@ class OrgScopedImplementations {
         ...assignmentData,
         organizationId: this.organizationId, // ORG SCOPING
       })
+      .returning();
+    return assignment;
+  }
+
+  // Org-scoped A/B test assignment update
+  async updateAbTestAssignment(id: string, updates: Parameters<IStorage['updateAbTestAssignment']>[1]) {
+    const { abTestAssignments } = await import('@shared/schema');
+    const [assignment] = await db
+      .update(abTestAssignments)
+      .set(updates)
+      .where(and(
+        eq(abTestAssignments.id, id),
+        eq(abTestAssignments.organizationId, this.organizationId) // ORG SCOPING
+      ))
       .returning();
     return assignment;
   }
@@ -1515,6 +1537,102 @@ class OrgScopedImplementations {
         )
       )
       .orderBy(emailReportSchedules.nextRunAt);
+  }
+
+  // ========================================
+  // IMPERSONATION SESSION OPERATIONS
+  // ========================================
+
+  async createImpersonationSession(session: Parameters<IStorage['createImpersonationSession']>[0]) {
+    const { adminImpersonationSessions } = await import('@shared/schema');
+    
+    // Transactional: deactivate any existing active session for this admin in this org
+    return await db.transaction(async (tx) => {
+      // End any existing active sessions for this admin in this organization
+      await tx
+        .update(adminImpersonationSessions)
+        .set({ 
+          isActive: false, 
+          endedAt: new Date() 
+        })
+        .where(and(
+          eq(adminImpersonationSessions.adminId, session.adminId),
+          eq(adminImpersonationSessions.organizationId, this.organizationId),
+          eq(adminImpersonationSessions.isActive, true)
+        ));
+      
+      // Create new session with org scope
+      const [created] = await tx
+        .insert(adminImpersonationSessions)
+        .values({
+          ...session,
+          organizationId: this.organizationId,
+          isActive: true,
+          startedAt: new Date(),
+        })
+        .returning();
+      
+      return created;
+    });
+  }
+
+  async getImpersonationSessions(adminId: string) {
+    const { adminImpersonationSessions } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(adminImpersonationSessions)
+      .where(and(
+        eq(adminImpersonationSessions.adminId, adminId),
+        eq(adminImpersonationSessions.organizationId, this.organizationId)
+      ))
+      .orderBy(desc(adminImpersonationSessions.createdAt));
+  }
+
+  async endImpersonationSession(sessionId: string) {
+    const { adminImpersonationSessions } = await import('@shared/schema');
+    const [updated] = await db
+      .update(adminImpersonationSessions)
+      .set({ 
+        isActive: false, 
+        endedAt: new Date() 
+      })
+      .where(and(
+        eq(adminImpersonationSessions.id, sessionId),
+        eq(adminImpersonationSessions.organizationId, this.organizationId)
+      ))
+      .returning();
+    
+    return updated;
+  }
+
+  async getCurrentlyImpersonatedUser(adminId: string) {
+    const { adminImpersonationSessions, users } = await import('@shared/schema');
+    const results = await db
+      .select()
+      .from(adminImpersonationSessions)
+      .innerJoin(users, eq(adminImpersonationSessions.impersonatedUserId, users.id))
+      .where(and(
+        eq(adminImpersonationSessions.adminId, adminId),
+        eq(adminImpersonationSessions.organizationId, this.organizationId),
+        eq(adminImpersonationSessions.isActive, true)
+      ))
+      .limit(1);
+    
+    return results[0]?.users;
+  }
+
+  async hasActiveImpersonation(adminId: string) {
+    const { adminImpersonationSessions } = await import('@shared/schema');
+    const [result] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(adminImpersonationSessions)
+      .where(and(
+        eq(adminImpersonationSessions.adminId, adminId),
+        eq(adminImpersonationSessions.organizationId, this.organizationId),
+        eq(adminImpersonationSessions.isActive, true)
+      ));
+    
+    return (result?.count ?? 0) > 0;
   }
 }
 

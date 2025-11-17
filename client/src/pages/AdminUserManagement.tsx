@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Search, Shield, ShieldCheck, User as UserIcon, UserPlus, Trash2, Crown, Settings, X, Plus } from "lucide-react";
+import { Search, Shield, ShieldCheck, User as UserIcon, UserPlus, Trash2, Crown, Settings, X, Plus, UserCog } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -94,6 +94,19 @@ export default function AdminUserManagement() {
 
   const { data: currentUser } = useQuery<User>({
     queryKey: ["/api/auth/user"],
+  });
+
+  const isCurrentUser = (userId: string) => userId === currentUser?.id;
+  const isSuperAdmin = currentUser?.role === "super_admin";
+
+  // Check for active impersonation session
+  const { data: impersonationSession } = useQuery<{
+    id: string;
+    impersonatedUserId: string;
+    isActive: boolean;
+  } | null>({
+    queryKey: ['/api/admin/impersonation/session'],
+    enabled: isSuperAdmin,
   });
 
   // Fetch all available programs
@@ -261,6 +274,34 @@ export default function AdminUserManagement() {
     },
   });
 
+  const startImpersonationMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      return await apiRequest('POST', '/api/admin/impersonation/start', {
+        impersonatedUserId: userId,
+        reason: 'Admin troubleshooting via user management'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/impersonation/session'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      toast({
+        title: "Impersonation started",
+        description: "Reloading page to apply changes...",
+      });
+      // Reload page to apply impersonation
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start impersonation",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredUsers = users.filter((user) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -281,9 +322,6 @@ export default function AdminUserManagement() {
       userName: `${user.firstName} ${user.lastName}`,
     });
   };
-
-  const isCurrentUser = (userId: string) => userId === currentUser?.id;
-  const isSuperAdmin = currentUser?.role === "super_admin";
 
   const confirmRoleChange = () => {
     if (!confirmAction) return;
@@ -528,15 +566,37 @@ export default function AdminUserManagement() {
                           </TableCell>
                           {isSuperAdmin && (
                             <TableCell className="text-right">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleDeleteUser(user)}
-                                disabled={deleteUserMutation.isPending || isCurrentUser(user.id)}
-                                data-testid={`button-delete-${user.id}`}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
+                              <div className="flex items-center justify-end gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => startImpersonationMutation.mutate(user.id)}
+                                  disabled={
+                                    startImpersonationMutation.isPending || 
+                                    isCurrentUser(user.id) ||
+                                    impersonationSession?.isActive
+                                  }
+                                  data-testid={`button-impersonate-${user.id}`}
+                                  title={
+                                    isCurrentUser(user.id) 
+                                      ? "Cannot impersonate yourself" 
+                                      : impersonationSession?.isActive
+                                      ? "End current impersonation first"
+                                      : "Impersonate this user"
+                                  }
+                                >
+                                  <UserCog className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteUser(user)}
+                                  disabled={deleteUserMutation.isPending || isCurrentUser(user.id)}
+                                  data-testid={`button-delete-${user.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           )}
                         </TableRow>

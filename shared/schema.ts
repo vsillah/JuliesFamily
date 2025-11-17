@@ -3127,10 +3127,14 @@ export const adminImpersonationSessions = pgTable("admin_impersonation_sessions"
   ipAddress: varchar("ip_address"),
   userAgent: text("user_agent"),
   
+  // Multi-tenant support
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
+  
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
   index("impersonation_sessions_admin_idx").on(table.adminId),
   index("impersonation_sessions_user_idx").on(table.impersonatedUserId),
+  index("impersonation_sessions_org_idx").on(table.organizationId),
   
   // Compound index for active session lookups
   index("impersonation_sessions_admin_active_idx").on(table.adminId).where(sql`${table.isActive} = true`),
