@@ -98,6 +98,8 @@ export default function Home() {
   const hasHeroContent = !!heroContent?.[0];
   const isContentReady = !isPersonaLoading && !heroLoading && (!hasHeroContent || !heroImageLoading);
   
+  console.log('[Home DEBUG]', { isPersonaLoading, heroLoading, hasHeroContent, heroImageLoading, isContentReady });
+  
   if (!isContentReady) {
     return null;
   }
