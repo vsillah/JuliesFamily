@@ -81,6 +81,15 @@ The application incorporates Helmet Security Headers, a five-tier rate limiting 
   - Multi-tenant scheduler test (`tests/scheduler-multi-tenant.test.ts`): Verifies all 4 schedulers process orgs independently with NO cross-tenant enrollments, NO cross-tenant donations, reports scoped per org, backups scoped per org
 - **Documentation**: Comprehensive multi-tenant architecture guide (`docs/multi-tenant-architecture.md`) covering implementation patterns, high-risk areas (schedulers, webhooks, impersonation), data migration strategy, testing approach, and troubleshooting. Future refinement planned using verification-first methodology with traceability matrix.
 - **Security Approach**: Hostname normalization, trusted domain validation, DNS verification for custom domains, request-scoped storage enforcement, Proxy-based hard enforcement prevents cross-tenant data leakage through HTTP routes and background schedulers.
+- **Critical Bug Fixes (Nov 17, 2024)**:
+  - **Drizzle ORM Multi-Where Bug**: Fixed severe tenant isolation breach where multiple `.where()` calls caused the second call to replace the first, removing organizationId filters. Solution: Combined all WHERE conditions into a single `and()` call in all org-scoped queries.
+  - **Content Visibility Data Migration**: Migrated 382 `content_visibility` rows to set organization_id='1' (previously NULL), fixing hero content not appearing after tenant isolation fix.
+  - **A/B Testing Data Migration**: Migrated all A/B testing tables to set organization_id from parent tables:
+    - `ab_test_targets`: 7 rows migrated (inherit from ab_tests)
+    - `ab_test_variants`: 6 rows migrated (inherit from ab_tests)
+    - `ab_test_events`: 964 rows migrated (inherit from ab_tests)
+    - `ab_test_automation_runs`: 0 rows migrated (inherit from automation_rules)
+    - Result: A/B testing functionality fully restored in Admin Preview Mode
 
 **Content Visibility Architecture**: The system uses a persona×funnel stage matrix (6 personas × 4 stages = 24 combinations) for granular content control. The `buildVisibilityQuery` method in `server/storage.ts` conditionally applies persona/funnelStage filters only when explicitly provided, returning all active visible content without restrictions when undefined.
 
