@@ -51,6 +51,14 @@ export default function Home() {
   const { data: heroContent, isLoading: heroLoading } = useQuery<ContentItem[]>({
     queryKey: [currentOrg?.organizationId, "/api/content/visible/hero", effectivePersona, effectiveFunnelStage],
     enabled: !isPersonaLoading && !!persona && !!currentOrg,
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('persona', effectivePersona);
+      params.append('funnelStage', effectiveFunnelStage);
+      const res = await fetch(`/api/content/visible/hero?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch hero content');
+      return res.json();
+    },
     staleTime: 5 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
