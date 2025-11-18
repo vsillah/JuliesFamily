@@ -268,6 +268,7 @@ export default function AdminOrganizations() {
   const [searchQuery, setSearchQuery] = useState("");
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [orgToDelete, setOrgToDelete] = useState<Organization | null>(null);
+  const [bulkDeleteConfirmOpen, setBulkDeleteConfirmOpen] = useState(false);
   const [, setLocation] = useLocation();
   const { currentOrg, isLoading: currentLoading, switchOrganization, clearOverride } = useOrganization();
 
@@ -461,6 +462,31 @@ export default function AdminOrganizations() {
     },
   });
 
+  // Bulk delete mutation
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async (organizationIds: string[]) => {
+      const response = await apiRequest('DELETE', '/api/admin/organizations/bulk/delete', { organizationIds });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Organizations Deleted",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });
+      setBulkDeleteConfirmOpen(false);
+      setSelectedOrgs([]);
+      setIsSelectMode(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete organizations",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Filter organizations based on search query
   const filteredOrganizations = organizations?.filter((org) =>
     (org.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -598,6 +624,16 @@ export default function AdminOrganizations() {
     bulkStatusMutation.mutate({ organizationIds: selectedOrgs, status: 'suspended' });
   };
 
+  const handleBulkDeleteConfirm = () => {
+    if (selectedOrgs.length === 0) return;
+    setBulkDeleteConfirmOpen(true);
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedOrgs.length === 0) return;
+    bulkDeleteMutation.mutate(selectedOrgs);
+  };
+
   const handleOpenDeleteConfirm = (org: Organization) => {
     setOrgToDelete(org);
     setDeleteConfirmOpen(true);
@@ -724,6 +760,14 @@ export default function AdminOrganizations() {
                   data-testid="button-bulk-suspend"
                 >
                   Suspend Selected
+                </Button>
+                <Button
+                  onClick={handleBulkDeleteConfirm}
+                  disabled={selectedOrgs.length === 0 || bulkDeleteMutation.isPending}
+                  variant="destructive"
+                  data-testid="button-bulk-delete"
+                >
+                  Delete Selected
                 </Button>
               </div>
             </div>
@@ -1032,6 +1076,40 @@ export default function AdminOrganizations() {
               data-testid="button-confirm-delete"
             >
               {deleteOrgMutation.isPending ? "Deleting..." : "Delete Organization"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <Dialog 
+        open={bulkDeleteConfirmOpen} 
+        onOpenChange={setBulkDeleteConfirmOpen}
+      >
+        <DialogContent data-testid="dialog-bulk-delete-confirm">
+          <DialogHeader>
+            <DialogTitle data-testid="text-bulk-delete-title">Delete Multiple Organizations</DialogTitle>
+            <DialogDescription data-testid="text-bulk-delete-description">
+              Are you sure you want to delete {selectedOrgs.length} organization{selectedOrgs.length !== 1 ? 's' : ''}? This action cannot be undone and will remove all associated data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setBulkDeleteConfirmOpen(false)}
+              data-testid="button-cancel-bulk-delete"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleBulkDelete}
+              disabled={bulkDeleteMutation.isPending}
+              data-testid="button-confirm-bulk-delete"
+            >
+              {bulkDeleteMutation.isPending ? "Deleting..." : `Delete ${selectedOrgs.length} Organization${selectedOrgs.length !== 1 ? 's' : ''}`}
             </Button>
           </DialogFooter>
         </DialogContent>

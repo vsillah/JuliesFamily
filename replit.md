@@ -35,7 +35,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Hybrid Card Reordering System**: Three-method content reordering interface (drag-and-drop, arrow buttons, jump-to-position dropdown) with transactional batch updates and optimistic UI.
 -   **Student Projects Carousel with Passion Badges**: Passion-filtered carousel showcasing student work to donors, with OIDC passions persistence and visual passion badges.
 -   **Feature Toggle System**: Multi-tenant feature flag platform with super admin UI for organization-specific feature control, `useFeatureEnabled` hook, and `FeatureGate` component.
--   **Organization Provisioning Wizard**: Multi-step wizard for comprehensive organization setup with content seeding, tier-based feature enablement, SendGrid welcome emails, and transaction-based rollback on failure. Supports automated website content extraction and persona detection during organization setup.
+-   **Organization Management System**: Full CRUD operations for organizations with drag-and-drop reordering, search functionality, bulk status updates (activate/suspend), and bulk deletion. Includes comprehensive organization provisioning wizard with automated website content extraction, persona detection, content seeding, tier-based feature enablement, SendGrid welcome emails, and transaction-based rollback on failure.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are handled by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a **two-tier RBAC system**:

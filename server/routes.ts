@@ -574,6 +574,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk delete organizations (super admin only)
+  app.delete('/api/admin/organizations/bulk/delete', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { organizationIds } = req.body;
+
+      if (!Array.isArray(organizationIds) || organizationIds.length === 0) {
+        return res.status(400).json({ message: 'organizationIds array is required' });
+      }
+
+      // Delete each organization
+      await Promise.all(
+        organizationIds.map(id => storage.deleteOrganization(id))
+      );
+
+      console.log(`[Organizations] Bulk deleted ${organizationIds.length} organizations`);
+      res.json({ message: `Successfully deleted ${organizationIds.length} organization${organizationIds.length !== 1 ? 's' : ''}` });
+    } catch (error: any) {
+      console.error('[Organizations] Error bulk deleting organizations:', error);
+      res.status(500).json({ message: error.message || 'Failed to delete organizations' });
+    }
+  });
+
   // Delete organization (super admin only)
   app.delete('/api/admin/organizations/:orgId', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
