@@ -510,6 +510,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(updatedOrg);
     } catch (error: any) {
       console.error('[Organizations] Error updating organization:', error);
+      
+      // Check for unique constraint violation (duplicate name)
+      if (error.code === '23505') {
+        return res.status(409).json({ 
+          message: 'An organization with this name already exists. Please choose a different name.' 
+        });
+      }
+      
       res.status(500).json({ message: error.message || 'Failed to update organization' });
     }
   });
