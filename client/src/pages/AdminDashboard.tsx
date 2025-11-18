@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
 
   // Fetch analytics data (Premium tier feature)
-  const { data: analytics, isError: analyticsError } = useQuery<any>({
+  const { data: analytics, isError: analyticsError, isLoading: analyticsLoading } = useQuery<any>({
     queryKey: ["/api/admin/analytics"],
     retry: false,
   });
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
   const queryString = queryParams.toString();
   const leadsUrl = queryString ? `/api/admin/leads?${queryString}` : "/api/admin/leads";
 
-  const { data: leads = [], isError: leadsError } = useQuery<Lead[]>({
+  const { data: leads = [], isError: leadsError, isLoading: leadsLoading } = useQuery<Lead[]>({
     queryKey: [leadsUrl],
     retry: false,
   });
@@ -61,7 +61,17 @@ export default function AdminDashboard() {
     return null;
   }
 
+  // Show loading state while data is being fetched
+  if (analyticsLoading || leadsLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading dashboard...</div>
+      </div>
+    );
+  }
+
   // Check if Premium features are unavailable (likely tier restriction)
+  // This happens when both analytics and leads fail to load (403 forbidden)
   const isPremiumRestricted = analyticsError && leadsError;
 
   const personaLabels: Record<string, string> = {
