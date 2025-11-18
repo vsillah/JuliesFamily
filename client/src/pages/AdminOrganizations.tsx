@@ -315,6 +315,12 @@ export default function AdminOrganizations() {
             });
           }
         });
+      } else if (error.message && error.message.includes('already exists')) {
+        // If it's a duplicate name error, show it on the form field
+        createForm.setError('name', {
+          type: 'manual',
+          message: error.message,
+        });
       }
       
       toast({
@@ -342,6 +348,14 @@ export default function AdminOrganizations() {
       editForm.reset();
     },
     onError: (error: any) => {
+      // If it's a duplicate name error, show it on the form field
+      if (error.message && error.message.includes('already exists')) {
+        editForm.setError('name', {
+          type: 'manual',
+          message: error.message,
+        });
+      }
+      
       toast({
         title: "Error",
         description: error.message || "Failed to update organization",
