@@ -31,7 +31,7 @@ export function requireTier(requiredTier: Tier) {
         });
       }
 
-      // Get user and their organization
+      // Get user
       const user = await storage.getUser(userId);
       if (!user) {
         return res.status(401).json({ 
@@ -40,15 +40,15 @@ export function requireTier(requiredTier: Tier) {
         });
       }
 
-      // Get organization tier (null organizationId defaults to Basic)
-      let userTier: Tier = TIERS.BASIC;
-      let organizationId: string | null = null;
+      // Get organization tier from request context (set by orgMiddleware)
+      // This respects super admin organization switching
+      let userTier: Tier = TIERS.STANDARD;
+      let organizationId: string | null = req.organizationId || null;
 
-      if (user.organizationId) {
-        const organization = await storage.getOrganization(user.organizationId);
+      if (organizationId) {
+        const organization = await storage.getOrganization(organizationId);
         if (organization) {
           userTier = organization.tier as Tier;
-          organizationId = organization.id;
         }
       }
 
@@ -84,14 +84,15 @@ export async function attachTierInfo(req: TierRequest, res: Response, next: Next
     if (userId) {
       const user = await storage.getUser(userId);
       if (user) {
-        let userTier: Tier = TIERS.BASIC;
-        let organizationId: string | null = null;
+        // Get organization tier from request context (set by orgMiddleware)
+        // This respects super admin organization switching
+        let userTier: Tier = TIERS.STANDARD;
+        let organizationId: string | null = req.organizationId || null;
 
-        if (user.organizationId) {
-          const organization = await storage.getOrganization(user.organizationId);
+        if (organizationId) {
+          const organization = await storage.getOrganization(organizationId);
           if (organization) {
             userTier = organization.tier as Tier;
-            organizationId = organization.id;
           }
         }
 
