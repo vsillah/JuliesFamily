@@ -1,5 +1,15 @@
-import { GraduationCap, Users, Calendar, Award } from "lucide-react";
+import { GraduationCap, Users, Calendar, Award, LucideIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import type { ContentItem, ImpactSectionMetadata } from "@shared/schema";
+
+// Icon mapping helper
+const iconMap: Record<string, LucideIcon> = {
+  Users,
+  GraduationCap,
+  Award,
+  Calendar,
+};
 
 // Animated counter component with easing
 function AnimatedCounter({ targetValue }: { targetValue: string }) {
@@ -76,28 +86,28 @@ function AnimatedCounter({ targetValue }: { targetValue: string }) {
 }
 
 export default function ImpactStats() {
-  const stats = [
-    {
-      icon: Users,
-      number: "299",
-      label: "Students Served in 2024",
-    },
-    {
-      icon: GraduationCap,
-      number: "+31%",
-      label: "Growth in Enrollment",
-    },
-    {
-      icon: Award,
-      number: "+155%",
-      label: "Increase in HSE Testing",
-    },
-    {
-      icon: Calendar,
-      number: "95",
-      label: "Monthly Average Enrollment",
-    },
-  ];
+  // Fetch impact section from database
+  const { data: impactData, isLoading } = useQuery<ContentItem>({
+    queryKey: ['/api/content/type/impact_section'],
+  });
+
+  // Parse metadata and provide fallback
+  const metadata = (impactData?.metadata as ImpactSectionMetadata) || {
+    sectionTitle: "2024: A Year of Incredible Growth",
+    stats: []
+  };
+
+  // Map stats with icon resolution
+  const stats = metadata.stats.map(stat => ({
+    icon: iconMap[stat.icon] || Users,
+    number: stat.number,
+    label: stat.label,
+  }));
+
+  // Don't render if no data yet
+  if (isLoading || !impactData) {
+    return null;
+  }
 
   return (
     <section id="impact" className="py-12 sm:py-16 bg-muted/30">
@@ -107,11 +117,10 @@ export default function ImpactStats() {
             – Our Impact –
           </p>
           <h2 className="text-4xl sm:text-5xl font-serif font-semibold mb-6">
-            2024: A Year of <span className="italic">Incredible</span>{" "}
-            <span className="font-bold">Growth</span>
+            {metadata.sectionTitle}
           </h2>
           <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            JFLP grew in FY24, serving more students and families than ever before with our programs in Adult Basic Education, Family Development, and Children's Services.
+            {impactData.description}
           </p>
         </div>
 
