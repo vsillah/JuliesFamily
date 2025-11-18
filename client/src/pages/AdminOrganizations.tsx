@@ -350,21 +350,40 @@ export default function AdminOrganizations() {
     },
   });
 
-  // Reorder mutation
+  // Reorder mutation with optimistic updates
   const reorderMutation = useMutation({
-    mutationFn: async (updates: { id: string; displayOrder: number }[]) => {
-      const response = await apiRequest('PATCH', '/api/admin/organizations/bulk/reorder', { updates });
+    mutationFn: async (params: { updates: { id: string; displayOrder: number }[]; reorderedOrgs: Organization[] }) => {
+      const response = await apiRequest('PATCH', '/api/admin/organizations/bulk/reorder', { updates: params.updates });
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });
+    onMutate: async (params) => {
+      // Cancel any outgoing refetches to prevent race conditions
+      await queryClient.cancelQueries({ queryKey: ['/api/admin/organizations'] });
+
+      // Snapshot the previous value (defaulting to empty array if undefined)
+      const previousOrgs = queryClient.getQueryData<Organization[]>(['/api/admin/organizations']) ?? [];
+
+      // Optimistically update to the new value
+      if (params.reorderedOrgs && params.reorderedOrgs.length > 0) {
+        queryClient.setQueryData(['/api/admin/organizations'], params.reorderedOrgs);
+      }
+
+      // Return context with snapshot (always has a value for reliable rollback)
+      return { previousOrgs };
     },
-    onError: (error: any) => {
+    onError: (error: any, _variables, context) => {
+      // Rollback to previous state on error (context.previousOrgs is always defined)
+      if (context?.previousOrgs) {
+        queryClient.setQueryData(['/api/admin/organizations'], context.previousOrgs);
+      }
       toast({
         title: "Error",
         description: error.message || "Failed to reorder organizations",
         variant: "destructive",
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });
     },
   });
 
@@ -482,17 +501,20 @@ export default function AdminOrganizations() {
 
     const reorderedOrgs = arrayMove(organizations, oldIndex, newIndex);
     
-    // Update displayOrder for all affected orgs
-    const updates = reorderedOrgs.map((org, index) => ({
+    // Update displayOrder for all orgs and create the reordered list with updated values
+    const reorderedOrgsWithOrder = reorderedOrgs.map((org, index) => ({
+      ...org,
+      displayOrder: index,
+    }));
+
+    // Create updates array for backend
+    const updates = reorderedOrgsWithOrder.map((org, index) => ({
       id: org.id,
       displayOrder: index,
     }));
 
-    // Optimistically update UI
-    queryClient.setQueryData(['/api/admin/organizations'], reorderedOrgs);
-    
-    // Send to backend
-    reorderMutation.mutate(updates);
+    // Send to backend - optimistic update handled in mutation's onMutate
+    reorderMutation.mutate({ updates, reorderedOrgs: reorderedOrgsWithOrder });
   };
 
   const handleToggleSelect = (orgId: string) => {
