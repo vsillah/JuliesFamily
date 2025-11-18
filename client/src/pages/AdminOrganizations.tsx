@@ -138,9 +138,15 @@ function SortableOrgCard({
                   <Badge variant={org.status === 'active' ? 'default' : 'secondary'} data-testid={`badge-status-${org.id}`}>
                     {org.status}
                   </Badge>
+                  <Badge 
+                    variant={org.tier === 'premium' ? 'default' : org.tier === 'pro' ? 'secondary' : 'outline'} 
+                    data-testid={`badge-tier-${org.id}`}
+                  >
+                    {org.tier.charAt(0).toUpperCase() + org.tier.slice(1)}
+                  </Badge>
                 </CardTitle>
                 <CardDescription>
-                  Tier: {org.tier}
+                  {org.slug}
                 </CardDescription>
               </div>
             </div>
