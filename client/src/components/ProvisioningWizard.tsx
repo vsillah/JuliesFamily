@@ -517,7 +517,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                                       <Input 
                                                         type="url"
                                                         placeholder="https://example.org/programs" 
-                                                        value={url}
+                                                        value={url || ''}
                                                         onChange={(e) => {
                                                           const newUrls = [...field.value];
                                                           newUrls[index] = e.target.value;
@@ -573,7 +573,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                                       <Input 
                                                         type="url"
                                                         placeholder="https://example.org/events" 
-                                                        value={url}
+                                                        value={url || ''}
                                                         onChange={(e) => {
                                                           const newUrls = [...field.value];
                                                           newUrls[index] = e.target.value;
@@ -629,7 +629,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                                       <Input 
                                                         type="url"
                                                         placeholder="https://example.org/testimonials" 
-                                                        value={url}
+                                                        value={url || ''}
                                                         onChange={(e) => {
                                                           const newUrls = [...field.value];
                                                           newUrls[index] = e.target.value;
