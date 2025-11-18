@@ -1,66 +1,79 @@
 import { Card } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/lib/organizationContext";
+import type { ContentItem, SponsorsSectionMetadata } from "@shared/schema";
 import cummingsLogo from "@assets/CumminsFoundationlogo_1762691811373.webp";
 import pierceLogo from "@assets/Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp";
 import candidLogo from "@assets/CandidAwardImg.jpg_1762691811371.webp";
 
+// Logo mapping for static asset resolution
+const logoMap: Record<string, string> = {
+  "CumminsFoundationlogo_1762691811373.webp": cummingsLogo,
+  "Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp": pierceLogo,
+  "CandidAwardImg.jpg_1762691811371.webp": candidLogo,
+};
+
 export default function Sponsors() {
+  const { currentOrg } = useOrganization();
+
+  // Fetch sponsors section from database
+  const { data: sponsorsDataArray = [], isLoading } = useQuery<ContentItem[]>({
+    queryKey: ['/api/content/type/sponsors_section', { orgId: currentOrg?.organizationId || 'default' }],
+  });
+
+  // Get the first (and only) sponsors section for this org
+  const sponsorsData = sponsorsDataArray[0];
+
+  // Parse metadata and provide fallback
+  const metadata = (sponsorsData?.metadata as SponsorsSectionMetadata) || {
+    sectionTitle: "Supported by Generous Partners",
+    subtitle: "– Our Partners –",
+    sponsors: []
+  };
+
+  // Don't render if loading or no data
+  if (isLoading || !sponsorsData || metadata.sponsors.length === 0) {
+    return null;
+  }
+
   return (
-    <section className="py-12 sm:py-16 bg-background">
+    <section className="py-12 sm:py-16 bg-background" data-testid="section-sponsors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <p className="text-sm uppercase tracking-wider text-muted-foreground mb-4">
-            – Our Partners –
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-serif font-semibold mb-4">
-            Supported by <span className="italic">Generous</span> Partners
+          {metadata.subtitle && (
+            <p className="text-sm uppercase tracking-wider text-muted-foreground mb-4" data-testid="text-sponsors-subtitle">
+              {metadata.subtitle}
+            </p>
+          )}
+          <h2 className="text-3xl sm:text-4xl font-serif font-semibold mb-4" data-testid="text-sponsors-title">
+            {metadata.sectionTitle}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <Card className="p-8 text-center">
-            <div className="flex items-center justify-center h-32 w-48 mx-auto mb-4">
-              <img 
-                src={cummingsLogo} 
-                alt="Cummings Foundation $100k for 100 logo"
-                className="h-full w-full object-contain mix-blend-multiply"
-                data-testid="img-cummings-logo"
-              />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">Cummings Foundation</h3>
-            <p className="text-sm text-muted-foreground">
-              Proud recipient of a $100k for 100 grant supporting our mission.
-            </p>
-          </Card>
-
-          <Card className="p-8 text-center">
-            <div className="flex items-center justify-center h-32 w-32 mx-auto mb-4">
-              <img 
-                src={pierceLogo} 
-                alt="Pierce Property Services logo"
-                className="h-full w-full object-contain mix-blend-multiply"
-                data-testid="img-pierce-logo"
-              />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">Pierce Property Services</h3>
-            <p className="text-sm text-muted-foreground">
-              Providing invaluable in-kind services to support our programs.
-            </p>
-          </Card>
-
-          <Card className="p-8 text-center">
-            <div className="flex items-center justify-center h-32 w-32 mx-auto mb-4">
-              <img 
-                src={candidLogo} 
-                alt="Candid Platinum Transparency 2024 Seal"
-                className="h-full w-full object-contain"
-                data-testid="img-candid-logo"
-              />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">GuideStar Platinum Seal</h3>
-            <p className="text-sm text-muted-foreground">
-              2024 Platinum Seal of Transparency in recognition of our financial integrity.
-            </p>
-          </Card>
+          {metadata.sponsors.map((sponsor, index) => {
+            // Resolve logo URL from mapping or use as-is if it's a full URL
+            const logoSrc = logoMap[sponsor.logoUrl] || sponsor.logoUrl;
+            
+            return (
+              <Card key={index} className="p-8 text-center" data-testid={`card-sponsor-${index}`}>
+                <div className={`flex items-center justify-center ${index === 0 ? 'h-32 w-48' : 'h-32 w-32'} mx-auto mb-4`}>
+                  <img 
+                    src={logoSrc} 
+                    alt={`${sponsor.name} logo`}
+                    className={`h-full w-full object-contain ${index < 2 ? 'mix-blend-multiply' : ''}`}
+                    data-testid={`img-sponsor-logo-${index}`}
+                  />
+                </div>
+                <h3 className="font-semibold text-lg mb-2" data-testid={`text-sponsor-name-${index}`}>
+                  {sponsor.name}
+                </h3>
+                <p className="text-sm text-muted-foreground" data-testid={`text-sponsor-description-${index}`}>
+                  {sponsor.description}
+                </p>
+              </Card>
+            );
+          })}
         </div>
       </div>
     </section>
