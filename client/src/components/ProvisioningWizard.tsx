@@ -92,7 +92,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
     },
     onSuccess: (data) => {
       toast({
-        title: "Organization Provisioned! 🎉",
+        title: "Organization Provisioned Successfully",
         description: `${data.organization.name} is ready to go. Welcome email sent!`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });

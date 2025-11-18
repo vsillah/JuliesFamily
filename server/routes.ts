@@ -412,31 +412,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Import provisioning orchestrator
-      const { provisionOrganization, sendWelcomeEmail } = await import('./provisioning');
+      const { provisionOrganization } = await import('./provisioning');
       
       // Provision the organization with all content and features
+      // This includes: org creation, persona/content seeding, feature enablement, and welcome email
       const result = await provisionOrganization(validation.data);
       
       console.log(`[Provisioning] Created organization: ${result.organization.name} (${result.organization.id})`);
       
-      // Send welcome email (async, don't block response)
-      if (result.contactEmail) {
-        sendWelcomeEmail(
-          result.organization.name,
-          result.contactName,
-          result.contactEmail,
-          result.organization.slug || result.organization.id
-        ).then((emailResult) => {
-          if (emailResult.sent) {
-            console.log(`[Provisioning] Welcome email sent to ${result.contactEmail}`);
-          } else if (emailResult.skipped) {
-            console.log(`[Provisioning] Welcome email skipped: ${emailResult.reason}`);
-          } else {
-            console.warn(`[Provisioning] Welcome email failed: ${emailResult.error}`);
-          }
-        }).catch((error) => {
-          console.error('[Provisioning] Unexpected error sending welcome email:', error);
-        });
+      // Log email result
+      if (result.emailResult) {
+        if (result.emailResult.sent) {
+          console.log(`[Provisioning] Welcome email sent to ${result.contactEmail}`);
+        } else if (result.emailResult.skipped) {
+          console.log(`[Provisioning] Welcome email skipped: ${result.emailResult.reason}`);
+        } else {
+          console.warn(`[Provisioning] Welcome email failed: ${result.emailResult.error}`);
+        }
       }
       
       res.status(201).json({

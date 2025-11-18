@@ -150,6 +150,31 @@ export const insertOrganizationFeatureSchema = createInsertSchema(organizationFe
 export type InsertOrganizationFeature = z.infer<typeof insertOrganizationFeatureSchema>;
 export type OrganizationFeature = typeof organizationFeatures.$inferSelect;
 
+// Provisioning Requests table - tracks organization provisioning workflow status
+export const provisioningStatusEnum = z.enum(['pending', 'in_progress', 'completed', 'failed']);
+export type ProvisioningStatus = z.infer<typeof provisioningStatusEnum>;
+
+export const provisioningRequests = pgTable("provisioning_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
+  status: varchar("status").notNull().default('pending'), // pending, in_progress, completed, failed
+  requestData: jsonb("request_data").notNull(), // Full wizard data
+  errorMessage: text("error_message"), // Error details if failed
+  completedSteps: jsonb("completed_steps").default(sql`'[]'::jsonb`), // Array of completed step names
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertProvisioningRequestSchema = createInsertSchema(provisioningRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  completedAt: true,
+});
+export type InsertProvisioningRequest = z.infer<typeof insertProvisioningRequestSchema>;
+export type ProvisioningRequest = typeof provisioningRequests.$inferSelect;
+
 // Shared Templates table - platform-wide templates available to all organizations
 export const sharedTemplates = pgTable("shared_templates", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

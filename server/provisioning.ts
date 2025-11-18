@@ -1,4 +1,5 @@
 import { db } from './db';
+import type { IStorage } from './storage';
 import { 
   organizations, 
   organizationFeatures,
@@ -8,6 +9,8 @@ import {
   heroVariants,
   ctaVariants,
   contentVisibility,
+  personas,
+  provisioningRequests,
   type ProvisioningWizard,
 } from '@shared/schema';
 import { TIERS } from '@shared/tiers';
@@ -64,8 +67,9 @@ function generateSlug(name: string): string {
 
 /**
  * Seed default programs for a new organization
+ * Uses direct DB insert with explicit organizationId
  */
-async function seedDefaultPrograms(organizationId: string) {
+async function seedDefaultPrograms(tx: typeof db, organizationId: string) {
   const defaultPrograms = [
     {
       id: nanoid(),
@@ -99,14 +103,73 @@ async function seedDefaultPrograms(organizationId: string) {
     },
   ];
 
-  await db.insert(programs).values(defaultPrograms);
+  await tx.insert(programs).values(defaultPrograms);
   return defaultPrograms;
+}
+
+/**
+ * Seed default personas for a new organization
+ */
+async function seedDefaultPersonas(tx: typeof db, organizationId: string) {
+  const defaultPersonas = [
+    {
+      id: nanoid(),
+      organizationId,
+      name: 'default',
+      displayName: 'All Visitors',
+      description: 'Generic visitor with no specific targeting',
+      isActive: true,
+    },
+    {
+      id: nanoid(),
+      organizationId,
+      name: 'student',
+      displayName: 'Students',
+      description: 'Individuals seeking educational programs and support',
+      isActive: true,
+    },
+    {
+      id: nanoid(),
+      organizationId,
+      name: 'parent',
+      displayName: 'Parents',
+      description: 'Parents seeking programs for their children',
+      isActive: true,
+    },
+    {
+      id: nanoid(),
+      organizationId,
+      name: 'donor',
+      displayName: 'Donors',
+      description: 'Individuals interested in supporting the organization',
+      isActive: true,
+    },
+    {
+      id: nanoid(),
+      organizationId,
+      name: 'volunteer',
+      displayName: 'Volunteers',
+      description: 'Individuals interested in volunteering their time',
+      isActive: true,
+    },
+    {
+      id: nanoid(),
+      organizationId,
+      name: 'provider',
+      displayName: 'Service Providers',
+      description: 'Partner organizations and service providers',
+      isActive: true,
+    },
+  ];
+
+  await tx.insert(personas).values(defaultPersonas);
+  return defaultPersonas;
 }
 
 /**
  * Seed default testimonials for a new organization
  */
-async function seedDefaultTestimonials(organizationId: string) {
+async function seedDefaultTestimonials(tx: typeof db, organizationId: string) {
   const defaultTestimonials = [
     {
       id: nanoid(),
@@ -126,14 +189,14 @@ async function seedDefaultTestimonials(organizationId: string) {
     },
   ];
 
-  await db.insert(testimonials).values(defaultTestimonials);
+  await tx.insert(testimonials).values(defaultTestimonials);
   return defaultTestimonials;
 }
 
 /**
  * Seed default events for a new organization
  */
-async function seedDefaultEvents(organizationId: string) {
+async function seedDefaultEvents(tx: typeof db, organizationId: string) {
   const today = new Date();
   const nextMonth = new Date(today);
   nextMonth.setMonth(nextMonth.getMonth() + 1);
@@ -150,14 +213,14 @@ async function seedDefaultEvents(organizationId: string) {
     },
   ];
 
-  await db.insert(events).values(defaultEvents);
+  await tx.insert(events).values(defaultEvents);
   return defaultEvents;
 }
 
 /**
  * Seed default hero and CTA variants
  */
-async function seedDefaultContent(organizationId: string, orgName: string) {
+async function seedDefaultContent(tx: typeof db, organizationId: string, orgName: string) {
   // Create hero variants for each persona x funnel stage combination
   const heroVariantsToCreate = [];
   const personas = ['default', 'student', 'provider', 'parent', 'donor', 'volunteer'];
@@ -181,7 +244,7 @@ async function seedDefaultContent(organizationId: string, orgName: string) {
     }
   }
   
-  await db.insert(heroVariants).values(heroVariantsToCreate);
+  await tx.insert(heroVariants).values(heroVariantsToCreate);
   
   // Create CTA variants for each persona x funnel stage combination
   const ctaVariantsToCreate = [];
@@ -203,7 +266,7 @@ async function seedDefaultContent(organizationId: string, orgName: string) {
     }
   }
   
-  await db.insert(ctaVariants).values(ctaVariantsToCreate);
+  await tx.insert(ctaVariants).values(ctaVariantsToCreate);
   
   return { heroVariants: heroVariantsToCreate, ctaVariants: ctaVariantsToCreate };
 }
@@ -211,7 +274,7 @@ async function seedDefaultContent(organizationId: string, orgName: string) {
 /**
  * Seed content visibility settings for default persona
  */
-async function seedContentVisibility(organizationId: string, programIds: string[]) {
+async function seedContentVisibility(tx: typeof db, organizationId: string, programIds: string[]) {
   const visibilityRecords = [];
   const funnelStages = ['awareness', 'consideration', 'decision', 'retention'];
   
@@ -231,14 +294,14 @@ async function seedContentVisibility(organizationId: string, programIds: string[
     }
   }
   
-  await db.insert(contentVisibility).values(visibilityRecords);
+  await tx.insert(contentVisibility).values(visibilityRecords);
   return visibilityRecords;
 }
 
 /**
  * Enable features for the organization based on tier
  */
-async function enableTierFeatures(organizationId: string, tier: string, additionalFeatures: string[] = []) {
+async function enableTierFeatures(tx: typeof db, organizationId: string, tier: string, additionalFeatures: string[] = []) {
   const tierFeatures = TIER_FEATURES[tier as keyof typeof TIER_FEATURES] || TIER_FEATURES.basic;
   const allFeatures = [...new Set([...tierFeatures, ...additionalFeatures])];
   
@@ -249,7 +312,9 @@ async function enableTierFeatures(organizationId: string, tier: string, addition
     isEnabled: true,
   }));
   
-  await db.insert(organizationFeatures).values(featureRecords);
+  if (featureRecords.length > 0) {
+    await tx.insert(organizationFeatures).values(featureRecords);
+  }
   return featureRecords;
 }
 
@@ -257,47 +322,138 @@ async function enableTierFeatures(organizationId: string, tier: string, addition
  * Main provisioning orchestrator - creates organization with full setup
  */
 export async function provisionOrganization(data: ProvisioningWizard) {
-  // Use a transaction to ensure all-or-nothing
-  return await db.transaction(async (tx) => {
-    // 1. Create the organization
-    const slug = generateSlug(data.name);
-    const [organization] = await tx.insert(organizations).values({
-      name: data.name,
-      slug,
-      tier: data.tier,
-      status: 'active',
-    }).returning();
+  // Create a provisioning request to track progress
+  const [provisioningRequest] = await db.insert(provisioningRequests).values({
+    status: 'pending',
+    requestData: data as any,
+    completedSteps: [],
+  }).returning();
+  
+  const requestId = provisioningRequest.id;
+  
+  try {
+    // Update status to in_progress
+    await db.update(provisioningRequests)
+      .set({ status: 'in_progress', updatedAt: new Date() })
+      .where(eq(provisioningRequests.id, requestId));
     
-    const orgId = organization.id;
+    // Use a transaction to ensure all-or-nothing
+    const result = await db.transaction(async (tx) => {
+      // 1. Create the organization
+      const slug = generateSlug(data.name);
+      const [organization] = await tx.insert(organizations).values({
+        name: data.name,
+        slug,
+        tier: data.tier,
+        status: 'active',
+      }).returning();
+      
+      const orgId = organization.id;
+      
+      // Update provisioning request with orgId
+      await tx.update(provisioningRequests)
+        .set({ 
+          organizationId: orgId,
+          completedSteps: ['organization_created'],
+          updatedAt: new Date()
+        })
+        .where(eq(provisioningRequests.id, requestId));
+      
+      // 2. Seed personas first (required for content visibility)
+      await seedDefaultPersonas(tx, orgId);
+      await tx.update(provisioningRequests)
+        .set({ 
+          completedSteps: ['organization_created', 'personas_created'],
+          updatedAt: new Date()
+        })
+        .where(eq(provisioningRequests.id, requestId));
+      
+      // 3. Handle content strategy
+      let createdPrograms: any[] = [];
+      if (data.contentStrategy === 'default_templates') {
+        // Seed default content
+        createdPrograms = await seedDefaultPrograms(tx, orgId);
+        await seedDefaultTestimonials(tx, orgId);
+        await seedDefaultEvents(tx, orgId);
+        await seedDefaultContent(tx, orgId, data.name);
+        await seedContentVisibility(tx, orgId, createdPrograms.map(p => p.id));
+        
+        await tx.update(provisioningRequests)
+          .set({ 
+            completedSteps: ['organization_created', 'personas_created', 'content_seeded'],
+            updatedAt: new Date()
+          })
+          .where(eq(provisioningRequests.id, requestId));
+      } else if (data.contentStrategy === 'import_from_website') {
+        // TODO: Implement website scraping in future iteration
+        // For now, fall back to default templates
+        createdPrograms = await seedDefaultPrograms(tx, orgId);
+        await seedDefaultTestimonials(tx, orgId);
+        await seedDefaultEvents(tx, orgId);
+        await seedDefaultContent(tx, orgId, data.name);
+        await seedContentVisibility(tx, orgId, createdPrograms.map(p => p.id));
+        
+        await tx.update(provisioningRequests)
+          .set({ 
+            completedSteps: ['organization_created', 'personas_created', 'content_seeded'],
+            updatedAt: new Date()
+          })
+          .where(eq(provisioningRequests.id, requestId));
+      }
+      // 'start_blank' - no seeding needed
+      
+      // 4. Enable tier-based features + any custom selections
+      await enableTierFeatures(tx, orgId, data.tier, data.enabledFeatures);
+      
+      await tx.update(provisioningRequests)
+        .set({ 
+          completedSteps: ['organization_created', 'personas_created', 'content_seeded', 'features_enabled'],
+          updatedAt: new Date()
+        })
+        .where(eq(provisioningRequests.id, requestId));
+      
+      return {
+        organization,
+        contactEmail: data.contactEmail,
+        contactName: data.contactName,
+      };
+    });
     
-    // 2. Handle content strategy
-    if (data.contentStrategy === 'default_templates') {
-      // Seed default content
-      const createdPrograms = await seedDefaultPrograms(orgId);
-      await seedDefaultTestimonials(orgId);
-      await seedDefaultEvents(orgId);
-      await seedDefaultContent(orgId, data.name);
-      await seedContentVisibility(orgId, createdPrograms.map(p => p.id));
-    } else if (data.contentStrategy === 'import_from_website') {
-      // TODO: Implement website scraping in future iteration
-      // For now, fall back to default templates
-      const createdPrograms = await seedDefaultPrograms(orgId);
-      await seedDefaultTestimonials(orgId);
-      await seedDefaultEvents(orgId);
-      await seedDefaultContent(orgId, data.name);
-      await seedContentVisibility(orgId, createdPrograms.map(p => p.id));
-    }
-    // 'start_blank' - no seeding needed
+    // 5. Send welcome email (outside transaction to avoid blocking)
+    const emailResult = await sendWelcomeEmail(
+      result.organization.name,
+      result.contactName,
+      result.contactEmail,
+      result.organization.slug || result.organization.id
+    );
     
-    // 3. Enable tier-based features + any custom selections
-    await enableTierFeatures(orgId, data.tier, data.enabledFeatures);
+    // Mark as completed
+    await db.update(provisioningRequests)
+      .set({ 
+        status: 'completed',
+        completedAt: new Date(),
+        updatedAt: new Date(),
+        completedSteps: ['organization_created', 'personas_created', 'content_seeded', 'features_enabled', 'welcome_email_sent'],
+      })
+      .where(eq(provisioningRequests.id, requestId));
     
     return {
-      organization,
-      contactEmail: data.contactEmail,
-      contactName: data.contactName,
+      ...result,
+      emailResult,
+      provisioningRequestId: requestId,
     };
-  });
+  } catch (error: any) {
+    // Mark provisioning as failed
+    await db.update(provisioningRequests)
+      .set({ 
+        status: 'failed',
+        errorMessage: error.message || 'Unknown error',
+        updatedAt: new Date(),
+      })
+      .where(eq(provisioningRequests.id, requestId));
+    
+    throw error;
+  }
 }
 
 /**
@@ -309,8 +465,7 @@ export async function sendWelcomeEmail(
   contactEmail: string,
   organizationSlug: string
 ) {
-  // Get SendGrid from storage or environment
-  const sgMail = await import('@sendgrid/mail');
+  // Get SendGrid from environment
   const apiKey = process.env.SENDGRID_API_KEY;
   
   if (!apiKey) {
@@ -318,12 +473,13 @@ export async function sendWelcomeEmail(
     return { skipped: true, reason: 'No SendGrid API key' };
   }
   
+  const sgMail = await import('@sendgrid/mail');
   sgMail.default.setApiKey(apiKey);
   
   const msg = {
     to: contactEmail,
     from: process.env.FROM_EMAIL || 'noreply@kinflo.io',
-    subject: `Welcome to KinFlo - ${organizationName} is Ready!`,
+    subject: `Welcome to KinFlo - ${organizationName} is Ready`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -343,7 +499,7 @@ export async function sendWelcomeEmail(
       <body>
         <div class="container">
           <div class="header">
-            <h1>🎉 Welcome to KinFlo!</h1>
+            <h1>Welcome to KinFlo</h1>
             <p>Your organization is ready to go</p>
           </div>
           <div class="content">
@@ -356,12 +512,12 @@ export async function sendWelcomeEmail(
             
             <div class="checklist">
               <h3>Quick Start Checklist</h3>
-              <div class="checklist-item">✓ Organization created with default content</div>
-              <div class="checklist-item">✓ Features enabled based on your tier</div>
-              <div class="checklist-item">⏳ Customize your branding and colors</div>
-              <div class="checklist-item">⏳ Add team members</div>
-              <div class="checklist-item">⏳ Review and update programs</div>
-              <div class="checklist-item">⏳ Set up custom domain (Premium)</div>
+              <div class="checklist-item">Organization created with default content</div>
+              <div class="checklist-item">Features enabled based on your tier</div>
+              <div class="checklist-item">Customize your branding and colors</div>
+              <div class="checklist-item">Add team members</div>
+              <div class="checklist-item">Review and update programs</div>
+              <div class="checklist-item">Set up custom domain (Premium)</div>
             </div>
             
             <h3>What's Next?</h3>
