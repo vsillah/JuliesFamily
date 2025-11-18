@@ -62,11 +62,11 @@ const STEPS = [
 
 // Feature definitions with tier requirements
 const FEATURES = [
-  // Basic tier features
-  { key: 'donation_forms', label: 'Donation Forms', description: 'Accept online donations', tier: 'basic' },
-  { key: 'lead_capture', label: 'Lead Capture', description: 'Collect visitor information', tier: 'basic' },
-  { key: 'email_notifications', label: 'Email Notifications', description: 'Automated email alerts', tier: 'basic' },
-  { key: 'content_management', label: 'Content Management', description: 'Manage programs and events', tier: 'basic' },
+  // Standard tier features
+  { key: 'donation_forms', label: 'Donation Forms', description: 'Accept online donations', tier: 'standard' },
+  { key: 'lead_capture', label: 'Lead Capture', description: 'Collect visitor information', tier: 'standard' },
+  { key: 'email_notifications', label: 'Email Notifications', description: 'Automated email alerts', tier: 'standard' },
+  { key: 'content_management', label: 'Content Management', description: 'Manage programs and events', tier: 'standard' },
   
   // Pro tier features
   { key: 'ab_testing', label: 'A/B Testing', description: 'Test and optimize content', tier: 'pro' },
@@ -81,7 +81,7 @@ const FEATURES = [
   { key: 'api_access', label: 'API Access', description: 'Integrate with external systems', tier: 'premium' },
 ];
 
-const TIER_ORDER = { basic: 0, pro: 1, premium: 2, enterprise: 3 };
+const TIER_ORDER = { standard: 0, pro: 1, premium: 2 };
 
 export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
@@ -109,7 +109,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
     resolver: zodResolver(provisioningWizardSchema),
     defaultValues: {
       name: "",
-      tier: "basic",
+      tier: "standard",
       existingWebsiteUrl: "",
       contactName: "",
       contactEmail: "",
@@ -326,8 +326,8 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="basic" data-testid="select-tier-basic">
-                            Basic - Essential features
+                          <SelectItem value="standard" data-testid="select-tier-standard">
+                            Standard - Essential features
                           </SelectItem>
                           <SelectItem value="pro" data-testid="select-tier-pro">
                             Pro - Advanced features

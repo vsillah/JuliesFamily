@@ -14,13 +14,13 @@ interface TierGateProps {
 }
 
 const tierIcons = {
-  [TIERS.BASIC]: Zap,
+  [TIERS.STANDARD]: Zap,
   [TIERS.PRO]: Sparkles,
   [TIERS.PREMIUM]: Crown,
 };
 
 const tierColors = {
-  [TIERS.BASIC]: 'text-muted-foreground',
+  [TIERS.STANDARD]: 'text-muted-foreground',
   [TIERS.PRO]: 'text-blue-600 dark:text-blue-400',
   [TIERS.PREMIUM]: 'text-amber-600 dark:text-amber-400',
 };

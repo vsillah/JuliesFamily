@@ -285,7 +285,7 @@ export default function AdminOrganizations() {
     resolver: zodResolver(createOrganizationWizardSchema),
     defaultValues: {
       name: "",
-      tier: "basic",
+      tier: "standard",
     },
   });
 
@@ -294,7 +294,7 @@ export default function AdminOrganizations() {
     resolver: zodResolver(editOrganizationSchema),
     defaultValues: {
       name: "",
-      tier: "basic",
+      tier: "standard",
       status: "active",
     },
   });
@@ -900,7 +900,7 @@ export default function AdminOrganizations() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent data-testid="select-org-tier-content">
-                        <SelectItem value="basic" data-testid="select-tier-basic">Basic</SelectItem>
+                        <SelectItem value="standard" data-testid="select-tier-standard">Standard</SelectItem>
                         <SelectItem value="pro" data-testid="select-tier-pro">Pro</SelectItem>
                         <SelectItem value="premium" data-testid="select-tier-premium">Premium</SelectItem>
                       </SelectContent>
@@ -986,7 +986,7 @@ export default function AdminOrganizations() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent data-testid="select-edit-org-tier-content">
-                        <SelectItem value="basic" data-testid="select-edit-tier-basic">Basic</SelectItem>
+                        <SelectItem value="standard" data-testid="select-edit-tier-standard">Standard</SelectItem>
                         <SelectItem value="pro" data-testid="select-edit-tier-pro">Pro</SelectItem>
                         <SelectItem value="premium" data-testid="select-edit-tier-premium">Premium</SelectItem>
                       </SelectContent>

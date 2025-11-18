@@ -984,8 +984,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Default to Basic tier if no organization
-      let tier = 'basic';
+      // Default to Standard tier if no organization
+      let tier = 'standard';
       let organizationId = null;
       let organizationName = null;
 
@@ -1039,8 +1039,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { tier, name } = req.body;
       
       // Validate tier if provided
-      if (tier && !['basic', 'pro', 'premium'].includes(tier)) {
-        return res.status(400).json({ message: "Invalid tier. Must be 'basic', 'pro', or 'premium'" });
+      if (tier && !['standard', 'pro', 'premium'].includes(tier)) {
+        return res.status(400).json({ message: "Invalid tier. Must be 'standard', 'pro', or 'premium'" });
       }
 
       const updates: any = {};

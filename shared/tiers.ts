@@ -1,5 +1,5 @@
 export const TIERS = {
-  BASIC: 'basic',
+  STANDARD: 'standard',
   PRO: 'pro',
   PREMIUM: 'premium'
 } as const;
@@ -42,7 +42,7 @@ export interface TierFeatures {
 }
 
 export const TIER_CONFIG: Record<Tier, TierFeatures> = {
-  [TIERS.BASIC]: {
+  [TIERS.STANDARD]: {
     // Core CRM - All tiers
     leadManagement: true,
     basicSegmentation: true,
@@ -153,7 +153,7 @@ export function getTierFeatures(tier: Tier): TierFeatures {
 }
 
 export function hasTierAccess(userTier: Tier, requiredTier: Tier): boolean {
-  const tierOrder = [TIERS.BASIC, TIERS.PRO, TIERS.PREMIUM];
+  const tierOrder = [TIERS.STANDARD, TIERS.PRO, TIERS.PREMIUM];
   const userIndex = tierOrder.indexOf(userTier);
   const requiredIndex = tierOrder.indexOf(requiredTier);
   return userIndex >= requiredIndex;

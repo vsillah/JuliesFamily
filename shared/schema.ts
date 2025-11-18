@@ -31,7 +31,7 @@ export const organizationRoleEnum = z.enum(['viewer', 'editor', 'org_admin', 'ow
 export type OrganizationRole = z.infer<typeof organizationRoleEnum>;
 
 // Organization tier enum for feature access control
-export const organizationTierEnum = z.enum(['basic', 'pro', 'premium', 'enterprise']);
+export const organizationTierEnum = z.enum(['standard', 'pro', 'premium']);
 export type OrganizationTier = z.infer<typeof organizationTierEnum>;
 
 // Organization status enum
@@ -51,7 +51,7 @@ export const organizations = pgTable("organizations", {
   primaryColor: varchar("primary_color").default('#3b82f6'), // Brand color
   domain: varchar("domain").unique(), // Optional custom domain (e.g., 'donate.redcross.org')
   status: varchar("status").notNull().default('active'), // active, suspended, pending
-  tier: varchar("tier").notNull().default('basic'), // basic, pro, premium, enterprise
+  tier: varchar("tier").notNull().default('standard'), // standard, pro, premium
   stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for billing
   subscriptionStatus: varchar("subscription_status").default('none'), // active, canceled, past_due, trialing, none
   displayOrder: integer("display_order").default(0), // Manual ordering for admin UI
@@ -71,7 +71,7 @@ export type Organization = typeof organizations.$inferSelect;
 // Only requires name and tier - other fields use database defaults
 export const createOrganizationWizardSchema = z.object({
   name: z.string().min(1, "Organization name is required"),
-  tier: organizationTierEnum.default('basic'),
+  tier: organizationTierEnum.default('standard'),
 });
 export type CreateOrganizationWizard = z.infer<typeof createOrganizationWizardSchema>;
 
@@ -79,7 +79,7 @@ export type CreateOrganizationWizard = z.infer<typeof createOrganizationWizardSc
 export const provisioningWizardSchema = z.object({
   // Step 1: Organization Details
   name: z.string().min(1, "Organization name is required").max(100),
-  tier: organizationTierEnum.default('basic'),
+  tier: organizationTierEnum.default('standard'),
   existingWebsiteUrl: z.string().url().optional().or(z.literal('')),
   contactName: z.string().min(1, "Contact name is required").max(100),
   contactEmail: z.string().email("Valid email required"),

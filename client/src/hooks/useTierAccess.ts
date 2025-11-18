@@ -12,7 +12,7 @@ export function useTierAccess() {
     queryKey: ['/api/organization/tier'],
   });
 
-  const currentTier: Tier = data?.tier || TIERS.BASIC;
+  const currentTier: Tier = data?.tier || TIERS.STANDARD;
   const features: TierFeatures = getTierFeatures(currentTier);
 
   const hasAccess = (requiredTier: Tier): boolean => {
@@ -40,7 +40,7 @@ export function useTierAccess() {
     isWithinLimit,
     isLoading,
     error,
-    isBasic: currentTier === TIERS.BASIC,
+    isStandard: currentTier === TIERS.STANDARD,
     isPro: currentTier === TIERS.PRO || currentTier === TIERS.PREMIUM,
     isPremium: currentTier === TIERS.PREMIUM,
   };
