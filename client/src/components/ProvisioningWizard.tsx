@@ -701,6 +701,97 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                       </Alert>
                     )}
 
+                    {/* Logo and Theme Colors Preview */}
+                    {(scrapedData.logo || scrapedData.themeColors) && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Sparkles className="h-4 w-4" />
+                            Extracted Branding
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            {scrapedData.logo && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">Logo</p>
+                                <div className="flex items-center gap-3 p-3 bg-muted rounded-md">
+                                  <img 
+                                    src={scrapedData.logo} 
+                                    alt="Extracted logo" 
+                                    className="h-12 w-12 object-contain bg-white rounded"
+                                    data-testid="img-extracted-logo"
+                                  />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs text-muted-foreground truncate">{scrapedData.logo}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                            {scrapedData.themeColors && (
+                              <div>
+                                <p className="text-sm font-medium mb-2">Theme Colors</p>
+                                <div className="grid grid-cols-2 gap-2">
+                                  {scrapedData.themeColors.primary && (
+                                    <div className="flex items-center gap-2">
+                                      <div 
+                                        className="h-8 w-8 rounded border"
+                                        style={{ backgroundColor: scrapedData.themeColors.primary }}
+                                        data-testid="color-primary"
+                                      />
+                                      <div>
+                                        <p className="text-xs font-medium">Primary</p>
+                                        <p className="text-xs text-muted-foreground">{scrapedData.themeColors.primary}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {scrapedData.themeColors.accent && (
+                                    <div className="flex items-center gap-2">
+                                      <div 
+                                        className="h-8 w-8 rounded border"
+                                        style={{ backgroundColor: scrapedData.themeColors.accent }}
+                                        data-testid="color-accent"
+                                      />
+                                      <div>
+                                        <p className="text-xs font-medium">Accent</p>
+                                        <p className="text-xs text-muted-foreground">{scrapedData.themeColors.accent}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {scrapedData.themeColors.background && (
+                                    <div className="flex items-center gap-2">
+                                      <div 
+                                        className="h-8 w-8 rounded border"
+                                        style={{ backgroundColor: scrapedData.themeColors.background }}
+                                        data-testid="color-background"
+                                      />
+                                      <div>
+                                        <p className="text-xs font-medium">Background</p>
+                                        <p className="text-xs text-muted-foreground">{scrapedData.themeColors.background}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {scrapedData.themeColors.text && (
+                                    <div className="flex items-center gap-2">
+                                      <div 
+                                        className="h-8 w-8 rounded border"
+                                        style={{ backgroundColor: scrapedData.themeColors.text }}
+                                        data-testid="color-text"
+                                      />
+                                      <div>
+                                        <p className="text-xs font-medium">Text</p>
+                                        <p className="text-xs text-muted-foreground">{scrapedData.themeColors.text}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+
                     {/* Detected Personas */}
                     <Card>
                       <CardHeader>

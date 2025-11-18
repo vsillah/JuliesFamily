@@ -103,6 +103,13 @@ export const provisioningWizardSchema = z.object({
   
   // Optional: Scraped data from website import
   scrapedData: z.object({
+    logo: z.string().nullable().optional(),
+    themeColors: z.object({
+      primary: z.string().optional(),
+      accent: z.string().optional(),
+      background: z.string().optional(),
+      text: z.string().optional(),
+    }).nullable().optional(),
     personas: z.array(z.string()),
     programs: z.array(z.object({
       title: z.string(),
