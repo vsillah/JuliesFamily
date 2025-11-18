@@ -22,6 +22,7 @@ import { StudentDashboard } from "@/components/StudentDashboard";
 import { VolunteerDashboard } from "@/components/VolunteerDashboard";
 import { useContentAvailability, type VisibleSections } from "@/hooks/useContentAvailability";
 import type { ContentItem } from "@shared/schema";
+import { LoadRipple } from "@/components/ui/load-ripple";
 
 // Default sections during loading - campaign-impact defaults to false (persona-specific)
 const DEFAULT_SECTIONS: VisibleSections = {
@@ -109,7 +110,11 @@ export default function Home() {
   const isContentReady = !isPersonaLoading && !heroLoading && (!hasHeroContent || !heroImageLoading);
   
   if (!isContentReady) {
-    return null;
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <LoadRipple />
+      </div>
+    );
   }
 
   return (

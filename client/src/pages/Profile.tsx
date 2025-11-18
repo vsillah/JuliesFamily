@@ -19,6 +19,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { LoadRipple } from "@/components/ui/load-ripple";
 
 type ProfileFormValues = z.infer<typeof updateUserProfileSchema>;
 
@@ -210,8 +211,8 @@ export default function Profile() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex min-h-screen items-center justify-center">
+        <LoadRipple />
       </div>
     );
   }

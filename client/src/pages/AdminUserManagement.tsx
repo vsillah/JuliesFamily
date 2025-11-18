@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { LoadRipple } from "@/components/ui/load-ripple";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -407,8 +408,8 @@ export default function AdminUserManagement() {
             </div>
 
             {isLoading ? (
-              <div className="text-center py-12 text-muted-foreground">
-                Loading users...
+              <div className="flex min-h-screen items-center justify-center">
+                <LoadRipple />
               </div>
             ) : filteredUsers.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
