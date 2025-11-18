@@ -1275,7 +1275,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllOrganizations(): Promise<Organization[]> {
-    return await db.select().from(organizations).orderBy(desc(organizations.createdAt));
+    return await db.select().from(organizations).orderBy(organizations.displayOrder, desc(organizations.createdAt));
   }
 
   async updateOrganization(id: string, updates: Partial<InsertOrganization>): Promise<Organization | undefined> {

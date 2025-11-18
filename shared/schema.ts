@@ -54,6 +54,7 @@ export const organizations = pgTable("organizations", {
   tier: varchar("tier").notNull().default('basic'), // basic, pro, premium
   stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for billing
   subscriptionStatus: varchar("subscription_status").default('none'), // active, canceled, past_due, trialing, none
+  displayOrder: integer("display_order").default(0), // Manual ordering for admin UI
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

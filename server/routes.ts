@@ -480,6 +480,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update organization (super admin only)
+  app.patch('/api/admin/organizations/:orgId', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { orgId } = req.params;
+      const updates = req.body;
+
+      // Validate allowed fields
+      const allowedFields = ['name', 'tier', 'status', 'displayOrder', 'logo', 'primaryColor'];
+      const filteredUpdates: any = {};
+      
+      for (const field of allowedFields) {
+        if (updates[field] !== undefined) {
+          filteredUpdates[field] = updates[field];
+        }
+      }
+
+      if (Object.keys(filteredUpdates).length === 0) {
+        return res.status(400).json({ message: 'No valid fields to update' });
+      }
+
+      const updatedOrg = await storage.updateOrganization(orgId, filteredUpdates);
+      
+      if (!updatedOrg) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+
+      console.log(`[Organizations] Updated organization ${orgId}:`, Object.keys(filteredUpdates));
+      res.json(updatedOrg);
+    } catch (error: any) {
+      console.error('[Organizations] Error updating organization:', error);
+      res.status(500).json({ message: error.message || 'Failed to update organization' });
+    }
+  });
+
+  // Bulk update organization order (super admin only)
+  app.patch('/api/admin/organizations/bulk/reorder', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { updates } = req.body; // Array of { id, displayOrder }
+
+      if (!Array.isArray(updates) || updates.length === 0) {
+        return res.status(400).json({ message: 'Updates array is required' });
+      }
+
+      // Update each organization's displayOrder
+      await Promise.all(
+        updates.map(({ id, displayOrder }) =>
+          storage.updateOrganization(id, { displayOrder })
+        )
+      );
+
+      console.log(`[Organizations] Bulk reordered ${updates.length} organizations`);
+      res.json({ message: 'Organizations reordered successfully' });
+    } catch (error: any) {
+      console.error('[Organizations] Error bulk reordering:', error);
+      res.status(500).json({ message: error.message || 'Failed to reorder organizations' });
+    }
+  });
+
+  // Bulk update organization status (super admin only)
+  app.patch('/api/admin/organizations/bulk/status', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { organizationIds, status } = req.body;
+
+      if (!Array.isArray(organizationIds) || organizationIds.length === 0) {
+        return res.status(400).json({ message: 'organizationIds array is required' });
+      }
+
+      if (!['active', 'suspended', 'pending'].includes(status)) {
+        return res.status(400).json({ message: 'Invalid status value' });
+      }
+
+      // Update each organization's status
+      await Promise.all(
+        organizationIds.map(id =>
+          storage.updateOrganization(id, { status })
+        )
+      );
+
+      console.log(`[Organizations] Bulk updated status to "${status}" for ${organizationIds.length} organizations`);
+      res.json({ message: `${organizationIds.length} organizations updated to ${status}` });
+    } catch (error: any) {
+      console.error('[Organizations] Error bulk updating status:', error);
+      res.status(500).json({ message: error.message || 'Failed to update organization status' });
+    }
+  });
+
   // Get current organization context (for super admins)
   // Public organization endpoint - accessible to all users
   app.get('/api/organization/current', async (req, res) => {
