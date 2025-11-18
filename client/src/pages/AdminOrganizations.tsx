@@ -463,8 +463,8 @@ export default function AdminOrganizations() {
 
   // Filter organizations based on search query
   const filteredOrganizations = organizations?.filter((org) =>
-    org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.slug.toLowerCase().includes(searchQuery.toLowerCase())
+    (org.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (org.slug || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleSwitchOrg = async (orgId: string) => {
