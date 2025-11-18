@@ -8,10 +8,21 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Feature Toggle System Complete (November 17, 2025)
+**Production-Ready**: Fully tested multi-tenant feature flag system enabling organization-specific feature control via admin UI and programmatic access.
+
+**Implementation Summary**:
+- **Backend API**: 5 org-scoped endpoints for feature CRUD (GET/POST/DELETE) with super admin protection
+- **Frontend Utilities**: `useFeatureEnabled` hook and `FeatureGate` component for conditional rendering
+- **Admin UI**: Full-featured management interface at `/admin/feature-toggles` with two-column layout (organizations list + features grid)
+- **Database**: `organization_features` table with unique constraint on (organization_id, feature_key)
+- **Security**: Complete tenant isolation via org-scoped storage wrapper with zero cross-tenant leakage risk
+- **Testing**: End-to-end validation passed - full lifecycle tested (create, toggle, delete)
+
+**Org-Scoped Storage Coverage**: **286/331 methods (86%)** - includes 5 feature toggle methods
+
 ### Org-Scoped Storage Expansion Complete (November 17, 2025)
 **Major Achievement**: Expanded org-scoped storage coverage from 38% to 84.4% by implementing 145 new tenant-isolated methods across 5 priority phases, ensuring comprehensive multi-tenant data protection.
-
-**Org-Scoped Storage Coverage**: **271/321 methods (84.4%)** - up from 110 methods (38%)
 
 **Implementation Summary**:
 - **Priority 1 - Financial & Communication (50 methods)**: Donation operations, campaigns, saved payment methods, email/SMS tracking, unsubscribe management, lead assignments - ✓ Architect approved
@@ -68,6 +79,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Bulk SMS Campaign System**: Comprehensive bulk messaging platform with persona×funnel stage targeting, recipient preview, async processing, and campaign history tracking.
 -   **Hybrid Card Reordering System**: Three-method content reordering interface (drag-and-drop, arrow buttons, jump-to-position dropdown) with transactional batch updates and optimistic UI.
 -   **Student Projects Carousel with Passion Badges**: Passion-filtered carousel showcasing student work to donors, with OIDC passions persistence and visual passion badges.
+-   **Feature Toggle System**: Production-ready multi-tenant feature flag platform with super admin UI for organization-specific feature control, `useFeatureEnabled` hook for frontend conditional rendering, and `FeatureGate` component for declarative feature gating.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are handled by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a **two-tier RBAC system**:
