@@ -45,6 +45,13 @@ KinFlo Admins can switch between organizations using a session override.
 
 The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
 
+**Subscription Tiers**:
+-   **Three-Tier Model**: Standard, Pro, and Premium (rationalized from previous Basic/Pro/Premium/Enterprise)
+-   **Tier Hierarchy**: Standard (0) < Pro (1) < Premium (2) for feature gating
+-   **Feature Gating**: Implemented via `shared/tiers.ts` with `TIERS` constants, `hasTierAccess()` function, and `getTierFeatures()` utilities
+-   **Frontend Components**: `TierGate` component with upgrade prompts, `useTierAccess()` hook for conditional rendering, and `useFeatureEnabled()` for feature flags
+-   **Default Tier**: Organizations default to Standard tier if no tier is specified
+
 **Multi-Tenant Architecture**:
 -   **Database Schema**: Nullable `organizationId` column for tenant isolation in existing tables; new tables for `organizations`, `organization_users`, `custom_domains`, and `shared_templates`. Organization names have a unique constraint to prevent data collisions.
 -   **Domain Detection Middleware**: Detects organization from custom verified domains or defaults. Host header validation prevents tenant spoofing.
