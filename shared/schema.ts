@@ -31,7 +31,7 @@ export const organizationRoleEnum = z.enum(['viewer', 'editor', 'org_admin', 'ow
 export type OrganizationRole = z.infer<typeof organizationRoleEnum>;
 
 // Organization tier enum for feature access control
-export const organizationTierEnum = z.enum(['basic', 'pro', 'premium']);
+export const organizationTierEnum = z.enum(['basic', 'pro', 'premium', 'enterprise']);
 export type OrganizationTier = z.infer<typeof organizationTierEnum>;
 
 // Organization status enum
@@ -51,7 +51,7 @@ export const organizations = pgTable("organizations", {
   primaryColor: varchar("primary_color").default('#3b82f6'), // Brand color
   domain: varchar("domain").unique(), // Optional custom domain (e.g., 'donate.redcross.org')
   status: varchar("status").notNull().default('active'), // active, suspended, pending
-  tier: varchar("tier").notNull().default('basic'), // basic, pro, premium
+  tier: varchar("tier").notNull().default('basic'), // basic, pro, premium, enterprise
   stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for billing
   subscriptionStatus: varchar("subscription_status").default('none'), // active, canceled, past_due, trialing, none
   displayOrder: integer("display_order").default(0), // Manual ordering for admin UI

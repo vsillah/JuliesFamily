@@ -81,7 +81,7 @@ const FEATURES = [
   { key: 'api_access', label: 'API Access', description: 'Integrate with external systems', tier: 'premium' },
 ];
 
-const TIER_ORDER = { basic: 0, pro: 1, premium: 2 };
+const TIER_ORDER = { basic: 0, pro: 1, premium: 2, enterprise: 3 };
 
 export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
