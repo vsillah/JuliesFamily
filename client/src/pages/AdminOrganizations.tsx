@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus, ExternalLink, Sparkles, GripVertical, Pencil, CheckSquare, XSquare } from "lucide-react";
+import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus, ExternalLink, Sparkles, GripVertical, Pencil, CheckSquare, XSquare, Search, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -81,7 +81,8 @@ function SortableOrgCard({
   onSelect, 
   onSwitchOrg, 
   onViewWebsite, 
-  onEdit 
+  onEdit,
+  onDelete 
 }: {
   org: Organization;
   isCurrentOrg: boolean;
@@ -92,6 +93,7 @@ function SortableOrgCard({
   onSwitchOrg: (id: string) => void;
   onViewWebsite: (id: string) => void;
   onEdit: (org: Organization) => void;
+  onDelete: (org: Organization) => void;
 }) {
   const {
     attributes,
@@ -150,6 +152,14 @@ function SortableOrgCard({
                 data-testid={`button-edit-${org.id}`}
               >
                 <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => onDelete(org)}
+                data-testid={`button-delete-${org.id}`}
+              >
+                <Trash2 className="h-4 w-4" />
               </Button>
               <div
                 {...attributes}
@@ -255,6 +265,9 @@ export default function AdminOrganizations() {
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
   const [editingOrg, setEditingOrg] = useState<Organization | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [orgToDelete, setOrgToDelete] = useState<Organization | null>(null);
   const [, setLocation] = useLocation();
   const { currentOrg, isLoading: currentLoading, switchOrganization, clearOverride } = useOrganization();
 
@@ -424,6 +437,36 @@ export default function AdminOrganizations() {
     },
   });
 
+  // Delete organization mutation
+  const deleteOrgMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest('DELETE', `/api/admin/organizations/${id}`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Organization Deleted",
+        description: data.message,
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });
+      setDeleteConfirmOpen(false);
+      setOrgToDelete(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete organization",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Filter organizations based on search query
+  const filteredOrganizations = organizations?.filter((org) =>
+    org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    org.slug.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const handleSwitchOrg = async (orgId: string) => {
     setIsSwitching(true);
     try {
@@ -555,6 +598,16 @@ export default function AdminOrganizations() {
     bulkStatusMutation.mutate({ organizationIds: selectedOrgs, status: 'suspended' });
   };
 
+  const handleOpenDeleteConfirm = (org: Organization) => {
+    setOrgToDelete(org);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleDeleteOrg = () => {
+    if (!orgToDelete) return;
+    deleteOrgMutation.mutate(orgToDelete.id);
+  };
+
   if (orgsLoading || currentLoading) {
     return (
       <div className="container mx-auto p-6 space-y-6">
@@ -627,6 +680,19 @@ export default function AdminOrganizations() {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search organizations by name or slug..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+          data-testid="input-search-organizations"
+        />
+      </div>
+
       {/* Bulk Actions Toolbar */}
       {isSelectMode && (
         <Card>
@@ -692,11 +758,11 @@ export default function AdminOrganizations() {
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={organizations?.map(org => org.id) || []}
+          items={filteredOrganizations?.map(org => org.id) || []}
           strategy={verticalListSortingStrategy}
         >
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {organizations?.map((org) => {
+            {filteredOrganizations?.map((org) => {
               const isCurrentOrg = org.id === currentOrg?.organizationId;
               const isSelected = selectedOrgs.includes(org.id);
               
@@ -712,6 +778,7 @@ export default function AdminOrganizations() {
                   onSwitchOrg={handleSwitchOrg}
                   onViewWebsite={handleViewWebsite}
                   onEdit={handleOpenEdit}
+                  onDelete={handleOpenDeleteConfirm}
                 />
               );
             })}
@@ -719,7 +786,17 @@ export default function AdminOrganizations() {
         </SortableContext>
       </DndContext>
 
-      {organizations && organizations.length === 0 && (
+      {filteredOrganizations && filteredOrganizations.length === 0 && searchQuery && (
+        <Card>
+          <CardContent className="py-8">
+            <p className="text-center text-muted-foreground">
+              No organizations match your search "{searchQuery}".
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {organizations && organizations.length === 0 && !searchQuery && (
         <Card>
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">
@@ -920,6 +997,43 @@ export default function AdminOrganizations() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog 
+        open={deleteConfirmOpen} 
+        onOpenChange={setDeleteConfirmOpen}
+      >
+        <DialogContent data-testid="dialog-delete-confirm">
+          <DialogHeader>
+            <DialogTitle data-testid="text-delete-title">Delete Organization</DialogTitle>
+            <DialogDescription data-testid="text-delete-description">
+              Are you sure you want to delete "{orgToDelete?.name}"? This action cannot be undone and will remove all associated data.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDeleteConfirmOpen(false);
+                setOrgToDelete(null);
+              }}
+              data-testid="button-cancel-delete"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDeleteOrg}
+              disabled={deleteOrgMutation.isPending}
+              data-testid="button-confirm-delete"
+            >
+              {deleteOrgMutation.isPending ? "Deleting..." : "Delete Organization"}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
