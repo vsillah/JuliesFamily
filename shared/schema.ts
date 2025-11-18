@@ -668,7 +668,7 @@ export type ImageAsset = typeof imageAssets.$inferSelect;
 export const contentItems = pgTable("content_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
-  type: varchar("type").notNull(), // 'service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card'
+  type: varchar("type").notNull(), // 'service', 'event', 'program', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card'
   title: text("title").notNull(),
   description: text("description"),
   imageName: varchar("image_name"), // Cloudinary image name (legacy)
@@ -676,7 +676,7 @@ export const contentItems = pgTable("content_items", {
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
   passionTags: text("passion_tags").array(), // Array of passion tags for targeting (e.g., ['literacy', 'stem', 'arts'])
-  metadata: jsonb("metadata"), // Additional data: For service: number, priority, linkedProgramDetailId. For program_detail: programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona. For event/testimonial: location, date, rating, icon. For socialMedia/video: videoId, category, platform. For student_project/student_testimonial: submittingUserId, submittingUserEmail, submittingUserName, programId, classId, files: [{url, alt, uploadedAt}], status: 'pending'|'approved'|'rejected', reviewedBy, reviewedAt, rejectionReason. For student_dashboard_card: buttonText, buttonLink, goalText, motivationalText. For volunteer_dashboard_card: buttonText, buttonLink, goalText, motivationalText
+  metadata: jsonb("metadata"), // Additional data: For service: number, priority, linkedProgramDetailId. For program: persona, funnelStage, needsClassification (boolean flag for scraped content). For program_detail: programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona. For event: startDate, location, registrationLink, persona, funnelStage, needsClassification. For testimonial: location, date, rating, icon. For socialMedia/video: videoId, category, platform. For student_project/student_testimonial: submittingUserId, submittingUserEmail, submittingUserName, programId, classId, files: [{url, alt, uploadedAt}], status: 'pending'|'approved'|'rejected', reviewedBy, reviewedAt, rejectionReason. For student_dashboard_card: buttonText, buttonLink, goalText, motivationalText. For volunteer_dashboard_card: buttonText, buttonLink, goalText, motivationalText
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -693,7 +693,7 @@ export type ContentItem = typeof contentItems.$inferSelect;
 
 // Update schema for content items - whitelisted fields only
 export const updateContentItemSchema = z.object({
-  type: z.enum(['service', 'event', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card']).optional(),
+  type: z.enum(['service', 'event', 'program', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card']).optional(),
   title: z.string().optional(),
   description: z.string().optional(),
   imageName: z.string().optional(),

@@ -240,7 +240,9 @@ async function seedDefaultContent(tx: typeof db, organizationId: string, orgName
  */
 
 /**
- * Seed programs from scraped data
+ * Seed programs from scraped data into content_items
+ * Programs are stored with default persona='student' and needsClassification=true
+ * Admins can reclassify them later in the Content Manager
  */
 async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrapedPrograms: any[]) {
   if (scrapedPrograms.length === 0) return [];
@@ -248,17 +250,26 @@ async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrape
   const programsToCreate = scrapedPrograms.map(program => ({
     id: nanoid(),
     organizationId,
-    name: program.title,
+    type: 'program' as const,
+    title: program.title,
     description: program.description || 'No description available',
-    programType: 'student_program' as const, // Default to student_program for scraped content
+    order: 0,
     isActive: true,
+    metadata: {
+      persona: 'student', // Default persona for scraped programs
+      funnelStage: 'awareness', // Default funnel stage
+      needsClassification: true, // Flag for admin review
+      url: program.url,
+    },
   }));
   
-  return await tx.insert(programs).values(programsToCreate).returning();
+  return await tx.insert(contentItems).values(programsToCreate).returning();
 }
 
 /**
- * Seed events from scraped data
+ * Seed events from scraped data into content_items
+ * Events are stored with default persona='student' and needsClassification=true
+ * Admins can reclassify them later in the Content Manager
  */
 async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedEvents: any[]) {
   if (scrapedEvents.length === 0) return [];
@@ -275,6 +286,9 @@ async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedE
       startDate: event.date, // Match existing schema
       location: event.location,
       registrationLink: event.url, // Match existing schema
+      persona: 'student', // Default persona for scraped events
+      funnelStage: 'awareness', // Default funnel stage
+      needsClassification: true, // Flag for admin review
     },
   }));
   
