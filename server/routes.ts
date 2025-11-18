@@ -400,19 +400,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Scrape website for content and persona detection (super admin only)
   app.post('/api/admin/organizations/scrape-website', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
-      const { url, programsUrl, eventsUrl, testimonialsUrl } = req.body;
+      const { url, programsUrls, eventsUrls, testimonialsUrls } = req.body;
       
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ message: 'URL is required' });
       }
       
-      // Import and call the enhanced content extractor
+      // Import and call the enhanced content extractor with multi-URL support
       const { scrapeWebsiteContent } = await import('./provisioning/contentExtractor');
       const result = await scrapeWebsiteContent({
         baseUrl: url,
-        programsUrl: programsUrl || undefined,
-        eventsUrl: eventsUrl || undefined,
-        testimonialsUrl: testimonialsUrl || undefined,
+        programsUrls: programsUrls || [],
+        eventsUrls: eventsUrls || [],
+        testimonialsUrls: testimonialsUrls || [],
       });
       
       console.log(`[Scraper] Scraped ${url}:`, {

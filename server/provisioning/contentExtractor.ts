@@ -90,12 +90,13 @@ export async function extractThemeColors(html: string): Promise<{
 
 /**
  * Enhanced multi-URL scraping with content-type-specific extraction
+ * Supports up to 5 URLs per content section (programs, events, testimonials)
  */
 export async function scrapeWebsiteContent(params: {
   baseUrl: string;
-  programsUrl?: string;
-  eventsUrl?: string;
-  testimonialsUrl?: string;
+  programsUrls?: string[];
+  eventsUrls?: string[];
+  testimonialsUrls?: string[];
 }): Promise<{
   logo: string | null;
   themeColors: any | null;
@@ -132,40 +133,48 @@ export async function scrapeWebsiteContent(params: {
     logo = await extractLogo(baseHtml, params.baseUrl);
     themeColors = await extractThemeColors(baseHtml);
     
-    // Scrape programs if URL provided
-    if (params.programsUrl) {
-      try {
-        const programsData = await scrapeProgramsPage(params.programsUrl);
-        programs.push(...programsData.programs);
-        programsData.personas.forEach(p => detectedPersonas.add(p));
-      } catch (error: any) {
-        errors.push(`Failed to scrape programs: ${error.message}`);
+    // Scrape programs from all provided URLs (up to 5)
+    if (params.programsUrls && params.programsUrls.length > 0) {
+      for (const programUrl of params.programsUrls.slice(0, 5)) {
+        try {
+          const programsData = await scrapeProgramsPage(programUrl);
+          programs.push(...programsData.programs);
+          programsData.personas.forEach(p => detectedPersonas.add(p));
+        } catch (error: any) {
+          errors.push(`Failed to scrape programs from ${programUrl}: ${error.message}`);
+        }
       }
     }
     
-    // Scrape events if URL provided
-    if (params.eventsUrl) {
-      try {
-        const eventsData = await scrapeEventsPage(params.eventsUrl);
-        events.push(...eventsData.events);
-      } catch (error: any) {
-        errors.push(`Failed to scrape events: ${error.message}`);
+    // Scrape events from all provided URLs (up to 5)
+    if (params.eventsUrls && params.eventsUrls.length > 0) {
+      for (const eventUrl of params.eventsUrls.slice(0, 5)) {
+        try {
+          const eventsData = await scrapeEventsPage(eventUrl);
+          events.push(...eventsData.events);
+        } catch (error: any) {
+          errors.push(`Failed to scrape events from ${eventUrl}: ${error.message}`);
+        }
       }
     }
     
-    // Scrape testimonials if URL provided
-    if (params.testimonialsUrl) {
-      try {
-        const testimonialsData = await scrapeTestimonialsPage(params.testimonialsUrl);
-        testimonials.push(...testimonialsData.testimonials);
-        testimonialsData.personas.forEach(p => detectedPersonas.add(p));
-      } catch (error: any) {
-        errors.push(`Failed to scrape testimonials: ${error.message}`);
+    // Scrape testimonials from all provided URLs (up to 5)
+    if (params.testimonialsUrls && params.testimonialsUrls.length > 0) {
+      for (const testimonialUrl of params.testimonialsUrls.slice(0, 5)) {
+        try {
+          const testimonialsData = await scrapeTestimonialsPage(testimonialUrl);
+          testimonials.push(...testimonialsData.testimonials);
+          testimonialsData.personas.forEach(p => detectedPersonas.add(p));
+        } catch (error: any) {
+          errors.push(`Failed to scrape testimonials from ${testimonialUrl}: ${error.message}`);
+        }
       }
     }
     
     // If no specific URLs provided, try to extract from homepage
-    if (!params.programsUrl && !params.eventsUrl && !params.testimonialsUrl) {
+    if ((!params.programsUrls || params.programsUrls.length === 0) && 
+        (!params.eventsUrls || params.eventsUrls.length === 0) && 
+        (!params.testimonialsUrls || params.testimonialsUrls.length === 0)) {
       const homepageData = await scrapeHomepage(baseHtml, params.baseUrl);
       programs.push(...homepageData.programs);
       events.push(...homepageData.events);

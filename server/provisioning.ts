@@ -355,10 +355,10 @@ export async function provisionOrganization(data: ProvisioningWizard) {
         status: 'active',
       };
       
-      // Add URL mappings if provided
-      if (data.programsUrl) orgData.programsUrl = data.programsUrl;
-      if (data.eventsUrl) orgData.eventsUrl = data.eventsUrl;
-      if (data.testimonialsUrl) orgData.testimonialsUrl = data.testimonialsUrl;
+      // Add URL mappings if provided (arrays of up to 5 URLs each)
+      if (data.programsUrls && data.programsUrls.length > 0) orgData.programsUrls = data.programsUrls;
+      if (data.eventsUrls && data.eventsUrls.length > 0) orgData.eventsUrls = data.eventsUrls;
+      if (data.testimonialsUrls && data.testimonialsUrls.length > 0) orgData.testimonialsUrls = data.testimonialsUrls;
       
       // Add extracted logo and theme colors from scraped data
       if (data.scrapedData) {
