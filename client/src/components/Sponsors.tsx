@@ -2,16 +2,6 @@ import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { useOrganization } from "@/contexts/OrganizationContext";
 import type { ContentItem, SponsorsSectionMetadata } from "@shared/schema";
-import cummingsLogo from "@assets/CumminsFoundationlogo_1762691811373.webp";
-import pierceLogo from "@assets/Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp";
-import candidLogo from "@assets/CandidAwardImg.jpg_1762691811371.webp";
-
-// Logo mapping for static asset resolution
-const logoMap: Record<string, string> = {
-  "CumminsFoundationlogo_1762691811373.webp": cummingsLogo,
-  "Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp": pierceLogo,
-  "CandidAwardImg.jpg_1762691811371.webp": candidLogo,
-};
 
 export default function Sponsors() {
   const { currentOrg } = useOrganization();
@@ -51,29 +41,24 @@ export default function Sponsors() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {metadata.sponsors.map((sponsor, index) => {
-            // Resolve logo URL from mapping or use as-is if it's a full URL
-            const logoSrc = logoMap[sponsor.logoUrl] || sponsor.logoUrl;
-            
-            return (
-              <Card key={index} className="p-8 text-center" data-testid={`card-sponsor-${index}`}>
-                <div className={`flex items-center justify-center ${index === 0 ? 'h-32 w-48' : 'h-32 w-32'} mx-auto mb-4`}>
-                  <img 
-                    src={logoSrc} 
-                    alt={`${sponsor.name} logo`}
-                    className={`h-full w-full object-contain ${index < 2 ? 'mix-blend-multiply' : ''}`}
-                    data-testid={`img-sponsor-logo-${index}`}
-                  />
-                </div>
-                <h3 className="font-semibold text-lg mb-2" data-testid={`text-sponsor-name-${index}`}>
-                  {sponsor.name}
-                </h3>
-                <p className="text-sm text-muted-foreground" data-testid={`text-sponsor-description-${index}`}>
-                  {sponsor.description}
-                </p>
-              </Card>
-            );
-          })}
+          {metadata.sponsors.map((sponsor, index) => (
+            <Card key={index} className="p-8 text-center" data-testid={`card-sponsor-${index}`}>
+              <div className={`flex items-center justify-center ${index === 0 ? 'h-32 w-48' : 'h-32 w-32'} mx-auto mb-4`}>
+                <img 
+                  src={sponsor.logoUrl} 
+                  alt={`${sponsor.name} logo`}
+                  className={`h-full w-full object-contain ${index < 2 ? 'mix-blend-multiply' : ''}`}
+                  data-testid={`img-sponsor-logo-${index}`}
+                />
+              </div>
+              <h3 className="font-semibold text-lg mb-2" data-testid={`text-sponsor-name-${index}`}>
+                {sponsor.name}
+              </h3>
+              <p className="text-sm text-muted-foreground" data-testid={`text-sponsor-description-${index}`}>
+                {sponsor.description}
+              </p>
+            </Card>
+          ))}
         </div>
       </div>
     </section>
