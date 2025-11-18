@@ -34,13 +34,13 @@ export default function AdminDashboard() {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
 
-  // Fetch analytics data
-  const { data: analytics } = useQuery<any>({
+  // Fetch analytics data (Premium tier feature)
+  const { data: analytics, isError: analyticsError } = useQuery<any>({
     queryKey: ["/api/admin/analytics"],
     retry: false,
   });
 
-  // Fetch leads with combined filters
+  // Fetch leads with combined filters (also Premium tier)
   const queryParams = new URLSearchParams();
   if (selectedPersona !== "all") queryParams.append("persona", selectedPersona);
   if (selectedFunnelStage !== "all") queryParams.append("funnelStage", selectedFunnelStage);
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
   const queryString = queryParams.toString();
   const leadsUrl = queryString ? `/api/admin/leads?${queryString}` : "/api/admin/leads";
 
-  const { data: leads = [] } = useQuery<Lead[]>({
+  const { data: leads = [], isError: leadsError } = useQuery<Lead[]>({
     queryKey: [leadsUrl],
     retry: false,
   });
@@ -61,14 +61,8 @@ export default function AdminDashboard() {
     return null;
   }
 
-  // Show loading state
-  if (!analytics) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading dashboard...</div>
-      </div>
-    );
-  }
+  // Check if Premium features are unavailable (likely tier restriction)
+  const isPremiumRestricted = analyticsError && leadsError;
 
   const personaLabels: Record<string, string> = {
     student: "Adult Education Student",
@@ -91,6 +85,65 @@ export default function AdminDashboard() {
     decision: "bg-green-500",
     retention: "bg-purple-500",
   };
+
+  // Show tier restriction message if Premium features unavailable
+  if (isPremiumRestricted) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <Breadcrumbs items={[{ label: "Admin Dashboard" }]} />
+          <Card className="mt-8">
+            <CardHeader>
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-2xl">Premium Feature</CardTitle>
+                  <CardDescription className="mt-2">
+                    The CRM Dashboard and analytics features require a Premium subscription tier.
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Upgrade to Premium to unlock:
+                </p>
+                <ul className="space-y-2 text-sm">
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+                    <span>Lead management and CRM pipeline</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+                    <span>Analytics and funnel tracking</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+                    <span>A/B testing and optimization</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5" />
+                    <span>Email and SMS campaign management</span>
+                  </li>
+                </ul>
+                <div className="pt-4">
+                  <Link href="/admin/organizations">
+                    <Button variant="default" data-testid="button-manage-org">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Manage Organization Settings
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
