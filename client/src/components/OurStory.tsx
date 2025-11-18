@@ -35,7 +35,7 @@ export default function OurStory() {
 
   // Fetch story section from database (returns array)
   const { data: storyDataArray = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, '/api/content/type/story_section'],
+    queryKey: ['/api/content/type/story_section', currentOrg?.organizationId],
     enabled: !!currentOrg,
   });
 

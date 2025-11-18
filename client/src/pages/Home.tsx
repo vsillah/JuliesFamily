@@ -163,11 +163,7 @@ export default function Home() {
         </section>
       )}
 
-      {sections.impact && (
-        <section id="impact" data-testid="section-impact">
-          <ImpactStats />
-        </section>
-      )}
+      <ImpactStats />
       
       <OurStory />
       

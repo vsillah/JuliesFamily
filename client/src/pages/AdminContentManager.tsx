@@ -481,12 +481,12 @@ export default function AdminContentManager() {
   });
 
   const { data: impactSections = [], isLoading: impactSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/impact_section"],
+    queryKey: ["/api/content/type/impact_section", currentOrg?.organizationId],
     enabled: !!currentOrg,
   });
 
   const { data: storySections = [], isLoading: storySectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/story_section"],
+    queryKey: ["/api/content/type/story_section", currentOrg?.organizationId],
     enabled: !!currentOrg,
   });
 
@@ -521,7 +521,9 @@ export default function AdminContentManager() {
       // Reset when closing dialog
       setSelectedLeadMagnetCombos(new Set());
     }
-  }, [editingItem, allVisibilitySettings]);
+    // Only depend on editingItem?.id to avoid infinite loop from allVisibilitySettings array reference changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingItem?.id]);
 
   // Fetch all A/B tests for matrix view
   const { data: allAbTests = [] } = useQuery<AbTest[]>({
