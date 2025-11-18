@@ -56,10 +56,10 @@ export const organizations = pgTable("organizations", {
   subscriptionStatus: varchar("subscription_status").default('none'), // active, canceled, past_due, trialing, none
   displayOrder: integer("display_order").default(0), // Manual ordering for admin UI
   
-  // Content mapping URLs for enhanced provisioning wizard scraping
-  programsUrl: text("programs_url"), // URL to programs/services page (e.g., /what-we-do/programs/)
-  eventsUrl: text("events_url"), // URL to events page (e.g., /what-we-do/annual-events/)
-  testimonialsUrl: text("testimonials_url"), // URL to testimonials/success stories page (e.g., /our-impact/success-stories/)
+  // Content mapping URLs for enhanced provisioning wizard scraping (supports up to 5 URLs per section)
+  programsUrls: jsonb("programs_urls").$type<string[]>(), // Array of URLs to programs/services pages (max 5)
+  eventsUrls: jsonb("events_urls").$type<string[]>(), // Array of URLs to events pages (max 5)
+  testimonialsUrls: jsonb("testimonials_urls").$type<string[]>(), // Array of URLs to testimonials/success stories pages (max 5)
   
   // Theme and branding extracted from website
   themeColors: jsonb("theme_colors"), // Extracted theme colors: {primary, accent, background, foreground, etc.}
@@ -96,10 +96,10 @@ export const provisioningWizardSchema = z.object({
   // Step 2: Content Strategy
   contentStrategy: z.enum(['default_templates', 'import_from_website', 'start_blank']).default('default_templates'),
   
-  // Step 2.5: Content URL Mapping (for import_from_website strategy)
-  programsUrl: z.string().url().optional().or(z.literal('')),
-  eventsUrl: z.string().url().optional().or(z.literal('')),
-  testimonialsUrl: z.string().url().optional().or(z.literal('')),
+  // Step 2.5: Content URL Mapping (for import_from_website strategy) - up to 5 URLs per section
+  programsUrls: z.array(z.string().url()).max(5, "Maximum 5 URLs allowed per section").default([]),
+  eventsUrls: z.array(z.string().url()).max(5, "Maximum 5 URLs allowed per section").default([]),
+  testimonialsUrls: z.array(z.string().url()).max(5, "Maximum 5 URLs allowed per section").default([]),
   
   // Optional: Scraped data from website import
   scrapedData: z.object({
