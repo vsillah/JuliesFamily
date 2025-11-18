@@ -74,6 +74,23 @@ export const createOrganizationWizardSchema = z.object({
 });
 export type CreateOrganizationWizard = z.infer<typeof createOrganizationWizardSchema>;
 
+// Provisioning wizard schema - comprehensive org setup with content strategy
+export const provisioningWizardSchema = z.object({
+  // Step 1: Organization Details
+  name: z.string().min(1, "Organization name is required").max(100),
+  tier: organizationTierEnum.default('basic'),
+  existingWebsiteUrl: z.string().url().optional().or(z.literal('')),
+  contactName: z.string().min(1, "Contact name is required").max(100),
+  contactEmail: z.string().email("Valid email required"),
+  
+  // Step 2: Content Strategy
+  contentStrategy: z.enum(['default_templates', 'import_from_website', 'start_blank']).default('default_templates'),
+  
+  // Step 3: Feature Configuration (array of feature keys to enable)
+  enabledFeatures: z.array(z.string()).default([]),
+});
+export type ProvisioningWizard = z.infer<typeof provisioningWizardSchema>;
+
 // Organization Users table - many-to-many relationship between users and organizations
 // A user can belong to multiple organizations with different roles in each
 export const organizationUsers = pgTable("organization_users", {

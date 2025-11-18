@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus, ExternalLink } from "lucide-react";
+import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus, ExternalLink, Sparkles } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createOrganizationWizardSchema, type CreateOrganizationWizard } from "@shared/schema";
 import { useLocation } from "wouter";
 import { useOrganization } from "@/contexts/OrganizationContext";
+import { ProvisioningWizard } from "@/components/ProvisioningWizard";
 
 interface OrganizationMetrics {
   leadsCount: number;
@@ -44,6 +45,7 @@ interface CurrentOrganization {
 export default function AdminOrganizations() {
   const { toast } = useToast();
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [provisionWizardOpen, setProvisionWizardOpen] = useState(false);
   const [isSwitching, setIsSwitching] = useState(false);
   const [, setLocation] = useLocation();
   const { currentOrg, isLoading: currentLoading, switchOrganization, clearOverride } = useOrganization();
@@ -213,11 +215,19 @@ export default function AdminOrganizations() {
             </Button>
           )}
           <Button
+            onClick={() => setProvisionWizardOpen(true)}
+            data-testid="button-provision-wizard"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            New Organization Wizard
+          </Button>
+          <Button
             onClick={() => setCreateDialogOpen(true)}
+            variant="outline"
             data-testid="button-create-org"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Create Organization
+            Quick Create
           </Button>
         </div>
       </div>
@@ -446,6 +456,12 @@ export default function AdminOrganizations() {
           </Form>
         </DialogContent>
       </Dialog>
+
+      {/* Provisioning Wizard */}
+      <ProvisioningWizard
+        open={provisionWizardOpen}
+        onClose={() => setProvisionWizardOpen(false)}
+      />
     </div>
   );
 }

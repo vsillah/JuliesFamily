@@ -354,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create new organization (super admin only)
+  // Create new organization (super admin only) - Simple wizard
   app.post('/api/admin/organizations', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
       // Validate request body using wizard schema (simpler, only name + tier)
@@ -393,6 +393,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(500).json({ 
         message: error.message || 'Failed to create organization' 
+      });
+    }
+  });
+
+  // Provision new organization with full setup (super admin only) - Comprehensive wizard
+  app.post('/api/admin/organizations/provision', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      // Validate request body using comprehensive provisioning schema
+      const { provisioningWizardSchema } = await import("@shared/schema");
+      const validation = provisioningWizardSchema.safeParse(req.body);
+      
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid provisioning data",
+          errors: validation.error.errors 
+        });
+      }
+      
+      // Import provisioning orchestrator
+      const { provisionOrganization, sendWelcomeEmail } = await import('./provisioning');
+      
+      // Provision the organization with all content and features
+      const result = await provisionOrganization(validation.data);
+      
+      console.log(`[Provisioning] Created organization: ${result.organization.name} (${result.organization.id})`);
+      
+      // Send welcome email (async, don't block response)
+      if (result.contactEmail) {
+        sendWelcomeEmail(
+          result.organization.name,
+          result.contactName,
+          result.contactEmail,
+          result.organization.slug || result.organization.id
+        ).then((emailResult) => {
+          if (emailResult.sent) {
+            console.log(`[Provisioning] Welcome email sent to ${result.contactEmail}`);
+          } else if (emailResult.skipped) {
+            console.log(`[Provisioning] Welcome email skipped: ${emailResult.reason}`);
+          } else {
+            console.warn(`[Provisioning] Welcome email failed: ${emailResult.error}`);
+          }
+        }).catch((error) => {
+          console.error('[Provisioning] Unexpected error sending welcome email:', error);
+        });
+      }
+      
+      res.status(201).json({
+        organization: result.organization,
+        message: `Organization ${result.organization.name} provisioned successfully`,
+      });
+    } catch (error: any) {
+      console.error('[Provisioning] Error provisioning organization:', error);
+      
+      // Check for common database errors
+      if (error.code === '23505') {  // Unique constraint violation
+        return res.status(409).json({ 
+          message: 'An organization with this name or slug already exists' 
+        });
+      }
+      
+      res.status(500).json({ 
+        message: error.message || 'Failed to provision organization' 
       });
     }
   });
