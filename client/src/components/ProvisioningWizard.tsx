@@ -403,23 +403,106 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                           </Card>
 
                           <Card 
-                            className={`cursor-pointer transition-colors ${
+                            className={`transition-colors ${
                               field.value === 'import_from_website' ? 'border-primary ring-2 ring-primary' : ''
                             }`}
-                            onClick={() => field.onChange('import_from_website')}
                             data-testid="card-strategy-import"
                           >
                             <CardHeader>
                               <div className="flex items-start gap-3">
-                                <RadioGroupItem value="import_from_website" id="import_from_website" />
-                                <div className="flex-1">
-                                  <CardTitle className="text-base flex items-center gap-2">
-                                    <Download className="h-4 w-4" />
-                                    Import from Website
-                                  </CardTitle>
-                                  <CardDescription>
-                                    Automatically detect personas and extract content
-                                  </CardDescription>
+                                <div className="pt-0.5">
+                                  <RadioGroupItem value="import_from_website" id="import_from_website" />
+                                </div>
+                                <div className="flex-1 space-y-3">
+                                  <div 
+                                    className="cursor-pointer"
+                                    onClick={() => field.onChange('import_from_website')}
+                                  >
+                                    <CardTitle className="text-base flex items-center gap-2">
+                                      <Download className="h-4 w-4" />
+                                      Import & Scan Website
+                                    </CardTitle>
+                                    <CardDescription>
+                                      Automatically detect personas and extract content from your existing website
+                                    </CardDescription>
+                                  </div>
+                                  
+                                  {field.value === 'import_from_website' && !scrapedData && (
+                                    <div className="pt-2">
+                                      <Button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const url = form.getValues('existingWebsiteUrl');
+                                          if (!url) {
+                                            toast({
+                                              title: "Website URL Required",
+                                              description: "Please enter a website URL in Step 1",
+                                              variant: "destructive",
+                                            });
+                                            return;
+                                          }
+                                          // Validate URL format
+                                          try {
+                                            new URL(url);
+                                          } catch {
+                                            toast({
+                                              title: "Invalid URL",
+                                              description: "Please enter a valid website URL (e.g., https://example.org)",
+                                              variant: "destructive",
+                                            });
+                                            return;
+                                          }
+                                          scrapeMutation.mutate(url);
+                                        }}
+                                        disabled={scrapeMutation.isPending}
+                                        className="w-full"
+                                        data-testid="button-scan-website"
+                                      >
+                                        {scrapeMutation.isPending ? (
+                                          <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Scanning Website...
+                                          </>
+                                        ) : (
+                                          <>
+                                            <Search className="mr-2 h-4 w-4" />
+                                            Scan Website
+                                          </>
+                                        )}
+                                      </Button>
+                                    </div>
+                                  )}
+                                  
+                                  {field.value === 'import_from_website' && scrapedData && (
+                                    <div className="pt-2 space-y-2">
+                                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <Check className="h-4 w-4 text-green-600" />
+                                        <span>
+                                          Scanned: {scrapedData.personas.length} personas, {scrapedData.programs.length} programs, 
+                                          {scrapedData.events.length} events, {scrapedData.testimonials.length} testimonials
+                                        </span>
+                                      </div>
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const url = form.getValues('existingWebsiteUrl');
+                                          if (url) {
+                                            scrapeMutation.mutate(url);
+                                          }
+                                        }}
+                                        disabled={scrapeMutation.isPending}
+                                        className="w-full"
+                                        data-testid="button-rescan-website"
+                                      >
+                                        <Search className="mr-2 h-4 w-4" />
+                                        Scan Again
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </CardHeader>
@@ -454,179 +537,118 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                   )}
                 />
 
-                {contentStrategy === 'import_from_website' && (
+                {contentStrategy === 'import_from_website' && scrapedData && (
                   <div className="space-y-4">
-                    {!scrapedData ? (
-                      <Card>
-                        <CardContent className="pt-6 space-y-4">
-                          <div className="flex items-start gap-3">
-                            <Search className="h-5 w-5 text-muted-foreground mt-0.5" />
-                            <div className="flex-1">
-                              <h4 className="text-sm font-medium">Scan Existing Website</h4>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                We'll analyze the website from Step 1 to detect personas and extract content.
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <Button
-                            type="button"
-                            onClick={() => {
-                              const url = form.getValues('existingWebsiteUrl');
-                              if (!url) {
-                                toast({
-                                  title: "Website URL Required",
-                                  description: "Please enter a website URL in Step 1",
-                                  variant: "destructive",
-                                });
-                                return;
-                              }
-                              scrapeMutation.mutate(url);
-                            }}
-                            disabled={scrapeMutation.isPending}
-                            className="w-full"
-                            data-testid="button-scan-website"
-                          >
-                            {scrapeMutation.isPending ? (
-                              <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Scanning Website...
-                              </>
-                            ) : (
-                              <>
-                                <Search className="mr-2 h-4 w-4" />
-                                Scan Website
-                              </>
-                            )}
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <div className="space-y-4">
-                        {/* Errors/Warnings */}
-                        {scrapedData.errors.length > 0 && (
-                          <Alert>
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>
-                              <ul className="list-disc list-inside space-y-1">
-                                {scrapedData.errors.map((error, i) => (
-                                  <li key={i} className="text-sm">{error}</li>
-                                ))}
-                              </ul>
-                            </AlertDescription>
-                          </Alert>
-                        )}
+                    {/* Errors/Warnings */}
+                    {scrapedData.errors.length > 0 && (
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          <ul className="list-disc list-inside space-y-1">
+                            {scrapedData.errors.map((error, i) => (
+                              <li key={i} className="text-sm">{error}</li>
+                            ))}
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
+                    )}
 
-                        {/* Detected Personas */}
-                        <Card>
-                          <CardHeader>
-                            <CardTitle className="text-base flex items-center gap-2">
-                              <Users className="h-4 w-4" />
-                              Detected Personas ({scrapedData.personas.length})
-                            </CardTitle>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="flex flex-wrap gap-2">
-                              {scrapedData.personas.map((persona) => (
-                                <Badge key={persona} variant="secondary">
-                                  {persona}
-                                </Badge>
+                    {/* Detected Personas */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-base flex items-center gap-2">
+                          <Users className="h-4 w-4" />
+                          Detected Personas ({scrapedData.personas.length})
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex flex-wrap gap-2">
+                          {scrapedData.personas.map((persona) => (
+                            <Badge key={persona} variant="secondary">
+                              {persona}
+                            </Badge>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* Programs */}
+                    {scrapedData.programs.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Sparkles className="h-4 w-4" />
+                            Programs ({scrapedData.programs.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ScrollArea className="h-[150px]">
+                            <div className="space-y-3">
+                              {scrapedData.programs.map((program, i) => (
+                                <div key={i} className="border-b last:border-0 pb-2 last:pb-0">
+                                  <h5 className="font-medium text-sm">{program.title}</h5>
+                                  <p className="text-xs text-muted-foreground line-clamp-2">
+                                    {program.description}
+                                  </p>
+                                </div>
                               ))}
                             </div>
-                          </CardContent>
-                        </Card>
-
-                        {/* Programs */}
-                        {scrapedData.programs.length > 0 && (
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="text-base flex items-center gap-2">
-                                <Sparkles className="h-4 w-4" />
-                                Programs ({scrapedData.programs.length})
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <ScrollArea className="h-[150px]">
-                                <div className="space-y-3">
-                                  {scrapedData.programs.map((program, i) => (
-                                    <div key={i} className="border-b last:border-0 pb-2 last:pb-0">
-                                      <h5 className="font-medium text-sm">{program.title}</h5>
-                                      <p className="text-xs text-muted-foreground line-clamp-2">
-                                        {program.description}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </ScrollArea>
-                            </CardContent>
-                          </Card>
-                        )}
-
-                        {/* Events */}
-                        {scrapedData.events.length > 0 && (
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="text-base flex items-center gap-2">
-                                <Calendar className="h-4 w-4" />
-                                Events ({scrapedData.events.length})
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <ScrollArea className="h-[100px]">
-                                <div className="space-y-2">
-                                  {scrapedData.events.map((event, i) => (
-                                    <div key={i} className="text-sm">
-                                      <span className="font-medium">{event.title}</span>
-                                      {event.date && <span className="text-muted-foreground ml-2">• {event.date}</span>}
-                                    </div>
-                                  ))}
-                                </div>
-                              </ScrollArea>
-                            </CardContent>
-                          </Card>
-                        )}
-
-                        {/* Testimonials */}
-                        {scrapedData.testimonials.length > 0 && (
-                          <Card>
-                            <CardHeader>
-                              <CardTitle className="text-base flex items-center gap-2">
-                                <MessageSquare className="h-4 w-4" />
-                                Testimonials ({scrapedData.testimonials.length})
-                              </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                              <ScrollArea className="h-[100px]">
-                                <div className="space-y-2">
-                                  {scrapedData.testimonials.map((testimonial, i) => (
-                                    <div key={i} className="text-sm">
-                                      <p className="italic line-clamp-2">"{testimonial.quote}"</p>
-                                      <p className="text-muted-foreground text-xs mt-1">
-                                        - {testimonial.author}
-                                        {testimonial.role && `, ${testimonial.role}`}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </ScrollArea>
-                            </CardContent>
-                          </Card>
-                        )}
-
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => {
-                            setScrapedData(null);
-                            form.setValue('contentStrategy', 'default_templates');
-                          }}
-                          className="w-full"
-                          data-testid="button-rescan"
-                        >
-                          Scan Different Website
-                        </Button>
-                      </div>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
                     )}
+
+                    {/* Events */}
+                    {scrapedData.events.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Events ({scrapedData.events.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ScrollArea className="h-[100px]">
+                            <div className="space-y-2">
+                              {scrapedData.events.map((event, i) => (
+                                <div key={i} className="text-sm">
+                                  <span className="font-medium">{event.title}</span>
+                                  {event.date && <span className="text-muted-foreground ml-2">• {event.date}</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Testimonials */}
+                    {scrapedData.testimonials.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base flex items-center gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            Testimonials ({scrapedData.testimonials.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ScrollArea className="h-[100px]">
+                            <div className="space-y-2">
+                              {scrapedData.testimonials.map((testimonial, i) => (
+                                <div key={i} className="text-sm">
+                                  <p className="italic line-clamp-2">"{testimonial.quote}"</p>
+                                  <p className="text-muted-foreground text-xs mt-1">
+                                    - {testimonial.author}
+                                    {testimonial.role && `, ${testimonial.role}`}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
+                    )}
+
                   </div>
                 )}
               </div>
