@@ -668,7 +668,7 @@ export type ImageAsset = typeof imageAssets.$inferSelect;
 export const contentItems = pgTable("content_items", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   organizationId: varchar("organization_id").references(() => organizations.id, { onDelete: "cascade" }),
-  type: varchar("type").notNull(), // 'service', 'event', 'program', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card', 'impact_section', 'story_section'
+  type: varchar("type").notNull(), // 'service', 'event', 'program', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card', 'impact_section', 'story_section', 'sponsors_section', 'footer_section'
   title: text("title").notNull(),
   description: text("description"),
   imageName: varchar("image_name"), // Cloudinary image name (legacy)
@@ -676,7 +676,7 @@ export const contentItems = pgTable("content_items", {
   order: integer("order").notNull().default(0), // Display order
   isActive: boolean("is_active").default(true),
   passionTags: text("passion_tags").array(), // Array of passion tags for targeting (e.g., ['literacy', 'stem', 'arts'])
-  metadata: jsonb("metadata"), // Additional data: For service: number, priority, linkedProgramDetailId. For program: persona, funnelStage, needsClassification (boolean flag for scraped content). For program_detail: programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona. For event: startDate, location, registrationLink, persona, funnelStage, needsClassification. For testimonial: location, date, rating, icon. For socialMedia/video: videoId, category, platform. For student_project/student_testimonial: submittingUserId, submittingUserEmail, submittingUserName, programId, classId, files: [{url, alt, uploadedAt}], status: 'pending'|'approved'|'rejected', reviewedBy, reviewedAt, rejectionReason. For student_dashboard_card: buttonText, buttonLink, goalText, motivationalText. For volunteer_dashboard_card: buttonText, buttonLink, goalText, motivationalText. For impact_section: sectionTitle, stats: [{icon, number, label}]. For story_section: sectionType ('origins'|'building'|'founders'), tabs: [{label, content}], images: [{url, alt}]
+  metadata: jsonb("metadata"), // Additional data: For service: number, priority, linkedProgramDetailId. For program: persona, funnelStage, needsClassification (boolean flag for scraped content). For program_detail: programId, overview, ageRange, schedule, location, cost, features, enrollmentSteps, faqs, defaultPersona. For event: startDate, location, registrationLink, persona, funnelStage, needsClassification. For testimonial: location, date, rating, icon. For socialMedia/video: videoId, category, platform. For student_project/student_testimonial: submittingUserId, submittingUserEmail, submittingUserName, programId, classId, files: [{url, alt, uploadedAt}], status: 'pending'|'approved'|'rejected', reviewedBy, reviewedAt, rejectionReason. For student_dashboard_card: buttonText, buttonLink, goalText, motivationalText. For volunteer_dashboard_card: buttonText, buttonLink, goalText, motivationalText. For impact_section: sectionTitle, stats: [{icon, number, label}]. For story_section: sectionType ('origins'|'building'|'founders'), tabs: [{label, content}], images: [{url, alt}]. For sponsors_section: sectionTitle, subtitle, sponsors: [{name, description, logoUrl}]. For footer_section: organizationName, tagline, quickLinks: [{label, href}], programs: string[], contact: {address, phone, email}, copyrightText
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
@@ -693,7 +693,7 @@ export type ContentItem = typeof contentItems.$inferSelect;
 
 // Update schema for content items - whitelisted fields only
 export const updateContentItemSchema = z.object({
-  type: z.enum(['service', 'event', 'program', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card', 'impact_section', 'story_section']).optional(),
+  type: z.enum(['service', 'event', 'program', 'testimonial', 'sponsor', 'lead_magnet', 'impact_stat', 'hero', 'cta', 'socialMedia', 'video', 'review', 'program_detail', 'student_project', 'student_testimonial', 'student_dashboard_card', 'volunteer_dashboard_card', 'impact_section', 'story_section', 'sponsors_section', 'footer_section']).optional(),
   title: z.string().optional(),
   description: z.string().optional(),
   imageName: z.string().optional(),
@@ -820,6 +820,42 @@ export const storySectionMetadataSchema = z.object({
   tabs: z.array(storySectionTabSchema),
 }).passthrough();
 export type StorySectionMetadata = z.infer<typeof storySectionMetadataSchema>;
+
+// Sponsors section metadata schema
+export const sponsorItemSchema = z.object({
+  name: z.string(), // Sponsor organization name: 'Cummings Foundation', 'Pierce Property Services'
+  description: z.string(), // Brief description of partnership
+  logoUrl: z.string(), // Cloudinary or object storage URL to sponsor logo
+});
+
+export const sponsorsSectionMetadataSchema = z.object({
+  sectionTitle: z.string(), // e.g., "Supported by Generous Partners"
+  subtitle: z.string().optional(), // e.g., "– Our Partners –"
+  sponsors: z.array(sponsorItemSchema),
+}).passthrough();
+export type SponsorsSectionMetadata = z.infer<typeof sponsorsSectionMetadataSchema>;
+
+// Footer section metadata schema
+export const footerLinkSchema = z.object({
+  label: z.string(),
+  href: z.string(), // Can be anchor link (#section) or full URL
+});
+
+export const footerContactSchema = z.object({
+  address: z.string(), // Multi-line address
+  phone: z.string(), // e.g., "(508) 879-7610"
+  email: z.string(), // Contact email
+});
+
+export const footerSectionMetadataSchema = z.object({
+  organizationName: z.string(), // e.g., "Julie's Family Learning Program"
+  tagline: z.string(), // e.g., "Empowering families through education..."
+  quickLinks: z.array(footerLinkSchema),
+  programs: z.array(z.string()), // Array of program names
+  contact: footerContactSchema,
+  copyrightText: z.string(), // e.g., "Julie's Family Learning Program. All rights reserved."
+}).passthrough();
+export type FooterSectionMetadata = z.infer<typeof footerSectionMetadataSchema>;
 
 // Extended ContentItem type with resolved image URL from image_assets join
 export type ContentItemWithResolvedImage = ContentItem & {
