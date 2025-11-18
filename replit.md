@@ -14,7 +14,12 @@ Preferred communication style: Simple, everyday language.
 **Implementation Summary**:
 - **4-Step Wizard UI**: Organization details (name, tier, contact) → Content strategy (templates/import/blank) → Feature configuration (tier-based with optional upgrades) → Review & confirm
 - **Backend Orchestrator**: Transaction-based provisioning with step-by-step progress tracking in `provisioning_requests` table (pending → in_progress → completed/failed)
-- **Content Seeding**: Automated seeding of default programs (3), personas (6), testimonials (2), events (1), hero/CTA variants (48), and content visibility rules
+- **Content Seeding** (49 items total for default templates):
+  - 3 programs (via programs table)
+  - 2 testimonials (via contentItems type='testimonial')
+  - 1 event (via contentItems type='event')
+  - 24 hero variants (via contentItems type='hero' with persona×funnel_stage metadata)
+  - 24 CTA variants (via contentItems type='cta' with persona×funnel_stage metadata)
 - **Feature Defaults**: Tier-based feature enablement (basic: 4 features, pro: 8 features, premium: 12 features)
 - **SendGrid Integration**: Automated welcome email with setup checklist and next steps, sent after successful provisioning
 - **Error Handling**: Complete rollback via transaction if any step fails, provisioning request tracks failure state and error message
@@ -26,7 +31,13 @@ Preferred communication style: Simple, everyday language.
 
 **Security**: Transaction ensures atomicity - all seeding functions use explicit organizationId within single transaction, no cross-tenant risk
 
-**Next Steps**: Integration test for mid-transaction failure rollback, SendGrid delivery monitoring, analytics on content strategy fallback paths
+**Provisioning Fixes** (November 18, 2025):
+- Fixed invalid table imports: Removed heroVariants, ctaVariants, events, personas, testimonials (these tables don't exist in schema)
+- All hero/CTA content now stored in contentItems table with type='hero'/'cta' and metadata for persona-specific fields
+- Events and testimonials stored as contentItems with appropriate type fields
+- Removed contentVisibility seeding (programs use separate visibility logic, not the contentVisibility table)
+- Personas are enum values used in metadata, not stored as separate records
+- Completed steps: organization_created → content_seeded → features_enabled → welcome_email_sent
 
 ### Feature Toggle System Complete (November 17, 2025)
 **Production-Ready**: Fully tested multi-tenant feature flag system enabling organization-specific feature control via admin UI and programmatic access.

@@ -4,12 +4,8 @@ import {
   organizations, 
   organizationFeatures,
   programs,
-  testimonials,
-  events,
-  heroVariants,
-  ctaVariants,
+  contentItems,
   contentVisibility,
-  personas,
   provisioningRequests,
   type ProvisioningWizard,
 } from '@shared/schema';
@@ -108,63 +104,10 @@ async function seedDefaultPrograms(tx: typeof db, organizationId: string) {
 }
 
 /**
- * Seed default personas for a new organization
+ * NOTE: Personas are not stored as separate records - they're just enum values
+ * used in content metadata and visibility rules throughout the system.
+ * The standard personas are: default, student, provider, parent, donor, volunteer
  */
-async function seedDefaultPersonas(tx: typeof db, organizationId: string) {
-  const defaultPersonas = [
-    {
-      id: nanoid(),
-      organizationId,
-      name: 'default',
-      displayName: 'All Visitors',
-      description: 'Generic visitor with no specific targeting',
-      isActive: true,
-    },
-    {
-      id: nanoid(),
-      organizationId,
-      name: 'student',
-      displayName: 'Students',
-      description: 'Individuals seeking educational programs and support',
-      isActive: true,
-    },
-    {
-      id: nanoid(),
-      organizationId,
-      name: 'parent',
-      displayName: 'Parents',
-      description: 'Parents seeking programs for their children',
-      isActive: true,
-    },
-    {
-      id: nanoid(),
-      organizationId,
-      name: 'donor',
-      displayName: 'Donors',
-      description: 'Individuals interested in supporting the organization',
-      isActive: true,
-    },
-    {
-      id: nanoid(),
-      organizationId,
-      name: 'volunteer',
-      displayName: 'Volunteers',
-      description: 'Individuals interested in volunteering their time',
-      isActive: true,
-    },
-    {
-      id: nanoid(),
-      organizationId,
-      name: 'provider',
-      displayName: 'Service Providers',
-      description: 'Partner organizations and service providers',
-      isActive: true,
-    },
-  ];
-
-  await tx.insert(personas).values(defaultPersonas);
-  return defaultPersonas;
-}
 
 /**
  * Seed default testimonials for a new organization
@@ -174,22 +117,32 @@ async function seedDefaultTestimonials(tx: typeof db, organizationId: string) {
     {
       id: nanoid(),
       organizationId,
-      quote: 'This program changed my life. I went from struggling to find work to landing my dream job.',
-      author: 'Sarah M.',
-      role: 'Program Graduate',
+      type: 'testimonial',
+      title: 'Sarah M. - Program Graduate',
+      description: 'This program changed my life. I went from struggling to find work to landing my dream job.',
+      order: 0,
       isActive: true,
+      metadata: {
+        author: 'Sarah M.',
+        role: 'Program Graduate',
+      },
     },
     {
       id: nanoid(),
       organizationId,
-      quote: 'The support I received was incredible. The staff truly cared about my success.',
-      author: 'Michael D.',
-      role: 'Community Member',
+      type: 'testimonial',
+      title: 'Michael D. - Community Member',
+      description: 'The support I received was incredible. The staff truly cared about my success.',
+      order: 1,
       isActive: true,
+      metadata: {
+        author: 'Michael D.',
+        role: 'Community Member',
+      },
     },
   ];
 
-  await tx.insert(testimonials).values(defaultTestimonials);
+  await tx.insert(contentItems).values(defaultTestimonials);
   return defaultTestimonials;
 }
 
@@ -205,98 +158,86 @@ async function seedDefaultEvents(tx: typeof db, organizationId: string) {
     {
       id: nanoid(),
       organizationId,
+      type: 'event',
       title: 'Open House',
       description: 'Join us for an open house to learn more about our programs and services.',
-      startDate: nextMonth.toISOString(),
-      endDate: nextMonth.toISOString(),
+      order: 0,
       isActive: true,
+      metadata: {
+        startDate: nextMonth.toISOString(),
+        endDate: nextMonth.toISOString(),
+      },
     },
   ];
 
-  await tx.insert(events).values(defaultEvents);
+  await tx.insert(contentItems).values(defaultEvents);
   return defaultEvents;
 }
 
 /**
- * Seed default hero and CTA variants
+ * Seed default hero and CTA content items
  */
 async function seedDefaultContent(tx: typeof db, organizationId: string, orgName: string) {
-  // Create hero variants for each persona x funnel stage combination
-  const heroVariantsToCreate = [];
+  const contentItemsToCreate = [];
   const personas = ['default', 'student', 'provider', 'parent', 'donor', 'volunteer'];
   const funnelStages = ['awareness', 'consideration', 'decision', 'retention'];
   
+  // Create hero content items for each persona x funnel stage combination
   for (const persona of personas) {
     for (const stage of funnelStages) {
       const defaultConfig = HERO_DEFAULTS[persona]?.[stage] || DEFAULT_HERO;
-      heroVariantsToCreate.push({
+      contentItemsToCreate.push({
         id: nanoid(),
         organizationId,
-        persona,
-        funnelStage: stage,
-        subtitle: defaultConfig.subtitle.replace("Julie's", orgName),
+        type: 'hero',
         title: defaultConfig.title,
         description: defaultConfig.description,
-        primaryCTA: defaultConfig.primaryCTA,
-        secondaryCTA: defaultConfig.secondaryCTA,
         imageName: defaultConfig.imageName,
+        order: 0,
+        isActive: true,
+        metadata: {
+          persona,
+          funnelStage: stage,
+          subtitle: defaultConfig.subtitle.replace("Julie's", orgName),
+          primaryCTA: defaultConfig.primaryCTA,
+          secondaryCTA: defaultConfig.secondaryCTA,
+        },
       });
     }
   }
   
-  await tx.insert(heroVariants).values(heroVariantsToCreate);
-  
-  // Create CTA variants for each persona x funnel stage combination
-  const ctaVariantsToCreate = [];
-  
+  // Create CTA content items for each persona x funnel stage combination
   for (const persona of personas) {
     for (const stage of funnelStages) {
       const defaultConfig = CTA_DEFAULTS[persona]?.[stage] || DEFAULT_CTA;
-      ctaVariantsToCreate.push({
+      contentItemsToCreate.push({
         id: nanoid(),
         organizationId,
-        persona,
-        funnelStage: stage,
+        type: 'cta',
         title: defaultConfig.title,
         description: defaultConfig.description,
-        primaryButton: defaultConfig.primaryButton,
-        secondaryButton: defaultConfig.secondaryButton,
         imageName: defaultConfig.imageName,
+        order: 0,
+        isActive: true,
+        metadata: {
+          persona,
+          funnelStage: stage,
+          primaryButton: defaultConfig.primaryButton,
+          secondaryButton: defaultConfig.secondaryButton,
+        },
       });
     }
   }
   
-  await tx.insert(ctaVariants).values(ctaVariantsToCreate);
+  await tx.insert(contentItems).values(contentItemsToCreate);
   
-  return { heroVariants: heroVariantsToCreate, ctaVariants: ctaVariantsToCreate };
+  return { contentItems: contentItemsToCreate };
 }
 
 /**
- * Seed content visibility settings for default persona
+ * NOTE: Content visibility is managed separately for contentItems.
+ * Programs have their own visibility logic and don't use the contentVisibility table.
  */
-async function seedContentVisibility(tx: typeof db, organizationId: string, programIds: string[]) {
-  const visibilityRecords = [];
-  const funnelStages = ['awareness', 'consideration', 'decision', 'retention'];
-  
-  // Create visibility for each program
-  for (const programId of programIds) {
-    for (const stage of funnelStages) {
-      visibilityRecords.push({
-        id: nanoid(),
-        organizationId,
-        contentType: 'program' as const,
-        contentId: programId,
-        persona: 'default',
-        funnelStage: stage,
-        isVisible: true,
-        displayOrder: 1,
-      });
-    }
-  }
-  
-  await tx.insert(contentVisibility).values(visibilityRecords);
-  return visibilityRecords;
-}
 
 /**
  * Enable features for the organization based on tier
@@ -359,43 +300,31 @@ export async function provisionOrganization(data: ProvisioningWizard) {
         })
         .where(eq(provisioningRequests.id, requestId));
       
-      // 2. Seed personas first (required for content visibility)
-      await seedDefaultPersonas(tx, orgId);
-      await tx.update(provisioningRequests)
-        .set({ 
-          completedSteps: ['organization_created', 'personas_created'],
-          updatedAt: new Date()
-        })
-        .where(eq(provisioningRequests.id, requestId));
-      
-      // 3. Handle content strategy
-      let createdPrograms: any[] = [];
+      // 2. Handle content strategy
       if (data.contentStrategy === 'default_templates') {
         // Seed default content
-        createdPrograms = await seedDefaultPrograms(tx, orgId);
+        await seedDefaultPrograms(tx, orgId);
         await seedDefaultTestimonials(tx, orgId);
         await seedDefaultEvents(tx, orgId);
         await seedDefaultContent(tx, orgId, data.name);
-        await seedContentVisibility(tx, orgId, createdPrograms.map(p => p.id));
         
         await tx.update(provisioningRequests)
           .set({ 
-            completedSteps: ['organization_created', 'personas_created', 'content_seeded'],
+            completedSteps: ['organization_created', 'content_seeded'],
             updatedAt: new Date()
           })
           .where(eq(provisioningRequests.id, requestId));
       } else if (data.contentStrategy === 'import_from_website') {
         // TODO: Implement website scraping in future iteration
         // For now, fall back to default templates
-        createdPrograms = await seedDefaultPrograms(tx, orgId);
+        await seedDefaultPrograms(tx, orgId);
         await seedDefaultTestimonials(tx, orgId);
         await seedDefaultEvents(tx, orgId);
         await seedDefaultContent(tx, orgId, data.name);
-        await seedContentVisibility(tx, orgId, createdPrograms.map(p => p.id));
         
         await tx.update(provisioningRequests)
           .set({ 
-            completedSteps: ['organization_created', 'personas_created', 'content_seeded'],
+            completedSteps: ['organization_created', 'content_seeded'],
             updatedAt: new Date()
           })
           .where(eq(provisioningRequests.id, requestId));
@@ -407,7 +336,7 @@ export async function provisionOrganization(data: ProvisioningWizard) {
       
       await tx.update(provisioningRequests)
         .set({ 
-          completedSteps: ['organization_created', 'personas_created', 'content_seeded', 'features_enabled'],
+          completedSteps: ['organization_created', 'content_seeded', 'features_enabled'],
           updatedAt: new Date()
         })
         .where(eq(provisioningRequests.id, requestId));
@@ -433,7 +362,7 @@ export async function provisionOrganization(data: ProvisioningWizard) {
         status: 'completed',
         completedAt: new Date(),
         updatedAt: new Date(),
-        completedSteps: ['organization_created', 'personas_created', 'content_seeded', 'features_enabled', 'welcome_email_sent'],
+        completedSteps: ['organization_created', 'content_seeded', 'features_enabled', 'welcome_email_sent'],
       })
       .where(eq(provisioningRequests.id, requestId));
     
