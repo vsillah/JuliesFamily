@@ -116,12 +116,15 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
       contactName: "",
       contactEmail: "",
       contentStrategy: "default_templates",
+      programsUrls: [],
+      eventsUrls: [],
+      testimonialsUrls: [],
       enabledFeatures: [],
     },
   });
 
   const scrapeMutation = useMutation({
-    mutationFn: async (params: { url: string; programsUrl?: string; eventsUrl?: string; testimonialsUrl?: string }) => {
+    mutationFn: async (params: { url: string; programsUrls?: string[]; eventsUrls?: string[]; testimonialsUrls?: string[] }) => {
       const response = await apiRequest('POST', '/api/admin/organizations/scrape-website', params);
       return response.json();
     },
@@ -498,25 +501,59 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                           Content Page Mapping (Optional)
                                         </div>
                                         <p className="text-sm text-muted-foreground">
-                                          Specify URLs to specific pages for better content extraction
+                                          Specify up to 5 URLs per section for comprehensive content extraction
                                         </p>
                                         
                                         <FormField
                                           control={form.control}
-                                          name="programsUrl"
-                                          render={({ field: programsField }) => (
+                                          name="programsUrls"
+                                          render={({ field }) => (
                                             <FormItem>
-                                              <FormLabel className="text-sm">Programs/Services Page</FormLabel>
+                                              <FormLabel className="text-sm">Programs/Services Pages</FormLabel>
                                               <FormControl>
-                                                <Input 
-                                                  {...programsField}
-                                                  type="url"
-                                                  placeholder="https://example.org/programs" 
-                                                  data-testid="input-programs-url"
-                                                />
+                                                <div className="space-y-2">
+                                                  {field.value.map((url, index) => (
+                                                    <div key={index} className="flex gap-2">
+                                                      <Input 
+                                                        type="url"
+                                                        placeholder="https://example.org/programs" 
+                                                        value={url}
+                                                        onChange={(e) => {
+                                                          const newUrls = [...field.value];
+                                                          newUrls[index] = e.target.value;
+                                                          field.onChange(newUrls);
+                                                        }}
+                                                        data-testid={`input-programs-url-${index}`}
+                                                      />
+                                                      <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => {
+                                                          const newUrls = field.value.filter((_, i) => i !== index);
+                                                          field.onChange(newUrls);
+                                                        }}
+                                                        data-testid={`button-remove-programs-url-${index}`}
+                                                      >
+                                                        ×
+                                                      </Button>
+                                                    </div>
+                                                  ))}
+                                                  {field.value.length < 5 && (
+                                                    <Button
+                                                      type="button"
+                                                      variant="outline"
+                                                      size="sm"
+                                                      onClick={() => field.onChange([...field.value, ''])}
+                                                      data-testid="button-add-programs-url"
+                                                    >
+                                                      + Add Programs URL
+                                                    </Button>
+                                                  )}
+                                                </div>
                                               </FormControl>
                                               <FormDescription className="text-xs">
-                                                e.g., /what-we-do/programs/
+                                                e.g., /what-we-do/programs/, /services/youth-programs/
                                               </FormDescription>
                                               <FormMessage />
                                             </FormItem>
@@ -525,20 +562,54 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                         
                                         <FormField
                                           control={form.control}
-                                          name="eventsUrl"
-                                          render={({ field: eventsField }) => (
+                                          name="eventsUrls"
+                                          render={({ field }) => (
                                             <FormItem>
-                                              <FormLabel className="text-sm">Events Page</FormLabel>
+                                              <FormLabel className="text-sm">Events Pages</FormLabel>
                                               <FormControl>
-                                                <Input 
-                                                  {...eventsField}
-                                                  type="url"
-                                                  placeholder="https://example.org/events" 
-                                                  data-testid="input-events-url"
-                                                />
+                                                <div className="space-y-2">
+                                                  {field.value.map((url, index) => (
+                                                    <div key={index} className="flex gap-2">
+                                                      <Input 
+                                                        type="url"
+                                                        placeholder="https://example.org/events" 
+                                                        value={url}
+                                                        onChange={(e) => {
+                                                          const newUrls = [...field.value];
+                                                          newUrls[index] = e.target.value;
+                                                          field.onChange(newUrls);
+                                                        }}
+                                                        data-testid={`input-events-url-${index}`}
+                                                      />
+                                                      <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => {
+                                                          const newUrls = field.value.filter((_, i) => i !== index);
+                                                          field.onChange(newUrls);
+                                                        }}
+                                                        data-testid={`button-remove-events-url-${index}`}
+                                                      >
+                                                        ×
+                                                      </Button>
+                                                    </div>
+                                                  ))}
+                                                  {field.value.length < 5 && (
+                                                    <Button
+                                                      type="button"
+                                                      variant="outline"
+                                                      size="sm"
+                                                      onClick={() => field.onChange([...field.value, ''])}
+                                                      data-testid="button-add-events-url"
+                                                    >
+                                                      + Add Events URL
+                                                    </Button>
+                                                  )}
+                                                </div>
                                               </FormControl>
                                               <FormDescription className="text-xs">
-                                                e.g., /what-we-do/annual-events/
+                                                e.g., /what-we-do/annual-events/, /calendar/
                                               </FormDescription>
                                               <FormMessage />
                                             </FormItem>
@@ -547,20 +618,54 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                         
                                         <FormField
                                           control={form.control}
-                                          name="testimonialsUrl"
-                                          render={({ field: testimonialsField }) => (
+                                          name="testimonialsUrls"
+                                          render={({ field }) => (
                                             <FormItem>
-                                              <FormLabel className="text-sm">Testimonials/Success Stories Page</FormLabel>
+                                              <FormLabel className="text-sm">Testimonials/Success Stories Pages</FormLabel>
                                               <FormControl>
-                                                <Input 
-                                                  {...testimonialsField}
-                                                  type="url"
-                                                  placeholder="https://example.org/testimonials" 
-                                                  data-testid="input-testimonials-url"
-                                                />
+                                                <div className="space-y-2">
+                                                  {field.value.map((url, index) => (
+                                                    <div key={index} className="flex gap-2">
+                                                      <Input 
+                                                        type="url"
+                                                        placeholder="https://example.org/testimonials" 
+                                                        value={url}
+                                                        onChange={(e) => {
+                                                          const newUrls = [...field.value];
+                                                          newUrls[index] = e.target.value;
+                                                          field.onChange(newUrls);
+                                                        }}
+                                                        data-testid={`input-testimonials-url-${index}`}
+                                                      />
+                                                      <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => {
+                                                          const newUrls = field.value.filter((_, i) => i !== index);
+                                                          field.onChange(newUrls);
+                                                        }}
+                                                        data-testid={`button-remove-testimonials-url-${index}`}
+                                                      >
+                                                        ×
+                                                      </Button>
+                                                    </div>
+                                                  ))}
+                                                  {field.value.length < 5 && (
+                                                    <Button
+                                                      type="button"
+                                                      variant="outline"
+                                                      size="sm"
+                                                      onClick={() => field.onChange([...field.value, ''])}
+                                                      data-testid="button-add-testimonials-url"
+                                                    >
+                                                      + Add Testimonials URL
+                                                    </Button>
+                                                  )}
+                                                </div>
                                               </FormControl>
                                               <FormDescription className="text-xs">
-                                                e.g., /our-impact/success-stories/
+                                                e.g., /our-impact/success-stories/, /testimonials/
                                               </FormDescription>
                                               <FormMessage />
                                             </FormItem>
@@ -593,9 +698,9 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                           }
                                           scrapeMutation.mutate({
                                             url,
-                                            programsUrl: form.getValues('programsUrl') || undefined,
-                                            eventsUrl: form.getValues('eventsUrl') || undefined,
-                                            testimonialsUrl: form.getValues('testimonialsUrl') || undefined,
+                                            programsUrls: form.getValues('programsUrls').filter(u => u.trim()),
+                                            eventsUrls: form.getValues('eventsUrls').filter(u => u.trim()),
+                                            testimonialsUrls: form.getValues('testimonialsUrls').filter(u => u.trim()),
                                           });
                                         }}
                                         disabled={scrapeMutation.isPending}
@@ -636,9 +741,9 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                           if (url) {
                                             scrapeMutation.mutate({
                                             url,
-                                            programsUrl: form.getValues('programsUrl') || undefined,
-                                            eventsUrl: form.getValues('eventsUrl') || undefined,
-                                            testimonialsUrl: form.getValues('testimonialsUrl') || undefined,
+                                            programsUrls: form.getValues('programsUrls').filter(u => u.trim()),
+                                            eventsUrls: form.getValues('eventsUrls').filter(u => u.trim()),
+                                            testimonialsUrls: form.getValues('testimonialsUrls').filter(u => u.trim()),
                                           });
                                           }
                                         }}
