@@ -45,7 +45,7 @@ export type SubscriptionStatus = z.infer<typeof subscriptionStatusEnum>;
 // Organizations table - for multi-tenant tier-based feature access
 export const organizations = pgTable("organizations", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  name: varchar("name").notNull(),
+  name: varchar("name").notNull().unique(), // Organization name must be unique to prevent data collisions
   slug: varchar("slug").unique(), // URL-friendly identifier (e.g., 'red-cross') - temporarily nullable for migration
   logo: varchar("logo"), // Logo URL or storage path
   primaryColor: varchar("primary_color").default('#3b82f6'), // Brand color
