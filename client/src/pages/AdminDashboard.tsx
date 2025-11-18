@@ -23,7 +23,6 @@ import { Link } from "wouter";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import LeadDetailsDialog from "@/components/LeadDetailsDialog";
 import { UniversalSearch } from "@/components/UniversalSearch";
-import { LoadRipple } from "@/components/ui/load-ripple";
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -65,8 +64,8 @@ export default function AdminDashboard() {
   // Show loading state
   if (!analytics) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <LoadRipple />
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading dashboard...</div>
       </div>
     );
   }

@@ -16,7 +16,6 @@ import { Link } from 'wouter';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { SavedPaymentMethods } from '@/components/SavedPaymentMethods';
-import { LoadRipple } from '@/components/ui/load-ripple';
 
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
   throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
@@ -430,8 +429,11 @@ export default function Donate() {
   // Show loading spinner while checking authentication
   if (isAuthLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <LoadRipple />
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }

@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Building2, Users, Mail, DollarSign, ArrowRight, RefreshCw, Plus, ExternalLink, Sparkles, GripVertical, Pencil, CheckSquare, XSquare } from "lucide-react";
-import { LoadRipple } from "@/components/ui/load-ripple";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -543,8 +543,13 @@ export default function AdminOrganizations() {
 
   if (orgsLoading || currentLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <LoadRipple />
+      <div className="container mx-auto p-6 space-y-6">
+        <Skeleton className="h-12 w-64" />
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-64" />
+          ))}
+        </div>
       </div>
     );
   }
