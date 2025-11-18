@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
-import { useOrganization } from "@/lib/organizationContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import type { ContentItem, SponsorsSectionMetadata } from "@shared/schema";
 import cummingsLogo from "@assets/CumminsFoundationlogo_1762691811373.webp";
 import pierceLogo from "@assets/Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp";

@@ -1,6 +1,6 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useOrganization } from "@/lib/organizationContext";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import type { ContentItem, FooterSectionMetadata } from "@shared/schema";
 
 export default function Footer() {
