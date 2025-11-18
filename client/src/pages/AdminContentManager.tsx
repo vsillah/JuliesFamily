@@ -876,6 +876,11 @@ export default function AdminContentManager() {
       };
     }
     
+    // Clear needsClassification flag when admin edits - they've now reviewed the content
+    if ((metadata as any)?.needsClassification) {
+      metadata = { ...metadata, needsClassification: false };
+    }
+    
     const updates: any = {
       title: editingItem.title,
       description: editingItem.description,
