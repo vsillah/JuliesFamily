@@ -481,13 +481,11 @@ export default function AdminContentManager() {
   });
 
   const { data: impactSections = [], isLoading: impactSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/impact_section", currentOrg?.organizationId],
-    enabled: !!currentOrg,
+    queryKey: ["/api/content/type/impact_section", { orgId: currentOrg?.organizationId || 'default' }],
   });
 
   const { data: storySections = [], isLoading: storySectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/story_section", currentOrg?.organizationId],
-    enabled: !!currentOrg,
+    queryKey: ["/api/content/type/story_section", { orgId: currentOrg?.organizationId || 'default' }],
   });
 
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({

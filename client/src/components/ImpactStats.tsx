@@ -88,29 +88,23 @@ function AnimatedCounter({ targetValue }: { targetValue: string }) {
 
 export default function ImpactStats() {
   const { currentOrg } = useOrganization();
-  
+
   // Fetch impact section from database (returns array)
+  // Note: Backend gets org context from middleware, not from URL
+  // Using object for org ID ensures cache scoping without polluting URL path
   const { data: impactDataArray = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: ['/api/content/type/impact_section', currentOrg?.organizationId],
-    enabled: !!currentOrg,
+    queryKey: ['/api/content/type/impact_section', { orgId: currentOrg?.organizationId || 'default' }],
+    // No 'enabled' - query runs immediately, backend handles org context via middleware
   });
 
   // Get the first (and only) impact section for this org
   const impactData = impactDataArray[0];
-
-  // Debug logging
-  console.log('[ImpactStats] isLoading:', isLoading);
-  console.log('[ImpactStats] impactDataArray:', impactDataArray);
-  console.log('[ImpactStats] impactData:', impactData);
-  console.log('[ImpactStats] currentOrg:', currentOrg);
 
   // Parse metadata and provide fallback
   const metadata = (impactData?.metadata as ImpactSectionMetadata) || {
     sectionTitle: "2024: A Year of Incredible Growth",
     stats: []
   };
-
-  console.log('[ImpactStats] metadata:', metadata);
 
   // Map stats with icon resolution
   const stats = metadata.stats.map(stat => ({
@@ -119,11 +113,8 @@ export default function ImpactStats() {
     label: stat.label,
   }));
 
-  console.log('[ImpactStats] stats:', stats);
-
   // Don't render if loading or no data
   if (isLoading || !impactData) {
-    console.log('[ImpactStats] Returning null - isLoading:', isLoading, 'impactData:', !!impactData);
     return null;
   }
 

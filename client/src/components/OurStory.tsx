@@ -34,9 +34,11 @@ export default function OurStory() {
   const { currentOrg } = useOrganization();
 
   // Fetch story section from database (returns array)
+  // Note: Backend gets org context from middleware, not from URL
+  // Using object for org ID ensures cache scoping without polluting URL path
   const { data: storyDataArray = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: ['/api/content/type/story_section', currentOrg?.organizationId],
-    enabled: !!currentOrg,
+    queryKey: ['/api/content/type/story_section', { orgId: currentOrg?.organizationId || 'default' }],
+    // No 'enabled' - query runs immediately, backend handles org context via middleware
   });
 
   // Get the first (and only) story section for this org
