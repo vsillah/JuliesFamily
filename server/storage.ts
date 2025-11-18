@@ -108,6 +108,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   getOrganizationByUserId(userId: string): Promise<Organization | undefined>;
   getAllOrganizations(): Promise<Organization[]>;
   updateOrganization(id: string, updates: Partial<InsertOrganization>): Promise<Organization | undefined>;
+  deleteOrganization(id: string): Promise<void>;
   
   // Organization Features operations - per-org feature toggles
   upsertOrganizationFeature(featureData: InsertOrganizationFeature): Promise<OrganizationFeature>;
@@ -1285,6 +1286,10 @@ export class DatabaseStorage implements IStorage {
       .where(eq(organizations.id, id))
       .returning();
     return org;
+  }
+
+  async deleteOrganization(id: string): Promise<void> {
+    await db.delete(organizations).where(eq(organizations.id, id));
   }
 
   // Organization Features operations - per-org feature toggles

@@ -574,6 +574,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete organization (super admin only)
+  app.delete('/api/admin/organizations/:orgId', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { orgId } = req.params;
+
+      // Check if organization exists
+      const org = await storage.getOrganization(orgId);
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+
+      // Delete the organization (cascade will handle related records)
+      await storage.deleteOrganization(orgId);
+
+      console.log(`[Organizations] Deleted organization ${orgId} (${org.name})`);
+      res.json({ message: `Organization "${org.name}" deleted successfully` });
+    } catch (error: any) {
+      console.error('[Organizations] Error deleting organization:', error);
+      res.status(500).json({ message: error.message || 'Failed to delete organization' });
+    }
+  });
+
   // Get current organization context (for super admins)
   // Public organization endpoint - accessible to all users
   app.get('/api/organization/current', async (req, res) => {
