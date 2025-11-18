@@ -1,0 +1,2899 @@
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+ping @ 58ebef0d-a855-445a-9…ev/@vite/client:736
+waitForSuccessfulPing @ 58ebef0d-a855-445a-9…ev/@vite/client:749
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:562
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The source list for the Content Security Policy directive 'default-src' contains an invalid source: ''unsafe-dynamic''. It will be ignored.
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The Content-Security-Policy directive 'default-src' contains 'report-uri' as a source expression. Did you want to add it as a directive and forget a semicolon?
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+The source list for Content Security Policy directive 'default-src' contains a source with an invalid path: '/api/4509669501698048/security/?sentry_key=7eb3d90eb4660416caf507087367e67e'. The query component, including the '?', will be ignored.
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763485608755_dy7mc4ow4dr 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM45 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19416
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM20 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM20 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19432
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM20 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18718
+workLoop @ VM20 chunk-RPCDYKBN.js:197
+flushWork @ VM20 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM20 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763485769227_rxxvrlw6rnj 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763485769227_rxxvrlw6rnj 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:48
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+commitRootImpl @ chunk-RPCDYKBN.js:19416
+commitRoot @ chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+(anonymous) @ chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js:555
+flush @ @tanstack_react-query.js:569
+batch @ @tanstack_react-query.js:587
+dispatch_fn @ @tanstack_react-query.js:996
+setData @ @tanstack_react-query.js:696
+onSuccess @ @tanstack_react-query.js:897
+resolve @ @tanstack_react-query.js:456
+Promise.then
+run @ @tanstack_react-query.js:498
+start @ @tanstack_react-query.js:536
+fetch @ @tanstack_react-query.js:926
+executeFetch_fn @ @tanstack_react-query.js:2211
+onSubscribe @ @tanstack_react-query.js:1898
+subscribe @ @tanstack_react-query.js:24
+(anonymous) @ @tanstack_react-query.js:3022
+subscribeToStore @ chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js:9119
+commitRootImpl @ chunk-RPCDYKBN.js:19432
+commitRoot @ chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js:18718
+workLoop @ chunk-RPCDYKBN.js:197
+flushWork @ chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763485769227_rxxvrlw6rnj 403 (Forbidden)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+(anonymous) @ 58ebef0d-a855-445a-9…hatbotWidget.tsx:48
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19416
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18895
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+(anonymous) @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:555
+flush @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:569
+batch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:587
+dispatch_fn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:996
+setData @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:696
+onSuccess @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:897
+resolve @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:456
+Promise.then
+run @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:498
+start @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:536
+fetch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:926
+executeFetch_fn @ 58ebef0d-a855-445a-9….js?v=9160b6dd:2211
+onSubscribe @ 58ebef0d-a855-445a-9….js?v=9160b6dd:1898
+subscribe @ 58ebef0d-a855-445a-9…ry.js?v=9160b6dd:24
+(anonymous) @ 58ebef0d-a855-445a-9….js?v=9160b6dd:3022
+subscribeToStore @ 58ebef0d-a855-445a-9…js?v=9160b6dd:11984
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18868
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19432
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+finishConcurrentRender @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18718
+workLoop @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:197
+flushWork @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:176
+performWorkUntilDeadline @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763485955907_xfxq0g3awq 403 (Forbidden)
+apply @ VM316 injected.js:204
+(anonymous) @ VM343 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM329 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM329 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM329 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM329 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM329 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM329 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM329 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM329 chunk-RPCDYKBN.js:19416
+commitRoot @ VM329 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM329 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM329 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM329 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM333 @tanstack_react-query.js:555
+flush @ VM333 @tanstack_react-query.js:569
+batch @ VM333 @tanstack_react-query.js:587
+dispatch_fn @ VM333 @tanstack_react-query.js:996
+setData @ VM333 @tanstack_react-query.js:696
+onSuccess @ VM333 @tanstack_react-query.js:897
+resolve @ VM333 @tanstack_react-query.js:456
+Promise.then
+run @ VM333 @tanstack_react-query.js:498
+start @ VM333 @tanstack_react-query.js:536
+fetch @ VM333 @tanstack_react-query.js:926
+executeFetch_fn @ VM333 @tanstack_react-query.js:2211
+onSubscribe @ VM333 @tanstack_react-query.js:1898
+subscribe @ VM333 @tanstack_react-query.js:24
+(anonymous) @ VM333 @tanstack_react-query.js:3022
+subscribeToStore @ VM329 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM329 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM329 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM329 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM329 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM329 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM329 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM329 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM329 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM329 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM329 chunk-RPCDYKBN.js:19432
+commitRoot @ VM329 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM329 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM329 chunk-RPCDYKBN.js:18718
+workLoop @ VM329 chunk-RPCDYKBN.js:197
+flushWork @ VM329 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM329 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763485955907_xfxq0g3awq 403 (Forbidden)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+(anonymous) @ 58ebef0d-a855-445a-9…hatbotWidget.tsx:48
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19416
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18895
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+(anonymous) @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:555
+flush @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:569
+batch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:587
+dispatch_fn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:996
+setData @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:696
+onSuccess @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:897
+resolve @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:456
+Promise.then
+run @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:498
+start @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:536
+fetch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:926
+executeFetch_fn @ 58ebef0d-a855-445a-9….js?v=9160b6dd:2211
+onSubscribe @ 58ebef0d-a855-445a-9….js?v=9160b6dd:1898
+subscribe @ 58ebef0d-a855-445a-9…ry.js?v=9160b6dd:24
+(anonymous) @ 58ebef0d-a855-445a-9….js?v=9160b6dd:3022
+subscribeToStore @ 58ebef0d-a855-445a-9…js?v=9160b6dd:11984
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18868
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19432
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+finishConcurrentRender @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18718
+workLoop @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:197
+flushWork @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:176
+performWorkUntilDeadline @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM316 injected.js:204
+ping @ VM320 client:736
+waitForSuccessfulPing @ VM320 client:749
+(anonymous) @ VM320 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+ping @ 58ebef0d-a855-445a-9…ev/@vite/client:736
+waitForSuccessfulPing @ 58ebef0d-a855-445a-9…ev/@vite/client:749
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM320 client:562
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:562
+workspace_iframe.html?initialPath=%2F&id=%3Arhb%3A:151  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev:8000/ 502 (Bad Gateway)
+(anonymous) @ workspace_iframe.html?initialPath=%2F&id=%3Arhb%3A:151
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763486095513_c1sn4jlzfaj 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM31 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM18 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM18 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM18 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM18 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM18 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM18 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM18 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM18 chunk-RPCDYKBN.js:19416
+commitRoot @ VM18 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM18 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM18 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM18 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM18 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM18 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM18 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM18 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM18 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM18 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM18 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM18 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM18 chunk-RPCDYKBN.js:19432
+commitRoot @ VM18 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM18 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18718
+workLoop @ VM18 chunk-RPCDYKBN.js:197
+flushWork @ VM18 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM18 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/organizations 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+(anonymous) @ VM26 queryClient.ts:33
+fetchFn @ VM24 @tanstack_react-query.js:840
+run @ VM24 @tanstack_react-query.js:494
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM18 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM18 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM18 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM18 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM18 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM18 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM18 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM18 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM18 chunk-RPCDYKBN.js:19416
+commitRoot @ VM18 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM18 chunk-RPCDYKBN.js:9119
+flushSync @ VM18 chunk-RPCDYKBN.js:18959
+scheduleRefresh @ VM18 chunk-RPCDYKBN.js:20004
+(anonymous) @ VM12 @react-refresh:228
+performReactRefresh @ VM12 @react-refresh:217
+(anonymous) @ VM12 @react-refresh:608
+setTimeout
+(anonymous) @ VM12 @react-refresh:598
+validateRefreshBoundaryAndEnqueueUpdate @ VM12 @react-refresh:648
+(anonymous) @ VM317 AdminOrganizations.tsx:1862
+(anonymous) @ VM11 client:34
+(anonymous) @ VM11 client:218
+(anonymous) @ VM11 client:193
+queueUpdate @ VM11 client:193
+await in queueUpdate
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763486378679_806y483nrwe 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM33 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM17 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM17 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM17 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM17 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM17 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM17 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM17 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM17 chunk-RPCDYKBN.js:19416
+commitRoot @ VM17 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM17 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM17 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM17 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM17 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM17 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM17 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM17 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM17 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM17 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM17 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM17 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM17 chunk-RPCDYKBN.js:19432
+commitRoot @ VM17 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM17 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18718
+workLoop @ VM17 chunk-RPCDYKBN.js:197
+flushWork @ VM17 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM17 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763486464751_uvlw7xe9xqk 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM54 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19416
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM20 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM20 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19432
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM20 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18718
+workLoop @ VM20 chunk-RPCDYKBN.js:197
+flushWork @ VM20 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM20 chunk-RPCDYKBN.js:384
+12b7aa6479c9e148.js:2  POST https://sp.replit.com/v1/t 400 (Bad Request)
+(anonymous) @ 12b7aa6479c9e148.js:2
+o @ sdk.min.js:1
+dispatch @ fetch-dispatcher.ts:11
+(anonymous) @ index.ts:122
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+g @ index.ts:93
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+o @ 12b7aa6479c9e148.js:2
+setTimeout
+(anonymous) @ 12b7aa6479c9e148.js:2
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+n.flushOne @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+n.deliver @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n.dispatchSingle @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+p @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n._dispatch @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n.track @ index.ts:241
+C @ fb2819b914270b40.js:2
+t @ 83ae8da879cc0e04.js:2
+o @ 12b7aa6479c9e148.js:2
+12b7aa6479c9e148.js:2  POST https://sp.replit.com/v1/t 400 (Bad Request)
+(anonymous) @ 12b7aa6479c9e148.js:2
+o @ sdk.min.js:1
+dispatch @ fetch-dispatcher.ts:11
+(anonymous) @ index.ts:122
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+g @ index.ts:93
+(anonymous) @ delivery.js:28
+(anonymous) @ delivery.js:11
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+(anonymous) @ delivery.js:4
+o @ delivery.js:27
+(anonymous) @ event-queue.js:325
+(anonymous) @ event-queue.js:323
+o @ 12b7aa6479c9e148.js:2
+setTimeout
+(anonymous) @ 12b7aa6479c9e148.js:2
+(anonymous) @ event-queue.js:321
+(anonymous) @ event-queue.js:320
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+n.flushOne @ event-queue.js:273
+(anonymous) @ event-queue.js:181
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+s @ tslib.es6.js:73
+Promise.then
+a @ tslib.es6.js:76
+(anonymous) @ tslib.es6.js:76
+u @ tslib.es6.js:72
+n.deliver @ event-queue.js:169
+(anonymous) @ event-queue.js:135
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n.dispatchSingle @ event-queue.js:128
+(anonymous) @ dispatch.js:25
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+p @ dispatch.js:18
+(anonymous) @ index.ts:460
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n._dispatch @ index.ts:454
+(anonymous) @ index.ts:253
+(anonymous) @ tslib.es6.js:103
+(anonymous) @ tslib.es6.js:108
+(anonymous) @ tslib.es6.js:80
+u @ tslib.es6.js:72
+n.track @ index.ts:241
+C @ fb2819b914270b40.js:2
+t @ 83ae8da879cc0e04.js:2
+o @ 12b7aa6479c9e148.js:2
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763486910029_6vgueinfalh 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM46 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM18 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM18 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM18 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM18 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM18 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM18 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM18 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM18 chunk-RPCDYKBN.js:19416
+commitRoot @ VM18 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM18 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM18 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM23 @tanstack_react-query.js:555
+flush @ VM23 @tanstack_react-query.js:569
+batch @ VM23 @tanstack_react-query.js:587
+dispatch_fn @ VM23 @tanstack_react-query.js:996
+setData @ VM23 @tanstack_react-query.js:696
+onSuccess @ VM23 @tanstack_react-query.js:897
+resolve @ VM23 @tanstack_react-query.js:456
+Promise.then
+run @ VM23 @tanstack_react-query.js:498
+start @ VM23 @tanstack_react-query.js:536
+fetch @ VM23 @tanstack_react-query.js:926
+executeFetch_fn @ VM23 @tanstack_react-query.js:2211
+onSubscribe @ VM23 @tanstack_react-query.js:1898
+subscribe @ VM23 @tanstack_react-query.js:24
+(anonymous) @ VM23 @tanstack_react-query.js:3022
+subscribeToStore @ VM18 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM18 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM18 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM18 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM18 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM18 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM18 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM18 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM18 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM18 chunk-RPCDYKBN.js:19432
+commitRoot @ VM18 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM18 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18718
+workLoop @ VM18 chunk-RPCDYKBN.js:197
+flushWork @ VM18 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM18 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487214884_jyor12f4jo8 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM53 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM16 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM16 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM16 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM16 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM16 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM16 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM16 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM16 chunk-RPCDYKBN.js:19416
+commitRoot @ VM16 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM16 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM16 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM16 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM16 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM16 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM16 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM16 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM16 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM16 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM16 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM16 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM16 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM16 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM16 chunk-RPCDYKBN.js:19432
+commitRoot @ VM16 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM16 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM16 chunk-RPCDYKBN.js:18718
+workLoop @ VM16 chunk-RPCDYKBN.js:197
+flushWork @ VM16 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM16 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487279416_n00h1qavqoi 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM45 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM17 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM17 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM17 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM17 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM17 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM17 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM17 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM17 chunk-RPCDYKBN.js:19416
+commitRoot @ VM17 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM17 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM17 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM17 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM17 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM17 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM17 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM17 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM17 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM17 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM17 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM17 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM17 chunk-RPCDYKBN.js:19432
+commitRoot @ VM17 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM17 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18718
+workLoop @ VM17 chunk-RPCDYKBN.js:197
+flushWork @ VM17 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM17 chunk-RPCDYKBN.js:384
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailCampaignDetails.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ client:602
+fetchUpdate @ client:211
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminHormoziEmails.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ client:602
+fetchUpdate @ client:211
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminABTestAnalytics.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailReports.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailCampaigns.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminEmailCampaignDetails.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminHormoziEmails.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminABTestAnalytics.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminEmailReports.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminEmailCampaigns.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminHormoziSms.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminHormoziSms.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminABTesting.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminABTesting.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminLeadSourcing.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminLeadSourcing.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminSegments.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminSegments.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminFunnelAnalytics.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminFunnelAnalytics.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminAutomationRuns.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminAutomationRuns.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminAutomationConfig.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminAutomationConfig.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminAutomationRules.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminAutomationRules.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/TierGate.tsx?t=1763487417836 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/components/TierGate.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487442532_cqvfc7jampp 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM51 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM17 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM17 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM17 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM17 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM17 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM17 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM17 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM17 chunk-RPCDYKBN.js:19416
+commitRoot @ VM17 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM17 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM17 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM17 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM17 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM17 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM17 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM17 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM17 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM17 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM17 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM17 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM17 chunk-RPCDYKBN.js:19432
+commitRoot @ VM17 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM17 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM17 chunk-RPCDYKBN.js:18718
+workLoop @ VM17 chunk-RPCDYKBN.js:197
+flushWork @ VM17 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM17 chunk-RPCDYKBN.js:384
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailCampaigns.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminEmailCampaigns.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailReports.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminEmailReports.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminABTesting.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminABTesting.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminEmailCampaignDetails.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminEmailCampaignDetails.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminABTestAnalytics.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminABTestAnalytics.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminAutomationRuns.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminAutomationRuns.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminHormoziEmails.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ client:602
+fetchUpdate @ client:211
+queueUpdate @ client:186
+(anonymous) @ client:642
+handleMessage @ client:640
+(anonymous) @ client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminHormoziEmails.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminHormoziSms.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminHormoziSms.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminLeadSourcing.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminLeadSourcing.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminFunnelAnalytics.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminFunnelAnalytics.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminSegments.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminSegments.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminAutomationRules.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminAutomationRules.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/pages/AdminAutomationConfig.tsx?t=1763487501472 net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ VM11 client:602
+fetchUpdate @ VM11 client:211
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:27 [hmr] Failed to reload /src/pages/AdminAutomationConfig.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ VM7 injected.js:27
+warnFailedUpdate @ VM11 client:176
+fetchUpdate @ VM11 client:213
+await in fetchUpdate
+queueUpdate @ VM11 client:186
+(anonymous) @ VM11 client:642
+handleMessage @ VM11 client:640
+(anonymous) @ VM11 client:550
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487524980_cyxa73rui4 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM46 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM18 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM18 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM18 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM18 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM18 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM18 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM18 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM18 chunk-RPCDYKBN.js:19416
+commitRoot @ VM18 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM18 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM18 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM18 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM18 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM18 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM18 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM18 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM18 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM18 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM18 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM18 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM18 chunk-RPCDYKBN.js:19432
+commitRoot @ VM18 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM18 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM18 chunk-RPCDYKBN.js:18718
+workLoop @ VM18 chunk-RPCDYKBN.js:197
+flushWork @ VM18 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM18 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562
+App.tsx:26  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ChatbotWidget.tsx net::ERR_ABORTED 502 (Bad Gateway)
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/App.tsx?v=lAGHauWp9PbQj3R4cE3ar:26  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ChatbotWidget.tsx net::ERR_ABORTED 502 (Bad Gateway)
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487837249_3l4vefos27u 403 (Forbidden)
+apply @ VM33 injected.js:204
+(anonymous) @ VM57 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM45 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM45 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM45 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM45 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM45 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM45 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM45 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM45 chunk-RPCDYKBN.js:19416
+commitRoot @ VM45 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM45 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM45 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM45 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM49 @tanstack_react-query.js:555
+flush @ VM49 @tanstack_react-query.js:569
+batch @ VM49 @tanstack_react-query.js:587
+dispatch_fn @ VM49 @tanstack_react-query.js:996
+setData @ VM49 @tanstack_react-query.js:696
+onSuccess @ VM49 @tanstack_react-query.js:897
+resolve @ VM49 @tanstack_react-query.js:456
+Promise.then
+run @ VM49 @tanstack_react-query.js:498
+start @ VM49 @tanstack_react-query.js:536
+fetch @ VM49 @tanstack_react-query.js:926
+executeFetch_fn @ VM49 @tanstack_react-query.js:2211
+onSubscribe @ VM49 @tanstack_react-query.js:1898
+subscribe @ VM49 @tanstack_react-query.js:24
+(anonymous) @ VM49 @tanstack_react-query.js:3022
+subscribeToStore @ VM45 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM45 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM45 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM45 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM45 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM45 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM45 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM45 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM45 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM45 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM45 chunk-RPCDYKBN.js:19432
+commitRoot @ VM45 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM45 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM45 chunk-RPCDYKBN.js:18718
+workLoop @ VM45 chunk-RPCDYKBN.js:197
+flushWork @ VM45 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM45 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487837249_3l4vefos27u 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:48
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM33 injected.js:204
+ping @ VM38 client:736
+waitForSuccessfulPing @ VM38 client:749
+(anonymous) @ VM38 client:561
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ injected.js:204
+ping @ client:736
+waitForSuccessfulPing @ client:749
+(anonymous) @ client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM38 client:562
+client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487930356_t6sdpw1qqxg 403 (Forbidden)
+apply @ VM343 injected.js:204
+(anonymous) @ VM384 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM355 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM355 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM355 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM355 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM355 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM355 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM355 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM355 chunk-RPCDYKBN.js:19416
+commitRoot @ VM355 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM355 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM355 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM355 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM359 @tanstack_react-query.js:555
+flush @ VM359 @tanstack_react-query.js:569
+batch @ VM359 @tanstack_react-query.js:587
+dispatch_fn @ VM359 @tanstack_react-query.js:996
+setData @ VM359 @tanstack_react-query.js:696
+onSuccess @ VM359 @tanstack_react-query.js:897
+resolve @ VM359 @tanstack_react-query.js:456
+Promise.then
+run @ VM359 @tanstack_react-query.js:498
+start @ VM359 @tanstack_react-query.js:536
+fetch @ VM359 @tanstack_react-query.js:926
+executeFetch_fn @ VM359 @tanstack_react-query.js:2211
+onSubscribe @ VM359 @tanstack_react-query.js:1898
+subscribe @ VM359 @tanstack_react-query.js:24
+(anonymous) @ VM359 @tanstack_react-query.js:3022
+subscribeToStore @ VM355 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM355 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM355 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM355 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM355 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM355 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM355 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM355 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM355 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM355 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM355 chunk-RPCDYKBN.js:19432
+commitRoot @ VM355 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM355 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM355 chunk-RPCDYKBN.js:18718
+workLoop @ VM355 chunk-RPCDYKBN.js:197
+flushWork @ VM355 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM355 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763487930356_t6sdpw1qqxg 403 (Forbidden)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+(anonymous) @ 58ebef0d-a855-445a-9…hatbotWidget.tsx:48
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19416
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18895
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+(anonymous) @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:555
+flush @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:569
+batch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:587
+dispatch_fn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:996
+setData @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:696
+onSuccess @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:897
+resolve @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:456
+Promise.then
+run @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:498
+start @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:536
+fetch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:926
+executeFetch_fn @ 58ebef0d-a855-445a-9….js?v=9160b6dd:2211
+onSubscribe @ 58ebef0d-a855-445a-9….js?v=9160b6dd:1898
+subscribe @ 58ebef0d-a855-445a-9…ry.js?v=9160b6dd:24
+(anonymous) @ 58ebef0d-a855-445a-9….js?v=9160b6dd:3022
+subscribeToStore @ 58ebef0d-a855-445a-9…js?v=9160b6dd:11984
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18868
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19432
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+finishConcurrentRender @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18718
+workLoop @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:197
+flushWork @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:176
+performWorkUntilDeadline @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM343 injected.js:204
+ping @ VM347 client:736
+waitForSuccessfulPing @ VM347 client:749
+(anonymous) @ VM347 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+ping @ 58ebef0d-a855-445a-9…ev/@vite/client:736
+waitForSuccessfulPing @ 58ebef0d-a855-445a-9…ev/@vite/client:749
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM347 client:562
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763488057417_ttq1cpxk8tj 403 (Forbidden)
+apply @ VM653 injected.js:204
+(anonymous) @ VM694 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM665 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM665 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM665 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM665 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM665 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM665 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM665 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM665 chunk-RPCDYKBN.js:19416
+commitRoot @ VM665 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM665 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM665 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM665 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM670 @tanstack_react-query.js:555
+flush @ VM670 @tanstack_react-query.js:569
+batch @ VM670 @tanstack_react-query.js:587
+dispatch_fn @ VM670 @tanstack_react-query.js:996
+setData @ VM670 @tanstack_react-query.js:696
+onSuccess @ VM670 @tanstack_react-query.js:897
+resolve @ VM670 @tanstack_react-query.js:456
+Promise.then
+run @ VM670 @tanstack_react-query.js:498
+start @ VM670 @tanstack_react-query.js:536
+fetch @ VM670 @tanstack_react-query.js:926
+executeFetch_fn @ VM670 @tanstack_react-query.js:2211
+onSubscribe @ VM670 @tanstack_react-query.js:1898
+subscribe @ VM670 @tanstack_react-query.js:24
+(anonymous) @ VM670 @tanstack_react-query.js:3022
+subscribeToStore @ VM665 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM665 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM665 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM665 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM665 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM665 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM665 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM665 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM665 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM665 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM665 chunk-RPCDYKBN.js:19432
+commitRoot @ VM665 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM665 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM665 chunk-RPCDYKBN.js:18718
+workLoop @ VM665 chunk-RPCDYKBN.js:197
+flushWork @ VM665 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM665 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763488057417_ttq1cpxk8tj 403 (Forbidden)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+(anonymous) @ 58ebef0d-a855-445a-9…hatbotWidget.tsx:48
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19416
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18895
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+(anonymous) @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:555
+flush @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:569
+batch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:587
+dispatch_fn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:996
+setData @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:696
+onSuccess @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:897
+resolve @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:456
+Promise.then
+run @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:498
+start @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:536
+fetch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:926
+executeFetch_fn @ 58ebef0d-a855-445a-9….js?v=9160b6dd:2211
+onSubscribe @ 58ebef0d-a855-445a-9….js?v=9160b6dd:1898
+subscribe @ 58ebef0d-a855-445a-9…ry.js?v=9160b6dd:24
+(anonymous) @ 58ebef0d-a855-445a-9….js?v=9160b6dd:3022
+subscribeToStore @ 58ebef0d-a855-445a-9…js?v=9160b6dd:11984
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18868
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19432
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+finishConcurrentRender @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18718
+workLoop @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:197
+flushWork @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:176
+performWorkUntilDeadline @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM653 injected.js:204
+ping @ VM658 client:736
+waitForSuccessfulPing @ VM658 client:749
+(anonymous) @ VM658 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+ping @ 58ebef0d-a855-445a-9…ev/@vite/client:736
+waitForSuccessfulPing @ 58ebef0d-a855-445a-9…ev/@vite/client:749
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM658 client:562
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763488269286_xp6xcmdgfge 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763488269286_xp6xcmdgfge 403 (Forbidden)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+(anonymous) @ 58ebef0d-a855-445a-9…hatbotWidget.tsx:48
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19416
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18895
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+(anonymous) @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:555
+flush @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:569
+batch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:587
+dispatch_fn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:996
+setData @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:696
+onSuccess @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:897
+resolve @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:456
+Promise.then
+run @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:498
+start @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:536
+fetch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:926
+executeFetch_fn @ 58ebef0d-a855-445a-9….js?v=9160b6dd:2211
+onSubscribe @ 58ebef0d-a855-445a-9….js?v=9160b6dd:1898
+subscribe @ 58ebef0d-a855-445a-9…ry.js?v=9160b6dd:24
+(anonymous) @ 58ebef0d-a855-445a-9….js?v=9160b6dd:3022
+subscribeToStore @ 58ebef0d-a855-445a-9…js?v=9160b6dd:11984
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18868
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19432
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+finishConcurrentRender @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18718
+workLoop @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:197
+flushWork @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:176
+performWorkUntilDeadline @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763489582963_4sgib4yi3ri 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+workspace_iframe.html?initialPath=%2F&id=%3Ar13r%3A:151  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 500 (Internal Server Error)
+(anonymous) @ workspace_iframe.html?initialPath=%2F&id=%3Ar13r%3A:151
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763490253976_8pmz8tgvuth 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763490361400_b0vm91y7sf 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763490445059_6rvcttik2rg 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:602  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/index.css?t=1763490704966&v=aCSO0Thlse71UVpihsVnT net::ERR_ABORTED 502 (Bad Gateway)
+importUpdatedModule @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:602
+fetchUpdate @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:211
+queueUpdate @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:186
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:642
+handleMessage @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:640
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:550
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:27 [hmr] Failed to reload /src/index.css?v=aCSO0Thlse71UVpihsVnT. This could be due to syntax errors or importing non-existent modules. (see errors above)
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:27
+warnFailedUpdate @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:176
+fetchUpdate @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:213
+await in fetchUpdate
+queueUpdate @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:186
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:642
+handleMessage @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:640
+(anonymous) @ 58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:550
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763490741066_ks38gtcbl9 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM31 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM22 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM22 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM22 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM22 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM22 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM22 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM22 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM22 chunk-RPCDYKBN.js:19416
+commitRoot @ VM22 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM22 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM22 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM22 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM22 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM22 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM22 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM22 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM22 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM22 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM22 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM22 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM22 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM22 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM22 chunk-RPCDYKBN.js:19432
+commitRoot @ VM22 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM22 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM22 chunk-RPCDYKBN.js:18718
+workLoop @ VM22 chunk-RPCDYKBN.js:197
+flushWork @ VM22 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM22 chunk-RPCDYKBN.js:384
+injected.js:27 Warning: A component is changing an uncontrolled input to be controlled. This is likely caused by the value changing from undefined to a defined value, which should not happen. Decide between using a controlled or uncontrolled input element for the lifetime of the component. More info: https://reactjs.org/link/controlled-components
+    at input
+    at _c (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/input.tsx:20:11)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:79:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:56:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/form.tsx:124:9
+    at div
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/form.tsx:72:6
+    at Controller (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-4BFJKWC4.js?v=9160b6dd:298:35)
+    at FormField (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/form.tsx:33:6)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at _c3 (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/card.tsx:45:12)
+    at div
+    at _c (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=9160b6dd:42:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:79:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:56:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-Q6YJROYD.js?v=9160b6dd:42:13
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=9160b6dd:38:15)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-KGAZ3MND.js?v=9160b6dd:58:5
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:79:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:56:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=9160b6dd:39:15
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=9160b6dd:38:15)
+    at CollectionProvider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-TPYHSINA.js?v=9160b6dd:29:13)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-KGAZ3MND.js?v=9160b6dd:52:76
+    at Provider (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=9160b6dd:38:15)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-radio-group.js?v=9160b6dd:182:7
+    at _c (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/radio-group.tsx:21:45)
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:79:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2K77HOHX.js?v=9160b6dd:56:13
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/form.tsx:124:9
+    at div
+    at https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/src/components/ui/form.tsx:72:6
+    at Controller (https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@fs/home/runner/wo
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+(anonymous) @ VM7 injected.js:27
+printWarning @ VM22 chunk-RPCDYKBN.js:521
+error @ VM22 chunk-RPCDYKBN.js:505
+updateWrapper @ VM22 chunk-RPCDYKBN.js:1968
+updateProperties @ VM22 chunk-RPCDYKBN.js:7762
+commitUpdate @ VM22 chunk-RPCDYKBN.js:8419
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17763
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17737
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17813
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17699
+recursivelyTraverseMutationEffects @ VM22 chunk-RPCDYKBN.js:17685
+commitMutationEffectsOnFiber @ VM22 chunk-RPCDYKBN.js:17896
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+workspace_iframe.html?initialPath=%2F&id=%3Ar1a6%3A:151  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 500 (Internal Server Error)
+(anonymous) @ workspace_iframe.html?initialPath=%2F&id=%3Ar1a6%3A:151
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763492011314_yryrvmf5du 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM54 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19416
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM20 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM20 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19432
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM20 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18718
+workLoop @ VM20 chunk-RPCDYKBN.js:197
+flushWork @ VM20 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM20 chunk-RPCDYKBN.js:384
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763492011314_yryrvmf5du 403 (Forbidden)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+(anonymous) @ 58ebef0d-a855-445a-9…hatbotWidget.tsx:48
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19416
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18895
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+(anonymous) @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:555
+flush @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:569
+batch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:587
+dispatch_fn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:996
+setData @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:696
+onSuccess @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:897
+resolve @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:456
+Promise.then
+run @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:498
+start @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:536
+fetch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:926
+executeFetch_fn @ 58ebef0d-a855-445a-9….js?v=9160b6dd:2211
+onSubscribe @ 58ebef0d-a855-445a-9….js?v=9160b6dd:1898
+subscribe @ 58ebef0d-a855-445a-9…ry.js?v=9160b6dd:24
+(anonymous) @ 58ebef0d-a855-445a-9….js?v=9160b6dd:3022
+subscribeToStore @ 58ebef0d-a855-445a-9…js?v=9160b6dd:11984
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18868
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19432
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+finishConcurrentRender @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18718
+workLoop @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:197
+flushWork @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:176
+performWorkUntilDeadline @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/__replco/static/devtools/injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+ping @ 58ebef0d-a855-445a-9…ev/@vite/client:736
+waitForSuccessfulPing @ 58ebef0d-a855-445a-9…ev/@vite/client:749
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ 58ebef0d-a855-445a-9…ev/@vite/client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763492099860_h60ar6v865 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM34 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM19 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM19 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM19 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM19 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM19 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM19 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM19 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM19 chunk-RPCDYKBN.js:19416
+commitRoot @ VM19 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM19 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM19 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM19 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM23 @tanstack_react-query.js:555
+flush @ VM23 @tanstack_react-query.js:569
+batch @ VM23 @tanstack_react-query.js:587
+dispatch_fn @ VM23 @tanstack_react-query.js:996
+setData @ VM23 @tanstack_react-query.js:696
+onSuccess @ VM23 @tanstack_react-query.js:897
+resolve @ VM23 @tanstack_react-query.js:456
+Promise.then
+run @ VM23 @tanstack_react-query.js:498
+start @ VM23 @tanstack_react-query.js:536
+fetch @ VM23 @tanstack_react-query.js:926
+executeFetch_fn @ VM23 @tanstack_react-query.js:2211
+onSubscribe @ VM23 @tanstack_react-query.js:1898
+subscribe @ VM23 @tanstack_react-query.js:24
+(anonymous) @ VM23 @tanstack_react-query.js:3022
+subscribeToStore @ VM19 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM19 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM19 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM19 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM19 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM19 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM19 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM19 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM19 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM19 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM19 chunk-RPCDYKBN.js:19432
+commitRoot @ VM19 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM19 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM19 chunk-RPCDYKBN.js:18718
+workLoop @ VM19 chunk-RPCDYKBN.js:197
+flushWork @ VM19 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM19 chunk-RPCDYKBN.js:384
+12b7aa6479c9e148.js:2  POST https://replit.com/graphql 504 (Gateway Timeout)
+(anonymous) @ 12b7aa6479c9e148.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+e @ 1b224bbc8db79db2.js:2
+o.subscribe @ 1b224bbc8db79db2.js:2
+e.consumeQueue @ 909adfd3a8839b9e.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+o @ 12b7aa6479c9e148.js:2
+setTimeout
+(anonymous) @ 12b7aa6479c9e148.js:2
+e.scheduleQueueConsumption @ 909adfd3a8839b9e.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+e @ 1b224bbc8db79db2.js:2
+o.subscribe @ 1b224bbc8db79db2.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+e @ 1b224bbc8db79db2.js:2
+o.subscribe @ 1b224bbc8db79db2.js:2
+e.try @ 909adfd3a8839b9e.js:2
+e.start @ 909adfd3a8839b9e.js:2
+r.request @ 909adfd3a8839b9e.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+Promise.then
+(anonymous) @ 909adfd3a8839b9e.js:2
+e @ 1b224bbc8db79db2.js:2
+o.subscribe @ 1b224bbc8db79db2.js:2
+complete @ 909adfd3a8839b9e.js:2
+r.start @ 909adfd3a8839b9e.js:2
+r @ 909adfd3a8839b9e.js:2
+e.getObservableFromLink @ 909adfd3a8839b9e.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+(anonymous) @ 909adfd3a8839b9e.js:2
+(anonymous) @ efcf629fa0283b2e.js:2
+(anonymous) @ efcf629fa0283b2e.js:2
+s @ efcf629fa0283b2e.js:2
+e.mutate @ 909adfd3a8839b9e.js:2
+e.mutate @ 909adfd3a8839b9e.js:2
+(anonymous) @ ba0aa57d2af5ad9c.js:2
+e.wait @ 83ae8da879cc0e04.js:2
+u @ 6dc7a950438d7a9e.js:2
+(anonymous) @ 6dc7a950438d7a9e.js:2
+o @ 12b7aa6479c9e148.js:2
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763492193974_59yer6c1als 403 (Forbidden)
+apply @ VM7 injected.js:204
+(anonymous) @ VM52 ChatbotWidget.tsx:48
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19416
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18895
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+(anonymous) @ VM20 chunk-RPCDYKBN.js:18627
+setTimeout
+scheduleFn @ VM24 @tanstack_react-query.js:555
+flush @ VM24 @tanstack_react-query.js:569
+batch @ VM24 @tanstack_react-query.js:587
+dispatch_fn @ VM24 @tanstack_react-query.js:996
+setData @ VM24 @tanstack_react-query.js:696
+onSuccess @ VM24 @tanstack_react-query.js:897
+resolve @ VM24 @tanstack_react-query.js:456
+Promise.then
+run @ VM24 @tanstack_react-query.js:498
+start @ VM24 @tanstack_react-query.js:536
+fetch @ VM24 @tanstack_react-query.js:926
+executeFetch_fn @ VM24 @tanstack_react-query.js:2211
+onSubscribe @ VM24 @tanstack_react-query.js:1898
+subscribe @ VM24 @tanstack_react-query.js:24
+(anonymous) @ VM24 @tanstack_react-query.js:3022
+subscribeToStore @ VM20 chunk-RPCDYKBN.js:11984
+commitHookEffectListMount @ VM20 chunk-RPCDYKBN.js:16915
+commitPassiveMountOnFiber @ VM20 chunk-RPCDYKBN.js:18156
+commitPassiveMountEffects_complete @ VM20 chunk-RPCDYKBN.js:18129
+commitPassiveMountEffects_begin @ VM20 chunk-RPCDYKBN.js:18119
+commitPassiveMountEffects @ VM20 chunk-RPCDYKBN.js:18109
+flushPassiveEffectsImpl @ VM20 chunk-RPCDYKBN.js:19490
+flushPassiveEffects @ VM20 chunk-RPCDYKBN.js:19447
+performSyncWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18868
+flushSyncCallbacks @ VM20 chunk-RPCDYKBN.js:9119
+commitRootImpl @ VM20 chunk-RPCDYKBN.js:19432
+commitRoot @ VM20 chunk-RPCDYKBN.js:19277
+finishConcurrentRender @ VM20 chunk-RPCDYKBN.js:18805
+performConcurrentWorkOnRoot @ VM20 chunk-RPCDYKBN.js:18718
+workLoop @ VM20 chunk-RPCDYKBN.js:197
+flushWork @ VM20 chunk-RPCDYKBN.js:176
+performWorkUntilDeadline @ VM20 chunk-RPCDYKBN.js:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/ 502 (Bad Gateway)
+apply @ VM7 injected.js:204
+ping @ VM11 client:736
+waitForSuccessfulPing @ VM11 client:749
+(anonymous) @ VM11 client:561
+58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/@vite/client:562  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/admin/organizations 502 (Bad Gateway)
+(anonymous) @ VM11 client:562
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763492327860_s8qgcq6fp1 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763492327860_s8qgcq6fp1 403 (Forbidden)
+apply @ 58ebef0d-a855-445a-9…ols/injected.js:204
+(anonymous) @ 58ebef0d-a855-445a-9…hatbotWidget.tsx:48
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19416
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18895
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+(anonymous) @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:555
+flush @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:569
+batch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:587
+dispatch_fn @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:996
+setData @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:696
+onSuccess @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:897
+resolve @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:456
+Promise.then
+run @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:498
+start @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:536
+fetch @ 58ebef0d-a855-445a-9…y.js?v=9160b6dd:926
+executeFetch_fn @ 58ebef0d-a855-445a-9….js?v=9160b6dd:2211
+onSubscribe @ 58ebef0d-a855-445a-9….js?v=9160b6dd:1898
+subscribe @ 58ebef0d-a855-445a-9…ry.js?v=9160b6dd:24
+(anonymous) @ 58ebef0d-a855-445a-9….js?v=9160b6dd:3022
+subscribeToStore @ 58ebef0d-a855-445a-9…js?v=9160b6dd:11984
+commitHookEffectListMount @ 58ebef0d-a855-445a-9…js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18119
+commitPassiveMountEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19490
+flushPassiveEffects @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19447
+performSyncWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18868
+flushSyncCallbacks @ 58ebef0d-a855-445a-9….js?v=9160b6dd:9119
+commitRootImpl @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19432
+commitRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:19277
+finishConcurrentRender @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ 58ebef0d-a855-445a-9…js?v=9160b6dd:18718
+workLoop @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:197
+flushWork @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:176
+performWorkUntilDeadline @ 58ebef0d-a855-445a-9…N.js?v=9160b6dd:384
+injected.js:204  GET https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/chatbot/history/session_1763492466189_4yf59htbqyn 403 (Forbidden)
+apply @ injected.js:204
+(anonymous) @ ChatbotWidget.tsx:44
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19416
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18895
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=9160b6dd:555
+flush @ @tanstack_react-query.js?v=9160b6dd:569
+batch @ @tanstack_react-query.js?v=9160b6dd:587
+dispatch_fn @ @tanstack_react-query.js?v=9160b6dd:996
+setData @ @tanstack_react-query.js?v=9160b6dd:696
+onSuccess @ @tanstack_react-query.js?v=9160b6dd:897
+resolve @ @tanstack_react-query.js?v=9160b6dd:456
+Promise.then
+run @ @tanstack_react-query.js?v=9160b6dd:498
+start @ @tanstack_react-query.js?v=9160b6dd:536
+fetch @ @tanstack_react-query.js?v=9160b6dd:926
+executeFetch_fn @ @tanstack_react-query.js?v=9160b6dd:2211
+onSubscribe @ @tanstack_react-query.js?v=9160b6dd:1898
+subscribe @ @tanstack_react-query.js?v=9160b6dd:24
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3022
+subscribeToStore @ chunk-RPCDYKBN.js?v=9160b6dd:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=9160b6dd:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=9160b6dd:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=9160b6dd:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=9160b6dd:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=9160b6dd:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=9160b6dd:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=9160b6dd:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=9160b6dd:19432
+commitRoot @ chunk-RPCDYKBN.js?v=9160b6dd:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=9160b6dd:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=9160b6dd:18718
+workLoop @ chunk-RPCDYKBN.js?v=9160b6dd:197
+flushWork @ chunk-RPCDYKBN.js?v=9160b6dd:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=9160b6dd:384
+injected.js:204  POST https://58ebef0d-a855-445a-9082-bcfbe0b05d1a-00-12w0s05hqohup.riker.replit.dev/api/admin/organizations/provision 500 (Internal Server Error)
+apply @ injected.js:204
+apiRequest @ queryClient.ts:17
+mutationFn @ ProvisioningWizard.tsx:156
+fn @ @tanstack_react-query.js?v=9160b6dd:1189
+run @ @tanstack_react-query.js?v=9160b6dd:494
+start @ @tanstack_react-query.js?v=9160b6dd:536
+execute @ @tanstack_react-query.js?v=9160b6dd:1225
+await in execute
+mutate @ @tanstack_react-query.js?v=9160b6dd:2630
+(anonymous) @ @tanstack_react-query.js?v=9160b6dd:3295
+(anonymous) @ ProvisioningWizard.tsx:221
+(anonymous) @ chunk-4BFJKWC4.js?v=9160b6dd:1465
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=9160b6dd:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=9160b6dd:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=9160b6dd:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=9160b6dd:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=9160b6dd:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=9160b6dd:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=9160b6dd:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=9160b6dd:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=9160b6dd:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=9160b6dd:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=9160b6dd:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=9160b6dd:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=9160b6dd:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=9160b6dd:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=9160b6dd:5449

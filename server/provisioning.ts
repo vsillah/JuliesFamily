@@ -250,6 +250,7 @@ async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrape
     organizationId,
     name: program.title,
     description: program.description || 'No description available',
+    programType: 'student_program' as const, // Default to student_program for scraped content
     isActive: true,
   }));
   
