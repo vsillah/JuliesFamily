@@ -76,7 +76,13 @@ async function upsertUser(
   const funnelStage = claims["funnelStage"]; // Extract funnelStage if provided (used for testing)
   // Extract role if provided (only used in development/test)
   // Support both "role" (singular string) and "roles" (array - take first element)
-  const role = claims["role"] || (Array.isArray(claims["roles"]) ? claims["roles"][0] : claims["roles"]);
+  // Also support kinflo_admin claim for testing super admin access
+  let role = claims["role"] || (Array.isArray(claims["roles"]) ? claims["roles"][0] : claims["roles"]);
+  
+  // Check for kinflo_admin claim (supports both boolean and string "true")
+  if (claims["kinflo_admin"] === true || claims["kinflo_admin"] === "true") {
+    role = "kinflo_admin";
+  }
   
   console.log("[OIDC Claims] Extracted data:", {
     sub: claims["sub"],

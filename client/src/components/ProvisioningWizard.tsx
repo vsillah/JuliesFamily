@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { provisioningWizardSchema, type ProvisioningWizard } from "@shared/schema";
@@ -87,6 +87,23 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
   const { toast } = useToast();
+  
+  // Track programmatic closes to avoid double-calling onClose
+  const isProgrammaticClose = useRef(false);
+  
+  // Reset scraped data and form when wizard closes
+  const resetWizardState = () => {
+    setScrapedData(null);
+    setCurrentStep(1);
+    form.reset();
+  };
+  
+  // Programmatically close the wizard
+  const closeWizard = () => {
+    isProgrammaticClose.current = true;
+    resetWizardState();
+    onClose();
+  };
 
   const form = useForm<ProvisioningWizard>({
     resolver: zodResolver(provisioningWizardSchema),
@@ -140,9 +157,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
         description: `${data.organization.name} is ready to go. Welcome email sent!`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });
-      form.reset();
-      setCurrentStep(1);
-      onClose();
+      closeWizard();
     },
     onError: (error: any) => {
       toast({
@@ -157,9 +172,35 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
     const fieldsToValidate = getFieldsForStep(currentStep);
     const isValid = await form.trigger(fieldsToValidate);
     
-    if (isValid) {
-      setCurrentStep(currentStep + 1);
+    if (!isValid) {
+      return;
     }
+    
+    // Step 2: Additional validation for import_from_website strategy
+    if (currentStep === 2) {
+      const strategy = form.getValues('contentStrategy');
+      const url = form.getValues('existingWebsiteUrl');
+      
+      if (strategy === 'import_from_website' && !url) {
+        toast({
+          title: "Website URL Required",
+          description: "Please enter a website URL or choose a different content strategy",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (strategy === 'import_from_website' && url && !scrapedData) {
+        toast({
+          title: "Scan Required",
+          description: "Please click 'Scan Website' before continuing, or choose a different content strategy",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    
+    setCurrentStep(currentStep + 1);
   };
 
   const handleBack = () => {
@@ -194,8 +235,26 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
 
   const progress = (currentStep / STEPS.length) * 100;
 
+  // Reset scrapedData when strategy changes away from import_from_website
+  useEffect(() => {
+    if (contentStrategy !== 'import_from_website') {
+      setScrapedData(null);
+    }
+  }, [contentStrategy]);
+  
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        // If this is a programmatic close, reset the flag and don't call onClose again
+        if (isProgrammaticClose.current) {
+          isProgrammaticClose.current = false;
+          return;
+        }
+        // User-initiated close (clicking X or outside)
+        resetWizardState();
+        onClose();
+      }
+    }}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="dialog-provisioning-wizard">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -335,32 +394,6 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="existingWebsiteUrl"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Existing Website URL (Optional)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                          <Input 
-                            {...field} 
-                            type="url"
-                            placeholder="https://example.org" 
-                            className="pl-9"
-                            data-testid="input-website-url"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormDescription>
-                        We can use this for content inspiration
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
             )}
 
@@ -428,7 +461,32 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                   </div>
                                   
                                   {field.value === 'import_from_website' && !scrapedData && (
-                                    <div className="pt-2">
+                                    <div className="pt-2 space-y-3">
+                                      <FormField
+                                        control={form.control}
+                                        name="existingWebsiteUrl"
+                                        render={({ field: urlField }) => (
+                                          <FormItem>
+                                            <FormLabel>Website URL</FormLabel>
+                                            <FormControl>
+                                              <div className="relative">
+                                                <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                                <Input 
+                                                  {...urlField}
+                                                  type="url"
+                                                  placeholder="https://example.org" 
+                                                  className="pl-9"
+                                                  data-testid="input-website-url"
+                                                />
+                                              </div>
+                                            </FormControl>
+                                            <FormDescription>
+                                              Enter your organization's website to automatically import content
+                                            </FormDescription>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
                                       <Button
                                         type="button"
                                         onClick={(e) => {
@@ -437,7 +495,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                           if (!url) {
                                             toast({
                                               title: "Website URL Required",
-                                              description: "Please enter a website URL in Step 1",
+                                              description: "Please enter a website URL in the field above",
                                               variant: "destructive",
                                             });
                                             return;
