@@ -397,6 +397,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Scrape website for content and persona detection (super admin only)
+  app.post('/api/admin/organizations/scrape-website', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { url } = req.body;
+      
+      if (!url || typeof url !== 'string') {
+        return res.status(400).json({ message: 'URL is required' });
+      }
+      
+      // Import and call the scraper
+      const { scrapeWebsite } = await import('./websiteScraper');
+      const result = await scrapeWebsite(url);
+      
+      console.log(`[Scraper] Scraped ${url}: ${result.personas.length} personas, ${result.programs.length} programs, ${result.events.length} events, ${result.testimonials.length} testimonials`);
+      
+      res.status(200).json(result);
+    } catch (error: any) {
+      console.error('[Scraper] Error scraping website:', error);
+      res.status(500).json({ 
+        message: error.message || 'Failed to scrape website',
+        personas: ['default'],
+        programs: [],
+        events: [],
+        testimonials: [],
+        errors: ['An unexpected error occurred while scraping the website.']
+      });
+    }
+  });
+
   // Provision new organization with full setup (super admin only) - Comprehensive wizard
   app.post('/api/admin/organizations/provision', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {

@@ -240,6 +240,70 @@ async function seedDefaultContent(tx: typeof db, organizationId: string, orgName
  */
 
 /**
+ * Seed programs from scraped data
+ */
+async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrapedPrograms: any[]) {
+  if (scrapedPrograms.length === 0) return [];
+  
+  const programsToCreate = scrapedPrograms.map(program => ({
+    id: nanoid(),
+    organizationId,
+    name: program.title,
+    description: program.description || 'No description available',
+    isActive: true,
+  }));
+  
+  return await tx.insert(programs).values(programsToCreate).returning();
+}
+
+/**
+ * Seed events from scraped data
+ */
+async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedEvents: any[]) {
+  if (scrapedEvents.length === 0) return [];
+  
+  const eventsToCreate = scrapedEvents.map(event => ({
+    id: nanoid(),
+    organizationId,
+    type: 'event' as const,
+    title: event.title,
+    description: event.description || '',
+    order: 0,
+    isActive: true,
+    metadata: {
+      startDate: event.date, // Match existing schema
+      location: event.location,
+      registrationLink: event.url, // Match existing schema
+    },
+  }));
+  
+  return await tx.insert(contentItems).values(eventsToCreate).returning();
+}
+
+/**
+ * Seed testimonials from scraped data
+ */
+async function seedScrapedTestimonials(tx: typeof db, organizationId: string, scrapedTestimonials: any[]) {
+  if (scrapedTestimonials.length === 0) return [];
+  
+  const testimonialsToCreate = scrapedTestimonials.map(testimonial => ({
+    id: nanoid(),
+    organizationId,
+    type: 'testimonial' as const,
+    title: testimonial.quote, // Quote as title
+    description: '', // Empty description
+    order: 0,
+    isActive: true,
+    metadata: {
+      author: testimonial.author, // Match existing schema
+      role: testimonial.role,
+    },
+  }));
+  
+  return await tx.insert(contentItems).values(testimonialsToCreate).returning();
+}
+
+/**
  * Enable features for the organization based on tier
  */
 async function enableTierFeatures(tx: typeof db, organizationId: string, tier: string, additionalFeatures: string[] = []) {
@@ -315,12 +379,34 @@ export async function provisionOrganization(data: ProvisioningWizard) {
           })
           .where(eq(provisioningRequests.id, requestId));
       } else if (data.contentStrategy === 'import_from_website') {
-        // TODO: Implement website scraping in future iteration
-        // For now, fall back to default templates
-        await seedDefaultPrograms(tx, orgId);
-        await seedDefaultTestimonials(tx, orgId);
-        await seedDefaultEvents(tx, orgId);
-        await seedDefaultContent(tx, orgId, data.name);
+        // Use scraped data if provided, otherwise fall back to defaults
+        if (data.scrapedData) {
+          // Seed content from scraped data
+          await seedScrapedPrograms(tx, orgId, data.scrapedData.programs);
+          await seedScrapedEvents(tx, orgId, data.scrapedData.events);
+          await seedScrapedTestimonials(tx, orgId, data.scrapedData.testimonials);
+          
+          // Seed hero/CTA variants for all personas
+          await seedDefaultContent(tx, orgId, data.name);
+          
+          // Store detected personas in provisioning request for reference
+          await tx.update(provisioningRequests)
+            .set({ 
+              requestData: {
+                ...data,
+                detectedPersonas: data.scrapedData.personas,
+              } as any,
+            })
+            .where(eq(provisioningRequests.id, requestId));
+          
+          console.log(`[Provisioning] Seeded content from scraped data: ${data.scrapedData.programs.length} programs, ${data.scrapedData.events.length} events, ${data.scrapedData.testimonials.length} testimonials, detected personas: ${data.scrapedData.personas.join(', ')}`);
+        } else {
+          // Fall back to default templates
+          await seedDefaultPrograms(tx, orgId);
+          await seedDefaultTestimonials(tx, orgId);
+          await seedDefaultEvents(tx, orgId);
+          await seedDefaultContent(tx, orgId, data.name);
+        }
         
         await tx.update(provisioningRequests)
           .set({ 

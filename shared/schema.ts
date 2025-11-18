@@ -86,6 +86,29 @@ export const provisioningWizardSchema = z.object({
   // Step 2: Content Strategy
   contentStrategy: z.enum(['default_templates', 'import_from_website', 'start_blank']).default('default_templates'),
   
+  // Optional: Scraped data from website import
+  scrapedData: z.object({
+    personas: z.array(z.string()),
+    programs: z.array(z.object({
+      title: z.string(),
+      description: z.string(),
+      url: z.string().optional(),
+    })),
+    events: z.array(z.object({
+      title: z.string(),
+      description: z.string(),
+      date: z.string().optional(),
+      location: z.string().optional(),
+      url: z.string().optional(),
+    })),
+    testimonials: z.array(z.object({
+      quote: z.string(),
+      author: z.string(),
+      role: z.string().optional(),
+    })),
+    errors: z.array(z.string()),
+  }).optional(),
+  
   // Step 3: Feature Configuration (array of feature keys to enable)
   enabledFeatures: z.array(z.string()).default([]),
 });
