@@ -46,11 +46,12 @@ KinFlo Admins can switch between organizations using a session override.
 The application incorporates Helmet Security Headers, a five-tier rate limiting system, centralized audit logging, Zod schema-based field validation, error sanitization, and secure session management.
 
 **Multi-Tenant Architecture**:
--   **Database Schema**: Nullable `organizationId` column for tenant isolation in existing tables; new tables for `organizations`, `organization_users`, `custom_domains`, and `shared_templates`.
+-   **Database Schema**: Nullable `organizationId` column for tenant isolation in existing tables; new tables for `organizations`, `organization_users`, `custom_domains`, and `shared_templates`. Organization names have a unique constraint to prevent data collisions.
 -   **Domain Detection Middleware**: Detects organization from custom verified domains or defaults. Host header validation prevents tenant spoofing.
 -   **Organization-Scoped Storage**: JavaScript Proxy-based wrapper enforcing tenant isolation on storage method calls.
 -   **Background Scheduler Security**: All 4 background schedulers process each organization independently with org-scoped storage, ensuring no cross-tenant data access.
 -   **Security Approach**: Hostname normalization, trusted domain validation, DNS verification, request-scoped storage enforcement, and Proxy-based hard enforcement prevent cross-tenant data leakage.
+-   **Unique Organization Names**: Database-level unique constraint on organization names with graceful error handling. Backend catches PostgreSQL duplicate key violations (error 23505) and returns HTTP 409 with clear messages. Frontend displays errors both inline on form fields and via toast notifications, keeping dialogs open for user correction.
 
 ## External Dependencies
 
