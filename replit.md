@@ -8,6 +8,26 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+### Organization Provisioning Wizard Complete (November 18, 2025)
+**Production-Ready**: Comprehensive multi-step wizard for complete organization setup with content seeding, feature configuration, and automated welcome emails.
+
+**Implementation Summary**:
+- **4-Step Wizard UI**: Organization details (name, tier, contact) → Content strategy (templates/import/blank) → Feature configuration (tier-based with optional upgrades) → Review & confirm
+- **Backend Orchestrator**: Transaction-based provisioning with step-by-step progress tracking in `provisioning_requests` table (pending → in_progress → completed/failed)
+- **Content Seeding**: Automated seeding of default programs (3), personas (6), testimonials (2), events (1), hero/CTA variants (48), and content visibility rules
+- **Feature Defaults**: Tier-based feature enablement (basic: 4 features, pro: 8 features, premium: 12 features)
+- **SendGrid Integration**: Automated welcome email with setup checklist and next steps, sent after successful provisioning
+- **Error Handling**: Complete rollback via transaction if any step fails, provisioning request tracks failure state and error message
+- **Admin UI Integration**: "New Organization Wizard" button on `/admin/organizations` page alongside existing "Quick Create" option
+
+**Database Schema**:
+- `provisioning_requests` table: Tracks workflow status (status, requestData, errorMessage, completedSteps, timestamps)
+- `provisioningWizardSchema`: Validates all wizard inputs (name, tier, contact info, content strategy, enabled features)
+
+**Security**: Transaction ensures atomicity - all seeding functions use explicit organizationId within single transaction, no cross-tenant risk
+
+**Next Steps**: Integration test for mid-transaction failure rollback, SendGrid delivery monitoring, analytics on content strategy fallback paths
+
 ### Feature Toggle System Complete (November 17, 2025)
 **Production-Ready**: Fully tested multi-tenant feature flag system enabling organization-specific feature control via admin UI and programmatic access.
 
@@ -80,6 +100,7 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Hybrid Card Reordering System**: Three-method content reordering interface (drag-and-drop, arrow buttons, jump-to-position dropdown) with transactional batch updates and optimistic UI.
 -   **Student Projects Carousel with Passion Badges**: Passion-filtered carousel showcasing student work to donors, with OIDC passions persistence and visual passion badges.
 -   **Feature Toggle System**: Production-ready multi-tenant feature flag platform with super admin UI for organization-specific feature control, `useFeatureEnabled` hook for frontend conditional rendering, and `FeatureGate` component for declarative feature gating.
+-   **Organization Provisioning Wizard**: Production-ready multi-step wizard for comprehensive organization setup with content seeding (programs, personas, testimonials, events, hero/CTA variants), tier-based feature enablement, SendGrid welcome emails, and transaction-based rollback on failure.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are handled by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a **two-tier RBAC system**:
