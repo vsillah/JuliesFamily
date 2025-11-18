@@ -777,6 +777,50 @@ export const programDetailMetadataSchema = z.object({
 }).passthrough(); // Allow additional fields
 export type ProgramDetailMetadata = z.infer<typeof programDetailMetadataSchema>;
 
+// Impact section metadata schema
+export const impactSectionMetadataSchema = z.object({
+  sectionTitle: z.string(), // e.g., "2024: A Year of Incredible Growth"
+  stats: z.array(z.object({
+    icon: z.string(), // Lucide icon name: 'Users', 'GraduationCap', 'Award', 'Calendar'
+    number: z.string(), // e.g., "299", "+31%", "+155%"
+    label: z.string(), // e.g., "Students Served in 2024"
+  })),
+}).passthrough();
+export type ImpactSectionMetadata = z.infer<typeof impactSectionMetadataSchema>;
+
+// Story section metadata schema
+export const storySectionTimelineItemSchema = z.object({
+  year: z.string(), // e.g., "1974", "1980"
+  icon: z.string(), // Lucide icon name: 'Heart', 'Users', 'GraduationCap', 'Home', 'Calendar'
+  heading: z.string(), // e.g., "The Beginning", "Merger & Unity"
+  content: z.string(), // Paragraph text
+});
+
+export const storySectionCardSchema = z.object({
+  heading: z.string(),
+  content: z.string(),
+  imageUrl: z.string().optional(), // Optional image reference
+  imageAlt: z.string().optional(),
+});
+
+export const storySectionTabSchema = z.object({
+  label: z.string(), // e.g., "Our Origins"
+  value: z.string(), // e.g., "origins"
+  summary: z.string(), // Brief intro paragraph
+  timeline: z.array(storySectionTimelineItemSchema).optional(), // For Origins tab
+  cards: z.array(storySectionCardSchema).optional(), // For Building/Founders tabs
+  images: z.array(z.object({
+    url: z.string(),
+    alt: z.string(),
+  })).optional(), // Tab-specific images
+});
+
+export const storySectionMetadataSchema = z.object({
+  sectionTitle: z.string(), // e.g., "A Legacy of Compassion and Service"
+  tabs: z.array(storySectionTabSchema),
+}).passthrough();
+export type StorySectionMetadata = z.infer<typeof storySectionMetadataSchema>;
+
 // Extended ContentItem type with resolved image URL from image_assets join
 export type ContentItemWithResolvedImage = ContentItem & {
   resolvedImageUrl?: string | null;
