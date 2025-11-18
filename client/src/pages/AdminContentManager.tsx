@@ -488,6 +488,14 @@ export default function AdminContentManager() {
     queryKey: ["/api/content/type/story_section", { orgId: currentOrg?.organizationId || 'default' }],
   });
 
+  const { data: sponsorsSections = [], isLoading: sponsorsSectionsLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/sponsors_section", { orgId: currentOrg?.organizationId || 'default' }],
+  });
+
+  const { data: footerSections = [], isLoading: footerSectionsLoading } = useQuery<ContentItem[]>({
+    queryKey: ["/api/content/type/footer_section", { orgId: currentOrg?.organizationId || 'default' }],
+  });
+
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
     queryKey: [currentOrg?.organizationId, "/api/google-reviews/all"],
     enabled: !!currentOrg,
@@ -1427,11 +1435,13 @@ export default function AdminContentManager() {
                     <TabsTrigger value="student_testimonial" data-testid="tab-student-testimonials" className="whitespace-nowrap flex-shrink-0">Student Testimonials ({studentTestimonials.length})</TabsTrigger>
                     <TabsTrigger value="impact_section" data-testid="tab-impact-section" className="whitespace-nowrap flex-shrink-0">Impact Section ({impactSections.length})</TabsTrigger>
                     <TabsTrigger value="story_section" data-testid="tab-story-section" className="whitespace-nowrap flex-shrink-0">Our Story Section ({storySections.length})</TabsTrigger>
+                    <TabsTrigger value="sponsors_section" data-testid="tab-sponsors-section" className="whitespace-nowrap flex-shrink-0">Sponsors Section ({sponsorsSections.length})</TabsTrigger>
+                    <TabsTrigger value="footer_section" data-testid="tab-footer-section" className="whitespace-nowrap flex-shrink-0">Footer Section ({footerSections.length})</TabsTrigger>
                   </TabsList>
                 </div>
               </div>
               
-              {activeTab !== "matrix" && activeTab !== "googleReviews" && activeTab !== "student_project" && activeTab !== "student_testimonial" && activeTab !== "impact_section" && activeTab !== "story_section" && (
+              {activeTab !== "matrix" && activeTab !== "googleReviews" && activeTab !== "student_project" && activeTab !== "student_testimonial" && activeTab !== "impact_section" && activeTab !== "story_section" && activeTab !== "sponsors_section" && activeTab !== "footer_section" && (
                 <div className="flex justify-end">
                   <Button
                     onClick={() => {
@@ -2084,6 +2094,92 @@ export default function AdminContentManager() {
                     >
                       <Pencil className="w-4 h-4 mr-1" />
                       Edit Story Section
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Sponsors Section Tab */}
+          <TabsContent value="sponsors_section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {sponsorsSectionsLoading ? (
+              <div className="text-center py-8">Loading sponsors section...</div>
+            ) : sponsorsSections.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground text-center">No sponsors section configured yet.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium">Section Title:</p>
+                      <p className="text-muted-foreground">{(sponsorsSections[0].metadata as any)?.sectionTitle || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Sponsors Count:</p>
+                      <p className="text-muted-foreground">{(sponsorsSections[0].metadata as any)?.sponsors?.length || 0}</p>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setEditingItem(sponsorsSections[0]);
+                        setIsEditDialogOpen(true);
+                      }}
+                      data-testid="button-edit-sponsors-section"
+                    >
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit Sponsors Section
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Footer Section Tab */}
+          <TabsContent value="footer_section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {footerSectionsLoading ? (
+              <div className="text-center py-8">Loading footer section...</div>
+            ) : footerSections.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground text-center">No footer section configured yet.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm font-medium">Organization Name:</p>
+                      <p className="text-muted-foreground">{(footerSections[0].metadata as any)?.organizationName || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Quick Links:</p>
+                      <p className="text-muted-foreground">{(footerSections[0].metadata as any)?.quickLinks?.length || 0} links</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Programs:</p>
+                      <p className="text-muted-foreground">{(footerSections[0].metadata as any)?.programs?.length || 0} programs</p>
+                    </div>
+                  </div>
+                  <div className="mt-6">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setEditingItem(footerSections[0]);
+                        setIsEditDialogOpen(true);
+                      }}
+                      data-testid="button-edit-footer-section"
+                    >
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit Footer Section
                     </Button>
                   </div>
                 </CardContent>
