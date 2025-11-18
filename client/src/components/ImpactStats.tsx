@@ -1,6 +1,7 @@
 import { GraduationCap, Users, Calendar, Award, LucideIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import type { ContentItem, ImpactSectionMetadata } from "@shared/schema";
 
 // Icon mapping helper
@@ -86,10 +87,16 @@ function AnimatedCounter({ targetValue }: { targetValue: string }) {
 }
 
 export default function ImpactStats() {
-  // Fetch impact section from database
-  const { data: impactData, isLoading } = useQuery<ContentItem>({
-    queryKey: ['/api/content/type/impact_section'],
+  const { currentOrg } = useOrganization();
+  
+  // Fetch impact section from database (returns array)
+  const { data: impactDataArray = [], isLoading } = useQuery<ContentItem[]>({
+    queryKey: [currentOrg?.organizationId, '/api/content/type/impact_section'],
+    enabled: !!currentOrg,
   });
+
+  // Get the first (and only) impact section for this org
+  const impactData = impactDataArray[0];
 
   // Parse metadata and provide fallback
   const metadata = (impactData?.metadata as ImpactSectionMetadata) || {
@@ -104,7 +111,7 @@ export default function ImpactStats() {
     label: stat.label,
   }));
 
-  // Don't render if no data yet
+  // Don't render if loading or no data
   if (isLoading || !impactData) {
     return null;
   }

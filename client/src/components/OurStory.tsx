@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -30,10 +31,16 @@ function resolveAssetPath(path: string): string {
 }
 
 export default function OurStory() {
-  // Fetch story section from database
-  const { data: storyData, isLoading } = useQuery<ContentItem>({
-    queryKey: ['/api/content/type/story_section'],
+  const { currentOrg } = useOrganization();
+
+  // Fetch story section from database (returns array)
+  const { data: storyDataArray = [], isLoading } = useQuery<ContentItem[]>({
+    queryKey: [currentOrg?.organizationId, '/api/content/type/story_section'],
+    enabled: !!currentOrg,
   });
+
+  // Get the first (and only) story section for this org
+  const storyData = storyDataArray[0];
 
   // Parse metadata
   const metadata = storyData?.metadata as StorySectionMetadata | undefined;
@@ -45,7 +52,7 @@ export default function OurStory() {
     setExpandedTabs(prev => ({ ...prev, [tabValue]: !prev[tabValue] }));
   };
 
-  // Don't render if no data yet
+  // Don't render if loading or no data
   if (isLoading || !storyData || !metadata) {
     return null;
   }

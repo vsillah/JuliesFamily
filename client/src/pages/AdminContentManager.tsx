@@ -480,6 +480,16 @@ export default function AdminContentManager() {
     enabled: !!currentOrg,
   });
 
+  const { data: impactSections = [], isLoading: impactSectionsLoading } = useQuery<ContentItem[]>({
+    queryKey: [currentOrg?.organizationId, "/api/content/type/impact_section"],
+    enabled: !!currentOrg,
+  });
+
+  const { data: storySections = [], isLoading: storySectionsLoading } = useQuery<ContentItem[]>({
+    queryKey: [currentOrg?.organizationId, "/api/content/type/story_section"],
+    enabled: !!currentOrg,
+  });
+
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
     queryKey: [currentOrg?.organizationId, "/api/google-reviews/all"],
     enabled: !!currentOrg,
@@ -1415,11 +1425,13 @@ export default function AdminContentManager() {
                     <TabsTrigger value="volunteer_dashboard_card" data-testid="tab-volunteer-dashboard-card" className="whitespace-nowrap flex-shrink-0">Volunteer Dashboard Card ({volunteerDashboardCards.length})</TabsTrigger>
                     <TabsTrigger value="student_project" data-testid="tab-student-projects" className="whitespace-nowrap flex-shrink-0">Student Projects ({studentProjects.length})</TabsTrigger>
                     <TabsTrigger value="student_testimonial" data-testid="tab-student-testimonials" className="whitespace-nowrap flex-shrink-0">Student Testimonials ({studentTestimonials.length})</TabsTrigger>
+                    <TabsTrigger value="impact_section" data-testid="tab-impact-section" className="whitespace-nowrap flex-shrink-0">Impact Section ({impactSections.length})</TabsTrigger>
+                    <TabsTrigger value="story_section" data-testid="tab-story-section" className="whitespace-nowrap flex-shrink-0">Our Story Section ({storySections.length})</TabsTrigger>
                   </TabsList>
                 </div>
               </div>
               
-              {activeTab !== "matrix" && activeTab !== "googleReviews" && activeTab !== "student_project" && activeTab !== "student_testimonial" && (
+              {activeTab !== "matrix" && activeTab !== "googleReviews" && activeTab !== "student_project" && activeTab !== "student_testimonial" && activeTab !== "impact_section" && activeTab !== "story_section" && (
                 <div className="flex justify-end">
                   <Button
                     onClick={() => {
@@ -2004,6 +2016,78 @@ export default function AdminContentManager() {
                   );
                 })}
               </div>
+            )}
+          </TabsContent>
+
+          {/* Impact Section Tab */}
+          <TabsContent value="impact_section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {impactSectionsLoading ? (
+              <div className="text-center py-8">Loading impact section...</div>
+            ) : impactSections.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground text-center">No impact section configured yet.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{impactSections[0].title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">{impactSections[0].description}</p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingItem(impactSections[0]);
+                        setIsEditDialogOpen(true);
+                      }}
+                      data-testid="button-edit-impact-section"
+                    >
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit Impact Section
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Story Section Tab */}
+          <TabsContent value="story_section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {storySectionsLoading ? (
+              <div className="text-center py-8">Loading story section...</div>
+            ) : storySections.length === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground text-center">No story section configured yet.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>{storySections[0].title}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-muted-foreground">{storySections[0].description}</p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        setEditingItem(storySections[0]);
+                        setIsEditDialogOpen(true);
+                      }}
+                      data-testid="button-edit-story-section"
+                    >
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit Story Section
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
         </Tabs>
