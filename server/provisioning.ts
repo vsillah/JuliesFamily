@@ -346,12 +346,35 @@ export async function provisionOrganization(data: ProvisioningWizard) {
     const result = await db.transaction(async (tx) => {
       // 1. Create the organization
       const slug = generateSlug(data.name);
-      const [organization] = await tx.insert(organizations).values({
+      
+      // Prepare organization data with URL mappings and theme
+      const orgData: any = {
         name: data.name,
         slug,
         tier: data.tier,
         status: 'active',
-      }).returning();
+      };
+      
+      // Add URL mappings if provided
+      if (data.programsUrl) orgData.programsUrl = data.programsUrl;
+      if (data.eventsUrl) orgData.eventsUrl = data.eventsUrl;
+      if (data.testimonialsUrl) orgData.testimonialsUrl = data.testimonialsUrl;
+      
+      // Add extracted logo and theme colors from scraped data
+      if (data.scrapedData) {
+        if (data.scrapedData.logo) {
+          orgData.logo = data.scrapedData.logo;
+        }
+        if (data.scrapedData.themeColors) {
+          orgData.themeColors = data.scrapedData.themeColors;
+          // Also set primary color for backward compatibility
+          if (data.scrapedData.themeColors.primary) {
+            orgData.primaryColor = data.scrapedData.themeColors.primary;
+          }
+        }
+      }
+      
+      const [organization] = await tx.insert(organizations).values(orgData).returning();
       
       const orgId = organization.id;
       

@@ -400,23 +400,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Scrape website for content and persona detection (super admin only)
   app.post('/api/admin/organizations/scrape-website', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
-      const { url } = req.body;
+      const { url, programsUrl, eventsUrl, testimonialsUrl } = req.body;
       
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ message: 'URL is required' });
       }
       
-      // Import and call the scraper
-      const { scrapeWebsite } = await import('./websiteScraper');
-      const result = await scrapeWebsite(url);
+      // Import and call the enhanced content extractor
+      const { scrapeWebsiteContent } = await import('./provisioning/contentExtractor');
+      const result = await scrapeWebsiteContent({
+        baseUrl: url,
+        programsUrl: programsUrl || undefined,
+        eventsUrl: eventsUrl || undefined,
+        testimonialsUrl: testimonialsUrl || undefined,
+      });
       
-      console.log(`[Scraper] Scraped ${url}: ${result.personas.length} personas, ${result.programs.length} programs, ${result.events.length} events, ${result.testimonials.length} testimonials`);
+      console.log(`[Scraper] Scraped ${url}:`, {
+        logo: result.logo ? 'found' : 'not found',
+        themeColors: result.themeColors ? 'extracted' : 'not extracted',
+        personas: result.personas.length,
+        programs: result.programs.length,
+        events: result.events.length,
+        testimonials: result.testimonials.length,
+        errors: result.errors.length,
+      });
       
-      res.status(200).json(result);
+      res.status(200).json({
+        logo: result.logo,
+        themeColors: result.themeColors,
+        personas: result.personas,
+        programs: result.programs,
+        events: result.events,
+        testimonials: result.testimonials,
+        errors: result.errors,
+      });
     } catch (error: any) {
       console.error('[Scraper] Error scraping website:', error);
       res.status(500).json({ 
         message: error.message || 'Failed to scrape website',
+        logo: null,
+        themeColors: null,
         personas: ['default'],
         programs: [],
         events: [],

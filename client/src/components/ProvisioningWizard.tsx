@@ -41,6 +41,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface ScrapedData {
+  logo: string | null;
+  themeColors: any | null;
   personas: string[];
   programs: Array<{ title: string; description: string; url?: string }>;
   events: Array<{ title: string; description: string; date?: string; location?: string; url?: string }>;
@@ -119,8 +121,8 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   });
 
   const scrapeMutation = useMutation({
-    mutationFn: async (url: string) => {
-      const response = await apiRequest('POST', '/api/admin/organizations/scrape-website', { url });
+    mutationFn: async (params: { url: string; programsUrl?: string; eventsUrl?: string; testimonialsUrl?: string }) => {
+      const response = await apiRequest('POST', '/api/admin/organizations/scrape-website', params);
       return response.json();
     },
     onSuccess: (data: ScrapedData) => {
@@ -487,6 +489,84 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                           </FormItem>
                                         )}
                                       />
+                                      
+                                      <Separator className="my-4" />
+                                      
+                                      <div className="space-y-3">
+                                        <div className="flex items-center gap-2 text-sm font-medium">
+                                          <Settings className="h-4 w-4" />
+                                          Content Page Mapping (Optional)
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">
+                                          Specify URLs to specific pages for better content extraction
+                                        </p>
+                                        
+                                        <FormField
+                                          control={form.control}
+                                          name="programsUrl"
+                                          render={({ field: programsField }) => (
+                                            <FormItem>
+                                              <FormLabel className="text-sm">Programs/Services Page</FormLabel>
+                                              <FormControl>
+                                                <Input 
+                                                  {...programsField}
+                                                  type="url"
+                                                  placeholder="https://example.org/programs" 
+                                                  data-testid="input-programs-url"
+                                                />
+                                              </FormControl>
+                                              <FormDescription className="text-xs">
+                                                e.g., /what-we-do/programs/
+                                              </FormDescription>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                        
+                                        <FormField
+                                          control={form.control}
+                                          name="eventsUrl"
+                                          render={({ field: eventsField }) => (
+                                            <FormItem>
+                                              <FormLabel className="text-sm">Events Page</FormLabel>
+                                              <FormControl>
+                                                <Input 
+                                                  {...eventsField}
+                                                  type="url"
+                                                  placeholder="https://example.org/events" 
+                                                  data-testid="input-events-url"
+                                                />
+                                              </FormControl>
+                                              <FormDescription className="text-xs">
+                                                e.g., /what-we-do/annual-events/
+                                              </FormDescription>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                        
+                                        <FormField
+                                          control={form.control}
+                                          name="testimonialsUrl"
+                                          render={({ field: testimonialsField }) => (
+                                            <FormItem>
+                                              <FormLabel className="text-sm">Testimonials/Success Stories Page</FormLabel>
+                                              <FormControl>
+                                                <Input 
+                                                  {...testimonialsField}
+                                                  type="url"
+                                                  placeholder="https://example.org/testimonials" 
+                                                  data-testid="input-testimonials-url"
+                                                />
+                                              </FormControl>
+                                              <FormDescription className="text-xs">
+                                                e.g., /our-impact/success-stories/
+                                              </FormDescription>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </div>
                                       <Button
                                         type="button"
                                         onClick={(e) => {
@@ -511,7 +591,12 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                             });
                                             return;
                                           }
-                                          scrapeMutation.mutate(url);
+                                          scrapeMutation.mutate({
+                                            url,
+                                            programsUrl: form.getValues('programsUrl') || undefined,
+                                            eventsUrl: form.getValues('eventsUrl') || undefined,
+                                            testimonialsUrl: form.getValues('testimonialsUrl') || undefined,
+                                          });
                                         }}
                                         disabled={scrapeMutation.isPending}
                                         className="w-full"
@@ -549,7 +634,12 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                           e.stopPropagation();
                                           const url = form.getValues('existingWebsiteUrl');
                                           if (url) {
-                                            scrapeMutation.mutate(url);
+                                            scrapeMutation.mutate({
+                                            url,
+                                            programsUrl: form.getValues('programsUrl') || undefined,
+                                            eventsUrl: form.getValues('eventsUrl') || undefined,
+                                            testimonialsUrl: form.getValues('testimonialsUrl') || undefined,
+                                          });
                                           }
                                         }}
                                         disabled={scrapeMutation.isPending}
