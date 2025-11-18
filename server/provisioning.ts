@@ -241,7 +241,7 @@ async function seedDefaultContent(tx: typeof db, organizationId: string, orgName
 
 /**
  * Seed programs from scraped data into content_items
- * Programs are stored with default persona='student' and needsClassification=true
+ * Programs are stored with type='program_detail' and needsClassification=true
  * Admins can reclassify them later in the Content Manager
  */
 async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrapedPrograms: any[]) {
@@ -250,7 +250,7 @@ async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrape
   const programsToCreate = scrapedPrograms.map(program => ({
     id: nanoid(),
     organizationId,
-    type: 'program' as const,
+    type: 'program_detail' as const,
     title: program.title,
     description: program.description || 'No description available',
     order: 0,

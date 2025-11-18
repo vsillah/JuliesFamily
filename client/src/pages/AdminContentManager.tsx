@@ -222,6 +222,16 @@ function SortableContentCard({
                 
                 <ConsolidatedVisibilityBadge contentId={item.id} isActive={item.isActive} />
                 
+                {/* Needs Classification Badge for scraped content */}
+                {(item.metadata as any)?.needsClassification && (
+                  <div className="flex items-center gap-1.5 mt-2">
+                    <Badge variant="outline" className="text-xs border-amber-500 text-amber-700 dark:text-amber-400">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Needs Classification
+                    </Badge>
+                  </div>
+                )}
+                
                 {item.description && (
                   <p className="text-sm text-muted-foreground leading-relaxed mt-2 break-normal" data-testid={`text-description-${item.id}`}>
                     {item.description}
