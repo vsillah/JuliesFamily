@@ -20,6 +20,7 @@ import { AdminPreviewDropdown } from "@/components/AdminPreviewDropdown";
 import { DevAdminButton } from "@/components/DevAdminButton";
 import { ImpersonationBanner } from "@/components/ImpersonationBanner";
 import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
+import { useOrganization } from "@/contexts/OrganizationContext";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
@@ -35,6 +36,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
   const { persona, setShowPersonaModal } = usePersona();
   const { isAuthenticated, user } = useAuth();
   const { isAdmin, isSuperAdmin } = useUserRole();
+  const { currentOrg } = useOrganization();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUploader, setShowUploader] = useState(false);
@@ -191,20 +193,29 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                 aria-label="Scroll to top"
                 data-testid="button-logo-scroll-top"
               >
-                <CloudinaryImage 
-                  name="site-logo"
-                  alt="Julie's Family Learning Program Logo" 
-                  className="h-9 md:h-12 w-auto"
-                  width={120}
-                  quality="auto:best"
-                  loading="eager"
-                />
+                {currentOrg?.logo ? (
+                  <img 
+                    src={currentOrg.logo}
+                    alt={`${currentOrg.name} Logo`} 
+                    className="h-9 md:h-12 w-auto"
+                    loading="eager"
+                  />
+                ) : (
+                  <CloudinaryImage 
+                    name="site-logo"
+                    alt="Julie's Family Learning Program Logo" 
+                    className="h-9 md:h-12 w-auto"
+                    width={120}
+                    quality="auto:best"
+                    loading="eager"
+                  />
+                )}
               </button>
               <div className="hidden xl:block">
                 <h1 className={`text-sm font-serif font-semibold transition-colors duration-300 leading-tight whitespace-nowrap ${
                   isScrolled ? "text-primary" : "text-white"
                 }`}>
-                  Julie's Family<br />Learning Program
+                  {currentOrg?.name || "Julie's Family"}<br />Learning Program
                 </h1>
               </div>
             </div>

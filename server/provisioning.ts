@@ -377,8 +377,32 @@ export async function provisionOrganization(data: ProvisioningWizard) {
       
       // Add extracted logo and theme colors from scraped data
       if (data.scrapedData) {
+        // Download and upload logo to Cloudinary if available
         if (data.scrapedData.logo) {
-          orgData.logo = data.scrapedData.logo;
+          try {
+            console.log(`[Provisioning] Downloading logo from: ${data.scrapedData.logo}`);
+            const logoResponse = await fetch(data.scrapedData.logo);
+            if (logoResponse.ok) {
+              const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
+              console.log(`[Provisioning] Logo downloaded (${(logoBuffer.length / 1024).toFixed(2)} KB)`);
+              
+              // Upload to Cloudinary
+              const { uploadToCloudinary } = await import('./cloudinary');
+              const publicId = `organizations/${slug}/logo`;
+              const cloudinaryResult = await uploadToCloudinary(logoBuffer, {
+                folder: 'julies-family-learning/organizations',
+                publicId: publicId,
+              });
+              
+              orgData.logo = cloudinaryResult.secureUrl;
+              console.log(`[Provisioning] Logo uploaded to Cloudinary: ${cloudinaryResult.secureUrl}`);
+            } else {
+              console.log(`[Provisioning] Failed to download logo (HTTP ${logoResponse.status}), skipping`);
+            }
+          } catch (logoError) {
+            console.error(`[Provisioning] Error uploading logo to Cloudinary:`, logoError);
+            // Continue without logo rather than failing the entire provisioning
+          }
         }
         if (data.scrapedData.themeColors) {
           orgData.themeColors = data.scrapedData.themeColors;
