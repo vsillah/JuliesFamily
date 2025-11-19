@@ -357,10 +357,63 @@ export async function provisionOrganization(data: ProvisioningWizard) {
       .set({ status: 'in_progress', updatedAt: new Date() })
       .where(eq(provisioningRequests.id, requestId));
     
+    // Download and upload logo to Cloudinary OUTSIDE transaction to avoid blocking
+    let cloudinaryLogoUrl: string | null = null;
+    const slug = generateSlug(data.name);
+    
+    if (data.scrapedData?.logo) {
+      try {
+        console.log(`[Provisioning] Downloading logo from: ${data.scrapedData.logo}`);
+        
+        // Add timeout and abort controller for fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+        
+        const logoResponse = await fetch(data.scrapedData.logo, {
+          signal: controller.signal,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; KinfloBot/1.0; +https://kinflo.com)'
+          }
+        });
+        clearTimeout(timeoutId);
+        
+        if (logoResponse.ok) {
+          const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
+          const logoSizeKB = logoBuffer.length / 1024;
+          
+          // Validate size (max 5MB)
+          if (logoSizeKB > 5120) {
+            console.log(`[Provisioning] Logo too large (${logoSizeKB.toFixed(2)} KB), skipping`);
+          } else {
+            console.log(`[Provisioning] Logo downloaded (${logoSizeKB.toFixed(2)} KB)`);
+            
+            // Upload to Cloudinary
+            const { uploadToCloudinary } = await import('./cloudinary');
+            const publicId = `organizations/${slug}/logo`;
+            const cloudinaryResult = await uploadToCloudinary(logoBuffer, {
+              folder: 'julies-family-learning/organizations',
+              publicId: publicId,
+            });
+            
+            cloudinaryLogoUrl = cloudinaryResult.secureUrl;
+            console.log(`[Provisioning] Logo uploaded to Cloudinary: ${cloudinaryLogoUrl}`);
+          }
+        } else {
+          console.log(`[Provisioning] Failed to download logo (HTTP ${logoResponse.status}), skipping`);
+        }
+      } catch (logoError: any) {
+        if (logoError.name === 'AbortError') {
+          console.error(`[Provisioning] Logo download timeout after 15 seconds, skipping`);
+        } else {
+          console.error(`[Provisioning] Error uploading logo to Cloudinary:`, logoError);
+        }
+        // Continue without logo rather than failing the entire provisioning
+      }
+    }
+    
     // Use a transaction to ensure all-or-nothing
     const result = await db.transaction(async (tx) => {
       // 1. Create the organization
-      const slug = generateSlug(data.name);
       
       // Prepare organization data with URL mappings and theme
       const orgData: any = {
@@ -375,35 +428,13 @@ export async function provisionOrganization(data: ProvisioningWizard) {
       if (data.eventsUrls && data.eventsUrls.length > 0) orgData.eventsUrls = data.eventsUrls;
       if (data.testimonialsUrls && data.testimonialsUrls.length > 0) orgData.testimonialsUrls = data.testimonialsUrls;
       
-      // Add extracted logo and theme colors from scraped data
+      // Add logo if successfully uploaded
+      if (cloudinaryLogoUrl) {
+        orgData.logo = cloudinaryLogoUrl;
+      }
+      
+      // Add extracted theme colors from scraped data
       if (data.scrapedData) {
-        // Download and upload logo to Cloudinary if available
-        if (data.scrapedData.logo) {
-          try {
-            console.log(`[Provisioning] Downloading logo from: ${data.scrapedData.logo}`);
-            const logoResponse = await fetch(data.scrapedData.logo);
-            if (logoResponse.ok) {
-              const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
-              console.log(`[Provisioning] Logo downloaded (${(logoBuffer.length / 1024).toFixed(2)} KB)`);
-              
-              // Upload to Cloudinary
-              const { uploadToCloudinary } = await import('./cloudinary');
-              const publicId = `organizations/${slug}/logo`;
-              const cloudinaryResult = await uploadToCloudinary(logoBuffer, {
-                folder: 'julies-family-learning/organizations',
-                publicId: publicId,
-              });
-              
-              orgData.logo = cloudinaryResult.secureUrl;
-              console.log(`[Provisioning] Logo uploaded to Cloudinary: ${cloudinaryResult.secureUrl}`);
-            } else {
-              console.log(`[Provisioning] Failed to download logo (HTTP ${logoResponse.status}), skipping`);
-            }
-          } catch (logoError) {
-            console.error(`[Provisioning] Error uploading logo to Cloudinary:`, logoError);
-            // Continue without logo rather than failing the entire provisioning
-          }
-        }
         if (data.scrapedData.themeColors) {
           orgData.themeColors = data.scrapedData.themeColors;
           // Also set primary color for backward compatibility

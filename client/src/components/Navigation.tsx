@@ -199,6 +199,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                     alt={`${currentOrg.name} Logo`} 
                     className="h-9 md:h-12 w-auto"
                     loading="eager"
+                    data-testid="img-org-logo"
                   />
                 ) : (
                   <CloudinaryImage 
