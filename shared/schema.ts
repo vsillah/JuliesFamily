@@ -101,6 +101,16 @@ export const provisioningWizardSchema = z.object({
   eventsUrls: z.array(z.string().url()).max(5, "Maximum 5 URLs allowed per section").default([]),
   testimonialsUrls: z.array(z.string().url()).max(5, "Maximum 5 URLs allowed per section").default([]),
   
+  // Optional: Manual overrides for branding (takes precedence over scraped data)
+  manualLogo: z.string().url().optional().or(z.literal('')),
+  manualThemeColors: z.object({
+    primary: z.string().optional().or(z.literal('')),
+    accent: z.string().optional().or(z.literal('')),
+    background: z.string().optional().or(z.literal('')),
+    text: z.string().optional().or(z.literal('')),
+  }).optional(),
+  manualPersonas: z.array(z.string()).optional(),
+  
   // Optional: Scraped data from website import
   scrapedData: z.object({
     logo: z.string().nullable().optional(),

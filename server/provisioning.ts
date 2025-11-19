@@ -456,15 +456,19 @@ export async function provisionOrganization(data: ProvisioningWizard) {
     let cloudinaryLogoUrl: string | null = null;
     const slug = generateSlug(data.name);
     
-    if (data.scrapedData?.logo) {
+    // Prioritize manual logo over scraped logo
+    const logoToProcess = data.manualLogo || data.scrapedData?.logo;
+    
+    if (logoToProcess) {
       try {
-        console.log(`[Provisioning] Downloading logo from: ${data.scrapedData.logo}`);
+        const logoSource = data.manualLogo ? 'manual' : 'scraped';
+        console.log(`[Provisioning] Downloading ${logoSource} logo from: ${logoToProcess}`);
         
         // Add timeout and abort controller for fetch
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
         
-        const logoResponse = await fetch(data.scrapedData.logo, {
+        const logoResponse = await fetch(logoToProcess, {
           signal: controller.signal,
           headers: {
             'User-Agent': 'Mozilla/5.0 (compatible; KinfloBot/1.0; +https://kinflo.com)'
@@ -528,15 +532,39 @@ export async function provisionOrganization(data: ProvisioningWizard) {
         orgData.logo = cloudinaryLogoUrl;
       }
       
-      // Add extracted theme colors from scraped data
-      if (data.scrapedData) {
-        if (data.scrapedData.themeColors) {
-          orgData.themeColors = data.scrapedData.themeColors;
-          // Also set primary color for backward compatibility
-          if (data.scrapedData.themeColors.primary) {
-            orgData.primaryColor = data.scrapedData.themeColors.primary;
-          }
+      // Merge manual theme colors with scraped theme colors, prioritizing manual overrides
+      const finalThemeColors: any = {};
+      
+      // Start with scraped colors as base
+      if (data.scrapedData?.themeColors) {
+        Object.assign(finalThemeColors, data.scrapedData.themeColors);
+      }
+      
+      // Override with manual colors if provided (filter out empty strings)
+      if (data.manualThemeColors) {
+        if (data.manualThemeColors.primary && data.manualThemeColors.primary.trim()) {
+          finalThemeColors.primary = data.manualThemeColors.primary;
         }
+        if (data.manualThemeColors.accent && data.manualThemeColors.accent.trim()) {
+          finalThemeColors.accent = data.manualThemeColors.accent;
+        }
+        if (data.manualThemeColors.background && data.manualThemeColors.background.trim()) {
+          finalThemeColors.background = data.manualThemeColors.background;
+        }
+        if (data.manualThemeColors.text && data.manualThemeColors.text.trim()) {
+          finalThemeColors.text = data.manualThemeColors.text;
+        }
+      }
+      
+      // Add theme colors if any were provided
+      if (Object.keys(finalThemeColors).length > 0) {
+        orgData.themeColors = finalThemeColors;
+        // Also set primary color for backward compatibility
+        if (finalThemeColors.primary) {
+          orgData.primaryColor = finalThemeColors.primary;
+        }
+        
+        console.log(`[Provisioning] Theme colors set:`, finalThemeColors);
       }
       
       const [organization] = await tx.insert(organizations).values(orgData).returning();
@@ -579,17 +607,23 @@ export async function provisionOrganization(data: ProvisioningWizard) {
           await seedDefaultContent(tx, orgId, data.name);
           await seedDefaultContentSections(tx, orgId, data.name);
           
-          // Store detected personas in provisioning request for reference
+          // Merge manual personas with scraped personas, prioritizing manual
+          const finalPersonas = data.manualPersonas && data.manualPersonas.length > 0 
+            ? data.manualPersonas 
+            : data.scrapedData.personas;
+          
+          // Store detected/final personas in provisioning request for reference
           await tx.update(provisioningRequests)
             .set({ 
               requestData: {
                 ...data,
                 detectedPersonas: data.scrapedData.personas,
+                finalPersonas: finalPersonas,
               } as any,
             })
             .where(eq(provisioningRequests.id, requestId));
           
-          console.log(`[Provisioning] Seeded content from scraped data: ${data.scrapedData.programs.length} programs, ${data.scrapedData.events.length} events, ${data.scrapedData.testimonials.length} testimonials, detected personas: ${data.scrapedData.personas.join(', ')}`);
+          console.log(`[Provisioning] Seeded content from scraped data: ${data.scrapedData.programs.length} programs, ${data.scrapedData.events.length} events, ${data.scrapedData.testimonials.length} testimonials, detected personas: ${data.scrapedData.personas.join(', ')}, final personas: ${finalPersonas.join(', ')}`);
         } else {
           // Fall back to default templates
           await seedDefaultPrograms(tx, orgId);

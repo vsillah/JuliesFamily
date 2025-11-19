@@ -119,6 +119,14 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
       programsUrls: [],
       eventsUrls: [],
       testimonialsUrls: [],
+      manualLogo: "",
+      manualThemeColors: {
+        primary: "",
+        accent: "",
+        background: "",
+        text: "",
+      },
+      manualPersonas: [],
       enabledFeatures: [],
     },
   });
@@ -790,6 +798,133 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                   )}
                 />
 
+                {/* Manual Branding Section - Always visible for all strategies */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <Settings className="h-4 w-4" />
+                      {contentStrategy === 'import_from_website' && scrapedData && (scrapedData.logo || scrapedData.themeColors)
+                        ? 'Branding (Auto-detected with Manual Override)'
+                        : 'Organization Branding (Optional)'}
+                    </CardTitle>
+                    <CardDescription>
+                      {contentStrategy === 'import_from_website' && scrapedData && (scrapedData.logo || scrapedData.themeColors)
+                        ? 'Edit or override the automatically detected branding'
+                        : 'Provide your organization\'s logo and theme colors'}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="manualLogo"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Logo URL</FormLabel>
+                          <FormControl>
+                            <Input 
+                              {...field}
+                              type="url"
+                              placeholder={scrapedData?.logo || "https://example.org/logo.png"} 
+                              data-testid="input-manual-logo"
+                            />
+                          </FormControl>
+                          <FormDescription className="text-xs">
+                            {scrapedData?.logo 
+                              ? `Auto-detected: ${scrapedData.logo.substring(0, 50)}... (override above)`
+                              : 'Provide a URL to your organization\'s logo'}
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Separator />
+                    
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium">Theme Colors (Hex format)</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <FormField
+                          control={form.control}
+                          name="manualThemeColors.primary"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Primary</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field}
+                                  placeholder={scrapedData?.themeColors?.primary || "#3B82F6"} 
+                                  data-testid="input-manual-color-primary"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="manualThemeColors.accent"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Accent</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field}
+                                  placeholder={scrapedData?.themeColors?.accent || "#10B981"} 
+                                  data-testid="input-manual-color-accent"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="manualThemeColors.background"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Background</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field}
+                                  placeholder={scrapedData?.themeColors?.background || "#FFFFFF"} 
+                                  data-testid="input-manual-color-background"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="manualThemeColors.text"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Text</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field}
+                                  placeholder={scrapedData?.themeColors?.text || "#000000"} 
+                                  data-testid="input-manual-color-text"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      {scrapedData?.themeColors && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Auto-detected colors: Primary: {scrapedData.themeColors.primary || 'N/A'}, 
+                          Accent: {scrapedData.themeColors.accent || 'N/A'}
+                        </p>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
                 {contentStrategy === 'import_from_website' && scrapedData && (
                   <div className="space-y-4">
                     {/* Errors/Warnings */}
@@ -904,8 +1039,11 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                           <Users className="h-4 w-4" />
                           Detected Personas ({scrapedData.personas.length})
                         </CardTitle>
+                        <CardDescription>
+                          Click to add/remove personas
+                        </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="space-y-3">
                         <div className="flex flex-wrap gap-2">
                           {scrapedData.personas.map((persona) => (
                             <Badge key={persona} variant="secondary">
@@ -913,6 +1051,35 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                             </Badge>
                           ))}
                         </div>
+                        
+                        <FormField
+                          control={form.control}
+                          name="manualPersonas"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm">Add/Override Personas (comma separated)</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field}
+                                  value={field.value?.join(', ') || ''}
+                                  onChange={(e) => {
+                                    const personas = e.target.value
+                                      .split(',')
+                                      .map(p => p.trim())
+                                      .filter(p => p.length > 0);
+                                    field.onChange(personas);
+                                  }}
+                                  placeholder="student, parent, donor, volunteer" 
+                                  data-testid="input-manual-personas"
+                                />
+                              </FormControl>
+                              <FormDescription className="text-xs">
+                                Override detected personas or add custom ones
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </CardContent>
                     </Card>
 
