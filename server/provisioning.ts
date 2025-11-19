@@ -605,8 +605,17 @@ export async function provisionOrganization(data: ProvisioningWizard) {
             updatedAt: new Date()
           })
           .where(eq(provisioningRequests.id, requestId));
+      } else if (data.contentStrategy === 'start_blank') {
+        // Even for blank orgs, seed the 4 required content sections
+        await seedDefaultContentSections(tx, orgId, data.name);
+        
+        await tx.update(provisioningRequests)
+          .set({ 
+            completedSteps: ['organization_created', 'content_seeded'],
+            updatedAt: new Date()
+          })
+          .where(eq(provisioningRequests.id, requestId));
       }
-      // 'start_blank' - no seeding needed
       
       // 4. Enable tier-based features + any custom selections
       await enableTierFeatures(tx, orgId, data.tier, data.enabledFeatures);
