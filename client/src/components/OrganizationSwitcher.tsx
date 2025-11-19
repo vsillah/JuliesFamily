@@ -30,7 +30,7 @@ export function OrganizationSwitcher() {
         >
           <Building2 className="h-4 w-4" />
           <span className="max-w-[150px] truncate">
-            {currentOrg.organization?.name || `Org ${currentOrg.organizationId}`}
+            {currentOrg.organization?.name || "Unknown Organization"}
           </span>
           {currentOrg.isOverride && (
             <Badge variant="secondary" className="ml-1 text-xs">

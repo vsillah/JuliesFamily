@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, LogIn, LogOut, Shield, Camera, Settings, Users, UserCog } from "lucide-react";
+import { Menu, X, User, LogIn, LogOut, Shield, Camera, Settings, Users, UserCog, Building2 } from "lucide-react";
 import { usePersona, personaConfigs } from "@/contexts/PersonaContext";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -379,6 +379,14 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                         </DropdownMenuItem>
                       </Link>
                     )}
+                    {isSuperAdmin && (
+                      <Link href="/admin/organizations">
+                        <DropdownMenuItem className="cursor-pointer" data-testid="menu-organizations">
+                          <Building2 className="w-4 h-4 mr-2" />
+                          Organizations
+                        </DropdownMenuItem>
+                      </Link>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem 
                       onClick={() => window.location.href = '/api/logout'}
@@ -649,6 +657,28 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
             >
               Virtual Tour
             </Link>
+            {isAdmin && (
+              <Link 
+                href="/admin"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-lg text-foreground hover:text-primary transition-colors flex items-center gap-2"
+                data-testid="link-admin-dashboard-mobile"
+              >
+                <Shield className="w-5 h-5" />
+                Admin Dashboard
+              </Link>
+            )}
+            {isSuperAdmin && (
+              <Link 
+                href="/admin/organizations"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-lg text-foreground hover:text-primary transition-colors flex items-center gap-2"
+                data-testid="link-organizations-mobile"
+              >
+                <Building2 className="w-5 h-5" />
+                Organizations
+              </Link>
+            )}
             {isAdmin && (
               <div className="w-full flex justify-center">
                 <AdminPreviewDropdown isScrolled={true} />

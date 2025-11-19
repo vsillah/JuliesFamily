@@ -795,7 +795,7 @@ export default function AdminOrganizations() {
               )}
             </CardTitle>
             <CardDescription>
-              You are currently viewing data for: {currentOrg.organization?.name || currentOrg.organizationId}
+              You are currently viewing data for: <strong>{currentOrg.organization?.name || "Unknown Organization"}</strong>
             </CardDescription>
           </CardHeader>
         </Card>
