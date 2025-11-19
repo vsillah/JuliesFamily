@@ -119,15 +119,9 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
       programsUrls: [],
       eventsUrls: [],
       testimonialsUrls: [],
-      manualLogo: "",
-      manualThemeColors: {
-        primary: "",
-        accent: "",
-        background: "",
-        text: "",
-      },
-      manualPersonas: [],
       enabledFeatures: [],
+      // Don't set default values for manual overrides - let them be undefined
+      // so the backend can distinguish between "user didn't provide" and "user provided empty"
     },
   });
 
@@ -221,9 +215,47 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   };
 
   const handleSubmit = form.handleSubmit((data) => {
+    // Clean up manual override fields - remove empty strings and empty arrays
+    // This ensures the backend can distinguish between "user didn't provide" and actual overrides
+    const cleanedData = { ...data };
+    
+    // Remove empty manual logo
+    if (!cleanedData.manualLogo || cleanedData.manualLogo.trim() === '') {
+      delete cleanedData.manualLogo;
+    }
+    
+    // Remove empty manual theme colors
+    if (cleanedData.manualThemeColors) {
+      const cleanedColors: any = {};
+      if (cleanedData.manualThemeColors.primary?.trim()) {
+        cleanedColors.primary = cleanedData.manualThemeColors.primary;
+      }
+      if (cleanedData.manualThemeColors.accent?.trim()) {
+        cleanedColors.accent = cleanedData.manualThemeColors.accent;
+      }
+      if (cleanedData.manualThemeColors.background?.trim()) {
+        cleanedColors.background = cleanedData.manualThemeColors.background;
+      }
+      if (cleanedData.manualThemeColors.text?.trim()) {
+        cleanedColors.text = cleanedData.manualThemeColors.text;
+      }
+      
+      // Only include if at least one color was provided
+      if (Object.keys(cleanedColors).length > 0) {
+        cleanedData.manualThemeColors = cleanedColors;
+      } else {
+        delete cleanedData.manualThemeColors;
+      }
+    }
+    
+    // Remove empty manual personas array
+    if (!cleanedData.manualPersonas || cleanedData.manualPersonas.length === 0) {
+      delete cleanedData.manualPersonas;
+    }
+    
     // Include scraped data if importing from website
     const submissionData = {
-      ...data,
+      ...cleanedData,
       ...(scrapedData && { scrapedData }),
     };
     provisionMutation.mutate(submissionData);

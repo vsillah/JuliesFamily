@@ -457,11 +457,14 @@ export async function provisionOrganization(data: ProvisioningWizard) {
     const slug = generateSlug(data.name);
     
     // Prioritize manual logo over scraped logo
-    const logoToProcess = data.manualLogo || data.scrapedData?.logo;
+    // Normalize manual logo by trimming and treating empty strings as undefined
+    const normalizedManualLogo = data.manualLogo?.trim() || undefined;
+    const logoToProcess = normalizedManualLogo || data.scrapedData?.logo;
     
     if (logoToProcess) {
       try {
-        const logoSource = data.manualLogo ? 'manual' : 'scraped';
+        const logoSource = normalizedManualLogo ? 'manual' : 'scraped';
+        console.log(`[Provisioning] Logo source: ${logoSource} (manual: ${normalizedManualLogo ? 'YES' : 'NO'}, scraped: ${data.scrapedData?.logo ? 'YES' : 'NO'})`);
         console.log(`[Provisioning] Downloading ${logoSource} logo from: ${logoToProcess}`);
         
         // Add timeout and abort controller for fetch
@@ -533,39 +536,53 @@ export async function provisionOrganization(data: ProvisioningWizard) {
       }
       
       // Merge manual theme colors with scraped theme colors, prioritizing manual overrides
-      const finalThemeColors: any = {};
+      // Start with default colors to ensure consistent branding
+      const defaultThemeColors = {
+        primary: '#3B82F6',    // Blue
+        accent: '#10B981',     // Green
+        background: '#FFFFFF', // White
+        text: '#000000'        // Black
+      };
       
-      // Start with scraped colors as base
+      const finalThemeColors: any = { ...defaultThemeColors };
+      
+      // Override with scraped colors if available
       if (data.scrapedData?.themeColors) {
         Object.assign(finalThemeColors, data.scrapedData.themeColors);
+        console.log(`[Provisioning] Starting with scraped theme colors:`, data.scrapedData.themeColors);
       }
       
       // Override with manual colors if provided (filter out empty strings)
+      const manualOverrides: string[] = [];
       if (data.manualThemeColors) {
         if (data.manualThemeColors.primary && data.manualThemeColors.primary.trim()) {
           finalThemeColors.primary = data.manualThemeColors.primary;
+          manualOverrides.push('primary');
         }
         if (data.manualThemeColors.accent && data.manualThemeColors.accent.trim()) {
           finalThemeColors.accent = data.manualThemeColors.accent;
+          manualOverrides.push('accent');
         }
         if (data.manualThemeColors.background && data.manualThemeColors.background.trim()) {
           finalThemeColors.background = data.manualThemeColors.background;
+          manualOverrides.push('background');
         }
         if (data.manualThemeColors.text && data.manualThemeColors.text.trim()) {
           finalThemeColors.text = data.manualThemeColors.text;
+          manualOverrides.push('text');
+        }
+        
+        if (manualOverrides.length > 0) {
+          console.log(`[Provisioning] Applied manual color overrides for: ${manualOverrides.join(', ')}`);
         }
       }
       
-      // Add theme colors if any were provided
-      if (Object.keys(finalThemeColors).length > 0) {
-        orgData.themeColors = finalThemeColors;
-        // Also set primary color for backward compatibility
-        if (finalThemeColors.primary) {
-          orgData.primaryColor = finalThemeColors.primary;
-        }
-        
-        console.log(`[Provisioning] Theme colors set:`, finalThemeColors);
-      }
+      // Always set theme colors (we start with defaults and layer overrides)
+      orgData.themeColors = finalThemeColors;
+      // Also set primary color for backward compatibility
+      orgData.primaryColor = finalThemeColors.primary;
+      
+      console.log(`[Provisioning] Final theme colors:`, finalThemeColors);
       
       const [organization] = await tx.insert(organizations).values(orgData).returning();
       
@@ -608,22 +625,35 @@ export async function provisionOrganization(data: ProvisioningWizard) {
           await seedDefaultContentSections(tx, orgId, data.name);
           
           // Merge manual personas with scraped personas, prioritizing manual
-          const finalPersonas = data.manualPersonas && data.manualPersonas.length > 0 
-            ? data.manualPersonas 
-            : data.scrapedData.personas;
+          // Filter out any empty strings and ensure array is non-empty before using
+          const cleanedManualPersonas = data.manualPersonas
+            ?.filter(p => typeof p === 'string' && p.trim().length > 0)
+            .map(p => p.trim());
+          
+          // Define default personas to ensure personalization features always have data
+          const defaultPersonas = ['student', 'parent', 'donor', 'volunteer', 'community_member', 'educator'];
+          
+          // Robust fallback: manual → scraped → defaults
+          const scrapedPersonas = data.scrapedData?.personas || [];
+          const finalPersonas = cleanedManualPersonas && cleanedManualPersonas.length > 0 
+            ? cleanedManualPersonas 
+            : (scrapedPersonas.length > 0 ? scrapedPersonas : defaultPersonas);
+          
+          const personaSource = cleanedManualPersonas && cleanedManualPersonas.length > 0 ? 'manual' : (scrapedPersonas.length > 0 ? 'scraped' : 'default');
+          console.log(`[Provisioning] Persona source: ${personaSource} (manual provided: ${data.manualPersonas ? 'YES' : 'NO'}, count: ${cleanedManualPersonas?.length || 0})`);
           
           // Store detected/final personas in provisioning request for reference
           await tx.update(provisioningRequests)
             .set({ 
               requestData: {
                 ...data,
-                detectedPersonas: data.scrapedData.personas,
+                detectedPersonas: scrapedPersonas,
                 finalPersonas: finalPersonas,
               } as any,
             })
             .where(eq(provisioningRequests.id, requestId));
           
-          console.log(`[Provisioning] Seeded content from scraped data: ${data.scrapedData.programs.length} programs, ${data.scrapedData.events.length} events, ${data.scrapedData.testimonials.length} testimonials, detected personas: ${data.scrapedData.personas.join(', ')}, final personas: ${finalPersonas.join(', ')}`);
+          console.log(`[Provisioning] Seeded content from scraped data: ${data.scrapedData.programs.length} programs, ${data.scrapedData.events.length} events, ${data.scrapedData.testimonials.length} testimonials, detected personas: ${scrapedPersonas.join(', ')}, final personas: ${finalPersonas.length > 0 ? finalPersonas.join(', ') : 'none (using defaults)'}`);
         } else {
           // Fall back to default templates
           await seedDefaultPrograms(tx, orgId);
