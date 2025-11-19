@@ -319,6 +319,101 @@ async function seedScrapedTestimonials(tx: typeof db, organizationId: string, sc
 }
 
 /**
+ * Seed default content sections (Impact, Story, Sponsors, Footer) for new organizations
+ */
+async function seedDefaultContentSections(tx: typeof db, organizationId: string, orgName: string) {
+  const sectionsToCreate = [];
+  
+  // 1. Impact Section - placeholder stats
+  sectionsToCreate.push({
+    id: nanoid(),
+    organizationId,
+    type: 'impact_section' as const,
+    title: 'Our Impact',
+    description: 'Impact statistics and achievements',
+    order: 0,
+    isActive: true,
+    metadata: {
+      sectionTitle: 'Making a Difference',
+      stats: [
+        { icon: 'Users', number: '0', label: 'People Served' },
+        { icon: 'Heart', number: '0', label: 'Programs Offered' },
+        { icon: 'Award', number: '0', label: 'Community Partners' },
+        { icon: 'Calendar', number: '0', label: 'Years of Service' },
+      ],
+    },
+  });
+  
+  // 2. Story Section - basic placeholder
+  sectionsToCreate.push({
+    id: nanoid(),
+    organizationId,
+    type: 'story_section' as const,
+    title: 'Our Story',
+    description: 'Organization history and mission',
+    order: 0,
+    isActive: true,
+    metadata: {
+      sectionTitle: 'About Us',
+      tabs: [
+        {
+          label: 'Our Mission',
+          value: 'origins',
+          summary: `${orgName} is dedicated to serving our community.`,
+          timeline: [],
+        },
+      ],
+    },
+  });
+  
+  // 3. Sponsors Section - empty placeholder
+  sectionsToCreate.push({
+    id: nanoid(),
+    organizationId,
+    type: 'sponsors_section' as const,
+    title: 'Our Sponsors',
+    description: 'Partners and supporters',
+    order: 0,
+    isActive: true,
+    metadata: {
+      sectionTitle: 'Our Partners',
+      subtitle: '– Thank You –',
+      sponsors: [],
+    },
+  });
+  
+  // 4. Footer Section - default contact info
+  sectionsToCreate.push({
+    id: nanoid(),
+    organizationId,
+    type: 'footer_section' as const,
+    title: 'Footer',
+    description: 'Footer content',
+    order: 0,
+    isActive: true,
+    metadata: {
+      organizationName: orgName,
+      tagline: `${orgName} - Serving our community.`,
+      quickLinks: [
+        { label: 'Home', href: '/' },
+        { label: 'Programs', href: '#programs' },
+        { label: 'Events', href: '#events' },
+        { label: 'Contact', href: '#contact' },
+      ],
+      programs: [],
+      contact: {
+        address: '',
+        phone: '',
+        email: '',
+      },
+      copyrightText: `${orgName}. All rights reserved.`,
+    },
+  });
+  
+  return await tx.insert(contentItems).values(sectionsToCreate).returning();
+}
+
+/**
  * Enable features for the organization based on tier
  */
 async function enableTierFeatures(tx: typeof db, organizationId: string, tier: string, additionalFeatures: string[] = []) {
@@ -464,6 +559,7 @@ export async function provisionOrganization(data: ProvisioningWizard) {
         await seedDefaultTestimonials(tx, orgId);
         await seedDefaultEvents(tx, orgId);
         await seedDefaultContent(tx, orgId, data.name);
+        await seedDefaultContentSections(tx, orgId, data.name);
         
         await tx.update(provisioningRequests)
           .set({ 
@@ -481,6 +577,7 @@ export async function provisionOrganization(data: ProvisioningWizard) {
           
           // Seed hero/CTA variants for all personas
           await seedDefaultContent(tx, orgId, data.name);
+          await seedDefaultContentSections(tx, orgId, data.name);
           
           // Store detected personas in provisioning request for reference
           await tx.update(provisioningRequests)
@@ -499,6 +596,7 @@ export async function provisionOrganization(data: ProvisioningWizard) {
           await seedDefaultTestimonials(tx, orgId);
           await seedDefaultEvents(tx, orgId);
           await seedDefaultContent(tx, orgId, data.name);
+          await seedDefaultContentSections(tx, orgId, data.name);
         }
         
         await tx.update(provisioningRequests)
