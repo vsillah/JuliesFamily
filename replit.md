@@ -11,6 +11,10 @@ Preferred communication style: Simple, everyday language.
 ### UI/UX Decisions
 The frontend uses React 18, TypeScript, and Vite, with Tailwind CSS, custom CSS variables, and shadcn/ui (New York style) for styling. It supports light/dark modes and WCAG AA compliant colors. Typography includes Playfair Display for headlines and Inter for body text. The design is responsive and features dynamic, data-driven navigation.
 
+**Navigation Enhancements**:
+-   **Direct Organization Access**: KinFlo admins can access the Organizations management page directly from both desktop (user dropdown menu) and mobile (drawer menu) navigation, eliminating the need to navigate through the admin dashboard and breadcrumbs.
+-   **Organization Name Display**: All UI components display organization names instead of IDs. OrganizationSwitcher and AdminOrganizations pages show "Unknown Organization" as a fallback when names are unavailable, improving user experience and readability.
+
 ### Technical Implementations
 The frontend is a single-page application using `wouter` for routing and TanStack Query for server state management. Key features include:
 -   **Persona-Based Personalization**: Tailors content for 6 user personas and filters based on user interests.
