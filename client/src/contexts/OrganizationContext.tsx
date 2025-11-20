@@ -12,11 +12,12 @@ interface OrgSession {
 }
 
 // Extend database organization type with context-specific fields
+// Keeps type safety with OrganizationLayout enum from schema
 interface Organization extends Partial<DBOrganization> {
   organizationId: string;
   organizationName: string;
   isOverride: boolean;
-  layout?: string; // Layout theme for visual styling
+  // Note: layout field inherited from DBOrganization maintains OrganizationLayout type
 }
 
 interface OrganizationContextType {

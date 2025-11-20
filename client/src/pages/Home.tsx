@@ -44,7 +44,9 @@ export default function Home() {
   const { currentOrg, organization } = useOrganization();
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const { data: visibleSections } = useContentAvailability();
-  const layout = (organization?.layout || 'classic') as OrganizationLayout;
+  
+  // Get layout with type-safe fallback to 'classic' if missing or invalid
+  const layout: OrganizationLayout = organization?.layout || 'classic';
 
   // Use actual persona values - no fallback to prevent flash
   const effectivePersona = persona;
