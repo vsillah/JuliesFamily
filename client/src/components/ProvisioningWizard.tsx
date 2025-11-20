@@ -39,7 +39,8 @@ import {
   Palette,
   Leaf,
   Zap,
-  Heart
+  Heart,
+  X
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -1172,30 +1173,61 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                         <FormField
                           control={form.control}
                           name="manualPersonas"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-sm">Add/Override Personas (comma separated)</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  {...field}
-                                  value={field.value?.join(', ') || ''}
-                                  onChange={(e) => {
-                                    const personas = e.target.value
-                                      .split(',')
-                                      .map(p => p.trim())
-                                      .filter(p => p.length > 0);
-                                    field.onChange(personas);
-                                  }}
-                                  placeholder="student, parent, donor, volunteer" 
-                                  data-testid="input-manual-personas"
-                                />
-                              </FormControl>
-                              <FormDescription className="text-xs">
-                                Override detected personas or add custom ones
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
+                          render={({ field }) => {
+                            const inputValue = field.value?.join(', ') || '';
+                            return (
+                              <FormItem>
+                                <FormLabel className="text-sm">Add/Override Personas</FormLabel>
+                                <FormControl>
+                                  <div className="space-y-2">
+                                    <Input 
+                                      value={inputValue}
+                                      onChange={(e) => {
+                                        const personas = e.target.value
+                                          .split(',')
+                                          .map(p => p.trim())
+                                          .filter(p => p.length > 0);
+                                        field.onChange(personas);
+                                      }}
+                                      onBlur={field.onBlur}
+                                      name={field.name}
+                                      ref={field.ref}
+                                      placeholder="Type personas separated by commas (e.g., student, parent, donor)" 
+                                      data-testid="input-manual-personas"
+                                    />
+                                    {field.value && field.value.length > 0 && (
+                                      <div className="flex flex-wrap gap-2">
+                                        {field.value.map((persona, idx) => (
+                                          <Badge 
+                                            key={idx} 
+                                            variant="default"
+                                            className="gap-1"
+                                          >
+                                            {persona}
+                                            <button
+                                              type="button"
+                                              onClick={() => {
+                                                const newPersonas = field.value?.filter((_, i) => i !== idx) || [];
+                                                field.onChange(newPersonas);
+                                              }}
+                                              className="ml-1 hover:bg-primary-foreground/20 rounded-sm"
+                                              data-testid={`button-remove-persona-${idx}`}
+                                            >
+                                              <X className="h-3 w-3" />
+                                            </button>
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </FormControl>
+                                <FormDescription className="text-xs">
+                                  Override detected personas or add custom ones. Type multiple personas separated by commas.
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
                         />
                       </CardContent>
                     </Card>
