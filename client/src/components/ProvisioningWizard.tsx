@@ -91,9 +91,20 @@ const FEATURES = [
 
 const TIER_ORDER = { standard: 0, pro: 1, premium: 2 };
 
+interface LayoutRecommendation {
+  recommendedLayout: OrganizationLayout;
+  reasoning: string;
+  confidence: 'high' | 'medium' | 'low';
+  alternativeLayouts: {
+    layout: OrganizationLayout;
+    reason: string;
+  }[];
+}
+
 export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
+  const [layoutRecommendation, setLayoutRecommendation] = useState<LayoutRecommendation | null>(null);
   const { toast } = useToast();
   
   // Track programmatic closes to avoid double-calling onClose
@@ -102,9 +113,26 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   // Reset scraped data and form when wizard closes
   const resetWizardState = () => {
     setScrapedData(null);
+    setLayoutRecommendation(null);
     setCurrentStep(1);
     form.reset();
   };
+
+  // Trigger layout recommendation when entering Step 3 for non-website strategies
+  useEffect(() => {
+    if (currentStep === 3 && !layoutRecommendation && !scrapedData) {
+      const orgName = form.getValues('name');
+      const contentStrategy = form.getValues('contentStrategy');
+      
+      // Only auto-recommend for non-website strategies that haven't been scraped
+      if (orgName && contentStrategy !== 'import_from_website') {
+        recommendLayoutMutation.mutate({
+          organizationName: orgName,
+          organizationType: '', // Could add an input field for this
+        });
+      }
+    }
+  }, [currentStep]);
   
   // Programmatically close the wizard
   const closeWizard = () => {
@@ -139,6 +167,22 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
     },
     onSuccess: (data: ScrapedData) => {
       setScrapedData(data);
+      
+      // Trigger layout recommendation after scraping
+      const orgName = form.getValues('name');
+      const existingUrl = form.getValues('existingWebsiteUrl');
+      if (orgName && data) {
+        recommendLayoutMutation.mutate({
+          organizationName: orgName,
+          existingWebsiteUrl: existingUrl,
+          scrapedContent: {
+            heroText: data.programs?.[0]?.description || '',
+            aboutText: data.testimonials?.[0]?.quote || '',
+            values: data.personas || [],
+          },
+        });
+      }
+      
       if (data.errors.length > 0) {
         toast({
           title: "Website Scanned with Warnings",
@@ -157,6 +201,28 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
         description: error.message || "Failed to scan website",
         variant: "destructive",
       });
+    },
+  });
+
+  const recommendLayoutMutation = useMutation({
+    mutationFn: async (params: {
+      organizationName: string;
+      missionStatement?: string;
+      scrapedContent?: any;
+      organizationType?: string;
+      existingWebsiteUrl?: string;
+    }) => {
+      const response = await apiRequest('POST', '/api/admin/organizations/recommend-layout', params);
+      return response.json();
+    },
+    onSuccess: (data: LayoutRecommendation) => {
+      setLayoutRecommendation(data);
+      // Auto-select the recommended layout
+      form.setValue('layout', data.recommendedLayout);
+    },
+    onError: (error: any) => {
+      console.error('Failed to get layout recommendation:', error);
+      // Silently fail - user can still select layout manually
     },
   });
 
@@ -1217,6 +1283,46 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                     Select a layout theme that best represents your organization's identity
                   </p>
                 </div>
+
+                {/* AI Recommendation Display */}
+                {layoutRecommendation && (
+                  <Alert className="border-primary/50 bg-primary/5">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <AlertDescription>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-sm">
+                            AI Recommendation: {LAYOUT_THEMES[layoutRecommendation.recommendedLayout].name}
+                          </span>
+                          <Badge variant={
+                            layoutRecommendation.confidence === 'high' ? 'default' :
+                            layoutRecommendation.confidence === 'medium' ? 'secondary' : 'outline'
+                          } className="text-xs">
+                            {layoutRecommendation.confidence} confidence
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {layoutRecommendation.reasoning}
+                        </p>
+                        {layoutRecommendation.alternativeLayouts.length > 0 && (
+                          <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+                            <span className="font-medium">Alternatives:</span> {layoutRecommendation.alternativeLayouts.map(alt => LAYOUT_THEMES[alt.layout].name).join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Loading state while getting recommendation */}
+                {recommendLayoutMutation.isPending && !layoutRecommendation && (
+                  <Alert>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <AlertDescription>
+                      Analyzing organization characteristics to recommend the best layout...
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 <FormField
                   control={form.control}

@@ -449,6 +449,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI-powered layout recommendation (super admin only)
+  app.post('/api/admin/organizations/recommend-layout', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
+    try {
+      const { recommendLayout } = await import('./layoutRecommender');
+      
+      const recommendation = await recommendLayout({
+        organizationName: req.body.organizationName || '',
+        missionStatement: req.body.missionStatement,
+        scrapedContent: req.body.scrapedContent,
+        organizationType: req.body.organizationType,
+        existingWebsiteUrl: req.body.existingWebsiteUrl,
+      });
+
+      console.log(`[LayoutRecommender] Recommended ${recommendation.recommendedLayout} for ${req.body.organizationName}`);
+      
+      res.json(recommendation);
+    } catch (error: any) {
+      console.error('[LayoutRecommender] Error recommending layout:', error);
+      res.status(500).json({ 
+        message: error.message || 'Failed to recommend layout',
+        // Fallback to classic
+        recommendedLayout: 'classic',
+        reasoning: 'Error occurred during recommendation. Defaulting to classic layout.',
+        confidence: 'low',
+        alternativeLayouts: []
+      });
+    }
+  });
+
   // Provision new organization with full setup (super admin only) - Comprehensive wizard
   app.post('/api/admin/organizations/provision', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
