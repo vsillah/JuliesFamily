@@ -64,19 +64,21 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
   // Switch organization mutation
   // Uses enforcement hook to guarantee refetch-first pattern
-  const switchMutation = useOrgMutation<{ organizationId: string; organizationName: string }, string>({
+  const switchMutation = useOrgMutation<Organization, string>({
     mutationFn: async (organizationId: string) => {
       const response = await apiRequest('POST', '/api/admin/organization/switch', { organizationId });
       return response.json();
     },
     onSuccessCallback: async (data) => {
       // useOrgMutation already refetched session queries - state update is now safe
+      // Use full API response with all org fields including layout
       setCurrentOrg({
-        organizationId: data.organizationId,
-        organizationName: data.organizationName || data.organizationId,
+        ...data,
+        organizationId: data.id || data.organizationId,
+        organizationName: data.name || data.organizationName,
         isOverride: true,
       });
-      setCachedOrgId(data.organizationId);
+      setCachedOrgId(data.id || data.organizationId);
       
       // Invalidate org-dependent queries using centralized helper
       await invalidateOrgQueries();
@@ -85,19 +87,21 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
 
   // Clear override mutation
   // Uses enforcement hook to guarantee refetch-first pattern
-  const clearMutation = useOrgMutation<{ organizationId: string; organizationName: string }, void>({
+  const clearMutation = useOrgMutation<Organization, void>({
     mutationFn: async () => {
       const response = await apiRequest('DELETE', '/api/admin/organization/switch');
       return response.json();
     },
     onSuccessCallback: async (data) => {
       // useOrgMutation already refetched session queries - state update is now safe
+      // Use full API response with all org fields including layout
       setCurrentOrg({
-        organizationId: data.organizationId,
-        organizationName: data.organizationName || data.organizationId,
+        ...data,
+        organizationId: data.id || data.organizationId,
+        organizationName: data.name || data.organizationName,
         isOverride: false,
       });
-      setCachedOrgId(data.organizationId);
+      setCachedOrgId(data.id || data.organizationId);
       
       // Invalidate org-dependent queries using centralized helper
       await invalidateOrgQueries();
