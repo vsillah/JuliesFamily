@@ -36,19 +36,30 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
   const [cachedOrgId, setCachedOrgId] = useState<string | null>(null);
 
   // Fetch current organization using the new session endpoint
-  // Uses centralized query options to enforce consistent behavior
+  // Override query options to cache for 5 minutes and disable automatic refetches
+  // This prevents excessive middleware calls on every render
   const { data: orgSession, isLoading: isSessionLoading } = useQuery<OrgSession>({
     queryKey: ['/api/organization/session'],
     ...STANDARD_QUERY_OPTIONS,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 
   // Fetch organization details only when we have a stable org ID
-  // Uses centralized query options to enforce consistent behavior
+  // Override query options to cache for 5 minutes and disable automatic refetches
   // Uses public endpoint accessible to all authenticated users
   const { data: orgDetails, isLoading: isDetailsLoading } = useQuery<Organization>({
     queryKey: ['/api/organization/current'],
     enabled: !!orgSession?.organizationId,
     ...STANDARD_QUERY_OPTIONS,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
   });
 
   // Consider loading if either query is loading OR if we have query data but haven't set state yet
