@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
+import { NatureHero } from "@/components/layouts/NatureHero";
+import { ModernHero } from "@/components/layouts/ModernHero";
+import { CommunityHero } from "@/components/layouts/CommunityHero";
 import Services from "@/components/Services";
 import PersonalizedLeadMagnet from "@/components/PersonalizedLeadMagnet";
 import ImpactStats from "@/components/ImpactStats";
@@ -21,7 +24,7 @@ import { CampaignImpactCard } from "@/components/CampaignImpactCard";
 import { StudentDashboard } from "@/components/StudentDashboard";
 import { VolunteerDashboard } from "@/components/VolunteerDashboard";
 import { useContentAvailability, type VisibleSections } from "@/hooks/useContentAvailability";
-import type { ContentItem } from "@shared/schema";
+import type { ContentItem, OrganizationLayout } from "@shared/schema";
 
 // Default sections during loading - campaign-impact defaults to false (persona-specific)
 const DEFAULT_SECTIONS: VisibleSections = {
@@ -38,9 +41,10 @@ const DEFAULT_SECTIONS: VisibleSections = {
 
 export default function Home() {
   const { persona, funnelStage, isPersonaLoading } = usePersona();
-  const { currentOrg } = useOrganization();
+  const { currentOrg, organization } = useOrganization();
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
   const { data: visibleSections } = useContentAvailability();
+  const layout = (organization?.layout || 'classic') as OrganizationLayout;
 
   // Use actual persona values - no fallback to prevent flash
   const effectivePersona = persona;
@@ -112,11 +116,28 @@ export default function Home() {
     return null;
   }
 
+  // Render hero based on layout
+  const renderHero = () => {
+    const organizationName = organization?.name || "Our Organization";
+    
+    switch (layout) {
+      case 'nature':
+        return <NatureHero organizationName={organizationName} />;
+      case 'modern':
+        return <ModernHero organizationName={organizationName} />;
+      case 'community':
+        return <CommunityHero organizationName={organizationName} />;
+      case 'classic':
+      default:
+        return <Hero onImageLoaded={setHeroImageLoaded} isPersonaLoading={isPersonaLoading} />;
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <SchemaMarkup />
       <Navigation heroImageLoaded={heroImageLoaded} />
-      <Hero onImageLoaded={setHeroImageLoaded} isPersonaLoading={isPersonaLoading} />
+      {renderHero()}
       
       {/* Campaign Impact Section - Controlled by persona×journey matrix */}
       {sections["campaign-impact"] && (
