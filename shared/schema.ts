@@ -34,6 +34,10 @@ export type OrganizationRole = z.infer<typeof organizationRoleEnum>;
 export const organizationTierEnum = z.enum(['standard', 'pro', 'premium']);
 export type OrganizationTier = z.infer<typeof organizationTierEnum>;
 
+// Organization layout/theme enum for visual styling
+export const organizationLayoutEnum = z.enum(['classic', 'nature', 'modern', 'community']);
+export type OrganizationLayout = z.infer<typeof organizationLayoutEnum>;
+
 // Organization status enum
 export const organizationStatusEnum = z.enum(['active', 'suspended', 'pending']);
 export type OrganizationStatus = z.infer<typeof organizationStatusEnum>;
@@ -63,6 +67,9 @@ export const organizations = pgTable("organizations", {
   
   // Theme and branding extracted from website
   themeColors: jsonb("theme_colors"), // Extracted theme colors: {primary, accent, background, foreground, etc.}
+  
+  // Visual layout/theme selection
+  layout: varchar("layout").notNull().default('classic'), // classic, nature, modern, community
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -110,6 +117,9 @@ export const provisioningWizardSchema = z.object({
     text: z.string().optional().or(z.literal('')),
   }).optional(),
   manualPersonas: z.array(z.string()).optional(),
+  
+  // Step 2.75: Layout/Theme Selection
+  layout: organizationLayoutEnum.default('classic'),
   
   // Optional: Scraped data from website import
   scrapedData: z.object({

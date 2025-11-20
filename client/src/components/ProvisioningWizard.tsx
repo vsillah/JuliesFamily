@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { provisioningWizardSchema, type ProvisioningWizard } from "@shared/schema";
+import { provisioningWizardSchema, type ProvisioningWizard, type OrganizationLayout } from "@shared/schema";
+import { LAYOUT_THEMES } from "@shared/layouts";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -34,7 +35,11 @@ import {
   Users,
   Calendar,
   MessageSquare,
-  AlertCircle
+  AlertCircle,
+  Palette,
+  Leaf,
+  Zap,
+  Heart
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -58,8 +63,9 @@ interface ProvisioningWizardProps {
 const STEPS = [
   { id: 1, title: "Organization Details", icon: Building2 },
   { id: 2, title: "Content Strategy", icon: FileText },
-  { id: 3, title: "Features", icon: Settings },
-  { id: 4, title: "Review", icon: Check },
+  { id: 3, title: "Layout & Style", icon: Palette },
+  { id: 4, title: "Features", icon: Settings },
+  { id: 5, title: "Review", icon: Check },
 ];
 
 // Feature definitions with tier requirements
@@ -119,6 +125,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
       programsUrls: [],
       eventsUrls: [],
       testimonialsUrls: [],
+      layout: "classic",
       enabledFeatures: [],
       // Don't set default values for manual overrides - let them be undefined
       // so the backend can distinguish between "user didn't provide" and "user provided empty"
@@ -268,6 +275,8 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
       case 2:
         return ['contentStrategy', 'existingWebsiteUrl'];
       case 3:
+        return ['layout'];
+      case 4:
         return ['enabledFeatures'];
       default:
         return [];
@@ -1197,8 +1206,84 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
               </div>
             )}
 
-            {/* Step 3: Feature Configuration */}
+            {/* Step 3: Layout & Style */}
             {currentStep === 3 && (
+              <div className="space-y-4" data-testid="step-layout">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">
+                    Choose Your Visual Style
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select a layout theme that best represents your organization's identity
+                  </p>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="layout"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {(Object.keys(LAYOUT_THEMES) as OrganizationLayout[]).map((layoutKey) => {
+                            const layout = LAYOUT_THEMES[layoutKey];
+                            const Icon = layoutKey === 'classic' ? Sparkles : 
+                                        layoutKey === 'nature' ? Leaf :
+                                        layoutKey === 'modern' ? Zap :
+                                        Heart;
+                            const isSelected = field.value === layoutKey;
+                            
+                            return (
+                              <Card
+                                key={layoutKey}
+                                className={`cursor-pointer transition-all hover-elevate ${
+                                  isSelected ? 'border-primary ring-2 ring-primary' : ''
+                                }`}
+                                onClick={() => field.onChange(layoutKey)}
+                                data-testid={`card-layout-${layoutKey}`}
+                              >
+                                <CardHeader>
+                                  <div className="flex items-start gap-3">
+                                    <Icon className={`h-5 w-5 mt-0.5 ${
+                                      isSelected ? 'text-primary' : 'text-muted-foreground'
+                                    }`} />
+                                    <div className="flex-1">
+                                      <CardTitle className="text-base flex items-center justify-between">
+                                        {layout.name}
+                                        {isSelected && (
+                                          <Check className="h-4 w-4 text-primary" />
+                                        )}
+                                      </CardTitle>
+                                      <CardDescription className="mt-1">
+                                        {layout.description}
+                                      </CardDescription>
+                                    </div>
+                                  </div>
+                                </CardHeader>
+                                <CardContent className="space-y-2">
+                                  <div className="space-y-1 text-xs">
+                                    {layout.characteristics.map((char, idx) => (
+                                      <div key={idx} className="flex items-center gap-2 text-muted-foreground">
+                                        <div className="h-1 w-1 rounded-full bg-muted-foreground" />
+                                        {char}
+                                      </div>
+                                    ))}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          })}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            {/* Step 4: Feature Configuration */}
+            {currentStep === 4 && (
               <div className="space-y-4" data-testid="step-features">
                 <div>
                   <h3 className="text-sm font-medium mb-2">
@@ -1264,8 +1349,8 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
               </div>
             )}
 
-            {/* Step 4: Review */}
-            {currentStep === 4 && (
+            {/* Step 5: Review */}
+            {currentStep === 5 && (
               <div className="space-y-4" data-testid="step-review">
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Review & Confirm</h3>
@@ -1304,6 +1389,22 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                     <Badge data-testid="review-content-strategy">
                       {form.getValues('contentStrategy').replace(/_/g, ' ')}
                     </Badge>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Layout & Style</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" data-testid="review-layout">
+                        {LAYOUT_THEMES[form.getValues('layout')].name}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {LAYOUT_THEMES[form.getValues('layout')].description}
+                      </span>
+                    </div>
                   </CardContent>
                 </Card>
 

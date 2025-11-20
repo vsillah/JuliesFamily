@@ -523,6 +523,7 @@ export async function provisionOrganization(data: ProvisioningWizard) {
         slug,
         tier: data.tier,
         status: 'active',
+        layout: data.layout || 'classic',
       };
       
       // Add URL mappings if provided (arrays of up to 5 URLs each)
