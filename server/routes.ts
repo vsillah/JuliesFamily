@@ -650,9 +650,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const org = await storage.getOrganization(organizationId);
       
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+      
+      // Return full organization object plus override flag
       res.json({
-        organizationId,
-        organizationName: org?.name || organizationId,
+        ...org,
+        organizationId: org.id,
+        organizationName: org.name,
         isOverride
       });
     } catch (error) {

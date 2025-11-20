@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useOrgMutation, invalidateOrgQueries } from '@/hooks/useOrgMutation';
 import { STANDARD_QUERY_OPTIONS } from '@/lib/queryOptions';
+import type { Organization as DBOrganization } from '@shared/schema';
 
 interface OrgSession {
   organizationId: string;
@@ -10,14 +11,17 @@ interface OrgSession {
   ready: boolean;
 }
 
-interface Organization {
+// Extend database organization type with context-specific fields
+interface Organization extends Partial<DBOrganization> {
   organizationId: string;
   organizationName: string;
   isOverride: boolean;
+  layout?: string; // Layout theme for visual styling
 }
 
 interface OrganizationContextType {
   currentOrg: Organization | null;
+  organization: Organization | null; // Alias for convenience
   isLoading: boolean;
   isSwitching: boolean;
   switchOrganization: (organizationId: string) => Promise<void>;
@@ -113,6 +117,7 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     <OrganizationContext.Provider
       value={{
         currentOrg,
+        organization: currentOrg, // Alias for convenience
         isLoading,
         isSwitching,
         switchOrganization,
