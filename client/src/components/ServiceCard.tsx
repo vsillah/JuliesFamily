@@ -63,7 +63,7 @@ export default function ServiceCard({
   return (
     <Card 
       ref={cardRef}
-      className="overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105"
+      className="layout-card overflow-hidden hover-elevate transition-transform duration-300 hover:scale-105"
       data-testid={`card-service-${position}`}
     >
       <div className="relative aspect-[4/3] overflow-hidden">

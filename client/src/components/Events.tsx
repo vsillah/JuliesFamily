@@ -48,7 +48,7 @@ export default function Events() {
 
   if (isLoading) {
     return (
-      <section id="events" className="py-12 sm:py-16 bg-muted/30">
+      <section id="events" className="layout-section bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12 text-muted-foreground">Loading events...</div>
         </div>
@@ -62,7 +62,7 @@ export default function Events() {
   }
 
   return (
-    <section id="events" className="py-12 sm:py-16 bg-muted/30">
+    <section id="events" className="layout-section bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <p className="text-sm uppercase tracking-wider text-muted-foreground mb-4">

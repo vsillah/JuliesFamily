@@ -92,7 +92,7 @@ export default function Services() {
 
   if (isLoading) {
     return (
-      <section id="services" className="py-12 sm:py-16 bg-background">
+      <section id="services" className="layout-section bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12 text-muted-foreground">Loading services...</div>
         </div>
@@ -101,7 +101,7 @@ export default function Services() {
   }
 
   return (
-    <section id="services" className="py-12 sm:py-16 bg-background">
+    <section id="services" className="layout-section bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <p className="text-sm uppercase tracking-wider text-muted-foreground mb-4">

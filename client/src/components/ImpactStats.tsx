@@ -119,7 +119,7 @@ export default function ImpactStats() {
   }
 
   return (
-    <section id="impact" className="py-12 sm:py-16 bg-muted/30">
+    <section id="impact" className="layout-section bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <p className="text-sm uppercase tracking-wider text-muted-foreground mb-4">
@@ -142,7 +142,7 @@ export default function ImpactStats() {
                 className="text-center"
                 data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-primary/10">
+                <div className="inline-flex items-center justify-center w-16 h-16 mb-4 layout-accent" style={{ borderRadius: 'var(--theme-border-radius)', backgroundColor: 'hsl(var(--primary) / 0.1)' }}>
                   <Icon className="w-8 h-8 text-primary" />
                 </div>
                 <AnimatedCounter targetValue={stat.number} />
