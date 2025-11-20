@@ -38,7 +38,7 @@ export interface LayoutRecommendation {
  */
 export async function recommendLayout(
   context: RecommendationContext
-): Promise<LayoutRecommendation> {
+): Promise<LayoutRecommendation | null> {
   // Fallback to heuristic-based recommendation if API key not configured
   if (!genAI) {
     console.warn("GOOGLE_API_KEY not available, using heuristic-based recommendation");
@@ -60,25 +60,41 @@ export async function recommendLayout(
 
     const responseText = result.response?.text() || result.text || "";
     
-    // Clean up the response
-    let cleanedResponse = responseText.trim();
-    cleanedResponse = cleanedResponse.replace(/```json\n?/g, '');
-    cleanedResponse = cleanedResponse.replace(/```\n?/g, '');
-    cleanedResponse = cleanedResponse.trim();
-
     // Validate response is not empty
-    if (!cleanedResponse) {
+    if (!responseText || !responseText.trim()) {
       console.error("Empty response from Gemini AI");
       return heuristicRecommendation(context);
     }
 
-    // Try to parse JSON response
+    // Extract JSON from response - try multiple strategies
+    let cleanedResponse = responseText.trim();
+    
+    // Strategy 1: Strip markdown code fences if present
+    if (cleanedResponse.startsWith('```json')) {
+      cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (cleanedResponse.startsWith('```')) {
+      cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
+    
+    // Strategy 2: Find JSON object boundaries (first { to last })
+    const firstBrace = cleanedResponse.indexOf('{');
+    const lastBrace = cleanedResponse.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1 || firstBrace >= lastBrace) {
+      console.error("No valid JSON object found in Gemini response");
+      console.error("Response was:", responseText.substring(0, 200));
+      return heuristicRecommendation(context);
+    }
+    
+    const jsonText = cleanedResponse.substring(firstBrace, lastBrace + 1);
+
+    // Try to parse extracted JSON
     let parsed;
     try {
-      parsed = JSON.parse(cleanedResponse);
+      parsed = JSON.parse(jsonText);
     } catch (parseError) {
-      console.error("Failed to parse Gemini response as JSON:", parseError);
-      console.error("Response was:", cleanedResponse.substring(0, 200));
+      console.error("Failed to parse extracted JSON:", parseError);
+      console.error("Extracted JSON was:", jsonText.substring(0, 300));
       return heuristicRecommendation(context);
     }
 
@@ -183,9 +199,11 @@ Valid layouts: "classic", "nature", "modern", "community"`;
 
 /**
  * Heuristic-based recommendation fallback (no AI required)
+ * Returns null if there's insufficient data for a meaningful recommendation
  */
-function heuristicRecommendation(context: RecommendationContext): LayoutRecommendation {
+function heuristicRecommendation(context: RecommendationContext): LayoutRecommendation | null {
   const text = [
+    context.organizationName || '',
     context.missionStatement || '',
     context.scrapedContent?.heroText || '',
     context.scrapedContent?.aboutText || '',
@@ -193,38 +211,43 @@ function heuristicRecommendation(context: RecommendationContext): LayoutRecommen
     ...context.scrapedContent?.values || []
   ].join(' ').toLowerCase();
 
+  // Check if we have sufficient data (at least 20 characters of meaningful text)
+  const meaningfulText = text.trim();
+  if (meaningfulText.length < 20) {
+    console.log('Insufficient data for heuristic recommendation (text too short)');
+    return null;
+  }
+
   // Environment/nature keywords
-  const natureKeywords = ['environment', 'nature', 'wildlife', 'conservation', 'sustainability', 'climate', 'ocean', 'forest', 'green', 'eco', 'earth', 'planet'];
+  const natureKeywords = ['environment', 'nature', 'wildlife', 'conservation', 'sustainability', 'climate', 'ocean', 'forest', 'green', 'eco', 'earth', 'planet', 'animal', 'renewable'];
   const natureScore = natureKeywords.filter(k => text.includes(k)).length;
 
   // Community/people keywords
-  const communityKeywords = ['mentor', 'community', 'family', 'relationship', 'connection', 'belong', 'people', 'social', 'foster', 'youth', 'children', 'volunteer', 'empower'];
+  const communityKeywords = ['mentor', 'community', 'family', 'relationship', 'connection', 'belong', 'people', 'social', 'foster', 'youth', 'children', 'volunteer', 'empower', 'support', 'serve'];
   const communityScore = communityKeywords.filter(k => text.includes(k)).length;
 
   // Modern/tech keywords
-  const modernKeywords = ['innovation', 'tech', 'digital', 'startup', 'modern', 'future', 'ai', 'data', 'platform', 'app'];
+  const modernKeywords = ['innovation', 'tech', 'digital', 'startup', 'modern', 'future', 'ai', 'data', 'platform', 'app', 'software', 'online', 'virtual'];
   const modernScore = modernKeywords.filter(k => text.includes(k)).length;
+
+  // Professional/traditional keywords
+  const classicKeywords = ['foundation', 'trust', 'scholarship', 'education', 'grant', 'fund', 'endowment', 'professional', 'academic'];
+  const classicScore = classicKeywords.filter(k => text.includes(k)).length;
 
   // Determine best match
   const scores = {
     nature: natureScore,
     community: communityScore,
     modern: modernScore,
+    classic: classicScore,
   };
 
   const maxScore = Math.max(...Object.values(scores));
   
-  // If no clear match, default to classic
+  // If no clear signal (no keyword matches), return null
   if (maxScore === 0) {
-    return {
-      recommendedLayout: 'classic',
-      reasoning: 'Classic layout provides a professional, trustworthy design suitable for most organizations.',
-      confidence: 'low',
-      alternativeLayouts: [
-        { layout: 'community', reason: 'Good alternative if the focus is on people and relationships' },
-        { layout: 'nature', reason: 'Consider if environmental elements are important' }
-      ]
-    };
+    console.log('No clear keyword matches for heuristic recommendation');
+    return null;
   }
 
   // Find the layout with highest score
@@ -233,18 +256,29 @@ function heuristicRecommendation(context: RecommendationContext): LayoutRecommen
   )[0] as OrganizationLayout;
 
   const reasoningMap: Record<OrganizationLayout, string> = {
-    classic: 'Professional and trustworthy design for traditional nonprofits.',
-    nature: 'Strong environmental focus detected. Organic, nature-inspired design aligns with sustainability mission.',
-    modern: 'Innovation and tech-forward language suggests a modern, bold aesthetic.',
-    community: 'People-focused mission with emphasis on relationships and community building.'
+    classic: 'Based on professional and institutional language, a clean, trustworthy Classic layout is recommended.',
+    nature: 'Strong environmental focus detected. The Nature layout with organic, earth-inspired design aligns well.',
+    modern: 'Tech-forward and innovation language suggests a bold, modern aesthetic would be most effective.',
+    community: 'People-focused mission with emphasis on relationships suggests the warm Community layout.'
   };
+
+  // Determine confidence based on score strength
+  const confidence = maxScore >= 4 ? 'high' : maxScore >= 2 ? 'medium' : 'low';
+
+  // Get alternative layouts (sorted by score, excluding recommended)
+  const alternatives = Object.entries(scores)
+    .filter(([layout]) => layout !== recommended)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(([layout]) => ({
+      layout: layout as OrganizationLayout,
+      reason: `Alternative based on ${layout} characteristics in your content`
+    }));
 
   return {
     recommendedLayout: recommended,
     reasoning: reasoningMap[recommended],
-    confidence: maxScore >= 3 ? 'high' : 'medium',
-    alternativeLayouts: [
-      { layout: 'classic', reason: 'Professional alternative for donor focus' }
-    ]
+    confidence,
+    alternativeLayouts: alternatives
   };
 }

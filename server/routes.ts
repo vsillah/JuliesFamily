@@ -452,29 +452,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI-powered layout recommendation (super admin only)
   app.post('/api/admin/organizations/recommend-layout', ...authWithImpersonation, requireSuperAdmin, async (req, res) => {
     try {
+      // Validate request body using Zod
+      const recommendLayoutSchema = z.object({
+        organizationName: z.string().min(1, "Organization name is required"),
+        missionStatement: z.string().optional(),
+        scrapedContent: z.object({
+          heroText: z.string().optional(),
+          aboutText: z.string().optional(),
+          programsText: z.string().optional(),
+          values: z.array(z.string()).optional(),
+        }).optional(),
+        organizationType: z.string().optional(),
+        existingWebsiteUrl: z.string().url().optional().or(z.literal('')),
+      });
+
+      const validation = recommendLayoutSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid recommendation request",
+          errors: validation.error.errors 
+        });
+      }
+
       const { recommendLayout } = await import('./layoutRecommender');
       
       const recommendation = await recommendLayout({
-        organizationName: req.body.organizationName || '',
-        missionStatement: req.body.missionStatement,
-        scrapedContent: req.body.scrapedContent,
-        organizationType: req.body.organizationType,
-        existingWebsiteUrl: req.body.existingWebsiteUrl,
+        organizationName: validation.data.organizationName,
+        missionStatement: validation.data.missionStatement,
+        scrapedContent: validation.data.scrapedContent,
+        organizationType: validation.data.organizationType,
+        existingWebsiteUrl: validation.data.existingWebsiteUrl,
       });
 
-      console.log(`[LayoutRecommender] Recommended ${recommendation.recommendedLayout} for ${req.body.organizationName}`);
+      // Handle null recommendation (insufficient data)
+      if (!recommendation) {
+        console.log(`[LayoutRecommender] Insufficient data for ${validation.data.organizationName}, no recommendation`);
+        return res.status(200).json(null);
+      }
+
+      console.log(`[LayoutRecommender] Recommended ${recommendation.recommendedLayout} for ${validation.data.organizationName}`);
       
-      res.json(recommendation);
+      res.status(200).json(recommendation);
     } catch (error: any) {
-      console.error('[LayoutRecommender] Error recommending layout:', error);
-      res.status(500).json({ 
-        message: error.message || 'Failed to recommend layout',
-        // Fallback to classic
-        recommendedLayout: 'classic',
-        reasoning: 'Error occurred during recommendation. Defaulting to classic layout.',
-        confidence: 'low',
-        alternativeLayouts: []
-      });
+      console.error('[LayoutRecommender] Unexpected error:', error);
+      // Return 200 with null on unexpected errors (graceful degradation)
+      res.status(200).json(null);
     }
   });
 

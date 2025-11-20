@@ -215,10 +215,20 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
       const response = await apiRequest('POST', '/api/admin/organizations/recommend-layout', params);
       return response.json();
     },
-    onSuccess: (data: LayoutRecommendation) => {
+    onSuccess: (data: LayoutRecommendation | null) => {
+      if (!data) {
+        // No recommendation available (insufficient data)
+        console.log('No layout recommendation available - insufficient data');
+        return;
+      }
+      
       setLayoutRecommendation(data);
-      // Auto-select the recommended layout
-      form.setValue('layout', data.recommendedLayout);
+      
+      // Only auto-select if confidence is medium or high
+      // Low confidence recommendations should not auto-select
+      if (data.confidence !== 'low') {
+        form.setValue('layout', data.recommendedLayout);
+      }
     },
     onError: (error: any) => {
       console.error('Failed to get layout recommendation:', error);
@@ -1286,13 +1296,21 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
 
                 {/* AI Recommendation Display */}
                 {layoutRecommendation && (
-                  <Alert className="border-primary/50 bg-primary/5">
-                    <Sparkles className="h-4 w-4 text-primary" />
+                  <Alert className={
+                    layoutRecommendation.confidence === 'low' 
+                      ? "border-muted bg-muted/5" 
+                      : "border-primary/50 bg-primary/5"
+                  }>
+                    <Sparkles className={`h-4 w-4 ${
+                      layoutRecommendation.confidence === 'low' 
+                        ? 'text-muted-foreground' 
+                        : 'text-primary'
+                    }`} />
                     <AlertDescription>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="font-medium text-sm">
-                            AI Recommendation: {LAYOUT_THEMES[layoutRecommendation.recommendedLayout].name}
+                            {layoutRecommendation.confidence === 'low' ? 'Suggested:' : 'AI Recommendation:'} {LAYOUT_THEMES[layoutRecommendation.recommendedLayout].name}
                           </span>
                           <Badge variant={
                             layoutRecommendation.confidence === 'high' ? 'default' :
@@ -1304,6 +1322,11 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                         <p className="text-sm text-muted-foreground">
                           {layoutRecommendation.reasoning}
                         </p>
+                        {layoutRecommendation.confidence === 'low' && (
+                          <p className="text-xs text-muted-foreground italic">
+                            This is a general suggestion. Please review all options and choose the one that best fits your organization.
+                          </p>
+                        )}
                         {layoutRecommendation.alternativeLayouts.length > 0 && (
                           <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
                             <span className="font-medium">Alternatives:</span> {layoutRecommendation.alternativeLayouts.map(alt => LAYOUT_THEMES[alt.layout].name).join(', ')}
