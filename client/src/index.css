@@ -393,3 +393,57 @@
 .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--muted-foreground) / 0.5);
 }
+/* =================================
+   LAYOUT THEME SYSTEM
+   ================================= */
+
+/* Theme: Classic - Professional and trustworthy */
+.theme-classic {
+  --theme-section-padding: 3rem 0;
+  --theme-card-border: 1px;
+  --theme-card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --theme-border-radius: 0.5rem;
+  --theme-accent-opacity: 1;
+}
+
+/* Theme: Nature - Organic and environmental */
+.theme-nature {
+  --theme-section-padding: 4rem 0;
+  --theme-card-border: 2px;
+  --theme-card-shadow: 0 2px 8px rgb(0 0 0 / 0.05);
+  --theme-border-radius: 1.5rem;
+  --theme-accent-opacity: 0.7;
+}
+
+/* Theme: Modern - Bold and minimalist */
+.theme-modern {
+  --theme-section-padding: 2.5rem 0;
+  --theme-card-border: 0px;
+  --theme-card-shadow: none;
+  --theme-border-radius: 0.25rem;
+  --theme-accent-opacity: 1;
+}
+
+/* Theme: Community - Warm and welcoming */
+.theme-community {
+  --theme-section-padding: 3.5rem 0;
+  --theme-card-border: 1px;
+  --theme-card-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --theme-border-radius: 1rem;
+  --theme-accent-opacity: 0.85;
+}
+
+/* Layout-aware utility classes */
+.layout-card {
+  border-width: var(--theme-card-border);
+  box-shadow: var(--theme-card-shadow);
+  border-radius: var(--theme-border-radius);
+}
+
+.layout-section {
+  padding: var(--theme-section-padding);
+}
+
+.layout-accent {
+  opacity: var(--theme-accent-opacity);
+}

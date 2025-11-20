@@ -11,6 +11,13 @@ export interface LayoutTheme {
     imagery: string;
   };
   characteristics: string[];
+  cssClass: string; // CSS class to apply for this theme
+  styles: {
+    cardStyle: 'elevated' | 'outlined' | 'minimal' | 'warm';
+    sectionSpacing: 'compact' | 'comfortable' | 'spacious';
+    borderRadius: 'sharp' | 'rounded' | 'soft' | 'organic';
+    accentStyle: 'bold' | 'subtle' | 'vibrant' | 'natural';
+  };
 }
 
 export const LAYOUT_THEMES: Record<OrganizationLayout, LayoutTheme> = {
@@ -30,6 +37,13 @@ export const LAYOUT_THEMES: Record<OrganizationLayout, LayoutTheme> = {
       'Strong donation focus',
       'Grid-based layouts',
     ],
+    cssClass: 'theme-classic',
+    styles: {
+      cardStyle: 'elevated',
+      sectionSpacing: 'comfortable',
+      borderRadius: 'rounded',
+      accentStyle: 'bold',
+    },
   },
   nature: {
     id: 'nature',
@@ -47,6 +61,13 @@ export const LAYOUT_THEMES: Record<OrganizationLayout, LayoutTheme> = {
       'Soft, natural color palettes',
       'Image-driven storytelling',
     ],
+    cssClass: 'theme-nature',
+    styles: {
+      cardStyle: 'outlined',
+      sectionSpacing: 'spacious',
+      borderRadius: 'organic',
+      accentStyle: 'natural',
+    },
   },
   modern: {
     id: 'modern',
@@ -64,6 +85,13 @@ export const LAYOUT_THEMES: Record<OrganizationLayout, LayoutTheme> = {
       'High contrast design',
       'Minimal, focused content',
     ],
+    cssClass: 'theme-modern',
+    styles: {
+      cardStyle: 'minimal',
+      sectionSpacing: 'compact',
+      borderRadius: 'sharp',
+      accentStyle: 'vibrant',
+    },
   },
   community: {
     id: 'community',
@@ -81,6 +109,13 @@ export const LAYOUT_THEMES: Record<OrganizationLayout, LayoutTheme> = {
       'Emphasizes local impact',
       'Personal storytelling',
     ],
+    cssClass: 'theme-community',
+    styles: {
+      cardStyle: 'warm',
+      sectionSpacing: 'comfortable',
+      borderRadius: 'soft',
+      accentStyle: 'subtle',
+    },
   },
 };
 
