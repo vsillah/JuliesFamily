@@ -706,10 +706,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await req.session.save();
       
       console.log(`[Organizations] Super admin switched to org ${organizationId}`);
+      // Return full organization object for context consistency
       res.json({ 
+        ...org,
         message: 'Organization switched successfully',
-        organizationId,
-        organizationName: org.name || organizationId
+        organizationId: org.id,
+        organizationName: org.name
       });
     } catch (error) {
       console.error('[Organizations] Error switching organization:', error);
@@ -752,11 +754,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const org = await storage.getOrganization(organizationId);
       
+      if (!org) {
+        return res.status(404).json({ message: 'Organization not found' });
+      }
+      
       console.log(`[Organizations] Super admin cleared organization override, defaulting to org ${organizationId}`);
+      // Return full organization object for context consistency
       res.json({ 
+        ...org,
         message: 'Organization override cleared',
-        organizationId,
-        organizationName: org?.name || organizationId
+        organizationId: org.id,
+        organizationName: org.name
       });
     } catch (error) {
       console.error('[Organizations] Error clearing organization override:', error);
