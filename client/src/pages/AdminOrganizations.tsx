@@ -59,7 +59,7 @@ interface Organization {
 
 interface CurrentOrganization {
   organizationId: string;
-  organization: Organization;
+  organizationName: string;
   isOverride: boolean;
 }
 
@@ -795,7 +795,7 @@ export default function AdminOrganizations() {
               )}
             </CardTitle>
             <CardDescription>
-              You are currently viewing data for: <strong>{currentOrg.organization?.name || "Unknown Organization"}</strong>
+              You are currently viewing data for: <strong>{currentOrg.organizationName || "Unknown Organization"}</strong>
             </CardDescription>
           </CardHeader>
         </Card>
