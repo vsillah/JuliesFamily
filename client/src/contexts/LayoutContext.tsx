@@ -28,9 +28,9 @@ function colorToHSL(color: string): string | null {
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     
-    // Set the color and read it back as normalized RGB
+    // Set the color and read it back as normalized format
     ctx.fillStyle = trimmed;
-    const normalized = ctx.fillStyle; // Browser returns hex format
+    const normalized = ctx.fillStyle; // Browser returns hex or rgba format
     
     // If browser rejected the color, it stays as default (#000000)
     // Check if input was actually processed (unless input was black)
@@ -39,11 +39,30 @@ function colorToHSL(color: string): string | null {
       return null;
     }
     
-    // Parse the normalized hex color
-    const hex = normalized.replace('#', '');
-    const r = parseInt(hex.slice(0, 2), 16) / 255;
-    const g = parseInt(hex.slice(2, 4), 16) / 255;
-    const b = parseInt(hex.slice(4, 6), 16) / 255;
+    let r: number, g: number, b: number;
+    
+    // Parse normalized color - can be hex or rgba
+    if (normalized.startsWith('#')) {
+      // Hex format
+      const hex = normalized.replace('#', '');
+      r = parseInt(hex.slice(0, 2), 16) / 255;
+      g = parseInt(hex.slice(2, 4), 16) / 255;
+      b = parseInt(hex.slice(4, 6), 16) / 255;
+    } else if (normalized.startsWith('rgb')) {
+      // rgba(r, g, b, a) or rgb(r, g, b) format
+      // Note: Canvas may return floats for RGB when converting from hsla
+      const match = normalized.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*[\d.]+)?\)/);
+      if (!match) {
+        console.warn('[BrandColors] Failed to parse rgba color:', normalized);
+        return null;
+      }
+      r = parseFloat(match[1]) / 255;
+      g = parseFloat(match[2]) / 255;
+      b = parseFloat(match[3]) / 255;
+    } else {
+      console.warn('[BrandColors] Unsupported color format from canvas:', normalized);
+      return null;
+    }
     
     // Convert RGB to HSL
     const max = Math.max(r, g, b);
@@ -65,6 +84,12 @@ function colorToHSL(color: string): string | null {
     const hue = Math.round(h * 360);
     const saturation = Math.round(s * 100);
     const lightness = Math.round(l * 100);
+    
+    // Validate the conversion produced valid numbers
+    if (isNaN(hue) || isNaN(saturation) || isNaN(lightness)) {
+      console.warn('[BrandColors] Color conversion produced NaN values:', { hue, saturation, lightness, input: trimmed });
+      return null;
+    }
     
     return `${hue} ${saturation}% ${lightness}%`;
   } catch (error) {
