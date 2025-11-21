@@ -28,6 +28,12 @@ export default function Footer() {
     copyrightText: "All rights reserved."
   };
 
+  // Use organization contact info if available, otherwise fall back to metadata
+  const contactPersonName = currentOrg?.contactPersonName || null;
+  const contactEmail = currentOrg?.contactEmail || metadata.contact.email;
+  const contactPhone = metadata.contact.phone;
+  const contactAddress = metadata.contact.address;
+
   // Don't render if loading or no data
   if (isLoading || !footerData) {
     return null;
@@ -81,38 +87,45 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold mb-4" data-testid="text-footer-contact-heading">Contact</h4>
             <ul className="space-y-3 text-sm">
-              {metadata.contact.address && (
+              {contactPersonName && (
+                <li className="flex items-start gap-2 text-muted-foreground">
+                  <span className="font-medium text-foreground" data-testid="text-footer-contact-person">
+                    {contactPersonName}
+                  </span>
+                </li>
+              )}
+              {contactAddress && (
                 <li className="flex items-start gap-2 text-muted-foreground">
                   <MapPin size={16} className="mt-1 flex-shrink-0" />
                   <span 
                     style={{ whiteSpace: 'pre-line' }}
                     data-testid="text-footer-address"
                   >
-                    {metadata.contact.address}
+                    {contactAddress}
                   </span>
                 </li>
               )}
-              {metadata.contact.phone && (
+              {contactPhone && (
                 <li className="flex items-center gap-2 text-muted-foreground">
                   <Phone size={16} className="flex-shrink-0" />
                   <a 
-                    href={`tel:${metadata.contact.phone.replace(/\D/g, '')}`} 
+                    href={`tel:${contactPhone.replace(/\D/g, '')}`} 
                     className="hover:text-primary transition-colors"
                     data-testid="link-footer-phone"
                   >
-                    {metadata.contact.phone}
+                    {contactPhone}
                   </a>
                 </li>
               )}
-              {metadata.contact.email && (
+              {contactEmail && (
                 <li className="flex items-center gap-2 text-muted-foreground">
                   <Mail size={16} className="flex-shrink-0" />
                   <a 
-                    href={`mailto:${metadata.contact.email}`} 
+                    href={`mailto:${contactEmail}`} 
                     className="hover:text-primary transition-colors"
                     data-testid="link-footer-email"
                   >
-                    {metadata.contact.email}
+                    {contactEmail}
                   </a>
                 </li>
               )}
