@@ -1,7 +1,7 @@
 # Julie's Family Learning Program Website (Powered by Kinflo)
 
 ## Overview
-Julie's Family Learning Program website is a non-profit, full-stack web application demonstrating educational programs, impact, testimonials, events, and facilitating donations and volunteering. It serves as a showcase for **Kinflo**, a relationship-first CRM for nonprofits, emphasizing persona-based personalization, lead management, and communication automation. The project has evolved into a multi-tenant SaaS platform for rapid deployment of customized demo sites, supporting custom domains, cross-organization consultant access, and a shared template library. The business vision is to provide a comprehensive, adaptable platform for nonprofits to manage their online presence and constituent relationships effectively.
+Julie's Family Learning Program website is a non-profit, full-stack web application demonstrating educational programs, impact, testimonials, events, and facilitating donations and volunteering. It serves as a showcase for **Kinflo**, a relationship-first CRM for nonprofits, emphasizing persona-based personalization, lead management, and communication automation. The project has evolved into a multi-tenant SaaS platform for rapid deployment of customized demo sites, supporting custom domains, cross-organization consultant access, and a shared template library. The business vision is to provide a comprehensive, adaptable platform for nonprofits to manage their online presence and constituent relationships effectively. **Personas provided in the provisioning wizard generate the persona × journey matrix structure and represent different pages on the organization's website.**
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
