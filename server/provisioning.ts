@@ -271,7 +271,7 @@ async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrape
     persona: null,
     funnelStage: null,
     isVisible: true,
-    order: null,
+    order: 0,
   }));
   
   await tx.insert(contentVisibility).values(visibilityRecords);
@@ -313,7 +313,7 @@ async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedE
     persona: null,
     funnelStage: null,
     isVisible: true,
-    order: null,
+    order: 0,
   }));
   
   await tx.insert(contentVisibility).values(visibilityRecords);
@@ -354,7 +354,7 @@ async function seedScrapedTestimonials(tx: typeof db, organizationId: string, sc
     persona: null,
     funnelStage: null,
     isVisible: true,
-    order: null,
+    order: 0,
   }));
   
   await tx.insert(contentVisibility).values(visibilityRecords);
