@@ -34,8 +34,11 @@ export default function Footer() {
   const contactPhone = metadata.contact.phone;
   const contactAddress = metadata.contact.address;
 
-  // Don't render if loading or no data
-  if (isLoading || !footerData) {
+  // Show footer even while content is loading if we have organization data
+  // This ensures contact info from organization is always visible
+  const shouldRender = !isLoading || currentOrg;
+  
+  if (!shouldRender) {
     return null;
   }
 

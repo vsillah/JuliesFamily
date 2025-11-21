@@ -30,10 +30,11 @@ The frontend is a single-page application using `wouter` for routing and TanStac
 -   **Content Reordering**: Hybrid system (drag-and-drop, arrow buttons, jump-to) with transactional batch updates.
 -   **Student Projects Carousel**: Passion-filtered display of student work with OIDC passions persistence.
 -   **Feature Toggle System**: Multi-tenant feature flag platform with an admin UI and client-side hooks.
--   **Organization Management System**: Full CRUD operations for organizations, including a comprehensive provisioning wizard with automated website content extraction, persona detection, content seeding, tier-based feature enablement, and transaction-based rollback.
+-   **Organization Management System**: Full CRUD operations for organizations, including a comprehensive provisioning wizard with automated website content extraction, persona detection, content seeding, tier-based feature enablement, and transaction-based rollback. Captures contact person name and email during provisioning for display in website footer.
 -   **Multi-URL Mapping & Branding Extraction**: Enhanced provisioning with multi-URL scraping, automatic logo, and theme color extraction.
 -   **Manual Branding Override System**: Allows manual overriding of logos, theme colors, and personas with a strict priority hierarchy.
 -   **Layout/Theme System with AI Recommendations**: Fixed template system with 4 visual layout options (Classic, Nature, Modern, Community) selected during provisioning. LayoutProvider dynamically applies theme-specific CSS classes and organization-specific brand colors. An AI-powered engine (Google Gemini) recommends layouts based on organization characteristics.
+-   **Organization Branding**: Organization logos are automatically displayed in the navigation header, and contact person information (name and email) captured during provisioning is displayed in the website footer.
 
 ### System Design Choices
 The backend uses Express.js on Node.js with TypeScript, providing RESTful API endpoints. Data is stored in PostgreSQL (Neon serverless) via Drizzle ORM. Authentication and authorization are handled by Replit Auth with OpenID Connect (Passport.js) and PostgreSQL for session storage, implementing a two-tier RBAC system (platform-level `kinflo_admin` and organization-level roles like `viewer`, `editor`, `org_admin`, `owner`). Security features include Helmet Security Headers, five-tier rate limiting, centralized audit logging, Zod schema validation, error sanitization, and secure session management.
