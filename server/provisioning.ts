@@ -568,6 +568,8 @@ export async function provisionOrganization(data: ProvisioningWizard) {
         tier: data.tier,
         status: 'active',
         layout: data.layout || 'classic',
+        contactPersonName: data.contactName,
+        contactEmail: data.contactEmail,
       };
       
       // Add URL mappings if provided (arrays of up to 5 URLs each)
