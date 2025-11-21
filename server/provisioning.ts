@@ -242,6 +242,7 @@ async function seedDefaultContent(tx: typeof db, organizationId: string, orgName
 /**
  * Seed programs from scraped data into content_items
  * Programs are stored with type='program_detail' and needsClassification=true
+ * No persona/funnelStage set so they're visible to all personas by default
  * Admins can reclassify them later in the Content Manager
  */
 async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrapedPrograms: any[]) {
@@ -256,8 +257,6 @@ async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrape
     order: 0,
     isActive: true,
     metadata: {
-      persona: 'student', // Default persona for scraped programs
-      funnelStage: 'awareness', // Default funnel stage
       needsClassification: true, // Flag for admin review
       url: program.url,
     },
@@ -268,7 +267,8 @@ async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrape
 
 /**
  * Seed events from scraped data into content_items
- * Events are stored with default persona='student' and needsClassification=true
+ * Events are stored with needsClassification=true
+ * No persona/funnelStage set so they're visible to all personas by default
  * Admins can reclassify them later in the Content Manager
  */
 async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedEvents: any[]) {
@@ -286,8 +286,6 @@ async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedE
       startDate: event.date, // Match existing schema
       location: event.location,
       registrationLink: event.url, // Match existing schema
-      persona: 'student', // Default persona for scraped events
-      funnelStage: 'awareness', // Default funnel stage
       needsClassification: true, // Flag for admin review
     },
   }));
@@ -297,6 +295,8 @@ async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedE
 
 /**
  * Seed testimonials from scraped data
+ * Testimonials have no persona/funnelStage so they're visible to all personas
+ * needsClassification flag allows admins to review and customize
  */
 async function seedScrapedTestimonials(tx: typeof db, organizationId: string, scrapedTestimonials: any[]) {
   if (scrapedTestimonials.length === 0) return [];
@@ -312,6 +312,7 @@ async function seedScrapedTestimonials(tx: typeof db, organizationId: string, sc
     metadata: {
       author: testimonial.author, // Match existing schema
       role: testimonial.role,
+      needsClassification: true, // Flag for admin review
     },
   }));
   
