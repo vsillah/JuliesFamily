@@ -242,7 +242,7 @@ async function seedDefaultContent(tx: typeof db, organizationId: string, orgName
 /**
  * Seed programs from scraped data into content_items
  * Programs are stored with type='program_detail' and needsClassification=true
- * No persona/funnelStage set so they're visible to all personas by default
+ * Creates universal visibility records (persona=NULL, funnelStage=NULL) for all-persona visibility
  * Admins can reclassify them later in the Content Manager
  */
 async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrapedPrograms: any[]) {
@@ -262,13 +262,27 @@ async function seedScrapedPrograms(tx: typeof db, organizationId: string, scrape
     },
   }));
   
-  return await tx.insert(contentItems).values(programsToCreate).returning();
+  const createdPrograms = await tx.insert(contentItems).values(programsToCreate).returning();
+  
+  // Create universal visibility records (NULL persona/funnelStage = visible to all)
+  const visibilityRecords = createdPrograms.map(program => ({
+    id: nanoid(),
+    contentItemId: program.id,
+    persona: null,
+    funnelStage: null,
+    isVisible: true,
+    order: null,
+  }));
+  
+  await tx.insert(contentVisibility).values(visibilityRecords);
+  
+  return createdPrograms;
 }
 
 /**
  * Seed events from scraped data into content_items
  * Events are stored with needsClassification=true
- * No persona/funnelStage set so they're visible to all personas by default
+ * Creates universal visibility records (persona=NULL, funnelStage=NULL) for all-persona visibility
  * Admins can reclassify them later in the Content Manager
  */
 async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedEvents: any[]) {
@@ -290,12 +304,27 @@ async function seedScrapedEvents(tx: typeof db, organizationId: string, scrapedE
     },
   }));
   
-  return await tx.insert(contentItems).values(eventsToCreate).returning();
+  const createdEvents = await tx.insert(contentItems).values(eventsToCreate).returning();
+  
+  // Create universal visibility records (NULL persona/funnelStage = visible to all)
+  const visibilityRecords = createdEvents.map(event => ({
+    id: nanoid(),
+    contentItemId: event.id,
+    persona: null,
+    funnelStage: null,
+    isVisible: true,
+    order: null,
+  }));
+  
+  await tx.insert(contentVisibility).values(visibilityRecords);
+  
+  return createdEvents;
 }
 
 /**
  * Seed testimonials from scraped data
  * Testimonials have no persona/funnelStage so they're visible to all personas
+ * Creates universal visibility records (persona=NULL, funnelStage=NULL) for all-persona visibility
  * needsClassification flag allows admins to review and customize
  */
 async function seedScrapedTestimonials(tx: typeof db, organizationId: string, scrapedTestimonials: any[]) {
@@ -316,7 +345,21 @@ async function seedScrapedTestimonials(tx: typeof db, organizationId: string, sc
     },
   }));
   
-  return await tx.insert(contentItems).values(testimonialsToCreate).returning();
+  const createdTestimonials = await tx.insert(contentItems).values(testimonialsToCreate).returning();
+  
+  // Create universal visibility records (NULL persona/funnelStage = visible to all)
+  const visibilityRecords = createdTestimonials.map(testimonial => ({
+    id: nanoid(),
+    contentItemId: testimonial.id,
+    persona: null,
+    funnelStage: null,
+    isVisible: true,
+    order: null,
+  }));
+  
+  await tx.insert(contentVisibility).values(visibilityRecords);
+  
+  return createdTestimonials;
 }
 
 /**
