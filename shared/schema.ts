@@ -54,6 +54,10 @@ export const organizations = pgTable("organizations", {
   logo: varchar("logo"), // Logo URL or storage path
   primaryColor: varchar("primary_color").default('#3b82f6'), // Brand color
   domain: varchar("domain").unique(), // Optional custom domain (e.g., 'donate.redcross.org')
+  
+  // Contact information for organization
+  contactPersonName: varchar("contact_person_name"), // Primary contact person name
+  contactEmail: varchar("contact_email"), // Primary contact email
   status: varchar("status").notNull().default('active'), // active, suspended, pending
   tier: varchar("tier").notNull().default('standard'), // standard, pro, premium
   stripeCustomerId: varchar("stripe_customer_id").unique(), // Stripe Customer ID for billing
