@@ -45,6 +45,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useOrganization } from "@/contexts/OrganizationContext";
 
 interface ScrapedData {
   logo: string | null;
@@ -107,6 +108,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
   const [layoutRecommendation, setLayoutRecommendation] = useState<LayoutRecommendation | null>(null);
   const { toast } = useToast();
+  const { switchOrganization } = useOrganization();
   
   // Track programmatic closes to avoid double-calling onClose
   const isProgrammaticClose = useRef(false);
@@ -242,12 +244,16 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
       const response = await apiRequest('POST', '/api/admin/organizations/provision', data);
       return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast({
         title: "Organization Provisioned Successfully",
         description: `${data.organization.name} is ready to go. Welcome email sent!`,
       });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/organizations'] });
+      
+      // Automatically switch to the newly created organization
+      await switchOrganization(data.organization.id);
+      
       closeWizard();
     },
     onError: (error: any) => {
