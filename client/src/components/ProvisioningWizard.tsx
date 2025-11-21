@@ -107,6 +107,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [scrapedData, setScrapedData] = useState<ScrapedData | null>(null);
   const [layoutRecommendation, setLayoutRecommendation] = useState<LayoutRecommendation | null>(null);
+  const [personaInput, setPersonaInput] = useState("");
   const { toast } = useToast();
   const { switchOrganization } = useOrganization();
   
@@ -117,6 +118,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
   const resetWizardState = () => {
     setScrapedData(null);
     setLayoutRecommendation(null);
+    setPersonaInput("");
     setCurrentStep(1);
     form.reset();
   };
@@ -1180,25 +1182,33 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                           control={form.control}
                           name="manualPersonas"
                           render={({ field }) => {
-                            const inputValue = field.value?.join(', ') || '';
+                            const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const trimmed = personaInput.trim();
+                                if (trimmed.length > 0) {
+                                  const currentPersonas = field.value || [];
+                                  if (!currentPersonas.includes(trimmed)) {
+                                    field.onChange([...currentPersonas, trimmed]);
+                                  }
+                                  setPersonaInput("");
+                                }
+                              }
+                            };
+
                             return (
                               <FormItem>
                                 <FormLabel className="text-sm">Add/Override Personas</FormLabel>
                                 <FormControl>
                                   <div className="space-y-2">
                                     <Input 
-                                      value={inputValue}
-                                      onChange={(e) => {
-                                        const personas = e.target.value
-                                          .split(',')
-                                          .map(p => p.trim())
-                                          .filter(p => p.length > 0);
-                                        field.onChange(personas);
-                                      }}
+                                      value={personaInput}
+                                      onChange={(e) => setPersonaInput(e.target.value)}
+                                      onKeyDown={handleKeyDown}
                                       onBlur={field.onBlur}
                                       name={field.name}
                                       ref={field.ref}
-                                      placeholder="Type personas separated by commas (e.g., student, parent, donor)" 
+                                      placeholder="Type a persona and press Enter (e.g., student, parent, donor)" 
                                       data-testid="input-manual-personas"
                                     />
                                     {field.value && field.value.length > 0 && (
@@ -1228,7 +1238,7 @@ export function ProvisioningWizard({ open, onClose }: ProvisioningWizardProps) {
                                   </div>
                                 </FormControl>
                                 <FormDescription className="text-xs">
-                                  Override detected personas or add custom ones. Type multiple personas separated by commas.
+                                  Override detected personas or add custom ones. Press Enter to add each persona.
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
