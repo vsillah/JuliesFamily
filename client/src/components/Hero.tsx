@@ -76,6 +76,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   }, [isReady, currentHero, tracking]);
   
   // Diagnostic logging for A/B test debugging (development only)
+  // Note: metrics excluded from deps to prevent logging spam (metrics updates every 100ms)
   useEffect(() => {
     if (import.meta.env.DEV && isReady && baseHero) {
       console.log('[Hero A/B Test Debug]', {
@@ -86,14 +87,10 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
         baseHeroTitle: baseHero.title,
         finalHeroTitle: currentHero?.title,
         overridesApplied: abConfig ? Object.keys(abConfig) : [],
-        engagementTracking: {
-          isVisible: metrics.isVisible,
-          dwellTime: metrics.dwellTime,
-          hasEngaged: metrics.hasEngaged,
-        }
       });
     }
-  }, [isReady, hasTest, abVariant, abConfig, baseHero, currentHero, metrics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady, hasTest, abVariant, abConfig, baseHero, currentHero]);
   
   const imageName = currentHero?.imageName || "hero-volunteer-student";
   const { data: heroImageAsset } = useCloudinaryImage(imageName);
