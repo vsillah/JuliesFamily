@@ -11,6 +11,7 @@ import {
 import { Building2, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useOrganization } from "@/contexts/OrganizationContext";
+import { cn } from "@/lib/utils";
 
 interface OrganizationSwitcherProps {
   isScrolled?: boolean;
@@ -29,11 +30,16 @@ export function OrganizationSwitcher({ isScrolled = false }: OrganizationSwitche
       <DropdownMenuTrigger asChild>
         <Button 
           variant={currentOrg.isOverride ? "default" : (isScrolled ? "outline" : "ghost")}
-          className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover-elevate active-elevate-2 bg-primary text-primary-foreground border border-primary-border min-h-9 px-4 py-2 gap-2 transition-colors duration-300 false pt-[7px] pb-[7px]"
+          size="sm"
+          className={cn(
+            "gap-2 relative",
+            !isScrolled && !currentOrg.isOverride && "border-white/30 text-white hover:bg-white/10",
+            currentOrg.isOverride && "bg-primary text-primary-foreground"
+          )}
           data-testid="button-org-switcher"
         >
-          <Building2 className="h-4 w-4" />
-          <span className="max-w-[150px] truncate">
+          <Building2 className="w-4 h-4" />
+          <span className="max-w-[150px] truncate text-xs">
             {currentOrg.organizationName || currentOrg.name || "Unknown Organization"}
           </span>
           {currentOrg.isOverride && (
@@ -41,7 +47,7 @@ export function OrganizationSwitcher({ isScrolled = false }: OrganizationSwitche
               Override
             </Badge>
           )}
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="w-3 h-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
