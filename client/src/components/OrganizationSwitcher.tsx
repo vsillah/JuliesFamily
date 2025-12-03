@@ -12,7 +12,11 @@ import { Building2, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useOrganization } from "@/contexts/OrganizationContext";
 
-export function OrganizationSwitcher() {
+interface OrganizationSwitcherProps {
+  isScrolled?: boolean;
+}
+
+export function OrganizationSwitcher({ isScrolled = false }: OrganizationSwitcherProps) {
   const [, setLocation] = useLocation();
   const { currentOrg } = useOrganization();
 
@@ -24,8 +28,10 @@ export function OrganizationSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="outline" 
-          className="gap-2"
+          variant={currentOrg.isOverride ? "default" : (isScrolled ? "outline" : "ghost")}
+          className={`gap-2 transition-colors duration-300 ${
+            !isScrolled && !currentOrg.isOverride && "border-white/30 text-white hover:bg-white/10"
+          }`}
           data-testid="button-org-switcher"
         >
           <Building2 className="h-4 w-4" />

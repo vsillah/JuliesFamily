@@ -333,7 +333,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
               {!isAdmin && isAuthenticated && <DevAdminButton />}
               
               {isSuperAdmin && (
-                <OrganizationSwitcher />
+                <OrganizationSwitcher isScrolled={isScrolled} />
               )}
               
               {isAdmin && (
