@@ -15,17 +15,17 @@ interface CampaignImpactCardProps {
 export function CampaignImpactCard() {
   const [, navigate] = useLocation();
   const { currentOrg } = useOrganization();
-  const orgKey = currentOrg?.organizationId ?? 'no-org';
 
   // Fetch current user to get their passions
+  // Note: URL must come first in queryKey, org ID goes in object for cache isolation
   const { data: user } = useQuery<User>({
-    queryKey: [orgKey, '/api/auth/user'],
+    queryKey: ['/api/auth/user', { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   // Fetch active donation campaigns
   const { data: campaigns, isLoading } = useQuery<DonationCampaign[]>({
-    queryKey: [orgKey, '/api/donation-campaigns/active'],
+    queryKey: ['/api/donation-campaigns/active', { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 

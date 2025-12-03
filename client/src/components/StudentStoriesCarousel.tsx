@@ -8,7 +8,7 @@ import { ContentCarousel } from './ContentCarousel';
 export function StudentStoriesCarousel() {
   const { currentOrg } = useOrganization();
   const { data: videos, isLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, '/api/content/visible/video'],
+    queryKey: ['/api/content/visible/video', { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 

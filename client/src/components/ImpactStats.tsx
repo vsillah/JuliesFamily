@@ -90,8 +90,9 @@ export default function ImpactStats() {
   const { currentOrg } = useOrganization();
 
   // Fetch impact section from database (returns array)
+  // Note: URL must come first in queryKey, org ID goes in object for cache isolation
   const { data: impactDataArray = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, '/api/content/type/impact_section'],
+    queryKey: ['/api/content/type/impact_section', { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 

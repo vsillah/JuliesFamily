@@ -40,7 +40,7 @@ export default function Events() {
   });
   
   const { data: allEvents = [], isLoading } = useQuery<ContentItemWithResolvedImage[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/event"],
+    queryKey: ["/api/content/type/event", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 

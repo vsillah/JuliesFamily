@@ -593,6 +593,7 @@ class OrgScopedImplementations {
 
   async getContentItemsByType(type: string) {
     const { contentItems, imageAssets } = await import('@shared/schema');
+    console.log(`[OrgScoped.getContentItemsByType] type=${type}, orgId=${this.organizationId}`);
     const results = await db
       .select({
         id: contentItems.id,
@@ -618,6 +619,7 @@ class OrgScopedImplementations {
       ))
       .orderBy(contentItems.order);
     
+    console.log(`[OrgScoped.getContentItemsByType] Found ${results.length} items for type=${type}`);
     return results as any;
   }
 

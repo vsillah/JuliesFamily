@@ -9,7 +9,7 @@ import type { ContentItemWithResolvedImage } from "@shared/schema";
 export default function SocialMediaCarousel() {
   const { currentOrg } = useOrganization();
   const { data: allPosts = [], isLoading } = useQuery<ContentItemWithResolvedImage[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/socialMedia"],
+    queryKey: ["/api/content/type/socialMedia", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 

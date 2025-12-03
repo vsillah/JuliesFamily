@@ -85,26 +85,27 @@ export function UniversalSearch() {
   const shouldFetchDynamic = open && !!currentOrg;
 
   // Dynamic loaders - use default queryFn from query client for consistent auth handling
+  // Note: URL must come first in queryKey, org ID goes in object for cache isolation
   const { data: leads = [], isLoading: leadsLoading } = useQuery<Lead[]>({
-    queryKey: [orgKey, "/api/admin/leads"],
+    queryKey: ["/api/admin/leads", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: shouldFetchDynamic,
     staleTime: 60000, // Cache for 1 minute
   });
 
   const { data: tasks = [], isLoading: tasksLoading } = useQuery<Task[]>({
-    queryKey: [orgKey, "/api/tasks"],
+    queryKey: ["/api/tasks", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });
 
   const { data: emailCampaigns = [], isLoading: campaignsLoading } = useQuery<EmailCampaign[]>({
-    queryKey: [orgKey, "/api/email-campaigns"],
+    queryKey: ["/api/email-campaigns", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });
 
   const { data: content = [], isLoading: contentLoading } = useQuery<ContentItem[]>({
-    queryKey: [orgKey, "/api/content"],
+    queryKey: ["/api/content", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: shouldFetchDynamic,
     staleTime: 60000,
   });

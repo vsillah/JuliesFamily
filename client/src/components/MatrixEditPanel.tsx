@@ -37,7 +37,7 @@ export default function MatrixEditPanel({
 
   // Query visibility settings directly to always have the latest data
   const { data: latestVisibilitySettings = [] } = useQuery<ContentVisibility[]>({
-    queryKey: [orgKey, "/api/content/visibility"],
+    queryKey: ["/api/content/visibility", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
@@ -81,7 +81,7 @@ export default function MatrixEditPanel({
 
   // Fetch active A/B tests for this permutation and content type
   const { data: activeTests = [] } = useQuery<AbTest[]>({
-    queryKey: [orgKey, "/api/admin/ab-tests", persona, stage, contentType, contentItem?.id],
+    queryKey: ["/api/admin/ab-tests", { orgId: currentOrg?.organizationId || 'default', persona, stage, contentType, contentItemId: contentItem?.id }],
     enabled: !!contentItem && !!currentOrg,
     select: (tests) => tests.filter(
       t => t.status === 'active' && 
@@ -126,7 +126,7 @@ export default function MatrixEditPanel({
 
       // Refetch visibility settings to ensure we have the latest data
       const latestVisibility = await queryClient.fetchQuery<ContentVisibility[]>({
-        queryKey: [orgKey, "/api/content/visibility"],
+        queryKey: ["/api/content/visibility", { orgId: currentOrg?.organizationId || 'default' }],
       });
 
       // Find if visibility record exists with latest data

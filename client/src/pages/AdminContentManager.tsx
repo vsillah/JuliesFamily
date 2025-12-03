@@ -415,93 +415,94 @@ export default function AdminContentManager() {
   // Track reordering operations per content type to prevent concurrent mutations
   const [reorderingTypes, setReorderingTypes] = useState<Set<string>>(new Set());
 
+  // Note: URL must come first in queryKey, org ID goes in object for cache isolation
   const { data: services = [], isLoading: servicesLoading} = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/service"],
+    queryKey: ["/api/content/type/service", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: events = [], isLoading: eventsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/event"],
+    queryKey: ["/api/content/type/event", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: testimonials = [], isLoading: testimonialsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/testimonial"],
+    queryKey: ["/api/content/type/testimonial", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: leadMagnets = [], isLoading: leadMagnetsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/lead_magnet"],
+    queryKey: ["/api/content/type/lead_magnet", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: heroContent = [], isLoading: heroLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/hero"],
+    queryKey: ["/api/content/type/hero", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: ctaContent = [], isLoading: ctaLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/cta"],
+    queryKey: ["/api/content/type/cta", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: socialMediaPosts = [], isLoading: socialMediaLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/socialMedia"],
+    queryKey: ["/api/content/type/socialMedia", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: videos = [], isLoading: videosLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/video"],
+    queryKey: ["/api/content/type/video", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: programDetails = [], isLoading: programDetailsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/program_detail"],
+    queryKey: ["/api/content/type/program_detail", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: studentProjects = [], isLoading: studentProjectsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/student_project"],
+    queryKey: ["/api/content/type/student_project", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: studentTestimonials = [], isLoading: studentTestimonialsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/student_testimonial"],
+    queryKey: ["/api/content/type/student_testimonial", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: studentDashboardCards = [], isLoading: studentDashboardCardsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/student_dashboard_card"],
+    queryKey: ["/api/content/type/student_dashboard_card", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: volunteerDashboardCards = [], isLoading: volunteerDashboardCardsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/volunteer_dashboard_card"],
+    queryKey: ["/api/content/type/volunteer_dashboard_card", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: impactSections = [], isLoading: impactSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/impact_section"],
+    queryKey: ["/api/content/type/impact_section", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: storySections = [], isLoading: storySectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/story_section"],
+    queryKey: ["/api/content/type/story_section", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: sponsorsSections = [], isLoading: sponsorsSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/sponsors_section"],
+    queryKey: ["/api/content/type/sponsors_section", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: footerSections = [], isLoading: footerSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/footer_section"],
+    queryKey: ["/api/content/type/footer_section", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
-    queryKey: [currentOrg?.organizationId, "/api/google-reviews/all"],
+    queryKey: ["/api/google-reviews/all", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
@@ -511,7 +512,7 @@ export default function AdminContentManager() {
 
   // Fetch all visibility settings (needed for editing content from any tab)
   const { data: allVisibilitySettings = [] } = useQuery<ContentVisibility[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/visibility"],
+    queryKey: ["/api/content/visibility", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
   
@@ -537,7 +538,7 @@ export default function AdminContentManager() {
 
   // Fetch all A/B tests for matrix view
   const { data: allAbTests = [] } = useQuery<AbTest[]>({
-    queryKey: [currentOrg?.organizationId, "/api/admin/ab-tests"],
+    queryKey: ["/api/admin/ab-tests", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg && activeTab === "matrix",
   });
 

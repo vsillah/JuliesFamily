@@ -39,8 +39,9 @@ export default function DonationCTA() {
   });
   
   // Fetch visible CTA content filtered by persona + journey stage + passion tags
+  // Note: URL must come first in queryKey, org ID goes in object for cache isolation
   const { data: ctaContent } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/visible/cta", { persona, funnelStage }],
+    queryKey: ["/api/content/visible/cta", { orgId: currentOrg?.organizationId || 'default', persona, funnelStage }],
     enabled: !!currentOrg,
   });
   

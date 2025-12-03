@@ -23,8 +23,9 @@ import { Link } from "wouter";
 export default function HowItWorks() {
   const { currentOrg } = useOrganization();
   // Fetch volunteer dashboard card content for public demo
+  // Note: URL must come first in queryKey, org ID goes in object for cache isolation
   const { data: volunteerCardContent } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/volunteer_dashboard_card"],
+    queryKey: ["/api/content/type/volunteer_dashboard_card", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 

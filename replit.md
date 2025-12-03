@@ -43,6 +43,11 @@ The backend uses Express.js on Node.js with TypeScript, providing RESTful API en
 
 **Multi-Tenant Architecture**: Achieved through a nullable `organizationId` column for tenant isolation, dedicated tables for `organizations`, `organization_users`, `custom_domains`, and `shared_templates`. A domain detection middleware identifies organizations, and a JavaScript Proxy-based wrapper enforces organization-scoped storage. Robust security measures (hostname normalization, trusted domain validation, DNS verification, request-scoped storage enforcement) prevent cross-tenant data leakage. Unique organization names are enforced with a database-level unique constraint and graceful error handling.
 
+**CRITICAL Query Key Pattern**: For TanStack Query queries that rely on the default `queryFn` in `queryClient.ts`, the **URL must come first** in the queryKey array. The `getQueryFn` concatenates string parts with `/`, so `[orgId, "/api/path"]` creates invalid URL `"orgId//api/path"`. Correct patterns:
+- `["/api/path"]` - Simple URL only
+- `["/api/path", { orgId: currentOrg?.organizationId || 'default' }]` - URL first, params as object for cache isolation
+- Queries with custom `queryFn` can use any queryKey format since they build their own URL.
+
 ## External Dependencies
 
 -   **UI Framework & Components**: Radix UI, shadcn/ui, Lucide React

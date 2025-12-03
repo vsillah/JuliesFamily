@@ -37,12 +37,12 @@ export default function Services() {
   });
   
   const { data: allServices = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/service"],
+    queryKey: ["/api/content/type/service", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
   const { data: programDetails = [] } = useQuery<ContentItem[]>({
-    queryKey: [currentOrg?.organizationId, "/api/content/type/program_detail"],
+    queryKey: ["/api/content/type/program_detail", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 

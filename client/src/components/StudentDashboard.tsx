@@ -37,10 +37,9 @@ interface TGHProgress {
 
 export function StudentDashboard() {
   const { currentOrg } = useOrganization();
-  const orgKey = currentOrg?.organizationId ?? 'no-org';
 
   const { data: progress, isLoading, error } = useQuery<TGHProgress>({
-    queryKey: [orgKey, "/api/tgh/progress"],
+    queryKey: ["/api/tgh/progress", { orgId: currentOrg?.organizationId || 'default' }],
     enabled: !!currentOrg,
   });
 
