@@ -29,12 +29,11 @@ export function OrganizationSwitcher({ isScrolled = false }: OrganizationSwitche
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant={currentOrg.isOverride ? "default" : (isScrolled ? "outline" : "ghost")}
+          variant={isScrolled ? "outline" : "ghost"}
           size="sm"
           className={cn(
             "gap-2 relative",
-            !isScrolled && !currentOrg.isOverride && "border-white/30 text-white hover:bg-white/10",
-            currentOrg.isOverride && "bg-primary text-primary-foreground"
+            !isScrolled && "border-white/30 text-white hover:bg-white/10"
           )}
           data-testid="button-org-switcher"
         >
