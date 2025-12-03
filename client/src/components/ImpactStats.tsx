@@ -90,11 +90,9 @@ export default function ImpactStats() {
   const { currentOrg } = useOrganization();
 
   // Fetch impact section from database (returns array)
-  // Note: Backend gets org context from middleware, not from URL
-  // Using object for org ID ensures cache scoping without polluting URL path
   const { data: impactDataArray = [], isLoading } = useQuery<ContentItem[]>({
-    queryKey: ['/api/content/type/impact_section', { orgId: currentOrg?.organizationId || 'default' }],
-    // No 'enabled' - query runs immediately, backend handles org context via middleware
+    queryKey: [currentOrg?.organizationId, '/api/content/type/impact_section'],
+    enabled: !!currentOrg,
   });
 
   // Get the first (and only) impact section for this org

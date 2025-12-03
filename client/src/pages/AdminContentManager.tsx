@@ -481,19 +481,23 @@ export default function AdminContentManager() {
   });
 
   const { data: impactSections = [], isLoading: impactSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/impact_section", { orgId: currentOrg?.organizationId || 'default' }],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/impact_section"],
+    enabled: !!currentOrg,
   });
 
   const { data: storySections = [], isLoading: storySectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/story_section", { orgId: currentOrg?.organizationId || 'default' }],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/story_section"],
+    enabled: !!currentOrg,
   });
 
   const { data: sponsorsSections = [], isLoading: sponsorsSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/sponsors_section", { orgId: currentOrg?.organizationId || 'default' }],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/sponsors_section"],
+    enabled: !!currentOrg,
   });
 
   const { data: footerSections = [], isLoading: footerSectionsLoading } = useQuery<ContentItem[]>({
-    queryKey: ["/api/content/type/footer_section", { orgId: currentOrg?.organizationId || 'default' }],
+    queryKey: [currentOrg?.organizationId, "/api/content/type/footer_section"],
+    enabled: !!currentOrg,
   });
 
   const { data: googleReviews = [], isLoading: googleReviewsLoading } = useQuery<GoogleReview[]>({
