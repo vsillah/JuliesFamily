@@ -26,7 +26,7 @@ import { sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
 import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps, syncTaskToCalendar } from "./taskAutomation";
 import Stripe from "stripe";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { CalendarService } from "./calendarService";
 import { fromZonedTime } from "date-fns-tz";
 import { seedDemoData, seedFunnelProgressionRules } from "./demo-data";
@@ -2800,31 +2800,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const format = req.query.format === 'csv' ? 'csv' : 'xlsx';
       
-      const templateData = [
-        {
-          Email: 'example@email.com',
-          'First Name': 'John',
-          'Last Name': 'Doe',
-          Phone: '+1234567890',
-          Persona: 'student',
-          'Funnel Stage': 'awareness',
-          'Pipeline Stage': 'new_lead',
-          'Lead Source': 'bulk_import',
-          Notes: 'Sample lead notes',
-        },
-      ];
+      const headers = ['Email', 'First Name', 'Last Name', 'Phone', 'Persona', 'Funnel Stage', 'Pipeline Stage', 'Lead Source', 'Notes'];
+      const templateRow = ['example@email.com', 'John', 'Doe', '+1234567890', 'student', 'awareness', 'new_lead', 'bulk_import', 'Sample lead notes'];
 
-      const worksheet = XLSX.utils.json_to_sheet(templateData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Leads');
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Leads');
+      worksheet.addRow(headers);
+      worksheet.addRow(templateRow);
 
       if (format === 'csv') {
-        const csv = XLSX.utils.sheet_to_csv(worksheet);
+        // Helper function to properly escape CSV values
+        const escapeCsvValue = (val: string | number | null | undefined): string => {
+          const strVal = String(val ?? '');
+          if (strVal.includes(',') || strVal.includes('"') || strVal.includes('\n') || strVal.includes('\r')) {
+            return `"${strVal.replace(/"/g, '""')}"`;
+          }
+          return strVal;
+        };
+        const csvRows = [
+          headers.map(escapeCsvValue).join(','),
+          templateRow.map(escapeCsvValue).join(',')
+        ];
+        const csv = csvRows.join('\r\n');
         res.setHeader('Content-Disposition', 'attachment; filename=leads_import_template.csv');
         res.setHeader('Content-Type', 'text/csv');
         res.send(csv);
       } else {
-        const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+        const buffer = await workbook.xlsx.writeBuffer();
         res.setHeader('Content-Disposition', 'attachment; filename=leads_import_template.xlsx');
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.send(buffer);
@@ -2902,11 +2904,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No file uploaded" });
       }
 
-      // XLSX library can handle both Excel and CSV files
-      const workbook = XLSX.read(req.file.buffer, { type: 'buffer', raw: false });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(worksheet);
+      // ExcelJS can handle both Excel and CSV files
+      const workbook = new ExcelJS.Workbook();
+      const ext = req.file.originalname.toLowerCase();
+      if (ext.endsWith('.csv')) {
+        // For CSV, create a readable stream from the buffer
+        const { Readable } = await import('stream');
+        const stream = Readable.from(req.file.buffer);
+        await workbook.csv.read(stream);
+      } else {
+        await workbook.xlsx.load(req.file.buffer);
+      }
+      const worksheet = workbook.worksheets[0];
+      
+      if (!worksheet) {
+        return res.status(400).json({ message: "No worksheet found in file" });
+      }
+      
+      // Convert worksheet to array of objects
+      const data: Record<string, any>[] = [];
+      const headers: string[] = [];
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) {
+          row.eachCell((cell, colNumber) => {
+            headers[colNumber - 1] = String(cell.value || '');
+          });
+        } else {
+          const rowData: Record<string, any> = {};
+          row.eachCell((cell, colNumber) => {
+            const header = headers[colNumber - 1];
+            if (header) {
+              rowData[header] = cell.value;
+            }
+          });
+          if (Object.keys(rowData).length > 0) {
+            data.push(rowData);
+          }
+        }
+      });
 
       const results = {
         total: data.length,
@@ -6680,9 +6715,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Combine summary and detail rows
       const fullExportData = [summaryRow, {}, ...exportData];
       
-      // Convert to CSV
-      const worksheet = XLSX.utils.json_to_sheet(fullExportData);
-      const csv = XLSX.utils.sheet_to_csv(worksheet);
+      // Convert to CSV with proper escaping
+      const escapeCsvValue = (val: string | number | null | undefined): string => {
+        const strVal = String(val ?? '');
+        if (strVal.includes(',') || strVal.includes('"') || strVal.includes('\n') || strVal.includes('\r')) {
+          return `"${strVal.replace(/"/g, '""')}"`;
+        }
+        return strVal;
+      };
+      const csvHeaders = Object.keys(summaryRow);
+      const csvRows = [
+        csvHeaders.map(escapeCsvValue).join(','),
+        ...fullExportData.map(row => 
+          csvHeaders.map(header => escapeCsvValue((row as Record<string, any>)[header])).join(',')
+        )
+      ];
+      const csv = csvRows.join('\r\n');
       
       // Set response headers
       const filename = `campaign_${campaignId}_analytics_${new Date().toISOString().split('T')[0]}.csv`;
@@ -6767,157 +6815,103 @@ export async function registerRoutes(app: Express): Promise<Server> {
         };
       });
       
-      // Sheet 3: Link Performance (using proper types for Excel formatting)
-      const linkPerformanceData = linkPerformance.map(link => ({
-        'Link URL': link.url,
-        'Total Clicks': link.totalClicks,
-        'Unique Clicks': link.uniqueClicks,
-        'Click-Through Rate': link.clickThroughRate / 100, // Store as decimal for percentage format
-        'Unique Recipients': link.uniqueRecipients,
-      }));
-      
-      // Helper function to apply Excel cell formatting
-      const applySheetFormatting = (sheet: any, config: {
-        percentageColumns?: { col: number, startRow: number, endRow?: number }[],
-        dateColumns?: { col: number, startRow: number, endRow?: number }[],
-        boldHeader?: boolean,
-      }) => {
-        if (!sheet['!ref']) return;
-        
-        const range = XLSX.utils.decode_range(sheet['!ref']);
-        
-        // Apply bold styling to header row
-        if (config.boldHeader) {
-          for (let col = range.s.c; col <= range.e.c; col++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
-            if (sheet[cellAddress]) {
-              sheet[cellAddress].s = { font: { bold: true } };
-            }
-          }
-          // Set header row height
-          sheet['!rows'] = [{ hpt: 18 }];
-        }
-        
-        // Apply percentage formatting to specified columns
-        if (config.percentageColumns) {
-          for (const { col, startRow, endRow } of config.percentageColumns) {
-            const lastRow = endRow ?? range.e.r;
-            for (let row = startRow; row <= lastRow; row++) {
-              const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-              if (sheet[cellAddress] && typeof sheet[cellAddress].v === 'number') {
-                sheet[cellAddress].t = 'n'; // number type
-                sheet[cellAddress].z = '0.0%'; // percentage format
-              }
-            }
-          }
-        }
-        
-        // Apply date formatting to specified columns
-        if (config.dateColumns) {
-          for (const { col, startRow, endRow } of config.dateColumns) {
-            const lastRow = endRow ?? range.e.r;
-            for (let row = startRow; row <= lastRow; row++) {
-              const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-              if (sheet[cellAddress] && sheet[cellAddress].v instanceof Date) {
-                sheet[cellAddress].t = 'd'; // date type
-                sheet[cellAddress].z = 'yyyy-mm-dd hh:mm:ss'; // date format
-              }
-            }
-          }
-        }
-      };
-      
-      // Create workbook
-      const workbook = XLSX.utils.book_new();
+      // Create workbook using ExcelJS
+      const workbook = new ExcelJS.Workbook();
       
       // Sheet 1: Campaign Summary with formatting
-      const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-      
-      // Set column widths for summary sheet
-      summarySheet['!cols'] = [
-        { wch: 25 }, // Metric column
-        { wch: 50 }, // Value column
+      const summarySheet = workbook.addWorksheet('Campaign Summary');
+      summarySheet.columns = [
+        { header: 'Metric', key: 'metric', width: 25 },
+        { header: 'Value', key: 'value', width: 50 },
       ];
       
-      // Freeze header row
-      summarySheet['!freeze'] = { xSplit: 0, ySplit: 1 };
+      // Make header row bold
+      summarySheet.getRow(1).font = { bold: true };
+      summarySheet.views = [{ state: 'frozen', ySplit: 1 }];
       
-      // Apply cell formatting
-      // Note: json_to_sheet adds header row, so data rows are 1-indexed (row 0 = headers)
-      applySheetFormatting(summarySheet, {
-        boldHeader: true,
-        percentageColumns: [
-          { col: 1, startRow: 12, endRow: 15 }, // Value column: Open Rate, Click Rate, Click-to-Open Rate, Engagement Rate
-        ],
-        dateColumns: [
-          { col: 1, startRow: 4, endRow: 4 }, // Value column: Created At
-        ],
+      // Add summary data rows
+      summaryData.forEach((row, index) => {
+        const dataRow = summarySheet.addRow([row.Metric, row.Value]);
+        // Format percentage rows (rows 12-15 in data, which are rows 13-16 including header)
+        if (index >= 11 && index <= 14 && typeof row.Value === 'number') {
+          dataRow.getCell(2).numFmt = '0.0%';
+        }
+        // Format date row (row 4 in data, which is row 5 including header)
+        if (index === 3 && row.Value instanceof Date) {
+          dataRow.getCell(2).numFmt = 'yyyy-mm-dd hh:mm:ss';
+        }
       });
-      
-      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Campaign Summary');
       
       // Sheet 2: Lead Details with formatting
-      const leadDetailsSheet = XLSX.utils.json_to_sheet(leadDetailsData);
-      
-      // Set column widths for lead details sheet
-      leadDetailsSheet['!cols'] = [
-        { wch: 30 }, // Recipient Email
-        { wch: 10 }, // Status
-        { wch: 22 }, // Sent At
-        { wch: 12 }, // Total Opens
-        { wch: 22 }, // First Opened
-        { wch: 22 }, // Last Opened
-        { wch: 12 }, // Total Clicks
-        { wch: 22 }, // First Clicked
-        { wch: 10 }, // Engaged
-        { wch: 40 }, // Error Message
+      const leadDetailsSheet = workbook.addWorksheet('Lead Details');
+      leadDetailsSheet.columns = [
+        { header: 'Recipient Email', key: 'email', width: 30 },
+        { header: 'Status', key: 'status', width: 10 },
+        { header: 'Sent At', key: 'sentAt', width: 22 },
+        { header: 'Total Opens', key: 'totalOpens', width: 12 },
+        { header: 'First Opened', key: 'firstOpened', width: 22 },
+        { header: 'Last Opened', key: 'lastOpened', width: 22 },
+        { header: 'Total Clicks', key: 'totalClicks', width: 12 },
+        { header: 'First Clicked', key: 'firstClicked', width: 22 },
+        { header: 'Engaged', key: 'engaged', width: 10 },
+        { header: 'Error Message', key: 'errorMessage', width: 40 },
       ];
       
-      // Freeze header row
-      leadDetailsSheet['!freeze'] = { xSplit: 0, ySplit: 1 };
+      // Make header row bold and freeze
+      leadDetailsSheet.getRow(1).font = { bold: true };
+      leadDetailsSheet.views = [{ state: 'frozen', ySplit: 1 }];
       
-      // Apply cell formatting
-      applySheetFormatting(leadDetailsSheet, {
-        boldHeader: true,
-        dateColumns: [
-          { col: 2, startRow: 1 }, // Sent At column (0-indexed col 2)
-          { col: 4, startRow: 1 }, // First Opened column (0-indexed col 4)
-          { col: 5, startRow: 1 }, // Last Opened column (0-indexed col 5)
-          { col: 7, startRow: 1 }, // First Clicked column (0-indexed col 7)
-        ],
+      // Add lead details data
+      leadDetailsData.forEach(row => {
+        const dataRow = leadDetailsSheet.addRow([
+          row['Recipient Email'],
+          row['Status'],
+          row['Sent At'],
+          row['Total Opens'],
+          row['First Opened'],
+          row['Last Opened'],
+          row['Total Clicks'],
+          row['First Clicked'],
+          row['Engaged'],
+          row['Error Message'],
+        ]);
+        // Apply date formatting
+        if (row['Sent At'] instanceof Date) dataRow.getCell(3).numFmt = 'yyyy-mm-dd hh:mm:ss';
+        if (row['First Opened'] instanceof Date) dataRow.getCell(5).numFmt = 'yyyy-mm-dd hh:mm:ss';
+        if (row['Last Opened'] instanceof Date) dataRow.getCell(6).numFmt = 'yyyy-mm-dd hh:mm:ss';
+        if (row['First Clicked'] instanceof Date) dataRow.getCell(8).numFmt = 'yyyy-mm-dd hh:mm:ss';
       });
       
-      XLSX.utils.book_append_sheet(workbook, leadDetailsSheet, 'Lead Details');
-      
       // Sheet 3: Link Performance with formatting (if data exists)
-      if (linkPerformanceData.length > 0) {
-        const linkPerformanceSheet = XLSX.utils.json_to_sheet(linkPerformanceData);
-        
-        // Set column widths for link performance sheet
-        linkPerformanceSheet['!cols'] = [
-          { wch: 50 }, // Link URL
-          { wch: 12 }, // Total Clicks
-          { wch: 14 }, // Unique Clicks
-          { wch: 18 }, // Click-Through Rate
-          { wch: 18 }, // Unique Recipients
+      if (linkPerformance.length > 0) {
+        const linkPerformanceSheet = workbook.addWorksheet('Link Performance');
+        linkPerformanceSheet.columns = [
+          { header: 'Link URL', key: 'url', width: 50 },
+          { header: 'Total Clicks', key: 'totalClicks', width: 12 },
+          { header: 'Unique Clicks', key: 'uniqueClicks', width: 14 },
+          { header: 'Click-Through Rate', key: 'ctr', width: 18 },
+          { header: 'Unique Recipients', key: 'uniqueRecipients', width: 18 },
         ];
         
-        // Freeze header row
-        linkPerformanceSheet['!freeze'] = { xSplit: 0, ySplit: 1 };
+        // Make header row bold and freeze
+        linkPerformanceSheet.getRow(1).font = { bold: true };
+        linkPerformanceSheet.views = [{ state: 'frozen', ySplit: 1 }];
         
-        // Apply cell formatting
-        applySheetFormatting(linkPerformanceSheet, {
-          boldHeader: true,
-          percentageColumns: [
-            { col: 3, startRow: 1 }, // Click-Through Rate column (0-indexed col 3)
-          ],
+        // Add link performance data
+        linkPerformance.forEach(link => {
+          const dataRow = linkPerformanceSheet.addRow([
+            link.url,
+            link.totalClicks,
+            link.uniqueClicks,
+            link.clickThroughRate / 100,
+            link.uniqueRecipients,
+          ]);
+          dataRow.getCell(4).numFmt = '0.0%';
         });
-        
-        XLSX.utils.book_append_sheet(workbook, linkPerformanceSheet, 'Link Performance');
       }
       
       // Generate Excel file
-      const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+      const buffer = await workbook.xlsx.writeBuffer();
       
       // Set response headers
       const filename = `campaign_${campaignId}_analytics_${new Date().toISOString().split('T')[0]}.xlsx`;
