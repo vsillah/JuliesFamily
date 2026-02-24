@@ -374,8 +374,8 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                     {isAdmin && (
                       <Link href="/admin">
                         <DropdownMenuItem className="cursor-pointer" data-testid="menu-admin-dashboard">
-                          <Shield className="w-4 h-4 mr-2" />
-                          Admin Dashboard
+                          <Settings className="w-4 h-4 mr-2" />
+                          {currentOrg?.name ? `${currentOrg.name} Admin` : "Org Admin"}
                         </DropdownMenuItem>
                       </Link>
                     )}
@@ -383,7 +383,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                       <Link href="/admin/organizations">
                         <DropdownMenuItem className="cursor-pointer" data-testid="menu-organizations">
                           <Building2 className="w-4 h-4 mr-2" />
-                          Organizations
+                          Super Admin
                         </DropdownMenuItem>
                       </Link>
                     )}
@@ -664,8 +664,8 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                 className="text-lg text-foreground hover:text-primary transition-colors flex items-center gap-2"
                 data-testid="link-admin-dashboard-mobile"
               >
-                <Shield className="w-5 h-5" />
-                Admin Dashboard
+                <Settings className="w-5 h-5" />
+                {currentOrg?.name ? `${currentOrg.name} Admin` : "Org Admin"}
               </Link>
             )}
             {isSuperAdmin && (
@@ -676,7 +676,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                 data-testid="link-organizations-mobile"
               >
                 <Building2 className="w-5 h-5" />
-                Organizations
+                Super Admin
               </Link>
             )}
             {isAdmin && (
