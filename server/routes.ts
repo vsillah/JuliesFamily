@@ -1077,8 +1077,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let organizationId = null;
       let organizationName = null;
 
-      if (user.organizationId) {
-        const organization = await req.storage.getOrganization(user.organizationId);
+      // First try user's stored organizationId, then fall back to middleware-resolved org
+      const resolvedOrgId = user.organizationId || req.organizationId;
+      if (resolvedOrgId) {
+        const organization = await req.storage.getOrganization(resolvedOrgId);
         if (organization) {
           tier = organization.tier;
           organizationId = organization.id;
@@ -3675,7 +3677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CAC:LTGP Overview
   app.get('/api/admin/cac-ltgp/overview', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage, req.organizationId);
       const overview = await cacAnalytics.getCACLTGPOverview();
       res.json(overview);
     } catch (error) {
@@ -3687,7 +3689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Channel Performance
   app.get('/api/admin/cac-ltgp/channels', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage, req.organizationId);
       const channels = await cacAnalytics.getChannelPerformance();
       res.json(channels);
     } catch (error) {
@@ -3699,7 +3701,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Campaign Performance
   app.get('/api/admin/cac-ltgp/campaigns', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage, req.organizationId);
       const campaigns = await cacAnalytics.getCampaignPerformance();
       res.json(campaigns);
     } catch (error) {
@@ -3711,7 +3713,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Cohort Analysis
   app.get('/api/admin/cac-ltgp/cohorts', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
-      const cacAnalytics = createCacLtgpAnalyticsService(req.storage);
+      const cacAnalytics = createCacLtgpAnalyticsService(req.storage, req.organizationId);
       const periodType = (req.query.periodType as 'week' | 'month') || 'month';
       const cohorts = await cacAnalytics.getCohortAnalysis(periodType);
       res.json(cohorts);

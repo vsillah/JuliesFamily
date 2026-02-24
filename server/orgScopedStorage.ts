@@ -414,6 +414,31 @@ const IMPLEMENTED_ORG_SCOPED_METHODS = new Set([
   'getOrganizationFeatures',
   'deleteOrganizationFeature',
   'isFeatureEnabled',
+  
+  // CAC:LTGP Acquisition Channels (6 methods)
+  'createAcquisitionChannel',
+  'getAcquisitionChannel',
+  'getAllAcquisitionChannels',
+  'getActiveAcquisitionChannels',
+  'updateAcquisitionChannel',
+  'deleteAcquisitionChannel',
+  
+  // CAC:LTGP Marketing Campaigns (6 methods)
+  'createMarketingCampaign',
+  'getMarketingCampaign',
+  'getAllMarketingCampaigns',
+  'getActiveMarketingCampaigns',
+  'getCampaignsByChannel',
+  'updateMarketingCampaign',
+  
+  // CAC:LTGP Lead Attribution (2 methods)
+  'createLeadAttribution',
+  'getLeadAttribution',
+  
+  // CAC:LTGP Donor Economics (3 methods)
+  'createDonorEconomics',
+  'getDonorEconomics',
+  'updateDonorEconomics',
 ]);
 
 /**
@@ -5079,6 +5104,201 @@ class OrgScopedImplementations {
 
   async isFeatureEnabled(featureKey: string) {
     return this.baseStorage.isFeatureEnabled(this.organizationId, featureKey);
+  }
+
+  // ========================================
+  // CAC:LTGP ACQUISITION CHANNELS
+  // ========================================
+
+  async createAcquisitionChannel(channelData: Parameters<IStorage['createAcquisitionChannel']>[0]) {
+    return this.baseStorage.createAcquisitionChannel({
+      ...channelData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getAcquisitionChannel(id: string) {
+    const { acquisitionChannels } = await import('@shared/schema');
+    const [channel] = await db
+      .select()
+      .from(acquisitionChannels)
+      .where(and(
+        eq(acquisitionChannels.id, id),
+        eq(acquisitionChannels.organizationId, this.organizationId)
+      ));
+    return channel;
+  }
+
+  async getAllAcquisitionChannels() {
+    const { acquisitionChannels } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(acquisitionChannels)
+      .where(eq(acquisitionChannels.organizationId, this.organizationId))
+      .orderBy(desc(acquisitionChannels.createdAt));
+  }
+
+  async getActiveAcquisitionChannels() {
+    const { acquisitionChannels } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(acquisitionChannels)
+      .where(and(
+        eq(acquisitionChannels.organizationId, this.organizationId),
+        eq(acquisitionChannels.isActive, true)
+      ))
+      .orderBy(desc(acquisitionChannels.createdAt));
+  }
+
+  async updateAcquisitionChannel(id: string, updates: Parameters<IStorage['updateAcquisitionChannel']>[1]) {
+    const { acquisitionChannels } = await import('@shared/schema');
+    const [updated] = await db
+      .update(acquisitionChannels)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(acquisitionChannels.id, id),
+        eq(acquisitionChannels.organizationId, this.organizationId)
+      ))
+      .returning();
+    return updated;
+  }
+
+  async deleteAcquisitionChannel(id: string) {
+    const { acquisitionChannels } = await import('@shared/schema');
+    await db
+      .delete(acquisitionChannels)
+      .where(and(
+        eq(acquisitionChannels.id, id),
+        eq(acquisitionChannels.organizationId, this.organizationId)
+      ));
+  }
+
+  // ========================================
+  // CAC:LTGP MARKETING CAMPAIGNS
+  // ========================================
+
+  async createMarketingCampaign(campaignData: Parameters<IStorage['createMarketingCampaign']>[0]) {
+    return this.baseStorage.createMarketingCampaign({
+      ...campaignData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getMarketingCampaign(id: string) {
+    const { marketingCampaigns } = await import('@shared/schema');
+    const [campaign] = await db
+      .select()
+      .from(marketingCampaigns)
+      .where(and(
+        eq(marketingCampaigns.id, id),
+        eq(marketingCampaigns.organizationId, this.organizationId)
+      ));
+    return campaign;
+  }
+
+  async getAllMarketingCampaigns() {
+    const { marketingCampaigns } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(marketingCampaigns)
+      .where(eq(marketingCampaigns.organizationId, this.organizationId))
+      .orderBy(desc(marketingCampaigns.createdAt));
+  }
+
+  async getActiveMarketingCampaigns() {
+    const { marketingCampaigns } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(marketingCampaigns)
+      .where(and(
+        eq(marketingCampaigns.organizationId, this.organizationId),
+        eq(marketingCampaigns.status, 'active')
+      ))
+      .orderBy(desc(marketingCampaigns.startDate));
+  }
+
+  async getCampaignsByChannel(channelId: string) {
+    const { marketingCampaigns } = await import('@shared/schema');
+    return await db
+      .select()
+      .from(marketingCampaigns)
+      .where(and(
+        eq(marketingCampaigns.organizationId, this.organizationId),
+        eq(marketingCampaigns.channelId, channelId)
+      ))
+      .orderBy(desc(marketingCampaigns.startDate));
+  }
+
+  async updateMarketingCampaign(id: string, updates: Parameters<IStorage['updateMarketingCampaign']>[1]) {
+    const { marketingCampaigns } = await import('@shared/schema');
+    const [updated] = await db
+      .update(marketingCampaigns)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(marketingCampaigns.id, id),
+        eq(marketingCampaigns.organizationId, this.organizationId)
+      ))
+      .returning();
+    return updated;
+  }
+
+  // ========================================
+  // CAC:LTGP LEAD ATTRIBUTION
+  // ========================================
+
+  async createLeadAttribution(attributionData: Parameters<IStorage['createLeadAttribution']>[0]) {
+    return this.baseStorage.createLeadAttribution({
+      ...attributionData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getLeadAttribution(leadId: string) {
+    const { leadAttribution } = await import('@shared/schema');
+    const [attribution] = await db
+      .select()
+      .from(leadAttribution)
+      .where(and(
+        eq(leadAttribution.leadId, leadId),
+        eq(leadAttribution.organizationId, this.organizationId)
+      ));
+    return attribution;
+  }
+
+  // ========================================
+  // CAC:LTGP DONOR ECONOMICS
+  // ========================================
+
+  async createDonorEconomics(economicsData: Parameters<IStorage['createDonorEconomics']>[0]) {
+    return this.baseStorage.createDonorEconomics({
+      ...economicsData,
+      organizationId: this.organizationId,
+    });
+  }
+
+  async getDonorEconomics(leadId: string) {
+    const { donorEconomics } = await import('@shared/schema');
+    const [economics] = await db
+      .select()
+      .from(donorEconomics)
+      .where(and(
+        eq(donorEconomics.leadId, leadId),
+        eq(donorEconomics.organizationId, this.organizationId)
+      ));
+    return economics;
+  }
+
+  async updateDonorEconomics(leadId: string, updates: Parameters<IStorage['updateDonorEconomics']>[1]) {
+    const { donorEconomics } = await import('@shared/schema');
+    const [updated] = await db
+      .update(donorEconomics)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(and(
+        eq(donorEconomics.leadId, leadId),
+        eq(donorEconomics.organizationId, this.organizationId)
+      ))
+      .returning();
+    return updated;
   }
 }
 
