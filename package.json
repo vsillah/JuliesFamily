@@ -146,5 +146,16 @@
   },
   "optionalDependencies": {
     "bufferutil": "^4.0.8"
+  },
+  "overrides": {
+    "axios": "$axios",
+    "fast-xml-parser": "$fast-xml-parser",
+    "glob": "$glob",
+    "minimatch": "$minimatch",
+    "preact": "$preact",
+    "qs": "$qs",
+    "jsonwebtoken": {
+      "jws": "$jws"
+    }
   }
 }
