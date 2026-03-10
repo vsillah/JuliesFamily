@@ -3041,6 +3041,11 @@ var init_schema = __esm({
 });
 
 // server/db.ts
+var db_exports = {};
+__export(db_exports, {
+  db: () => db,
+  pool: () => pool
+});
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 var pool, db;
@@ -14469,6 +14474,21 @@ import * as XLSX from "xlsx";
 import { fromZonedTime as fromZonedTime3 } from "date-fns-tz";
 async function registerRoutes(app2) {
   await setupAuth(app2);
+  app2.get("/api/debug/db-test", async (_req, res) => {
+    try {
+      const { pool: pool2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const connStart = Date.now();
+      const client2 = await pool2.connect();
+      const connMs = Date.now() - connStart;
+      const qStart = Date.now();
+      const result = await client2.query("SELECT 1 as ok, current_database() as db");
+      const qMs = Date.now() - qStart;
+      client2.release();
+      res.json({ ok: true, connMs, qMs, row: result.rows[0], dbUrl: (process.env.DATABASE_URL || "").substring(0, 40) + "..." });
+    } catch (e) {
+      res.status(500).json({ ok: false, error: e.message, code: e.code, stack: e.stack?.substring(0, 1e3) });
+    }
+  });
   app2.get("/track/open/:token", async (req, res) => {
     try {
       const { token } = req.params;
@@ -17036,7 +17056,7 @@ async function registerRoutes(app2) {
       res.json(items);
     } catch (error) {
       console.error("Error fetching content items by type:", error);
-      res.status(500).json({ message: "Failed to fetch content items" });
+      res.status(500).json({ message: "Failed to fetch content items", _debug: { error: error?.message, code: error?.code, stack: error?.stack?.substring(0, 500) } });
     }
   });
   app2.get("/api/student/my-project", ...authWithImpersonation, async (req, res) => {
