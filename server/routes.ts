@@ -99,24 +99,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
 
-  // #region agent log
-  app.get('/api/debug/db-test', async (_req, res) => {
-    try {
-      const { pool } = await import("./db");
-      const connStart = Date.now();
-      const client = await pool.connect();
-      const connMs = Date.now() - connStart;
-      const qStart = Date.now();
-      const result = await client.query('SELECT 1 as ok, current_database() as db');
-      const qMs = Date.now() - qStart;
-      client.release();
-      res.json({ ok: true, connMs, qMs, row: result.rows[0], dbUrl: (process.env.DATABASE_URL || '').substring(0, 40) + '...' });
-    } catch (e: any) {
-      res.status(500).json({ ok: false, error: e.message, code: e.code, stack: e.stack?.substring(0, 1000) });
-    }
-  });
-  // #endregion
-
   // Public Email Tracking Endpoints (no auth required)
   // Tracking pixel endpoint for email opens
   app.get('/track/open/:token', async (req, res) => {
@@ -3435,11 +3417,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const items = await storage.getContentItemsByType(req.params.type);
       res.json(items);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching content items by type:", error);
-      // #region agent log
-      res.status(500).json({ message: "Failed to fetch content items", _debug: { error: error?.message, code: error?.code, stack: error?.stack?.substring(0, 500) } });
-      // #endregion
+      res.status(500).json({ message: "Failed to fetch content items" });
     }
   });
 
