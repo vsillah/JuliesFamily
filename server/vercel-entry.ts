@@ -1,6 +1,6 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { app } from "../server/app";
-import { registerRoutes } from "../server/routes";
+import type { IncomingMessage, ServerResponse } from "http";
+import { app } from "./app";
+import { registerRoutes } from "./routes";
 import type { Request, Response, NextFunction } from "express";
 
 let ready: Promise<void> | null = null;
@@ -21,7 +21,7 @@ function ensureReady(): Promise<void> {
   return ready;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
   await ensureReady();
-  app(req, res);
+  app(req as any, res as any);
 }

@@ -5,11 +5,11 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 esbuild.build({
-  entryPoints: ['api/index.ts'],
+  entryPoints: ['server/vercel-entry.ts'],
   bundle: true,
   platform: 'node',
   format: 'esm',
-  outfile: 'api/index.js',
+  outfile: 'api/index.mjs',
   packages: 'external',
   alias: {
     '@db': path.resolve(__dirname, 'shared'),
@@ -18,11 +18,11 @@ esbuild.build({
   banner: {
     js: `
 import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { fileURLToPath as _fileURLToPath } from 'url';
+import { dirname as _dirname } from 'path';
 const require = createRequire(import.meta.url);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __filename = _fileURLToPath(import.meta.url);
+const __dirname = _dirname(__filename);
     `.trim()
   }
 }).catch(() => process.exit(1));

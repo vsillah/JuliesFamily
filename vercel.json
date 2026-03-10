@@ -5,7 +5,7 @@
   "installCommand": "npm install --include=dev",
   "framework": null,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/api/(.*)", "destination": "/api/index.mjs" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
