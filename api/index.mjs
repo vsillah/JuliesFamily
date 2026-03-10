@@ -22008,12 +22008,7 @@ var init_routes = __esm({
     init_calendarService();
     init_demo_data();
     init_googleSheets();
-    if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
-    }
-    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: "2025-10-29.clover"
-    });
+    stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.startsWith("sk_test_...") ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-10-29.clover" }) : null;
     requireRole = (...allowedRoles) => {
       return async (req, res, next) => {
         try {
