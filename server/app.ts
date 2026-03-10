@@ -1,12 +1,21 @@
 import express, { type Request, Response, NextFunction } from "express";
 import helmet from "helmet";
-import { log } from "./vite";
 import { helmetConfig, globalLimiter } from "./security";
 
 declare module 'http' {
   interface IncomingMessage {
     rawBody: unknown
   }
+}
+
+function log(message: string, source = "express") {
+  const formattedTime = new Date().toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
 }
 
 const app = express();

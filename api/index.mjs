@@ -14,60 +14,6 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-var vite_config_default;
-var init_vite_config = __esm({
-  "vite.config.ts"() {
-    "use strict";
-    vite_config_default = defineConfig({
-      plugins: [react()],
-      resolve: {
-        alias: {
-          "@": path.resolve(import.meta.dirname, "client", "src"),
-          "@shared": path.resolve(import.meta.dirname, "shared"),
-          "@assets": path.resolve(import.meta.dirname, "attached_assets")
-        }
-      },
-      root: path.resolve(import.meta.dirname, "client"),
-      build: {
-        outDir: path.resolve(import.meta.dirname, "dist/public"),
-        emptyOutDir: true
-      },
-      server: {
-        fs: {
-          strict: true,
-          deny: ["**/.*"]
-        }
-      }
-    });
-  }
-});
-
-// server/vite.ts
-import express from "express";
-import { createServer as createViteServer, createLogger } from "vite";
-import { nanoid } from "nanoid";
-function log(message, source = "express") {
-  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  });
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
-var viteLogger;
-var init_vite = __esm({
-  "server/vite.ts"() {
-    "use strict";
-    init_vite_config();
-    viteLogger = createLogger();
-  }
-});
-
 // server/security.ts
 import rateLimit from "express-rate-limit";
 var globalMax, globalLimiter, authLimiter, adminLimiter, paymentLimiter, leadLimiter, unsubscribeVerifyLimiter, unsubscribeProcessLimiter, helmetConfig;
@@ -159,24 +105,32 @@ var app_exports = {};
 __export(app_exports, {
   app: () => app
 });
-import express2 from "express";
+import express from "express";
 import helmet from "helmet";
+function log(message, source = "express") {
+  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
 var app;
 var init_app = __esm({
   "server/app.ts"() {
     "use strict";
-    init_vite();
     init_security();
-    app = express2();
+    app = express();
     app.use(helmet(helmetConfig));
     app.use(globalLimiter);
-    app.use(express2.json({
+    app.use(express.json({
       limit: "50mb",
       verify: (req, _res, buf) => {
         req.rawBody = buf;
       }
     }));
-    app.use(express2.urlencoded({ extended: false, limit: "50mb" }));
+    app.use(express.urlencoded({ extended: false, limit: "50mb" }));
     app.use((req, res, next) => {
       const start = Date.now();
       const reqPath = req.path;
@@ -7160,8 +7114,8 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 function getCallbackUrl() {
   const base = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$/, "") : process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim() || "localhost"}` : "http://localhost:5000";
-  const path2 = process.env.OIDC_CALLBACK_PATH || "/api/callback";
-  return `${base}${path2.startsWith("/") ? path2 : "/" + path2}`;
+  const path = process.env.OIDC_CALLBACK_PATH || "/api/callback";
+  return `${base}${path.startsWith("/") ? path : "/" + path}`;
 }
 function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1e3;
@@ -8308,11 +8262,11 @@ function getClient() {
   }
   return replitStorageInstance;
 }
-function parseObjectPath(path2) {
-  if (!path2.startsWith("/")) {
-    path2 = `/${path2}`;
+function parseObjectPath(path) {
+  if (!path.startsWith("/")) {
+    path = `/${path}`;
   }
-  const pathParts = path2.split("/");
+  const pathParts = path.split("/");
   if (pathParts.length < 3) {
     throw new Error("Invalid path: must contain at least a bucket name");
   }
@@ -8384,17 +8338,17 @@ var init_objectStorageReplit = __esm({
         }
         return bucketId;
       }
-      normalizePath(path2) {
-        if (path2.startsWith("/")) {
-          return path2;
+      normalizePath(path) {
+        if (path.startsWith("/")) {
+          return path;
         }
-        return `/${this.getDefaultBucketId()}/${path2}`;
+        return `/${this.getDefaultBucketId()}/${path}`;
       }
       getPublicObjectSearchPaths() {
         const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
         const paths = Array.from(
           new Set(
-            pathsStr.split(",").map((path2) => path2.trim()).filter((path2) => path2.length > 0).map((path2) => this.normalizePath(path2))
+            pathsStr.split(",").map((path) => path.trim()).filter((path) => path.length > 0).map((path) => this.normalizePath(path))
           )
         );
         if (paths.length === 0) {
@@ -8600,9 +8554,9 @@ function getClient2() {
   }
   return s3Client;
 }
-function parsePath(path2) {
+function parsePath(path) {
   const bucket = getS3Config().bucket;
-  const p = path2.startsWith("/") ? path2.slice(1) : path2;
+  const p = path.startsWith("/") ? path.slice(1) : path;
   const key = p.startsWith(bucket + "/") ? p.slice(bucket.length + 1) : p;
   return { bucket, key };
 }
@@ -8704,9 +8658,9 @@ var init_objectStorageS3 = __esm({
       getBucket() {
         return getS3Config().bucket;
       }
-      normalizePath(path2) {
-        if (path2.startsWith("/")) return path2;
-        return `/${this.getBucket()}/${path2}`;
+      normalizePath(path) {
+        if (path.startsWith("/")) return path;
+        return `/${this.getBucket()}/${path}`;
       }
       getPublicObjectSearchPaths() {
         const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || process.env.S3_PUBLIC_PREFIXES || "";
@@ -9287,7 +9241,7 @@ __export(email_exports, {
   sendTemplatedEmail: () => sendTemplatedEmail
 });
 import sgMail from "@sendgrid/mail";
-import { nanoid as nanoid2 } from "nanoid";
+import { nanoid } from "nanoid";
 import * as cheerio from "cheerio";
 function renderTemplate(template, variables) {
   let rendered = template;
@@ -9322,7 +9276,7 @@ function prepareTrackedEmailContent(baseUrl, html, trackingToken) {
         console.warn("[Email Tracking] Skipping invalid URL:", originalHref);
         return;
       }
-      const linkToken = nanoid2();
+      const linkToken = nanoid();
       linksToTrack.push({
         linkToken,
         targetUrl: originalHref
@@ -9369,7 +9323,7 @@ async function sendEmail(storage2, options) {
       });
       return { success: false, error: "Recipient has unsubscribed", skipped: true };
     }
-    const trackingToken = nanoid2();
+    const trackingToken = nanoid();
     const baseUrl = process.env.BASE_URL || (process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : null) || "http://localhost:5000";
     const unsubscribeUrl = generateUnsubscribeUrl(options.to, baseUrl);
     let htmlWithUnsubscribe = addUnsubscribeToHtml(options.html, unsubscribeUrl);
@@ -9430,7 +9384,7 @@ async function sendEmail(storage2, options) {
       subject: options.subject,
       status: "failed",
       emailProvider: "sendgrid",
-      trackingToken: nanoid2(),
+      trackingToken: nanoid(),
       // Generate token even for failed emails
       leadId: options.leadId,
       errorMessage: error.message || "Unknown error",
@@ -10266,7 +10220,7 @@ var init_copywriter = __esm({
 import { google } from "googleapis";
 function getGoogleAuthClient() {
   const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  const path2 = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
+  const path = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
   if (json && json.trim().startsWith("{")) {
     try {
       const credentials = JSON.parse(json);
@@ -10275,8 +10229,8 @@ function getGoogleAuthClient() {
       return null;
     }
   }
-  if (path2 || json && !json.trim().startsWith("{")) {
-    const keyPath = path2 || json.trim();
+  if (path || json && !json.trim().startsWith("{")) {
+    const keyPath = path || json.trim();
     return new google.auth.GoogleAuth({ keyFile: keyPath });
   }
   return null;
@@ -11225,7 +11179,7 @@ var init_demo_data = __esm({
 import { google as google2 } from "googleapis";
 function getGoogleAuthClient2() {
   const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  const path2 = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
+  const path = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
   if (json && json.trim().startsWith("{")) {
     try {
       const credentials = JSON.parse(json);
@@ -11234,8 +11188,8 @@ function getGoogleAuthClient2() {
       return null;
     }
   }
-  if (path2 || json && !json.trim().startsWith("{")) {
-    const keyPath = path2 || json.trim();
+  if (path || json && !json.trim().startsWith("{")) {
+    const keyPath = path || json.trim();
     return new google2.auth.GoogleAuth({ keyFile: keyPath });
   }
   return null;
