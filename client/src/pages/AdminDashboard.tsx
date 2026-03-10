@@ -34,8 +34,8 @@ export default function AdminDashboard() {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
   const [isLeadDialogOpen, setIsLeadDialogOpen] = useState(false);
 
-  // Fetch analytics data
-  const { data: analytics } = useQuery<any>({
+  // Fetch analytics data (no tier gate so dashboard always loads for admins)
+  const { data: analytics, isError: analyticsError, error: analyticsErr } = useQuery<any>({
     queryKey: ["/api/admin/analytics"],
     retry: false,
   });
@@ -62,13 +62,34 @@ export default function AdminDashboard() {
   }
 
   // Show loading state
-  if (!analytics) {
+  if (!analytics && !analyticsError) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading dashboard...</div>
       </div>
     );
   }
+
+  // Show error state (e.g. 403 tier, network) so we don't spin forever
+  if (analyticsError) {
+    const msg = (analyticsErr as any)?.response?.data?.message ?? (analyticsErr as Error)?.message ?? "Failed to load dashboard";
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <div className="text-lg font-medium">Dashboard couldn’t load</div>
+        <p className="text-muted-foreground text-sm max-w-md text-center">{msg}</p>
+        <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+      </div>
+    );
+  }
+
+  // Use empty analytics if for some reason data is missing
+  const safeAnalytics = analytics ?? {
+    totalLeads: 0,
+    byPersona: { student: 0, provider: 0, parent: 0, donor: 0, volunteer: 0 },
+    byFunnelStage: { awareness: 0, consideration: 0, decision: 0, retention: 0 },
+    converted: 0,
+    avgEngagementScore: 0,
+  };
 
   const personaLabels: Record<string, string> = {
     student: "Adult Education Student",
@@ -265,7 +286,7 @@ export default function AdminDashboard() {
               <Users className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.totalLeads}</div>
+              <div className="text-2xl font-bold">{safeAnalytics.totalLeads}</div>
               <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
@@ -276,10 +297,10 @@ export default function AdminDashboard() {
               <Target className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.converted}</div>
+              <div className="text-2xl font-bold">{safeAnalytics.converted}</div>
               <p className="text-xs text-muted-foreground">
-                {analytics.totalLeads > 0 
-                  ? `${Math.round((analytics.converted / analytics.totalLeads) * 100)}% conversion rate`
+                {safeAnalytics.totalLeads > 0 
+                  ? `${Math.round((safeAnalytics.converted / safeAnalytics.totalLeads) * 100)}% conversion rate`
                   : "No leads yet"}
               </p>
             </CardContent>
@@ -291,7 +312,7 @@ export default function AdminDashboard() {
               <TrendingUp className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{Math.round(analytics.avgEngagementScore)}</div>
+              <div className="text-2xl font-bold">{Math.round(safeAnalytics.avgEngagementScore)}</div>
               <p className="text-xs text-muted-foreground">Engagement score</p>
             </CardContent>
           </Card>
@@ -302,7 +323,7 @@ export default function AdminDashboard() {
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.byFunnelStage.decision}</div>
+              <div className="text-2xl font-bold">{safeAnalytics.byFunnelStage.decision}</div>
               <p className="text-xs text-muted-foreground">Ready to convert</p>
             </CardContent>
           </Card>
@@ -317,9 +338,9 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-4">
               {Object.entries(funnelStageLabels).map(([stage, label]) => {
-                const count = analytics.byFunnelStage[stage];
-                const percentage = analytics.totalLeads > 0 
-                  ? (count / analytics.totalLeads) * 100 
+                const count = safeAnalytics.byFunnelStage[stage];
+                const percentage = safeAnalytics.totalLeads > 0 
+                  ? (count / safeAnalytics.totalLeads) * 100 
                   : 0;
                 
                 return (

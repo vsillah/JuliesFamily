@@ -6,9 +6,11 @@
 import rateLimit from "express-rate-limit";
 
 // Global rate limiter - general protection against abuse
+// In development, use a much higher limit so localhost (browser + API + HMR) doesn't hit 429
+const globalMax = process.env.NODE_ENV === "development" ? 10000 : 1000;
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 requests per window
+  max: globalMax,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,

@@ -2964,7 +2964,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Analytics endpoint
-  app.get('/api/admin/analytics', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
+  app.get('/api/admin/analytics', ...authWithImpersonation, isAdmin, async (req, res) => {
     try {
       const allLeads = await storage.getAllLeads();
       
@@ -6918,51 +6918,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Validate Twilio signature to prevent spoofing
       const twilio = await import('twilio');
-      const { getTwilioClient } = await import('./twilio');
-      
-      // Get auth token for signature validation
-      const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-      const xReplitToken = process.env.REPL_IDENTITY 
-        ? 'repl ' + process.env.REPL_IDENTITY 
-        : process.env.WEB_REPL_RENEWAL 
-        ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-        : null;
-        
-      if (!xReplitToken) {
-        console.error('X_REPLIT_TOKEN not found for Twilio webhook validation');
-        return res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+      const { getTwilioAuthToken } = await import('./twilio');
+
+      let authToken = getTwilioAuthToken();
+      if (!authToken && process.env.REPLIT_CONNECTORS_HOSTNAME && (process.env.REPL_IDENTITY || process.env.WEB_REPL_RENEWAL)) {
+        const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+        const xReplitToken = process.env.REPL_IDENTITY ? 'repl ' + process.env.REPL_IDENTITY : 'depl ' + process.env.WEB_REPL_RENEWAL;
+        const connectionSettings = await fetch(
+          'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=twilio',
+          { headers: { Accept: 'application/json', X_REPLIT_TOKEN: xReplitToken } }
+        ).then((r) => r.json()).then((data) => data.items?.[0]);
+        authToken = connectionSettings?.settings?.api_key_secret;
       }
-      
-      const connectionSettings = await fetch(
-        'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=twilio',
-        {
-          headers: {
-            'Accept': 'application/json',
-            'X_REPLIT_TOKEN': xReplitToken
-          }
-        }
-      ).then(r => r.json()).then(data => data.items?.[0]);
-      
-      const authToken = connectionSettings?.settings?.api_key_secret;
-      
+
       if (!authToken) {
-        console.error('Twilio auth token not found for webhook validation');
+        console.error('Twilio auth token not found for webhook validation. Set TWILIO_AUTH_TOKEN or use Replit Connectors.');
         return res.status(500).send('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
       }
-      
-      // Construct the full URL for signature validation
-      // Twilio uses the full URL including protocol, host, and path
+
       const protocol = req.protocol;
       const host = req.get('host');
       const url = `${protocol}://${host}${req.originalUrl}`;
-      
-      // Validate request signature
-      const isValid = twilio.validateRequest(
-        authToken,
-        twilioSignature,
-        url,
-        req.body
-      );
+
+      const isValid = twilio.validateRequest(authToken, twilioSignature, url, req.body);
       
       if (!isValid) {
         console.error('Invalid Twilio signature - possible spoofing attempt');
@@ -9791,6 +9769,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: error.message || "Failed to seed funnel progression rules",
         error: error.toString(),
       });
+    }
+  });
+
+  // ─── Vercel Cron Routes ────────────────────────────────────────────
+  // Protected by CRON_SECRET. Vercel sends Authorization: Bearer <secret>.
+
+  const verifyCronSecret: RequestHandler = (req, res, next) => {
+    const secret = process.env.CRON_SECRET;
+    if (!secret) {
+      res.status(500).json({ message: "CRON_SECRET not configured" });
+      return;
+    }
+    const auth = req.headers.authorization;
+    if (auth !== `Bearer ${secret}`) {
+      res.status(401).json({ message: "Unauthorized" });
+      return;
+    }
+    next();
+  };
+
+  app.post('/api/cron/backup', verifyCronSecret, async (_req, res) => {
+    try {
+      const { poll: backupPoll } = await import("./services/backupScheduler");
+      await backupPoll();
+      res.json({ ok: true });
+    } catch (error: any) {
+      console.error("[Cron] backup error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post('/api/cron/donor-lifecycle', verifyCronSecret, async (_req, res) => {
+    try {
+      const { triggerLapsedDonorDetection } = await import("./services/donorLifecycleScheduler");
+      const count = await triggerLapsedDonorDetection();
+      res.json({ ok: true, lapsedCount: count });
+    } catch (error: any) {
+      console.error("[Cron] donor-lifecycle error:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+
+  app.post('/api/cron/email-reports', verifyCronSecret, async (_req, res) => {
+    try {
+      const { poll: emailPoll } = await import("./services/emailReportScheduler");
+      await emailPoll();
+      res.json({ ok: true });
+    } catch (error: any) {
+      console.error("[Cron] email-reports error:", error);
+      res.status(500).json({ message: error.message });
     }
   });
 

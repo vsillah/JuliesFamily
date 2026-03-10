@@ -1,5 +1,4 @@
-// Replit Auth implementation using OpenID Connect
-// Reference: blueprint:javascript_log_in_with_replit
+// OpenID Connect authentication (configurable for any OIDC provider)
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 
@@ -11,11 +10,41 @@ import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { authLimiter } from "./security";
 
+const STRATEGY_NAME = "oidc";
+
+function getCallbackUrl(): string {
+  const base = process.env.BASE_URL
+    ? process.env.BASE_URL.replace(/\/$/, "")
+    : process.env.REPLIT_DOMAINS
+      ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim() || "localhost"}`
+      : "http://localhost:5000";
+  const path = process.env.OIDC_CALLBACK_PATH || "/api/callback";
+  return `${base}${path.startsWith("/") ? path : "/" + path}`;
+}
+
 const getOidcConfig = memoize(
   async () => {
+    let issuerUrl = (process.env.OIDC_ISSUER_URL || process.env.ISSUER_URL || "").trim();
+    const clientId = process.env.OIDC_CLIENT_ID || process.env.REPL_ID;
+    if (!issuerUrl || !clientId) {
+      throw new Error(
+        "OIDC auth requires OIDC_ISSUER_URL and OIDC_CLIENT_ID (or legacy ISSUER_URL and REPL_ID). " +
+          "Set them in .env or disable auth."
+      );
+    }
+    if (!issuerUrl.startsWith("http://") && !issuerUrl.startsWith("https://")) {
+      issuerUrl = "https://" + issuerUrl;
+    }
+    const callbackUrl = getCallbackUrl();
+    const metadata: { redirect_uris?: string[] } = { redirect_uris: [callbackUrl] };
+    const clientAuth = process.env.OIDC_CLIENT_SECRET
+      ? client.ClientSecretPost(process.env.OIDC_CLIENT_SECRET)
+      : undefined;
     return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+      new URL(issuerUrl),
+      clientId,
+      metadata,
+      clientAuth
     );
   },
   { maxAge: 3600 * 1000 }
@@ -127,7 +156,19 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  const issuerUrl = process.env.OIDC_ISSUER_URL || process.env.ISSUER_URL;
+  const clientId = process.env.OIDC_CLIENT_ID || process.env.REPL_ID;
+  if (!issuerUrl || !clientId) {
+    app.get("/api/login", (_req, res) => {
+      res.redirect("/?login=unconfigured");
+    });
+    app.get("/api/callback", (_req, res) => res.redirect("/"));
+    app.get("/api/logout", (_req, res) => res.redirect("/"));
+    return;
+  }
+
   const config = await getOidcConfig();
+  const callbackUrl = getCallbackUrl();
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -136,70 +177,58 @@ export async function setupAuth(app: Express) {
     const user: any = {};
     updateUserSession(user, tokens);
     const dbUser = await upsertUser(tokens.claims());
-    // Store user ID in session so tier middleware can access it
     user.id = dbUser.id;
     verified(null, user);
   };
 
-  // Keep track of registered strategies
-  const registeredStrategies = new Set<string>();
-
-  // Helper function to ensure strategy exists for a domain
-  const ensureStrategy = (domain: string) => {
-    const strategyName = `replitauth:${domain}`;
-    if (!registeredStrategies.has(strategyName)) {
-      const strategy = new Strategy(
-        {
-          name: strategyName,
-          config,
-          scope: "openid email profile offline_access",
-          callbackURL: `https://${domain}/api/callback`,
-        },
-        verify,
-      );
-      passport.use(strategy);
-      registeredStrategies.add(strategyName);
-    }
-  };
+  const strategy = new Strategy(
+    {
+      name: STRATEGY_NAME,
+      config,
+      scope: "openid email profile offline_access",
+      callbackURL: callbackUrl,
+    },
+    verify,
+  );
+  passport.use(strategy);
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  // Apply rate limiting to authentication endpoints to prevent brute force attacks
   app.get("/api/login", authLimiter, (req, res, next) => {
-    ensureStrategy(req.hostname);
-    
-    // Capture and sanitize returnTo parameter
     const returnTo = req.query.returnTo as string;
-    if (returnTo) {
-      // Security: Only allow same-origin paths (must start with / and not be a protocol)
-      if (returnTo.startsWith('/') && !returnTo.startsWith('//') && !returnTo.includes('://')) {
-        req.session.returnTo = returnTo;
-      }
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
+      req.session.returnTo = returnTo;
     }
-    
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    passport.authenticate(STRATEGY_NAME, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", authLimiter, (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    passport.authenticate(STRATEGY_NAME, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
   });
 
+  const logoutRedirectUri =
+    process.env.BASE_URL?.replace(/\/$/, "") ||
+    (process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim()}` : null) ||
+    "/";
+
   app.get("/api/logout", (req, res) => {
     req.logout(() => {
-      res.redirect(
-        client.buildEndSessionUrl(config, {
-          client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `https://${req.hostname}`,  // Always use HTTPS
-        }).href
-      );
+      try {
+        const url = client.buildEndSessionUrl(config, {
+          client_id: process.env.OIDC_CLIENT_ID || process.env.REPL_ID!,
+          post_logout_redirect_uri: logoutRedirectUri,
+        }).href;
+        res.redirect(url);
+      } catch {
+        res.redirect(logoutRedirectUri);
+      }
     });
   });
 }

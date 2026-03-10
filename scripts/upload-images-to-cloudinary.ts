@@ -1,8 +1,12 @@
+import "dotenv/config";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: ".env.local", override: true });
+
 import fs from 'fs';
 import path from 'path';
 import { uploadToCloudinary } from '../server/cloudinary';
 import { db } from '../server/db';
-import { imageAssets } from '../shared/schema';
+import { imageAssets, users } from '../shared/schema';
 import { eq } from 'drizzle-orm';
 
 const imageMapping = [
@@ -119,9 +123,13 @@ const imageMapping = [
 
 async function uploadImages() {
   console.log('Starting image upload to Cloudinary...\n');
-  
+
+  // Use first user as uploadedBy (satisfies FK); null if no users (e.g. fresh DB)
+  const [firstUser] = await db.select({ id: users.id }).from(users).limit(1);
+  const uploadedBy = firstUser?.id ?? null;
+
   const assetsDir = path.join(process.cwd(), 'attached_assets');
-  
+
   for (const imageInfo of imageMapping) {
     try {
       const imagePath = path.join(assetsDir, imageInfo.localPath);
@@ -176,7 +184,7 @@ async function uploadImages() {
           format: cloudinaryResult.format,
           fileSize: cloudinaryResult.bytes,
           usage: imageInfo.usage,
-          uploadedBy: 'admin-test-004',
+          uploadedBy,
           isActive: true,
         });
       }

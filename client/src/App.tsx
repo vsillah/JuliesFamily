@@ -1,11 +1,29 @@
+import { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PersonaProvider } from "@/contexts/PersonaContext";
 import PersonaSelectionModal from "@/components/PersonaSelectionModal";
 import { ChatbotWidget } from "@/components/ChatbotWidget";
+
+function LoginUnconfiguredNotice() {
+  const { toast } = useToast();
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("login") === "unconfigured") {
+      toast({
+        title: "Login not configured",
+        description: "Sign-in isn't set up yet. Add OIDC_ISSUER_URL and OIDC_CLIENT_ID to .env when you're ready to enable login.",
+        variant: "default",
+      });
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [toast]);
+  return null;
+}
 import Home from "@/pages/Home";
 import HowItWorks from "@/pages/HowItWorks";
 import VirtualTour from "@/pages/VirtualTour";
@@ -124,6 +142,7 @@ function App() {
       <TooltipProvider>
         <PersonaProvider>
           <Toaster />
+          <LoginUnconfiguredNotice />
           <PersonaSelectionModal />
           <ChatbotWidget />
           <Router />

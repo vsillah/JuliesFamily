@@ -1,3 +1,7 @@
+import "dotenv/config";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: ".env.local", override: true });
+
 import { storage } from './storage';
 import { TIERS } from '@shared/tiers';
 

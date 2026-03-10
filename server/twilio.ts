@@ -1,44 +1,87 @@
 import twilio from 'twilio';
 
-let connectionSettings: any;
+type TwilioCreds = {
+  accountSid: string;
+  apiKey: string;
+  apiKeySecret: string;
+  phoneNumber: string;
+};
 
-async function getCredentials() {
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME
-  const xReplitToken = process.env.REPL_IDENTITY 
-    ? 'repl ' + process.env.REPL_IDENTITY 
-    : process.env.WEB_REPL_RENEWAL 
-    ? 'depl ' + process.env.WEB_REPL_RENEWAL 
-    : null;
+let cachedCreds: TwilioCreds | null = null;
 
-  if (!xReplitToken) {
-    throw new Error('X_REPLIT_TOKEN not found for repl/depl');
+async function getCredentials(): Promise<TwilioCreds> {
+  if (cachedCreds) return cachedCreds;
+
+  // Direct Twilio credentials (non-Replit)
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+  const apiKey = process.env.TWILIO_API_KEY;
+  const apiKeySecret = process.env.TWILIO_API_KEY_SECRET;
+  const phoneNumber = process.env.TWILIO_PHONE_NUMBER;
+
+  if (accountSid && phoneNumber && (authToken || (apiKey && apiKeySecret))) {
+    cachedCreds = {
+      accountSid,
+      apiKey: apiKey || accountSid,
+      apiKeySecret: apiKeySecret || authToken!,
+      phoneNumber,
+    };
+    return cachedCreds;
   }
 
-  connectionSettings = await fetch(
+  // Replit Connectors fallback
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY
+    ? 'repl ' + process.env.REPL_IDENTITY
+    : process.env.WEB_REPL_RENEWAL
+      ? 'depl ' + process.env.WEB_REPL_RENEWAL
+      : null;
+
+  if (!xReplitToken || !hostname) {
+    throw new Error(
+      'Twilio not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN (or TWILIO_API_KEY + TWILIO_API_KEY_SECRET), and TWILIO_PHONE_NUMBER, or use Replit Connectors.'
+    );
+  }
+
+  const connectionSettings = await fetch(
     'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=twilio',
     {
       headers: {
-        'Accept': 'application/json',
-        'X_REPLIT_TOKEN': xReplitToken
-      }
+        Accept: 'application/json',
+        X_REPLIT_TOKEN: xReplitToken,
+      },
     }
-  ).then(res => res.json()).then(data => data.items?.[0]);
+  )
+    .then((res) => res.json())
+    .then((data) => data.items?.[0]);
 
-  if (!connectionSettings || (!connectionSettings.settings.account_sid || !connectionSettings.settings.api_key || !connectionSettings.settings.api_key_secret)) {
-    throw new Error('Twilio not connected');
+  if (
+    !connectionSettings ||
+    !connectionSettings.settings?.account_sid ||
+    !connectionSettings.settings?.api_key ||
+    !connectionSettings.settings?.api_key_secret
+  ) {
+    throw new Error('Twilio not connected via Replit Connectors');
   }
-  return {
+
+  cachedCreds = {
     accountSid: connectionSettings.settings.account_sid,
     apiKey: connectionSettings.settings.api_key,
     apiKeySecret: connectionSettings.settings.api_key_secret,
-    phoneNumber: connectionSettings.settings.phone_number
+    phoneNumber: connectionSettings.settings.phone_number,
   };
+  return cachedCreds;
+}
+
+/** Auth token for webhook signature validation (TWILIO_AUTH_TOKEN or API key secret when using API keys). */
+export function getTwilioAuthToken(): string | null {
+  return process.env.TWILIO_AUTH_TOKEN ?? process.env.TWILIO_API_KEY_SECRET ?? null;
 }
 
 export async function getTwilioClient() {
   const { accountSid, apiKey, apiKeySecret } = await getCredentials();
   return twilio(apiKey, apiKeySecret, {
-  accountSid: accountSid
+    accountSid,
   });
 }
 

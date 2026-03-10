@@ -1,3 +1,7 @@
+import "dotenv/config";
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig({ path: ".env.local", override: true });
+
 import { storage } from "../server/storage";
 import type { InsertContentItem } from "@shared/schema";
 import fs from "fs";

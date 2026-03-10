@@ -1,7 +1,13 @@
 // Referenced from blueprint:javascript_object_storage integration
-import { File } from "@google-cloud/storage";
-
 const ACL_POLICY_METADATA_KEY = "custom:aclPolicy";
+
+/** Minimal file interface so both GCS File and S3 adapter can be used */
+export interface IStorageFile {
+  getMetadata(): Promise<[{ metadata?: Record<string, string>; contentType?: string; size?: number }]>;
+  setMetadata(arg: { metadata: Record<string, string> }): Promise<unknown>;
+  exists(): Promise<[boolean]>;
+  name?: string;
+}
 
 export enum ObjectAccessGroupType {}
 
@@ -54,12 +60,12 @@ function createObjectAccessGroup(
 }
 
 export async function setObjectAclPolicy(
-  objectFile: File,
+  objectFile: IStorageFile,
   aclPolicy: ObjectAclPolicy,
 ): Promise<void> {
   const [exists] = await objectFile.exists();
   if (!exists) {
-    throw new Error(`Object not found: ${objectFile.name}`);
+    throw new Error(`Object not found: ${objectFile.name ?? "unknown"}`);
   }
   await objectFile.setMetadata({
     metadata: {
@@ -69,7 +75,7 @@ export async function setObjectAclPolicy(
 }
 
 export async function getObjectAclPolicy(
-  objectFile: File,
+  objectFile: IStorageFile,
 ): Promise<ObjectAclPolicy | null> {
   const [metadata] = await objectFile.getMetadata();
   const aclPolicy = metadata?.metadata?.[ACL_POLICY_METADATA_KEY];
@@ -85,7 +91,7 @@ export async function canAccessObject({
   requestedPermission,
 }: {
   userId?: string;
-  objectFile: File;
+  objectFile: IStorageFile;
   requestedPermission: ObjectPermission;
 }): Promise<boolean> {
   const aclPolicy = await getObjectAclPolicy(objectFile);

@@ -176,9 +176,9 @@ export async function sendEmail(
     const trackingToken = nanoid();
     
     // Get base URL for tracking links
-    const baseUrl = process.env.REPLIT_DOMAINS 
-      ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}`
-      : 'http://localhost:5000';
+    const baseUrl = process.env.BASE_URL
+      || (process.env.REPLIT_DOMAINS ? `https://${process.env.REPLIT_DOMAINS.split(',')[0]}` : null)
+      || 'http://localhost:5000';
     
     // Generate unsubscribe URL for this email
     const unsubscribeUrl = generateUnsubscribeUrl(options.to, baseUrl);

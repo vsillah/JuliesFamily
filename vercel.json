@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build:client",
+  "outputDirectory": "dist/public",
+  "installCommand": "npm install",
+  "framework": null,
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 60,
+      "includeFiles": "server/**,shared/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/cron/backup", "schedule": "* * * * *" },
+    { "path": "/api/cron/email-reports", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/donor-lifecycle", "schedule": "0 6 * * *" }
+  ]
+}

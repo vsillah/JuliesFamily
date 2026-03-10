@@ -63,9 +63,10 @@ export async function shutdownEmailReportScheduler(): Promise<void> {
 }
 
 /**
- * Main polling loop - checks for due schedules and executes them
+ * Main polling loop - checks for due schedules and executes them.
+ * Exported so Vercel Cron routes can invoke it directly.
  */
-async function poll(): Promise<void> {
+export async function poll(): Promise<void> {
   if (isRunning) {
     console.log('[EmailReportScheduler] Poll already running, skipping...');
     return;

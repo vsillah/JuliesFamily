@@ -99,6 +99,6 @@ export function verifySmsUnsubscribeToken(token: string): string | null {
  */
 export function generateSmsUnsubscribeUrl(phone: string, baseUrl?: string): string {
   const token = generateSmsUnsubscribeToken(phone);
-  const base = baseUrl || process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000';
+  const base = baseUrl || process.env.BASE_URL || process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000';
   return `${base.startsWith('http') ? base : 'https://' + base}/sms-unsubscribe?token=${token}`;
 }

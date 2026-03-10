@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { usePersona } from "@/contexts/PersonaContext";
 import { useCloudinaryImage, getOptimizedUrl } from "@/hooks/useCloudinaryImage";
@@ -7,6 +7,8 @@ import { useABTestTracking } from "@/hooks/useABTestTracking";
 import { useHeroEngagement } from "@/hooks/useViewportTracking";
 import { applyABVariantOverrides } from "@/lib/abTestUtils";
 import { METRIC_THRESHOLDS } from "@/lib/abTestMetrics";
+import { HERO_DEFAULTS, DEFAULT_HERO } from "@shared/defaults/heroDefaults";
+import type { Persona, FunnelStage } from "@shared/defaults/personas";
 import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
 interface HeroProps {
@@ -46,15 +48,39 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
   
   // Select first hero content (already filtered by persona×journey matrix and ordered by passion tags)
   const baseHero = heroContent?.[0];
-  
+
+  // Fallback hero when DB has no hero content (e.g. fresh migration) so the hero section always shows
+  const fallbackHero = useMemo((): ContentItem | null => {
+    if (isPersonaLoading || !persona || !funnelStage) return null;
+    const personaKey = persona as Persona;
+    const stageKey = funnelStage as FunnelStage;
+    const matrix = HERO_DEFAULTS[personaKey]?.[stageKey];
+    const variant = matrix ?? DEFAULT_HERO;
+    return {
+      id: "fallback-hero",
+      type: "hero",
+      title: variant.title,
+      description: variant.description,
+      imageName: variant.imageName,
+      metadata: {
+        subtitle: variant.subtitle,
+        primaryButton: variant.primaryCTA,
+        secondaryButton: variant.secondaryCTA,
+      },
+    } as ContentItem;
+  }, [persona, funnelStage, isPersonaLoading]);
+
   // CRITICAL: Wait for A/B test assignment to complete before applying overrides
   // This ensures we only render configured variants (control or treatment), never fallback content
   const isReady = !contentLoading && !abTestLoading;
-  
+
+  // Use API hero if available; otherwise use fallback so the hero section always renders
+  const resolvedBaseHero = baseHero ?? fallbackHero ?? undefined;
+
   // Apply A/B test variant overrides if active test exists
   // IMPORTANT: Show base hero while A/B test is loading to prevent blank screen
-  const currentHero = baseHero 
-    ? (isReady ? applyABVariantOverrides(baseHero, abConfig as AbTestVariantConfiguration | null) : baseHero)
+  const currentHero = resolvedBaseHero
+    ? (isReady ? applyABVariantOverrides(resolvedBaseHero, abConfig as AbTestVariantConfiguration | null) : resolvedBaseHero)
     : undefined;
   
   // Track hero view when component is ready and visible
@@ -174,8 +200,7 @@ export default function Hero({ onImageLoaded, isPersonaLoading }: HeroProps) {
       })
     : "";
 
-  // Don't render hero until persona is loaded and hero content is available
-  // This prevents flash of default content without jarring placeholder
+  // Don't render hero until persona is loaded; then show API content or fallback (so hero always shows)
   if (isPersonaLoading || !currentHero) {
     return null;
   }

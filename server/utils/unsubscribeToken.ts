@@ -99,6 +99,6 @@ export function verifyUnsubscribeToken(token: string): string | null {
  */
 export function generateUnsubscribeUrl(email: string, baseUrl?: string): string {
   const token = generateUnsubscribeToken(email);
-  const base = baseUrl || process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000';
+  const base = baseUrl || process.env.BASE_URL || process.env.REPLIT_DEV_DOMAIN || 'http://localhost:5000';
   return `${base.startsWith('http') ? base : 'https://' + base}/unsubscribe?token=${token}`;
 }

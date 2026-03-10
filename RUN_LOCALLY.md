@@ -2,6 +2,8 @@
 
 This guide explains how to migrate this application from Replit to GitHub and run it on your local machine or deploy it to other platforms.
 
+**Quick summary of what to change when leaving Replit:** see **[MIGRATION_CHECKLIST.md](./MIGRATION_CHECKLIST.md)** for a one-page checklist (authentication, database, object storage, Twilio, etc.).
+
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Environment Variables](#environment-variables)
@@ -30,58 +32,34 @@ This guide explains how to migrate this application from Replit to GitHub and ru
 
 ## Environment Variables
 
-### Required Environment Variables
+The server loads **`.env`** and **`.env.local`** at startup (via `dotenv` in `server/index.ts`). Copy **`.env.example`** to **`.env`** and fill in values.
 
-Create a `.env` file in the root directory with these variables:
+### Required to start the app
 
-```env
-# Database (PostgreSQL)
-DATABASE_URL=postgresql://username:password@host:port/database
+- **`DATABASE_URL`** – PostgreSQL connection string.
+- **`SESSION_SECRET`** – Long random secret for sessions.
+- **`STRIPE_SECRET_KEY`** – Stripe secret key (required at startup).
 
-# Session Management
-SESSION_SECRET=your-long-random-secret-key-here
+### Authentication (OIDC)
 
-# Cloudinary (Image CDN)
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
+Set for any OIDC provider (Auth0, Keycloak, Google, etc.):
 
-# Authentication (REQUIRES REPLACEMENT - see below)
-REPL_ID=your-oauth-client-id
-ISSUER_URL=https://replit.com/oidc
+- **`OIDC_ISSUER_URL`** – Issuer URL (e.g. `https://your-tenant.auth0.com`).
+- **`OIDC_CLIENT_ID`** – Client ID.
+- **`OIDC_CLIENT_SECRET`** – Client secret.
+- **`BASE_URL`** – Base URL for callback and links (e.g. `http://localhost:5000`).
 
-# Server Configuration
-PORT=5000
-NODE_ENV=development
-```
+If these are not set, the app still starts but `/api/login` returns 503.
 
-### Optional Environment Variables
+### Optional
 
-```env
-# Object Storage (Replit-specific - may need replacement)
-DEFAULT_OBJECT_STORAGE_BUCKET_ID=your-bucket-id
-PUBLIC_OBJECT_SEARCH_PATHS=/public
-PRIVATE_OBJECT_DIR=/.private
-```
+- **`BASE_URL`** – Used for email links, unsubscribe links, and auth callback.
+- **Cloudinary:** `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`.
+- **Twilio:** `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`.
+- **Object storage (S3/R2):** `OBJECT_STORAGE_PROVIDER=s3`, `S3_BUCKET` or `R2_*` vars (see `.env.example`).
+- **Google Sheets/Calendar:** `GOOGLE_SERVICE_ACCOUNT_JSON` or `GOOGLE_SERVICE_ACCOUNT_KEY_PATH`.
 
-### Creating `.env.example` Template
-
-Copy this template for version control:
-
-```bash
-# Create environment template
-cat > .env.example << 'EOF'
-DATABASE_URL=postgresql://username:password@host:port/database
-SESSION_SECRET=generate-a-random-secret
-CLOUDINARY_CLOUD_NAME=your-cloud-name
-CLOUDINARY_API_KEY=your-api-key
-CLOUDINARY_API_SECRET=your-api-secret
-OAUTH_CLIENT_ID=your-oauth-client-id
-OAUTH_ISSUER_URL=your-oauth-issuer
-PORT=5000
-NODE_ENV=development
-EOF
-```
+Use the project’s **`.env.example`** as the template; it lists all supported variables and short notes.
 
 ---
 
@@ -123,6 +101,19 @@ npm run dev
 ```
 
 The application will be available at `http://localhost:5000`
+
+### 5. Get admin access (first time only)
+
+The **Admin Dashboard** link in the nav appears only for users with the **admin** or **super_admin** role. New logins are created as **client** by default. To make your account an admin:
+
+1. Log in once at `http://localhost:5000` so your user exists in the database.
+2. From the project root, run (use the same email you used to log in):
+
+   ```bash
+   npx tsx scripts/promote-admin.ts your@email.com
+   ```
+
+3. Refresh the app (or log out and log in again). You should see the **Admin Dashboard** link and can use **User Management** to change other users’ roles.
 
 ---
 
@@ -171,110 +162,19 @@ openssl rand -hex 64
 
 ---
 
-## Critical Changes Needed
+## Critical Changes Needed (implemented)
 
-### 🔴 1. Authentication System Replacement (CRITICAL)
+### 1. Authentication (OIDC – implemented)
 
-**Current Issue:** The app uses Replit Auth which only works on Replit.
+The app supports **any OIDC provider**. Set **`OIDC_ISSUER_URL`**, **`OIDC_CLIENT_ID`**, and **`OIDC_CLIENT_SECRET`** in `.env`. Callback URL is **`BASE_URL`** + `/api/callback`. Legacy **`REPL_ID`** / **`ISSUER_URL`** still work. See **`server/replitAuth.ts`**.
 
-**Files to Modify:**
-- `server/replitAuth.ts` - Main authentication configuration
-- Environment variables (`REPL_ID`, `ISSUER_URL`)
+### 2. Object Storage (implemented)
 
-**Replacement Options:**
+Set **`OBJECT_STORAGE_PROVIDER=s3`** and configure **S3** or **R2** env vars (see `.env.example`). The app uses **`server/objectStorageS3.ts`** when provider is `s3`; otherwise Replit GCS when on Replit.
 
-#### Option A: Standard OAuth Providers (Google, GitHub)
+### 3. Replit Vite plugins (removed)
 
-```javascript
-// Example: Replace Replit OIDC with Google OAuth
-import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "http://localhost:5000/api/callback"
-  },
-  async (accessToken, refreshToken, profile, done) => {
-    // User upsert logic
-  }
-));
-```
-
-#### Option B: Auth Services (Easiest)
-
-- **Auth0**: Full-featured, drop-in replacement
-- **Clerk**: Modern auth with great DX
-- **Supabase Auth**: If already using Supabase for database
-
-#### Option C: Email/Password Auth
-
-Use the existing `passport-local` dependency:
-
-```javascript
-import { Strategy as LocalStrategy } from 'passport-local';
-import bcrypt from 'bcrypt';
-
-passport.use(new LocalStrategy(
-  async (username, password, done) => {
-    // Verify credentials
-  }
-));
-```
-
-### 🟡 2. Object Storage Replacement (Optional)
-
-**Current:** Uses Replit App Storage via Google Cloud Storage SDK
-
-**Options:**
-
-#### Option A: Migrate to Cloudinary (Recommended)
-- Already partially implemented
-- Move profile photos to Cloudinary
-- Update `server/objectStorage.ts`
-
-#### Option B: Use AWS S3
-```bash
-npm install @aws-sdk/client-s3
-```
-
-#### Option C: Use Cloudflare R2 (S3-compatible)
-- More affordable than S3
-- Same API as S3
-
-### 🟢 3. Remove Replit-Specific Dependencies
-
-**Update `package.json`:**
-
-Remove these dev dependencies:
-```json
-{
-  "devDependencies": {
-    "@replit/vite-plugin-cartographer": "^0.4.1",  // REMOVE
-    "@replit/vite-plugin-dev-banner": "^0.1.1",    // REMOVE
-    "@replit/vite-plugin-runtime-error-modal": "^0.0.3"  // REMOVE
-  }
-}
-```
-
-**Update `vite.config.ts`:**
-
-```typescript
-// BEFORE (lines 10-20)
-...(process.env.NODE_ENV !== "production" &&
-process.env.REPL_ID !== undefined
-  ? [
-      await import("@replit/vite-plugin-cartographer").then((m) =>
-        m.cartographer(),
-      ),
-      await import("@replit/vite-plugin-dev-banner").then((m) =>
-        m.devBanner(),
-      ),
-    ]
-  : []),
-
-// AFTER
-// Remove the entire conditional block above
-```
+Replit plugins have been removed from **`package.json`** and **`vite.config.ts`**. No action needed.
 
 **Update `.gitignore`:**
 
@@ -472,10 +372,10 @@ Add these in GitHub Settings → Secrets and variables → Actions:
 ### During Migration
 
 - [ ] Create GitHub repository
-- [ ] Update `.gitignore` to exclude `.env` files
-- [ ] Remove Replit-specific dependencies
-- [ ] Update `vite.config.ts` (remove Replit plugins)
-- [ ] Create `.env.example` template
+- [ ] Update `.gitignore` to exclude `.env` files (e.g. `.env`, `.env.local`)
+- [x] Remove Replit-specific dependencies (Replit Vite plugins removed)
+- [x] Update `vite.config.ts` (Replit plugins removed)
+- [x] Create `.env.example` template
 - [ ] Set up new database (Neon, Railway, etc.)
 - [ ] Configure Cloudinary account
 - [ ] **Replace authentication system** (critical!)
@@ -640,17 +540,17 @@ For general development questions:
 
 ## Summary of Critical Changes
 
-| Component | Current Status | Action Required |
-|-----------|---------------|-----------------|
-| **Dependencies** | ✅ Mostly OK | Remove 3 Replit plugins from `package.json` and `vite.config.ts` |
-| **Database** | ✅ Good | Set `DATABASE_URL` environment variable |
-| **Cloudinary** | ✅ Works | Set API credentials in environment |
-| **Authentication** | ❌ **CRITICAL** | Replace Replit Auth completely with OAuth/Auth0/Clerk |
-| **Object Storage** | ⚠️ Partial | Migrate profile photos to Cloudinary or S3 |
-| **Build Scripts** | ✅ Good | Works as-is, no changes needed |
-| **Environment** | ⚠️ Required | Set up all environment variables |
-
-**The biggest challenge is replacing the authentication system.** Everything else is straightforward configuration and environment setup.
+| Component | Status | Action |
+|-----------|--------|--------|
+| **Dependencies** | ✅ Done | Replit Vite plugins removed |
+| **Database** | ✅ Good | Set `DATABASE_URL`; run `npm run db:push` |
+| **Cloudinary** | ✅ Works | Set API credentials in `.env` |
+| **Authentication** | ✅ Implemented | Set `OIDC_ISSUER_URL`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET`, `BASE_URL` for any OIDC provider |
+| **Object Storage** | ✅ Implemented | Set `OBJECT_STORAGE_PROVIDER=s3` and S3/R2 env vars when not on Replit |
+| **Twilio / Google** | ✅ Implemented | Set `TWILIO_*` and `GOOGLE_SERVICE_ACCOUNT_*` for direct credentials |
+| **Build Scripts** | ✅ Good | Works as-is |
+| **Environment** | Required | Copy `.env.example` to `.env`; server loads `.env` and `.env.local` via dotenv |
+| **First admin** | One-time | Log in once, then run `npx tsx scripts/promote-admin.ts your@email.com`; refresh to see Admin Dashboard |
 
 ---
 

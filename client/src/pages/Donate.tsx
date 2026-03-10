@@ -17,10 +17,8 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
 import { SavedPaymentMethods } from '@/components/SavedPaymentMethods';
 
-if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
-}
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 const PRESET_AMOUNTS = [25, 50, 100, 250, 500, 1000];
 
@@ -495,6 +493,11 @@ export default function Donate() {
           <p className="text-lg text-muted-foreground">
             Your generosity helps provide education and opportunities to families in our community.
           </p>
+          {!stripePromise && (
+            <p className="mt-3 text-sm text-amber-600 dark:text-amber-400">
+              Donation form is not configured yet (missing Stripe key). The rest of the site works normally.
+            </p>
+          )}
         </div>
 
         {/* Campaign Context Card - shows goal, progress, and projected impact */}
@@ -646,10 +649,14 @@ export default function Donate() {
                   )}
                 </Button>
               </div>
-            ) : clientSecret ? (
+            ) : clientSecret && stripePromise ? (
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <CheckoutForm clientSecret={clientSecret} amount={amount} />
               </Elements>
+            ) : !stripePromise ? (
+              <div className="rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 p-4 text-center text-sm text-amber-800 dark:text-amber-200">
+                Donations are not configured yet. Add <code className="font-mono text-xs">VITE_STRIPE_PUBLIC_KEY</code> to your .env to enable the donation form.
+              </div>
             ) : (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
