@@ -29,7 +29,7 @@ const headlineContent: Record<string, { title: string; description: string }> = 
 
 export default function Events() {
   const { persona, funnelStage } = usePersona();
-  const headline = headlineContent[persona || "donor"];
+  const headline = headlineContent[persona] ?? headlineContent["donor"];
   
   // Check for active A/B test for event card order with integrated tracking
   const { tracking, hasTest } = useABTestTracking('event_card_order', { 
