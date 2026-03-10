@@ -3048,7 +3048,7 @@ __export(db_exports, {
 });
 import pg from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-var pool, db;
+var isServerless, isLocalhost, pool, db;
 var init_db = __esm({
   "server/db.ts"() {
     "use strict";
@@ -3058,12 +3058,15 @@ var init_db = __esm({
         "DATABASE_URL must be set. Did you forget to provision a database?"
       );
     }
+    isServerless = !!process.env.VERCEL;
+    isLocalhost = (process.env.DATABASE_URL || "").includes("localhost");
     pool = new pg.Pool({
       connectionString: process.env.DATABASE_URL,
-      max: 10,
-      idleTimeoutMillis: 3e4,
+      max: isServerless ? 1 : 10,
+      idleTimeoutMillis: isServerless ? 1e4 : 3e4,
       connectionTimeoutMillis: 1e4,
-      ssl: process.env.DATABASE_URL.includes("localhost") ? false : { rejectUnauthorized: false }
+      ssl: isLocalhost ? false : { rejectUnauthorized: false },
+      ...isServerless ? { allowExitOnIdle: true } : {}
     });
     db = drizzle(pool, { schema: schema_exports });
   }

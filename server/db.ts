@@ -8,11 +8,15 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
+const isServerless = !!process.env.VERCEL;
+const isLocalhost = (process.env.DATABASE_URL || "").includes("localhost");
+
 export const pool = new pg.Pool({
   connectionString: process.env.DATABASE_URL,
-  max: 10,
-  idleTimeoutMillis: 30000,
+  max: isServerless ? 1 : 10,
+  idleTimeoutMillis: isServerless ? 10000 : 30000,
   connectionTimeoutMillis: 10000,
-  ssl: process.env.DATABASE_URL.includes("localhost") ? false : { rejectUnauthorized: false },
+  ssl: isLocalhost ? false : { rejectUnauthorized: false },
+  ...(isServerless ? { allowExitOnIdle: true } : {}),
 });
 export const db = drizzle(pool, { schema });
