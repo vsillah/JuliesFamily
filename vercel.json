@@ -4,13 +4,8 @@
   "outputDirectory": "dist/public",
   "installCommand": "npm install --include=dev",
   "framework": null,
-  "functions": {
-    "api/index.js": {
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.js" },
+    { "source": "/api/(.*)", "destination": "/api/index.ts" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
