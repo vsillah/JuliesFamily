@@ -14,6 +14,196 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
+// vite.config.ts
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+var vite_config_default;
+var init_vite_config = __esm({
+  "vite.config.ts"() {
+    "use strict";
+    vite_config_default = defineConfig({
+      plugins: [react()],
+      resolve: {
+        alias: {
+          "@": path.resolve(import.meta.dirname, "client", "src"),
+          "@shared": path.resolve(import.meta.dirname, "shared"),
+          "@assets": path.resolve(import.meta.dirname, "attached_assets")
+        }
+      },
+      root: path.resolve(import.meta.dirname, "client"),
+      build: {
+        outDir: path.resolve(import.meta.dirname, "dist/public"),
+        emptyOutDir: true
+      },
+      server: {
+        fs: {
+          strict: true,
+          deny: ["**/.*"]
+        }
+      }
+    });
+  }
+});
+
+// server/vite.ts
+import express from "express";
+import { createServer as createViteServer, createLogger } from "vite";
+import { nanoid } from "nanoid";
+function log(message, source = "express") {
+  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+  console.log(`${formattedTime} [${source}] ${message}`);
+}
+var viteLogger;
+var init_vite = __esm({
+  "server/vite.ts"() {
+    "use strict";
+    init_vite_config();
+    viteLogger = createLogger();
+  }
+});
+
+// server/security.ts
+import rateLimit from "express-rate-limit";
+var globalMax, globalLimiter, authLimiter, adminLimiter, paymentLimiter, leadLimiter, unsubscribeVerifyLimiter, unsubscribeProcessLimiter, helmetConfig;
+var init_security = __esm({
+  "server/security.ts"() {
+    "use strict";
+    globalMax = process.env.NODE_ENV === "development" ? 1e4 : 1e3;
+    globalLimiter = rateLimit({
+      windowMs: 15 * 60 * 1e3,
+      // 15 minutes
+      max: globalMax,
+      message: "Too many requests from this IP, please try again later.",
+      standardHeaders: true,
+      legacyHeaders: false
+    });
+    authLimiter = rateLimit({
+      windowMs: 15 * 60 * 1e3,
+      // 15 minutes
+      max: 10,
+      // Limit each IP to 10 login attempts per window
+      message: "Too many login attempts, please try again later.",
+      standardHeaders: true,
+      legacyHeaders: false,
+      skipSuccessfulRequests: true
+      // Don't count successful requests
+    });
+    adminLimiter = rateLimit({
+      windowMs: 15 * 60 * 1e3,
+      // 15 minutes  
+      max: 100,
+      // Limit admin operations
+      message: "Too many requests to admin endpoints, please try again later.",
+      standardHeaders: true,
+      legacyHeaders: false
+    });
+    paymentLimiter = rateLimit({
+      windowMs: 60 * 60 * 1e3,
+      // 1 hour
+      max: 20,
+      // Limit payment attempts
+      message: "Too many payment attempts, please try again later.",
+      standardHeaders: true,
+      legacyHeaders: false
+    });
+    leadLimiter = rateLimit({
+      windowMs: 60 * 60 * 1e3,
+      // 1 hour
+      max: 10,
+      // Limit lead submissions per hour
+      message: "Too many submissions, please try again later.",
+      standardHeaders: true,
+      legacyHeaders: false
+    });
+    unsubscribeVerifyLimiter = rateLimit({
+      windowMs: 5 * 60 * 1e3,
+      // 5 minutes
+      max: 60,
+      // Accommodate shared-IP bursts (corporate networks, NAT)
+      message: "Too many verification requests, please try again in a few minutes.",
+      standardHeaders: true,
+      legacyHeaders: false
+    });
+    unsubscribeProcessLimiter = rateLimit({
+      windowMs: 5 * 60 * 1e3,
+      // 5 minutes
+      max: 10,
+      // Protect write path from abuse while allowing legitimate retries
+      message: "Too many unsubscribe attempts, please try again in a few minutes.",
+      standardHeaders: true,
+      legacyHeaders: false
+    });
+    helmetConfig = {
+      contentSecurityPolicy: false,
+      // Disabled for Replit infrastructure + 3rd party resources
+      crossOriginEmbedderPolicy: false,
+      // Allow embedding third-party resources (YouTube, Cloudinary, Google Fonts)
+      hsts: {
+        maxAge: 31536e3,
+        // 1 year
+        includeSubDomains: true,
+        preload: true
+      }
+    };
+  }
+});
+
+// server/app.ts
+var app_exports = {};
+__export(app_exports, {
+  app: () => app
+});
+import express2 from "express";
+import helmet from "helmet";
+var app;
+var init_app = __esm({
+  "server/app.ts"() {
+    "use strict";
+    init_vite();
+    init_security();
+    app = express2();
+    app.use(helmet(helmetConfig));
+    app.use(globalLimiter);
+    app.use(express2.json({
+      limit: "50mb",
+      verify: (req, _res, buf) => {
+        req.rawBody = buf;
+      }
+    }));
+    app.use(express2.urlencoded({ extended: false, limit: "50mb" }));
+    app.use((req, res, next) => {
+      const start = Date.now();
+      const reqPath = req.path;
+      let capturedJsonResponse = void 0;
+      const originalResJson = res.json;
+      res.json = function(bodyJson, ...args) {
+        capturedJsonResponse = bodyJson;
+        return originalResJson.apply(res, [bodyJson, ...args]);
+      };
+      res.on("finish", () => {
+        const duration = Date.now() - start;
+        if (reqPath.startsWith("/api")) {
+          let logLine = `${req.method} ${reqPath} ${res.statusCode} in ${duration}ms`;
+          if (capturedJsonResponse) {
+            logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+          }
+          if (logLine.length > 80) {
+            logLine = logLine.slice(0, 79) + "\u2026";
+          }
+          log(logLine);
+        }
+      });
+      next();
+    });
+  }
+});
+
 // shared/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
@@ -6961,6 +7151,854 @@ var init_storage = __esm({
   }
 });
 
+// server/replitAuth.ts
+import * as client from "openid-client";
+import { Strategy } from "openid-client/passport";
+import passport from "passport";
+import session from "express-session";
+import memoize from "memoizee";
+import connectPg from "connect-pg-simple";
+function getCallbackUrl() {
+  const base = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$/, "") : process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim() || "localhost"}` : "http://localhost:5000";
+  const path2 = process.env.OIDC_CALLBACK_PATH || "/api/callback";
+  return `${base}${path2.startsWith("/") ? path2 : "/" + path2}`;
+}
+function getSession() {
+  const sessionTtl = 7 * 24 * 60 * 60 * 1e3;
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: false,
+    ttl: sessionTtl,
+    tableName: "sessions"
+  });
+  const isProduction = process.env.NODE_ENV === "production";
+  return session({
+    secret: process.env.SESSION_SECRET,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: isProduction ? "auto" : false,
+      // Auto-detect HTTPS in production
+      sameSite: "lax",
+      domain: void 0,
+      // Let browser handle domain automatically
+      path: "/",
+      maxAge: sessionTtl
+    }
+  });
+}
+function updateUserSession(user, tokens) {
+  user.claims = tokens.claims();
+  user.access_token = tokens.access_token;
+  user.refresh_token = tokens.refresh_token;
+  user.expires_at = user.claims?.exp;
+}
+async function upsertUser(claims) {
+  console.log("[OIDC Claims] Received claims:", JSON.stringify(claims, null, 2));
+  const email = claims["email"] || claims["preferred_username"];
+  const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(" ")[0];
+  const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(" ")[1];
+  const persona = claims["persona"];
+  const passions = claims["passions"];
+  const funnelStage = claims["funnelStage"];
+  const role = claims["role"] || (Array.isArray(claims["roles"]) ? claims["roles"][0] : claims["roles"]);
+  console.log("[OIDC Claims] Extracted data:", {
+    sub: claims["sub"],
+    email,
+    firstName,
+    lastName,
+    profileImageUrl: claims["profile_image_url"] || claims["picture"],
+    persona,
+    passions,
+    funnelStage,
+    role: role || "(not provided - will use default/existing)"
+  });
+  const upsertData = {
+    oidcSub: claims["sub"],
+    email,
+    firstName,
+    lastName,
+    profileImageUrl: claims["profile_image_url"] || claims["picture"],
+    persona,
+    // Include persona from claims if provided
+    passions,
+    // Include passions from claims if provided (for testing)
+    funnelStage
+    // Include funnelStage from claims if provided (for testing)
+  };
+  if (process.env.NODE_ENV === "development" && role) {
+    console.log("[OIDC Claims] Development mode: accepting role from claims:", role);
+    upsertData.role = role;
+  } else {
+    console.log("[OIDC Claims] Role NOT added to upsertData. NODE_ENV:", process.env.NODE_ENV, "role:", role);
+  }
+  console.log("[OIDC Claims] Calling upsertUser with:", JSON.stringify(upsertData, null, 2));
+  const result = await storage.upsertUser(upsertData);
+  console.log("[OIDC Claims] upsertUser returned user with role:", result.role);
+  return result;
+}
+async function setupAuth(app2) {
+  app2.set("trust proxy", 1);
+  app2.use(getSession());
+  app2.use(passport.initialize());
+  app2.use(passport.session());
+  const issuerUrl = process.env.OIDC_ISSUER_URL || process.env.ISSUER_URL;
+  const clientId = process.env.OIDC_CLIENT_ID || process.env.REPL_ID;
+  if (!issuerUrl || !clientId) {
+    app2.get("/api/login", (_req, res) => {
+      res.redirect("/?login=unconfigured");
+    });
+    app2.get("/api/callback", (_req, res) => res.redirect("/"));
+    app2.get("/api/logout", (_req, res) => res.redirect("/"));
+    return;
+  }
+  const config = await getOidcConfig();
+  const callbackUrl = getCallbackUrl();
+  const verify = async (tokens, verified) => {
+    const user = {};
+    updateUserSession(user, tokens);
+    const dbUser = await upsertUser(tokens.claims());
+    user.id = dbUser.id;
+    verified(null, user);
+  };
+  const strategy = new Strategy(
+    {
+      name: STRATEGY_NAME,
+      config,
+      scope: "openid email profile offline_access",
+      callbackURL: callbackUrl
+    },
+    verify
+  );
+  passport.use(strategy);
+  passport.serializeUser((user, cb) => cb(null, user));
+  passport.deserializeUser((user, cb) => cb(null, user));
+  app2.get("/api/login", authLimiter, (req, res, next) => {
+    const returnTo = req.query.returnTo;
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
+      req.session.returnTo = returnTo;
+    }
+    passport.authenticate(STRATEGY_NAME, {
+      prompt: "login consent",
+      scope: ["openid", "email", "profile", "offline_access"]
+    })(req, res, next);
+  });
+  app2.get("/api/callback", authLimiter, (req, res, next) => {
+    passport.authenticate(STRATEGY_NAME, {
+      successReturnToOrRedirect: "/",
+      failureRedirect: "/api/login"
+    })(req, res, next);
+  });
+  const logoutRedirectUri = process.env.BASE_URL?.replace(/\/$/, "") || (process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim()}` : null) || "/";
+  app2.get("/api/logout", (req, res) => {
+    req.logout(() => {
+      try {
+        const url = client.buildEndSessionUrl(config, {
+          client_id: process.env.OIDC_CLIENT_ID || process.env.REPL_ID,
+          post_logout_redirect_uri: logoutRedirectUri
+        }).href;
+        res.redirect(url);
+      } catch {
+        res.redirect(logoutRedirectUri);
+      }
+    });
+  });
+}
+var STRATEGY_NAME, getOidcConfig, isAuthenticated;
+var init_replitAuth = __esm({
+  "server/replitAuth.ts"() {
+    "use strict";
+    init_storage();
+    init_security();
+    STRATEGY_NAME = "oidc";
+    getOidcConfig = memoize(
+      async () => {
+        let issuerUrl = (process.env.OIDC_ISSUER_URL || process.env.ISSUER_URL || "").trim();
+        const clientId = process.env.OIDC_CLIENT_ID || process.env.REPL_ID;
+        if (!issuerUrl || !clientId) {
+          throw new Error(
+            "OIDC auth requires OIDC_ISSUER_URL and OIDC_CLIENT_ID (or legacy ISSUER_URL and REPL_ID). Set them in .env or disable auth."
+          );
+        }
+        if (!issuerUrl.startsWith("http://") && !issuerUrl.startsWith("https://")) {
+          issuerUrl = "https://" + issuerUrl;
+        }
+        const callbackUrl = getCallbackUrl();
+        const metadata = { redirect_uris: [callbackUrl] };
+        const clientAuth = process.env.OIDC_CLIENT_SECRET ? client.ClientSecretPost(process.env.OIDC_CLIENT_SECRET) : void 0;
+        return await client.discovery(
+          new URL(issuerUrl),
+          clientId,
+          metadata,
+          clientAuth
+        );
+      },
+      { maxAge: 3600 * 1e3 }
+    );
+    isAuthenticated = async (req, res, next) => {
+      const user = req.user;
+      if (!req.isAuthenticated() || !user.expires_at) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      const now = Math.floor(Date.now() / 1e3);
+      if (now <= user.expires_at) {
+        return next();
+      }
+      const refreshToken = user.refresh_token;
+      if (!refreshToken) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+      try {
+        const config = await getOidcConfig();
+        const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
+        updateUserSession(user, tokenResponse);
+        return next();
+      } catch (error) {
+        res.status(401).json({ message: "Unauthorized" });
+        return;
+      }
+    };
+  }
+});
+
+// server/impersonationMiddleware.ts
+import { eq as eq5, and as and6 } from "drizzle-orm";
+async function applyImpersonation(req, res, next) {
+  try {
+    if (!req.user) {
+      return next();
+    }
+    const currentOidcSub = req.user.claims?.sub;
+    if (!currentOidcSub) {
+      return next();
+    }
+    const [currentUser] = await db.select().from(users).where(eq5(users.oidcSub, currentOidcSub)).limit(1);
+    if (!currentUser) {
+      return next();
+    }
+    if (currentUser.role !== "admin" && currentUser.role !== "super_admin") {
+      return next();
+    }
+    const [session2] = await db.select().from(adminImpersonationSessions).where(and6(
+      eq5(adminImpersonationSessions.adminId, currentUser.id),
+      eq5(adminImpersonationSessions.isActive, true)
+    )).limit(1);
+    if (!session2) {
+      return next();
+    }
+    const [impersonatedUser] = await db.select().from(users).where(eq5(users.id, session2.impersonatedUserId)).limit(1);
+    if (!impersonatedUser) {
+      console.warn(`[Impersonation] Session ${session2.id} references non-existent user ${session2.impersonatedUserId}`);
+      return next();
+    }
+    req.adminUser = req.user;
+    req.isImpersonating = true;
+    req.user = {
+      ...req.user,
+      claims: {
+        ...req.user.claims,
+        sub: impersonatedUser.oidcSub
+      }
+    };
+    console.log(`[Impersonation] Admin ${currentUser.email} is viewing as ${impersonatedUser.email}`);
+    next();
+  } catch (error) {
+    console.error("[Impersonation] Error applying impersonation:", error);
+    next();
+  }
+}
+function requireActualAdmin(req, res, next) {
+  const userToCheck = req.isImpersonating ? req.adminUser : req.user;
+  if (!userToCheck) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+  const checkAdmin = async () => {
+    try {
+      const oidcSub = userToCheck.claims?.sub;
+      if (!oidcSub) {
+        return res.status(401).json({ message: "Invalid authentication" });
+      }
+      const [user] = await db.select().from(users).where(eq5(users.oidcSub, oidcSub)).limit(1);
+      if (!user || user.role !== "admin" && user.role !== "super_admin") {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      next();
+    } catch (error) {
+      console.error("[requireActualAdmin] Error checking admin status:", error);
+      res.status(500).json({ message: "Failed to verify admin status" });
+    }
+  };
+  checkAdmin();
+}
+var init_impersonationMiddleware = __esm({
+  "server/impersonationMiddleware.ts"() {
+    "use strict";
+    init_db();
+    init_schema();
+  }
+});
+
+// shared/tiers.ts
+function hasTierAccess(userTier, requiredTier) {
+  const tierOrder = [TIERS.BASIC, TIERS.PRO, TIERS.PREMIUM];
+  const userIndex = tierOrder.indexOf(userTier);
+  const requiredIndex = tierOrder.indexOf(requiredTier);
+  return userIndex >= requiredIndex;
+}
+var TIERS, TIER_CONFIG;
+var init_tiers = __esm({
+  "shared/tiers.ts"() {
+    "use strict";
+    TIERS = {
+      BASIC: "basic",
+      PRO: "pro",
+      PREMIUM: "premium"
+    };
+    TIER_CONFIG = {
+      [TIERS.BASIC]: {
+        // Core CRM - All tiers
+        leadManagement: true,
+        basicSegmentation: true,
+        communicationTimeline: true,
+        taskManagement: true,
+        // Content & Engagement - All tiers
+        contentManagement: true,
+        passionBasedPersonalization: true,
+        donationSystem: true,
+        volunteerTracking: true,
+        // Pro Features - Locked
+        advancedSegmentation: false,
+        emailCampaigns: false,
+        scheduledReports: false,
+        googleCalendarIntegration: false,
+        bulkLeadImport: false,
+        // Premium Features - Locked
+        abTesting: false,
+        automatedAbTesting: false,
+        smsCampaigns: false,
+        bulkSmsCampaigns: false,
+        aiCopyGeneration: false,
+        automationRules: false,
+        // Limits
+        maxLeads: 100,
+        maxEmailsPerMonth: 500,
+        maxSmsPerMonth: 0,
+        maxAdmins: 2
+      },
+      [TIERS.PRO]: {
+        // Core CRM - All tiers
+        leadManagement: true,
+        basicSegmentation: true,
+        communicationTimeline: true,
+        taskManagement: true,
+        // Content & Engagement - All tiers
+        contentManagement: true,
+        passionBasedPersonalization: true,
+        donationSystem: true,
+        volunteerTracking: true,
+        // Pro Features - Unlocked
+        advancedSegmentation: true,
+        emailCampaigns: true,
+        scheduledReports: true,
+        googleCalendarIntegration: true,
+        bulkLeadImport: true,
+        // Premium Features - Locked
+        abTesting: false,
+        automatedAbTesting: false,
+        smsCampaigns: false,
+        bulkSmsCampaigns: false,
+        aiCopyGeneration: false,
+        automationRules: false,
+        // Limits
+        maxLeads: 1e3,
+        maxEmailsPerMonth: 5e3,
+        maxSmsPerMonth: 0,
+        maxAdmins: 5
+      },
+      [TIERS.PREMIUM]: {
+        // Core CRM - All tiers
+        leadManagement: true,
+        basicSegmentation: true,
+        communicationTimeline: true,
+        taskManagement: true,
+        // Content & Engagement - All tiers
+        contentManagement: true,
+        passionBasedPersonalization: true,
+        donationSystem: true,
+        volunteerTracking: true,
+        // Pro Features - Unlocked
+        advancedSegmentation: true,
+        emailCampaigns: true,
+        scheduledReports: true,
+        googleCalendarIntegration: true,
+        bulkLeadImport: true,
+        // Premium Features - Unlocked
+        abTesting: true,
+        automatedAbTesting: true,
+        smsCampaigns: true,
+        bulkSmsCampaigns: true,
+        aiCopyGeneration: true,
+        automationRules: true,
+        // Limits
+        maxLeads: -1,
+        // Unlimited
+        maxEmailsPerMonth: -1,
+        // Unlimited
+        maxSmsPerMonth: 1e4,
+        maxAdmins: -1
+        // Unlimited
+      }
+    };
+  }
+});
+
+// server/tierMiddleware.ts
+function requireTier(requiredTier) {
+  return async (req, res, next) => {
+    try {
+      const sessionUser = req.user;
+      const userId = sessionUser?.id || req.session?.userId || req.session?.passport?.user;
+      if (!userId) {
+        return res.status(401).json({
+          error: "Unauthorized",
+          message: "Authentication required"
+        });
+      }
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(401).json({
+          error: "Unauthorized",
+          message: "User not found"
+        });
+      }
+      let userTier = TIERS.BASIC;
+      let organizationId = null;
+      if (user.organizationId) {
+        const organization = await storage.getOrganization(user.organizationId);
+        if (organization) {
+          userTier = organization.tier;
+          organizationId = organization.id;
+        }
+      }
+      if (!hasTierAccess(userTier, requiredTier)) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: `This feature requires ${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)} tier`,
+          currentTier: userTier,
+          requiredTier
+        });
+      }
+      req.userTier = userTier;
+      req.organizationId = organizationId;
+      next();
+    } catch (error) {
+      console.error("[requireTier] Error checking tier access:", error);
+      return res.status(500).json({
+        error: "Internal Server Error",
+        message: "Failed to verify tier access"
+      });
+    }
+  };
+}
+var init_tierMiddleware = __esm({
+  "server/tierMiddleware.ts"() {
+    "use strict";
+    init_storage();
+    init_tiers();
+  }
+});
+
+// server/services/cacLtgpAnalytics.ts
+import { sql as sql7 } from "drizzle-orm";
+function createCacLtgpAnalyticsService(storage2) {
+  return new CacLtgpAnalyticsService(storage2);
+}
+var CacLtgpAnalyticsService;
+var init_cacLtgpAnalytics = __esm({
+  "server/services/cacLtgpAnalytics.ts"() {
+    "use strict";
+    init_db();
+    CacLtgpAnalyticsService = class {
+      constructor(storage2) {
+        this.storage = storage2;
+      }
+      /**
+       * Get overview of all CAC:LTGP metrics across all channels and campaigns
+       */
+      async getCACLTGPOverview() {
+        const channels = await this.storage.getAllAcquisitionChannels();
+        const campaigns = await this.storage.getAllMarketingCampaigns();
+        const spendResult = await db.execute(sql7`
+      SELECT 
+        COALESCE(SUM(amount_spent), 0) as total_spend,
+        COALESCE(SUM(leads_acquired), 0) as total_leads,
+        COALESCE(SUM(donors_acquired), 0) as total_donors
+      FROM channel_spend_ledger
+    `);
+        const totalSpend = Number(spendResult.rows[0]?.total_spend || 0);
+        const totalLeads = Number(spendResult.rows[0]?.total_leads || 0);
+        const totalDonors = Number(spendResult.rows[0]?.total_donors || 0);
+        const ltgpResult = await db.execute(sql7`
+      SELECT 
+        COALESCE(AVG(lifetime_gross_profit), 0) as avg_ltgp,
+        COALESCE(AVG(customer_acquisition_cost), 0) as avg_cac,
+        COALESCE(AVG(ltgp_to_cac_ratio), 0) as avg_ratio
+      FROM donor_economics
+      WHERE lifetime_gross_profit > 0
+    `);
+        const avgLTGP = Number(ltgpResult.rows[0]?.avg_ltgp || 0);
+        const avgCAC = Number(ltgpResult.rows[0]?.avg_cac || 0);
+        const avgRatio = Number(ltgpResult.rows[0]?.avg_ratio || 0) / 100;
+        const topChannelsResult = await db.execute(sql7`
+      WITH channel_spend AS (
+        SELECT 
+          channel_id,
+          SUM(amount_spent) as spend,
+          SUM(leads_acquired) as leads,
+          SUM(donors_acquired) as donors
+        FROM channel_spend_ledger
+        GROUP BY channel_id
+      ),
+      channel_economics AS (
+        SELECT 
+          la.channel_id,
+          AVG(de.lifetime_gross_profit) as ltgp,
+          AVG(de.ltgp_to_cac_ratio) as ratio
+        FROM lead_attribution la
+        INNER JOIN donor_economics de ON la.lead_id = de.lead_id
+        WHERE de.lifetime_gross_profit > 0
+        GROUP BY la.channel_id
+      )
+      SELECT 
+        c.id as channel_id,
+        c.name as channel_name,
+        COALESCE(cs.spend, 0) as spend,
+        COALESCE(cs.leads, 0) as leads,
+        COALESCE(cs.donors, 0) as donors,
+        CASE 
+          WHEN COALESCE(cs.donors, 0) > 0 
+          THEN COALESCE(cs.spend, 0) / cs.donors
+          ELSE 0 
+        END as cac,
+        COALESCE(ce.ltgp, 0) as ltgp,
+        COALESCE(ce.ratio, 0) as ratio
+      FROM acquisition_channels c
+      LEFT JOIN channel_spend cs ON c.id = cs.channel_id
+      LEFT JOIN channel_economics ce ON c.id = ce.channel_id
+      WHERE c.is_active = true
+      ORDER BY ratio DESC
+      LIMIT 5
+    `);
+        const topChannels = topChannelsResult.rows.map((row) => ({
+          channelId: String(row.channel_id),
+          channelName: String(row.channel_name),
+          spend: Number(row.spend),
+          leads: Number(row.leads),
+          donors: Number(row.donors),
+          cac: Number(row.cac),
+          ltgp: Number(row.ltgp),
+          ratio: Number(row.ratio) / 100
+          // Convert from stored format (consistent with other endpoints)
+        }));
+        return {
+          totalChannels: channels.length,
+          totalCampaigns: campaigns.length,
+          totalSpend,
+          totalLeads,
+          totalDonors,
+          avgCAC,
+          avgLTGP,
+          avgRatio,
+          topChannels
+        };
+      }
+      /**
+       * Get performance metrics for all acquisition channels
+       */
+      async getChannelPerformance() {
+        const result = await db.execute(sql7`
+      WITH channel_spend AS (
+        SELECT 
+          channel_id,
+          SUM(amount_spent) as total_spend,
+          SUM(leads_acquired) as total_leads,
+          SUM(donors_acquired) as total_donors
+        FROM channel_spend_ledger
+        GROUP BY channel_id
+      ),
+      channel_economics AS (
+        SELECT 
+          la.channel_id,
+          AVG(de.lifetime_gross_profit) as avg_donor_ltgp,
+          AVG(de.ltgp_to_cac_ratio) as ltgp_to_cac_ratio
+        FROM lead_attribution la
+        INNER JOIN donor_economics de ON la.lead_id = de.lead_id
+        WHERE de.lifetime_gross_profit > 0
+        GROUP BY la.channel_id
+      ),
+      channel_campaigns AS (
+        SELECT channel_id, COUNT(*) as campaigns
+        FROM marketing_campaigns
+        GROUP BY channel_id
+      )
+      SELECT 
+        c.id as channel_id,
+        c.name as channel_name,
+        COALESCE(cs.total_spend, 0) as total_spend,
+        COALESCE(cs.total_leads, 0) as total_leads,
+        COALESCE(cs.total_donors, 0) as total_donors,
+        CASE 
+          WHEN COALESCE(cs.total_leads, 0) > 0 
+          THEN COALESCE(cs.total_spend, 0) / cs.total_leads
+          ELSE 0 
+        END as avg_cost_per_lead,
+        CASE 
+          WHEN COALESCE(cs.total_donors, 0) > 0 
+          THEN COALESCE(cs.total_spend, 0) / cs.total_donors
+          ELSE 0 
+        END as avg_cost_per_donor,
+        COALESCE(ce.avg_donor_ltgp, 0) as avg_donor_ltgp,
+        COALESCE(ce.ltgp_to_cac_ratio, 0) as ltgp_to_cac_ratio,
+        COALESCE(cc.campaigns, 0) as campaigns
+      FROM acquisition_channels c
+      LEFT JOIN channel_spend cs ON c.id = cs.channel_id
+      LEFT JOIN channel_economics ce ON c.id = ce.channel_id
+      LEFT JOIN channel_campaigns cc ON c.id = cc.channel_id
+      ORDER BY ltgp_to_cac_ratio DESC
+    `);
+        return result.rows.map((row) => ({
+          channelId: String(row.channel_id),
+          channelName: String(row.channel_name),
+          totalSpend: Number(row.total_spend),
+          totalLeads: Number(row.total_leads),
+          totalDonors: Number(row.total_donors),
+          avgCostPerLead: Number(row.avg_cost_per_lead),
+          avgCostPerDonor: Number(row.avg_cost_per_donor),
+          avgDonorLTGP: Number(row.avg_donor_ltgp),
+          ltgpToCacRatio: Number(row.ltgp_to_cac_ratio) / 100,
+          // Convert from stored format
+          campaigns: Number(row.campaigns)
+        }));
+      }
+      /**
+       * Get performance metrics for all marketing campaigns
+       */
+      async getCampaignPerformance() {
+        const result = await db.execute(sql7`
+      WITH campaign_spend AS (
+        SELECT 
+          campaign_id,
+          SUM(amount_spent) as spent,
+          SUM(leads_acquired) as leads,
+          SUM(donors_acquired) as donors
+        FROM channel_spend_ledger
+        WHERE campaign_id IS NOT NULL
+        GROUP BY campaign_id
+      ),
+      campaign_economics AS (
+        SELECT 
+          la.campaign_id,
+          AVG(de.lifetime_gross_profit) as avg_ltgp,
+          AVG(de.ltgp_to_cac_ratio) as avg_ratio
+        FROM lead_attribution la
+        INNER JOIN donor_economics de ON la.lead_id = de.lead_id
+        WHERE la.campaign_id IS NOT NULL AND de.lifetime_gross_profit > 0
+        GROUP BY la.campaign_id
+      )
+      SELECT 
+        mc.id as campaign_id,
+        mc.name as campaign_name,
+        c.name as channel_name,
+        COALESCE(mc.budget, 0) as budget,
+        COALESCE(cs.spent, 0) as spent,
+        COALESCE(cs.leads, 0) as leads,
+        COALESCE(cs.donors, 0) as donors,
+        CASE 
+          WHEN COALESCE(cs.donors, 0) > 0 
+          THEN COALESCE(cs.spent, 0) / cs.donors
+          ELSE 0 
+        END as cac,
+        COALESCE(ce.avg_ltgp, 0) as ltgp,
+        COALESCE(ce.avg_ratio, 0) as ratio,
+        CASE 
+          WHEN COALESCE(cs.spent, 0) > 0 
+          THEN ((COALESCE(ce.avg_ltgp, 0) * COALESCE(cs.donors, 0)) - COALESCE(cs.spent, 0)) / cs.spent * 100
+          ELSE 0 
+        END as roi
+      FROM marketing_campaigns mc
+      LEFT JOIN acquisition_channels c ON mc.channel_id = c.id
+      LEFT JOIN campaign_spend cs ON mc.id = cs.campaign_id
+      LEFT JOIN campaign_economics ce ON mc.id = ce.campaign_id
+      ORDER BY ratio DESC
+    `);
+        return result.rows.map((row) => ({
+          campaignId: String(row.campaign_id),
+          campaignName: String(row.campaign_name),
+          channelName: String(row.channel_name || "Unknown"),
+          budget: Number(row.budget),
+          spent: Number(row.spent),
+          leads: Number(row.leads),
+          donors: Number(row.donors),
+          cac: Number(row.cac),
+          ltgp: Number(row.ltgp),
+          ratio: Number(row.ratio) / 100,
+          // Convert from stored format
+          roi: Number(row.roi)
+        }));
+      }
+      /**
+       * Get cohort analysis grouped by time period (week or month)
+       */
+      async getCohortAnalysis(periodType = "month") {
+        const result = await db.execute(sql7`
+      WITH period_spend AS (
+        SELECT 
+          period_key,
+          period_start,
+          period_end,
+          SUM(amount_spent) as spend,
+          SUM(leads_acquired) as leads_acquired,
+          SUM(donors_acquired) as donors_acquired
+        FROM channel_spend_ledger
+        WHERE period_type = ${periodType}
+        GROUP BY period_key, period_start, period_end
+      ),
+      period_economics AS (
+        SELECT 
+          ps.period_key,
+          AVG(de.lifetime_gross_profit) as current_ltgp,
+          AVG(de.ltgp_to_cac_ratio) as current_ratio
+        FROM period_spend ps
+        LEFT JOIN lead_attribution la ON la.created_at >= ps.period_start AND la.created_at < ps.period_end
+        LEFT JOIN donor_economics de ON la.lead_id = de.lead_id
+        WHERE de.lifetime_gross_profit > 0
+        GROUP BY ps.period_key
+      )
+      SELECT 
+        ps.period_key,
+        ps.period_start::text,
+        ps.period_end::text,
+        COALESCE(ps.spend, 0) as spend,
+        COALESCE(ps.leads_acquired, 0) as leads_acquired,
+        COALESCE(ps.donors_acquired, 0) as donors_acquired,
+        CASE 
+          WHEN COALESCE(ps.donors_acquired, 0) > 0 
+          THEN COALESCE(ps.spend, 0) / ps.donors_acquired
+          ELSE 0 
+        END as cac,
+        COALESCE(pe.current_ltgp, 0) as current_ltgp,
+        COALESCE(pe.current_ratio, 0) as current_ratio,
+        EXTRACT(MONTH FROM AGE(NOW(), ps.period_start))::integer as months_active
+      FROM period_spend ps
+      LEFT JOIN period_economics pe ON ps.period_key = pe.period_key
+      ORDER BY ps.period_start DESC
+      LIMIT 12
+    `);
+        return result.rows.map((row) => ({
+          periodKey: String(row.period_key),
+          periodStart: String(row.period_start),
+          periodEnd: String(row.period_end),
+          spend: Number(row.spend),
+          leadsAcquired: Number(row.leads_acquired),
+          donorsAcquired: Number(row.donors_acquired),
+          cac: Number(row.cac),
+          currentLTGP: Number(row.current_ltgp),
+          currentRatio: Number(row.current_ratio) / 100,
+          // Convert from stored format
+          monthsActive: Number(row.months_active)
+        }));
+      }
+      /**
+       * Calculate lifetime gross profit for a specific donor
+       */
+      async calculateDonorLTGP(leadId) {
+        const economics = await this.storage.getDonorEconomics(leadId);
+        if (!economics) {
+          return 0;
+        }
+        const lifetimeRevenue = economics.lifetimeRevenue || 0;
+        const deliveryCosts = economics.actualDeliveryCosts || economics.estimatedDeliveryCosts || 0;
+        const ltgp = lifetimeRevenue - deliveryCosts;
+        await this.storage.updateDonorEconomics(leadId, {
+          lifetimeGrossProfit: ltgp,
+          grossMarginPercent: lifetimeRevenue > 0 ? Math.round(ltgp / lifetimeRevenue * 100) : 0,
+          ltgpToCacRatio: economics.customerAcquisitionCost > 0 ? Math.round(ltgp / economics.customerAcquisitionCost * 100) : 0
+        });
+        return ltgp;
+      }
+    };
+  }
+});
+
+// server/services/adminEntitlementService.ts
+import { eq as eq6, and as and7 } from "drizzle-orm";
+var AdminEntitlementService;
+var init_adminEntitlementService = __esm({
+  "server/services/adminEntitlementService.ts"() {
+    "use strict";
+    init_db();
+    init_schema();
+    AdminEntitlementService = class {
+      constructor(storage2) {
+        this.storage = storage2;
+      }
+      /**
+       * Deactivates an admin entitlement and cleans up all associated test data
+       * Transactional: soft-deletes entitlement + hard-deletes test enrollments/logs
+       * 
+       * @throws Error if entitlement not found or cleanup fails
+       */
+      async deactivateEntitlement(entitlementId) {
+        const entitlement = await this.storage.getAdminEntitlement(entitlementId);
+        if (!entitlement) {
+          throw new Error(`Entitlement ${entitlementId} not found`);
+        }
+        await db.transaction(async (tx) => {
+          await tx.update(adminEntitlements).set({
+            isActive: false,
+            deactivatedAt: /* @__PURE__ */ new Date(),
+            updatedAt: /* @__PURE__ */ new Date()
+          }).where(eq6(adminEntitlements.id, entitlementId));
+          if (entitlement.tghEnrollmentId) {
+            await tx.delete(techGoesHomeAttendance).where(and7(
+              eq6(techGoesHomeAttendance.enrollmentId, entitlement.tghEnrollmentId),
+              eq6(techGoesHomeAttendance.isTestData, true)
+            ));
+            await tx.delete(techGoesHomeEnrollments).where(and7(
+              eq6(techGoesHomeEnrollments.id, entitlement.tghEnrollmentId),
+              eq6(techGoesHomeEnrollments.isTestData, true)
+            ));
+          }
+          if (entitlement.volunteerEnrollmentId) {
+            await tx.delete(volunteerSessionLogs).where(and7(
+              eq6(volunteerSessionLogs.enrollmentId, entitlement.volunteerEnrollmentId),
+              eq6(volunteerSessionLogs.isTestData, true)
+            ));
+            await tx.delete(volunteerEnrollments).where(and7(
+              eq6(volunteerEnrollments.id, entitlement.volunteerEnrollmentId),
+              eq6(volunteerEnrollments.isTestData, true)
+            ));
+          }
+        });
+      }
+      /**
+       * Bulk deactivate all entitlements for an admin
+       * Used when admin wants to "reset" all test enrollments
+       */
+      async deactivateAllEntitlements(adminId) {
+        const entitlements = await this.storage.getActiveAdminEntitlements(adminId);
+        for (const entitlement of entitlements) {
+          await this.deactivateEntitlement(entitlement.id);
+        }
+      }
+    };
+  }
+});
+
 // server/services/funnelProgressionService.ts
 import { eq as eq7, and as and8, sql as sql8, desc as desc5 } from "drizzle-orm";
 async function evaluateLeadProgression(leadId, triggerEvent, triggeredBy) {
@@ -7176,6 +8214,998 @@ var init_funnelProgressionService = __esm({
       // Partnership inquiry
     };
     FUNNEL_STAGES = ["awareness", "consideration", "decision", "retention"];
+  }
+});
+
+// server/objectAcl.ts
+function isPermissionAllowed(requested, granted) {
+  if (requested === "read" /* READ */) {
+    return ["read" /* READ */, "write" /* WRITE */].includes(granted);
+  }
+  return granted === "write" /* WRITE */;
+}
+function createObjectAccessGroup(group) {
+  switch (group.type) {
+    default:
+      throw new Error(`Unknown access group type: ${group.type}`);
+  }
+}
+async function setObjectAclPolicy(objectFile, aclPolicy) {
+  const [exists] = await objectFile.exists();
+  if (!exists) {
+    throw new Error(`Object not found: ${objectFile.name ?? "unknown"}`);
+  }
+  await objectFile.setMetadata({
+    metadata: {
+      [ACL_POLICY_METADATA_KEY]: JSON.stringify(aclPolicy)
+    }
+  });
+}
+async function getObjectAclPolicy(objectFile) {
+  const [metadata] = await objectFile.getMetadata();
+  const aclPolicy = metadata?.metadata?.[ACL_POLICY_METADATA_KEY];
+  if (!aclPolicy) {
+    return null;
+  }
+  return JSON.parse(aclPolicy);
+}
+async function canAccessObject({
+  userId,
+  objectFile,
+  requestedPermission
+}) {
+  const aclPolicy = await getObjectAclPolicy(objectFile);
+  if (!aclPolicy) {
+    return false;
+  }
+  if (aclPolicy.visibility === "public" && requestedPermission === "read" /* READ */) {
+    return true;
+  }
+  if (!userId) {
+    return false;
+  }
+  if (aclPolicy.owner === userId) {
+    return true;
+  }
+  for (const rule of aclPolicy.aclRules || []) {
+    const accessGroup = createObjectAccessGroup(rule.group);
+    if (await accessGroup.hasMember(userId) && isPermissionAllowed(requestedPermission, rule.permission)) {
+      return true;
+    }
+  }
+  return false;
+}
+var ACL_POLICY_METADATA_KEY;
+var init_objectAcl = __esm({
+  "server/objectAcl.ts"() {
+    "use strict";
+    ACL_POLICY_METADATA_KEY = "custom:aclPolicy";
+  }
+});
+
+// server/objectStorageReplit.ts
+import { Storage } from "@google-cloud/storage";
+import { randomUUID } from "crypto";
+function getClient() {
+  if (!replitStorageInstance) {
+    replitStorageInstance = new Storage({
+      credentials: {
+        audience: "replit",
+        subject_token_type: "access_token",
+        token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
+        type: "external_account",
+        credential_source: {
+          url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
+          format: {
+            type: "json",
+            subject_token_field_name: "access_token"
+          }
+        },
+        universe_domain: "googleapis.com"
+      },
+      projectId: ""
+    });
+  }
+  return replitStorageInstance;
+}
+function parseObjectPath(path2) {
+  if (!path2.startsWith("/")) {
+    path2 = `/${path2}`;
+  }
+  const pathParts = path2.split("/");
+  if (pathParts.length < 3) {
+    throw new Error("Invalid path: must contain at least a bucket name");
+  }
+  const bucketName = pathParts[1];
+  const objectName = pathParts.slice(2).join("/");
+  return {
+    bucketName,
+    objectName
+  };
+}
+async function signObjectURL({
+  bucketName,
+  objectName,
+  method,
+  ttlSec
+}) {
+  const request = {
+    bucket_name: bucketName,
+    object_name: objectName,
+    method,
+    expires_at: new Date(Date.now() + ttlSec * 1e3).toISOString()
+  };
+  const response = await fetch(
+    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(request)
+    }
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to sign object URL, errorcode: ${response.status}, make sure you're running on Replit`
+    );
+  }
+  const { signed_url: signedURL } = await response.json();
+  return signedURL;
+}
+var REPLIT_SIDECAR_ENDPOINT, replitStorageInstance, objectStorageClient, ObjectNotFoundError, ObjectStorageService;
+var init_objectStorageReplit = __esm({
+  "server/objectStorageReplit.ts"() {
+    "use strict";
+    init_objectAcl();
+    REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
+    replitStorageInstance = null;
+    objectStorageClient = new Proxy({}, {
+      get(_, prop) {
+        return getClient()[prop];
+      }
+    });
+    ObjectNotFoundError = class _ObjectNotFoundError extends Error {
+      constructor() {
+        super("Object not found");
+        this.name = "ObjectNotFoundError";
+        Object.setPrototypeOf(this, _ObjectNotFoundError.prototype);
+      }
+    };
+    ObjectStorageService = class {
+      constructor() {
+      }
+      getDefaultBucketId() {
+        const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID || "";
+        if (!bucketId) {
+          throw new Error(
+            "DEFAULT_OBJECT_STORAGE_BUCKET_ID not set. Create a bucket in 'Object Storage' tool."
+          );
+        }
+        return bucketId;
+      }
+      normalizePath(path2) {
+        if (path2.startsWith("/")) {
+          return path2;
+        }
+        return `/${this.getDefaultBucketId()}/${path2}`;
+      }
+      getPublicObjectSearchPaths() {
+        const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
+        const paths = Array.from(
+          new Set(
+            pathsStr.split(",").map((path2) => path2.trim()).filter((path2) => path2.length > 0).map((path2) => this.normalizePath(path2))
+          )
+        );
+        if (paths.length === 0) {
+          throw new Error(
+            "PUBLIC_OBJECT_SEARCH_PATHS not set. Create a bucket in 'Object Storage' tool and set PUBLIC_OBJECT_SEARCH_PATHS env var (comma-separated paths)."
+          );
+        }
+        return paths;
+      }
+      getPrivateObjectDir() {
+        const dir = process.env.PRIVATE_OBJECT_DIR || "";
+        if (!dir) {
+          throw new Error(
+            "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' tool and set PRIVATE_OBJECT_DIR env var."
+          );
+        }
+        return this.normalizePath(dir);
+      }
+      async searchPublicObject(filePath) {
+        const client2 = getClient();
+        for (const searchPath of this.getPublicObjectSearchPaths()) {
+          const fullPath = `${searchPath}/${filePath}`;
+          const { bucketName, objectName } = parseObjectPath(fullPath);
+          const bucket = client2.bucket(bucketName);
+          const file = bucket.file(objectName);
+          const [exists] = await file.exists();
+          if (exists) {
+            return file;
+          }
+        }
+        return null;
+      }
+      async downloadObject(file, res, cacheTtlSec = 3600) {
+        try {
+          const [metadata] = await file.getMetadata();
+          const aclPolicy = await getObjectAclPolicy(file);
+          const isPublic = aclPolicy?.visibility === "public";
+          res.set({
+            "Content-Type": metadata.contentType || "application/octet-stream",
+            "Content-Length": String(metadata.size ?? 0),
+            "Cache-Control": `${isPublic ? "public" : "private"}, max-age=${cacheTtlSec}`
+          });
+          const stream = file.createReadStream();
+          stream.on("error", (err) => {
+            console.error("Stream error:", err);
+            if (!res.headersSent) {
+              res.status(500).json({ error: "Error streaming file" });
+            }
+          });
+          stream.pipe(res);
+        } catch (error) {
+          console.error("Error downloading file:", error);
+          if (!res.headersSent) {
+            res.status(500).json({ error: "Error downloading file" });
+          }
+        }
+      }
+      async getObjectEntityUploadURL() {
+        const privateObjectDir = this.getPrivateObjectDir();
+        if (!privateObjectDir) {
+          throw new Error(
+            "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' tool and set PRIVATE_OBJECT_DIR env var."
+          );
+        }
+        const objectId = randomUUID();
+        const fullPath = `${privateObjectDir}/uploads/${objectId}`;
+        const { bucketName, objectName } = parseObjectPath(fullPath);
+        const uploadURL = await signObjectURL({
+          bucketName,
+          objectName,
+          method: "PUT",
+          ttlSec: 900
+        });
+        const objectPath = `/objects/uploads/${objectId}`;
+        return { uploadURL, objectPath };
+      }
+      async getObjectEntityFile(objectPath) {
+        const client2 = getClient();
+        if (!objectPath.startsWith("/objects/")) {
+          throw new ObjectNotFoundError();
+        }
+        const parts = objectPath.slice(1).split("/");
+        if (parts.length < 2) {
+          throw new ObjectNotFoundError();
+        }
+        const entityId = parts.slice(1).join("/");
+        let entityDir = this.getPrivateObjectDir();
+        if (!entityDir.endsWith("/")) {
+          entityDir = `${entityDir}/`;
+        }
+        const objectEntityPath = `${entityDir}${entityId}`;
+        const { bucketName, objectName } = parseObjectPath(objectEntityPath);
+        const bucket = client2.bucket(bucketName);
+        const objectFile = bucket.file(objectName);
+        const [exists] = await objectFile.exists();
+        if (!exists) {
+          throw new ObjectNotFoundError();
+        }
+        return objectFile;
+      }
+      normalizeObjectEntityPath(rawPath) {
+        if (!rawPath.startsWith("https://storage.googleapis.com/")) {
+          return rawPath;
+        }
+        const url = new URL(rawPath);
+        const rawObjectPath = url.pathname;
+        let objectEntityDir = this.getPrivateObjectDir();
+        if (!objectEntityDir.endsWith("/")) {
+          objectEntityDir = `${objectEntityDir}/`;
+        }
+        if (!rawObjectPath.startsWith(objectEntityDir)) {
+          return rawObjectPath;
+        }
+        const entityId = rawObjectPath.slice(objectEntityDir.length);
+        return `/objects/${entityId}`;
+      }
+      async setObjectEntityAclPolicy(objectPath, aclPolicy) {
+        const objectFile = await this.getObjectEntityFile(objectPath);
+        await setObjectAclPolicy(objectFile, aclPolicy);
+        return objectPath;
+      }
+      async trySetObjectEntityAclPolicy(rawPath, aclPolicy) {
+        const normalizedPath = this.normalizeObjectEntityPath(rawPath);
+        if (!normalizedPath.startsWith("/")) {
+          return normalizedPath;
+        }
+        const objectFile = await this.getObjectEntityFile(normalizedPath);
+        await setObjectAclPolicy(objectFile, aclPolicy);
+        return normalizedPath;
+      }
+      async canAccessObjectEntity({
+        userId,
+        objectFile,
+        requestedPermission
+      }) {
+        return canAccessObject({
+          userId,
+          objectFile,
+          requestedPermission: requestedPermission ?? "read" /* READ */
+        });
+      }
+      async renameObjectEntity(originalPath, newFilename) {
+        const client2 = getClient();
+        const originalFile = await this.getObjectEntityFile(originalPath);
+        const parts = originalPath.slice(1).split("/");
+        const entityId = parts.slice(1).join("/");
+        const directory = entityId.substring(0, entityId.lastIndexOf("/") + 1);
+        let entityDir = this.getPrivateObjectDir();
+        if (!entityDir.endsWith("/")) {
+          entityDir = `${entityDir}/`;
+        }
+        const newObjectPath = `${entityDir}${directory}${newFilename}`;
+        const { bucketName, objectName } = parseObjectPath(newObjectPath);
+        const bucket = client2.bucket(bucketName);
+        const newFile = bucket.file(objectName);
+        await originalFile.copy(newFile);
+        const aclPolicy = await getObjectAclPolicy(originalFile);
+        if (aclPolicy) {
+          await setObjectAclPolicy(newFile, aclPolicy);
+        }
+        await originalFile.delete();
+        return `/objects/${directory}${newFilename}`;
+      }
+    };
+  }
+});
+
+// server/objectStorageS3.ts
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  CopyObjectCommand,
+  HeadObjectCommand
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { randomUUID as randomUUID2 } from "crypto";
+import { Readable } from "stream";
+function getS3Config() {
+  const bucket = process.env.S3_BUCKET || process.env.R2_BUCKET || process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
+  if (!bucket) {
+    throw new Error(
+      "S3_BUCKET or R2_BUCKET or DEFAULT_OBJECT_STORAGE_BUCKET_ID must be set when OBJECT_STORAGE_PROVIDER=s3"
+    );
+  }
+  const region = process.env.AWS_REGION || process.env.R2_REGION || "auto";
+  const endpoint = process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : void 0;
+  const credentials = process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY ? {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
+  } : void 0;
+  return { bucket, region, endpoint, credentials };
+}
+function getClient2() {
+  if (!s3Client) {
+    const { region, endpoint, credentials } = getS3Config();
+    s3Client = new S3Client({
+      region,
+      endpoint: endpoint || void 0,
+      credentials: credentials || void 0
+    });
+  }
+  return s3Client;
+}
+function parsePath(path2) {
+  const bucket = getS3Config().bucket;
+  const p = path2.startsWith("/") ? path2.slice(1) : path2;
+  const key = p.startsWith(bucket + "/") ? p.slice(bucket.length + 1) : p;
+  return { bucket, key };
+}
+var s3Client, ObjectNotFoundError2, S3StorageFile, ObjectStorageService2;
+var init_objectStorageS3 = __esm({
+  "server/objectStorageS3.ts"() {
+    "use strict";
+    init_objectAcl();
+    s3Client = null;
+    ObjectNotFoundError2 = class _ObjectNotFoundError extends Error {
+      constructor() {
+        super("Object not found");
+        this.name = "ObjectNotFoundError";
+        Object.setPrototypeOf(this, _ObjectNotFoundError.prototype);
+      }
+    };
+    S3StorageFile = class {
+      constructor(client2, bucket, key) {
+        this.client = client2;
+        this.bucket = bucket;
+        this.key = key;
+      }
+      get name() {
+        return `${this.bucket}/${this.key}`;
+      }
+      async getMetadata() {
+        const cmd = new HeadObjectCommand({ Bucket: this.bucket, Key: this.key });
+        const meta = await this.client.send(cmd);
+        return [
+          {
+            metadata: meta.Metadata || {},
+            contentType: meta.ContentType,
+            size: meta.ContentLength
+          }
+        ];
+      }
+      async setMetadata(arg) {
+        const getCmd = new GetObjectCommand({ Bucket: this.bucket, Key: this.key });
+        const obj = await this.client.send(getCmd);
+        const body = obj.Body;
+        const metadata = arg.metadata;
+        const putCmd = new PutObjectCommand({
+          Bucket: this.bucket,
+          Key: this.key,
+          Body: body,
+          ContentType: obj.ContentType,
+          Metadata: metadata
+        });
+        return this.client.send(putCmd);
+      }
+      async exists() {
+        try {
+          await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: this.key }));
+          return [true];
+        } catch {
+          return [false];
+        }
+      }
+      createReadStream() {
+        const client2 = this.client;
+        const bucket = this.bucket;
+        const key = this.key;
+        const readable = new Readable({ read: () => {
+        } });
+        (async () => {
+          try {
+            const cmd = new GetObjectCommand({ Bucket: bucket, Key: key });
+            const res = await client2.send(cmd);
+            const stream = res.Body;
+            stream.on("data", (chunk) => readable.push(chunk));
+            stream.on("end", () => readable.push(null));
+            stream.on("error", (err) => readable.destroy(err));
+          } catch (err) {
+            readable.destroy(err);
+          }
+        })();
+        return readable;
+      }
+      getBucket() {
+        return this.bucket;
+      }
+      getKey() {
+        return this.key;
+      }
+      async copy(dest) {
+        await this.client.send(
+          new CopyObjectCommand({
+            CopySource: `${this.bucket}/${this.key}`,
+            Bucket: dest.getBucket(),
+            Key: dest.getKey()
+          })
+        );
+      }
+      async delete() {
+        await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: this.key }));
+      }
+    };
+    ObjectStorageService2 = class {
+      getBucket() {
+        return getS3Config().bucket;
+      }
+      normalizePath(path2) {
+        if (path2.startsWith("/")) return path2;
+        return `/${this.getBucket()}/${path2}`;
+      }
+      getPublicObjectSearchPaths() {
+        const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || process.env.S3_PUBLIC_PREFIXES || "";
+        const paths = pathsStr.split(",").map((p) => p.trim()).filter(Boolean).map((p) => this.normalizePath(p));
+        if (paths.length === 0) {
+          throw new Error("PUBLIC_OBJECT_SEARCH_PATHS or S3_PUBLIC_PREFIXES must be set (comma-separated prefixes)");
+        }
+        return [...new Set(paths)];
+      }
+      getPrivateObjectDir() {
+        const dir = process.env.PRIVATE_OBJECT_DIR || process.env.S3_PRIVATE_PREFIX || "";
+        if (!dir) {
+          throw new Error("PRIVATE_OBJECT_DIR or S3_PRIVATE_PREFIX must be set");
+        }
+        return this.normalizePath(dir);
+      }
+      async searchPublicObject(filePath) {
+        const client2 = getClient2();
+        const bucket = this.getBucket();
+        for (const searchPath of this.getPublicObjectSearchPaths()) {
+          const { key } = parsePath(`${searchPath}/${filePath}`);
+          const file = new S3StorageFile(client2, bucket, key);
+          const [exists] = await file.exists();
+          if (exists) return file;
+        }
+        return null;
+      }
+      async downloadObject(file, res, cacheTtlSec = 3600) {
+        try {
+          const [metadata] = await file.getMetadata();
+          const aclPolicy = await getObjectAclPolicy(file);
+          const isPublic = aclPolicy?.visibility === "public";
+          res.set({
+            "Content-Type": metadata.contentType || "application/octet-stream",
+            "Content-Length": String(metadata.size ?? 0),
+            "Cache-Control": `${isPublic ? "public" : "private"}, max-age=${cacheTtlSec}`
+          });
+          const stream = file.createReadStream();
+          stream.on("error", (err) => {
+            console.error("Stream error:", err);
+            if (!res.headersSent) res.status(500).json({ error: "Error streaming file" });
+          });
+          stream.pipe(res);
+        } catch (err) {
+          console.error("Error downloading file:", err);
+          if (!res.headersSent) res.status(500).json({ error: "Error downloading file" });
+        }
+      }
+      async getObjectEntityUploadURL() {
+        const client2 = getClient2();
+        const bucket = this.getBucket();
+        const prefix = this.getPrivateObjectDir().replace(/^\//, "").replace(/^[^/]+\//, "") || "uploads";
+        const objectId = randomUUID2();
+        const key = `${prefix}/uploads/${objectId}`;
+        const uploadURL = await getSignedUrl(
+          client2,
+          new PutObjectCommand({ Bucket: bucket, Key: key }),
+          { expiresIn: 900 }
+        );
+        return { uploadURL, objectPath: `/objects/uploads/${objectId}` };
+      }
+      async getObjectEntityFile(objectPath) {
+        if (!objectPath.startsWith("/objects/")) throw new ObjectNotFoundError2();
+        const parts = objectPath.slice(1).split("/");
+        if (parts.length < 2) throw new ObjectNotFoundError2();
+        const entityId = parts.slice(1).join("/");
+        const bucket = this.getBucket();
+        const dirPrefix = this.getPrivateObjectDir().replace(/^\//, "").replace(/^[^/]+\//, "") || "";
+        const key = dirPrefix ? `${dirPrefix}/${entityId}` : entityId;
+        const client2 = getClient2();
+        const file = new S3StorageFile(client2, bucket, key);
+        const [exists] = await file.exists();
+        if (!exists) throw new ObjectNotFoundError2();
+        return file;
+      }
+      normalizeObjectEntityPath(rawPath) {
+        if (!rawPath.includes(".r2.cloudflarestorage.com") && !rawPath.includes("s3.")) {
+          return rawPath;
+        }
+        try {
+          const url = new URL(rawPath);
+          const pathname = url.pathname.replace(/^\//, "");
+          const entityDir = this.getPrivateObjectDir().replace(/^\//, "").split("/").slice(1).join("/");
+          if (!pathname.startsWith(entityDir + "/")) return rawPath;
+          const entityId = pathname.slice(entityDir.length + 1);
+          return `/objects/${entityId}`;
+        } catch {
+          return rawPath;
+        }
+      }
+      async setObjectEntityAclPolicy(objectPath, aclPolicy) {
+        const file = await this.getObjectEntityFile(objectPath);
+        await setObjectAclPolicy(file, aclPolicy);
+        return objectPath;
+      }
+      async trySetObjectEntityAclPolicy(rawPath, aclPolicy) {
+        const normalizedPath = this.normalizeObjectEntityPath(rawPath);
+        if (!normalizedPath.startsWith("/")) return normalizedPath;
+        const file = await this.getObjectEntityFile(normalizedPath);
+        await setObjectAclPolicy(file, aclPolicy);
+        return normalizedPath;
+      }
+      async canAccessObjectEntity({
+        userId,
+        objectFile,
+        requestedPermission
+      }) {
+        return canAccessObject({
+          userId,
+          objectFile,
+          requestedPermission: requestedPermission ?? "read" /* READ */
+        });
+      }
+      async renameObjectEntity(originalPath, newFilename) {
+        const originalFile = await this.getObjectEntityFile(originalPath);
+        const parts = originalPath.slice(1).split("/");
+        const entityId = parts.slice(1).join("/");
+        const directory = entityId.substring(0, entityId.lastIndexOf("/") + 1);
+        const bucket = this.getBucket();
+        const prefix = this.getPrivateObjectDir().replace(/^\//, "").replace(/^[^/]+\//, "") || "";
+        const newKey = prefix ? `${prefix}/${directory}${newFilename}` : `${directory}${newFilename}`;
+        const client2 = getClient2();
+        const newFile = new S3StorageFile(client2, bucket, newKey);
+        await originalFile.copy(newFile);
+        const aclPolicy = await getObjectAclPolicy(originalFile);
+        if (aclPolicy) await setObjectAclPolicy(newFile, aclPolicy);
+        await originalFile.delete();
+        return `/objects/${directory}${newFilename}`;
+      }
+    };
+  }
+});
+
+// server/objectStorage.ts
+var provider, ObjectStorageService3, ObjectNotFoundError3;
+var init_objectStorage = __esm({
+  "server/objectStorage.ts"() {
+    "use strict";
+    init_objectStorageReplit();
+    init_objectStorageS3();
+    provider = process.env.OBJECT_STORAGE_PROVIDER || "replit";
+    ObjectStorageService3 = provider === "s3" ? ObjectStorageService2 : ObjectStorageService;
+    ObjectNotFoundError3 = provider === "s3" ? ObjectNotFoundError2 : ObjectNotFoundError;
+  }
+});
+
+// server/cloudinary.ts
+import { v2 as cloudinary } from "cloudinary";
+async function uploadToCloudinary(imageBuffer, options = {}) {
+  const {
+    folder = "julies-family-learning",
+    publicId,
+    transformation = [],
+    upscale = true,
+    quality = "auto:best"
+  } = options;
+  const transformations = [...transformation];
+  if (upscale) {
+    transformations.push({
+      quality,
+      fetch_format: "auto",
+      flags: "progressive:steep"
+    });
+  }
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        public_id: publicId,
+        transformation: transformations.length > 0 ? transformations : void 0,
+        eager: [
+          {
+            width: 1920,
+            height: 1080,
+            crop: "limit",
+            quality: "auto:best",
+            fetch_format: "auto"
+          },
+          {
+            width: 3840,
+            height: 2160,
+            crop: "limit",
+            quality: "auto:best",
+            fetch_format: "auto"
+          }
+        ],
+        eager_async: true,
+        resource_type: "image",
+        allowed_formats: ["jpg", "png", "webp", "gif", "svg"]
+      },
+      (error, result) => {
+        if (error) {
+          reject(new Error(`Cloudinary upload failed: ${error.message}`));
+          return;
+        }
+        if (!result) {
+          reject(new Error("Cloudinary upload failed: No result returned"));
+          return;
+        }
+        resolve({
+          publicId: result.public_id,
+          url: result.url,
+          secureUrl: result.secure_url,
+          width: result.width,
+          height: result.height,
+          format: result.format,
+          bytes: result.bytes
+        });
+      }
+    );
+    uploadStream.end(imageBuffer);
+  });
+}
+function getOptimizedImageUrl(publicId, options = {}) {
+  const {
+    width,
+    height,
+    quality = "auto:best",
+    format: format2 = "auto"
+  } = options;
+  return cloudinary.url(publicId, {
+    width,
+    height,
+    crop: "limit",
+    quality,
+    fetch_format: format2,
+    secure: true
+  });
+}
+async function deleteFromCloudinary(publicId) {
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (error) {
+    console.error("Error deleting from Cloudinary:", error);
+    throw new Error(`Failed to delete image: ${publicId}`);
+  }
+}
+var init_cloudinary = __esm({
+  "server/cloudinary.ts"() {
+    "use strict";
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+      secure: true
+    });
+  }
+});
+
+// server/gemini.ts
+import { GoogleGenAI } from "@google/genai";
+async function analyzeSocialPostScreenshot(imageBase64, mimeType = "image/jpeg") {
+  const prompt = `You are analyzing a screenshot of a social media post. Extract the following information:
+
+1. **Caption/Description**: The full text content of the post
+2. **Platform**: Whether this is from Instagram, Facebook, or LinkedIn (look for visual indicators like interface design, icons, colors, layout, etc.)
+3. **Username**: The account name/handle or company name that posted this
+4. **Suggested Title**: Create a short, descriptive title (max 60 characters) that summarizes what this post is about
+5. **Link**: If visible, extract any links mentioned in the post. If the username/company name is visible, construct a profile link.
+
+For Instagram: https://instagram.com/{username}
+For Facebook: https://www.facebook.com/{username}
+For LinkedIn: https://linkedin.com/company/{company-name}
+
+Visual platform indicators:
+- Instagram: Camera icon, colorful gradient theme, square/portrait photos
+- Facebook: Blue theme, "f" logo, reactions icons (Like, Love, etc.)
+- LinkedIn: Blue and white professional theme, "in" logo, corporate/professional content
+
+Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
+{
+  "caption": "the full post text here",
+  "platform": "instagram",
+  "username": "accountname",
+  "suggestedTitle": "Brief description of post",
+  "suggestedLink": "https://instagram.com/accountname"
+}
+
+If you cannot determine a field with confidence, use these defaults:
+- caption: ""
+- platform: "instagram"
+- username: ""
+- suggestedTitle: "Social Media Post"
+- suggestedLink: ""`;
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType,
+              data: imageBase64
+            }
+          }
+        ]
+      }
+    ]
+  });
+  const responseText = result.response?.text() || result.text || "";
+  let cleanedResponse = responseText.trim();
+  cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
+  cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
+  cleanedResponse = cleanedResponse.trim();
+  try {
+    const parsed = JSON.parse(cleanedResponse);
+    let platform = "instagram";
+    if (parsed.platform === "facebook") {
+      platform = "facebook";
+    } else if (parsed.platform === "linkedin") {
+      platform = "linkedin";
+    }
+    return {
+      caption: parsed.caption || "",
+      platform,
+      username: parsed.username || "",
+      suggestedTitle: parsed.suggestedTitle || "Social Media Post",
+      suggestedLink: parsed.suggestedLink || ""
+    };
+  } catch (error) {
+    console.error("Failed to parse Gemini response:", cleanedResponse);
+    throw new Error("Failed to analyze screenshot - invalid response format");
+  }
+}
+async function analyzeImageForNaming(imageBase64, mimeType = "image/jpeg", originalFilename) {
+  const prompt = `You are analyzing an image to generate a descriptive, SEO-friendly filename for a nonprofit educational program's media library.
+
+${originalFilename ? `Original filename: "${originalFilename}"` : ""}
+
+Analyze the image and provide:
+
+1. **Category**: Classify this image into ONE of these categories:
+   - program: Program activities (children learning, reading circles, classroom activities)
+   - event: Special events (fundraisers, family fun days, community gatherings)
+   - facility: Building/space photos (classrooms, library, playground, empty rooms)
+   - testimonial: People-focused photos (parents, staff, volunteers, close-ups for quotes)
+   - marketing: Promotional materials (banners, flyers, graphics, hero images)
+   - general: Everything else that doesn't fit above
+
+2. **Description**: Create a brief, descriptive phrase (2-5 words, lowercase, underscore-separated) that captures the main visual elements. Focus on:
+   - Key subjects (children, families, staff)
+   - Primary activity (reading, playing, learning, speaking)
+   - Setting/location if relevant (outdoor, library, classroom)
+   - Visual composition (closeup, wide_angle, group)
+   
+   Examples:
+   - "children_reading_circle"
+   - "outdoor_playground_activities"
+   - "parent_testimonial_closeup"
+   - "library_wide_angle_empty"
+   - "staff_volunteer_group_photo"
+
+3. **Suggested Filename**: Combine category and description in format: {category}_{description}
+   - Use only lowercase letters, numbers, and underscores
+   - Keep it concise but descriptive (max 50 characters)
+   - Do NOT include file extension
+   - Do NOT include dates/timestamps (we'll add those)
+
+Visual analysis tips:
+- Look for people, their age groups, and what they're doing
+- Identify the setting (indoor/outdoor, specific rooms)
+- Note the composition (wide shot, close-up, group photo)
+- Determine the purpose (documentation, marketing, testimonial)
+
+Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
+{
+  "category": "program",
+  "description": "children_reading_circle",
+  "suggestedFilename": "program_children_reading_circle"
+}
+
+If you cannot determine with confidence, use these defaults:
+- category: "general"
+- description: "image"
+- suggestedFilename: "general_image"`;
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType,
+              data: imageBase64
+            }
+          }
+        ]
+      }
+    ]
+  });
+  const responseText = result.response?.text() || result.text || "";
+  let cleanedResponse = responseText.trim();
+  cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
+  cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
+  cleanedResponse = cleanedResponse.trim();
+  try {
+    const parsed = JSON.parse(cleanedResponse);
+    const validCategories = ["program", "event", "facility", "testimonial", "marketing", "general"];
+    let category = "general";
+    if (validCategories.includes(parsed.category)) {
+      category = parsed.category;
+    }
+    const sanitize = (str) => str.toLowerCase().replace(/[^a-z0-9_]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "").substring(0, 50);
+    const description = sanitize(parsed.description || "image");
+    const suggestedFilename = sanitize(parsed.suggestedFilename || `${category}_${description}`);
+    return {
+      category,
+      description,
+      suggestedFilename
+    };
+  } catch (error) {
+    console.error("Failed to parse Gemini response:", cleanedResponse);
+    throw new Error("Failed to analyze image for naming - invalid response format");
+  }
+}
+async function analyzeYouTubeVideoThumbnail(thumbnailUrl, videoTitle, videoDescription) {
+  const response = await fetch(thumbnailUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const base64Image = buffer.toString("base64");
+  const prompt = `You are analyzing a thumbnail from a YouTube video${videoTitle ? ` titled "${videoTitle}"` : ""}${videoDescription ? ` with description: "${videoDescription}"` : ""}. 
+
+Based on the thumbnail image${videoTitle ? ", title," : ""}${videoDescription ? " and description," : ""} extract or suggest the following:
+
+1. **Suggested Title**: ${videoTitle ? `Refine or improve the existing title "${videoTitle}" to be more engaging and descriptive (max 80 characters)` : "Create a compelling, descriptive title (max 80 characters) that captures what this video is about"}
+2. **Suggested Description**: Create a detailed description (2-3 sentences) that would work well for a nonprofit educational program website, highlighting the value and content
+3. **Category**: Classify this video into ONE of these categories: virtual_tour, program_overview, testimonial, educational_content, event_coverage, community_impact
+4. **Tags**: Suggest 3-5 relevant tags/keywords that describe this video's content (e.g., "early learning", "family programs", "community", "education")
+
+Visual analysis cues:
+- Look for people (staff, families, children) to identify testimonials or program activities
+- Identify facilities, classrooms, or spaces to categorize as virtual_tour
+- Look for text overlays, graphics, or presentation elements to identify educational_content
+- Identify group activities or gatherings to categorize as event_coverage or community_impact
+
+Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
+{
+  "suggestedTitle": "Engaging video title here",
+  "suggestedDescription": "Detailed 2-3 sentence description highlighting educational value and impact for families",
+  "category": "virtual_tour",
+  "tags": ["tag1", "tag2", "tag3"]
+}
+
+If you cannot determine a field with confidence, use these defaults:
+- suggestedTitle: "${videoTitle || "Educational Video"}"
+- suggestedDescription: "Discover more about our programs and community impact"
+- category: "program_overview"
+- tags: ["education", "community", "families"]`;
+  const result = await genAI.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: prompt },
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: base64Image
+            }
+          }
+        ]
+      }
+    ]
+  });
+  const responseText = result.response?.text() || result.text || "";
+  let cleanedResponse = responseText.trim();
+  cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
+  cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
+  cleanedResponse = cleanedResponse.trim();
+  try {
+    const parsed = JSON.parse(cleanedResponse);
+    const validCategories = ["virtual_tour", "program_overview", "testimonial", "educational_content", "event_coverage", "community_impact"];
+    let category = "program_overview";
+    if (validCategories.includes(parsed.category)) {
+      category = parsed.category;
+    }
+    return {
+      suggestedTitle: parsed.suggestedTitle || videoTitle || "Educational Video",
+      suggestedDescription: parsed.suggestedDescription || "Discover more about our programs and community impact",
+      category,
+      tags: Array.isArray(parsed.tags) ? parsed.tags : ["education", "community", "families"]
+    };
+  } catch (error) {
+    console.error("Failed to parse Gemini response:", cleanedResponse);
+    throw new Error("Failed to analyze video thumbnail - invalid response format");
+  }
+}
+var genAI;
+var init_gemini = __esm({
+  "server/gemini.ts"() {
+    "use strict";
+    genAI = new GoogleGenAI({
+      apiKey: process.env.GOOGLE_API_KEY
+    });
   }
 });
 
@@ -8229,6 +10259,1078 @@ var init_copywriter = __esm({
     genAI2 = new GoogleGenAI2({
       apiKey: process.env.GOOGLE_API_KEY
     });
+  }
+});
+
+// server/calendarService.ts
+import { google } from "googleapis";
+function getGoogleAuthClient() {
+  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  const path2 = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
+  if (json && json.trim().startsWith("{")) {
+    try {
+      const credentials = JSON.parse(json);
+      return new google.auth.GoogleAuth({ credentials });
+    } catch {
+      return null;
+    }
+  }
+  if (path2 || json && !json.trim().startsWith("{")) {
+    const keyPath = path2 || json.trim();
+    return new google.auth.GoogleAuth({ keyFile: keyPath });
+  }
+  return null;
+}
+async function getAccessToken() {
+  const auth = getGoogleAuthClient();
+  if (auth) {
+    const client2 = await auth.getClient();
+    const token = await client2.getAccessToken();
+    if (token.token) return token.token;
+  }
+  if (connectionSettings?.settings?.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
+    return connectionSettings.settings.access_token;
+  }
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY ? "repl " + process.env.REPL_IDENTITY : process.env.WEB_REPL_RENEWAL ? "depl " + process.env.WEB_REPL_RENEWAL : null;
+  if (!xReplitToken || !hostname) {
+    throw new Error(
+      "Google Calendar not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SERVICE_ACCOUNT_KEY_PATH, or use Replit Connectors."
+    );
+  }
+  connectionSettings = await fetch(
+    "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=google-calendar",
+    { headers: { Accept: "application/json", X_REPLIT_TOKEN: xReplitToken } }
+  ).then((res) => res.json()).then((data) => data.items?.[0]);
+  const accessToken = connectionSettings?.settings?.access_token || connectionSettings?.settings?.oauth?.credentials?.access_token;
+  if (!connectionSettings || !accessToken) {
+    throw new Error("Google Calendar not connected via Replit Connectors");
+  }
+  return accessToken;
+}
+async function getUncachableGoogleCalendarClient() {
+  const auth = getGoogleAuthClient();
+  if (auth) {
+    return google.calendar({ version: "v3", auth });
+  }
+  const accessToken = await getAccessToken();
+  const oauth2Client = new google.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  return google.calendar({ version: "v3", auth: oauth2Client });
+}
+var connectionSettings, CalendarService;
+var init_calendarService = __esm({
+  "server/calendarService.ts"() {
+    "use strict";
+    CalendarService = class {
+      static CALENDAR_ID = "primary";
+      static DEFAULT_TIMEZONE = "America/New_York";
+      static async createEvent(event) {
+        try {
+          const calendar = await getUncachableGoogleCalendarClient();
+          const response = await calendar.events.insert({
+            calendarId: this.CALENDAR_ID,
+            requestBody: {
+              summary: event.summary,
+              description: event.description,
+              location: event.location,
+              start: event.start,
+              end: event.end,
+              attendees: event.attendees,
+              sendUpdates: "all"
+            }
+          });
+          return {
+            id: response.data.id,
+            htmlLink: response.data.htmlLink,
+            summary: response.data.summary,
+            start: response.data.start?.dateTime || response.data.start?.date || "",
+            end: response.data.end?.dateTime || response.data.end?.date || ""
+          };
+        } catch (error) {
+          console.error("Error creating calendar event:", error);
+          throw new Error("Failed to create calendar event");
+        }
+      }
+      static async getEvent(eventId) {
+        try {
+          const calendar = await getUncachableGoogleCalendarClient();
+          const response = await calendar.events.get({
+            calendarId: this.CALENDAR_ID,
+            eventId
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching calendar event:", error);
+          throw new Error("Failed to fetch calendar event");
+        }
+      }
+      static async updateEvent(eventId, updates) {
+        try {
+          const calendar = await getUncachableGoogleCalendarClient();
+          const response = await calendar.events.patch({
+            calendarId: this.CALENDAR_ID,
+            eventId,
+            requestBody: updates
+          });
+          return response.data;
+        } catch (error) {
+          console.error("Error updating calendar event:", error);
+          throw new Error("Failed to update calendar event");
+        }
+      }
+      static async deleteEvent(eventId) {
+        try {
+          const calendar = await getUncachableGoogleCalendarClient();
+          await calendar.events.delete({
+            calendarId: this.CALENDAR_ID,
+            eventId
+          });
+          return { success: true };
+        } catch (error) {
+          console.error("Error deleting calendar event:", error);
+          throw new Error("Failed to delete calendar event");
+        }
+      }
+      static async listEvents(timeMin, timeMax, maxResults = 50) {
+        try {
+          const calendar = await getUncachableGoogleCalendarClient();
+          const response = await calendar.events.list({
+            calendarId: this.CALENDAR_ID,
+            timeMin: timeMin || (/* @__PURE__ */ new Date()).toISOString(),
+            timeMax,
+            maxResults,
+            singleEvents: true,
+            orderBy: "startTime"
+          });
+          return response.data.items || [];
+        } catch (error) {
+          console.error("Error listing calendar events:", error);
+          throw new Error("Failed to list calendar events");
+        }
+      }
+      static async checkAvailability(startDateTime, endDateTime) {
+        try {
+          const calendar = await getUncachableGoogleCalendarClient();
+          const response = await calendar.freebusy.query({
+            requestBody: {
+              timeMin: startDateTime,
+              timeMax: endDateTime,
+              items: [{ id: this.CALENDAR_ID }]
+            }
+          });
+          const busySlots = response.data.calendars?.[this.CALENDAR_ID]?.busy || [];
+          return {
+            available: busySlots.length === 0,
+            busySlots
+          };
+        } catch (error) {
+          console.error("Error checking availability:", error);
+          throw new Error("Failed to check availability");
+        }
+      }
+      static formatDateTime(date, time, timezone = this.DEFAULT_TIMEZONE) {
+        const dateTimeString = `${date}T${time}:00`;
+        return new Date(dateTimeString).toISOString();
+      }
+    };
+  }
+});
+
+// server/taskAutomation.ts
+async function createTaskForNewLead(storage2, lead, assignedTo) {
+  try {
+    const template = NEW_LEAD_TEMPLATES[lead.persona] || NEW_LEAD_TEMPLATES.student;
+    let taskAssignee = assignedTo;
+    if (!taskAssignee) {
+      const assignments = await storage2.getLeadAssignments({ leadId: lead.id });
+      if (assignments.length > 0) {
+        taskAssignee = assignments[0].assignedTo;
+      }
+    }
+    if (!taskAssignee) {
+      const allUsers = await storage2.getAllUsers();
+      const admin = allUsers.find((u) => u.isAdmin);
+      if (!admin) {
+        console.warn("No admin users found to assign automated task");
+        return;
+      }
+      taskAssignee = admin.id;
+    }
+    const dueDate = /* @__PURE__ */ new Date();
+    dueDate.setDate(dueDate.getDate() + template.daysUntilDue);
+    const taskData = {
+      leadId: lead.id,
+      assignedTo: taskAssignee,
+      createdBy: null,
+      // Null for automated tasks
+      title: template.title,
+      description: template.description,
+      taskType: template.taskType,
+      priority: template.priority,
+      status: "pending",
+      dueDate,
+      completedAt: null,
+      isAutomated: true
+    };
+    await storage2.createTask(taskData);
+    console.log(`Automated task created for new lead: ${lead.id} (${lead.persona})`);
+  } catch (error) {
+    console.error("Error creating automated task for new lead:", error);
+  }
+}
+async function createTaskForStageChange(storage2, lead, newStage, assignedTo) {
+  try {
+    if (newStage === "converted" || newStage === "lost") {
+      return;
+    }
+    const template = STAGE_CHANGE_TEMPLATES[newStage];
+    if (!template) {
+      console.log(`No task template for stage: ${newStage}`);
+      return;
+    }
+    let taskAssignee = assignedTo;
+    if (!taskAssignee) {
+      const assignments = await storage2.getLeadAssignments({ leadId: lead.id });
+      if (assignments.length > 0) {
+        taskAssignee = assignments[0].assignedTo;
+      }
+    }
+    if (!taskAssignee) {
+      const allUsers = await storage2.getAllUsers();
+      const admin = allUsers.find((u) => u.isAdmin);
+      if (!admin) {
+        console.warn("No admin users found to assign automated task");
+        return;
+      }
+      taskAssignee = admin.id;
+    }
+    const dueDate = /* @__PURE__ */ new Date();
+    dueDate.setDate(dueDate.getDate() + template.daysUntilDue);
+    const taskData = {
+      leadId: lead.id,
+      assignedTo: taskAssignee,
+      createdBy: null,
+      title: template.title,
+      description: template.description,
+      taskType: template.taskType,
+      priority: template.priority,
+      status: "pending",
+      dueDate,
+      completedAt: null,
+      isAutomated: true
+    };
+    await storage2.createTask(taskData);
+    console.log(`Automated task created for stage change: ${lead.id} \u2192 ${newStage}`);
+  } catch (error) {
+    console.error("Error creating automated task for stage change:", error);
+  }
+}
+async function createTasksForMissedFollowUps(storage2) {
+  try {
+    const now = /* @__PURE__ */ new Date();
+    const allTasks = await storage2.getTasks({ status: "pending" });
+    const overdueTasks = allTasks.filter((task) => {
+      if (!task.dueDate) return false;
+      return new Date(task.dueDate) < now;
+    });
+    console.log(`Found ${overdueTasks.length} overdue tasks`);
+    for (const overdueTask of overdueTasks) {
+      const leadTasks = await storage2.getTasks({
+        leadId: overdueTask.leadId,
+        status: "pending"
+      });
+      const hasRecentFollowUp = leadTasks.some((task) => {
+        if (task.id === overdueTask.id) return false;
+        if (task.taskType !== "follow_up") return false;
+        const taskAge = now.getTime() - new Date(task.createdAt).getTime();
+        return taskAge < 24 * 60 * 60 * 1e3;
+      });
+      if (hasRecentFollowUp) {
+        continue;
+      }
+      const followUpDueDate = /* @__PURE__ */ new Date();
+      followUpDueDate.setDate(followUpDueDate.getDate() + 1);
+      const taskData = {
+        leadId: overdueTask.leadId,
+        assignedTo: overdueTask.assignedTo,
+        createdBy: null,
+        title: `Follow up on overdue: ${overdueTask.title}`,
+        description: `Original task "${overdueTask.title}" was due on ${new Date(overdueTask.dueDate).toLocaleDateString()}. Please follow up urgently.`,
+        taskType: "follow_up",
+        priority: "urgent",
+        status: "pending",
+        dueDate: followUpDueDate,
+        completedAt: null,
+        isAutomated: true
+      };
+      await storage2.createTask(taskData);
+      console.log(`Created follow-up task for overdue task: ${overdueTask.id}`);
+    }
+  } catch (error) {
+    console.error("Error creating tasks for missed follow-ups:", error);
+  }
+}
+async function syncTaskToCalendar(storage2, task) {
+  try {
+    if (!task.dueDate) {
+      console.log(`Task ${task.id} has no due date, skipping calendar sync`);
+      return null;
+    }
+    let leadInfo = "";
+    if (task.leadId) {
+      const lead = await storage2.getLeadById(task.leadId);
+      if (lead) {
+        leadInfo = `
+
+Lead: ${lead.firstName} ${lead.lastName}
+Email: ${lead.email}
+Persona: ${lead.persona}`;
+      }
+    }
+    const assignee = await storage2.getUserById(task.assignedTo);
+    if (!assignee || !assignee.email) {
+      console.log(`Task ${task.id} assignee has no email, cannot send calendar invite`);
+      return null;
+    }
+    const dueDate = new Date(task.dueDate);
+    const startDateTime = new Date(dueDate);
+    startDateTime.setHours(9, 0, 0, 0);
+    const endDateTime = new Date(dueDate);
+    endDateTime.setHours(10, 0, 0, 0);
+    const calendarEvent = await CalendarService.createEvent({
+      summary: `Task: ${task.title}`,
+      description: `${task.description || "No description"}${leadInfo}
+
+Priority: ${task.priority}
+Type: ${task.taskType}`,
+      location: "",
+      start: {
+        dateTime: startDateTime.toISOString(),
+        timeZone: "America/New_York"
+      },
+      end: {
+        dateTime: endDateTime.toISOString(),
+        timeZone: "America/New_York"
+      },
+      attendees: [
+        {
+          email: assignee.email,
+          displayName: `${assignee.firstName} ${assignee.lastName}`
+        }
+      ]
+    });
+    console.log(`Task ${task.id} synced to calendar: ${calendarEvent.id}`);
+    return calendarEvent.id;
+  } catch (error) {
+    console.error(`Error syncing task ${task.id} to calendar:`, error);
+    return null;
+  }
+}
+var NEW_LEAD_TEMPLATES, STAGE_CHANGE_TEMPLATES;
+var init_taskAutomation = __esm({
+  "server/taskAutomation.ts"() {
+    "use strict";
+    init_calendarService();
+    NEW_LEAD_TEMPLATES = {
+      student: {
+        title: "Initial outreach to prospective student",
+        description: "Reach out to introduce programs, answer questions, and understand their educational goals.",
+        taskType: "call",
+        priority: "high",
+        daysUntilDue: 1
+      },
+      parent: {
+        title: "Follow up with parent inquiry",
+        description: "Contact parent to discuss children's services, answer questions about enrollment, and schedule a visit.",
+        taskType: "call",
+        priority: "high",
+        daysUntilDue: 1
+      },
+      provider: {
+        title: "Connect with service provider",
+        description: "Reach out to discuss partnership opportunities and referral process.",
+        taskType: "email",
+        priority: "medium",
+        daysUntilDue: 2
+      },
+      donor: {
+        title: "Thank donor and provide impact info",
+        description: "Send thank you message and share how their support makes a difference.",
+        taskType: "email",
+        priority: "medium",
+        daysUntilDue: 1
+      },
+      volunteer: {
+        title: "Follow up on volunteer interest",
+        description: "Contact volunteer to discuss opportunities, availability, and next steps for onboarding.",
+        taskType: "call",
+        priority: "medium",
+        daysUntilDue: 2
+      }
+    };
+    STAGE_CHANGE_TEMPLATES = {
+      new_lead: {
+        title: "Make first contact with new lead",
+        description: "Introduce yourself, understand their needs, and schedule follow-up.",
+        taskType: "call",
+        priority: "high",
+        daysUntilDue: 1
+      },
+      contacted: {
+        title: "Send follow-up materials",
+        description: "Send program information, enrollment forms, or requested materials.",
+        taskType: "email",
+        priority: "medium",
+        daysUntilDue: 2
+      },
+      qualified: {
+        title: "Schedule enrollment meeting",
+        description: "Set up meeting to discuss program details, answer questions, and begin enrollment process.",
+        taskType: "meeting",
+        priority: "high",
+        daysUntilDue: 3
+      },
+      nurturing: {
+        title: "Check in with prospect",
+        description: "Reach out to answer any questions and see if they're ready to move forward.",
+        taskType: "call",
+        priority: "medium",
+        daysUntilDue: 7
+      },
+      enrolled: {
+        title: "Welcome and onboard new participant",
+        description: "Provide orientation information, schedule first session, and ensure smooth start.",
+        taskType: "email",
+        priority: "high",
+        daysUntilDue: 1
+      }
+    };
+  }
+});
+
+// server/demo-data.ts
+import { sql as sql9 } from "drizzle-orm";
+async function seedDemoData(clearExisting = false) {
+  console.log("\u{1F331} Starting demo data seeding...");
+  try {
+    if (clearExisting) {
+      console.log("\u{1F5D1}\uFE0F Clearing existing demo data...");
+      await db.delete(campaignMembers);
+      await db.delete(donationCampaigns).where(sql9`slug LIKE 'demo-%'`);
+      await db.delete(leads).where(sql9`email LIKE '%@example.com'`);
+      await db.delete(contentItems).where(sql9`type IN ('event', 'testimonial') AND metadata IS NOT NULL`);
+      console.log("\u2705 Existing demo data cleared");
+    }
+    console.log("\u{1F4DD} Creating sample leads...");
+    const sampleLeads = [
+      {
+        email: "parent1@example.com",
+        firstName: "Sarah",
+        lastName: "Johnson",
+        phone: "+1-555-0101",
+        persona: "parent",
+        funnelStage: "retention",
+        leadSource: "website",
+        passions: ["literacy", "stem"]
+      },
+      {
+        email: "parent2@example.com",
+        firstName: "Michael",
+        lastName: "Chen",
+        phone: "+1-555-0102",
+        persona: "parent",
+        funnelStage: "retention",
+        leadSource: "referral",
+        passions: ["arts", "community"]
+      },
+      {
+        email: "donor1@example.com",
+        firstName: "Emily",
+        lastName: "Rodriguez",
+        phone: "+1-555-0201",
+        persona: "donor",
+        funnelStage: "decision",
+        leadSource: "campaign",
+        passions: ["literacy", "nutrition"]
+      },
+      {
+        email: "donor2@example.com",
+        firstName: "David",
+        lastName: "Thompson",
+        phone: "+1-555-0202",
+        persona: "donor",
+        funnelStage: "consideration",
+        leadSource: "ad",
+        passions: ["stem", "community"]
+      },
+      {
+        email: "donor3@example.com",
+        firstName: "Lisa",
+        lastName: "Martinez",
+        phone: "+1-555-0203",
+        persona: "donor",
+        funnelStage: "awareness",
+        leadSource: "organic",
+        passions: ["arts", "literacy"]
+      },
+      {
+        email: "volunteer1@example.com",
+        firstName: "James",
+        lastName: "Wilson",
+        phone: "+1-555-0301",
+        persona: "volunteer",
+        funnelStage: "consideration",
+        leadSource: "website",
+        passions: ["community", "nutrition"]
+      },
+      {
+        email: "student1@example.com",
+        firstName: "Alex",
+        lastName: "Kim",
+        persona: "student",
+        funnelStage: "retention",
+        leadSource: "in_person",
+        passions: ["stem", "arts"]
+      }
+    ];
+    await db.insert(leads).values(sampleLeads).onConflictDoNothing();
+    console.log(`\u2705 Created ${sampleLeads.length} sample leads`);
+    console.log("\u{1F4B0} Creating donation campaigns...");
+    const now = /* @__PURE__ */ new Date();
+    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1e3);
+    const sixtyDaysFromNow = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1e3);
+    const sampleCampaigns = [
+      {
+        name: "STEM Summer Program 2025",
+        slug: "demo-stem-summer-2025",
+        description: "Fund hands-on science, technology, engineering, and math activities for 50 students this summer",
+        story: "Our STEM Summer Program provides underserved youth with access to cutting-edge technology, robotics workshops, and mentorship from local engineers. Last year, 92% of participants reported increased interest in STEM careers. Your donation directly funds lab materials, field trips to tech companies, and expert instructors.",
+        goalAmount: 15e5,
+        // $15,000
+        raisedAmount: 875e3,
+        // $8,750 (58% funded)
+        passionTags: ["stem", "community"],
+        startDate: now,
+        endDate: sixtyDaysFromNow,
+        status: "active",
+        totalDonations: 42,
+        uniqueDonors: 38
+      },
+      {
+        name: "Literacy Champions Fund",
+        slug: "demo-literacy-champions",
+        description: "Provide books and reading tutors to help 100 children improve their reading skills",
+        story: "Every child deserves the gift of literacy. Our Literacy Champions program pairs struggling readers with trained tutors and provides age-appropriate books to take home. We've helped 200+ children increase reading proficiency by an average of 2 grade levels in just 6 months.",
+        goalAmount: 1e6,
+        // $10,000
+        raisedAmount: 725e3,
+        // $7,250 (72.5% funded)
+        passionTags: ["literacy", "community"],
+        startDate: now,
+        endDate: thirtyDaysFromNow,
+        status: "active",
+        totalDonations: 35,
+        uniqueDonors: 32
+      },
+      {
+        name: "Arts & Creativity Workshop",
+        slug: "demo-arts-creativity-2025",
+        description: "Bring professional artists to lead painting, music, and theater workshops for our students",
+        story: "Art transforms lives. Our Arts & Creativity Workshop introduces children to painting, sculpture, music composition, and theater performance. Many students discover hidden talents and build confidence through creative expression. Professional artists donate their time - we need your help covering materials and space rental.",
+        goalAmount: 8e5,
+        // $8,000
+        raisedAmount: 28e4,
+        // $2,800 (35% funded)
+        passionTags: ["arts"],
+        startDate: now,
+        endDate: sixtyDaysFromNow,
+        status: "active",
+        totalDonations: 18,
+        uniqueDonors: 16
+      },
+      {
+        name: "Healthy Meals Initiative",
+        slug: "demo-healthy-meals-2025",
+        description: "Ensure every child receives nutritious breakfast and lunch during our programs",
+        story: "No child should learn on an empty stomach. Our Healthy Meals Initiative provides fresh, nutritious breakfast and lunch to program participants. We work with local farms and nutritionists to create balanced menus that fuel growing bodies and minds. 100% of donations go directly to food costs.",
+        goalAmount: 12e5,
+        // $12,000
+        raisedAmount: 95e4,
+        // $9,500 (79% funded)
+        passionTags: ["nutrition", "community"],
+        startDate: now,
+        endDate: thirtyDaysFromNow,
+        status: "active",
+        totalDonations: 48,
+        uniqueDonors: 43
+      }
+    ];
+    const insertedCampaigns = await db.insert(donationCampaigns).values(sampleCampaigns).returning();
+    console.log(`\u2705 Created ${insertedCampaigns.length} donation campaigns`);
+    console.log("\u{1F4C4} Creating content items...");
+    const sampleContent = [
+      {
+        type: "event",
+        title: "Annual Charity Gala",
+        description: "Join us for an evening of inspiration, entertainment, and impact. Meet the students and families whose lives have been transformed by your support.",
+        order: 1,
+        isActive: true,
+        passionTags: ["community"],
+        metadata: {
+          date: "2025-12-15",
+          location: "Grand Ballroom, Downtown Convention Center",
+          ticketPrice: "Free for donors, $75 for general admission"
+        }
+      },
+      {
+        type: "event",
+        title: "STEM Fair & Showcase",
+        description: "Students demonstrate their robotics projects, science experiments, and engineering designs. Open to the community!",
+        order: 2,
+        isActive: true,
+        passionTags: ["stem"],
+        metadata: {
+          date: "2025-08-20",
+          location: "Julie's Family Learning Center",
+          ticketPrice: "Free admission"
+        }
+      },
+      {
+        type: "testimonial",
+        title: "My Daughter Discovered Her Love of Reading",
+        description: "Before joining the Literacy Champions program, my daughter struggled with reading and avoided books. Now she reads every night and her comprehension has improved dramatically. Thank you for believing in our children!",
+        order: 1,
+        isActive: true,
+        passionTags: ["literacy"],
+        metadata: {
+          author: "Sarah Johnson",
+          role: "Parent",
+          rating: 5
+        }
+      },
+      {
+        type: "testimonial",
+        title: "STEM Camp Changed My Career Path",
+        description: "The robotics workshop opened my eyes to engineering. I'm now studying computer science in college and I credit this program for showing me what's possible. It gave me hands-on experience I couldn't get anywhere else.",
+        order: 2,
+        isActive: true,
+        passionTags: ["stem"],
+        metadata: {
+          author: "Marcus Thompson",
+          role: "Former Student",
+          rating: 5
+        }
+      },
+      {
+        type: "testimonial",
+        title: "The Arts Program Built My Confidence",
+        description: "I was always shy and afraid to express myself. Through the Arts & Creativity Workshop, I found my voice in theater and painting. Now I perform in school plays and my artwork was featured in a gallery!",
+        order: 3,
+        isActive: true,
+        passionTags: ["arts"],
+        metadata: {
+          author: "Emma Rodriguez",
+          role: "Current Student",
+          rating: 5
+        }
+      }
+    ];
+    await db.insert(contentItems).values(sampleContent).onConflictDoNothing();
+    console.log(`\u2705 Created ${sampleContent.length} content items`);
+    console.log("\u{1F465} Creating users and campaign members...");
+    const parentLeads = await db.select().from(leads).where(sql9`persona = 'parent'`);
+    const demoUsers = [];
+    for (const parent of parentLeads) {
+      const existingUsers = await db.select().from(users).where(sql9`email = ${parent.email}`);
+      if (existingUsers.length > 0) {
+        demoUsers.push(existingUsers[0]);
+      } else {
+        try {
+          const [newUser] = await db.insert(users).values({
+            email: parent.email,
+            firstName: parent.firstName || "Member",
+            lastName: parent.lastName || "",
+            persona: "parent",
+            role: "client"
+          }).returning();
+          demoUsers.push(newUser);
+        } catch (error) {
+          const retryUsers = await db.select().from(users).where(sql9`email = ${parent.email}`);
+          if (retryUsers.length > 0) {
+            demoUsers.push(retryUsers[0]);
+          }
+        }
+      }
+    }
+    const campaignMembers_data = [];
+    for (const campaign of insertedCampaigns) {
+      const membersToAdd = demoUsers.slice(0, Math.floor(Math.random() * 2) + 1);
+      for (const user of membersToAdd) {
+        campaignMembers_data.push({
+          campaignId: campaign.id,
+          userId: user.id,
+          role: "beneficiary",
+          // Parents are beneficiaries whose children benefit from the campaign
+          notifyOnDonation: true,
+          notificationChannels: ["email"],
+          metadata: {
+            relationship: "parent",
+            childName: "Demo Student"
+          }
+        });
+      }
+    }
+    if (campaignMembers_data.length > 0) {
+      await db.insert(campaignMembers).values(campaignMembers_data).onConflictDoNothing();
+      console.log(`\u2705 Created ${demoUsers.length} users and ${campaignMembers_data.length} campaign member relationships`);
+    }
+    console.log("\u2728 Demo data seeding complete!");
+    return {
+      success: true,
+      summary: {
+        leads: sampleLeads.length,
+        campaigns: insertedCampaigns.length,
+        contentItems: sampleContent.length,
+        users: demoUsers.length,
+        campaignMembers: campaignMembers_data.length
+      }
+    };
+  } catch (error) {
+    console.error("\u274C Error seeding demo data:", error);
+    throw error;
+  }
+}
+async function seedFunnelProgressionRules(clearExisting = false) {
+  console.log("\u{1F3AF} Starting funnel progression rules seeding...");
+  try {
+    if (clearExisting) {
+      console.log("\u{1F5D1}\uFE0F Clearing existing funnel progression rules...");
+      await db.delete(funnelProgressionRules);
+      console.log("\u2705 Existing rules cleared");
+    }
+    const defaultRules = [
+      // DONOR PERSONA
+      {
+        persona: "donor",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 100,
+        // ~10 page views or 3-4 resource downloads
+        minimumDaysInStage: 1,
+        // At least 1 day before advancing
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 90,
+        // 3 months of inactivity
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "donor",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 150,
+        // Donation page view (60pts) + calculator use (25pts) + more
+        minimumDaysInStage: 2,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        // 2 months
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "donor",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        // Auto-progress only via donation_completed event
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["donation_completed"],
+        inactivityDaysThreshold: 45,
+        // 1.5 months
+        decayToStage: "consideration",
+        isActive: true
+      },
+      // STUDENT PERSONA
+      {
+        persona: "student",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 80,
+        // Quiz start (20pts) + video watch (25pts) + engagement
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "student",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 120,
+        // Program inquiry (90pts) + other engagement
+        minimumDaysInStage: 3,
+        // Students take time to decide
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 45,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "student",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["enrollment_submitted"],
+        inactivityDaysThreshold: 30,
+        decayToStage: "consideration",
+        isActive: true
+      },
+      // PARENT PERSONA
+      {
+        persona: "parent",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 90,
+        // Testimonials (25pts) + impact calculator (25pts) + more
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 75,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "parent",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 140,
+        // Program inquiry (90pts) + engagement
+        minimumDaysInStage: 2,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "parent",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["enrollment_submitted"],
+        // Enrolling child
+        inactivityDaysThreshold: 30,
+        decayToStage: "consideration",
+        isActive: true
+      },
+      // VOLUNTEER PERSONA
+      {
+        persona: "volunteer",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 70,
+        // Resource downloads + video engagement
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 90,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "volunteer",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 110,
+        // Volunteer inquiry (80pts) + engagement
+        minimumDaysInStage: 2,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "volunteer",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["volunteer_enrolled"],
+        inactivityDaysThreshold: 45,
+        decayToStage: "consideration",
+        isActive: true
+      },
+      // PROVIDER PERSONA (Service providers/partners)
+      {
+        persona: "provider",
+        fromStage: "awareness",
+        toStage: "consideration",
+        engagementScoreThreshold: 100,
+        // Resource downloads + testimonial engagement
+        minimumDaysInStage: 1,
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 90,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "provider",
+        fromStage: "consideration",
+        toStage: "decision",
+        engagementScoreThreshold: 200,
+        // Multiple high-value engagements before partnership
+        minimumDaysInStage: 5,
+        // Partnerships take time
+        autoProgressEvents: [],
+        inactivityDaysThreshold: 60,
+        decayToStage: "awareness",
+        isActive: true
+      },
+      {
+        persona: "provider",
+        fromStage: "decision",
+        toStage: "retention",
+        engagementScoreThreshold: 9999,
+        minimumDaysInStage: 0,
+        autoProgressEvents: ["contact_form_submit"],
+        // Partnership inquiry
+        inactivityDaysThreshold: 45,
+        decayToStage: "consideration",
+        isActive: true
+      }
+    ];
+    const inserted = await db.insert(funnelProgressionRules).values(defaultRules).returning();
+    console.log(`\u2705 Created ${inserted.length} funnel progression rules`);
+    console.log("\u2728 Funnel progression rules seeding complete!");
+    return {
+      success: true,
+      rulesCreated: inserted.length,
+      rules: inserted
+    };
+  } catch (error) {
+    console.error("\u274C Error seeding funnel progression rules:", error);
+    throw error;
+  }
+}
+var init_demo_data = __esm({
+  "server/demo-data.ts"() {
+    "use strict";
+    init_db();
+    init_schema();
+  }
+});
+
+// server/googleSheets.ts
+import { google as google2 } from "googleapis";
+function getGoogleAuthClient2() {
+  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  const path2 = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
+  if (json && json.trim().startsWith("{")) {
+    try {
+      const credentials = JSON.parse(json);
+      return new google2.auth.GoogleAuth({ credentials });
+    } catch {
+      return null;
+    }
+  }
+  if (path2 || json && !json.trim().startsWith("{")) {
+    const keyPath = path2 || json.trim();
+    return new google2.auth.GoogleAuth({ keyFile: keyPath });
+  }
+  return null;
+}
+async function getAccessToken2() {
+  const auth = getGoogleAuthClient2();
+  if (auth) {
+    const client2 = await auth.getClient();
+    const token = await client2.getAccessToken();
+    if (token.token) return token.token;
+  }
+  if (connectionSettings2?.settings?.expires_at && new Date(connectionSettings2.settings.expires_at).getTime() > Date.now()) {
+    return connectionSettings2.settings.access_token;
+  }
+  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
+  const xReplitToken = process.env.REPL_IDENTITY ? "repl " + process.env.REPL_IDENTITY : process.env.WEB_REPL_RENEWAL ? "depl " + process.env.WEB_REPL_RENEWAL : null;
+  if (!xReplitToken || !hostname) {
+    throw new Error(
+      "Google Sheets not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SERVICE_ACCOUNT_KEY_PATH, or use Replit Connectors (REPLIT_CONNECTORS_HOSTNAME + REPL_IDENTITY or WEB_REPL_RENEWAL)."
+    );
+  }
+  connectionSettings2 = await fetch(
+    "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=google-sheet",
+    { headers: { Accept: "application/json", X_REPLIT_TOKEN: xReplitToken } }
+  ).then((res) => res.json()).then((data) => data.items?.[0]);
+  const accessToken = connectionSettings2?.settings?.access_token || connectionSettings2?.settings?.oauth?.credentials?.access_token;
+  if (!connectionSettings2 || !accessToken) {
+    throw new Error("Google Sheet not connected via Replit Connectors");
+  }
+  return accessToken;
+}
+async function getUncachableGoogleSheetClient() {
+  const auth = getGoogleAuthClient2();
+  if (auth) {
+    return google2.sheets({ version: "v4", auth });
+  }
+  const accessToken = await getAccessToken2();
+  const oauth2Client = new google2.auth.OAuth2();
+  oauth2Client.setCredentials({ access_token: accessToken });
+  return google2.sheets({ version: "v4", auth: oauth2Client });
+}
+function parseGoogleSheetUrl(url) {
+  try {
+    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    if (!match) return null;
+    const spreadsheetId = match[1];
+    const gidMatch = url.match(/[#&]gid=(\d+)/);
+    return {
+      spreadsheetId,
+      gid: gidMatch ? gidMatch[1] : void 0,
+      range: void 0
+      // Will read all data by default
+    };
+  } catch (error) {
+    console.error("Error parsing Google Sheets URL:", error);
+    return null;
+  }
+}
+async function fetchSheetData(spreadsheetId, gid, range) {
+  const sheets = await getUncachableGoogleSheetClient();
+  const metadata = await sheets.spreadsheets.get({
+    spreadsheetId
+  });
+  let sheetName;
+  if (gid) {
+    const targetSheet = metadata.data.sheets?.find(
+      (sheet) => sheet.properties?.sheetId?.toString() === gid
+    );
+    sheetName = targetSheet?.properties?.title || metadata.data.sheets?.[0]?.properties?.title || "Sheet1";
+  } else {
+    sheetName = metadata.data.sheets?.[0]?.properties?.title || "Sheet1";
+  }
+  const fullRange = range || sheetName;
+  const response = await sheets.spreadsheets.values.get({
+    spreadsheetId,
+    range: fullRange
+  });
+  const rows = response.data.values;
+  if (!rows || rows.length === 0) {
+    return [];
+  }
+  const headers = rows[0];
+  const data = rows.slice(1).map((row) => {
+    const obj = {};
+    headers.forEach((header, index2) => {
+      obj[header] = row[index2] || "";
+    });
+    return obj;
+  });
+  return data;
+}
+var connectionSettings2;
+var init_googleSheets = __esm({
+  "server/googleSheets.ts"() {
+    "use strict";
   }
 });
 
@@ -11399,3055 +14501,18 @@ var init_donorLifecycleScheduler = __esm({
   }
 });
 
-// server/app.ts
-import express2 from "express";
-import helmet from "helmet";
-
-// server/vite.ts
-import express from "express";
-import { createServer as createViteServer, createLogger } from "vite";
-
-// vite.config.ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
-var vite_config_default = defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets")
-    }
-  },
-  root: path.resolve(import.meta.dirname, "client"),
-  build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
-    emptyOutDir: true
-  },
-  server: {
-    fs: {
-      strict: true,
-      deny: ["**/.*"]
-    }
-  }
-});
-
-// server/vite.ts
-import { nanoid } from "nanoid";
-var viteLogger = createLogger();
-function log(message, source = "express") {
-  const formattedTime = (/* @__PURE__ */ new Date()).toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true
-  });
-  console.log(`${formattedTime} [${source}] ${message}`);
-}
-
-// server/security.ts
-import rateLimit from "express-rate-limit";
-var globalMax = process.env.NODE_ENV === "development" ? 1e4 : 1e3;
-var globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1e3,
-  // 15 minutes
-  max: globalMax,
-  message: "Too many requests from this IP, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false
-});
-var authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1e3,
-  // 15 minutes
-  max: 10,
-  // Limit each IP to 10 login attempts per window
-  message: "Too many login attempts, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true
-  // Don't count successful requests
-});
-var adminLimiter = rateLimit({
-  windowMs: 15 * 60 * 1e3,
-  // 15 minutes  
-  max: 100,
-  // Limit admin operations
-  message: "Too many requests to admin endpoints, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false
-});
-var paymentLimiter = rateLimit({
-  windowMs: 60 * 60 * 1e3,
-  // 1 hour
-  max: 20,
-  // Limit payment attempts
-  message: "Too many payment attempts, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false
-});
-var leadLimiter = rateLimit({
-  windowMs: 60 * 60 * 1e3,
-  // 1 hour
-  max: 10,
-  // Limit lead submissions per hour
-  message: "Too many submissions, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false
-});
-var unsubscribeVerifyLimiter = rateLimit({
-  windowMs: 5 * 60 * 1e3,
-  // 5 minutes
-  max: 60,
-  // Accommodate shared-IP bursts (corporate networks, NAT)
-  message: "Too many verification requests, please try again in a few minutes.",
-  standardHeaders: true,
-  legacyHeaders: false
-});
-var unsubscribeProcessLimiter = rateLimit({
-  windowMs: 5 * 60 * 1e3,
-  // 5 minutes
-  max: 10,
-  // Protect write path from abuse while allowing legitimate retries
-  message: "Too many unsubscribe attempts, please try again in a few minutes.",
-  standardHeaders: true,
-  legacyHeaders: false
-});
-var helmetConfig = {
-  contentSecurityPolicy: false,
-  // Disabled for Replit infrastructure + 3rd party resources
-  crossOriginEmbedderPolicy: false,
-  // Allow embedding third-party resources (YouTube, Cloudinary, Google Fonts)
-  hsts: {
-    maxAge: 31536e3,
-    // 1 year
-    includeSubDomains: true,
-    preload: true
-  }
-};
-
-// server/app.ts
-var app = express2();
-app.use(helmet(helmetConfig));
-app.use(globalLimiter);
-app.use(express2.json({
-  limit: "50mb",
-  verify: (req, _res, buf) => {
-    req.rawBody = buf;
-  }
-}));
-app.use(express2.urlencoded({ extended: false, limit: "50mb" }));
-app.use((req, res, next) => {
-  const start = Date.now();
-  const reqPath = req.path;
-  let capturedJsonResponse = void 0;
-  const originalResJson = res.json;
-  res.json = function(bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (reqPath.startsWith("/api")) {
-      let logLine = `${req.method} ${reqPath} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "\u2026";
-      }
-      log(logLine);
-    }
-  });
-  next();
-});
-
 // server/routes.ts
-init_storage();
-init_db();
+var routes_exports = {};
+__export(routes_exports, {
+  registerRoutes: () => registerRoutes
+});
 import { createServer } from "http";
-
-// server/replitAuth.ts
-init_storage();
-import * as client from "openid-client";
-import { Strategy } from "openid-client/passport";
-import passport from "passport";
-import session from "express-session";
-import memoize from "memoizee";
-import connectPg from "connect-pg-simple";
-var STRATEGY_NAME = "oidc";
-function getCallbackUrl() {
-  const base = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$/, "") : process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim() || "localhost"}` : "http://localhost:5000";
-  const path2 = process.env.OIDC_CALLBACK_PATH || "/api/callback";
-  return `${base}${path2.startsWith("/") ? path2 : "/" + path2}`;
-}
-var getOidcConfig = memoize(
-  async () => {
-    let issuerUrl = (process.env.OIDC_ISSUER_URL || process.env.ISSUER_URL || "").trim();
-    const clientId = process.env.OIDC_CLIENT_ID || process.env.REPL_ID;
-    if (!issuerUrl || !clientId) {
-      throw new Error(
-        "OIDC auth requires OIDC_ISSUER_URL and OIDC_CLIENT_ID (or legacy ISSUER_URL and REPL_ID). Set them in .env or disable auth."
-      );
-    }
-    if (!issuerUrl.startsWith("http://") && !issuerUrl.startsWith("https://")) {
-      issuerUrl = "https://" + issuerUrl;
-    }
-    const callbackUrl = getCallbackUrl();
-    const metadata = { redirect_uris: [callbackUrl] };
-    const clientAuth = process.env.OIDC_CLIENT_SECRET ? client.ClientSecretPost(process.env.OIDC_CLIENT_SECRET) : void 0;
-    return await client.discovery(
-      new URL(issuerUrl),
-      clientId,
-      metadata,
-      clientAuth
-    );
-  },
-  { maxAge: 3600 * 1e3 }
-);
-function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1e3;
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions"
-  });
-  const isProduction = process.env.NODE_ENV === "production";
-  return session({
-    secret: process.env.SESSION_SECRET,
-    store: sessionStore,
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: isProduction ? "auto" : false,
-      // Auto-detect HTTPS in production
-      sameSite: "lax",
-      domain: void 0,
-      // Let browser handle domain automatically
-      path: "/",
-      maxAge: sessionTtl
-    }
-  });
-}
-function updateUserSession(user, tokens) {
-  user.claims = tokens.claims();
-  user.access_token = tokens.access_token;
-  user.refresh_token = tokens.refresh_token;
-  user.expires_at = user.claims?.exp;
-}
-async function upsertUser(claims) {
-  console.log("[OIDC Claims] Received claims:", JSON.stringify(claims, null, 2));
-  const email = claims["email"] || claims["preferred_username"];
-  const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(" ")[0];
-  const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(" ")[1];
-  const persona = claims["persona"];
-  const passions = claims["passions"];
-  const funnelStage = claims["funnelStage"];
-  const role = claims["role"] || (Array.isArray(claims["roles"]) ? claims["roles"][0] : claims["roles"]);
-  console.log("[OIDC Claims] Extracted data:", {
-    sub: claims["sub"],
-    email,
-    firstName,
-    lastName,
-    profileImageUrl: claims["profile_image_url"] || claims["picture"],
-    persona,
-    passions,
-    funnelStage,
-    role: role || "(not provided - will use default/existing)"
-  });
-  const upsertData = {
-    oidcSub: claims["sub"],
-    email,
-    firstName,
-    lastName,
-    profileImageUrl: claims["profile_image_url"] || claims["picture"],
-    persona,
-    // Include persona from claims if provided
-    passions,
-    // Include passions from claims if provided (for testing)
-    funnelStage
-    // Include funnelStage from claims if provided (for testing)
-  };
-  if (process.env.NODE_ENV === "development" && role) {
-    console.log("[OIDC Claims] Development mode: accepting role from claims:", role);
-    upsertData.role = role;
-  } else {
-    console.log("[OIDC Claims] Role NOT added to upsertData. NODE_ENV:", process.env.NODE_ENV, "role:", role);
-  }
-  console.log("[OIDC Claims] Calling upsertUser with:", JSON.stringify(upsertData, null, 2));
-  const result = await storage.upsertUser(upsertData);
-  console.log("[OIDC Claims] upsertUser returned user with role:", result.role);
-  return result;
-}
-async function setupAuth(app2) {
-  app2.set("trust proxy", 1);
-  app2.use(getSession());
-  app2.use(passport.initialize());
-  app2.use(passport.session());
-  const issuerUrl = process.env.OIDC_ISSUER_URL || process.env.ISSUER_URL;
-  const clientId = process.env.OIDC_CLIENT_ID || process.env.REPL_ID;
-  if (!issuerUrl || !clientId) {
-    app2.get("/api/login", (_req, res) => {
-      res.redirect("/?login=unconfigured");
-    });
-    app2.get("/api/callback", (_req, res) => res.redirect("/"));
-    app2.get("/api/logout", (_req, res) => res.redirect("/"));
-    return;
-  }
-  const config = await getOidcConfig();
-  const callbackUrl = getCallbackUrl();
-  const verify = async (tokens, verified) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    const dbUser = await upsertUser(tokens.claims());
-    user.id = dbUser.id;
-    verified(null, user);
-  };
-  const strategy = new Strategy(
-    {
-      name: STRATEGY_NAME,
-      config,
-      scope: "openid email profile offline_access",
-      callbackURL: callbackUrl
-    },
-    verify
-  );
-  passport.use(strategy);
-  passport.serializeUser((user, cb) => cb(null, user));
-  passport.deserializeUser((user, cb) => cb(null, user));
-  app2.get("/api/login", authLimiter, (req, res, next) => {
-    const returnTo = req.query.returnTo;
-    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
-      req.session.returnTo = returnTo;
-    }
-    passport.authenticate(STRATEGY_NAME, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"]
-    })(req, res, next);
-  });
-  app2.get("/api/callback", authLimiter, (req, res, next) => {
-    passport.authenticate(STRATEGY_NAME, {
-      successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login"
-    })(req, res, next);
-  });
-  const logoutRedirectUri = process.env.BASE_URL?.replace(/\/$/, "") || (process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim()}` : null) || "/";
-  app2.get("/api/logout", (req, res) => {
-    req.logout(() => {
-      try {
-        const url = client.buildEndSessionUrl(config, {
-          client_id: process.env.OIDC_CLIENT_ID || process.env.REPL_ID,
-          post_logout_redirect_uri: logoutRedirectUri
-        }).href;
-        res.redirect(url);
-      } catch {
-        res.redirect(logoutRedirectUri);
-      }
-    });
-  });
-}
-var isAuthenticated = async (req, res, next) => {
-  const user = req.user;
-  if (!req.isAuthenticated() || !user.expires_at) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-  const now = Math.floor(Date.now() / 1e3);
-  if (now <= user.expires_at) {
-    return next();
-  }
-  const refreshToken = user.refresh_token;
-  if (!refreshToken) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-  try {
-    const config = await getOidcConfig();
-    const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
-    updateUserSession(user, tokenResponse);
-    return next();
-  } catch (error) {
-    res.status(401).json({ message: "Unauthorized" });
-    return;
-  }
-};
-
-// server/impersonationMiddleware.ts
-init_db();
-init_schema();
-import { eq as eq5, and as and6 } from "drizzle-orm";
-async function applyImpersonation(req, res, next) {
-  try {
-    if (!req.user) {
-      return next();
-    }
-    const currentOidcSub = req.user.claims?.sub;
-    if (!currentOidcSub) {
-      return next();
-    }
-    const [currentUser] = await db.select().from(users).where(eq5(users.oidcSub, currentOidcSub)).limit(1);
-    if (!currentUser) {
-      return next();
-    }
-    if (currentUser.role !== "admin" && currentUser.role !== "super_admin") {
-      return next();
-    }
-    const [session2] = await db.select().from(adminImpersonationSessions).where(and6(
-      eq5(adminImpersonationSessions.adminId, currentUser.id),
-      eq5(adminImpersonationSessions.isActive, true)
-    )).limit(1);
-    if (!session2) {
-      return next();
-    }
-    const [impersonatedUser] = await db.select().from(users).where(eq5(users.id, session2.impersonatedUserId)).limit(1);
-    if (!impersonatedUser) {
-      console.warn(`[Impersonation] Session ${session2.id} references non-existent user ${session2.impersonatedUserId}`);
-      return next();
-    }
-    req.adminUser = req.user;
-    req.isImpersonating = true;
-    req.user = {
-      ...req.user,
-      claims: {
-        ...req.user.claims,
-        sub: impersonatedUser.oidcSub
-      }
-    };
-    console.log(`[Impersonation] Admin ${currentUser.email} is viewing as ${impersonatedUser.email}`);
-    next();
-  } catch (error) {
-    console.error("[Impersonation] Error applying impersonation:", error);
-    next();
-  }
-}
-function requireActualAdmin(req, res, next) {
-  const userToCheck = req.isImpersonating ? req.adminUser : req.user;
-  if (!userToCheck) {
-    return res.status(401).json({ message: "Not authenticated" });
-  }
-  const checkAdmin = async () => {
-    try {
-      const oidcSub = userToCheck.claims?.sub;
-      if (!oidcSub) {
-        return res.status(401).json({ message: "Invalid authentication" });
-      }
-      const [user] = await db.select().from(users).where(eq5(users.oidcSub, oidcSub)).limit(1);
-      if (!user || user.role !== "admin" && user.role !== "super_admin") {
-        return res.status(403).json({ message: "Admin access required" });
-      }
-      next();
-    } catch (error) {
-      console.error("[requireActualAdmin] Error checking admin status:", error);
-      res.status(500).json({ message: "Failed to verify admin status" });
-    }
-  };
-  checkAdmin();
-}
-
-// server/tierMiddleware.ts
-init_storage();
-
-// shared/tiers.ts
-var TIERS = {
-  BASIC: "basic",
-  PRO: "pro",
-  PREMIUM: "premium"
-};
-var TIER_CONFIG = {
-  [TIERS.BASIC]: {
-    // Core CRM - All tiers
-    leadManagement: true,
-    basicSegmentation: true,
-    communicationTimeline: true,
-    taskManagement: true,
-    // Content & Engagement - All tiers
-    contentManagement: true,
-    passionBasedPersonalization: true,
-    donationSystem: true,
-    volunteerTracking: true,
-    // Pro Features - Locked
-    advancedSegmentation: false,
-    emailCampaigns: false,
-    scheduledReports: false,
-    googleCalendarIntegration: false,
-    bulkLeadImport: false,
-    // Premium Features - Locked
-    abTesting: false,
-    automatedAbTesting: false,
-    smsCampaigns: false,
-    bulkSmsCampaigns: false,
-    aiCopyGeneration: false,
-    automationRules: false,
-    // Limits
-    maxLeads: 100,
-    maxEmailsPerMonth: 500,
-    maxSmsPerMonth: 0,
-    maxAdmins: 2
-  },
-  [TIERS.PRO]: {
-    // Core CRM - All tiers
-    leadManagement: true,
-    basicSegmentation: true,
-    communicationTimeline: true,
-    taskManagement: true,
-    // Content & Engagement - All tiers
-    contentManagement: true,
-    passionBasedPersonalization: true,
-    donationSystem: true,
-    volunteerTracking: true,
-    // Pro Features - Unlocked
-    advancedSegmentation: true,
-    emailCampaigns: true,
-    scheduledReports: true,
-    googleCalendarIntegration: true,
-    bulkLeadImport: true,
-    // Premium Features - Locked
-    abTesting: false,
-    automatedAbTesting: false,
-    smsCampaigns: false,
-    bulkSmsCampaigns: false,
-    aiCopyGeneration: false,
-    automationRules: false,
-    // Limits
-    maxLeads: 1e3,
-    maxEmailsPerMonth: 5e3,
-    maxSmsPerMonth: 0,
-    maxAdmins: 5
-  },
-  [TIERS.PREMIUM]: {
-    // Core CRM - All tiers
-    leadManagement: true,
-    basicSegmentation: true,
-    communicationTimeline: true,
-    taskManagement: true,
-    // Content & Engagement - All tiers
-    contentManagement: true,
-    passionBasedPersonalization: true,
-    donationSystem: true,
-    volunteerTracking: true,
-    // Pro Features - Unlocked
-    advancedSegmentation: true,
-    emailCampaigns: true,
-    scheduledReports: true,
-    googleCalendarIntegration: true,
-    bulkLeadImport: true,
-    // Premium Features - Unlocked
-    abTesting: true,
-    automatedAbTesting: true,
-    smsCampaigns: true,
-    bulkSmsCampaigns: true,
-    aiCopyGeneration: true,
-    automationRules: true,
-    // Limits
-    maxLeads: -1,
-    // Unlimited
-    maxEmailsPerMonth: -1,
-    // Unlimited
-    maxSmsPerMonth: 1e4,
-    maxAdmins: -1
-    // Unlimited
-  }
-};
-function hasTierAccess(userTier, requiredTier) {
-  const tierOrder = [TIERS.BASIC, TIERS.PRO, TIERS.PREMIUM];
-  const userIndex = tierOrder.indexOf(userTier);
-  const requiredIndex = tierOrder.indexOf(requiredTier);
-  return userIndex >= requiredIndex;
-}
-
-// server/tierMiddleware.ts
-function requireTier(requiredTier) {
-  return async (req, res, next) => {
-    try {
-      const sessionUser = req.user;
-      const userId = sessionUser?.id || req.session?.userId || req.session?.passport?.user;
-      if (!userId) {
-        return res.status(401).json({
-          error: "Unauthorized",
-          message: "Authentication required"
-        });
-      }
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(401).json({
-          error: "Unauthorized",
-          message: "User not found"
-        });
-      }
-      let userTier = TIERS.BASIC;
-      let organizationId = null;
-      if (user.organizationId) {
-        const organization = await storage.getOrganization(user.organizationId);
-        if (organization) {
-          userTier = organization.tier;
-          organizationId = organization.id;
-        }
-      }
-      if (!hasTierAccess(userTier, requiredTier)) {
-        return res.status(403).json({
-          error: "Forbidden",
-          message: `This feature requires ${requiredTier.charAt(0).toUpperCase() + requiredTier.slice(1)} tier`,
-          currentTier: userTier,
-          requiredTier
-        });
-      }
-      req.userTier = userTier;
-      req.organizationId = organizationId;
-      next();
-    } catch (error) {
-      console.error("[requireTier] Error checking tier access:", error);
-      return res.status(500).json({
-        error: "Internal Server Error",
-        message: "Failed to verify tier access"
-      });
-    }
-  };
-}
-
-// server/routes.ts
-init_schema();
-
-// server/services/cacLtgpAnalytics.ts
-init_db();
-import { sql as sql7 } from "drizzle-orm";
-var CacLtgpAnalyticsService = class {
-  constructor(storage2) {
-    this.storage = storage2;
-  }
-  /**
-   * Get overview of all CAC:LTGP metrics across all channels and campaigns
-   */
-  async getCACLTGPOverview() {
-    const channels = await this.storage.getAllAcquisitionChannels();
-    const campaigns = await this.storage.getAllMarketingCampaigns();
-    const spendResult = await db.execute(sql7`
-      SELECT 
-        COALESCE(SUM(amount_spent), 0) as total_spend,
-        COALESCE(SUM(leads_acquired), 0) as total_leads,
-        COALESCE(SUM(donors_acquired), 0) as total_donors
-      FROM channel_spend_ledger
-    `);
-    const totalSpend = Number(spendResult.rows[0]?.total_spend || 0);
-    const totalLeads = Number(spendResult.rows[0]?.total_leads || 0);
-    const totalDonors = Number(spendResult.rows[0]?.total_donors || 0);
-    const ltgpResult = await db.execute(sql7`
-      SELECT 
-        COALESCE(AVG(lifetime_gross_profit), 0) as avg_ltgp,
-        COALESCE(AVG(customer_acquisition_cost), 0) as avg_cac,
-        COALESCE(AVG(ltgp_to_cac_ratio), 0) as avg_ratio
-      FROM donor_economics
-      WHERE lifetime_gross_profit > 0
-    `);
-    const avgLTGP = Number(ltgpResult.rows[0]?.avg_ltgp || 0);
-    const avgCAC = Number(ltgpResult.rows[0]?.avg_cac || 0);
-    const avgRatio = Number(ltgpResult.rows[0]?.avg_ratio || 0) / 100;
-    const topChannelsResult = await db.execute(sql7`
-      WITH channel_spend AS (
-        SELECT 
-          channel_id,
-          SUM(amount_spent) as spend,
-          SUM(leads_acquired) as leads,
-          SUM(donors_acquired) as donors
-        FROM channel_spend_ledger
-        GROUP BY channel_id
-      ),
-      channel_economics AS (
-        SELECT 
-          la.channel_id,
-          AVG(de.lifetime_gross_profit) as ltgp,
-          AVG(de.ltgp_to_cac_ratio) as ratio
-        FROM lead_attribution la
-        INNER JOIN donor_economics de ON la.lead_id = de.lead_id
-        WHERE de.lifetime_gross_profit > 0
-        GROUP BY la.channel_id
-      )
-      SELECT 
-        c.id as channel_id,
-        c.name as channel_name,
-        COALESCE(cs.spend, 0) as spend,
-        COALESCE(cs.leads, 0) as leads,
-        COALESCE(cs.donors, 0) as donors,
-        CASE 
-          WHEN COALESCE(cs.donors, 0) > 0 
-          THEN COALESCE(cs.spend, 0) / cs.donors
-          ELSE 0 
-        END as cac,
-        COALESCE(ce.ltgp, 0) as ltgp,
-        COALESCE(ce.ratio, 0) as ratio
-      FROM acquisition_channels c
-      LEFT JOIN channel_spend cs ON c.id = cs.channel_id
-      LEFT JOIN channel_economics ce ON c.id = ce.channel_id
-      WHERE c.is_active = true
-      ORDER BY ratio DESC
-      LIMIT 5
-    `);
-    const topChannels = topChannelsResult.rows.map((row) => ({
-      channelId: String(row.channel_id),
-      channelName: String(row.channel_name),
-      spend: Number(row.spend),
-      leads: Number(row.leads),
-      donors: Number(row.donors),
-      cac: Number(row.cac),
-      ltgp: Number(row.ltgp),
-      ratio: Number(row.ratio) / 100
-      // Convert from stored format (consistent with other endpoints)
-    }));
-    return {
-      totalChannels: channels.length,
-      totalCampaigns: campaigns.length,
-      totalSpend,
-      totalLeads,
-      totalDonors,
-      avgCAC,
-      avgLTGP,
-      avgRatio,
-      topChannels
-    };
-  }
-  /**
-   * Get performance metrics for all acquisition channels
-   */
-  async getChannelPerformance() {
-    const result = await db.execute(sql7`
-      WITH channel_spend AS (
-        SELECT 
-          channel_id,
-          SUM(amount_spent) as total_spend,
-          SUM(leads_acquired) as total_leads,
-          SUM(donors_acquired) as total_donors
-        FROM channel_spend_ledger
-        GROUP BY channel_id
-      ),
-      channel_economics AS (
-        SELECT 
-          la.channel_id,
-          AVG(de.lifetime_gross_profit) as avg_donor_ltgp,
-          AVG(de.ltgp_to_cac_ratio) as ltgp_to_cac_ratio
-        FROM lead_attribution la
-        INNER JOIN donor_economics de ON la.lead_id = de.lead_id
-        WHERE de.lifetime_gross_profit > 0
-        GROUP BY la.channel_id
-      ),
-      channel_campaigns AS (
-        SELECT channel_id, COUNT(*) as campaigns
-        FROM marketing_campaigns
-        GROUP BY channel_id
-      )
-      SELECT 
-        c.id as channel_id,
-        c.name as channel_name,
-        COALESCE(cs.total_spend, 0) as total_spend,
-        COALESCE(cs.total_leads, 0) as total_leads,
-        COALESCE(cs.total_donors, 0) as total_donors,
-        CASE 
-          WHEN COALESCE(cs.total_leads, 0) > 0 
-          THEN COALESCE(cs.total_spend, 0) / cs.total_leads
-          ELSE 0 
-        END as avg_cost_per_lead,
-        CASE 
-          WHEN COALESCE(cs.total_donors, 0) > 0 
-          THEN COALESCE(cs.total_spend, 0) / cs.total_donors
-          ELSE 0 
-        END as avg_cost_per_donor,
-        COALESCE(ce.avg_donor_ltgp, 0) as avg_donor_ltgp,
-        COALESCE(ce.ltgp_to_cac_ratio, 0) as ltgp_to_cac_ratio,
-        COALESCE(cc.campaigns, 0) as campaigns
-      FROM acquisition_channels c
-      LEFT JOIN channel_spend cs ON c.id = cs.channel_id
-      LEFT JOIN channel_economics ce ON c.id = ce.channel_id
-      LEFT JOIN channel_campaigns cc ON c.id = cc.channel_id
-      ORDER BY ltgp_to_cac_ratio DESC
-    `);
-    return result.rows.map((row) => ({
-      channelId: String(row.channel_id),
-      channelName: String(row.channel_name),
-      totalSpend: Number(row.total_spend),
-      totalLeads: Number(row.total_leads),
-      totalDonors: Number(row.total_donors),
-      avgCostPerLead: Number(row.avg_cost_per_lead),
-      avgCostPerDonor: Number(row.avg_cost_per_donor),
-      avgDonorLTGP: Number(row.avg_donor_ltgp),
-      ltgpToCacRatio: Number(row.ltgp_to_cac_ratio) / 100,
-      // Convert from stored format
-      campaigns: Number(row.campaigns)
-    }));
-  }
-  /**
-   * Get performance metrics for all marketing campaigns
-   */
-  async getCampaignPerformance() {
-    const result = await db.execute(sql7`
-      WITH campaign_spend AS (
-        SELECT 
-          campaign_id,
-          SUM(amount_spent) as spent,
-          SUM(leads_acquired) as leads,
-          SUM(donors_acquired) as donors
-        FROM channel_spend_ledger
-        WHERE campaign_id IS NOT NULL
-        GROUP BY campaign_id
-      ),
-      campaign_economics AS (
-        SELECT 
-          la.campaign_id,
-          AVG(de.lifetime_gross_profit) as avg_ltgp,
-          AVG(de.ltgp_to_cac_ratio) as avg_ratio
-        FROM lead_attribution la
-        INNER JOIN donor_economics de ON la.lead_id = de.lead_id
-        WHERE la.campaign_id IS NOT NULL AND de.lifetime_gross_profit > 0
-        GROUP BY la.campaign_id
-      )
-      SELECT 
-        mc.id as campaign_id,
-        mc.name as campaign_name,
-        c.name as channel_name,
-        COALESCE(mc.budget, 0) as budget,
-        COALESCE(cs.spent, 0) as spent,
-        COALESCE(cs.leads, 0) as leads,
-        COALESCE(cs.donors, 0) as donors,
-        CASE 
-          WHEN COALESCE(cs.donors, 0) > 0 
-          THEN COALESCE(cs.spent, 0) / cs.donors
-          ELSE 0 
-        END as cac,
-        COALESCE(ce.avg_ltgp, 0) as ltgp,
-        COALESCE(ce.avg_ratio, 0) as ratio,
-        CASE 
-          WHEN COALESCE(cs.spent, 0) > 0 
-          THEN ((COALESCE(ce.avg_ltgp, 0) * COALESCE(cs.donors, 0)) - COALESCE(cs.spent, 0)) / cs.spent * 100
-          ELSE 0 
-        END as roi
-      FROM marketing_campaigns mc
-      LEFT JOIN acquisition_channels c ON mc.channel_id = c.id
-      LEFT JOIN campaign_spend cs ON mc.id = cs.campaign_id
-      LEFT JOIN campaign_economics ce ON mc.id = ce.campaign_id
-      ORDER BY ratio DESC
-    `);
-    return result.rows.map((row) => ({
-      campaignId: String(row.campaign_id),
-      campaignName: String(row.campaign_name),
-      channelName: String(row.channel_name || "Unknown"),
-      budget: Number(row.budget),
-      spent: Number(row.spent),
-      leads: Number(row.leads),
-      donors: Number(row.donors),
-      cac: Number(row.cac),
-      ltgp: Number(row.ltgp),
-      ratio: Number(row.ratio) / 100,
-      // Convert from stored format
-      roi: Number(row.roi)
-    }));
-  }
-  /**
-   * Get cohort analysis grouped by time period (week or month)
-   */
-  async getCohortAnalysis(periodType = "month") {
-    const result = await db.execute(sql7`
-      WITH period_spend AS (
-        SELECT 
-          period_key,
-          period_start,
-          period_end,
-          SUM(amount_spent) as spend,
-          SUM(leads_acquired) as leads_acquired,
-          SUM(donors_acquired) as donors_acquired
-        FROM channel_spend_ledger
-        WHERE period_type = ${periodType}
-        GROUP BY period_key, period_start, period_end
-      ),
-      period_economics AS (
-        SELECT 
-          ps.period_key,
-          AVG(de.lifetime_gross_profit) as current_ltgp,
-          AVG(de.ltgp_to_cac_ratio) as current_ratio
-        FROM period_spend ps
-        LEFT JOIN lead_attribution la ON la.created_at >= ps.period_start AND la.created_at < ps.period_end
-        LEFT JOIN donor_economics de ON la.lead_id = de.lead_id
-        WHERE de.lifetime_gross_profit > 0
-        GROUP BY ps.period_key
-      )
-      SELECT 
-        ps.period_key,
-        ps.period_start::text,
-        ps.period_end::text,
-        COALESCE(ps.spend, 0) as spend,
-        COALESCE(ps.leads_acquired, 0) as leads_acquired,
-        COALESCE(ps.donors_acquired, 0) as donors_acquired,
-        CASE 
-          WHEN COALESCE(ps.donors_acquired, 0) > 0 
-          THEN COALESCE(ps.spend, 0) / ps.donors_acquired
-          ELSE 0 
-        END as cac,
-        COALESCE(pe.current_ltgp, 0) as current_ltgp,
-        COALESCE(pe.current_ratio, 0) as current_ratio,
-        EXTRACT(MONTH FROM AGE(NOW(), ps.period_start))::integer as months_active
-      FROM period_spend ps
-      LEFT JOIN period_economics pe ON ps.period_key = pe.period_key
-      ORDER BY ps.period_start DESC
-      LIMIT 12
-    `);
-    return result.rows.map((row) => ({
-      periodKey: String(row.period_key),
-      periodStart: String(row.period_start),
-      periodEnd: String(row.period_end),
-      spend: Number(row.spend),
-      leadsAcquired: Number(row.leads_acquired),
-      donorsAcquired: Number(row.donors_acquired),
-      cac: Number(row.cac),
-      currentLTGP: Number(row.current_ltgp),
-      currentRatio: Number(row.current_ratio) / 100,
-      // Convert from stored format
-      monthsActive: Number(row.months_active)
-    }));
-  }
-  /**
-   * Calculate lifetime gross profit for a specific donor
-   */
-  async calculateDonorLTGP(leadId) {
-    const economics = await this.storage.getDonorEconomics(leadId);
-    if (!economics) {
-      return 0;
-    }
-    const lifetimeRevenue = economics.lifetimeRevenue || 0;
-    const deliveryCosts = economics.actualDeliveryCosts || economics.estimatedDeliveryCosts || 0;
-    const ltgp = lifetimeRevenue - deliveryCosts;
-    await this.storage.updateDonorEconomics(leadId, {
-      lifetimeGrossProfit: ltgp,
-      grossMarginPercent: lifetimeRevenue > 0 ? Math.round(ltgp / lifetimeRevenue * 100) : 0,
-      ltgpToCacRatio: economics.customerAcquisitionCost > 0 ? Math.round(ltgp / economics.customerAcquisitionCost * 100) : 0
-    });
-    return ltgp;
-  }
-};
-function createCacLtgpAnalyticsService(storage2) {
-  return new CacLtgpAnalyticsService(storage2);
-}
-
-// server/services/adminEntitlementService.ts
-init_db();
-init_schema();
-import { eq as eq6, and as and7 } from "drizzle-orm";
-var AdminEntitlementService = class {
-  constructor(storage2) {
-    this.storage = storage2;
-  }
-  /**
-   * Deactivates an admin entitlement and cleans up all associated test data
-   * Transactional: soft-deletes entitlement + hard-deletes test enrollments/logs
-   * 
-   * @throws Error if entitlement not found or cleanup fails
-   */
-  async deactivateEntitlement(entitlementId) {
-    const entitlement = await this.storage.getAdminEntitlement(entitlementId);
-    if (!entitlement) {
-      throw new Error(`Entitlement ${entitlementId} not found`);
-    }
-    await db.transaction(async (tx) => {
-      await tx.update(adminEntitlements).set({
-        isActive: false,
-        deactivatedAt: /* @__PURE__ */ new Date(),
-        updatedAt: /* @__PURE__ */ new Date()
-      }).where(eq6(adminEntitlements.id, entitlementId));
-      if (entitlement.tghEnrollmentId) {
-        await tx.delete(techGoesHomeAttendance).where(and7(
-          eq6(techGoesHomeAttendance.enrollmentId, entitlement.tghEnrollmentId),
-          eq6(techGoesHomeAttendance.isTestData, true)
-        ));
-        await tx.delete(techGoesHomeEnrollments).where(and7(
-          eq6(techGoesHomeEnrollments.id, entitlement.tghEnrollmentId),
-          eq6(techGoesHomeEnrollments.isTestData, true)
-        ));
-      }
-      if (entitlement.volunteerEnrollmentId) {
-        await tx.delete(volunteerSessionLogs).where(and7(
-          eq6(volunteerSessionLogs.enrollmentId, entitlement.volunteerEnrollmentId),
-          eq6(volunteerSessionLogs.isTestData, true)
-        ));
-        await tx.delete(volunteerEnrollments).where(and7(
-          eq6(volunteerEnrollments.id, entitlement.volunteerEnrollmentId),
-          eq6(volunteerEnrollments.isTestData, true)
-        ));
-      }
-    });
-  }
-  /**
-   * Bulk deactivate all entitlements for an admin
-   * Used when admin wants to "reset" all test enrollments
-   */
-  async deactivateAllEntitlements(adminId) {
-    const entitlements = await this.storage.getActiveAdminEntitlements(adminId);
-    for (const entitlement of entitlements) {
-      await this.deactivateEntitlement(entitlement.id);
-    }
-  }
-};
-
-// server/routes.ts
-init_funnelProgressionService();
-init_schema();
 import { eq as eq11, sql as sql12, and as and12, isNotNull } from "drizzle-orm";
-
-// server/objectStorageReplit.ts
-import { Storage } from "@google-cloud/storage";
-import { randomUUID } from "crypto";
-
-// server/objectAcl.ts
-var ACL_POLICY_METADATA_KEY = "custom:aclPolicy";
-function isPermissionAllowed(requested, granted) {
-  if (requested === "read" /* READ */) {
-    return ["read" /* READ */, "write" /* WRITE */].includes(granted);
-  }
-  return granted === "write" /* WRITE */;
-}
-function createObjectAccessGroup(group) {
-  switch (group.type) {
-    default:
-      throw new Error(`Unknown access group type: ${group.type}`);
-  }
-}
-async function setObjectAclPolicy(objectFile, aclPolicy) {
-  const [exists] = await objectFile.exists();
-  if (!exists) {
-    throw new Error(`Object not found: ${objectFile.name ?? "unknown"}`);
-  }
-  await objectFile.setMetadata({
-    metadata: {
-      [ACL_POLICY_METADATA_KEY]: JSON.stringify(aclPolicy)
-    }
-  });
-}
-async function getObjectAclPolicy(objectFile) {
-  const [metadata] = await objectFile.getMetadata();
-  const aclPolicy = metadata?.metadata?.[ACL_POLICY_METADATA_KEY];
-  if (!aclPolicy) {
-    return null;
-  }
-  return JSON.parse(aclPolicy);
-}
-async function canAccessObject({
-  userId,
-  objectFile,
-  requestedPermission
-}) {
-  const aclPolicy = await getObjectAclPolicy(objectFile);
-  if (!aclPolicy) {
-    return false;
-  }
-  if (aclPolicy.visibility === "public" && requestedPermission === "read" /* READ */) {
-    return true;
-  }
-  if (!userId) {
-    return false;
-  }
-  if (aclPolicy.owner === userId) {
-    return true;
-  }
-  for (const rule of aclPolicy.aclRules || []) {
-    const accessGroup = createObjectAccessGroup(rule.group);
-    if (await accessGroup.hasMember(userId) && isPermissionAllowed(requestedPermission, rule.permission)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-// server/objectStorageReplit.ts
-var REPLIT_SIDECAR_ENDPOINT = "http://127.0.0.1:1106";
-var replitStorageInstance = null;
-function getClient() {
-  if (!replitStorageInstance) {
-    replitStorageInstance = new Storage({
-      credentials: {
-        audience: "replit",
-        subject_token_type: "access_token",
-        token_url: `${REPLIT_SIDECAR_ENDPOINT}/token`,
-        type: "external_account",
-        credential_source: {
-          url: `${REPLIT_SIDECAR_ENDPOINT}/credential`,
-          format: {
-            type: "json",
-            subject_token_field_name: "access_token"
-          }
-        },
-        universe_domain: "googleapis.com"
-      },
-      projectId: ""
-    });
-  }
-  return replitStorageInstance;
-}
-var objectStorageClient = new Proxy({}, {
-  get(_, prop) {
-    return getClient()[prop];
-  }
-});
-var ObjectNotFoundError = class _ObjectNotFoundError extends Error {
-  constructor() {
-    super("Object not found");
-    this.name = "ObjectNotFoundError";
-    Object.setPrototypeOf(this, _ObjectNotFoundError.prototype);
-  }
-};
-var ObjectStorageService = class {
-  constructor() {
-  }
-  getDefaultBucketId() {
-    const bucketId = process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID || "";
-    if (!bucketId) {
-      throw new Error(
-        "DEFAULT_OBJECT_STORAGE_BUCKET_ID not set. Create a bucket in 'Object Storage' tool."
-      );
-    }
-    return bucketId;
-  }
-  normalizePath(path2) {
-    if (path2.startsWith("/")) {
-      return path2;
-    }
-    return `/${this.getDefaultBucketId()}/${path2}`;
-  }
-  getPublicObjectSearchPaths() {
-    const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || "";
-    const paths = Array.from(
-      new Set(
-        pathsStr.split(",").map((path2) => path2.trim()).filter((path2) => path2.length > 0).map((path2) => this.normalizePath(path2))
-      )
-    );
-    if (paths.length === 0) {
-      throw new Error(
-        "PUBLIC_OBJECT_SEARCH_PATHS not set. Create a bucket in 'Object Storage' tool and set PUBLIC_OBJECT_SEARCH_PATHS env var (comma-separated paths)."
-      );
-    }
-    return paths;
-  }
-  getPrivateObjectDir() {
-    const dir = process.env.PRIVATE_OBJECT_DIR || "";
-    if (!dir) {
-      throw new Error(
-        "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' tool and set PRIVATE_OBJECT_DIR env var."
-      );
-    }
-    return this.normalizePath(dir);
-  }
-  async searchPublicObject(filePath) {
-    const client2 = getClient();
-    for (const searchPath of this.getPublicObjectSearchPaths()) {
-      const fullPath = `${searchPath}/${filePath}`;
-      const { bucketName, objectName } = parseObjectPath(fullPath);
-      const bucket = client2.bucket(bucketName);
-      const file = bucket.file(objectName);
-      const [exists] = await file.exists();
-      if (exists) {
-        return file;
-      }
-    }
-    return null;
-  }
-  async downloadObject(file, res, cacheTtlSec = 3600) {
-    try {
-      const [metadata] = await file.getMetadata();
-      const aclPolicy = await getObjectAclPolicy(file);
-      const isPublic = aclPolicy?.visibility === "public";
-      res.set({
-        "Content-Type": metadata.contentType || "application/octet-stream",
-        "Content-Length": String(metadata.size ?? 0),
-        "Cache-Control": `${isPublic ? "public" : "private"}, max-age=${cacheTtlSec}`
-      });
-      const stream = file.createReadStream();
-      stream.on("error", (err) => {
-        console.error("Stream error:", err);
-        if (!res.headersSent) {
-          res.status(500).json({ error: "Error streaming file" });
-        }
-      });
-      stream.pipe(res);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      if (!res.headersSent) {
-        res.status(500).json({ error: "Error downloading file" });
-      }
-    }
-  }
-  async getObjectEntityUploadURL() {
-    const privateObjectDir = this.getPrivateObjectDir();
-    if (!privateObjectDir) {
-      throw new Error(
-        "PRIVATE_OBJECT_DIR not set. Create a bucket in 'Object Storage' tool and set PRIVATE_OBJECT_DIR env var."
-      );
-    }
-    const objectId = randomUUID();
-    const fullPath = `${privateObjectDir}/uploads/${objectId}`;
-    const { bucketName, objectName } = parseObjectPath(fullPath);
-    const uploadURL = await signObjectURL({
-      bucketName,
-      objectName,
-      method: "PUT",
-      ttlSec: 900
-    });
-    const objectPath = `/objects/uploads/${objectId}`;
-    return { uploadURL, objectPath };
-  }
-  async getObjectEntityFile(objectPath) {
-    const client2 = getClient();
-    if (!objectPath.startsWith("/objects/")) {
-      throw new ObjectNotFoundError();
-    }
-    const parts = objectPath.slice(1).split("/");
-    if (parts.length < 2) {
-      throw new ObjectNotFoundError();
-    }
-    const entityId = parts.slice(1).join("/");
-    let entityDir = this.getPrivateObjectDir();
-    if (!entityDir.endsWith("/")) {
-      entityDir = `${entityDir}/`;
-    }
-    const objectEntityPath = `${entityDir}${entityId}`;
-    const { bucketName, objectName } = parseObjectPath(objectEntityPath);
-    const bucket = client2.bucket(bucketName);
-    const objectFile = bucket.file(objectName);
-    const [exists] = await objectFile.exists();
-    if (!exists) {
-      throw new ObjectNotFoundError();
-    }
-    return objectFile;
-  }
-  normalizeObjectEntityPath(rawPath) {
-    if (!rawPath.startsWith("https://storage.googleapis.com/")) {
-      return rawPath;
-    }
-    const url = new URL(rawPath);
-    const rawObjectPath = url.pathname;
-    let objectEntityDir = this.getPrivateObjectDir();
-    if (!objectEntityDir.endsWith("/")) {
-      objectEntityDir = `${objectEntityDir}/`;
-    }
-    if (!rawObjectPath.startsWith(objectEntityDir)) {
-      return rawObjectPath;
-    }
-    const entityId = rawObjectPath.slice(objectEntityDir.length);
-    return `/objects/${entityId}`;
-  }
-  async setObjectEntityAclPolicy(objectPath, aclPolicy) {
-    const objectFile = await this.getObjectEntityFile(objectPath);
-    await setObjectAclPolicy(objectFile, aclPolicy);
-    return objectPath;
-  }
-  async trySetObjectEntityAclPolicy(rawPath, aclPolicy) {
-    const normalizedPath = this.normalizeObjectEntityPath(rawPath);
-    if (!normalizedPath.startsWith("/")) {
-      return normalizedPath;
-    }
-    const objectFile = await this.getObjectEntityFile(normalizedPath);
-    await setObjectAclPolicy(objectFile, aclPolicy);
-    return normalizedPath;
-  }
-  async canAccessObjectEntity({
-    userId,
-    objectFile,
-    requestedPermission
-  }) {
-    return canAccessObject({
-      userId,
-      objectFile,
-      requestedPermission: requestedPermission ?? "read" /* READ */
-    });
-  }
-  async renameObjectEntity(originalPath, newFilename) {
-    const client2 = getClient();
-    const originalFile = await this.getObjectEntityFile(originalPath);
-    const parts = originalPath.slice(1).split("/");
-    const entityId = parts.slice(1).join("/");
-    const directory = entityId.substring(0, entityId.lastIndexOf("/") + 1);
-    let entityDir = this.getPrivateObjectDir();
-    if (!entityDir.endsWith("/")) {
-      entityDir = `${entityDir}/`;
-    }
-    const newObjectPath = `${entityDir}${directory}${newFilename}`;
-    const { bucketName, objectName } = parseObjectPath(newObjectPath);
-    const bucket = client2.bucket(bucketName);
-    const newFile = bucket.file(objectName);
-    await originalFile.copy(newFile);
-    const aclPolicy = await getObjectAclPolicy(originalFile);
-    if (aclPolicy) {
-      await setObjectAclPolicy(newFile, aclPolicy);
-    }
-    await originalFile.delete();
-    return `/objects/${directory}${newFilename}`;
-  }
-};
-function parseObjectPath(path2) {
-  if (!path2.startsWith("/")) {
-    path2 = `/${path2}`;
-  }
-  const pathParts = path2.split("/");
-  if (pathParts.length < 3) {
-    throw new Error("Invalid path: must contain at least a bucket name");
-  }
-  const bucketName = pathParts[1];
-  const objectName = pathParts.slice(2).join("/");
-  return {
-    bucketName,
-    objectName
-  };
-}
-async function signObjectURL({
-  bucketName,
-  objectName,
-  method,
-  ttlSec
-}) {
-  const request = {
-    bucket_name: bucketName,
-    object_name: objectName,
-    method,
-    expires_at: new Date(Date.now() + ttlSec * 1e3).toISOString()
-  };
-  const response = await fetch(
-    `${REPLIT_SIDECAR_ENDPOINT}/object-storage/signed-object-url`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(request)
-    }
-  );
-  if (!response.ok) {
-    throw new Error(
-      `Failed to sign object URL, errorcode: ${response.status}, make sure you're running on Replit`
-    );
-  }
-  const { signed_url: signedURL } = await response.json();
-  return signedURL;
-}
-
-// server/objectStorageS3.ts
-import {
-  S3Client,
-  GetObjectCommand,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  CopyObjectCommand,
-  HeadObjectCommand
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { randomUUID as randomUUID2 } from "crypto";
-import { Readable } from "stream";
-function getS3Config() {
-  const bucket = process.env.S3_BUCKET || process.env.R2_BUCKET || process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID;
-  if (!bucket) {
-    throw new Error(
-      "S3_BUCKET or R2_BUCKET or DEFAULT_OBJECT_STORAGE_BUCKET_ID must be set when OBJECT_STORAGE_PROVIDER=s3"
-    );
-  }
-  const region = process.env.AWS_REGION || process.env.R2_REGION || "auto";
-  const endpoint = process.env.R2_ACCOUNT_ID ? `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com` : void 0;
-  const credentials = process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY ? {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY
-  } : void 0;
-  return { bucket, region, endpoint, credentials };
-}
-var s3Client = null;
-function getClient2() {
-  if (!s3Client) {
-    const { region, endpoint, credentials } = getS3Config();
-    s3Client = new S3Client({
-      region,
-      endpoint: endpoint || void 0,
-      credentials: credentials || void 0
-    });
-  }
-  return s3Client;
-}
-function parsePath(path2) {
-  const bucket = getS3Config().bucket;
-  const p = path2.startsWith("/") ? path2.slice(1) : path2;
-  const key = p.startsWith(bucket + "/") ? p.slice(bucket.length + 1) : p;
-  return { bucket, key };
-}
-var ObjectNotFoundError2 = class _ObjectNotFoundError extends Error {
-  constructor() {
-    super("Object not found");
-    this.name = "ObjectNotFoundError";
-    Object.setPrototypeOf(this, _ObjectNotFoundError.prototype);
-  }
-};
-var S3StorageFile = class {
-  constructor(client2, bucket, key) {
-    this.client = client2;
-    this.bucket = bucket;
-    this.key = key;
-  }
-  get name() {
-    return `${this.bucket}/${this.key}`;
-  }
-  async getMetadata() {
-    const cmd = new HeadObjectCommand({ Bucket: this.bucket, Key: this.key });
-    const meta = await this.client.send(cmd);
-    return [
-      {
-        metadata: meta.Metadata || {},
-        contentType: meta.ContentType,
-        size: meta.ContentLength
-      }
-    ];
-  }
-  async setMetadata(arg) {
-    const getCmd = new GetObjectCommand({ Bucket: this.bucket, Key: this.key });
-    const obj = await this.client.send(getCmd);
-    const body = obj.Body;
-    const metadata = arg.metadata;
-    const putCmd = new PutObjectCommand({
-      Bucket: this.bucket,
-      Key: this.key,
-      Body: body,
-      ContentType: obj.ContentType,
-      Metadata: metadata
-    });
-    return this.client.send(putCmd);
-  }
-  async exists() {
-    try {
-      await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: this.key }));
-      return [true];
-    } catch {
-      return [false];
-    }
-  }
-  createReadStream() {
-    const client2 = this.client;
-    const bucket = this.bucket;
-    const key = this.key;
-    const readable = new Readable({ read: () => {
-    } });
-    (async () => {
-      try {
-        const cmd = new GetObjectCommand({ Bucket: bucket, Key: key });
-        const res = await client2.send(cmd);
-        const stream = res.Body;
-        stream.on("data", (chunk) => readable.push(chunk));
-        stream.on("end", () => readable.push(null));
-        stream.on("error", (err) => readable.destroy(err));
-      } catch (err) {
-        readable.destroy(err);
-      }
-    })();
-    return readable;
-  }
-  getBucket() {
-    return this.bucket;
-  }
-  getKey() {
-    return this.key;
-  }
-  async copy(dest) {
-    await this.client.send(
-      new CopyObjectCommand({
-        CopySource: `${this.bucket}/${this.key}`,
-        Bucket: dest.getBucket(),
-        Key: dest.getKey()
-      })
-    );
-  }
-  async delete() {
-    await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: this.key }));
-  }
-};
-var ObjectStorageService2 = class {
-  getBucket() {
-    return getS3Config().bucket;
-  }
-  normalizePath(path2) {
-    if (path2.startsWith("/")) return path2;
-    return `/${this.getBucket()}/${path2}`;
-  }
-  getPublicObjectSearchPaths() {
-    const pathsStr = process.env.PUBLIC_OBJECT_SEARCH_PATHS || process.env.S3_PUBLIC_PREFIXES || "";
-    const paths = pathsStr.split(",").map((p) => p.trim()).filter(Boolean).map((p) => this.normalizePath(p));
-    if (paths.length === 0) {
-      throw new Error("PUBLIC_OBJECT_SEARCH_PATHS or S3_PUBLIC_PREFIXES must be set (comma-separated prefixes)");
-    }
-    return [...new Set(paths)];
-  }
-  getPrivateObjectDir() {
-    const dir = process.env.PRIVATE_OBJECT_DIR || process.env.S3_PRIVATE_PREFIX || "";
-    if (!dir) {
-      throw new Error("PRIVATE_OBJECT_DIR or S3_PRIVATE_PREFIX must be set");
-    }
-    return this.normalizePath(dir);
-  }
-  async searchPublicObject(filePath) {
-    const client2 = getClient2();
-    const bucket = this.getBucket();
-    for (const searchPath of this.getPublicObjectSearchPaths()) {
-      const { key } = parsePath(`${searchPath}/${filePath}`);
-      const file = new S3StorageFile(client2, bucket, key);
-      const [exists] = await file.exists();
-      if (exists) return file;
-    }
-    return null;
-  }
-  async downloadObject(file, res, cacheTtlSec = 3600) {
-    try {
-      const [metadata] = await file.getMetadata();
-      const aclPolicy = await getObjectAclPolicy(file);
-      const isPublic = aclPolicy?.visibility === "public";
-      res.set({
-        "Content-Type": metadata.contentType || "application/octet-stream",
-        "Content-Length": String(metadata.size ?? 0),
-        "Cache-Control": `${isPublic ? "public" : "private"}, max-age=${cacheTtlSec}`
-      });
-      const stream = file.createReadStream();
-      stream.on("error", (err) => {
-        console.error("Stream error:", err);
-        if (!res.headersSent) res.status(500).json({ error: "Error streaming file" });
-      });
-      stream.pipe(res);
-    } catch (err) {
-      console.error("Error downloading file:", err);
-      if (!res.headersSent) res.status(500).json({ error: "Error downloading file" });
-    }
-  }
-  async getObjectEntityUploadURL() {
-    const client2 = getClient2();
-    const bucket = this.getBucket();
-    const prefix = this.getPrivateObjectDir().replace(/^\//, "").replace(/^[^/]+\//, "") || "uploads";
-    const objectId = randomUUID2();
-    const key = `${prefix}/uploads/${objectId}`;
-    const uploadURL = await getSignedUrl(
-      client2,
-      new PutObjectCommand({ Bucket: bucket, Key: key }),
-      { expiresIn: 900 }
-    );
-    return { uploadURL, objectPath: `/objects/uploads/${objectId}` };
-  }
-  async getObjectEntityFile(objectPath) {
-    if (!objectPath.startsWith("/objects/")) throw new ObjectNotFoundError2();
-    const parts = objectPath.slice(1).split("/");
-    if (parts.length < 2) throw new ObjectNotFoundError2();
-    const entityId = parts.slice(1).join("/");
-    const bucket = this.getBucket();
-    const dirPrefix = this.getPrivateObjectDir().replace(/^\//, "").replace(/^[^/]+\//, "") || "";
-    const key = dirPrefix ? `${dirPrefix}/${entityId}` : entityId;
-    const client2 = getClient2();
-    const file = new S3StorageFile(client2, bucket, key);
-    const [exists] = await file.exists();
-    if (!exists) throw new ObjectNotFoundError2();
-    return file;
-  }
-  normalizeObjectEntityPath(rawPath) {
-    if (!rawPath.includes(".r2.cloudflarestorage.com") && !rawPath.includes("s3.")) {
-      return rawPath;
-    }
-    try {
-      const url = new URL(rawPath);
-      const pathname = url.pathname.replace(/^\//, "");
-      const entityDir = this.getPrivateObjectDir().replace(/^\//, "").split("/").slice(1).join("/");
-      if (!pathname.startsWith(entityDir + "/")) return rawPath;
-      const entityId = pathname.slice(entityDir.length + 1);
-      return `/objects/${entityId}`;
-    } catch {
-      return rawPath;
-    }
-  }
-  async setObjectEntityAclPolicy(objectPath, aclPolicy) {
-    const file = await this.getObjectEntityFile(objectPath);
-    await setObjectAclPolicy(file, aclPolicy);
-    return objectPath;
-  }
-  async trySetObjectEntityAclPolicy(rawPath, aclPolicy) {
-    const normalizedPath = this.normalizeObjectEntityPath(rawPath);
-    if (!normalizedPath.startsWith("/")) return normalizedPath;
-    const file = await this.getObjectEntityFile(normalizedPath);
-    await setObjectAclPolicy(file, aclPolicy);
-    return normalizedPath;
-  }
-  async canAccessObjectEntity({
-    userId,
-    objectFile,
-    requestedPermission
-  }) {
-    return canAccessObject({
-      userId,
-      objectFile,
-      requestedPermission: requestedPermission ?? "read" /* READ */
-    });
-  }
-  async renameObjectEntity(originalPath, newFilename) {
-    const originalFile = await this.getObjectEntityFile(originalPath);
-    const parts = originalPath.slice(1).split("/");
-    const entityId = parts.slice(1).join("/");
-    const directory = entityId.substring(0, entityId.lastIndexOf("/") + 1);
-    const bucket = this.getBucket();
-    const prefix = this.getPrivateObjectDir().replace(/^\//, "").replace(/^[^/]+\//, "") || "";
-    const newKey = prefix ? `${prefix}/${directory}${newFilename}` : `${directory}${newFilename}`;
-    const client2 = getClient2();
-    const newFile = new S3StorageFile(client2, bucket, newKey);
-    await originalFile.copy(newFile);
-    const aclPolicy = await getObjectAclPolicy(originalFile);
-    if (aclPolicy) await setObjectAclPolicy(newFile, aclPolicy);
-    await originalFile.delete();
-    return `/objects/${directory}${newFilename}`;
-  }
-};
-
-// server/objectStorage.ts
-var provider = process.env.OBJECT_STORAGE_PROVIDER || "replit";
-var ObjectStorageService3 = provider === "s3" ? ObjectStorageService2 : ObjectStorageService;
-var ObjectNotFoundError3 = provider === "s3" ? ObjectNotFoundError2 : ObjectNotFoundError;
-
-// server/routes.ts
 import { z as z2 } from "zod";
-
-// server/cloudinary.ts
-import { v2 as cloudinary } from "cloudinary";
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true
-});
-async function uploadToCloudinary(imageBuffer, options = {}) {
-  const {
-    folder = "julies-family-learning",
-    publicId,
-    transformation = [],
-    upscale = true,
-    quality = "auto:best"
-  } = options;
-  const transformations = [...transformation];
-  if (upscale) {
-    transformations.push({
-      quality,
-      fetch_format: "auto",
-      flags: "progressive:steep"
-    });
-  }
-  return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        public_id: publicId,
-        transformation: transformations.length > 0 ? transformations : void 0,
-        eager: [
-          {
-            width: 1920,
-            height: 1080,
-            crop: "limit",
-            quality: "auto:best",
-            fetch_format: "auto"
-          },
-          {
-            width: 3840,
-            height: 2160,
-            crop: "limit",
-            quality: "auto:best",
-            fetch_format: "auto"
-          }
-        ],
-        eager_async: true,
-        resource_type: "image",
-        allowed_formats: ["jpg", "png", "webp", "gif", "svg"]
-      },
-      (error, result) => {
-        if (error) {
-          reject(new Error(`Cloudinary upload failed: ${error.message}`));
-          return;
-        }
-        if (!result) {
-          reject(new Error("Cloudinary upload failed: No result returned"));
-          return;
-        }
-        resolve({
-          publicId: result.public_id,
-          url: result.url,
-          secureUrl: result.secure_url,
-          width: result.width,
-          height: result.height,
-          format: result.format,
-          bytes: result.bytes
-        });
-      }
-    );
-    uploadStream.end(imageBuffer);
-  });
-}
-function getOptimizedImageUrl(publicId, options = {}) {
-  const {
-    width,
-    height,
-    quality = "auto:best",
-    format: format2 = "auto"
-  } = options;
-  return cloudinary.url(publicId, {
-    width,
-    height,
-    crop: "limit",
-    quality,
-    fetch_format: format2,
-    secure: true
-  });
-}
-async function deleteFromCloudinary(publicId) {
-  try {
-    await cloudinary.uploader.destroy(publicId);
-  } catch (error) {
-    console.error("Error deleting from Cloudinary:", error);
-    throw new Error(`Failed to delete image: ${publicId}`);
-  }
-}
-
-// server/routes.ts
 import multer from "multer";
-
-// server/gemini.ts
-import { GoogleGenAI } from "@google/genai";
-var genAI = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_API_KEY
-});
-async function analyzeSocialPostScreenshot(imageBase64, mimeType = "image/jpeg") {
-  const prompt = `You are analyzing a screenshot of a social media post. Extract the following information:
-
-1. **Caption/Description**: The full text content of the post
-2. **Platform**: Whether this is from Instagram, Facebook, or LinkedIn (look for visual indicators like interface design, icons, colors, layout, etc.)
-3. **Username**: The account name/handle or company name that posted this
-4. **Suggested Title**: Create a short, descriptive title (max 60 characters) that summarizes what this post is about
-5. **Link**: If visible, extract any links mentioned in the post. If the username/company name is visible, construct a profile link.
-
-For Instagram: https://instagram.com/{username}
-For Facebook: https://www.facebook.com/{username}
-For LinkedIn: https://linkedin.com/company/{company-name}
-
-Visual platform indicators:
-- Instagram: Camera icon, colorful gradient theme, square/portrait photos
-- Facebook: Blue theme, "f" logo, reactions icons (Like, Love, etc.)
-- LinkedIn: Blue and white professional theme, "in" logo, corporate/professional content
-
-Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
-{
-  "caption": "the full post text here",
-  "platform": "instagram",
-  "username": "accountname",
-  "suggestedTitle": "Brief description of post",
-  "suggestedLink": "https://instagram.com/accountname"
-}
-
-If you cannot determine a field with confidence, use these defaults:
-- caption: ""
-- platform: "instagram"
-- username: ""
-- suggestedTitle: "Social Media Post"
-- suggestedLink: ""`;
-  const result = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          { text: prompt },
-          {
-            inlineData: {
-              mimeType,
-              data: imageBase64
-            }
-          }
-        ]
-      }
-    ]
-  });
-  const responseText = result.response?.text() || result.text || "";
-  let cleanedResponse = responseText.trim();
-  cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
-  cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
-  cleanedResponse = cleanedResponse.trim();
-  try {
-    const parsed = JSON.parse(cleanedResponse);
-    let platform = "instagram";
-    if (parsed.platform === "facebook") {
-      platform = "facebook";
-    } else if (parsed.platform === "linkedin") {
-      platform = "linkedin";
-    }
-    return {
-      caption: parsed.caption || "",
-      platform,
-      username: parsed.username || "",
-      suggestedTitle: parsed.suggestedTitle || "Social Media Post",
-      suggestedLink: parsed.suggestedLink || ""
-    };
-  } catch (error) {
-    console.error("Failed to parse Gemini response:", cleanedResponse);
-    throw new Error("Failed to analyze screenshot - invalid response format");
-  }
-}
-async function analyzeImageForNaming(imageBase64, mimeType = "image/jpeg", originalFilename) {
-  const prompt = `You are analyzing an image to generate a descriptive, SEO-friendly filename for a nonprofit educational program's media library.
-
-${originalFilename ? `Original filename: "${originalFilename}"` : ""}
-
-Analyze the image and provide:
-
-1. **Category**: Classify this image into ONE of these categories:
-   - program: Program activities (children learning, reading circles, classroom activities)
-   - event: Special events (fundraisers, family fun days, community gatherings)
-   - facility: Building/space photos (classrooms, library, playground, empty rooms)
-   - testimonial: People-focused photos (parents, staff, volunteers, close-ups for quotes)
-   - marketing: Promotional materials (banners, flyers, graphics, hero images)
-   - general: Everything else that doesn't fit above
-
-2. **Description**: Create a brief, descriptive phrase (2-5 words, lowercase, underscore-separated) that captures the main visual elements. Focus on:
-   - Key subjects (children, families, staff)
-   - Primary activity (reading, playing, learning, speaking)
-   - Setting/location if relevant (outdoor, library, classroom)
-   - Visual composition (closeup, wide_angle, group)
-   
-   Examples:
-   - "children_reading_circle"
-   - "outdoor_playground_activities"
-   - "parent_testimonial_closeup"
-   - "library_wide_angle_empty"
-   - "staff_volunteer_group_photo"
-
-3. **Suggested Filename**: Combine category and description in format: {category}_{description}
-   - Use only lowercase letters, numbers, and underscores
-   - Keep it concise but descriptive (max 50 characters)
-   - Do NOT include file extension
-   - Do NOT include dates/timestamps (we'll add those)
-
-Visual analysis tips:
-- Look for people, their age groups, and what they're doing
-- Identify the setting (indoor/outdoor, specific rooms)
-- Note the composition (wide shot, close-up, group photo)
-- Determine the purpose (documentation, marketing, testimonial)
-
-Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
-{
-  "category": "program",
-  "description": "children_reading_circle",
-  "suggestedFilename": "program_children_reading_circle"
-}
-
-If you cannot determine with confidence, use these defaults:
-- category: "general"
-- description: "image"
-- suggestedFilename: "general_image"`;
-  const result = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          { text: prompt },
-          {
-            inlineData: {
-              mimeType,
-              data: imageBase64
-            }
-          }
-        ]
-      }
-    ]
-  });
-  const responseText = result.response?.text() || result.text || "";
-  let cleanedResponse = responseText.trim();
-  cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
-  cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
-  cleanedResponse = cleanedResponse.trim();
-  try {
-    const parsed = JSON.parse(cleanedResponse);
-    const validCategories = ["program", "event", "facility", "testimonial", "marketing", "general"];
-    let category = "general";
-    if (validCategories.includes(parsed.category)) {
-      category = parsed.category;
-    }
-    const sanitize = (str) => str.toLowerCase().replace(/[^a-z0-9_]/g, "_").replace(/_+/g, "_").replace(/^_|_$/g, "").substring(0, 50);
-    const description = sanitize(parsed.description || "image");
-    const suggestedFilename = sanitize(parsed.suggestedFilename || `${category}_${description}`);
-    return {
-      category,
-      description,
-      suggestedFilename
-    };
-  } catch (error) {
-    console.error("Failed to parse Gemini response:", cleanedResponse);
-    throw new Error("Failed to analyze image for naming - invalid response format");
-  }
-}
-async function analyzeYouTubeVideoThumbnail(thumbnailUrl, videoTitle, videoDescription) {
-  const response = await fetch(thumbnailUrl);
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  const base64Image = buffer.toString("base64");
-  const prompt = `You are analyzing a thumbnail from a YouTube video${videoTitle ? ` titled "${videoTitle}"` : ""}${videoDescription ? ` with description: "${videoDescription}"` : ""}. 
-
-Based on the thumbnail image${videoTitle ? ", title," : ""}${videoDescription ? " and description," : ""} extract or suggest the following:
-
-1. **Suggested Title**: ${videoTitle ? `Refine or improve the existing title "${videoTitle}" to be more engaging and descriptive (max 80 characters)` : "Create a compelling, descriptive title (max 80 characters) that captures what this video is about"}
-2. **Suggested Description**: Create a detailed description (2-3 sentences) that would work well for a nonprofit educational program website, highlighting the value and content
-3. **Category**: Classify this video into ONE of these categories: virtual_tour, program_overview, testimonial, educational_content, event_coverage, community_impact
-4. **Tags**: Suggest 3-5 relevant tags/keywords that describe this video's content (e.g., "early learning", "family programs", "community", "education")
-
-Visual analysis cues:
-- Look for people (staff, families, children) to identify testimonials or program activities
-- Identify facilities, classrooms, or spaces to categorize as virtual_tour
-- Look for text overlays, graphics, or presentation elements to identify educational_content
-- Identify group activities or gatherings to categorize as event_coverage or community_impact
-
-Return ONLY valid JSON in this exact format, with no markdown formatting or code blocks:
-{
-  "suggestedTitle": "Engaging video title here",
-  "suggestedDescription": "Detailed 2-3 sentence description highlighting educational value and impact for families",
-  "category": "virtual_tour",
-  "tags": ["tag1", "tag2", "tag3"]
-}
-
-If you cannot determine a field with confidence, use these defaults:
-- suggestedTitle: "${videoTitle || "Educational Video"}"
-- suggestedDescription: "Discover more about our programs and community impact"
-- category: "program_overview"
-- tags: ["education", "community", "families"]`;
-  const result = await genAI.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [
-      {
-        role: "user",
-        parts: [
-          { text: prompt },
-          {
-            inlineData: {
-              mimeType: "image/jpeg",
-              data: base64Image
-            }
-          }
-        ]
-      }
-    ]
-  });
-  const responseText = result.response?.text() || result.text || "";
-  let cleanedResponse = responseText.trim();
-  cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
-  cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
-  cleanedResponse = cleanedResponse.trim();
-  try {
-    const parsed = JSON.parse(cleanedResponse);
-    const validCategories = ["virtual_tour", "program_overview", "testimonial", "educational_content", "event_coverage", "community_impact"];
-    let category = "program_overview";
-    if (validCategories.includes(parsed.category)) {
-      category = parsed.category;
-    }
-    return {
-      suggestedTitle: parsed.suggestedTitle || videoTitle || "Educational Video",
-      suggestedDescription: parsed.suggestedDescription || "Discover more about our programs and community impact",
-      category,
-      tags: Array.isArray(parsed.tags) ? parsed.tags : ["education", "community", "families"]
-    };
-  } catch (error) {
-    console.error("Failed to parse Gemini response:", cleanedResponse);
-    throw new Error("Failed to analyze video thumbnail - invalid response format");
-  }
-}
-
-// server/routes.ts
-init_email();
-init_copywriter();
-
-// server/calendarService.ts
-import { google } from "googleapis";
-var connectionSettings;
-function getGoogleAuthClient() {
-  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  const path2 = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
-  if (json && json.trim().startsWith("{")) {
-    try {
-      const credentials = JSON.parse(json);
-      return new google.auth.GoogleAuth({ credentials });
-    } catch {
-      return null;
-    }
-  }
-  if (path2 || json && !json.trim().startsWith("{")) {
-    const keyPath = path2 || json.trim();
-    return new google.auth.GoogleAuth({ keyFile: keyPath });
-  }
-  return null;
-}
-async function getAccessToken() {
-  const auth = getGoogleAuthClient();
-  if (auth) {
-    const client2 = await auth.getClient();
-    const token = await client2.getAccessToken();
-    if (token.token) return token.token;
-  }
-  if (connectionSettings?.settings?.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
-  }
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY ? "repl " + process.env.REPL_IDENTITY : process.env.WEB_REPL_RENEWAL ? "depl " + process.env.WEB_REPL_RENEWAL : null;
-  if (!xReplitToken || !hostname) {
-    throw new Error(
-      "Google Calendar not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SERVICE_ACCOUNT_KEY_PATH, or use Replit Connectors."
-    );
-  }
-  connectionSettings = await fetch(
-    "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=google-calendar",
-    { headers: { Accept: "application/json", X_REPLIT_TOKEN: xReplitToken } }
-  ).then((res) => res.json()).then((data) => data.items?.[0]);
-  const accessToken = connectionSettings?.settings?.access_token || connectionSettings?.settings?.oauth?.credentials?.access_token;
-  if (!connectionSettings || !accessToken) {
-    throw new Error("Google Calendar not connected via Replit Connectors");
-  }
-  return accessToken;
-}
-async function getUncachableGoogleCalendarClient() {
-  const auth = getGoogleAuthClient();
-  if (auth) {
-    return google.calendar({ version: "v3", auth });
-  }
-  const accessToken = await getAccessToken();
-  const oauth2Client = new google.auth.OAuth2();
-  oauth2Client.setCredentials({ access_token: accessToken });
-  return google.calendar({ version: "v3", auth: oauth2Client });
-}
-var CalendarService = class {
-  static CALENDAR_ID = "primary";
-  static DEFAULT_TIMEZONE = "America/New_York";
-  static async createEvent(event) {
-    try {
-      const calendar = await getUncachableGoogleCalendarClient();
-      const response = await calendar.events.insert({
-        calendarId: this.CALENDAR_ID,
-        requestBody: {
-          summary: event.summary,
-          description: event.description,
-          location: event.location,
-          start: event.start,
-          end: event.end,
-          attendees: event.attendees,
-          sendUpdates: "all"
-        }
-      });
-      return {
-        id: response.data.id,
-        htmlLink: response.data.htmlLink,
-        summary: response.data.summary,
-        start: response.data.start?.dateTime || response.data.start?.date || "",
-        end: response.data.end?.dateTime || response.data.end?.date || ""
-      };
-    } catch (error) {
-      console.error("Error creating calendar event:", error);
-      throw new Error("Failed to create calendar event");
-    }
-  }
-  static async getEvent(eventId) {
-    try {
-      const calendar = await getUncachableGoogleCalendarClient();
-      const response = await calendar.events.get({
-        calendarId: this.CALENDAR_ID,
-        eventId
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching calendar event:", error);
-      throw new Error("Failed to fetch calendar event");
-    }
-  }
-  static async updateEvent(eventId, updates) {
-    try {
-      const calendar = await getUncachableGoogleCalendarClient();
-      const response = await calendar.events.patch({
-        calendarId: this.CALENDAR_ID,
-        eventId,
-        requestBody: updates
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error updating calendar event:", error);
-      throw new Error("Failed to update calendar event");
-    }
-  }
-  static async deleteEvent(eventId) {
-    try {
-      const calendar = await getUncachableGoogleCalendarClient();
-      await calendar.events.delete({
-        calendarId: this.CALENDAR_ID,
-        eventId
-      });
-      return { success: true };
-    } catch (error) {
-      console.error("Error deleting calendar event:", error);
-      throw new Error("Failed to delete calendar event");
-    }
-  }
-  static async listEvents(timeMin, timeMax, maxResults = 50) {
-    try {
-      const calendar = await getUncachableGoogleCalendarClient();
-      const response = await calendar.events.list({
-        calendarId: this.CALENDAR_ID,
-        timeMin: timeMin || (/* @__PURE__ */ new Date()).toISOString(),
-        timeMax,
-        maxResults,
-        singleEvents: true,
-        orderBy: "startTime"
-      });
-      return response.data.items || [];
-    } catch (error) {
-      console.error("Error listing calendar events:", error);
-      throw new Error("Failed to list calendar events");
-    }
-  }
-  static async checkAvailability(startDateTime, endDateTime) {
-    try {
-      const calendar = await getUncachableGoogleCalendarClient();
-      const response = await calendar.freebusy.query({
-        requestBody: {
-          timeMin: startDateTime,
-          timeMax: endDateTime,
-          items: [{ id: this.CALENDAR_ID }]
-        }
-      });
-      const busySlots = response.data.calendars?.[this.CALENDAR_ID]?.busy || [];
-      return {
-        available: busySlots.length === 0,
-        busySlots
-      };
-    } catch (error) {
-      console.error("Error checking availability:", error);
-      throw new Error("Failed to check availability");
-    }
-  }
-  static formatDateTime(date, time, timezone = this.DEFAULT_TIMEZONE) {
-    const dateTimeString = `${date}T${time}:00`;
-    return new Date(dateTimeString).toISOString();
-  }
-};
-
-// server/taskAutomation.ts
-var NEW_LEAD_TEMPLATES = {
-  student: {
-    title: "Initial outreach to prospective student",
-    description: "Reach out to introduce programs, answer questions, and understand their educational goals.",
-    taskType: "call",
-    priority: "high",
-    daysUntilDue: 1
-  },
-  parent: {
-    title: "Follow up with parent inquiry",
-    description: "Contact parent to discuss children's services, answer questions about enrollment, and schedule a visit.",
-    taskType: "call",
-    priority: "high",
-    daysUntilDue: 1
-  },
-  provider: {
-    title: "Connect with service provider",
-    description: "Reach out to discuss partnership opportunities and referral process.",
-    taskType: "email",
-    priority: "medium",
-    daysUntilDue: 2
-  },
-  donor: {
-    title: "Thank donor and provide impact info",
-    description: "Send thank you message and share how their support makes a difference.",
-    taskType: "email",
-    priority: "medium",
-    daysUntilDue: 1
-  },
-  volunteer: {
-    title: "Follow up on volunteer interest",
-    description: "Contact volunteer to discuss opportunities, availability, and next steps for onboarding.",
-    taskType: "call",
-    priority: "medium",
-    daysUntilDue: 2
-  }
-};
-var STAGE_CHANGE_TEMPLATES = {
-  new_lead: {
-    title: "Make first contact with new lead",
-    description: "Introduce yourself, understand their needs, and schedule follow-up.",
-    taskType: "call",
-    priority: "high",
-    daysUntilDue: 1
-  },
-  contacted: {
-    title: "Send follow-up materials",
-    description: "Send program information, enrollment forms, or requested materials.",
-    taskType: "email",
-    priority: "medium",
-    daysUntilDue: 2
-  },
-  qualified: {
-    title: "Schedule enrollment meeting",
-    description: "Set up meeting to discuss program details, answer questions, and begin enrollment process.",
-    taskType: "meeting",
-    priority: "high",
-    daysUntilDue: 3
-  },
-  nurturing: {
-    title: "Check in with prospect",
-    description: "Reach out to answer any questions and see if they're ready to move forward.",
-    taskType: "call",
-    priority: "medium",
-    daysUntilDue: 7
-  },
-  enrolled: {
-    title: "Welcome and onboard new participant",
-    description: "Provide orientation information, schedule first session, and ensure smooth start.",
-    taskType: "email",
-    priority: "high",
-    daysUntilDue: 1
-  }
-};
-async function createTaskForNewLead(storage2, lead, assignedTo) {
-  try {
-    const template = NEW_LEAD_TEMPLATES[lead.persona] || NEW_LEAD_TEMPLATES.student;
-    let taskAssignee = assignedTo;
-    if (!taskAssignee) {
-      const assignments = await storage2.getLeadAssignments({ leadId: lead.id });
-      if (assignments.length > 0) {
-        taskAssignee = assignments[0].assignedTo;
-      }
-    }
-    if (!taskAssignee) {
-      const allUsers = await storage2.getAllUsers();
-      const admin = allUsers.find((u) => u.isAdmin);
-      if (!admin) {
-        console.warn("No admin users found to assign automated task");
-        return;
-      }
-      taskAssignee = admin.id;
-    }
-    const dueDate = /* @__PURE__ */ new Date();
-    dueDate.setDate(dueDate.getDate() + template.daysUntilDue);
-    const taskData = {
-      leadId: lead.id,
-      assignedTo: taskAssignee,
-      createdBy: null,
-      // Null for automated tasks
-      title: template.title,
-      description: template.description,
-      taskType: template.taskType,
-      priority: template.priority,
-      status: "pending",
-      dueDate,
-      completedAt: null,
-      isAutomated: true
-    };
-    await storage2.createTask(taskData);
-    console.log(`Automated task created for new lead: ${lead.id} (${lead.persona})`);
-  } catch (error) {
-    console.error("Error creating automated task for new lead:", error);
-  }
-}
-async function createTaskForStageChange(storage2, lead, newStage, assignedTo) {
-  try {
-    if (newStage === "converted" || newStage === "lost") {
-      return;
-    }
-    const template = STAGE_CHANGE_TEMPLATES[newStage];
-    if (!template) {
-      console.log(`No task template for stage: ${newStage}`);
-      return;
-    }
-    let taskAssignee = assignedTo;
-    if (!taskAssignee) {
-      const assignments = await storage2.getLeadAssignments({ leadId: lead.id });
-      if (assignments.length > 0) {
-        taskAssignee = assignments[0].assignedTo;
-      }
-    }
-    if (!taskAssignee) {
-      const allUsers = await storage2.getAllUsers();
-      const admin = allUsers.find((u) => u.isAdmin);
-      if (!admin) {
-        console.warn("No admin users found to assign automated task");
-        return;
-      }
-      taskAssignee = admin.id;
-    }
-    const dueDate = /* @__PURE__ */ new Date();
-    dueDate.setDate(dueDate.getDate() + template.daysUntilDue);
-    const taskData = {
-      leadId: lead.id,
-      assignedTo: taskAssignee,
-      createdBy: null,
-      title: template.title,
-      description: template.description,
-      taskType: template.taskType,
-      priority: template.priority,
-      status: "pending",
-      dueDate,
-      completedAt: null,
-      isAutomated: true
-    };
-    await storage2.createTask(taskData);
-    console.log(`Automated task created for stage change: ${lead.id} \u2192 ${newStage}`);
-  } catch (error) {
-    console.error("Error creating automated task for stage change:", error);
-  }
-}
-async function createTasksForMissedFollowUps(storage2) {
-  try {
-    const now = /* @__PURE__ */ new Date();
-    const allTasks = await storage2.getTasks({ status: "pending" });
-    const overdueTasks = allTasks.filter((task) => {
-      if (!task.dueDate) return false;
-      return new Date(task.dueDate) < now;
-    });
-    console.log(`Found ${overdueTasks.length} overdue tasks`);
-    for (const overdueTask of overdueTasks) {
-      const leadTasks = await storage2.getTasks({
-        leadId: overdueTask.leadId,
-        status: "pending"
-      });
-      const hasRecentFollowUp = leadTasks.some((task) => {
-        if (task.id === overdueTask.id) return false;
-        if (task.taskType !== "follow_up") return false;
-        const taskAge = now.getTime() - new Date(task.createdAt).getTime();
-        return taskAge < 24 * 60 * 60 * 1e3;
-      });
-      if (hasRecentFollowUp) {
-        continue;
-      }
-      const followUpDueDate = /* @__PURE__ */ new Date();
-      followUpDueDate.setDate(followUpDueDate.getDate() + 1);
-      const taskData = {
-        leadId: overdueTask.leadId,
-        assignedTo: overdueTask.assignedTo,
-        createdBy: null,
-        title: `Follow up on overdue: ${overdueTask.title}`,
-        description: `Original task "${overdueTask.title}" was due on ${new Date(overdueTask.dueDate).toLocaleDateString()}. Please follow up urgently.`,
-        taskType: "follow_up",
-        priority: "urgent",
-        status: "pending",
-        dueDate: followUpDueDate,
-        completedAt: null,
-        isAutomated: true
-      };
-      await storage2.createTask(taskData);
-      console.log(`Created follow-up task for overdue task: ${overdueTask.id}`);
-    }
-  } catch (error) {
-    console.error("Error creating tasks for missed follow-ups:", error);
-  }
-}
-async function syncTaskToCalendar(storage2, task) {
-  try {
-    if (!task.dueDate) {
-      console.log(`Task ${task.id} has no due date, skipping calendar sync`);
-      return null;
-    }
-    let leadInfo = "";
-    if (task.leadId) {
-      const lead = await storage2.getLeadById(task.leadId);
-      if (lead) {
-        leadInfo = `
-
-Lead: ${lead.firstName} ${lead.lastName}
-Email: ${lead.email}
-Persona: ${lead.persona}`;
-      }
-    }
-    const assignee = await storage2.getUserById(task.assignedTo);
-    if (!assignee || !assignee.email) {
-      console.log(`Task ${task.id} assignee has no email, cannot send calendar invite`);
-      return null;
-    }
-    const dueDate = new Date(task.dueDate);
-    const startDateTime = new Date(dueDate);
-    startDateTime.setHours(9, 0, 0, 0);
-    const endDateTime = new Date(dueDate);
-    endDateTime.setHours(10, 0, 0, 0);
-    const calendarEvent = await CalendarService.createEvent({
-      summary: `Task: ${task.title}`,
-      description: `${task.description || "No description"}${leadInfo}
-
-Priority: ${task.priority}
-Type: ${task.taskType}`,
-      location: "",
-      start: {
-        dateTime: startDateTime.toISOString(),
-        timeZone: "America/New_York"
-      },
-      end: {
-        dateTime: endDateTime.toISOString(),
-        timeZone: "America/New_York"
-      },
-      attendees: [
-        {
-          email: assignee.email,
-          displayName: `${assignee.firstName} ${assignee.lastName}`
-        }
-      ]
-    });
-    console.log(`Task ${task.id} synced to calendar: ${calendarEvent.id}`);
-    return calendarEvent.id;
-  } catch (error) {
-    console.error(`Error syncing task ${task.id} to calendar:`, error);
-    return null;
-  }
-}
-
-// server/routes.ts
 import Stripe from "stripe";
 import * as XLSX from "xlsx";
 import { fromZonedTime as fromZonedTime3 } from "date-fns-tz";
-
-// server/demo-data.ts
-init_db();
-init_schema();
-import { sql as sql9 } from "drizzle-orm";
-async function seedDemoData(clearExisting = false) {
-  console.log("\u{1F331} Starting demo data seeding...");
-  try {
-    if (clearExisting) {
-      console.log("\u{1F5D1}\uFE0F Clearing existing demo data...");
-      await db.delete(campaignMembers);
-      await db.delete(donationCampaigns).where(sql9`slug LIKE 'demo-%'`);
-      await db.delete(leads).where(sql9`email LIKE '%@example.com'`);
-      await db.delete(contentItems).where(sql9`type IN ('event', 'testimonial') AND metadata IS NOT NULL`);
-      console.log("\u2705 Existing demo data cleared");
-    }
-    console.log("\u{1F4DD} Creating sample leads...");
-    const sampleLeads = [
-      {
-        email: "parent1@example.com",
-        firstName: "Sarah",
-        lastName: "Johnson",
-        phone: "+1-555-0101",
-        persona: "parent",
-        funnelStage: "retention",
-        leadSource: "website",
-        passions: ["literacy", "stem"]
-      },
-      {
-        email: "parent2@example.com",
-        firstName: "Michael",
-        lastName: "Chen",
-        phone: "+1-555-0102",
-        persona: "parent",
-        funnelStage: "retention",
-        leadSource: "referral",
-        passions: ["arts", "community"]
-      },
-      {
-        email: "donor1@example.com",
-        firstName: "Emily",
-        lastName: "Rodriguez",
-        phone: "+1-555-0201",
-        persona: "donor",
-        funnelStage: "decision",
-        leadSource: "campaign",
-        passions: ["literacy", "nutrition"]
-      },
-      {
-        email: "donor2@example.com",
-        firstName: "David",
-        lastName: "Thompson",
-        phone: "+1-555-0202",
-        persona: "donor",
-        funnelStage: "consideration",
-        leadSource: "ad",
-        passions: ["stem", "community"]
-      },
-      {
-        email: "donor3@example.com",
-        firstName: "Lisa",
-        lastName: "Martinez",
-        phone: "+1-555-0203",
-        persona: "donor",
-        funnelStage: "awareness",
-        leadSource: "organic",
-        passions: ["arts", "literacy"]
-      },
-      {
-        email: "volunteer1@example.com",
-        firstName: "James",
-        lastName: "Wilson",
-        phone: "+1-555-0301",
-        persona: "volunteer",
-        funnelStage: "consideration",
-        leadSource: "website",
-        passions: ["community", "nutrition"]
-      },
-      {
-        email: "student1@example.com",
-        firstName: "Alex",
-        lastName: "Kim",
-        persona: "student",
-        funnelStage: "retention",
-        leadSource: "in_person",
-        passions: ["stem", "arts"]
-      }
-    ];
-    await db.insert(leads).values(sampleLeads).onConflictDoNothing();
-    console.log(`\u2705 Created ${sampleLeads.length} sample leads`);
-    console.log("\u{1F4B0} Creating donation campaigns...");
-    const now = /* @__PURE__ */ new Date();
-    const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1e3);
-    const sixtyDaysFromNow = new Date(now.getTime() + 60 * 24 * 60 * 60 * 1e3);
-    const sampleCampaigns = [
-      {
-        name: "STEM Summer Program 2025",
-        slug: "demo-stem-summer-2025",
-        description: "Fund hands-on science, technology, engineering, and math activities for 50 students this summer",
-        story: "Our STEM Summer Program provides underserved youth with access to cutting-edge technology, robotics workshops, and mentorship from local engineers. Last year, 92% of participants reported increased interest in STEM careers. Your donation directly funds lab materials, field trips to tech companies, and expert instructors.",
-        goalAmount: 15e5,
-        // $15,000
-        raisedAmount: 875e3,
-        // $8,750 (58% funded)
-        passionTags: ["stem", "community"],
-        startDate: now,
-        endDate: sixtyDaysFromNow,
-        status: "active",
-        totalDonations: 42,
-        uniqueDonors: 38
-      },
-      {
-        name: "Literacy Champions Fund",
-        slug: "demo-literacy-champions",
-        description: "Provide books and reading tutors to help 100 children improve their reading skills",
-        story: "Every child deserves the gift of literacy. Our Literacy Champions program pairs struggling readers with trained tutors and provides age-appropriate books to take home. We've helped 200+ children increase reading proficiency by an average of 2 grade levels in just 6 months.",
-        goalAmount: 1e6,
-        // $10,000
-        raisedAmount: 725e3,
-        // $7,250 (72.5% funded)
-        passionTags: ["literacy", "community"],
-        startDate: now,
-        endDate: thirtyDaysFromNow,
-        status: "active",
-        totalDonations: 35,
-        uniqueDonors: 32
-      },
-      {
-        name: "Arts & Creativity Workshop",
-        slug: "demo-arts-creativity-2025",
-        description: "Bring professional artists to lead painting, music, and theater workshops for our students",
-        story: "Art transforms lives. Our Arts & Creativity Workshop introduces children to painting, sculpture, music composition, and theater performance. Many students discover hidden talents and build confidence through creative expression. Professional artists donate their time - we need your help covering materials and space rental.",
-        goalAmount: 8e5,
-        // $8,000
-        raisedAmount: 28e4,
-        // $2,800 (35% funded)
-        passionTags: ["arts"],
-        startDate: now,
-        endDate: sixtyDaysFromNow,
-        status: "active",
-        totalDonations: 18,
-        uniqueDonors: 16
-      },
-      {
-        name: "Healthy Meals Initiative",
-        slug: "demo-healthy-meals-2025",
-        description: "Ensure every child receives nutritious breakfast and lunch during our programs",
-        story: "No child should learn on an empty stomach. Our Healthy Meals Initiative provides fresh, nutritious breakfast and lunch to program participants. We work with local farms and nutritionists to create balanced menus that fuel growing bodies and minds. 100% of donations go directly to food costs.",
-        goalAmount: 12e5,
-        // $12,000
-        raisedAmount: 95e4,
-        // $9,500 (79% funded)
-        passionTags: ["nutrition", "community"],
-        startDate: now,
-        endDate: thirtyDaysFromNow,
-        status: "active",
-        totalDonations: 48,
-        uniqueDonors: 43
-      }
-    ];
-    const insertedCampaigns = await db.insert(donationCampaigns).values(sampleCampaigns).returning();
-    console.log(`\u2705 Created ${insertedCampaigns.length} donation campaigns`);
-    console.log("\u{1F4C4} Creating content items...");
-    const sampleContent = [
-      {
-        type: "event",
-        title: "Annual Charity Gala",
-        description: "Join us for an evening of inspiration, entertainment, and impact. Meet the students and families whose lives have been transformed by your support.",
-        order: 1,
-        isActive: true,
-        passionTags: ["community"],
-        metadata: {
-          date: "2025-12-15",
-          location: "Grand Ballroom, Downtown Convention Center",
-          ticketPrice: "Free for donors, $75 for general admission"
-        }
-      },
-      {
-        type: "event",
-        title: "STEM Fair & Showcase",
-        description: "Students demonstrate their robotics projects, science experiments, and engineering designs. Open to the community!",
-        order: 2,
-        isActive: true,
-        passionTags: ["stem"],
-        metadata: {
-          date: "2025-08-20",
-          location: "Julie's Family Learning Center",
-          ticketPrice: "Free admission"
-        }
-      },
-      {
-        type: "testimonial",
-        title: "My Daughter Discovered Her Love of Reading",
-        description: "Before joining the Literacy Champions program, my daughter struggled with reading and avoided books. Now she reads every night and her comprehension has improved dramatically. Thank you for believing in our children!",
-        order: 1,
-        isActive: true,
-        passionTags: ["literacy"],
-        metadata: {
-          author: "Sarah Johnson",
-          role: "Parent",
-          rating: 5
-        }
-      },
-      {
-        type: "testimonial",
-        title: "STEM Camp Changed My Career Path",
-        description: "The robotics workshop opened my eyes to engineering. I'm now studying computer science in college and I credit this program for showing me what's possible. It gave me hands-on experience I couldn't get anywhere else.",
-        order: 2,
-        isActive: true,
-        passionTags: ["stem"],
-        metadata: {
-          author: "Marcus Thompson",
-          role: "Former Student",
-          rating: 5
-        }
-      },
-      {
-        type: "testimonial",
-        title: "The Arts Program Built My Confidence",
-        description: "I was always shy and afraid to express myself. Through the Arts & Creativity Workshop, I found my voice in theater and painting. Now I perform in school plays and my artwork was featured in a gallery!",
-        order: 3,
-        isActive: true,
-        passionTags: ["arts"],
-        metadata: {
-          author: "Emma Rodriguez",
-          role: "Current Student",
-          rating: 5
-        }
-      }
-    ];
-    await db.insert(contentItems).values(sampleContent).onConflictDoNothing();
-    console.log(`\u2705 Created ${sampleContent.length} content items`);
-    console.log("\u{1F465} Creating users and campaign members...");
-    const parentLeads = await db.select().from(leads).where(sql9`persona = 'parent'`);
-    const demoUsers = [];
-    for (const parent of parentLeads) {
-      const existingUsers = await db.select().from(users).where(sql9`email = ${parent.email}`);
-      if (existingUsers.length > 0) {
-        demoUsers.push(existingUsers[0]);
-      } else {
-        try {
-          const [newUser] = await db.insert(users).values({
-            email: parent.email,
-            firstName: parent.firstName || "Member",
-            lastName: parent.lastName || "",
-            persona: "parent",
-            role: "client"
-          }).returning();
-          demoUsers.push(newUser);
-        } catch (error) {
-          const retryUsers = await db.select().from(users).where(sql9`email = ${parent.email}`);
-          if (retryUsers.length > 0) {
-            demoUsers.push(retryUsers[0]);
-          }
-        }
-      }
-    }
-    const campaignMembers_data = [];
-    for (const campaign of insertedCampaigns) {
-      const membersToAdd = demoUsers.slice(0, Math.floor(Math.random() * 2) + 1);
-      for (const user of membersToAdd) {
-        campaignMembers_data.push({
-          campaignId: campaign.id,
-          userId: user.id,
-          role: "beneficiary",
-          // Parents are beneficiaries whose children benefit from the campaign
-          notifyOnDonation: true,
-          notificationChannels: ["email"],
-          metadata: {
-            relationship: "parent",
-            childName: "Demo Student"
-          }
-        });
-      }
-    }
-    if (campaignMembers_data.length > 0) {
-      await db.insert(campaignMembers).values(campaignMembers_data).onConflictDoNothing();
-      console.log(`\u2705 Created ${demoUsers.length} users and ${campaignMembers_data.length} campaign member relationships`);
-    }
-    console.log("\u2728 Demo data seeding complete!");
-    return {
-      success: true,
-      summary: {
-        leads: sampleLeads.length,
-        campaigns: insertedCampaigns.length,
-        contentItems: sampleContent.length,
-        users: demoUsers.length,
-        campaignMembers: campaignMembers_data.length
-      }
-    };
-  } catch (error) {
-    console.error("\u274C Error seeding demo data:", error);
-    throw error;
-  }
-}
-async function seedFunnelProgressionRules(clearExisting = false) {
-  console.log("\u{1F3AF} Starting funnel progression rules seeding...");
-  try {
-    if (clearExisting) {
-      console.log("\u{1F5D1}\uFE0F Clearing existing funnel progression rules...");
-      await db.delete(funnelProgressionRules);
-      console.log("\u2705 Existing rules cleared");
-    }
-    const defaultRules = [
-      // DONOR PERSONA
-      {
-        persona: "donor",
-        fromStage: "awareness",
-        toStage: "consideration",
-        engagementScoreThreshold: 100,
-        // ~10 page views or 3-4 resource downloads
-        minimumDaysInStage: 1,
-        // At least 1 day before advancing
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 90,
-        // 3 months of inactivity
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "donor",
-        fromStage: "consideration",
-        toStage: "decision",
-        engagementScoreThreshold: 150,
-        // Donation page view (60pts) + calculator use (25pts) + more
-        minimumDaysInStage: 2,
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 60,
-        // 2 months
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "donor",
-        fromStage: "decision",
-        toStage: "retention",
-        engagementScoreThreshold: 9999,
-        // Auto-progress only via donation_completed event
-        minimumDaysInStage: 0,
-        autoProgressEvents: ["donation_completed"],
-        inactivityDaysThreshold: 45,
-        // 1.5 months
-        decayToStage: "consideration",
-        isActive: true
-      },
-      // STUDENT PERSONA
-      {
-        persona: "student",
-        fromStage: "awareness",
-        toStage: "consideration",
-        engagementScoreThreshold: 80,
-        // Quiz start (20pts) + video watch (25pts) + engagement
-        minimumDaysInStage: 1,
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 60,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "student",
-        fromStage: "consideration",
-        toStage: "decision",
-        engagementScoreThreshold: 120,
-        // Program inquiry (90pts) + other engagement
-        minimumDaysInStage: 3,
-        // Students take time to decide
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 45,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "student",
-        fromStage: "decision",
-        toStage: "retention",
-        engagementScoreThreshold: 9999,
-        minimumDaysInStage: 0,
-        autoProgressEvents: ["enrollment_submitted"],
-        inactivityDaysThreshold: 30,
-        decayToStage: "consideration",
-        isActive: true
-      },
-      // PARENT PERSONA
-      {
-        persona: "parent",
-        fromStage: "awareness",
-        toStage: "consideration",
-        engagementScoreThreshold: 90,
-        // Testimonials (25pts) + impact calculator (25pts) + more
-        minimumDaysInStage: 1,
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 75,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "parent",
-        fromStage: "consideration",
-        toStage: "decision",
-        engagementScoreThreshold: 140,
-        // Program inquiry (90pts) + engagement
-        minimumDaysInStage: 2,
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 60,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "parent",
-        fromStage: "decision",
-        toStage: "retention",
-        engagementScoreThreshold: 9999,
-        minimumDaysInStage: 0,
-        autoProgressEvents: ["enrollment_submitted"],
-        // Enrolling child
-        inactivityDaysThreshold: 30,
-        decayToStage: "consideration",
-        isActive: true
-      },
-      // VOLUNTEER PERSONA
-      {
-        persona: "volunteer",
-        fromStage: "awareness",
-        toStage: "consideration",
-        engagementScoreThreshold: 70,
-        // Resource downloads + video engagement
-        minimumDaysInStage: 1,
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 90,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "volunteer",
-        fromStage: "consideration",
-        toStage: "decision",
-        engagementScoreThreshold: 110,
-        // Volunteer inquiry (80pts) + engagement
-        minimumDaysInStage: 2,
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 60,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "volunteer",
-        fromStage: "decision",
-        toStage: "retention",
-        engagementScoreThreshold: 9999,
-        minimumDaysInStage: 0,
-        autoProgressEvents: ["volunteer_enrolled"],
-        inactivityDaysThreshold: 45,
-        decayToStage: "consideration",
-        isActive: true
-      },
-      // PROVIDER PERSONA (Service providers/partners)
-      {
-        persona: "provider",
-        fromStage: "awareness",
-        toStage: "consideration",
-        engagementScoreThreshold: 100,
-        // Resource downloads + testimonial engagement
-        minimumDaysInStage: 1,
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 90,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "provider",
-        fromStage: "consideration",
-        toStage: "decision",
-        engagementScoreThreshold: 200,
-        // Multiple high-value engagements before partnership
-        minimumDaysInStage: 5,
-        // Partnerships take time
-        autoProgressEvents: [],
-        inactivityDaysThreshold: 60,
-        decayToStage: "awareness",
-        isActive: true
-      },
-      {
-        persona: "provider",
-        fromStage: "decision",
-        toStage: "retention",
-        engagementScoreThreshold: 9999,
-        minimumDaysInStage: 0,
-        autoProgressEvents: ["contact_form_submit"],
-        // Partnership inquiry
-        inactivityDaysThreshold: 45,
-        decayToStage: "consideration",
-        isActive: true
-      }
-    ];
-    const inserted = await db.insert(funnelProgressionRules).values(defaultRules).returning();
-    console.log(`\u2705 Created ${inserted.length} funnel progression rules`);
-    console.log("\u2728 Funnel progression rules seeding complete!");
-    return {
-      success: true,
-      rulesCreated: inserted.length,
-      rules: inserted
-    };
-  } catch (error) {
-    console.error("\u274C Error seeding funnel progression rules:", error);
-    throw error;
-  }
-}
-
-// server/googleSheets.ts
-import { google as google2 } from "googleapis";
-var connectionSettings2;
-function getGoogleAuthClient2() {
-  const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
-  const path2 = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
-  if (json && json.trim().startsWith("{")) {
-    try {
-      const credentials = JSON.parse(json);
-      return new google2.auth.GoogleAuth({ credentials });
-    } catch {
-      return null;
-    }
-  }
-  if (path2 || json && !json.trim().startsWith("{")) {
-    const keyPath = path2 || json.trim();
-    return new google2.auth.GoogleAuth({ keyFile: keyPath });
-  }
-  return null;
-}
-async function getAccessToken2() {
-  const auth = getGoogleAuthClient2();
-  if (auth) {
-    const client2 = await auth.getClient();
-    const token = await client2.getAccessToken();
-    if (token.token) return token.token;
-  }
-  if (connectionSettings2?.settings?.expires_at && new Date(connectionSettings2.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings2.settings.access_token;
-  }
-  const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
-  const xReplitToken = process.env.REPL_IDENTITY ? "repl " + process.env.REPL_IDENTITY : process.env.WEB_REPL_RENEWAL ? "depl " + process.env.WEB_REPL_RENEWAL : null;
-  if (!xReplitToken || !hostname) {
-    throw new Error(
-      "Google Sheets not configured. Set GOOGLE_SERVICE_ACCOUNT_JSON or GOOGLE_SERVICE_ACCOUNT_KEY_PATH, or use Replit Connectors (REPLIT_CONNECTORS_HOSTNAME + REPL_IDENTITY or WEB_REPL_RENEWAL)."
-    );
-  }
-  connectionSettings2 = await fetch(
-    "https://" + hostname + "/api/v2/connection?include_secrets=true&connector_names=google-sheet",
-    { headers: { Accept: "application/json", X_REPLIT_TOKEN: xReplitToken } }
-  ).then((res) => res.json()).then((data) => data.items?.[0]);
-  const accessToken = connectionSettings2?.settings?.access_token || connectionSettings2?.settings?.oauth?.credentials?.access_token;
-  if (!connectionSettings2 || !accessToken) {
-    throw new Error("Google Sheet not connected via Replit Connectors");
-  }
-  return accessToken;
-}
-async function getUncachableGoogleSheetClient() {
-  const auth = getGoogleAuthClient2();
-  if (auth) {
-    return google2.sheets({ version: "v4", auth });
-  }
-  const accessToken = await getAccessToken2();
-  const oauth2Client = new google2.auth.OAuth2();
-  oauth2Client.setCredentials({ access_token: accessToken });
-  return google2.sheets({ version: "v4", auth: oauth2Client });
-}
-function parseGoogleSheetUrl(url) {
-  try {
-    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    if (!match) return null;
-    const spreadsheetId = match[1];
-    const gidMatch = url.match(/[#&]gid=(\d+)/);
-    return {
-      spreadsheetId,
-      gid: gidMatch ? gidMatch[1] : void 0,
-      range: void 0
-      // Will read all data by default
-    };
-  } catch (error) {
-    console.error("Error parsing Google Sheets URL:", error);
-    return null;
-  }
-}
-async function fetchSheetData(spreadsheetId, gid, range) {
-  const sheets = await getUncachableGoogleSheetClient();
-  const metadata = await sheets.spreadsheets.get({
-    spreadsheetId
-  });
-  let sheetName;
-  if (gid) {
-    const targetSheet = metadata.data.sheets?.find(
-      (sheet) => sheet.properties?.sheetId?.toString() === gid
-    );
-    sheetName = targetSheet?.properties?.title || metadata.data.sheets?.[0]?.properties?.title || "Sheet1";
-  } else {
-    sheetName = metadata.data.sheets?.[0]?.properties?.title || "Sheet1";
-  }
-  const fullRange = range || sheetName;
-  const response = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: fullRange
-  });
-  const rows = response.data.values;
-  if (!rows || rows.length === 0) {
-    return [];
-  }
-  const headers = rows[0];
-  const data = rows.slice(1).map((row) => {
-    const obj = {};
-    headers.forEach((header, index2) => {
-      obj[header] = row[index2] || "";
-    });
-    return obj;
-  });
-  return data;
-}
-
-// server/routes.ts
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
-}
-var stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-10-29.clover"
-});
-var requireRole = (...allowedRoles) => {
-  return async (req, res, next) => {
-    try {
-      const userToCheck = req.isImpersonating ? req.adminUser : req.user;
-      const oidcSub = userToCheck?.claims?.sub;
-      console.log("[requireRole] Checking role access for oidcSub:", oidcSub, "allowed roles:", allowedRoles, "impersonating:", req.isImpersonating);
-      if (!oidcSub) {
-        console.log("[requireRole] No oidcSub found - returning 401");
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      const user = await storage.getUserByOidcSub(oidcSub);
-      console.log("[requireRole] Found user:", user ? { id: user.id, email: user.email, role: user.role } : null);
-      if (!user) {
-        console.log("[requireRole] User not found - returning 401");
-        return res.status(401).json({ message: "Unauthorized" });
-      }
-      if (!allowedRoles.includes(user.role)) {
-        console.log("[requireRole] User role not allowed - returning 403");
-        return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
-      }
-      console.log("[requireRole] Role check passed");
-      next();
-    } catch (error) {
-      console.error("Role auth error:", error);
-      res.status(500).json({ message: "Authorization check failed" });
-    }
-  };
-};
-var requireAdmin = requireRole("admin", "super_admin");
-var requireSuperAdmin = requireRole("super_admin");
-var isAdmin = requireAdmin;
-var authWithImpersonation = [isAuthenticated, applyImpersonation];
 async function registerRoutes(app2) {
   await setupAuth(app2);
   app2.get("/track/open/:token", async (req, res) => {
@@ -21917,26 +21982,114 @@ You're receiving this notification because you're a member of this campaign. You
   const httpServer = createServer(app2);
   return httpServer;
 }
+var stripe, requireRole, requireAdmin, requireSuperAdmin, isAdmin, authWithImpersonation;
+var init_routes = __esm({
+  "server/routes.ts"() {
+    "use strict";
+    init_storage();
+    init_db();
+    init_replitAuth();
+    init_impersonationMiddleware();
+    init_tierMiddleware();
+    init_tiers();
+    init_schema();
+    init_cacLtgpAnalytics();
+    init_adminEntitlementService();
+    init_security();
+    init_funnelProgressionService();
+    init_schema();
+    init_objectStorage();
+    init_objectAcl();
+    init_cloudinary();
+    init_gemini();
+    init_email();
+    init_copywriter();
+    init_taskAutomation();
+    init_calendarService();
+    init_demo_data();
+    init_googleSheets();
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
+    }
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-10-29.clover"
+    });
+    requireRole = (...allowedRoles) => {
+      return async (req, res, next) => {
+        try {
+          const userToCheck = req.isImpersonating ? req.adminUser : req.user;
+          const oidcSub = userToCheck?.claims?.sub;
+          console.log("[requireRole] Checking role access for oidcSub:", oidcSub, "allowed roles:", allowedRoles, "impersonating:", req.isImpersonating);
+          if (!oidcSub) {
+            console.log("[requireRole] No oidcSub found - returning 401");
+            return res.status(401).json({ message: "Unauthorized" });
+          }
+          const user = await storage.getUserByOidcSub(oidcSub);
+          console.log("[requireRole] Found user:", user ? { id: user.id, email: user.email, role: user.role } : null);
+          if (!user) {
+            console.log("[requireRole] User not found - returning 401");
+            return res.status(401).json({ message: "Unauthorized" });
+          }
+          if (!allowedRoles.includes(user.role)) {
+            console.log("[requireRole] User role not allowed - returning 403");
+            return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+          }
+          console.log("[requireRole] Role check passed");
+          next();
+        } catch (error) {
+          console.error("Role auth error:", error);
+          res.status(500).json({ message: "Authorization check failed" });
+        }
+      };
+    };
+    requireAdmin = requireRole("admin", "super_admin");
+    requireSuperAdmin = requireRole("super_admin");
+    isAdmin = requireAdmin;
+    authWithImpersonation = [isAuthenticated, applyImpersonation];
+  }
+});
 
 // server/vercel-entry.ts
 var ready = null;
+var initError = null;
 function ensureReady() {
   if (!ready) {
     ready = (async () => {
-      await registerRoutes(app);
-      app.use((err, req, res, _next) => {
-        const status = err.status || err.statusCode || 500;
-        const message = err.message || "Internal Server Error";
-        const clientMessage = status === 500 ? "Internal Server Error" : message;
-        res.status(status).json({ message: clientMessage });
-      });
+      try {
+        const { app: appInstance } = await Promise.resolve().then(() => (init_app(), app_exports));
+        const { registerRoutes: registerRoutes2 } = await Promise.resolve().then(() => (init_routes(), routes_exports));
+        await registerRoutes2(appInstance);
+        appInstance.use((err, req, res, _next) => {
+          const status = err.status || err.statusCode || 500;
+          const message = err.message || "Internal Server Error";
+          const clientMessage = status === 500 ? "Internal Server Error" : message;
+          res.status(status).json({ message: clientMessage });
+        });
+        globalThis.__vercelApp = appInstance;
+      } catch (e) {
+        initError = e;
+        console.error("[vercel-entry] INIT FAILED:", e?.message, e?.stack);
+        throw e;
+      }
     })();
   }
   return ready;
 }
 async function handler(req, res) {
-  await ensureReady();
-  app(req, res);
+  try {
+    await ensureReady();
+    const appInstance = globalThis.__vercelApp;
+    appInstance(req, res);
+  } catch (e) {
+    console.error("[vercel-entry] HANDLER ERROR:", e?.message, e?.stack);
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({
+      error: "Function initialization failed",
+      message: e?.message,
+      stack: e?.stack?.substring(0, 2e3)
+    }));
+  }
 }
 export {
   handler as default
