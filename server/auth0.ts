@@ -1,4 +1,4 @@
-// OpenID Connect authentication (configurable for any OIDC provider)
+// Auth0 (OpenID Connect) authentication
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 
@@ -7,6 +7,7 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
+import { pool } from "./db";
 import { storage } from "./storage";
 import { authLimiter } from "./security";
 
@@ -54,7 +55,7 @@ export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    pool,
     createTableIfMissing: false,
     ttl: sessionTtl,
     tableName: "sessions",
@@ -96,7 +97,7 @@ async function upsertUser(
   console.log("[OIDC Claims] Received claims:", JSON.stringify(claims, null, 2));
   
   // Extract user data from claims with fallbacks
-  // Replit Auth uses different claim names than standard OIDC
+  // Auth0 (and other OIDC providers) may use different claim names
   const email = claims["email"] || claims["preferred_username"];
   const firstName = claims["first_name"] || claims["given_name"] || claims["name"]?.split(' ')[0];
   const lastName = claims["last_name"] || claims["family_name"] || claims["name"]?.split(' ')[1];

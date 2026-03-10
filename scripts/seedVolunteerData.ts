@@ -1,6 +1,4 @@
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 import { storage } from "../server/storage";
 import type { InsertVolunteerEvent, InsertVolunteerShift, InsertVolunteerEnrollment } from "@shared/schema";

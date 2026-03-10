@@ -1,6 +1,4 @@
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 // Script to seed the database with existing hardcoded content
 // Run with: npx tsx scripts/seedContent.ts

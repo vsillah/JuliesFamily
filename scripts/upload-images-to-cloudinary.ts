@@ -1,6 +1,4 @@
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 import fs from 'fs';
 import path from 'path';

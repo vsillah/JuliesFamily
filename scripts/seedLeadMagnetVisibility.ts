@@ -1,6 +1,4 @@
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 // Script to seed content_visibility records for lead magnets
 // Run with: npx tsx scripts/seedLeadMagnetVisibility.ts

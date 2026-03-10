@@ -10,8 +10,8 @@ Use this when moving Julie's Family (Kinflo) from Replit to your own hosting (e.
 
 | Current | Change for new environment |
 |--------|------------------------------|
-| **Replit Auth** (OIDC via `replit.com/oidc`) | Use any OIDC provider (Auth0, Keycloak, Google, etc.). |
-| **Files** | `server/replitAuth.ts` – now supports configurable OIDC. |
+| **Auth0** (OIDC) | Use Auth0 or any OIDC provider (Keycloak, Google, etc.). |
+| **Files** | `server/auth0.ts` – Auth0 / configurable OIDC. |
 | **Env** | Set **`OIDC_ISSUER_URL`**, **`OIDC_CLIENT_ID`**, **`OIDC_CLIENT_SECRET`**. Optional: **`OIDC_CALLBACK_PATH`**. Callback URL is derived from **`BASE_URL`**. Legacy **`REPL_ID`** / **`ISSUER_URL`** still work. If OIDC vars are missing, `/api/login` returns 503 and the app still starts. |
 
 Sessions use **PostgreSQL** and **`SESSION_SECRET`** – no change.

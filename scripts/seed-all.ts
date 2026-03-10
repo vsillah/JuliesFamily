@@ -5,9 +5,7 @@
  *
  * Runs each seeder as a child process (they call process.exit internally).
  */
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 import { execSync } from "child_process";
 import path from "path";

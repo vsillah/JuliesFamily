@@ -25,4 +25,6 @@ const __filename = _fileURLToPath(import.meta.url);
 const __dirname = _dirname(__filename);
     `.trim()
   }
+}).then(() => {
+  console.log('Vercel bundle built: api/index.mjs');
 }).catch(() => process.exit(1));

@@ -7108,7 +7108,7 @@ var init_storage = __esm({
   }
 });
 
-// server/replitAuth.ts
+// server/auth0.ts
 import * as client from "openid-client";
 import { Strategy } from "openid-client/passport";
 import passport from "passport";
@@ -7124,7 +7124,7 @@ function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1e3;
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
+    pool,
     createTableIfMissing: false,
     ttl: sessionTtl,
     tableName: "sessions"
@@ -7265,9 +7265,10 @@ async function setupAuth(app2) {
   });
 }
 var STRATEGY_NAME, getOidcConfig, isAuthenticated;
-var init_replitAuth = __esm({
-  "server/replitAuth.ts"() {
+var init_auth0 = __esm({
+  "server/auth0.ts"() {
     "use strict";
+    init_db();
     init_storage();
     init_security();
     STRATEGY_NAME = "oidc";
@@ -21945,7 +21946,7 @@ var init_routes = __esm({
     "use strict";
     init_storage();
     init_db();
-    init_replitAuth();
+    init_auth0();
     init_impersonationMiddleware();
     init_tierMiddleware();
     init_tiers();

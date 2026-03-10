@@ -166,7 +166,7 @@ openssl rand -hex 64
 
 ### 1. Authentication (OIDC – implemented)
 
-The app supports **any OIDC provider**. Set **`OIDC_ISSUER_URL`**, **`OIDC_CLIENT_ID`**, and **`OIDC_CLIENT_SECRET`** in `.env`. Callback URL is **`BASE_URL`** + `/api/callback`. Legacy **`REPL_ID`** / **`ISSUER_URL`** still work. See **`server/replitAuth.ts`**.
+The app supports **any OIDC provider** (e.g. Auth0). Set **`OIDC_ISSUER_URL`**, **`OIDC_CLIENT_ID`**, and **`OIDC_CLIENT_SECRET`** in `.env`. Callback URL is **`BASE_URL`** + `/api/callback`. Legacy **`REPL_ID`** / **`ISSUER_URL`** still work. See **`server/auth0.ts`**.
 
 ### 2. Object Storage (implemented)
 
@@ -421,7 +421,7 @@ npm install
 **Issue:** Sessions not persisting
 
 1. Check `SESSION_SECRET` is set
-2. Verify cookie settings in `server/replitAuth.ts`
+2. Verify cookie settings in `server/auth0.ts`
 3. Ensure `trust proxy` is enabled for production
 4. Check browser console for CORS errors
 
@@ -463,7 +463,7 @@ julies-family-learning/
 │   ├── index.ts         # Entry point
 │   ├── routes.ts        # API routes
 │   ├── storage.ts       # Database operations
-│   ├── replitAuth.ts    # Authentication (NEEDS REPLACEMENT)
+│   ├── auth0.ts         # Auth0 (OIDC) authentication
 │   ├── cloudinary.ts    # Image optimization
 │   └── db.ts            # Database connection
 ├── shared/              # Shared types

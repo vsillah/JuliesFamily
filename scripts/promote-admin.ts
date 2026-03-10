@@ -4,9 +4,7 @@
  *
  * Usage: npx tsx scripts/promote-admin.ts your@email.com
  */
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 import { db } from "../server/db";
 import { users } from "@shared/schema";

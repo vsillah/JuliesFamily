@@ -4,7 +4,7 @@ import type { Express, RequestHandler, Request } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth0";
 import { applyImpersonation, requireActualAdmin } from "./impersonationMiddleware";
 import { requireTier } from "./tierMiddleware";
 import { TIERS } from "@shared/tiers";

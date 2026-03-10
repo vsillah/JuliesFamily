@@ -1,6 +1,4 @@
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 import { db } from "../server/db";
 import { emailTemplates } from "../shared/schema";

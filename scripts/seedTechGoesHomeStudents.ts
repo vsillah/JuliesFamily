@@ -1,6 +1,4 @@
-import "dotenv/config";
-import { config as dotenvConfig } from "dotenv";
-dotenvConfig({ path: ".env.local", override: true });
+import "../server/loadEnv";
 
 // Script to seed Tech Goes Home students with enrollment records and final projects
 // Run with: npx tsx scripts/seedTechGoesHomeStudents.ts
