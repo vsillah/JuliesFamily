@@ -139,6 +139,11 @@ async function countCustomDomains(ctx: AnyCtx, tenantId: any) {
   return domains.filter((domain) => domain.tenantId === tenantId && domain.status !== "disabled").length;
 }
 
+async function countCampaigns(ctx: AnyCtx, tenantId: any) {
+  const campaigns = await ctx.db.query("campaigns").collect();
+  return campaigns.filter((campaign) => campaign.tenantId === tenantId && campaign.status !== "archived").length;
+}
+
 async function usageForLimit(ctx: AnyCtx, tenantId: any, key: EntitlementLimitKey) {
   if (key === "sites") {
     return { current: await countActiveSites(ctx, tenantId), source: "sites" };
@@ -151,6 +156,9 @@ async function usageForLimit(ctx: AnyCtx, tenantId: any, key: EntitlementLimitKe
   }
   if (key === "customDomains") {
     return { current: await countCustomDomains(ctx, tenantId), source: "domains" };
+  }
+  if (key === "campaigns") {
+    return { current: await countCampaigns(ctx, tenantId), source: "campaigns" };
   }
   return { current: 0, source: "contract_placeholder" };
 }

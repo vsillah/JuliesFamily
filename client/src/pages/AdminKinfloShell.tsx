@@ -53,6 +53,7 @@ import {
   type ExperienceIconKey,
   type ShellLiveAdapterStatus,
   type KinfloShellStatus,
+  type ShellCampaignDraft,
   type ShellDomainDraft,
   type ShellIntegrationDraft,
   type ShellMetricIconKey,
@@ -183,6 +184,16 @@ export default function AdminKinfloShell() {
   const [integrationStatus, setIntegrationStatus] = useState<ShellIntegrationDraft["status"]>(defaultIntegration?.status ?? "not_configured");
   const [integrationEnvKeys, setIntegrationEnvKeys] = useState(defaultIntegration?.envKeys.join("\n") ?? "");
   const [integrationApprovalNotes, setIntegrationApprovalNotes] = useState(defaultIntegration?.approvalNotes ?? "");
+  const defaultCampaign = snapshot.campaignAutomation.campaigns.find(
+    (campaign) => campaign.key === snapshot.campaignAutomation.defaultCampaignKey,
+  ) ?? snapshot.campaignAutomation.campaigns[0];
+  const [campaignSiteKey, setCampaignSiteKey] = useState(snapshot.campaignAutomation.defaultSiteKey);
+  const [selectedCampaignKey, setSelectedCampaignKey] = useState(defaultCampaign?.key ?? "");
+  const [campaignName, setCampaignName] = useState(defaultCampaign?.name ?? "");
+  const [campaignChannel, setCampaignChannel] = useState<ShellCampaignDraft["channel"]>(defaultCampaign?.channel ?? "email");
+  const [campaignStatus, setCampaignStatus] = useState<ShellCampaignDraft["status"]>(defaultCampaign?.status ?? "draft");
+  const [campaignObjective, setCampaignObjective] = useState(defaultCampaign?.objective ?? "");
+  const [campaignApprovalOwner, setCampaignApprovalOwner] = useState(defaultCampaign?.approvalOwner ?? "");
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -467,6 +478,41 @@ export default function AdminKinfloShell() {
   ];
   const integrationReadyCount = integrationReadiness.filter((item) => item.done).length;
   const integrationReadinessPercent = Math.round((integrationReadyCount / integrationReadiness.length) * 100);
+  const selectedCampaignSite = useMemo(
+    () => snapshot.campaignAutomation.siteOptions.find((site) => site.key === campaignSiteKey) ?? snapshot.campaignAutomation.siteOptions[0],
+    [campaignSiteKey, snapshot.campaignAutomation.siteOptions],
+  );
+  const filteredCampaigns = useMemo(
+    () => snapshot.campaignAutomation.campaigns.filter((campaign) => campaign.siteKey === campaignSiteKey),
+    [campaignSiteKey, snapshot.campaignAutomation.campaigns],
+  );
+  const selectedCampaign = useMemo(
+    () => filteredCampaigns.find((campaign) => campaign.key === selectedCampaignKey) ?? filteredCampaigns[0],
+    [filteredCampaigns, selectedCampaignKey],
+  );
+  const selectedCampaignChannel = useMemo(
+    () => snapshot.campaignAutomation.channelOptions.find((channel) => channel.key === campaignChannel) ?? snapshot.campaignAutomation.channelOptions[0],
+    [campaignChannel, snapshot.campaignAutomation.channelOptions],
+  );
+  const campaignDraftDirty = Boolean(
+    selectedCampaign
+    && (
+      campaignName !== selectedCampaign.name
+      || campaignChannel !== selectedCampaign.channel
+      || campaignStatus !== selectedCampaign.status
+      || campaignObjective !== selectedCampaign.objective
+      || campaignApprovalOwner !== selectedCampaign.approvalOwner
+    ),
+  );
+  const campaignReadiness = [
+    { label: "Site selected", done: Boolean(selectedCampaignSite) },
+    { label: "Campaign selected", done: Boolean(selectedCampaign) },
+    { label: "Objective documented", done: Boolean(campaignObjective.trim()) },
+    { label: "Approval owner named", done: Boolean(campaignApprovalOwner.trim()) },
+    { label: "Live send and AI execution pending", done: false },
+  ];
+  const campaignReadyCount = campaignReadiness.filter((item) => item.done).length;
+  const campaignReadinessPercent = Math.round((campaignReadyCount / campaignReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -608,6 +654,27 @@ export default function AdminKinfloShell() {
 
   const handleIntegrationChange = (integrationKey: string) => {
     hydrateIntegration(snapshot.integrationReadiness.integrations.find((integration) => integration.key === integrationKey));
+  };
+
+  const hydrateCampaign = (campaign?: ShellCampaignDraft) => {
+    if (!campaign) {
+      return;
+    }
+    setSelectedCampaignKey(campaign.key);
+    setCampaignName(campaign.name);
+    setCampaignChannel(campaign.channel);
+    setCampaignStatus(campaign.status);
+    setCampaignObjective(campaign.objective);
+    setCampaignApprovalOwner(campaign.approvalOwner);
+  };
+
+  const handleCampaignSiteChange = (siteKey: string) => {
+    setCampaignSiteKey(siteKey);
+    hydrateCampaign(snapshot.campaignAutomation.campaigns.find((campaign) => campaign.siteKey === siteKey));
+  };
+
+  const handleCampaignChange = (campaignKey: string) => {
+    hydrateCampaign(snapshot.campaignAutomation.campaigns.find((campaign) => campaign.key === campaignKey));
   };
 
   useEffect(() => {
@@ -783,6 +850,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="assets">Assets</TabsTrigger>
             <TabsTrigger value="domains">Domains</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -2670,6 +2738,244 @@ export default function AdminKinfloShell() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {snapshot.integrationReadiness.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="campaigns" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Campaign Automation</h2>
+                    <p className="text-sm text-muted-foreground">Draft email, SMS, task, and AI-assisted campaign steps behind review and approval gates.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <Workflow className="mr-1 h-3 w-3" />
+                    Sends gated
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Campaign Draft Packet</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedCampaignSite?.label} · {selectedCampaignChannel?.label}
+                      </p>
+                    </div>
+                    <Badge variant={campaignDraftDirty ? "default" : "secondary"}>
+                      {campaignDraftDirty ? "Local edits" : "Fixture campaign"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={campaignSiteKey} onValueChange={handleCampaignSiteChange}>
+                          <SelectTrigger data-testid="select-kinflo-campaign-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.campaignAutomation.siteOptions.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Campaign</Label>
+                        <Select value={selectedCampaign?.key ?? ""} onValueChange={handleCampaignChange}>
+                          <SelectTrigger data-testid="select-kinflo-campaign-record">
+                            <SelectValue placeholder="Select campaign" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredCampaigns.map((campaign) => (
+                              <SelectItem key={campaign.key} value={campaign.key}>
+                                {campaign.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Channel</Label>
+                        <Select value={campaignChannel} onValueChange={(value) => setCampaignChannel(value as ShellCampaignDraft["channel"])}>
+                          <SelectTrigger data-testid="select-kinflo-campaign-channel">
+                            <SelectValue placeholder="Select channel" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.campaignAutomation.channelOptions.map((channel) => (
+                              <SelectItem key={channel.key} value={channel.key}>
+                                {channel.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={campaignStatus} onValueChange={(value) => setCampaignStatus(value as ShellCampaignDraft["status"])}>
+                          <SelectTrigger data-testid="select-kinflo-campaign-status">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.campaignAutomation.statusOptions.map((status) => (
+                              <SelectItem key={status.key} value={status.key}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-campaign-name">Campaign name</Label>
+                          <Input
+                            id="kinflo-campaign-name"
+                            value={campaignName}
+                            onChange={(event) => setCampaignName(event.target.value)}
+                            data-testid="input-kinflo-campaign-name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-campaign-objective">Objective</Label>
+                          <textarea
+                            id="kinflo-campaign-objective"
+                            value={campaignObjective}
+                            onChange={(event) => setCampaignObjective(event.target.value)}
+                            rows={4}
+                            className="min-h-[112px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-campaign-objective"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-campaign-approval-owner">Approval owner</Label>
+                          <Input
+                            id="kinflo-campaign-approval-owner"
+                            value={campaignApprovalOwner}
+                            onChange={(event) => setCampaignApprovalOwner(event.target.value)}
+                            data-testid="input-kinflo-campaign-approval-owner"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="rounded-md border p-3 text-sm">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="break-words font-medium">{campaignName}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">{selectedCampaign?.targetPersona} · {selectedCampaign?.journeyStage}</div>
+                            </div>
+                            <Badge variant={campaignStatus === "approved" ? "secondary" : "outline"}>{campaignStatus}</Badge>
+                          </div>
+                          <div className="mt-3 text-xs text-muted-foreground">{selectedCampaign?.providerBoundary}</div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{campaignReadinessPercent}%</span>
+                          </div>
+                          <Progress value={campaignReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {campaignReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border">
+                      <div className="border-b px-4 py-3 text-sm font-medium">Review steps</div>
+                      <div className="divide-y">
+                        {(selectedCampaign?.steps ?? []).map((step) => (
+                          <div key={step.key} className="grid gap-3 px-4 py-3 text-sm md:grid-cols-[minmax(0,1fr)_120px_130px] md:items-center">
+                            <div className="min-w-0">
+                              <div className="font-medium">{step.label}</div>
+                              <div className="mt-1 break-words text-xs text-muted-foreground">{step.subject ?? step.body}</div>
+                            </div>
+                            <Badge variant="outline" className="w-fit">{step.channel}</Badge>
+                            <Badge variant={step.providerStatus === "approved" ? "secondary" : "outline"} className="w-fit">
+                              {step.providerStatus}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.campaignAutomation.providerBoundary}</div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button disabled variant="outline" data-testid="button-request-campaign-approval">
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          Live approval gated
+                        </Button>
+                        <Button disabled data-testid="button-launch-campaign-automation">
+                          <MailPlus className="mr-2 h-4 w-4" />
+                          Live send gated
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Campaign Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Campaign records stay draft and approval metadata until hosted provider smokes are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.campaignAutomation.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Safety Checklist</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.campaignAutomation.safetyChecklist.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.campaignAutomation.activationEvidence.map((item) => (
                       <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                         <CircleDashed className="mt-0.5 h-4 w-4" />
                         <span>{item}</span>

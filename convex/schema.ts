@@ -114,6 +114,34 @@ export const integrationScope = v.union(
   v.literal("site"),
 );
 
+export const campaignChannel = v.union(
+  v.literal("email"),
+  v.literal("sms"),
+  v.literal("multi_channel"),
+  v.literal("ai_assisted"),
+);
+
+export const campaignStatus = v.union(
+  v.literal("draft"),
+  v.literal("review_pending"),
+  v.literal("approved"),
+  v.literal("paused"),
+  v.literal("archived"),
+);
+
+export const campaignStepChannel = v.union(
+  v.literal("email"),
+  v.literal("sms"),
+  v.literal("task"),
+  v.literal("ai_draft"),
+);
+
+export const approvalStatus = v.union(
+  v.literal("pending"),
+  v.literal("approved"),
+  v.literal("rejected"),
+);
+
 export default defineSchema({
   users: defineTable({
     subject: v.string(),
@@ -555,6 +583,97 @@ export default defineSchema({
     .index("by_lead", ["leadId"])
     .index("by_assigned_to", ["assignedTo"])
     .index("by_dueAt", ["dueAt"]),
+
+  campaigns: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    name: v.string(),
+    channel: campaignChannel,
+    status: campaignStatus,
+    objective: v.string(),
+    targetPersona: v.optional(v.string()),
+    journeyStage: v.optional(v.string()),
+    providerBoundary: v.string(),
+    createdBy: v.id("users"),
+    updatedBy: v.id("users"),
+    approvedBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    approvedAt: v.optional(v.number()),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_site_status", ["siteId", "status"])
+    .index("by_tenant_status", ["tenantId", "status"])
+    .index("by_site_channel", ["siteId", "channel"]),
+
+  campaignSteps: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    campaignId: v.id("campaigns"),
+    channel: campaignStepChannel,
+    order: v.number(),
+    templateName: v.string(),
+    subject: v.optional(v.string()),
+    body: v.string(),
+    delayHours: v.number(),
+    requiresApproval: v.boolean(),
+    providerStatus: v.union(
+      v.literal("not_queued"),
+      v.literal("ready_for_review"),
+      v.literal("approved"),
+      v.literal("blocked"),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_campaign_order", ["campaignId", "order"])
+    .index("by_site_channel", ["siteId", "channel"]),
+
+  campaignApprovals: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    campaignId: v.id("campaigns"),
+    status: approvalStatus,
+    requestedBy: v.id("users"),
+    reviewedBy: v.optional(v.id("users")),
+    reviewNotes: v.optional(v.string()),
+    createdAt: v.number(),
+    reviewedAt: v.optional(v.number()),
+  })
+    .index("by_campaign", ["campaignId"])
+    .index("by_site_status", ["siteId", "status"]),
+
+  automationSafetyPolicies: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.optional(v.id("sites")),
+    maxDailyEmailSends: v.number(),
+    maxDailySmsSends: v.number(),
+    maxDailyAiDrafts: v.number(),
+    requiresHumanApproval: v.boolean(),
+    quietHours: v.optional(v.any()),
+    createdBy: v.id("users"),
+    updatedBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_tenant", ["tenantId"])
+    .index("by_site", ["siteId"]),
+
+  aiGenerationRecords: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    campaignId: v.optional(v.id("campaigns")),
+    promptSummary: v.string(),
+    sourceInputs: v.optional(v.any()),
+    outputSummary: v.string(),
+    status: approvalStatus,
+    reviewerId: v.optional(v.id("users")),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    reviewedAt: v.optional(v.number()),
+  })
+    .index("by_site_status", ["siteId", "status"])
+    .index("by_campaign", ["campaignId"]),
 
   pipelineEvents: defineTable({
     tenantId: v.id("tenants"),

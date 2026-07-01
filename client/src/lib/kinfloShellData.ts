@@ -308,6 +308,48 @@ export type ShellIntegrationReadiness = {
   safetyChecklist: string[];
 };
 
+export type ShellCampaignChannel = "email" | "sms" | "multi_channel" | "ai_assisted";
+
+export type ShellCampaignStatus = "draft" | "review_pending" | "approved" | "paused" | "archived";
+
+export type ShellCampaignStepDraft = {
+  key: string;
+  channel: "email" | "sms" | "task" | "ai_draft";
+  label: string;
+  subject?: string;
+  body: string;
+  delayHours: number;
+  requiresApproval: boolean;
+  providerStatus: "not_queued" | "ready_for_review" | "approved" | "blocked";
+};
+
+export type ShellCampaignDraft = {
+  key: string;
+  siteKey: string;
+  name: string;
+  channel: ShellCampaignChannel;
+  status: ShellCampaignStatus;
+  objective: string;
+  targetPersona: string;
+  journeyStage: string;
+  approvalOwner: string;
+  providerBoundary: string;
+  steps: ShellCampaignStepDraft[];
+};
+
+export type ShellCampaignAutomation = {
+  defaultSiteKey: string;
+  defaultCampaignKey: string;
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  channelOptions: { key: ShellCampaignChannel; label: string }[];
+  statusOptions: { key: ShellCampaignStatus; label: string }[];
+  campaigns: ShellCampaignDraft[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+  safetyChecklist: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -448,6 +490,7 @@ export type KinfloShellSnapshot = {
   assetLibrary: ShellAssetLibraryDraft;
   domainReadiness: ShellDomainReadinessDraft;
   integrationReadiness: ShellIntegrationReadiness;
+  campaignAutomation: ShellCampaignAutomation;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -1119,6 +1162,142 @@ const fixtureIntegrationReadiness: ShellIntegrationReadiness = {
   ],
 };
 
+const fixtureCampaignAutomation: ShellCampaignAutomation = {
+  defaultSiteKey: "advisor-client-site",
+  defaultCampaignKey: "advisor-intake-nurture",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  channelOptions: [
+    { key: "email", label: "Email" },
+    { key: "sms", label: "SMS" },
+    { key: "multi_channel", label: "Email + SMS" },
+    { key: "ai_assisted", label: "AI-assisted draft" },
+  ],
+  statusOptions: [
+    { key: "draft", label: "Draft" },
+    { key: "review_pending", label: "Review pending" },
+    { key: "approved", label: "Approved" },
+    { key: "paused", label: "Paused" },
+    { key: "archived", label: "Archived" },
+  ],
+  campaigns: [
+    {
+      key: "advisor-intake-nurture",
+      siteKey: "advisor-client-site",
+      name: "Advisor intake nurture",
+      channel: "email",
+      status: "review_pending",
+      objective: "Follow up with qualified advisory leads after the intake form without sending provider email until approval.",
+      targetPersona: "client prospect",
+      journeyStage: "consideration",
+      approvalOwner: "Tenant Admin",
+      providerBoundary: "Email sequence is review-only until SendGrid sender identity, unsubscribe footer, and live smoke are approved.",
+      steps: [
+        {
+          key: "advisor-email-1",
+          channel: "email",
+          label: "Immediate confirmation",
+          subject: "We received your KinFlo intake",
+          body: "Confirm the inquiry, restate the next step, and route the lead to a human review queue.",
+          delayHours: 0,
+          requiresApproval: true,
+          providerStatus: "ready_for_review",
+        },
+        {
+          key: "advisor-task-1",
+          channel: "task",
+          label: "Human review task",
+          body: "Assign a follow-up task to the site admin before any second-touch message is approved.",
+          delayHours: 24,
+          requiresApproval: true,
+          providerStatus: "not_queued",
+        },
+      ],
+    },
+    {
+      key: "julie-family-reminders",
+      siteKey: "julies-family-public",
+      name: "Family program reminders",
+      channel: "multi_channel",
+      status: "draft",
+      objective: "Prepare opt-in family reminders for program sessions while consent and SMS policy are still gated.",
+      targetPersona: "parent",
+      journeyStage: "retention",
+      approvalOwner: "Program Lead",
+      providerBoundary: "SMS and email reminders stay local until consent proof, quiet hours, opt-out handling, and provider smoke pass.",
+      steps: [
+        {
+          key: "julie-email-reminder",
+          channel: "email",
+          label: "Session reminder email",
+          subject: "Your next Julie's Family session",
+          body: "Remind families about time, location, materials, and support contact.",
+          delayHours: 48,
+          requiresApproval: true,
+          providerStatus: "not_queued",
+        },
+        {
+          key: "julie-sms-reminder",
+          channel: "sms",
+          label: "Opt-in SMS reminder",
+          body: "Short SMS reminder with STOP language and program contact.",
+          delayHours: 24,
+          requiresApproval: true,
+          providerStatus: "blocked",
+        },
+      ],
+    },
+    {
+      key: "campaign-ai-proof",
+      siteKey: "campaign-microsite",
+      name: "Campaign proof copy review",
+      channel: "ai_assisted",
+      status: "paused",
+      objective: "Generate review-only proof-point drafts for a campaign microsite without touching public content.",
+      targetPersona: "supporter",
+      journeyStage: "awareness",
+      approvalOwner: "Campaign Editor",
+      providerBoundary: "AI copy remains proposal-only until source inputs, reviewer notes, usage caps, and publish approval are recorded.",
+      steps: [
+        {
+          key: "campaign-ai-draft",
+          channel: "ai_draft",
+          label: "Draft proof points",
+          body: "Create source-safe draft proof bullets for human review; do not publish generated copy automatically.",
+          delayHours: 0,
+          requiresApproval: true,
+          providerStatus: "blocked",
+        },
+      ],
+    },
+  ],
+  providerBoundary: "Campaign automation stores drafts, steps, review state, and safety policy only. No provider send, lead enrollment, AI generation, webhook, or analytics promotion runs from this shell.",
+  convexFunctions: [
+    "campaigns.listCampaignDrafts",
+    "campaigns.upsertCampaignDraft",
+    "campaigns.requestCampaignApproval",
+    "campaigns.approveCampaignDraft",
+    "entitlements.checkEntitlementLimit",
+  ],
+  activationEvidence: [
+    "campaign:manage can draft site-scoped campaigns",
+    "campaign:approve is required before activation",
+    "campaigns entitlement limit is checked before creation",
+    "approval writes audit evidence without provider sends",
+    "AI outputs remain proposal records until human review",
+  ],
+  safetyChecklist: [
+    "Confirm tenant and site scope before drafting",
+    "Require human approval for every outbound step",
+    "Keep consent, unsubscribe, quiet hours, and rate limits explicit",
+    "Record AI source inputs and reviewer before publish",
+    "Run SendGrid, Twilio, and AI smokes separately after hosted activation",
+  ],
+};
+
 const fixtureExperienceControls: ShellExperienceControl[] = [
   { label: "Theme Tokens", value: "Palette, typography, spacing, radii", iconKey: "theme" },
   { label: "Navigation", value: "Header and footer placement per site", iconKey: "navigation" },
@@ -1411,6 +1590,13 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
     status: "generated_api_pending",
   },
   {
+    surface: "Campaign automation",
+    fixtureSource: "campaign drafts, review steps, safety gates, and approval state",
+    convexFunctions: ["campaigns.listCampaignDrafts", "campaigns.upsertCampaignDraft", "campaigns.approveCampaignDraft"],
+    activationEvidence: ["campaign:manage scoped", "campaign limit enforced", "provider sends gated"],
+    status: "generated_api_pending",
+  },
+  {
     surface: "Public renderer",
     fixtureSource: "public preview resolver",
     convexFunctions: ["publicSite.resolvePublishedSite"],
@@ -1510,6 +1696,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Asset library shell", status: "done" },
   { label: "Domain readiness shell", status: "done" },
   { label: "Integration readiness shell", status: "done" },
+  { label: "Campaign automation shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1583,6 +1770,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       assetLibrary: fixtureAssetLibrary,
       domainReadiness: fixtureDomainReadiness,
       integrationReadiness: fixtureIntegrationReadiness,
+      campaignAutomation: fixtureCampaignAutomation,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

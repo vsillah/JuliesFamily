@@ -6,6 +6,7 @@ import {
 export type KinfloGeneratedApiModule =
   | "accessPolicy"
   | "activation"
+  | "campaigns"
   | "controlPlane"
   | "crm"
   | "entitlements"
@@ -83,6 +84,10 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("entitlementsCheckLimit", "query", "plans and entitlements", "limit check returns current, limit, remaining, and allowed"),
   binding("integrationsListSettings", "query", "integration readiness", "integration settings are scoped by tenant or site permission"),
   binding("integrationsUpsertSetting", "mutation", "integration readiness", "provider readiness records env key names, status, and audit evidence without provider writes"),
+  binding("campaignsListDrafts", "query", "campaign automation", "site-scoped campaign drafts are visible only to campaign managers"),
+  binding("campaignsUpsertDraft", "mutation", "campaign automation", "campaign draft upsert enforces campaign limits and writes audit evidence without provider sends"),
+  binding("campaignsRequestApproval", "mutation", "campaign automation", "campaign approval request creates review state without enrolling leads or sending messages"),
+  binding("campaignsApproveDraft", "mutation", "campaign automation", "campaign approval records reviewer evidence without email, SMS, AI, or automation execution"),
   binding("preferencesGetMyPreferences", "query", "experience preferences", "viewer can read own tenant/site scoped preferences after scope permission check"),
   binding("preferencesUpsertMyPreferences", "mutation", "experience preferences", "viewer can update own tenant/site scoped preferences after scope permission check"),
   binding("siteFactoryListStarterTemplates", "query", "site factory", "starter templates include quality contract metadata"),
