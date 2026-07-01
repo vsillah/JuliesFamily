@@ -500,6 +500,11 @@ export default function AdminKinfloShell() {
     (clientWebsiteStudioReadyCount / clientWebsiteStudioReadiness.length) * 100,
   );
   const clientWebsiteStudioPreviewPath = selectedClientWebsiteStudioSite?.previewPath ?? "/kinflo-sites/julies-family";
+  const selectedClientWebsiteLaunchBlueprint = useMemo(
+    () => snapshot.clientWebsiteStudio.launchBlueprints.find((blueprint) => blueprint.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.launchBlueprints[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchBlueprints],
+  );
   const selectedAssetSite = useMemo(
     () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
     [assetSiteKey, snapshot.assetLibrary.siteOptions],
@@ -2951,6 +2956,90 @@ export default function AdminKinfloShell() {
                           </div>
                         );
                       })}
+                    </div>
+
+                    <div className="rounded-md border p-4" data-testid="section-kinflo-client-website-blueprint">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <ListChecks className="h-4 w-4 text-muted-foreground" />
+                            <h3 className="text-base font-semibold">Launch Blueprint</h3>
+                          </div>
+                          <p className="mt-1 text-sm text-muted-foreground" data-testid="text-kinflo-client-website-blueprint">
+                            {selectedClientWebsiteLaunchBlueprint?.label}
+                          </p>
+                        </div>
+                        <Badge variant="outline">{selectedClientWebsiteLaunchBlueprint?.ownerRole}</Badge>
+                      </div>
+
+                      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                        <div className="min-w-0 space-y-4">
+                          <div>
+                            <div className="text-sm font-medium">Default pages</div>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {selectedClientWebsiteLaunchBlueprint?.defaultPages.map((page) => (
+                                <Badge key={page} variant="secondary">{page}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">Launch sequence</div>
+                            <div className="mt-2 space-y-2">
+                              {selectedClientWebsiteLaunchBlueprint?.launchSequence.map((step) => (
+                                <div key={step} className="flex items-start gap-2 text-sm text-muted-foreground">
+                                  <CircleDashed className="mt-0.5 h-4 w-4" />
+                                  <span>{step}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <div className="text-sm font-medium">Permission gates</div>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {selectedClientWebsiteLaunchBlueprint?.adminPermissionGates.map((permission) => (
+                                <Badge key={permission} variant="outline">{permission}</Badge>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-medium">Blocked provider actions</div>
+                            <div className="mt-2 space-y-2">
+                              {selectedClientWebsiteLaunchBlueprint?.blockedProviderActions.map((action) => (
+                                <div key={action} className="flex items-start gap-2 text-xs text-muted-foreground">
+                                  <ShieldCheck className="mt-0.5 h-3.5 w-3.5" />
+                                  <span>{action}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-wrap gap-2">
+                          {selectedClientWebsiteLaunchBlueprint?.convexFunctions.map((functionName) => (
+                            <Badge key={functionName} variant="outline">{functionName}</Badge>
+                          ))}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={!selectedClientWebsiteLaunchBlueprint?.launchPacketId}
+                          onClick={() => {
+                            if (selectedClientWebsiteLaunchBlueprint?.launchPacketId) {
+                              setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId);
+                              setActiveTab("factory");
+                            }
+                          }}
+                          data-testid="button-open-client-website-blueprint-factory"
+                        >
+                          <Factory className="mr-2 h-4 w-4" />
+                          Open factory packet
+                        </Button>
+                      </div>
                     </div>
 
                     <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">

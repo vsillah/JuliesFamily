@@ -35,6 +35,7 @@
     "kinflo:validate-hosted-activation-ledger": "node scripts/validate-kinflo-hosted-activation-ledger.mjs",
     "kinflo:validate-design-direction": "node scripts/validate-kinflo-design-direction.mjs",
     "kinflo:validate-client-website-studio": "node scripts/validate-kinflo-client-website-studio.mjs",
+    "kinflo:validate-client-website-blueprints": "node scripts/validate-kinflo-client-website-blueprints.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

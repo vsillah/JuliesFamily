@@ -121,6 +121,7 @@ for (const path of [
   "docs/phase53-hosted-activation-ledger.md",
   "docs/phase54-kinflo-os-design-direction.md",
   "docs/phase55-client-website-design-studio.md",
+  "docs/phase56-client-website-launch-blueprints.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -173,6 +174,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-ledger.mjs",
   "scripts/validate-kinflo-design-direction.mjs",
   "scripts/validate-kinflo-client-website-studio.mjs",
+  "scripts/validate-kinflo-client-website-blueprints.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -825,6 +827,20 @@ requireIncludes("docs/phase55-client-website-design-studio.md", [
   "https://www.weweb.io/blog/client-portals-buying-guide",
 ]);
 
+requireIncludes("docs/phase56-client-website-launch-blueprints.md", [
+  "npm run kinflo:validate-client-website-blueprints",
+  "Client Website Design Studio",
+  "clientWebsiteStudio.launchBlueprints",
+  "Launch blueprints: 3",
+  "Factory packet bridges: 2",
+  "Launch Blueprint",
+  "advisor-client-starter",
+  "campaign-microsite-lab",
+  "Local state only: yes",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -852,6 +868,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-ledger\"",
   "\"kinflo:validate-design-direction\"",
   "\"kinflo:validate-client-website-studio\"",
+  "\"kinflo:validate-client-website-blueprints\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1166,6 +1183,17 @@ requireIncludes("scripts/validate-kinflo-client-website-studio.mjs", [
   "client website studio shell does not import generated API",
   "client website studio shell does not execute live Convex",
   "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-website-blueprints.mjs", [
+  "Launch Blueprint",
+  "clientWebsiteStudio.launchBlueprints",
+  "section-kinflo-client-website-blueprint",
+  "button-open-client-website-blueprint-factory",
+  "client website launch blueprint shell does not import generated API",
+  "client website launch blueprint shell does not execute live Convex",
+  "Factory packet bridges: 2",
   "Live Convex execution: no",
 ]);
 
@@ -1527,8 +1555,12 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellClientWebsiteStudio",
   "fixtureClientWebsiteStudio",
   "clientWebsiteStudio: fixtureClientWebsiteStudio",
+  "ShellClientWebsiteLaunchBlueprint",
+  "launchBlueprints",
   "mission-clarity",
   "branded-portal-handoff",
+  "Advisor client starter blueprint",
+  "Campaign microsite launch blueprint",
   "Client website studio changes are local review notes",
   "ShellAssetLibraryDraft",
   "fixtureAssetLibrary",
@@ -1826,6 +1858,12 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "snapshot.clientWebsiteStudio.researchSources",
   "snapshot.clientWebsiteStudio.convexFunctions",
   "snapshot.clientWebsiteStudio.activationEvidence",
+  "selectedClientWebsiteLaunchBlueprint",
+  "section-kinflo-client-website-blueprint",
+  "text-kinflo-client-website-blueprint",
+  "button-open-client-website-blueprint-factory",
+  "setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId)",
+  "Launch Blueprint",
   "previewPath",
   "Follow-up Tasks",
   "/admin/guide",
