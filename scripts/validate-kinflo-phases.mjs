@@ -102,6 +102,7 @@ for (const path of [
   "docs/phase34-crm-progression-contracts.md",
   "docs/phase35-public-visibility-contract.md",
   "docs/phase36-admin-preferences-contract.md",
+  "docs/phase37-experience-preferences-shell.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -128,6 +129,7 @@ for (const path of [
   "scripts/validate-kinflo-crm-progression.mjs",
   "scripts/validate-kinflo-public-visibility.mjs",
   "scripts/validate-kinflo-admin-preferences.mjs",
+  "scripts/validate-kinflo-experience-shell.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -526,6 +528,17 @@ requireIncludes("docs/phase36-admin-preferences-contract.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase37-experience-preferences-shell.md", [
+  "npm run kinflo:validate-experience-shell",
+  "Experience Preferences",
+  "Live preference save gated",
+  "preferences.getMyPreferences",
+  "preferences.upsertMyPreferences",
+  "Local state only: yes",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -534,6 +547,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-crm-progression\"",
   "\"kinflo:validate-public-visibility\"",
   "\"kinflo:validate-admin-preferences\"",
+  "\"kinflo:validate-experience-shell\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -607,6 +621,16 @@ requireIncludes("scripts/validate-kinflo-admin-preferences.mjs", [
   "preferences.upsertMyPreferences",
   "adminPreferences",
   "tenant/site scoped preferences require matching access",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-experience-shell.mjs", [
+  "Experience Preferences",
+  "Live preference save gated",
+  "preferences.getMyPreferences",
+  "preferences.upsertMyPreferences",
+  "Local state only: yes",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -942,6 +966,10 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Admin experience preferences",
   "preferences.getMyPreferences",
   "preferences.upsertMyPreferences",
+  "ShellExperiencePreference",
+  "fixtureExperiencePreferences",
+  "Live preference save gated until generated Convex API bindings and hosted smoke are approved.",
+  "Admin preferences shell",
   "ShellLead",
   "ShellLeadCaptureContract",
   "fixtureLeads",
@@ -1017,6 +1045,17 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "setActiveTab(\"factory\")",
   "CRM Lead Workspace",
   "Public Intake",
+  "Experience Preferences",
+  "select-kinflo-experience-theme",
+  "select-kinflo-experience-density",
+  "select-kinflo-default-landing-page",
+  "select-kinflo-default-content-filter",
+  "input-kinflo-items-per-page",
+  "checkbox-notification-${channel.key}",
+  "button-save-experience-preferences",
+  "Live preference save gated",
+  "snapshot.experiencePreferences.convexFunctions",
+  "snapshot.experiencePreferences.activationEvidence",
   "previewPath",
   "Follow-up Tasks",
   "/admin/guide",

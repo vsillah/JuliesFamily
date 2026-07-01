@@ -28,6 +28,14 @@ const kinfloLocalAdminSmokePlugin = {
         return;
       }
 
+      if (req.method === "GET" && req.url?.startsWith("/api/admin/chatbot/history/")) {
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("X-KinFlo-Local-Admin-Fixture", "true");
+        res.end(JSON.stringify([]));
+        return;
+      }
+
       next();
     });
   },

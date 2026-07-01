@@ -16,6 +16,7 @@
     "kinflo:validate-crm-progression": "node scripts/validate-kinflo-crm-progression.mjs",
     "kinflo:validate-public-visibility": "node scripts/validate-kinflo-public-visibility.mjs",
     "kinflo:validate-admin-preferences": "node scripts/validate-kinflo-admin-preferences.mjs",
+    "kinflo:validate-experience-shell": "node scripts/validate-kinflo-experience-shell.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

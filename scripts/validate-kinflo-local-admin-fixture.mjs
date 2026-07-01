@@ -69,6 +69,7 @@ requireIncludes("scripts/serve-kinflo-local-admin-smoke.mjs", [
   "createServer",
   "kinflo-local-admin-smoke-fixture",
   "/api/auth/user",
+  "/api/admin/chatbot/history/",
   "X-KinFlo-Local-Admin-Fixture",
   "/admin/kinflo-os",
   "/kinflo-sites/julies-family",

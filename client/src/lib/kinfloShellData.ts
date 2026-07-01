@@ -107,6 +107,24 @@ export type ShellExperienceControl = {
   iconKey: ExperienceIconKey;
 };
 
+export type ShellExperiencePreference = {
+  scopeLabel: string;
+  scopeKind: "user" | "tenant" | "site";
+  tenant: string;
+  site: string;
+  defaultLandingPage: string;
+  theme: "light" | "dark" | "system";
+  dataDensity: "compact" | "comfortable" | "spacious";
+  itemsPerPage: number;
+  defaultContentFilter: string;
+  notificationChannels: string[];
+  workflowDefaults: { label: string; value: string }[];
+  communicationDefaults: { label: string; value: string }[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellRole = {
   role: string;
   scope: string;
@@ -196,6 +214,7 @@ export type KinfloShellSnapshot = {
   tenantEntitlements: ShellTenantEntitlement[];
   templates: ShellTemplate[];
   experienceControls: ShellExperienceControl[];
+  experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
   leads: ShellLead[];
   pipelineStages: ShellPipelineStage[];
@@ -415,6 +434,36 @@ const fixtureExperienceControls: ShellExperienceControl[] = [
   { label: "Audience Rules", value: "Persona and journey-stage block visibility", iconKey: "audience" },
   { label: "Responsive Preview", value: "Desktop, tablet, phone launch checks", iconKey: "preview" },
 ];
+
+const fixtureExperiencePreferences: ShellExperiencePreference = {
+  scopeLabel: "Julie's Family site admin",
+  scopeKind: "site",
+  tenant: "Julie's Family Learning Program",
+  site: "Julie Family Public Site",
+  defaultLandingPage: "/admin/kinflo-os",
+  theme: "system",
+  dataDensity: "comfortable",
+  itemsPerPage: 25,
+  defaultContentFilter: "all",
+  notificationChannels: ["email"],
+  workflowDefaults: [
+    { label: "Lead view", value: "Kanban by journey stage" },
+    { label: "Task due date", value: "3 days after assignment" },
+    { label: "New lead owner", value: "Manual assignment" },
+  ],
+  communicationDefaults: [
+    { label: "Daily digest", value: "Off" },
+    { label: "Weekly report", value: "On" },
+    { label: "Critical alerts", value: "All lead and task activity" },
+  ],
+  providerBoundary: "Live preference save gated until generated Convex API bindings and hosted smoke are approved.",
+  convexFunctions: ["preferences.getMyPreferences", "preferences.upsertMyPreferences"],
+  activationEvidence: [
+    "viewer reads own scoped preferences",
+    "tenant/site scoped preferences require matching access",
+    "upsert writes only the current user's preference record",
+  ],
+};
 
 const fixtureRoles: ShellRole[] = [
   { role: "Super Admin", scope: "Platform", access: "Tenants, templates, billing gates, leads, audit events", owner: "Vambah" },
@@ -702,6 +751,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Live smoke manifest", status: "done" },
   { label: "Live smoke dry runner", status: "done" },
   { label: "TypeScript baseline gate", status: "done" },
+  { label: "Admin preferences shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -769,6 +819,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       tenantEntitlements: fixtureTenantEntitlements,
       templates: fixtureTemplates,
       experienceControls: fixtureExperienceControls,
+      experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,
       leads: fixtureLeads,
       pipelineStages: fixturePipelineStages,

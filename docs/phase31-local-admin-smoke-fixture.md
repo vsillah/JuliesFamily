@@ -27,7 +27,7 @@ KINFLO_ENABLE_LOCAL_ADMIN_FIXTURE=true
 
 That lets `/admin/kinflo-os` render the provider-light shell in a repeatable browser smoke without requiring a real OIDC login, a seeded database admin, a hosted Convex deployment, or generated Convex API bindings.
 
-For database-free browser QA, `npm run kinflo:serve-local-admin-smoke` starts a Vite-only smoke server that serves the real client app and mocks only `GET /api/auth/user` with the same fixture identity.
+For database-free browser QA, `npm run kinflo:serve-local-admin-smoke` starts a Vite-only smoke server that serves the real client app, mocks `GET /api/auth/user` with the same fixture identity, and returns an empty JSON array for `GET /api/admin/chatbot/history/:sessionId` so the global chatbot widget does not turn the Vite HTML fallback into a console error during shell QA.
 
 ## Safety Boundary
 

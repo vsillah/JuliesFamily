@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
+  Bell,
   Boxes,
   CheckCircle2,
   CircleDashed,
@@ -16,6 +17,7 @@ import {
   Palette,
   Plus,
   Rocket,
+  Save,
   Settings2,
   ShieldCheck,
   SlidersHorizontal,
@@ -66,6 +68,12 @@ const experienceIcons: Record<ExperienceIconKey, typeof Palette> = {
   preview: MonitorSmartphone,
 };
 
+const notificationChannelOptions = [
+  { key: "email", label: "Email" },
+  { key: "in-app", label: "In app" },
+  { key: "weekly-digest", label: "Weekly digest" },
+];
+
 function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
     return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
@@ -105,6 +113,14 @@ export default function AdminKinfloShell() {
   const [wizardBrandTone, setWizardBrandTone] = useState(snapshot.siteCreationWizard.brandToneOptions[0] ?? "");
   const [wizardOwnerRole, setWizardOwnerRole] = useState(snapshot.siteCreationWizard.ownerRoleOptions[0] ?? "");
   const [selectedPlanKey, setSelectedPlanKey] = useState(snapshot.billingPlans[0]?.key ?? "");
+  const [experienceTheme, setExperienceTheme] = useState(snapshot.experiencePreferences.theme);
+  const [experienceDensity, setExperienceDensity] = useState(snapshot.experiencePreferences.dataDensity);
+  const [experienceLandingPage, setExperienceLandingPage] = useState(snapshot.experiencePreferences.defaultLandingPage);
+  const [experienceContentFilter, setExperienceContentFilter] = useState(snapshot.experiencePreferences.defaultContentFilter);
+  const [experienceItemsPerPage, setExperienceItemsPerPage] = useState(snapshot.experiencePreferences.itemsPerPage);
+  const [experienceNotificationChannels, setExperienceNotificationChannels] = useState(
+    snapshot.experiencePreferences.notificationChannels,
+  );
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -125,6 +141,17 @@ export default function AdminKinfloShell() {
     [snapshot.siteCreationWizard.pageOptions],
   );
   const requiredPagesSelected = requiredPageKeys.every((pageKey) => wizardPageKeys.includes(pageKey));
+  const experiencePreferencesDirty = (
+    experienceTheme !== snapshot.experiencePreferences.theme
+    || experienceDensity !== snapshot.experiencePreferences.dataDensity
+    || experienceLandingPage !== snapshot.experiencePreferences.defaultLandingPage
+    || experienceContentFilter !== snapshot.experiencePreferences.defaultContentFilter
+    || experienceItemsPerPage !== snapshot.experiencePreferences.itemsPerPage
+    || experienceNotificationChannels.join("|") !== snapshot.experiencePreferences.notificationChannels.join("|")
+  );
+  const selectedNotificationSummary = experienceNotificationChannels.length > 0
+    ? experienceNotificationChannels.join(", ")
+    : "none";
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -142,6 +169,15 @@ export default function AdminKinfloShell() {
         return current.includes(pageKey) ? current : [...current, pageKey];
       }
       return current.filter((item) => item !== pageKey);
+    });
+  };
+
+  const toggleExperienceNotification = (channel: string, checked: boolean) => {
+    setExperienceNotificationChannels((current) => {
+      if (checked) {
+        return current.includes(channel) ? current : [...current, channel];
+      }
+      return current.filter((item) => item !== channel);
     });
   };
 
@@ -228,23 +264,46 @@ export default function AdminKinfloShell() {
               {snapshot.dataMode.runtimeMode === "live_ready" ? "Convex live" : "Convex gated"}
             </Badge>
           </CardHeader>
-          <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)]">
-            <div>
+          <CardContent className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)]">
+            <div className="min-w-0">
               <div className="text-sm font-medium">Activation gate</div>
               <p className="mt-1 text-sm text-muted-foreground">{snapshot.dataMode.activationGate}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="text-sm font-medium">Convex contract</div>
-              <div className="mt-2 flex flex-wrap gap-2">
+              <div className="mt-2 flex min-w-0 flex-wrap gap-2">
                 {snapshot.dataMode.convexFunctions.map((functionName) => (
                   <Badge key={functionName} variant="secondary">{functionName}</Badge>
                 ))}
               </div>
             </div>
-            <div className="lg:col-span-2">
+            <div className="min-w-0 lg:col-span-2">
               <div className="text-sm font-medium">Live adapter readiness</div>
-              <div className="mt-2 overflow-hidden rounded-md border">
-                <Table>
+              <div className="mt-2 grid gap-3 md:hidden">
+                {snapshot.liveAdapterBindings.map((binding) => (
+                  <div key={binding.surface} className="rounded-md border p-3 text-sm">
+                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between">
+                      <div>
+                        <div className="font-medium">{binding.surface}</div>
+                        <div className="mt-1 text-xs text-muted-foreground">{binding.fixtureSource}</div>
+                      </div>
+                      {liveAdapterStatusBadge(binding.status)}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {binding.convexFunctions.map((functionName) => (
+                        <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
+                      ))}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {binding.activationEvidence.map((item) => (
+                        <Badge key={item} variant="outline" className="max-w-full whitespace-normal break-words text-left">{item}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 hidden rounded-md border md:block">
+                <Table className="min-w-[920px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Surface</TableHead>
@@ -1057,25 +1116,207 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="experience" className="mt-6">
-            <section className="space-y-4">
-              <h2 className="text-xl font-semibold">Configurable Experience Layer</h2>
-              <div className="grid gap-4 md:grid-cols-2">
-                {snapshot.experienceControls.map((control) => {
-                  const Icon = experienceIcons[control.iconKey];
-                  return (
-                    <Card key={control.label}>
-                      <CardHeader className="flex flex-row items-start gap-3 space-y-0">
-                        <div className="rounded-md border bg-background p-2">
-                          <Icon className="h-4 w-4" />
+            <section className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 max-w-full space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Experience Preferences</h2>
+                    <p className="text-sm text-muted-foreground">Scoped shell defaults for {snapshot.experiencePreferences.scopeLabel}.</p>
+                  </div>
+                  <Badge variant="outline" className="w-fit">
+                    <SlidersHorizontal className="mr-1 h-3 w-3" />
+                    {snapshot.experiencePreferences.scopeKind} scope
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Shell Defaults</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {snapshot.experiencePreferences.tenant} · {snapshot.experiencePreferences.site}
+                      </p>
+                    </div>
+                    <Badge variant={experiencePreferencesDirty ? "default" : "secondary"}>
+                      {experiencePreferencesDirty ? "Local changes" : "Fixture defaults"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label>Theme</Label>
+                        <Select value={experienceTheme} onValueChange={(value) => setExperienceTheme(value as typeof experienceTheme)}>
+                          <SelectTrigger data-testid="select-kinflo-experience-theme">
+                            <SelectValue placeholder="Select theme" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="system">System</SelectItem>
+                            <SelectItem value="light">Light</SelectItem>
+                            <SelectItem value="dark">Dark</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Data density</Label>
+                        <Select value={experienceDensity} onValueChange={(value) => setExperienceDensity(value as typeof experienceDensity)}>
+                          <SelectTrigger data-testid="select-kinflo-experience-density">
+                            <SelectValue placeholder="Select density" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="compact">Compact</SelectItem>
+                            <SelectItem value="comfortable">Comfortable</SelectItem>
+                            <SelectItem value="spacious">Spacious</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Default landing page</Label>
+                        <Select value={experienceLandingPage} onValueChange={setExperienceLandingPage}>
+                          <SelectTrigger data-testid="select-kinflo-default-landing-page">
+                            <SelectValue placeholder="Select landing page" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="/admin/kinflo-os">KinFlo OS</SelectItem>
+                            <SelectItem value="/admin/kinflo-os?tab=crm">CRM workspace</SelectItem>
+                            <SelectItem value="/admin/kinflo-os?tab=factory">Site factory</SelectItem>
+                            <SelectItem value="/admin/kinflo-os?tab=plans">Plans</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Default content filter</Label>
+                        <Select value={experienceContentFilter} onValueChange={setExperienceContentFilter}>
+                          <SelectTrigger data-testid="select-kinflo-default-content-filter">
+                            <SelectValue placeholder="Select filter" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">All content</SelectItem>
+                            <SelectItem value="draft">Drafts</SelectItem>
+                            <SelectItem value="needs-review">Needs review</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="kinflo-items-per-page">Items per page</Label>
+                        <Input
+                          id="kinflo-items-per-page"
+                          type="number"
+                          min={10}
+                          max={100}
+                          step={5}
+                          value={experienceItemsPerPage}
+                          onChange={(event) => setExperienceItemsPerPage(Number(event.target.value))}
+                          data-testid="input-kinflo-items-per-page"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Notification channels</Label>
+                        <div className="grid gap-2 rounded-md border p-3">
+                          {notificationChannelOptions.map((channel) => (
+                            <label key={channel.key} className="flex items-center gap-2 text-sm">
+                              <Checkbox
+                                checked={experienceNotificationChannels.includes(channel.key)}
+                                onCheckedChange={(checked) => toggleExperienceNotification(channel.key, checked === true)}
+                                data-testid={`checkbox-notification-${channel.key}`}
+                              />
+                              <span>{channel.label}</span>
+                            </label>
+                          ))}
                         </div>
-                        <div>
-                          <CardTitle className="text-base">{control.label}</CardTitle>
-                          <p className="mt-1 text-sm text-muted-foreground">{control.value}</p>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 rounded-md border p-3 text-sm md:grid-cols-3">
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Landing</div>
+                        <div className="mt-1 font-medium">{experienceLandingPage}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Rows</div>
+                        <div className="mt-1 font-medium">{experienceItemsPerPage} · {experienceDensity}</div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Alerts</div>
+                        <div className="mt-1 font-medium">{selectedNotificationSummary}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {snapshot.experiencePreferences.providerBoundary}
+                      </div>
+                      <Button disabled data-testid="button-save-experience-preferences">
+                        <Save className="mr-2 h-4 w-4" />
+                        Live preference save gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  {snapshot.experienceControls.map((control) => {
+                    const Icon = experienceIcons[control.iconKey];
+                    return (
+                      <Card key={control.label}>
+                        <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                          <div className="rounded-md border bg-background p-2">
+                            <Icon className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <CardTitle className="text-base">{control.label}</CardTitle>
+                            <p className="mt-1 text-sm text-muted-foreground">{control.value}</p>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                    <div className="rounded-md border bg-background p-2">
+                      <Bell className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Workflow Defaults</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">Lead, task, digest, and report defaults.</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[...snapshot.experiencePreferences.workflowDefaults, ...snapshot.experiencePreferences.communicationDefaults].map((item) => (
+                      <div key={item.label} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span>{item.label}</span>
+                        <span className="font-medium">{item.value}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Preference reads and writes stay scoped to the current synced user.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.experiencePreferences.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span>{functionName}</span>
+                        <Badge variant="outline">current user</Badge>
+                      </div>
+                    ))}
+                    <div className="space-y-2">
+                      {snapshot.experiencePreferences.activationEvidence.map((item) => (
+                        <div key={item} className="flex gap-2 text-sm text-muted-foreground">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                          <span>{item}</span>
                         </div>
-                      </CardHeader>
-                    </Card>
-                  );
-                })}
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </TabsContent>
