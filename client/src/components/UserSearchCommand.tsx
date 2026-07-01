@@ -1,4 +1,3 @@
-import { User } from "@shared/schema";
 import {
   CommandDialog,
   CommandEmpty,
@@ -10,8 +9,17 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserCircle } from "lucide-react";
 
+type SearchableUser = {
+  id: string;
+  email: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  profileImageUrl?: string | null;
+  profilePhotoUrl?: string | null;
+};
+
 interface UserSearchCommandProps {
-  users: User[];
+  users: SearchableUser[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (userId: string) => void;
@@ -49,6 +57,7 @@ export function UserSearchCommand({
             const initials = `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
             const isSelected = selectedUserId === user.id;
             const searchValue = `${user.firstName} ${user.lastName} ${user.email}`;
+            const profileImageUrl = user.profileImageUrl ?? user.profilePhotoUrl;
             
             return (
               <CommandItem
@@ -59,7 +68,7 @@ export function UserSearchCommand({
                 data-testid={`user-item-${user.id}`}
               >
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user.profilePhotoUrl || undefined} />
+                  <AvatarImage src={profileImageUrl || undefined} />
                   <AvatarFallback className="text-xs">
                     {initials || <UserCircle className="h-4 w-4" />}
                   </AvatarFallback>

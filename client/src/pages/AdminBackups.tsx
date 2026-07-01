@@ -64,6 +64,14 @@ import {
 } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 
+type BackupScheduleConfig = {
+  hour: number;
+  minute: number;
+  timezone: string;
+  dayOfWeek?: number;
+  dayOfMonth?: number;
+};
+
 // Utility function to format bytes
 function formatBytes(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
@@ -237,10 +245,16 @@ function ScheduledBackupsTab({ availableTables }: { availableTables: string[] })
     tableName: string;
   } | null>(null);
 
-  const [newSchedule, setNewSchedule] = useState({
+  const [newSchedule, setNewSchedule] = useState<{
+    tableName: string;
+    scheduleType: "daily" | "weekly" | "monthly" | "custom";
+    scheduleConfig: BackupScheduleConfig;
+    retentionCount: number;
+    isActive: boolean;
+  }>({
     tableName: "",
     scheduleType: "daily" as "daily" | "weekly" | "monthly" | "custom",
-    scheduleConfig: { hour: 2, minute: 0, timezone: "America/New_York" } as any,
+    scheduleConfig: { hour: 2, minute: 0, timezone: "America/New_York" },
     retentionCount: 7,
     isActive: true,
   });
@@ -523,7 +537,7 @@ function ScheduledBackupsTab({ availableTables }: { availableTables: string[] })
                     timezone: newSchedule.scheduleConfig.timezone || "America/New_York"
                   };
                   
-                  let config = { ...baseConfig };
+                  let config: BackupScheduleConfig = { ...baseConfig };
                   if (value === 'weekly') config = { ...baseConfig, dayOfWeek: 0 };
                   if (value === 'monthly') config = { ...baseConfig, dayOfMonth: 1 };
                   

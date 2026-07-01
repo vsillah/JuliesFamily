@@ -87,12 +87,18 @@ export default function PersonalizedLeadMagnet() {
     // Parent awareness fallback - only if DB has no data
     if (persona === "parent" && funnelStage === "awareness") {
       const fallbackLeadMagnet: ContentItem = {
-        id: 0,
+        id: "fallback-school-readiness-checklist",
         type: "lead_magnet",
+        order: 0,
         title: "School Readiness Checklist",
         description: "Assess your child's readiness for our early learning programs",
+        imageName: null,
+        imageUrl: null,
         metadata: { leadMagnetType: "checklist" },
         isActive: true,
+        passionTags: null,
+        createdAt: null,
+        updatedAt: null,
       };
       return <SchoolReadinessChecklist leadMagnet={fallbackLeadMagnet} />;
     }

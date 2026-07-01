@@ -6,12 +6,34 @@ import { Calendar, Clock, Users, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { format } from "date-fns";
 
+type VolunteerEnrollmentSummary = {
+  enrollments: Array<{
+    enrollment: {
+      volunteerRole?: string | null;
+      enrollmentStatus?: string | null;
+    };
+    event?: {
+      name?: string | null;
+    };
+    shift: {
+      shiftDate: string | Date;
+      startTime?: string | null;
+      endTime?: string | null;
+    };
+  }>;
+  hours: {
+    totalMinutes: number;
+    sessionCount: number;
+    yearToDate: number;
+  };
+};
+
 export function VolunteerEnrollmentCard() {
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
   });
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<VolunteerEnrollmentSummary>({
     queryKey: ['/api/volunteer/my-enrollments'],
     enabled: !!user,
   });
@@ -30,8 +52,8 @@ export function VolunteerEnrollmentCard() {
   const enrollments = data?.enrollments || [];
   const hours = data?.hours || { totalMinutes: 0, sessionCount: 0, yearToDate: 0 };
 
-  const upcomingEnrollments = enrollments.filter((e: any) => {
-    const shiftDate = new Date(e.shift?.shiftDate);
+  const upcomingEnrollments = enrollments.filter((e) => {
+    const shiftDate = new Date(e.shift.shiftDate);
     return shiftDate >= new Date();
   }).slice(0, 3);
 

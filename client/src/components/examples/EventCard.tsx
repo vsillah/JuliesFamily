@@ -1,5 +1,4 @@
 import EventCard from '../EventCard';
-import graduationImage from "@assets/generated_images/Graduation_celebration_ceremony_99c15e90.png";
 
 export default function EventCardExample() {
   return (
@@ -9,7 +8,7 @@ export default function EventCardExample() {
         date="April 4, 2024"
         location="UMass Club, Boston"
         description="Join us as we celebrate five decades of empowering families through education and support."
-        image={graduationImage}
+        imageName="Graduation celebration ceremony"
       />
     </div>
   );
