@@ -61,6 +61,7 @@ if (trackedFiles.some((file) => file.startsWith("convex/_generated/"))) {
 for (const path of [
   "docs/kinflo-saas-adoption-plan.md",
   "docs/phase0-baseline.md",
+  "docs/phase0-env-inventory.md",
   "docs/drizzle-to-convex-migration-map.md",
   "docs/phase1-convex-control-plane.md",
   "docs/phase2-kinflo-shell.md",
@@ -111,6 +112,7 @@ for (const path of [
   "client/src/lib/kinfloLeadCapture.ts",
   "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
+  "scripts/inventory-kinflo-env.mjs",
   "scripts/validate-convex-import-contracts.mjs",
   "scripts/dry-run-convex-import-contracts.mjs",
   "scripts/validate-convex-activation-preflight.mjs",
@@ -129,6 +131,16 @@ requireIncludes("docs/phase0-baseline.md", [
   "npm run build",
   "npm run check",
   ".env.local",
+  "npm run kinflo:inventory-env",
+]);
+
+requireIncludes("docs/phase0-env-inventory.md", [
+  "npm run kinflo:inventory-env",
+  "Source env keys referenced: 57",
+  "Referenced but missing from `.env.example`: 0",
+  "Reads local secret files: no",
+  "Prints secret values: no",
+  "Hosted deployment touched: no",
 ]);
 
 requireIncludes("docs/drizzle-to-convex-migration-map.md", [
@@ -386,6 +398,7 @@ requireIncludes("docs/phase29-typescript-baseline-gate.md", [
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
+  "\"kinflo:inventory-env\"",
   "\"kinflo:validate-imports\"",
   "\"kinflo:dry-run-imports\"",
   "\"kinflo:activation-preflight\"",
@@ -407,6 +420,15 @@ requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
   "shared/schema.ts",
   "docs/drizzle-to-convex-migration-map.md",
   "allowedUnmappedTables",
+]);
+
+requireIncludes("scripts/inventory-kinflo-env.mjs", [
+  "process\\.env",
+  "import\\.meta\\.env",
+  ".env.example",
+  "Tracked secret-like files",
+  "Prints secret values: no",
+  "Hosted deployment touched: no",
 ]);
 
 requireIncludes("scripts/validate-convex-import-contracts.mjs", [

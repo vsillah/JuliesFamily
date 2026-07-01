@@ -118,6 +118,14 @@ npm run kinflo:check-baseline
 
 Current result: pass.
 
+Current command run:
+
+```bash
+npm run kinflo:inventory-env
+```
+
+Current result: pass.
+
 Current TypeScript status:
 
 - Repo-wide TypeScript diagnostics: 0.
@@ -141,6 +149,7 @@ Current Phase 0 and provider-light continuation state:
 - `.env.local` remains untracked and ignored.
 - Generated Convex API files under `convex/_generated/` are not tracked.
 - `.env.example` contains blank Convex activation placeholders only.
+- The source env inventory has a repeatable no-secret command wired through `npm run kinflo:inventory-env`.
 - The Drizzle-to-Convex migration map has a validator wired through `npm run kinflo:validate-map`.
 - The provider-light phase packet has a validator wired through `npm run kinflo:validate-phases`.
 - The Convex scaffold, KinFlo shell, import contracts, activation preflight, runtime boundary, live handoff, generated API contract, and live smoke manifest have been added behind provider gates.
@@ -166,6 +175,7 @@ Completed:
 - Build baseline established.
 - Typecheck baseline established and later cleared to zero repo-wide diagnostics.
 - Migration map produced.
+- Env var inventory completed without reading or printing secret values.
 - Secret/env guard rails validated by local scripts.
 - Provider-light Convex continuation packet added without a hosted deployment.
 
