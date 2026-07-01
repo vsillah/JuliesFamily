@@ -53,6 +53,7 @@ import {
   type ExperienceIconKey,
   type ShellLiveAdapterStatus,
   type KinfloShellStatus,
+  type ShellDomainDraft,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
 
@@ -162,6 +163,15 @@ export default function AdminKinfloShell() {
   const [assetUsage, setAssetUsage] = useState(defaultAsset?.usage ?? "");
   const [assetAltText, setAssetAltText] = useState(defaultAsset?.altText ?? "");
   const [assetProvenance, setAssetProvenance] = useState(defaultAsset?.provenance ?? "");
+  const defaultDomain = snapshot.domainReadiness.domains.find((domain) => domain.key === snapshot.domainReadiness.defaultDomainKey)
+    ?? snapshot.domainReadiness.domains[0];
+  const [domainSiteKey, setDomainSiteKey] = useState(snapshot.domainReadiness.defaultSiteKey);
+  const [selectedDomainKey, setSelectedDomainKey] = useState(defaultDomain?.key ?? "");
+  const [domainHostname, setDomainHostname] = useState(defaultDomain?.hostname ?? "");
+  const [domainStatus, setDomainStatus] = useState<ShellDomainDraft["status"]>(defaultDomain?.status ?? "pending");
+  const [domainIsPrimary, setDomainIsPrimary] = useState(defaultDomain?.isPrimary ?? false);
+  const [domainVerificationToken, setDomainVerificationToken] = useState(defaultDomain?.verificationToken ?? "");
+  const [domainRollbackPlan, setDomainRollbackPlan] = useState(defaultDomain?.rollbackPlan ?? "");
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -381,6 +391,37 @@ export default function AdminKinfloShell() {
   ];
   const assetReadyCount = assetReadiness.filter((item) => item.done).length;
   const assetReadinessPercent = Math.round((assetReadyCount / assetReadiness.length) * 100);
+  const selectedDomainSite = useMemo(
+    () => snapshot.domainReadiness.siteOptions.find((site) => site.key === domainSiteKey) ?? snapshot.domainReadiness.siteOptions[0],
+    [domainSiteKey, snapshot.domainReadiness.siteOptions],
+  );
+  const filteredDomains = useMemo(
+    () => snapshot.domainReadiness.domains.filter((domain) => domain.siteKey === domainSiteKey),
+    [domainSiteKey, snapshot.domainReadiness.domains],
+  );
+  const selectedDomain = useMemo(
+    () => filteredDomains.find((domain) => domain.key === selectedDomainKey) ?? filteredDomains[0],
+    [filteredDomains, selectedDomainKey],
+  );
+  const domainDraftDirty = Boolean(
+    selectedDomain
+    && (
+      domainHostname !== selectedDomain.hostname
+      || domainStatus !== selectedDomain.status
+      || domainIsPrimary !== selectedDomain.isPrimary
+      || domainVerificationToken !== selectedDomain.verificationToken
+      || domainRollbackPlan !== selectedDomain.rollbackPlan
+    ),
+  );
+  const domainReadiness = [
+    { label: "Site selected", done: Boolean(selectedDomainSite) },
+    { label: "Bare hostname entered", done: Boolean(domainHostname.trim() && !domainHostname.includes("/") && !domainHostname.includes(":")) },
+    { label: "Verification token recorded", done: Boolean(domainVerificationToken.trim()) },
+    { label: "Rollback plan documented", done: Boolean(domainRollbackPlan.trim()) },
+    { label: "DNS and SSL provider writes pending", done: false },
+  ];
+  const domainReadyCount = domainReadiness.filter((item) => item.done).length;
+  const domainReadinessPercent = Math.round((domainReadyCount / domainReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -474,6 +515,27 @@ export default function AdminKinfloShell() {
 
   const handleAssetChange = (assetKey: string) => {
     hydrateAsset(snapshot.assetLibrary.assets.find((asset) => asset.key === assetKey));
+  };
+
+  const hydrateDomain = (domain?: ShellDomainDraft) => {
+    if (!domain) {
+      return;
+    }
+    setSelectedDomainKey(domain.key);
+    setDomainHostname(domain.hostname);
+    setDomainStatus(domain.status);
+    setDomainIsPrimary(domain.isPrimary);
+    setDomainVerificationToken(domain.verificationToken);
+    setDomainRollbackPlan(domain.rollbackPlan);
+  };
+
+  const handleDomainSiteChange = (siteKey: string) => {
+    setDomainSiteKey(siteKey);
+    hydrateDomain(snapshot.domainReadiness.domains.find((domain) => domain.siteKey === siteKey));
+  };
+
+  const handleDomainChange = (domainKey: string) => {
+    hydrateDomain(snapshot.domainReadiness.domains.find((domain) => domain.key === domainKey));
   };
 
   useEffect(() => {
@@ -647,6 +709,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="navigation">Nav</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="assets">Assets</TabsTrigger>
+            <TabsTrigger value="domains">Domains</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -2090,6 +2153,234 @@ export default function AdminKinfloShell() {
                   <Link href={selectedAssetSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}>
                     <ExternalLink className="mr-2 h-4 w-4" />
                     Preview asset usage
+                  </Link>
+                </Button>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="domains" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Domain Readiness</h2>
+                    <p className="text-sm text-muted-foreground">Prepare hostname metadata, verification tokens, and rollback notes before DNS or SSL provider writes are enabled.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <Globe2 className="mr-1 h-3 w-3" />
+                    DNS provider gated
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Domain Metadata Draft</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedDomainSite?.label} · {selectedDomain?.providerStatus}
+                      </p>
+                    </div>
+                    <Badge variant={domainDraftDirty ? "default" : "secondary"}>
+                      {domainDraftDirty ? "Local edits" : "Fixture domain"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={domainSiteKey} onValueChange={handleDomainSiteChange}>
+                          <SelectTrigger data-testid="select-kinflo-domain-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.domainReadiness.siteOptions.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Domain</Label>
+                        <Select value={selectedDomain?.key ?? ""} onValueChange={handleDomainChange}>
+                          <SelectTrigger data-testid="select-kinflo-domain-record">
+                            <SelectValue placeholder="Select domain" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredDomains.map((domain) => (
+                              <SelectItem key={domain.key} value={domain.key}>
+                                {domain.hostname}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={domainStatus} onValueChange={(value) => setDomainStatus(value as ShellDomainDraft["status"])}>
+                          <SelectTrigger data-testid="select-kinflo-domain-status">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.domainReadiness.statusOptions.map((status) => (
+                              <SelectItem key={status.key} value={status.key}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Primary</Label>
+                        <label className="flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm">
+                          <Checkbox
+                            checked={domainIsPrimary}
+                            onCheckedChange={(checked) => setDomainIsPrimary(Boolean(checked))}
+                            data-testid="checkbox-kinflo-domain-primary"
+                          />
+                          Use as primary domain
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-domain-hostname">Bare hostname</Label>
+                          <Input
+                            id="kinflo-domain-hostname"
+                            value={domainHostname}
+                            onChange={(event) => setDomainHostname(event.target.value)}
+                            data-testid="input-kinflo-domain-hostname"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-domain-token">TXT verification token</Label>
+                          <textarea
+                            id="kinflo-domain-token"
+                            value={domainVerificationToken}
+                            onChange={(event) => setDomainVerificationToken(event.target.value)}
+                            rows={3}
+                            className="min-h-[88px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-domain-token"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-domain-rollback">Rollback plan</Label>
+                          <textarea
+                            id="kinflo-domain-rollback"
+                            value={domainRollbackPlan}
+                            onChange={(event) => setDomainRollbackPlan(event.target.value)}
+                            rows={3}
+                            className="min-h-[88px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-domain-rollback"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="rounded-md border p-3 text-sm">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="break-all font-medium">{domainHostname}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">{selectedDomain?.sslStatus}</div>
+                            </div>
+                            <Badge variant={domainStatus === "verified" ? "secondary" : "outline"}>{domainStatus}</Badge>
+                          </div>
+                          <div className="mt-3 grid gap-2">
+                            <div className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">Provider status</div>
+                              <div className="font-medium">{selectedDomain?.providerStatus}</div>
+                            </div>
+                            <div className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">Primary route</div>
+                              <div className="font-medium">{domainIsPrimary ? "Primary" : "Secondary"}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{domainReadinessPercent}%</span>
+                          </div>
+                          <Progress value={domainReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {domainReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.domainReadiness.providerBoundary}</div>
+                      <Button disabled data-testid="button-save-domain-readiness">
+                        <Globe2 className="mr-2 h-4 w-4" />
+                        Live DNS save gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Domain Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Domain records stay metadata-only until hosted activation and provider ownership are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.domainReadiness.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">DNS Checklist</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.domainReadiness.dnsChecklist.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.domainReadiness.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={selectedDomainSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Preview before DNS
                   </Link>
                 </Button>
               </div>

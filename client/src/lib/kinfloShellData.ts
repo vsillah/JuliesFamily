@@ -238,6 +238,30 @@ export type ShellAssetLibraryDraft = {
   activationEvidence: string[];
 };
 
+export type ShellDomainDraft = {
+  key: string;
+  siteKey: string;
+  hostname: string;
+  status: "pending" | "verified" | "disabled";
+  isPrimary: boolean;
+  verificationToken: string;
+  sslStatus: "not_requested" | "pending" | "issued" | "blocked";
+  providerStatus: "not_attached" | "ready_for_dns" | "attached" | "blocked";
+  rollbackPlan: string;
+};
+
+export type ShellDomainReadinessDraft = {
+  defaultSiteKey: string;
+  defaultDomainKey: string;
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  statusOptions: { key: ShellDomainDraft["status"]; label: string }[];
+  domains: ShellDomainDraft[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+  dnsChecklist: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -376,6 +400,7 @@ export type KinfloShellSnapshot = {
   navigationDraft: ShellNavigationDraft;
   previewStudio: ShellPreviewStudioDraft;
   assetLibrary: ShellAssetLibraryDraft;
+  domainReadiness: ShellDomainReadinessDraft;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -871,6 +896,75 @@ const fixtureAssetLibrary: ShellAssetLibraryDraft = {
   ],
 };
 
+const fixtureDomainReadiness: ShellDomainReadinessDraft = {
+  defaultSiteKey: "advisor-client-site",
+  defaultDomainKey: "advisor-primary-domain",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  statusOptions: [
+    { key: "pending", label: "Pending" },
+    { key: "verified", label: "Verified" },
+    { key: "disabled", label: "Disabled" },
+  ],
+  domains: [
+    {
+      key: "advisor-primary-domain",
+      siteKey: "advisor-client-site",
+      hostname: "advisor.example.invalid",
+      status: "pending",
+      isPrimary: true,
+      verificationToken: "kinflo-advisor-client-verify",
+      sslStatus: "not_requested",
+      providerStatus: "ready_for_dns",
+      rollbackPlan: "Keep advisor client site on fixture preview route until DNS TXT and hosted resolver smoke pass.",
+    },
+    {
+      key: "julie-public-domain",
+      siteKey: "julies-family-public",
+      hostname: "juliesfamily.org",
+      status: "verified",
+      isPrimary: true,
+      verificationToken: "kinflo-julie-public-verify",
+      sslStatus: "issued",
+      providerStatus: "attached",
+      rollbackPlan: "Leave public renderer on fixture mode and do not map live hostnames until generated API smoke is approved.",
+    },
+    {
+      key: "campaign-lab-domain",
+      siteKey: "campaign-microsite",
+      hostname: "campaign.example.invalid",
+      status: "disabled",
+      isPrimary: false,
+      verificationToken: "kinflo-campaign-lab-verify",
+      sslStatus: "blocked",
+      providerStatus: "blocked",
+      rollbackPlan: "Keep campaign hostname disabled until plan limit, launch copy, and smoke data cleanup are reviewed.",
+    },
+  ],
+  providerBoundary: "Domain metadata is local until hosted Convex, DNS ownership, SSL provisioning, Vercel domain attachment, and rollback approval are complete.",
+  convexFunctions: [
+    "siteBuilder.upsertDomain",
+    "entitlements.checkEntitlementLimit",
+    "publicSite.resolvePublishedSite",
+  ],
+  activationEvidence: [
+    "customDomains entitlement limit is checked",
+    "duplicate hostname rejection is verified",
+    "verified primary domain updates site.primaryDomain",
+    "DNS and SSL provider writes remain manually approved gates",
+  ],
+  dnsChecklist: [
+    "Generate TXT verification token after hosted approval",
+    "Confirm DNS ownership in provider console",
+    "Attach hostname to Vercel only after rollback owner is named",
+    "Issue SSL certificate after resolver smoke passes",
+    "Keep fixture preview route available until public hostname resolves",
+  ],
+};
+
 const fixtureExperienceControls: ShellExperienceControl[] = [
   { label: "Theme Tokens", value: "Palette, typography, spacing, radii", iconKey: "theme" },
   { label: "Navigation", value: "Header and footer placement per site", iconKey: "navigation" },
@@ -1253,6 +1347,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Navigation builder shell", status: "done" },
   { label: "Preview QA shell", status: "done" },
   { label: "Asset library shell", status: "done" },
+  { label: "Domain readiness shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1324,6 +1419,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       navigationDraft: fixtureNavigationDraft,
       previewStudio: fixturePreviewStudio,
       assetLibrary: fixtureAssetLibrary,
+      domainReadiness: fixtureDomainReadiness,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,
