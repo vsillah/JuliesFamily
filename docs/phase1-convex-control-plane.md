@@ -12,8 +12,13 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - memberships,
   - roles,
   - invitations,
+  - navigation items,
+  - pages and page revisions,
+  - content blocks and visibility rules,
+  - asset records,
   - theme tokens,
   - feature flags,
+  - publish events,
   - audit events.
 - Control-plane functions for:
   - syncing the current authenticated user,
@@ -24,6 +29,14 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - updating site theme tokens,
   - granting memberships,
   - listing audit events.
+- Site-builder functions for:
+  - reading a site draft bundle,
+  - creating and updating pages,
+  - upserting navigation items,
+  - creating and updating content blocks,
+  - upserting persona/journey visibility rules,
+  - creating asset metadata records,
+  - publishing a page into a revision snapshot.
 
 ## Explicit Boundaries
 
@@ -36,7 +49,7 @@ This scaffold does not yet replace the existing Express/Postgres runtime. The le
 Phase 1 intentionally avoids:
 
 - CRM lead migration,
-- public site rendering,
+- live public site rendering,
 - Stripe billing,
 - email/SMS delivery,
 - custom domains,
@@ -51,8 +64,10 @@ After Convex auth/deployment setup is approved, the first smoke should prove:
 2. The platform admin creates a tenant.
 3. The platform admin creates a site under that tenant.
 4. A default theme token record is created for the site.
-5. Audit events exist for the tenant and site creation.
-6. A non-admin user cannot list all tenants.
+5. A draft homepage is created with navigation and content blocks.
+6. Publishing the page creates a page revision and publish event.
+7. Audit events exist for tenant, site, page, block, and publish actions.
+8. A non-admin user cannot list all tenants or mutate an unassigned site.
 
 ## Implementation Notes
 

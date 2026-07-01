@@ -33,6 +33,34 @@ export const invitationStatus = v.union(
   v.literal("expired"),
 );
 
+export const publishStatus = v.union(
+  v.literal("draft"),
+  v.literal("published"),
+  v.literal("archived"),
+);
+
+export const navPlacement = v.union(
+  v.literal("header"),
+  v.literal("footer"),
+);
+
+export const contentBlockType = v.union(
+  v.literal("hero"),
+  v.literal("services"),
+  v.literal("events"),
+  v.literal("testimonials"),
+  v.literal("lead_magnet"),
+  v.literal("form"),
+  v.literal("campaign"),
+  v.literal("custom"),
+);
+
+export const assetStatus = v.union(
+  v.literal("draft"),
+  v.literal("approved"),
+  v.literal("archived"),
+);
+
 export default defineSchema({
   users: defineTable({
     subject: v.string(),
@@ -124,6 +152,103 @@ export default defineSchema({
     .index("by_tenant_status", ["tenantId", "status"])
     .index("by_site_status", ["siteId", "status"]),
 
+  navigationItems: defineTable({
+    siteId: v.id("sites"),
+    parentId: v.optional(v.id("navigationItems")),
+    placement: navPlacement,
+    label: v.string(),
+    href: v.string(),
+    order: v.number(),
+    isVisible: v.boolean(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_site_placement", ["siteId", "placement"])
+    .index("by_parent", ["parentId"]),
+
+  pages: defineTable({
+    siteId: v.id("sites"),
+    title: v.string(),
+    route: v.string(),
+    status: publishStatus,
+    seo: v.optional(v.any()),
+    templateKey: v.optional(v.string()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    publishedAt: v.optional(v.number()),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_site_route", ["siteId", "route"])
+    .index("by_site_status", ["siteId", "status"]),
+
+  pageRevisions: defineTable({
+    pageId: v.id("pages"),
+    siteId: v.id("sites"),
+    title: v.string(),
+    route: v.string(),
+    seo: v.optional(v.any()),
+    blockSnapshot: v.any(),
+    revisionNumber: v.number(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_page", ["pageId"])
+    .index("by_site_createdAt", ["siteId", "createdAt"]),
+
+  contentBlocks: defineTable({
+    siteId: v.id("sites"),
+    pageId: v.id("pages"),
+    type: contentBlockType,
+    title: v.optional(v.string()),
+    body: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+    order: v.number(),
+    status: publishStatus,
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    publishedAt: v.optional(v.number()),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_site_type_status", ["siteId", "type", "status"])
+    .index("by_page_order", ["pageId", "order"]),
+
+  contentVisibilityRules: defineTable({
+    siteId: v.id("sites"),
+    blockId: v.id("contentBlocks"),
+    persona: v.optional(v.string()),
+    journeyStage: v.optional(v.string()),
+    isVisible: v.boolean(),
+    order: v.optional(v.number()),
+    overrides: v.optional(v.any()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_block", ["blockId"])
+    .index("by_site_persona_stage", ["siteId", "persona", "journeyStage"]),
+
+  assets: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.optional(v.id("sites")),
+    name: v.string(),
+    kind: v.string(),
+    status: assetStatus,
+    storageProvider: v.string(),
+    storageKey: v.string(),
+    publicUrl: v.optional(v.string()),
+    altText: v.optional(v.string()),
+    provenance: v.optional(v.any()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_tenant_status", ["tenantId", "status"])
+    .index("by_site_status", ["siteId", "status"]),
+
   themeTokens: defineTable({
     siteId: v.id("sites"),
     palette: v.optional(v.any()),
@@ -150,6 +275,23 @@ export default defineSchema({
   })
     .index("by_tenant_key", ["tenantId", "key"])
     .index("by_site_key", ["siteId", "key"]),
+
+  publishEvents: defineTable({
+    siteId: v.id("sites"),
+    pageId: v.optional(v.id("pages")),
+    actorUserId: v.id("users"),
+    action: v.union(
+      v.literal("previewed"),
+      v.literal("published"),
+      v.literal("rolled_back"),
+      v.literal("archived"),
+    ),
+    revisionId: v.optional(v.id("pageRevisions")),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index("by_site_createdAt", ["siteId", "createdAt"])
+    .index("by_page_createdAt", ["pageId", "createdAt"]),
 
   auditEvents: defineTable({
     scopeType: v.union(v.literal("platform"), v.literal("tenant"), v.literal("site")),

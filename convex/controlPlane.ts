@@ -22,6 +22,12 @@ function slugify(value: string) {
     .slice(0, 80);
 }
 
+function definedFields(value: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined),
+  );
+}
+
 async function syncCurrentUser(ctx: MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
@@ -403,7 +409,7 @@ export const updateThemeTokens = mutation({
       .first();
 
     const timestamp = now();
-    const patch = {
+    const patch = definedFields({
       palette: args.palette,
       typography: args.typography,
       radii: args.radii,
@@ -411,7 +417,7 @@ export const updateThemeTokens = mutation({
       buttons: args.buttons,
       media: args.media,
       updatedAt: timestamp,
-    };
+    });
 
     if (existing) {
       await ctx.db.patch(existing._id, patch);
