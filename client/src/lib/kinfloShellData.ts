@@ -170,6 +170,26 @@ export type ShellBrandThemeDraft = {
   activationEvidence: string[];
 };
 
+export type ShellNavigationItemDraft = {
+  key: string;
+  label: string;
+  href: string;
+  placement: "header" | "footer";
+  order: number;
+  isVisible: boolean;
+};
+
+export type ShellNavigationDraft = {
+  defaultSiteKey: string;
+  defaultPlacement: "header" | "footer";
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  placementOptions: { key: "header" | "footer"; label: string }[];
+  items: ShellNavigationItemDraft[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -305,6 +325,7 @@ export type KinfloShellSnapshot = {
   templates: ShellTemplate[];
   contentDraft: ShellContentDraft;
   brandTheme: ShellBrandThemeDraft;
+  navigationDraft: ShellNavigationDraft;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -647,6 +668,40 @@ const fixtureBrandTheme: ShellBrandThemeDraft = {
     "theme changes write audit evidence",
     "public preview resolves updated palette and typography",
     "visual QA passes mobile and desktop before publish",
+  ],
+};
+
+const fixtureNavigationDraft: ShellNavigationDraft = {
+  defaultSiteKey: "advisor-client-site",
+  defaultPlacement: "header",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  placementOptions: [
+    { key: "header", label: "Header" },
+    { key: "footer", label: "Footer" },
+  ],
+  items: [
+    { key: "home", label: "Home", href: "/", placement: "header", order: 1, isVisible: true },
+    { key: "services", label: "Services", href: "/services", placement: "header", order: 2, isVisible: true },
+    { key: "proof", label: "Proof", href: "/proof", placement: "header", order: 3, isVisible: true },
+    { key: "intake", label: "Start Here", href: "/intake", placement: "header", order: 4, isVisible: true },
+    { key: "privacy", label: "Privacy", href: "/privacy", placement: "footer", order: 1, isVisible: true },
+    { key: "contact", label: "Contact", href: "/contact", placement: "footer", order: 2, isVisible: true },
+  ],
+  providerBoundary: "Live navigation save is gated until hosted Convex auth, generated API bindings, public preview smoke, and audit review are approved.",
+  convexFunctions: [
+    "siteBuilder.getSiteDraft",
+    "siteBuilder.upsertNavigationItem",
+    "publicSite.resolvePublishedSite",
+  ],
+  activationEvidence: [
+    "site admin can update assigned site navigation",
+    "navigation write is guarded by site:update",
+    "public preview resolves updated header and footer order",
+    "audit event records navigation_item_upserted",
   ],
 };
 
@@ -1029,6 +1084,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Access delegation shell", status: "done" },
   { label: "Content draft shell", status: "done" },
   { label: "Brand theme shell", status: "done" },
+  { label: "Navigation builder shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1097,6 +1153,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       templates: fixtureTemplates,
       contentDraft: fixtureContentDraft,
       brandTheme: fixtureBrandTheme,
+      navigationDraft: fixtureNavigationDraft,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

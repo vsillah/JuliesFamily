@@ -20,6 +20,7 @@
     "kinflo:validate-access-shell": "node scripts/validate-kinflo-access-shell.mjs",
     "kinflo:validate-content-shell": "node scripts/validate-kinflo-content-shell.mjs",
     "kinflo:validate-brand-shell": "node scripts/validate-kinflo-brand-shell.mjs",
+    "kinflo:validate-navigation-shell": "node scripts/validate-kinflo-navigation-shell.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

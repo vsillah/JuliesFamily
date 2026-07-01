@@ -137,6 +137,15 @@ export default function AdminKinfloShell() {
   const [brandTypographyKey, setBrandTypographyKey] = useState(snapshot.brandTheme.defaultTypographyKey);
   const [brandButtonKey, setBrandButtonKey] = useState(snapshot.brandTheme.defaultButtonKey);
   const [brandMediaKey, setBrandMediaKey] = useState(snapshot.brandTheme.defaultMediaKey);
+  const defaultNavigationItem = snapshot.navigationDraft.items.find(
+    (item) => item.placement === snapshot.navigationDraft.defaultPlacement,
+  ) ?? snapshot.navigationDraft.items[0];
+  const [navigationSiteKey, setNavigationSiteKey] = useState(snapshot.navigationDraft.defaultSiteKey);
+  const [navigationPlacement, setNavigationPlacement] = useState(snapshot.navigationDraft.defaultPlacement);
+  const [selectedNavigationItemKey, setSelectedNavigationItemKey] = useState(defaultNavigationItem?.key ?? "");
+  const [navigationLabel, setNavigationLabel] = useState(defaultNavigationItem?.label ?? "");
+  const [navigationHref, setNavigationHref] = useState(defaultNavigationItem?.href ?? "");
+  const [navigationVisible, setNavigationVisible] = useState(defaultNavigationItem?.isVisible ?? true);
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -254,6 +263,45 @@ export default function AdminKinfloShell() {
   ];
   const brandReadyCount = brandReadiness.filter((item) => item.done).length;
   const brandReadinessPercent = Math.round((brandReadyCount / brandReadiness.length) * 100);
+  const selectedNavigationSite = useMemo(
+    () => snapshot.navigationDraft.siteOptions.find((site) => site.key === navigationSiteKey) ?? snapshot.navigationDraft.siteOptions[0],
+    [navigationSiteKey, snapshot.navigationDraft.siteOptions],
+  );
+  const filteredNavigationItems = useMemo(
+    () => snapshot.navigationDraft.items.filter((item) => item.placement === navigationPlacement),
+    [navigationPlacement, snapshot.navigationDraft.items],
+  );
+  const selectedNavigationItem = useMemo(
+    () => filteredNavigationItems.find((item) => item.key === selectedNavigationItemKey) ?? filteredNavigationItems[0],
+    [filteredNavigationItems, selectedNavigationItemKey],
+  );
+  const navigationPreviewItems = useMemo(
+    () => filteredNavigationItems
+      .map((item) => (
+        item.key === selectedNavigationItem?.key
+          ? { ...item, label: navigationLabel, href: navigationHref, isVisible: navigationVisible }
+          : item
+      ))
+      .sort((left, right) => left.order - right.order),
+    [filteredNavigationItems, navigationHref, navigationLabel, navigationVisible, selectedNavigationItem],
+  );
+  const navigationDraftDirty = Boolean(
+    selectedNavigationItem
+    && (
+      navigationLabel !== selectedNavigationItem.label
+      || navigationHref !== selectedNavigationItem.href
+      || navigationVisible !== selectedNavigationItem.isVisible
+    ),
+  );
+  const navigationReadiness = [
+    { label: "Assigned site selected", done: Boolean(selectedNavigationSite) },
+    { label: "Placement selected", done: Boolean(navigationPlacement) },
+    { label: "Navigation item selected", done: Boolean(selectedNavigationItem) },
+    { label: "Label and href present", done: Boolean(navigationLabel.trim() && navigationHref.trim()) },
+    { label: "Live navigation smoke pending", done: false },
+  ];
+  const navigationReadyCount = navigationReadiness.filter((item) => item.done).length;
+  const navigationReadinessPercent = Math.round((navigationReadyCount / navigationReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -298,6 +346,25 @@ export default function AdminKinfloShell() {
       setContentDraftTitle(nextBlock.title);
       setContentDraftBody(nextBlock.body);
     }
+  };
+
+  const hydrateNavigationItem = (item?: { key: string; label: string; href: string; isVisible: boolean }) => {
+    if (!item) {
+      return;
+    }
+    setSelectedNavigationItemKey(item.key);
+    setNavigationLabel(item.label);
+    setNavigationHref(item.href);
+    setNavigationVisible(item.isVisible);
+  };
+
+  const handleNavigationPlacementChange = (placement: typeof navigationPlacement) => {
+    setNavigationPlacement(placement);
+    hydrateNavigationItem(snapshot.navigationDraft.items.find((item) => item.placement === placement));
+  };
+
+  const handleNavigationItemChange = (itemKey: string) => {
+    hydrateNavigationItem(snapshot.navigationDraft.items.find((item) => item.key === itemKey));
   };
 
   useEffect(() => {
@@ -462,12 +529,13 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-10">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-11">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="plans">Plans</TabsTrigger>
             <TabsTrigger value="brand">Brand</TabsTrigger>
+            <TabsTrigger value="navigation">Nav</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -1260,6 +1328,228 @@ export default function AdminKinfloShell() {
 
                 <Button asChild variant="outline" className="w-full">
                   <Link href={selectedBrandSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Preview Route
+                  </Link>
+                </Button>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="navigation" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Navigation Builder</h2>
+                    <p className="text-sm text-muted-foreground">Configure header and footer links for a client site before live navigation writes are enabled.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <LayoutDashboard className="mr-1 h-3 w-3" />
+                    Provider-light nav
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Navigation Draft</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedNavigationSite?.label} · {navigationPlacement}
+                      </p>
+                    </div>
+                    <Badge variant={navigationDraftDirty ? "default" : "secondary"}>
+                      {navigationDraftDirty ? "Local edits" : "Fixture navigation"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={navigationSiteKey} onValueChange={setNavigationSiteKey}>
+                          <SelectTrigger data-testid="select-kinflo-navigation-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.navigationDraft.siteOptions.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Placement</Label>
+                        <Select
+                          value={navigationPlacement}
+                          onValueChange={(value) => handleNavigationPlacementChange(value as typeof navigationPlacement)}
+                        >
+                          <SelectTrigger data-testid="select-kinflo-navigation-placement">
+                            <SelectValue placeholder="Select placement" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.navigationDraft.placementOptions.map((placement) => (
+                              <SelectItem key={placement.key} value={placement.key}>
+                                {placement.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Item</Label>
+                        <Select value={selectedNavigationItem?.key ?? ""} onValueChange={handleNavigationItemChange}>
+                          <SelectTrigger data-testid="select-kinflo-navigation-item">
+                            <SelectValue placeholder="Select item" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredNavigationItems.map((item) => (
+                              <SelectItem key={item.key} value={item.key}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 space-y-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="kinflo-navigation-label">Label</Label>
+                            <Input
+                              id="kinflo-navigation-label"
+                              value={navigationLabel}
+                              onChange={(event) => setNavigationLabel(event.target.value)}
+                              data-testid="input-kinflo-navigation-label"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="kinflo-navigation-href">Href</Label>
+                            <Input
+                              id="kinflo-navigation-href"
+                              value={navigationHref}
+                              onChange={(event) => setNavigationHref(event.target.value)}
+                              data-testid="input-kinflo-navigation-href"
+                            />
+                          </div>
+                        </div>
+                        <label className="flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
+                          <Checkbox
+                            checked={navigationVisible}
+                            onCheckedChange={(checked) => setNavigationVisible(checked === true)}
+                            data-testid="checkbox-kinflo-navigation-visible"
+                          />
+                          <span>Visible in public navigation</span>
+                        </label>
+
+                        <div className="rounded-md border p-4 text-sm">
+                          <div className="flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <div className="font-medium">{selectedNavigationSite?.label}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">{selectedNavigationSite?.previewPath}</div>
+                            </div>
+                            <Badge variant="outline" className="self-start">{navigationPlacement}</Badge>
+                          </div>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            {navigationPreviewItems.map((item) => (
+                              <span
+                                key={item.key}
+                                className={`rounded-md border px-3 py-2 ${
+                                  item.isVisible ? "bg-background" : "bg-muted text-muted-foreground line-through"
+                                }`}
+                              >
+                                {item.label}
+                                <span className="ml-2 text-xs text-muted-foreground">{item.href}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {selectedNavigationItem ? (
+                          <div className="rounded-md border p-3 text-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="font-medium">{selectedNavigationItem.label}</div>
+                                <div className="mt-1 text-xs text-muted-foreground">
+                                  order {selectedNavigationItem.order} · {selectedNavigationItem.href}
+                                </div>
+                              </div>
+                              <Badge variant={selectedNavigationItem.isVisible ? "secondary" : "outline"}>
+                                {selectedNavigationItem.isVisible ? "Visible" : "Hidden"}
+                              </Badge>
+                            </div>
+                          </div>
+                        ) : null}
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{navigationReadinessPercent}%</span>
+                          </div>
+                          <Progress value={navigationReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {navigationReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.navigationDraft.providerBoundary}</div>
+                      <Button disabled data-testid="button-save-navigation">
+                        <Save className="mr-2 h-4 w-4" />
+                        Live navigation save gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Navigation Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Navigation writes remain gated until generated API bindings and public preview smoke are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.navigationDraft.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.navigationDraft.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={selectedNavigationSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}>
                     <ExternalLink className="mr-2 h-4 w-4" />
                     Preview Route
                   </Link>
