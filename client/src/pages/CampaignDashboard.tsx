@@ -21,6 +21,14 @@ import { useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import type { DonationCampaign, Donation } from "@shared/schema";
 
+function normalizePassionTags(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((tag): tag is string => typeof tag === "string" && tag.length > 0);
+}
+
 export default function CampaignDashboard() {
   const [, params] = useRoute("/admin/campaigns/:id");
   const campaignId = params?.id;
@@ -116,6 +124,7 @@ export default function CampaignDashboard() {
   );
   const uniqueDonors = uniqueDonorIds.size;
   const avgDonation = succeededDonations.length > 0 ? raisedAmount / succeededDonations.length : 0;
+  const passionTags = normalizePassionTags(campaign.passionTags);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -277,8 +286,8 @@ export default function CampaignDashboard() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-2">
-            {campaign.passionTags && campaign.passionTags.length > 0 ? (
-              campaign.passionTags.map((passion) => (
+            {passionTags.length > 0 ? (
+              passionTags.map((passion) => (
                 <Badge key={passion} variant="secondary" data-testid={`badge-passion-${passion}`}>
                   {passion.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </Badge>
@@ -351,8 +360,8 @@ export default function CampaignDashboard() {
             <AlertDialogDescription>
               This will send personalized {campaign.emailTemplateId ? 'emails' : ''}{campaign.emailTemplateId && campaign.smsTemplateId ? ' and ' : ''}{campaign.smsTemplateId ? 'SMS messages' : ''} to all donors whose passions match this campaign's target passions.
               <br /><br />
-              <strong>Target Passions:</strong> {campaign.passionTags && campaign.passionTags.length > 0 
-                ? (campaign.passionTags as string[]).join(', ').replace(/_/g, ' ')
+              <strong>Target Passions:</strong> {passionTags.length > 0
+                ? passionTags.join(', ').replace(/_/g, ' ')
                 : 'All donors'}
               <br /><br />
               This action cannot be undone. Are you sure you want to proceed?
