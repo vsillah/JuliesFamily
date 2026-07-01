@@ -521,7 +521,10 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   getEmailReportSchedule(id: string): Promise<EmailReportSchedule | undefined>;
   getActiveEmailReportSchedules(): Promise<EmailReportSchedule[]>;
   getSchedulesDueForExecution(): Promise<EmailReportSchedule[]>;
-  updateEmailReportSchedule(id: string, updates: Partial<InsertEmailReportSchedule>): Promise<EmailReportSchedule | undefined>;
+  updateEmailReportSchedule(
+    id: string,
+    updates: Partial<InsertEmailReportSchedule> & { lastRunAt?: Date | null }
+  ): Promise<EmailReportSchedule | undefined>;
   deleteEmailReportSchedule(id: string): Promise<void>;
   
   // Segment operations
@@ -4410,7 +4413,10 @@ export class DatabaseStorage implements IStorage {
       .orderBy(emailReportSchedules.nextRunAt);
   }
 
-  async updateEmailReportSchedule(id: string, updates: Partial<InsertEmailReportSchedule>): Promise<EmailReportSchedule | undefined> {
+  async updateEmailReportSchedule(
+    id: string,
+    updates: Partial<InsertEmailReportSchedule> & { lastRunAt?: Date | null }
+  ): Promise<EmailReportSchedule | undefined> {
     const [updated] = await db
       .update(emailReportSchedules)
       .set({ ...updates, updatedAt: new Date() })

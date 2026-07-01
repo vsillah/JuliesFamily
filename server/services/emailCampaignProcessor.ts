@@ -4,7 +4,6 @@ import {
   emailSequenceSteps,
   emailCampaigns,
   leads,
-  emailSentRecords,
   type EmailCampaignEnrollment,
   type EmailSequenceStep
 } from "@shared/schema";
@@ -103,7 +102,7 @@ export class EmailCampaignProcessor {
 
     for (const enrollment of enrollments) {
       // Get the next step to send
-      const nextStepNumber = enrollment.currentStepNumber + 1;
+      const nextStepNumber = (enrollment.currentStepNumber ?? 0) + 1;
       
       const [step] = await db
         .select()
@@ -132,7 +131,7 @@ export class EmailCampaignProcessor {
 
       // Calculate when this step should be sent
       const enrolledAt = enrollment.enrolledAt;
-      const lastSentAt = enrollment.lastEmailSentAt || enrolledAt;
+      const lastSentAt = enrollment.lastEmailSentAt || enrolledAt || new Date();
       
       const delayMs = (step.delayDays * 24 * 60 * 60 * 1000) + (step.delayHours * 60 * 60 * 1000);
       const sendAt = new Date(lastSentAt.getTime() + delayMs);
