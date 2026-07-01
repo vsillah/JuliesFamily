@@ -7,17 +7,65 @@ import { Calendar, CheckCircle2, Circle, ArrowLeft, FileText, Download } from "l
 import { Link, useLocation } from "wouter";
 import { format } from "date-fns";
 
+interface TechGoesHomeEnrollmentSummary {
+  id?: string;
+  programName: string;
+  enrollmentDate?: string | Date | null;
+  status: string;
+  totalClassesRequired?: number;
+  certificateIssued?: boolean | null;
+  chromebookReceived?: boolean | null;
+  internetActivated?: boolean | null;
+}
+
+interface TechGoesHomeAttendanceRecord {
+  id: string;
+  classDate: string | Date;
+  classNumber: number;
+  attended: boolean;
+  isMakeup?: boolean | null;
+  hoursCredits?: number | null;
+}
+
+interface EnrolledTechGoesHomeProgress {
+  enrolled: true;
+  classesCompleted: number;
+  classesRemaining: number;
+  hoursCompleted: number;
+  percentComplete: number;
+  isEligibleForRewards: boolean;
+  enrollment: TechGoesHomeEnrollmentSummary;
+  attendance: TechGoesHomeAttendanceRecord[];
+}
+
+interface UnenrolledTechGoesHomeProgress {
+  enrolled: false;
+  message?: string;
+}
+
+type TechGoesHomeProgress = EnrolledTechGoesHomeProgress | UnenrolledTechGoesHomeProgress;
+
+interface StudentProject {
+  title: string;
+  description?: string | null;
+  passionTags?: string[] | null;
+  metadata?: {
+    status?: "approved" | "pending" | string;
+    files?: Array<{ url: string }>;
+  } | null;
+}
+
 export default function TechGoesHomeStudentDashboard() {
   const [, setLocation] = useLocation();
 
   // Fetch student's progress
-  const { data: progress, isLoading, error, isError, refetch } = useQuery({
+  const { data: progress, isLoading, error, isError, refetch } = useQuery<TechGoesHomeProgress>({
     queryKey: ['/api/tgh/progress'],
     retry: 1
   });
 
   // Fetch current student's project (treats 404 as null - no project)
-  const { data: myProject } = useQuery<any | null>({
+  const { data: myProject } = useQuery<StudentProject | null>({
     queryKey: ['/api/student/my-project'],
     queryFn: async () => {
       const response = await fetch('/api/student/my-project', {
@@ -148,6 +196,15 @@ export default function TechGoesHomeStudentDashboard() {
     enrollment,
     attendance = []
   } = progress;
+  const progressCardData = {
+    ...progress,
+    totalClassesRequired: enrollment.totalClassesRequired,
+    enrollment: {
+      certificateIssued: enrollment.certificateIssued ?? undefined,
+      chromebookReceived: enrollment.chromebookReceived ?? undefined,
+      internetActivated: enrollment.internetActivated ?? undefined,
+    },
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -175,7 +232,7 @@ export default function TechGoesHomeStudentDashboard() {
             <div className="md:col-span-2 space-y-6">
               <TechGoesHomeProgressCard 
                 mode="full"
-                data={progress}
+                data={progressCardData}
               />
 
               {attendance.length > 0 && (

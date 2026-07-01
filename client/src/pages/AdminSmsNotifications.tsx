@@ -18,6 +18,13 @@ import type { Persona } from "@shared/defaults/personas";
 import CopyVariantGenerator from "@/components/CopyVariantGenerator";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
+function getSmsCampaignPendingCount(campaign: SmsBulkCampaign): number {
+  return Math.max(
+    0,
+    campaign.targetCount - campaign.sentCount - campaign.failedCount - campaign.blockedCount
+  );
+}
+
 export default function AdminSmsNotifications() {
   const { toast } = useToast();
   const [selectedTemplate, setSelectedTemplate] = useState<SmsTemplate | null>(null);
@@ -232,8 +239,8 @@ export default function AdminSmsNotifications() {
     const data = {
       name: formData.get('name') as string,
       description: formData.get('description') as string || null,
-      messageContent: formData.get('messageContent') as string,
-      category: formData.get('category') as string || null,
+      messageTemplate: formData.get('messageTemplate') as string,
+      templateCategory: formData.get('templateCategory') as string || null,
       persona: formData.get('persona') as string || null,
       isActive: formData.get('isActive') === 'on',
     };
@@ -249,8 +256,8 @@ export default function AdminSmsNotifications() {
     const data = {
       name: formData.get('name') as string,
       description: formData.get('description') as string || null,
-      messageContent: formData.get('messageContent') as string,
-      category: formData.get('category') as string || null,
+      messageTemplate: formData.get('messageTemplate') as string,
+      templateCategory: formData.get('templateCategory') as string || null,
       persona: formData.get('persona') as string || null,
       isActive: formData.get('isActive') === 'on',
     };
@@ -446,8 +453,8 @@ export default function AdminSmsNotifications() {
                           ) : (
                             <Badge variant="secondary">Inactive</Badge>
                           )}
-                          {template.category && (
-                            <Badge variant="outline">{template.category}</Badge>
+                          {template.templateCategory && (
+                            <Badge variant="outline">{template.templateCategory}</Badge>
                           )}
                         </div>
                         {template.description && (
@@ -460,7 +467,7 @@ export default function AdminSmsNotifications() {
                           variant="ghost"
                           onClick={() => {
                             setSelectedTemplate(template);
-                            setMessageText(template.messageContent || "");
+                            setMessageText(template.messageTemplate || "");
                             setShowTemplateDialog(true);
                           }}
                           data-testid={`button-edit-template-${template.id}`}
@@ -480,7 +487,7 @@ export default function AdminSmsNotifications() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm font-mono bg-muted p-3 rounded">
-                      {template.messageContent}
+                      {template.messageTemplate}
                     </p>
                   </CardContent>
                 </Card>
@@ -807,7 +814,7 @@ export default function AdminSmsNotifications() {
                       {/* Metrics Grid */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center" data-testid={`metric-total-${campaign.id}`}>
-                          <div className="text-2xl font-bold">{campaign.totalRecipients || 0}</div>
+                          <div className="text-2xl font-bold">{campaign.targetCount || 0}</div>
                           <div className="text-xs text-muted-foreground">Total</div>
                         </div>
                         <div className="text-center" data-testid={`metric-sent-${campaign.id}`}>
@@ -818,7 +825,7 @@ export default function AdminSmsNotifications() {
                         </div>
                         <div className="text-center" data-testid={`metric-pending-${campaign.id}`}>
                           <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                            {campaign.pendingCount || 0}
+                            {getSmsCampaignPendingCount(campaign)}
                           </div>
                           <div className="text-xs text-muted-foreground">Pending</div>
                         </div>
@@ -945,8 +952,8 @@ export default function AdminSmsNotifications() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category">Category (Optional)</Label>
-              <Select name="category" defaultValue={selectedTemplate?.category || undefined}>
+              <Label htmlFor="templateCategory">Category (Optional)</Label>
+              <Select name="templateCategory" defaultValue={selectedTemplate?.templateCategory || undefined}>
                 <SelectTrigger data-testid="select-category">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -977,14 +984,14 @@ export default function AdminSmsNotifications() {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="messageContent">Message Content</Label>
+                <Label htmlFor="messageTemplate">Message Content</Label>
                 <CopyVariantGenerator
-                  originalContent={messageText || selectedTemplate?.messageContent || ""}
+                  originalContent={messageText || selectedTemplate?.messageTemplate || ""}
                   contentType="email_body"
                   persona={selectedTemplate?.persona as Persona}
                   onSelectVariant={(variant) => {
                     setMessageText(variant || "");
-                    const textarea = document.getElementById('messageContent') as HTMLTextAreaElement;
+                    const textarea = document.getElementById('messageTemplate') as HTMLTextAreaElement;
                     if (textarea) textarea.value = variant || "";
                   }}
                   buttonText="✨ AI SMS"
@@ -992,9 +999,9 @@ export default function AdminSmsNotifications() {
                 />
               </div>
               <Textarea
-                id="messageContent"
-                name="messageContent"
-                value={messageText || selectedTemplate?.messageContent || ''}
+                id="messageTemplate"
+                name="messageTemplate"
+                value={messageText || selectedTemplate?.messageTemplate || ''}
                 onChange={(e) => setMessageText(e.target.value)}
                 placeholder="Your SMS message. Use {{firstName}}, {{lastName}} for personalization."
                 rows={4}
