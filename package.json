@@ -9,6 +9,7 @@
     "build:client": "npx vite build && node esbuild.vercel.js",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
+    "kinflo:validate-phases": "node scripts/validate-kinflo-phases.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
     "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts",
     "db:push": "drizzle-kit push"

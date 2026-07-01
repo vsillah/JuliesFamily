@@ -4,7 +4,7 @@
 
 Inspected source: `vsillah/JuliesFamily`, cloned read-only to `/tmp/juliesfamily-inspect` on June 30, 2026.
 
-Local workspace status: `/Users/vambahsillah/Documents/KinFlo CRM` is a placeholder git repo with no source checkout yet. It currently has `excalidraw.log` and this planning document.
+Local workspace status: `/Users/vambahsillah/Documents/KinFlo CRM` now contains the Julie's Family source on branch `codex/kinflo-phase-0-convex-plan`. `excalidraw.log` remains an unrelated untracked local file.
 
 The Julie's Family repository is already a feature-rich React/Vite + Express app, not a simple website. It includes:
 
@@ -117,6 +117,7 @@ Gate:
 - Local build status known.
 - Secret exposure risk documented.
 - Migration inventory committed as docs only.
+- Local phase readiness can be checked with `npm run kinflo:validate-phases`.
 
 ### Phase 1: Multi-Tenant Control Plane Shell
 

@@ -41,6 +41,7 @@ The page should continue consuming the same `KinfloShellSnapshot` shape so the U
 
 Current validation:
 
+- `npm run kinflo:validate-phases`: passes.
 - `npm run build`: passes.
 - `npm run convex:check`: passes.
 - Client-only browser smoke with mocked admin auth:
