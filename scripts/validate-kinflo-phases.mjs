@@ -78,6 +78,7 @@ for (const path of [
   "docs/phase14-public-lead-capture-adapter.md",
   "docs/phase15-public-site-preview-renderer.md",
   "docs/phase16-site-factory-launch-packets.md",
+  "docs/phase17-convex-activation-preflight.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -96,6 +97,7 @@ for (const path of [
   "scripts/validate-drizzle-convex-map.mjs",
   "scripts/validate-convex-import-contracts.mjs",
   "scripts/dry-run-convex-import-contracts.mjs",
+  "scripts/validate-convex-activation-preflight.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -216,11 +218,20 @@ requireIncludes("docs/phase16-site-factory-launch-packets.md", [
   "token-hash-only",
 ]);
 
+requireIncludes("docs/phase17-convex-activation-preflight.md", [
+  "npm run kinflo:activation-preflight",
+  "CONVEX_DEPLOYMENT",
+  "VITE_CONVEX_URL",
+  "activation.seedSmokeSite",
+  "No hosted Convex deployment is created",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"kinflo:validate-imports\"",
   "\"kinflo:dry-run-imports\"",
+  "\"kinflo:activation-preflight\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -245,6 +256,21 @@ requireIncludes("scripts/dry-run-convex-import-contracts.mjs", [
   "validate-convex-import-contracts.mjs",
   "External writes: 0",
   "Hosted deployment touched: no",
+]);
+
+requireIncludes("scripts/validate-convex-activation-preflight.mjs", [
+  "CONVEX_DEPLOYMENT",
+  "VITE_CONVEX_URL",
+  "External writes: 0",
+  "Hosted deployment touched: no",
+  "activation.seedSmokeSite",
+]);
+
+requireIncludes(".env.example", [
+  "CONVEX_DEPLOYMENT=",
+  "VITE_CONVEX_URL=",
+  "CONVEX_AUTH_ISSUER=",
+  "CONVEX_AUTH_CLIENT_ID=",
 ]);
 
 requireIncludes("docs/convex-import-contracts/import-manifest.json", [

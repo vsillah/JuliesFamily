@@ -37,17 +37,23 @@ This module is intentionally provider-light until Vambah approves the hosted own
 After the hosted Convex setup is approved:
 
 1. Configure the Convex deployment and auth provider.
-2. Run:
+2. Run the provider-light activation preflight:
+
+```bash
+npm run kinflo:activation-preflight
+```
+
+3. Run:
 
 ```bash
 npm run convex:codegen
 ```
 
-3. Sign in as Vambah.
-4. Run `controlPlane.upsertCurrentUser`.
-5. Run `controlPlane.bootstrapPlatformAdmin`.
-6. Run `activation.readiness`.
-7. Run `activation.seedSmokeSite` with defaults or explicit args:
+4. Sign in as Vambah.
+5. Run `controlPlane.upsertCurrentUser`.
+6. Run `controlPlane.bootstrapPlatformAdmin`.
+7. Run `activation.readiness`.
+8. Run `activation.seedSmokeSite` with defaults or explicit args:
 
 ```json
 {
@@ -60,9 +66,9 @@ npm run convex:codegen
 }
 ```
 
-8. Pass the returned `resolverArgs` to `publicSite.resolvePublishedSite`.
-9. Confirm the resolver returns tenant, site, theme, navigation, page, and published blocks.
-10. Confirm `activation.readiness` reports at least one tenant, one site, and one published site.
+9. Pass the returned `resolverArgs` to `publicSite.resolvePublishedSite`.
+10. Confirm the resolver returns tenant, site, theme, navigation, page, and published blocks.
+11. Confirm `activation.readiness` reports at least one tenant, one site, and one published site.
 
 ## Validation
 
