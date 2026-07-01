@@ -318,6 +318,7 @@ export const createSiteFromTemplate = mutation({
     });
 
     await ctx.db.insert("themeTokens", {
+      tenantId: args.tenantId,
       siteId,
       ...template.defaultTheme,
       createdBy: actor._id,
@@ -327,6 +328,7 @@ export const createSiteFromTemplate = mutation({
 
     for (const item of template.navigation) {
       await ctx.db.insert("navigationItems", {
+        tenantId: args.tenantId,
         siteId,
         placement: item.placement,
         label: item.label,
@@ -342,6 +344,7 @@ export const createSiteFromTemplate = mutation({
     const pageIds = [];
     for (const page of template.pages) {
       const pageId = await ctx.db.insert("pages", {
+        tenantId: args.tenantId,
         siteId,
         title: page.title,
         route: page.route,
@@ -356,6 +359,7 @@ export const createSiteFromTemplate = mutation({
 
       for (const [index, block] of page.blocks.entries()) {
         const blockId = await ctx.db.insert("contentBlocks", {
+          tenantId: args.tenantId,
           siteId,
           pageId,
           type: block.type,
@@ -370,6 +374,7 @@ export const createSiteFromTemplate = mutation({
         });
 
         await ctx.db.insert("contentVisibilityRules", {
+          tenantId: args.tenantId,
           siteId,
           blockId,
           isVisible: true,

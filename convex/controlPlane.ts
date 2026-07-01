@@ -454,6 +454,7 @@ export const createSite = mutation({
     });
 
     await ctx.db.insert("themeTokens", {
+      tenantId: args.tenantId,
       siteId,
       palette: {
         background: "#ffffff",
@@ -571,6 +572,7 @@ export const updateThemeTokens = mutation({
       await ctx.db.patch(existing._id, patch);
     } else {
       await ctx.db.insert("themeTokens", {
+        tenantId: site.tenantId,
         siteId: args.siteId,
         ...patch,
         createdBy: actor._id,

@@ -118,6 +118,7 @@ export const createPage = mutation({
 
     const timestamp = now();
     const pageId = await ctx.db.insert("pages", {
+      tenantId: site.tenantId,
       siteId: args.siteId,
       title: args.title.trim(),
       route,
@@ -226,6 +227,7 @@ export const upsertNavigationItem = mutation({
     }
 
     const itemId = await ctx.db.insert("navigationItems", {
+      tenantId: site.tenantId,
       siteId: args.siteId,
       parentId: args.parentId,
       placement: args.placement,
@@ -268,6 +270,7 @@ export const createContentBlock = mutation({
     const { user, site } = await requireSitePermission(ctx, page.siteId, "content:edit");
     const timestamp = now();
     const blockId = await ctx.db.insert("contentBlocks", {
+      tenantId: site.tenantId,
       siteId: page.siteId,
       pageId: page._id,
       type: args.type,
@@ -370,6 +373,7 @@ export const upsertVisibilityRule = mutation({
     }
 
     const ruleId = await ctx.db.insert("contentVisibilityRules", {
+      tenantId: site.tenantId,
       siteId: block.siteId,
       blockId: block._id,
       persona: args.persona,
@@ -603,6 +607,7 @@ export const publishPage = mutation({
     const timestamp = now();
     const revisionNumber = (priorRevision?.revisionNumber ?? 0) + 1;
     const revisionId = await ctx.db.insert("pageRevisions", {
+      tenantId: site.tenantId,
       pageId: page._id,
       siteId: page.siteId,
       title: page.title,
@@ -631,6 +636,7 @@ export const publishPage = mutation({
     }
 
     await ctx.db.insert("publishEvents", {
+      tenantId: site.tenantId,
       siteId: page.siteId,
       pageId: page._id,
       actorUserId: user._id,

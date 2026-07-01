@@ -98,6 +98,7 @@ for (const path of [
   "docs/phase30-shell-route-smoke.md",
   "docs/phase31-local-admin-smoke-fixture.md",
   "docs/phase32-phase0-readiness-manifest.md",
+  "docs/phase33-convex-schema-coverage.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -119,6 +120,7 @@ for (const path of [
   "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
   "scripts/validate-kinflo-phase0-readiness.mjs",
+  "scripts/validate-kinflo-schema-coverage.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -476,10 +478,21 @@ requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "No credentials are read, printed, rotated, or copied",
 ]);
 
+requireIncludes("docs/phase33-convex-schema-coverage.md", [
+  "npm run kinflo:validate-schema-coverage",
+  "Phase 1 multi-tenant control plane",
+  "Phase 2 configurable public renderer",
+  "Phase 3 CRM lead spine",
+  "Schema collections: 27",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"kinflo:validate-phase0-readiness\"",
+  "\"kinflo:validate-schema-coverage\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -514,6 +527,17 @@ requireIncludes("scripts/validate-kinflo-phase0-readiness.mjs", [
   "humanOwnedGates",
   "provider boundary",
   "Hosted deployment touched: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-schema-coverage.mjs", [
+  "Phase 1 minimum collections",
+  "Phase 2 minimum collections",
+  "Phase 3 minimum collections",
+  "pipelineEvents",
+  "journeyProgressionRules",
+  "journeyProgressionEvents",
+  "Generated API imported: no",
   "Live Convex execution: no",
 ]);
 
@@ -694,6 +718,9 @@ requireIncludes("convex/schema.ts", [
   "leads: defineTable",
   "leadEvents: defineTable",
   "pipelineStages: defineTable",
+  "pipelineEvents: defineTable",
+  "journeyProgressionRules: defineTable",
+  "journeyProgressionEvents: defineTable",
   "tasks: defineTable",
   "auditEvents: defineTable",
   "invitations: defineTable",

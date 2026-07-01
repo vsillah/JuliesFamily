@@ -118,6 +118,7 @@ async function publishHomepage(
     .collect();
 
   const revisionId = await ctx.db.insert("pageRevisions", definedFields({
+    tenantId: args.site.tenantId,
     pageId: page._id,
     siteId: args.site._id,
     title: page.title,
@@ -137,6 +138,7 @@ async function publishHomepage(
   }));
 
   await ctx.db.insert("publishEvents", {
+    tenantId: args.site.tenantId,
     siteId: args.site._id,
     pageId: page._id,
     actorUserId: args.actorUserId,
@@ -301,6 +303,7 @@ export const seedSmokeSite = mutation({
 
     if (siteCreated) {
       await ctx.db.insert("themeTokens", {
+        tenantId: tenant._id,
         siteId: site._id,
         ...template.defaultTheme,
         createdBy: actor._id,
@@ -310,6 +313,7 @@ export const seedSmokeSite = mutation({
 
       for (const item of template.navigation) {
         await ctx.db.insert("navigationItems", {
+          tenantId: tenant._id,
           siteId: site._id,
           placement: item.placement,
           label: item.label,
@@ -324,6 +328,7 @@ export const seedSmokeSite = mutation({
 
       for (const page of template.pages) {
         const pageId = await ctx.db.insert("pages", definedFields({
+          tenantId: tenant._id,
           siteId: site._id,
           title: page.title,
           route: page.route,
@@ -337,6 +342,7 @@ export const seedSmokeSite = mutation({
 
         for (const [index, block] of page.blocks.entries()) {
           const blockId = await ctx.db.insert("contentBlocks", definedFields({
+            tenantId: tenant._id,
             siteId: site._id,
             pageId,
             type: block.type,
@@ -351,6 +357,7 @@ export const seedSmokeSite = mutation({
           }));
 
           await ctx.db.insert("contentVisibilityRules", {
+            tenantId: tenant._id,
             siteId: site._id,
             blockId,
             isVisible: true,
