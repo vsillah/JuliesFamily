@@ -26,6 +26,7 @@ Create a real KinFlo working tree from the Julie's Family GitHub source, harden 
 | Mark Julie-specific content, reusable KinFlo modules, and implementation phases. | Repo-complete | [docs/kinflo-saas-adoption-plan.md](kinflo-saas-adoption-plan.md), [docs/drizzle-to-convex-migration-map.md](drizzle-to-convex-migration-map.md), and phase docs 1-29. | The branch goes beyond Phase 0 with provider-light scaffolds, but does not activate hosted providers. |
 | Preserve provider-free Convex boundary. | Repo-complete | `npm run kinflo:validate-phases`, `npm run kinflo:live-handoff`, `npm run kinflo:activation-preflight`, generated API/live smoke validators. | No hosted Convex deployment, no generated API import, no live Convex query/mutation/action. |
 | Keep generated Convex API files untracked. | Repo-complete | `npm run kinflo:validate-phases`, `npm run kinflo:inventory-env`, and `npm run kinflo:audit-secret-history` check generated/secret boundaries. | `convex/_generated/` remains out of git until hosted setup approval. |
+| Smoke-check provider-light shell route wiring. | Repo-complete | `npm run kinflo:validate-shell-routes` passes; [docs/phase30-shell-route-smoke.md](phase30-shell-route-smoke.md). | Static smoke protects `/admin/kinflo-os`, `/kinflo-sites/:siteSlug`, fixture slugs, and live-adapter fallback boundaries. Browser smoke confirms the public preview route; admin browser smoke remains gated by an authenticated admin session or test-only fixture. |
 | Prepare staged implementation plan. | Repo-complete | [docs/kinflo-saas-adoption-plan.md](kinflo-saas-adoption-plan.md), phase docs 1-29, and PR #1. | Hosted activation, live smoke, and integration-captain merge remain future gates. |
 
 ## Current Validation Set
@@ -37,6 +38,7 @@ The latest local validation set passed:
 - `npm run kinflo:validate-phases`
 - `npm run kinflo:validate-map`
 - `npm run kinflo:check-baseline`
+- `npm run kinflo:validate-shell-routes`
 - `npm run convex:check`
 - `npm run build`
 - `git diff --check`
@@ -55,6 +57,7 @@ For this branch, Phase 0 is repo-complete when:
 - env references are inventoried without reading values,
 - historical secret exposure is documented as a human-owned remediation gate,
 - build/typecheck/provider-light validators pass,
+- the provider-light shell and public preview routes remain wired,
 - the Drizzle-to-Convex map covers all current Drizzle tables or explicitly defers them,
 - the hosted Convex boundary is preserved.
 

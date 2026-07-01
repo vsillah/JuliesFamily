@@ -94,6 +94,7 @@ for (const path of [
   "docs/phase27-live-smoke-manifest.md",
   "docs/phase28-live-smoke-dry-runner.md",
   "docs/phase29-typescript-baseline-gate.md",
+  "docs/phase30-shell-route-smoke.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -125,6 +126,7 @@ for (const path of [
   "scripts/validate-kinflo-live-smoke-manifest.mjs",
   "scripts/dry-run-kinflo-live-smoke.mjs",
   "scripts/validate-kinflo-typescript-baseline.mjs",
+  "scripts/validate-kinflo-shell-routes.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -421,6 +423,19 @@ requireIncludes("docs/phase29-typescript-baseline-gate.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase30-shell-route-smoke.md", [
+  "npm run kinflo:validate-shell-routes",
+  "/admin/kinflo-os",
+  "/kinflo-sites/:siteSlug",
+  "julies-family",
+  "advisor-client-site",
+  "campaign-microsite",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+  "Browser Follow-Up Gate",
+  "admin auth session",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -435,6 +450,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-live-smoke\"",
   "\"kinflo:dry-run-live-smoke\"",
   "\"kinflo:check-baseline\"",
+  "\"kinflo:validate-shell-routes\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -536,6 +552,14 @@ requireIncludes("scripts/validate-kinflo-typescript-baseline.mjs", [
   "protectedPrefixes",
   "Protected KinFlo diagnostics",
   "KinFlo protected surfaces remain clear",
+]);
+
+requireIncludes("scripts/validate-kinflo-shell-routes.mjs", [
+  "/admin/kinflo-os",
+  "/kinflo-sites/:siteSlug",
+  "public preview fixture exists for",
+  "Generated API imported: no",
+  "Live Convex execution: no",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
