@@ -115,7 +115,9 @@ for (const path of [
   "docs/phase47-ai-review-provenance-shell.md",
   "docs/phase48-launch-readiness-shell.md",
   "docs/phase49-hosted-activation-packet.md",
+  "docs/phase50-adapter-switch-plan.md",
   "docs/convex-hosted-activation-packet.json",
+  "docs/convex-adapter-switch-plan.json",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -159,6 +161,7 @@ for (const path of [
   "scripts/validate-kinflo-ai-review-shell.mjs",
   "scripts/validate-kinflo-launch-readiness-shell.mjs",
   "scripts/validate-kinflo-hosted-activation-packet.mjs",
+  "scripts/validate-kinflo-adapter-switch-plan.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -737,6 +740,19 @@ requireIncludes("docs/phase49-hosted-activation-packet.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase50-adapter-switch-plan.md", [
+  "npm run kinflo:validate-adapter-switch-plan",
+  "docs/convex-adapter-switch-plan.json",
+  "provider_light_switch_plan",
+  "ShellLiveAdapterBinding",
+  "fixtureLiveAdapterBindings",
+  "liveKinfloShellAdapter",
+  "selectKinfloShellDataAdapter",
+  "KINFLO_GENERATED_API_BINDINGS",
+  "generatedApiAvailable = false",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -758,6 +774,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-ai-review-shell\"",
   "\"kinflo:validate-launch-readiness-shell\"",
   "\"kinflo:validate-hosted-activation-packet\"",
+  "\"kinflo:validate-adapter-switch-plan\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1004,6 +1021,19 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-packet.mjs", [
   "providerApisTouched",
   "secretsReadOrPrinted",
   "convex/_generated/api",
+  "Hosted deployment touched: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-adapter-switch-plan.mjs", [
+  "docs/convex-adapter-switch-plan.json",
+  "provider_light_switch_plan",
+  "generatedApiAvailable",
+  "liveKinfloShellAdapter",
+  "KINFLO_GENERATED_API_BINDINGS",
+  "switchAllowed",
+  "providerWrites",
+  "liveConvexExecution",
   "Hosted deployment touched: no",
   "Live Convex execution: no",
 ]);
@@ -1432,6 +1462,19 @@ requireIncludes("docs/convex-hosted-activation-packet.json", [
   "\"secretsReadOrPrinted\": false",
   "launchReadiness.getSiteLaunchReadiness",
   "npm run convex:codegen",
+]);
+
+requireIncludes("docs/convex-adapter-switch-plan.json", [
+  "\"phase\": 50",
+  "\"status\": \"provider_light_switch_plan\"",
+  "\"generatedApiAvailable\": false",
+  "\"liveAdapter\": \"fail_closed\"",
+  "\"selector\": \"selectKinfloShellDataAdapter\"",
+  "\"switchAllowed\": false",
+  "\"providerWrites\": false",
+  "\"liveConvexExecution\": false",
+  "KINFLO_GENERATED_API_BINDINGS",
+  "docs/convex-live-smoke-manifest.json",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [

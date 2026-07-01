@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "phase": 50,
+  "name": "KinFlo Convex adapter switch plan",
+  "status": "provider_light_switch_plan",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "providerApisTouched": false,
+    "secretsReadOrPrinted": false,
+    "notes": "This plan orders fixture-to-live adapter switching only. It does not change generatedApiAvailable false, import generated Convex API files, execute hosted Convex functions, or touch external providers."
+  },
+  "runtimeBoundary": {
+    "generatedApiAvailable": false,
+    "liveAdapter": "fail_closed",
+    "selector": "selectKinfloShellDataAdapter",
+    "fixtureFallback": "fixtureKinfloShellAdapter",
+    "gatedAdapter": "liveKinfloShellAdapter"
+  },
+  "sourceOfTruth": {
+    "phaseDocs": [
+      "docs/phase25-live-adapter-contract.md",
+      "docs/phase26-generated-api-contract.md",
+      "docs/phase27-live-smoke-manifest.md",
+      "docs/phase49-hosted-activation-packet.md"
+    ],
+    "contracts": [
+      "client/src/lib/kinfloShellData.ts",
+      "client/src/lib/kinfloConvexRuntime.ts",
+      "client/src/lib/kinfloGeneratedApiContract.ts",
+      "docs/convex-live-smoke-manifest.json",
+      "docs/convex-hosted-activation-packet.json"
+    ]
+  },
+  "globalPrerequisites": [
+    "Vambah approves hosted Convex project setup, billing/backup/auth/env ownership, and npm run convex:codegen.",
+    "Generated bindings are reviewed against KINFLO_GENERATED_API_BINDINGS.",
+    "npm run kinflo:validate-generated-api passes after codegen review.",
+    "npm run kinflo:validate-live-smoke and npm run kinflo:dry-run-live-smoke pass immediately before hosted smoke.",
+    "Read-only hosted smokes pass before any mutation-backed adapter is switched.",
+    "Every switched surface keeps fixture rollback available until smoke evidence is captured and reviewed."
+  ],
+  "switchBatches": [
+    {
+      "order": 10,
+      "id": "read-only-core",
+      "label": "Read-only core shell data",
+      "mode": "read_only",
+      "surfaces": [
+        {
+          "id": "tenant-control-plane",
+          "surface": "Tenant control plane",
+          "fixtureSource": "tenant, site, role, and audit tables",
+          "currentStatus": "fixture_fallback",
+          "convexFunctions": [
+            "controlPlane.listTenants",
+            "controlPlane.listSitesForTenant",
+            "controlPlane.listAuditEvents"
+          ],
+          "requiredSmokeEvidence": [
+            "super admin tenant list",
+            "tenant-scoped site list",
+            "audit trail smoke"
+          ],
+          "rollback": "Return tenant/site/audit tables to fixtureKinfloShellAdapter if scope filtering or audit visibility fails.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        },
+        {
+          "id": "plans-and-entitlements",
+          "surface": "Plans and entitlements",
+          "fixtureSource": "plan cards and tenant entitlement table",
+          "currentStatus": "generated_api_pending",
+          "convexFunctions": [
+            "entitlements.entitlementUsageSnapshot",
+            "entitlements.checkEntitlementLimit"
+          ],
+          "requiredSmokeEvidence": [
+            "usage snapshot matches site data",
+            "manual override honored",
+            "limit rejection audited"
+          ],
+          "rollback": "Restore fixture plan and entitlement cards if usage math, overrides, or limits diverge.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        },
+        {
+          "id": "public-renderer",
+          "surface": "Public renderer",
+          "fixtureSource": "public preview resolver",
+          "currentStatus": "fixture_fallback",
+          "convexFunctions": [
+            "publicSite.resolvePublishedSite"
+          ],
+          "requiredSmokeEvidence": [
+            "published site resolves",
+            "draft site hidden",
+            "verified domain required"
+          ],
+          "rollback": "Keep /kinflo-sites preview routed to local fixtures if published/draft filtering or public-safe data fails.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        },
+        {
+          "id": "launch-readiness",
+          "surface": "Launch readiness",
+          "fixtureSource": "site launch evidence across admin, content, preview, CRM, domain, integration, campaign, and AI gates",
+          "currentStatus": "generated_api_pending",
+          "convexFunctions": [
+            "launchReadiness.getSiteLaunchReadiness",
+            "activation.readiness"
+          ],
+          "requiredSmokeEvidence": [
+            "site:view scoped",
+            "read-only launch packet",
+            "provider actions gated"
+          ],
+          "rollback": "Restore fixture launch readiness if any launch gate is overstated or cross-tenant evidence leaks.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        }
+      ]
+    },
+    {
+      "order": 20,
+      "id": "user-scoped-preferences",
+      "label": "User-scoped preference reads and writes",
+      "mode": "mixed",
+      "surfaces": [
+        {
+          "id": "admin-experience-preferences",
+          "surface": "Admin experience preferences",
+          "fixtureSource": "data mode, filters, density, and landing-page defaults",
+          "currentStatus": "fixture_fallback",
+          "convexFunctions": [
+            "preferences.getMyPreferences",
+            "preferences.upsertMyPreferences"
+          ],
+          "requiredSmokeEvidence": [
+            "viewer reads own scoped preferences",
+            "tenant/site scoped preferences require matching access"
+          ],
+          "rollback": "Return preference controls to local state if tenant/site permission checks or personal defaults fail.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        }
+      ]
+    },
+    {
+      "order": 30,
+      "id": "site-creation-and-admin",
+      "label": "Site creation, invitations, and activation readiness",
+      "mode": "write",
+      "surfaces": [
+        {
+          "id": "activation-readiness",
+          "surface": "Activation readiness",
+          "fixtureSource": "data mode header and launch gates",
+          "currentStatus": "generated_api_pending",
+          "convexFunctions": [
+            "activation.readiness",
+            "activation.seedSmokeSite"
+          ],
+          "requiredSmokeEvidence": [
+            "readiness counts",
+            "activation smoke audit event"
+          ],
+          "rollback": "Keep activation smoke records labeled as smoke data and leave data mode on fixtures if seed output differs from manifest expectations.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        },
+        {
+          "id": "site-factory",
+          "surface": "Site factory",
+          "fixtureSource": "launch packets and site creation wizard",
+          "currentStatus": "fixture_fallback",
+          "convexFunctions": [
+            "siteFactory.listStarterTemplates",
+            "siteFactory.createSiteFromTemplate"
+          ],
+          "requiredSmokeEvidence": [
+            "template list",
+            "draft site created from template",
+            "owner invite scoped"
+          ],
+          "rollback": "Archive the smoke site, revoke pending invites, and return launch packets to fixtures if template creation or owner scope fails.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        }
+      ]
+    },
+    {
+      "order": 40,
+      "id": "public-crm-loop",
+      "label": "Public lead capture and CRM workflow",
+      "mode": "write",
+      "surfaces": [
+        {
+          "id": "crm-lead-workspace",
+          "surface": "CRM lead workspace",
+          "fixtureSource": "lead, pipeline, task, and intake fixtures",
+          "currentStatus": "fixture_fallback",
+          "convexFunctions": [
+            "crm.submitLead",
+            "crm.listLeads",
+            "crm.getLeadTimeline",
+            "crm.listJourneyProgressionRules",
+            "crm.upsertJourneyProgressionRule",
+            "crm.transitionLeadStage"
+          ],
+          "requiredSmokeEvidence": [
+            "public form creates lead",
+            "tenant admin sees scoped lead",
+            "pipeline transition appends pipeline, journey, timeline, and audit events"
+          ],
+          "rollback": "Mark smoke leads and workflow data as test-only, restore fixture CRM tables, and keep outbound notifications paused.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        }
+      ]
+    },
+    {
+      "order": 50,
+      "id": "provider-readiness-records",
+      "label": "Provider readiness metadata without provider writes",
+      "mode": "provider_gated",
+      "surfaces": [
+        {
+          "id": "domain-metadata",
+          "surface": "Domain metadata",
+          "fixtureSource": "site domain rows and launch checklist",
+          "currentStatus": "generated_api_pending",
+          "convexFunctions": [
+            "siteBuilder.upsertDomain",
+            "entitlements.checkEntitlementLimit"
+          ],
+          "requiredSmokeEvidence": [
+            "customDomains limit enforced",
+            "primary verified hostname set",
+            "duplicate hostname rejected"
+          ],
+          "rollback": "Deactivate smoke domain metadata and keep DNS/SSL/Vercel attachment blocked if hostname or entitlement checks fail.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        },
+        {
+          "id": "integration-readiness",
+          "surface": "Integration readiness",
+          "fixtureSource": "provider settings, env key references, and activation gates",
+          "currentStatus": "generated_api_pending",
+          "convexFunctions": [
+            "integrations.listIntegrationSettings",
+            "integrations.upsertIntegrationSetting"
+          ],
+          "requiredSmokeEvidence": [
+            "integration:manage scoped",
+            "secret values excluded",
+            "provider writes gated"
+          ],
+          "rollback": "Return integration readiness rows to fixtures and keep provider env activation blocked if settings expose secrets or scope incorrectly.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        }
+      ]
+    },
+    {
+      "order": 60,
+      "id": "campaign-and-ai-governance",
+      "label": "Campaign and AI governance records",
+      "mode": "provider_gated",
+      "surfaces": [
+        {
+          "id": "campaign-automation",
+          "surface": "Campaign automation",
+          "fixtureSource": "campaign drafts, review steps, safety gates, and approval state",
+          "currentStatus": "generated_api_pending",
+          "convexFunctions": [
+            "campaigns.listCampaignDrafts",
+            "campaigns.upsertCampaignDraft",
+            "campaigns.approveCampaignDraft"
+          ],
+          "requiredSmokeEvidence": [
+            "campaign:manage scoped",
+            "campaign limit enforced",
+            "provider sends gated"
+          ],
+          "rollback": "Pause campaign records, restore fixture campaign review state, and keep email/SMS/automation sends blocked.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        },
+        {
+          "id": "ai-review-provenance",
+          "surface": "AI review provenance",
+          "fixtureSource": "AI prompt, source, output, reviewer, and publish-target records",
+          "currentStatus": "generated_api_pending",
+          "convexFunctions": [
+            "aiReview.listAiGenerationRecords",
+            "aiReview.upsertAiGenerationRecord",
+            "aiReview.reviewAiGenerationRecord"
+          ],
+          "requiredSmokeEvidence": [
+            "ai:draft scoped",
+            "ai:review required",
+            "provider calls gated"
+          ],
+          "rollback": "Keep generated output unpublished, return AI review rows to fixtures, and block AI provider calls until provenance smoke passes.",
+          "switchAllowed": false,
+          "providerWrites": false,
+          "liveConvexExecution": false
+        }
+      ]
+    }
+  ],
+  "rollbackRequirements": [
+    "Keep fixtureKinfloShellAdapter available for every switched surface until hosted smoke evidence is reviewed.",
+    "Never switch a mutation-backed surface before read-only tenant/site/access/launch smokes pass.",
+    "Pause the switch immediately on any cross-tenant read or write leak.",
+    "Do not attach DNS, SSL, email, SMS, payment, storage, or AI providers from this plan.",
+    "Preserve audit evidence and mark smoke records as test data before cleanup."
+  ],
+  "completionEvidence": [
+    "All surface convexFunctions resolve to KINFLO_GENERATED_API_BINDINGS.",
+    "All switchAllowed flags remain false in this provider-light phase.",
+    "All surfaces declare rollback and requiredSmokeEvidence.",
+    "generatedApiAvailable remains false.",
+    "liveKinfloShellAdapter remains fail-closed."
+  ]
+}
