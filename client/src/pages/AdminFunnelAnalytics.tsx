@@ -93,8 +93,8 @@ export default function AdminFunnelAnalytics() {
         <div className="max-w-7xl mx-auto space-y-6">
           <Breadcrumbs
             items={[
-              { label: "Admin", path: "/admin" },
-              { label: "Funnel Analytics", path: "/admin/funnel-analytics" }
+              { label: "Admin", href: "/admin" },
+              { label: "Funnel Analytics", href: "/admin/funnel-analytics" }
             ]}
           />
           <div className="text-center py-12">
@@ -113,8 +113,8 @@ export default function AdminFunnelAnalytics() {
       <div className="max-w-7xl mx-auto space-y-6">
         <Breadcrumbs
           items={[
-            { label: "Admin", path: "/admin" },
-            { label: "Funnel Analytics", path: "/admin/funnel-analytics" }
+            { label: "Admin", href: "/admin" },
+            { label: "Funnel Analytics", href: "/admin/funnel-analytics" }
           ]}
         />
 

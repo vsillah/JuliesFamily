@@ -64,6 +64,10 @@ type Entitlement = {
   program: Program;
 };
 
+function normalizeUserRole(role: string | null | undefined): UserRole {
+  return role === "admin" || role === "super_admin" ? role : "client";
+}
+
 export default function AdminUserManagement() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -272,11 +276,12 @@ export default function AdminUserManagement() {
   });
 
   const handleRoleChange = (user: User, newRole: UserRole) => {
-    if (newRole === user.role) return; // No change
+    const currentRole = normalizeUserRole(user.role);
+    if (newRole === currentRole) return; // No change
     
     setConfirmAction({
       userId: user.id,
-      currentRole: user.role,
+      currentRole,
       newRole,
       userName: `${user.firstName} ${user.lastName}`,
     });
@@ -391,7 +396,8 @@ export default function AdminUserManagement() {
                   </TableHeader>
                   <TableBody>
                     {filteredUsers.map((user) => {
-                      const RoleIcon = getRoleIcon(user.role);
+                      const userRole = normalizeUserRole(user.role);
+                      const RoleIcon = getRoleIcon(userRole);
                       return (
                         <TableRow key={user.id} data-testid={`row-user-${user.id}`}>
                           <TableCell className="font-medium">
@@ -406,7 +412,7 @@ export default function AdminUserManagement() {
                           <TableCell>
                             {isSuperAdmin && !isCurrentUser(user.id) ? (
                               <Select
-                                value={user.role}
+                                value={userRole}
                                 onValueChange={(value) => handleRoleChange(user, value as UserRole)}
                                 disabled={updateRoleMutation.isPending}
                               >
@@ -438,13 +444,13 @@ export default function AdminUserManagement() {
                                 </SelectContent>
                               </Select>
                             ) : (
-                              <Badge 
-                                variant={getRoleBadgeVariant(user.role)} 
-                                className="gap-1" 
+                              <Badge
+                                variant={getRoleBadgeVariant(userRole)}
+                                className="gap-1"
                                 data-testid={`badge-role-${user.id}`}
                               >
                                 <RoleIcon className="h-3 w-3" />
-                                {getRoleLabel(user.role)}
+                                {getRoleLabel(userRole)}
                               </Badge>
                             )}
                             {isCurrentUser(user.id) && isSuperAdmin && (

@@ -152,7 +152,7 @@ export default function AdminEmailUnsubscribes() {
   });
 
   // Format date
-  const formatDate = (date: string | null) => {
+  const formatDate = (date: Date | string | null) => {
     if (!date) return "-";
     return new Date(date).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -438,7 +438,11 @@ export default function AdminEmailUnsubscribes() {
                         <Textarea
                           placeholder="Optional reason for unsubscribe..."
                           data-testid="input-reason"
-                          {...field}
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
                         />
                       </FormControl>
                       <FormMessage />
@@ -456,7 +460,11 @@ export default function AdminEmailUnsubscribes() {
                         <Input
                           placeholder="manual_admin"
                           data-testid="input-source"
-                          {...field}
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          name={field.name}
+                          ref={field.ref}
                         />
                       </FormControl>
                       <FormDescription>
