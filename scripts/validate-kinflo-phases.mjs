@@ -100,6 +100,7 @@ for (const path of [
   "docs/phase32-phase0-readiness-manifest.md",
   "docs/phase33-convex-schema-coverage.md",
   "docs/phase34-crm-progression-contracts.md",
+  "docs/phase35-public-visibility-contract.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -123,6 +124,7 @@ for (const path of [
   "scripts/validate-kinflo-phase0-readiness.mjs",
   "scripts/validate-kinflo-schema-coverage.mjs",
   "scripts/validate-kinflo-crm-progression.mjs",
+  "scripts/validate-kinflo-public-visibility.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -501,12 +503,22 @@ requireIncludes("docs/phase34-crm-progression-contracts.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase35-public-visibility-contract.md", [
+  "npm run kinflo:validate-public-visibility",
+  "Targeted persona and journey-stage rules do not apply to anonymous context.",
+  "Global visibility rules still apply when no persona or journey stage is supplied.",
+  "publicSite.resolvePublishedSite",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"kinflo:validate-phase0-readiness\"",
   "\"kinflo:validate-schema-coverage\"",
   "\"kinflo:validate-crm-progression\"",
+  "\"kinflo:validate-public-visibility\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -561,6 +573,15 @@ requireIncludes("scripts/validate-kinflo-crm-progression.mjs", [
   "crm.transitionLeadStage",
   "pipelineEvents",
   "journeyProgressionEvents",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-public-visibility.mjs", [
+  "Targeted persona and journey-stage rules do not apply to anonymous context.",
+  "publicSite.resolvePublishedSite",
+  "targeted persona rules require matching context",
+  "targeted journey rules require matching context",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -839,6 +860,16 @@ requireIncludes("convex/activation.ts", [
   "resolverArgs",
 ]);
 
+requireIncludes("convex/publicSite.ts", [
+  "export const resolvePublishedSite",
+  "normalizeAudienceValue",
+  "const rulePersona = normalizeAudienceValue(rule.persona)",
+  "const contextPersona = normalizeAudienceValue(persona)",
+  "const personaMatches = !rulePersona || rulePersona === contextPersona",
+  "const stageMatches = !ruleJourneyStage || ruleJourneyStage === contextJourneyStage",
+  "applyVisibility(block, rules, args.persona, args.journeyStage)",
+]);
+
 requireIncludes("convex/crm.ts", [
   "export const submitLead",
   "requireEntitlementLimit",
@@ -968,6 +999,8 @@ requireIncludes("client/src/lib/kinfloLeadCapture.ts", [
 requireIncludes("client/src/lib/kinfloPublicSitePreview.ts", [
   "KinfloPublicSitePreview",
   "publicSite.resolvePublishedSite",
+  "persona?: string",
+  "journeyStage?: string",
   "resolveKinfloPublicSitePreview",
   "listKinfloPublicSitePreviews",
 ]);

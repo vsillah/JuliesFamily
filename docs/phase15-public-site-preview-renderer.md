@@ -32,6 +32,8 @@ The renderer currently supports:
 
 Lead magnet and form blocks render `LeadCaptureForm` with a site-scoped `siteId`, preserving the Phase 14 `crm.submitLead` contract while keeping `/api/leads` as the temporary runtime fallback.
 
+Phase 35 tightens the `publicSite.resolvePublishedSite` visibility contract: global rules still apply to anonymous context, but persona and journey-stage rules only apply when the request context explicitly matches them.
+
 ## Provider Boundary
 
 No hosted Convex deployment is created.
@@ -59,6 +61,7 @@ Run:
 
 ```bash
 npm run kinflo:validate-phases
+npm run kinflo:validate-public-visibility
 npm run build
 ```
 

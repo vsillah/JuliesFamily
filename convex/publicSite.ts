@@ -13,13 +13,23 @@ function normalizeRoute(route?: string) {
   return `/${value.replace(/^\/+|\/+$/g, "")}`;
 }
 
+function normalizeAudienceValue(value?: string) {
+  const normalized = value?.trim().toLowerCase();
+  return normalized || undefined;
+}
+
 function ruleMatches(
   rule: any,
   persona?: string,
   journeyStage?: string,
 ) {
-  const personaMatches = !rule.persona || !persona || rule.persona === persona;
-  const stageMatches = !rule.journeyStage || !journeyStage || rule.journeyStage === journeyStage;
+  const rulePersona = normalizeAudienceValue(rule.persona);
+  const ruleJourneyStage = normalizeAudienceValue(rule.journeyStage);
+  const contextPersona = normalizeAudienceValue(persona);
+  const contextJourneyStage = normalizeAudienceValue(journeyStage);
+
+  const personaMatches = !rulePersona || rulePersona === contextPersona;
+  const stageMatches = !ruleJourneyStage || ruleJourneyStage === contextJourneyStage;
   return personaMatches && stageMatches;
 }
 

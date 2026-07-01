@@ -14,6 +14,7 @@
     "kinflo:validate-phase0-readiness": "node scripts/validate-kinflo-phase0-readiness.mjs",
     "kinflo:validate-schema-coverage": "node scripts/validate-kinflo-schema-coverage.mjs",
     "kinflo:validate-crm-progression": "node scripts/validate-kinflo-crm-progression.mjs",
+    "kinflo:validate-public-visibility": "node scripts/validate-kinflo-public-visibility.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

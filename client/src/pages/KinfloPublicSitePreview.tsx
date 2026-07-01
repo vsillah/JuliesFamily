@@ -193,6 +193,8 @@ export default function KinfloPublicSitePreview() {
   const footerNav = preview.navigationItems
     .filter((item) => item.placement === "footer")
     .sort((a, b) => a.order - b.order);
+  const contextPersona = preview.context.persona ?? "anonymous";
+  const contextJourneyStage = preview.context.journeyStage ?? "default";
 
   return (
     <div
@@ -216,6 +218,9 @@ export default function KinfloPublicSitePreview() {
           </nav>
           <Badge variant="outline" className="hidden sm:inline-flex">
             {preview.context.convexFunction}
+          </Badge>
+          <Badge variant="secondary" className="hidden whitespace-nowrap lg:inline-flex" data-testid="public-preview-context">
+            {contextPersona} / {contextJourneyStage}
           </Badge>
         </div>
       </header>
