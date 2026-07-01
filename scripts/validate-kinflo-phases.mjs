@@ -61,6 +61,7 @@ if (trackedFiles.some((file) => file.startsWith("convex/_generated/"))) {
 for (const path of [
   "docs/kinflo-saas-adoption-plan.md",
   "docs/phase0-baseline.md",
+  "docs/phase0-completion-audit.md",
   "docs/phase0-env-inventory.md",
   "docs/phase0-secret-remediation.md",
   "docs/drizzle-to-convex-migration-map.md",
@@ -134,6 +135,18 @@ requireIncludes("docs/phase0-baseline.md", [
   "npm run check",
   ".env.local",
   "npm run kinflo:inventory-env",
+]);
+
+requireIncludes("docs/phase0-completion-audit.md", [
+  "Requirement Audit",
+  "Repo-complete",
+  "Human-owned gate pending",
+  "npm run kinflo:audit-secret-history",
+  "npm run kinflo:inventory-env",
+  "npm run kinflo:validate-map",
+  "npm run kinflo:check-baseline",
+  "This branch satisfies those repo-complete conditions.",
+  "Do not treat it as approval to create providers",
 ]);
 
 requireIncludes("docs/phase0-env-inventory.md", [
