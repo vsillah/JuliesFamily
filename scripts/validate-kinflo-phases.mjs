@@ -116,6 +116,7 @@ for (const path of [
   "docs/phase48-launch-readiness-shell.md",
   "docs/phase49-hosted-activation-packet.md",
   "docs/phase50-adapter-switch-plan.md",
+  "docs/phase51-adapter-switch-parity.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-adapter-switch-plan.json",
   "docs/convex-live-smoke-manifest.json",
@@ -162,6 +163,7 @@ for (const path of [
   "scripts/validate-kinflo-launch-readiness-shell.mjs",
   "scripts/validate-kinflo-hosted-activation-packet.mjs",
   "scripts/validate-kinflo-adapter-switch-plan.mjs",
+  "scripts/validate-kinflo-adapter-switch-parity.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -753,6 +755,15 @@ requireIncludes("docs/phase50-adapter-switch-plan.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase51-adapter-switch-parity.md", [
+  "npm run kinflo:validate-adapter-switch-parity",
+  "fixtureLiveAdapterBindings",
+  "docs/convex-adapter-switch-plan.json",
+  "TypeScript compiler API",
+  "generatedApiAvailable = false",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -775,6 +786,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-launch-readiness-shell\"",
   "\"kinflo:validate-hosted-activation-packet\"",
   "\"kinflo:validate-adapter-switch-plan\"",
+  "\"kinflo:validate-adapter-switch-parity\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1035,6 +1047,18 @@ requireIncludes("scripts/validate-kinflo-adapter-switch-plan.mjs", [
   "providerWrites",
   "liveConvexExecution",
   "Hosted deployment touched: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-adapter-switch-parity.mjs", [
+  "fixtureLiveAdapterBindings",
+  "docs/convex-adapter-switch-plan.json",
+  "ts.createSourceFile",
+  "generatedApiAvailable = false",
+  "switchAllowed remains false",
+  "providerWrites remains false",
+  "liveConvexExecution remains false",
+  "Generated API imported: no",
   "Live Convex execution: no",
 ]);
 

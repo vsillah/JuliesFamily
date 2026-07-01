@@ -30,6 +30,7 @@
     "kinflo:validate-launch-readiness-shell": "node scripts/validate-kinflo-launch-readiness-shell.mjs",
     "kinflo:validate-hosted-activation-packet": "node scripts/validate-kinflo-hosted-activation-packet.mjs",
     "kinflo:validate-adapter-switch-plan": "node scripts/validate-kinflo-adapter-switch-plan.mjs",
+    "kinflo:validate-adapter-switch-parity": "node scripts/validate-kinflo-adapter-switch-parity.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",
