@@ -122,6 +122,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.createEmailOpen({
         emailLogId: emailLog.id,
         leadId: emailLog.leadId,
+        trackingToken: emailLog.trackingToken,
         userAgent: req.get('user-agent') || null,
         ipAddress: req.ip || null,
       });
@@ -7832,7 +7833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                       await storage.createEmailLog({
                         recipientEmail: user.email,
                         subject: emailSubject,
-                        htmlBody: emailHtml,
+                        trackingToken: `campaign-donation-${campaign.id}-${updatedDonation.id}-${member.id}`,
                         status: 'pending',
                         emailProvider: 'sendgrid',
                         metadata: {
@@ -8645,7 +8646,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.createEmailLog({
             recipientEmail: donorEmail,
             subject: emailSubject,
-            htmlBody: emailHtml,
+            trackingToken: nanoid(),
             status: 'sent',
             emailProvider: 'sendgrid',
             metadata: {

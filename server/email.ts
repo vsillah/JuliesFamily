@@ -56,8 +56,7 @@ export function prepareTrackedEmailContent(
     const hasBody = /<body[^>]*>/i.test(html);
     const wrappedHtml = hasBody ? html : `<body>${html}</body>`;
     
-    // Load HTML with cheerio (decodeEntities: true normalizes HTML entities)
-    const $ = cheerio.load(wrappedHtml, { decodeEntities: true });
+    const $ = cheerio.load(wrappedHtml);
     
     // Inject tracking pixel at the end of body
     const trackingPixel = `<img src="${baseUrl}/track/open/${trackingToken}" width="1" height="1" style="display:none" alt="" />`;
@@ -162,6 +161,7 @@ export async function sendEmail(
         recipientEmail: options.to,
         recipientName: options.toName,
         subject: options.subject,
+        trackingToken: nanoid(),
         status: 'failed',
         emailProvider: 'sendgrid',
         errorMessage: 'Recipient has unsubscribed',
@@ -294,6 +294,7 @@ export async function sendTemplatedEmail(
         recipientEmail,
         recipientName,
         subject: `Template Error: ${templateName}`,
+        trackingToken: nanoid(),
         status: 'failed',
         emailProvider: 'sendgrid',
         errorMessage: error,
@@ -310,6 +311,7 @@ export async function sendTemplatedEmail(
         recipientEmail,
         recipientName,
         subject: template.subject,
+        trackingToken: nanoid(),
         status: 'failed',
         emailProvider: 'sendgrid',
         errorMessage: error,

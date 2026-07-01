@@ -74,7 +74,7 @@ Return ONLY valid JSON in this exact format, with no markdown formatting or code
       ],
     });
 
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     
     // Clean up the response to ensure it's valid JSON
     let cleanedResponse = responseText.trim();
@@ -202,7 +202,7 @@ Return ONLY valid JSON in this exact format, with no markdown formatting or code
       ],
     });
 
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\n?/g, '');

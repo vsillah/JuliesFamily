@@ -51,7 +51,7 @@ export async function personalizeEmailTemplate(
       ],
     });
 
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     
     // Clean up the response
     let cleanedResponse = responseText.trim();

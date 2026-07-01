@@ -48,7 +48,7 @@ export async function personalizeSmsTemplate(
       ],
     });
 
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     
     // Clean up the response
     let cleanedResponse = responseText.trim();
@@ -235,7 +235,8 @@ function buildPersonalizationPrompt(
     ? Math.floor((Date.now() - new Date(lead.lastInteractionDate).getTime()) / (1000 * 60 * 60 * 24))
     : null;
 
-  const templateVars = (template.variables as string[]) || [];
+  const templateVars = (template.messageTemplate.match(/\{([^}]+)\}/g) || [])
+    .map(match => match.replace(/[{}]/g, ''));
 
   return `You are an expert SMS copywriter trained in Alex Hormozi's "$100M Leads" communication strategies, optimized for SMS constraints.
 

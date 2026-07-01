@@ -66,7 +66,7 @@ If you cannot determine a field with confidence, use these defaults:
     ],
   });
 
-  const responseText = result.response?.text() || result.text || "";
+  const responseText = result.text || "";
   
   // Clean up the response to ensure it's valid JSON
   let cleanedResponse = responseText.trim();
@@ -178,7 +178,7 @@ If you cannot determine with confidence, use these defaults:
     ],
   });
 
-  const responseText = result.response?.text() || result.text || "";
+  const responseText = result.text || "";
   
   // Clean up the response to ensure it's valid JSON
   let cleanedResponse = responseText.trim();
@@ -281,7 +281,7 @@ If you cannot determine a field with confidence, use these defaults:
     ],
   });
 
-  const responseText = result.response?.text() || result.text || "";
+  const responseText = result.text || "";
   
   // Clean up the response to ensure it's valid JSON
   let cleanedResponse = responseText.trim();
