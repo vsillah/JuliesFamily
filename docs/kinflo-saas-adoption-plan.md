@@ -118,6 +118,7 @@ Gate:
 - Secret exposure risk documented.
 - Migration inventory committed as docs only.
 - Local phase readiness can be checked with `npm run kinflo:validate-phases`.
+- Migration-map coverage can be checked with `npm run kinflo:validate-map`.
 
 ### Phase 1: Multi-Tenant Control Plane Shell
 

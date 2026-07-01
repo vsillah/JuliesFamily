@@ -29,6 +29,7 @@ The validator checks that the local migration packet still has the required docs
 - The migration map references the core Convex target tables.
 - The package `convex:check` command includes the activation module.
 - The docs preserve the no-hosted-deployment boundary.
+- The Drizzle-to-Convex migration map validator exists and is wired through `npm run kinflo:validate-map`.
 
 ## Current Boundary
 
@@ -41,6 +42,7 @@ It is meant to catch migration drift before the hosted ownership/auth/backup gat
 Current validation:
 
 - `npm run kinflo:validate-phases`: passes.
+- `npm run kinflo:validate-map`: passes.
 - `npm run convex:check`: passes.
 - `npm run build`: passes.
 

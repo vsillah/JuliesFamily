@@ -66,6 +66,8 @@ for (const path of [
   "docs/phase2-kinflo-shell.md",
   "docs/phase3-convex-activation-smoke.md",
   "docs/phase4-shell-data-adapter.md",
+  "docs/phase5-local-readiness-validator.md",
+  "docs/phase6-migration-map-validator.md",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "convex/siteBuilder.ts",
@@ -74,6 +76,8 @@ for (const path of [
   "convex/activation.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
+  "scripts/validate-drizzle-convex-map.mjs",
+  "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
 }
@@ -113,9 +117,28 @@ requireIncludes("docs/phase4-shell-data-adapter.md", [
   "no generated Convex runtime files are committed",
 ]);
 
+requireIncludes("docs/phase5-local-readiness-validator.md", [
+  "npm run kinflo:validate-phases",
+  "scripts/validate-kinflo-phases.mjs",
+]);
+
+requireIncludes("docs/phase6-migration-map-validator.md", [
+  "npm run kinflo:validate-map",
+  "scripts/validate-drizzle-convex-map.mjs",
+  "shared/schema.ts",
+]);
+
 requireIncludes("package.json", [
+  "\"kinflo:validate-map\"",
+  "\"kinflo:validate-phases\"",
   "\"convex:check\"",
   "convex/activation.ts",
+]);
+
+requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
+  "shared/schema.ts",
+  "docs/drizzle-to-convex-migration-map.md",
+  "allowedUnmappedTables",
 ]);
 
 requireIncludes("convex/schema.ts", [
