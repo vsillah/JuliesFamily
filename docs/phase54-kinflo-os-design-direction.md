@@ -89,3 +89,35 @@ Latest result:
 - Secrets read or printed: no.
 
 This phase does not claim a full design-system overhaul. It adds the first research-backed polish layer and leaves a concrete Claude Code retry path for higher-fidelity frames.
+
+## July 1, 2026 Design Refresh Pass
+
+Additional references reviewed:
+
+- `https://winners.webbyawards.com/winners/websites-and-mobile-sites`
+- `https://www.awwwards.com/websites/sites_of_the_day/`
+- `https://www.saasframe.io/blog/10-saas-landing-page-trends-for-2026-with-real-examples`
+- `https://developer.apple.com/design/human-interface-guidelines/typography`
+- `https://developer.apple.com/design/human-interface-guidelines/layout`
+
+Claude Code was retried with the current KinFlo OS source context and the 2026 research summary. It still returned `401 Invalid authentication credentials`, so no Claude-authenticated frame output was available.
+
+Generated visual frames were created locally instead:
+
+- Executive command shell: `/Users/vambahsillah/.codex/generated_images/019f1b24-bb06-7a50-ab88-93fd25fcb2ed/ig_073a0e8bfd97ee3a016a4595b9167081959e6cc621ea5003e4.png`
+- Client Website Studio: `/Users/vambahsillah/.codex/generated_images/019f1b24-bb06-7a50-ab88-93fd25fcb2ed/ig_073a0e8bfd97ee3a016a4595f20b1881959e46924ef0f310f8.png`
+
+Implementation brought over:
+
+- cooler white-and-slate command shell,
+- stronger decision-first command band,
+- compact tab strip with direct `?tab=` initialization,
+- summarized Convex function contract in the first viewport,
+- Client Website Studio workbench with site list, preview frame, readiness rail, launch blueprint inspector, research sources, and activation evidence.
+
+Screenshot evidence:
+
+- Desktop command shell captured with Chrome CDP at `/tmp/kinflo-os-command-shell-cdp.png`.
+- Desktop Studio captured with Chrome CDP at `/tmp/kinflo-os-site-studio-cdp.png`.
+- Mobile Studio captured at `/tmp/kinflo-os-site-studio-mobile.png`.
+- Mobile Studio overflow check at 390px: false.

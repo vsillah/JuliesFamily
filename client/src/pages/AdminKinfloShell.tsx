@@ -83,6 +83,40 @@ const notificationChannelOptions = [
   { key: "weekly-digest", label: "Weekly digest" },
 ];
 
+const shellTabValues = [
+  "tenants",
+  "sites",
+  "launch-readiness",
+  "adapter-switch",
+  "hosted-activation",
+  "factory",
+  "plans",
+  "brand",
+  "navigation",
+  "preview",
+  "site-studio",
+  "assets",
+  "domains",
+  "integrations",
+  "campaigns",
+  "ai-review",
+  "content",
+  "templates",
+  "crm",
+  "experience",
+  "access",
+] as const;
+
+type ShellTabValue = (typeof shellTabValues)[number];
+
+function readInitialShellTab(): ShellTabValue {
+  if (typeof window === "undefined") {
+    return "tenants";
+  }
+  const tab = new URLSearchParams(window.location.search).get("tab");
+  return shellTabValues.includes(tab as ShellTabValue) ? (tab as ShellTabValue) : "tenants";
+}
+
 function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
     return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
@@ -134,7 +168,7 @@ export default function AdminKinfloShell() {
   const { isAdmin } = useUserRole();
   const [, navigate] = useLocation();
   const snapshot = getKinfloShellSnapshot();
-  const [activeTab, setActiveTab] = useState("tenants");
+  const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
   const [adapterSwitchBatchId, setAdapterSwitchBatchId] = useState(snapshot.adapterSwitchReadiness.defaultBatchId);
@@ -873,27 +907,27 @@ export default function AdminKinfloShell() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="border-b bg-muted/30">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 text-slate-950">
+      <div className="border-b border-slate-200 bg-white/95">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
           <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]} />
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">Convex Phase 1</Badge>
-                <Badge variant="outline">Provider-light shell</Badge>
+                <Badge className="bg-slate-950 text-white hover:bg-slate-950">Convex Phase 1</Badge>
+                <Badge variant="outline" className="border-slate-300 bg-white">Provider-light shell</Badge>
               </div>
-              <h1 className="mt-3 text-3xl font-serif font-bold sm:text-4xl">KinFlo OS</h1>
-              <p className="mt-2 max-w-3xl text-base text-muted-foreground">
+              <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-normal sm:text-4xl">KinFlo OS</h1>
+              <p className="mt-2 max-w-3xl text-base leading-7 text-slate-600">
                 The operating shell for tenants, sites, templates, permissions, and configurable public experiences.
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button onClick={() => setActiveTab("factory")} data-testid="button-create-tenant">
+              <Button className="bg-slate-950 hover:bg-slate-800" onClick={() => setActiveTab("factory")} data-testid="button-create-tenant">
                 <Plus className="mr-2 h-4 w-4" />
                 New Tenant
               </Button>
-              <Button variant="outline" onClick={() => setActiveTab("factory")} data-testid="button-create-site">
+              <Button variant="outline" className="border-slate-300 bg-white" onClick={() => setActiveTab("factory")} data-testid="button-create-site">
                 <Globe2 className="mr-2 h-4 w-4" />
                 New Site
               </Button>
@@ -902,47 +936,47 @@ export default function AdminKinfloShell() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="mt-6 grid gap-4 rounded-lg border bg-background p-4 shadow-sm lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:p-5" data-testid="section-kinflo-command-brief">
+      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+        <section className="grid gap-5 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] lg:p-6" data-testid="section-kinflo-command-brief">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary">Command Brief</Badge>
-              <Badge variant="outline">{snapshot.dataMode.runtimeLabel}</Badge>
+              <Badge variant="secondary" className="bg-emerald-50 text-emerald-800 hover:bg-emerald-50">Command Brief</Badge>
+              <Badge variant="outline" className="border-slate-300 bg-white">{snapshot.dataMode.runtimeLabel}</Badge>
             </div>
             <h2 className="mt-4 max-w-3xl text-2xl font-semibold leading-tight tracking-normal md:text-3xl">
               {commandBrief.decision}
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
               {commandBrief.headline}: {commandBrief.blocker}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {commandBrief.proof.map((item) => (
-                <Badge key={item} variant="outline" className="bg-muted/40">
+                <Badge key={item} variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
                   {item}
                 </Badge>
               ))}
             </div>
           </div>
 
-          <div className="rounded-md border bg-muted/30 p-4">
+          <div className="rounded-md border border-slate-900 bg-slate-950 p-4 text-white">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-sm font-medium">Next gate</div>
+                <div className="text-sm font-medium text-slate-300">Next gate</div>
                 <p className="mt-1 text-lg font-semibold leading-tight">{commandBrief.nextGate?.label}</p>
               </div>
               {commandBrief.nextGate ? hostedActivationStatusBadge(commandBrief.nextGate.status) : null}
             </div>
-            <p className="mt-3 text-sm leading-6 text-muted-foreground">{commandBrief.nextGate?.evidenceTarget}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-300">{commandBrief.nextGate?.evidenceTarget}</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <Button size="sm" variant="outline" onClick={() => setActiveTab("launch-readiness")}>
+              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => setActiveTab("launch-readiness")}>
                 <Rocket className="mr-2 h-3 w-3" />
                 Launch
               </Button>
-              <Button size="sm" variant="outline" onClick={() => setActiveTab("adapter-switch")}>
+              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => setActiveTab("adapter-switch")}>
                 <Workflow className="mr-2 h-3 w-3" />
                 Switch
               </Button>
-              <Button size="sm" onClick={() => setActiveTab("hosted-activation")}>
+              <Button size="sm" className="bg-white text-slate-950 hover:bg-slate-200" onClick={() => setActiveTab("hosted-activation")}>
                 <KeyRound className="mr-2 h-3 w-3" />
                 Activation
               </Button>
@@ -950,25 +984,25 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           {snapshot.metrics.map((metric) => {
             const Icon = metricIcons[metric.iconKey];
             return (
-              <Card key={metric.label}>
+              <Card key={metric.label} className="border-slate-200 bg-white shadow-none">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">{metric.label}</CardTitle>
-                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-xs font-medium uppercase tracking-normal text-slate-500">{metric.label}</CardTitle>
+                  <Icon className="h-4 w-4 text-slate-400" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{metric.value}</div>
-                  <p className="mt-1 text-xs text-muted-foreground">{metric.detail}</p>
+                  <div className="text-2xl font-semibold tracking-normal">{metric.value}</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">{metric.detail}</p>
                 </CardContent>
               </Card>
             );
           })}
         </div>
 
-        <Card className="mt-6">
+        <Card className="mt-5 border-slate-200 bg-white shadow-none">
           <CardHeader className="flex flex-col gap-3 space-y-0 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -976,7 +1010,7 @@ export default function AdminKinfloShell() {
                 <Badge variant="outline">{snapshot.dataMode.label}</Badge>
                 <Badge variant="secondary">{snapshot.dataMode.runtimeLabel}</Badge>
               </div>
-              <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+              <p className="mt-2 max-w-3xl text-sm text-slate-600">
                 {snapshot.dataMode.description}
               </p>
             </div>
@@ -992,9 +1026,12 @@ export default function AdminKinfloShell() {
             <div className="min-w-0">
               <div className="text-sm font-medium">Convex contract</div>
               <div className="mt-2 flex min-w-0 flex-wrap gap-2">
-                {snapshot.dataMode.convexFunctions.map((functionName) => (
+                {snapshot.dataMode.convexFunctions.slice(0, 8).map((functionName) => (
                   <Badge key={functionName} variant="secondary">{functionName}</Badge>
                 ))}
+                {snapshot.dataMode.convexFunctions.length > 8 ? (
+                  <Badge variant="outline">+{snapshot.dataMode.convexFunctions.length - 8} more mapped</Badge>
+                ) : null}
               </div>
             </div>
             <div className="min-w-0 lg:col-span-2">
@@ -1062,29 +1099,29 @@ export default function AdminKinfloShell() {
           </CardContent>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:flex md:w-auto md:flex-wrap">
-            <TabsTrigger value="tenants">Tenants</TabsTrigger>
-            <TabsTrigger value="sites">Sites</TabsTrigger>
-            <TabsTrigger value="launch-readiness">Launch</TabsTrigger>
-            <TabsTrigger value="adapter-switch">Switch</TabsTrigger>
-            <TabsTrigger value="hosted-activation">Activation</TabsTrigger>
-            <TabsTrigger value="factory">Factory</TabsTrigger>
-            <TabsTrigger value="plans">Plans</TabsTrigger>
-            <TabsTrigger value="brand">Brand</TabsTrigger>
-            <TabsTrigger value="navigation">Nav</TabsTrigger>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-            <TabsTrigger value="site-studio">Studio</TabsTrigger>
-            <TabsTrigger value="assets">Assets</TabsTrigger>
-            <TabsTrigger value="domains">Domains</TabsTrigger>
-            <TabsTrigger value="integrations">Integrations</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-            <TabsTrigger value="ai-review">AI Review</TabsTrigger>
-            <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="templates">Templates</TabsTrigger>
-            <TabsTrigger value="crm">CRM</TabsTrigger>
-            <TabsTrigger value="experience">Experience</TabsTrigger>
-            <TabsTrigger value="access">Access</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ShellTabValue)} className="mt-7">
+          <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-md border border-slate-200 bg-white p-1">
+            <TabsTrigger className="shrink-0" value="tenants">Tenants</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="sites">Sites</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="launch-readiness">Launch</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="adapter-switch">Switch</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="hosted-activation">Activation</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="factory">Factory</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="plans">Plans</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="brand">Brand</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="navigation">Nav</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="preview">Preview</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="site-studio">Studio</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="assets">Assets</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="domains">Domains</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="integrations">Integrations</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="campaigns">Campaigns</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="ai-review">AI Review</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="content">Content</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="templates">Templates</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="crm">CRM</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="experience">Experience</TabsTrigger>
+            <TabsTrigger className="shrink-0" value="access">Access</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tenants" className="mt-6">
@@ -2839,102 +2876,140 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="site-studio" className="mt-6">
-            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
-              <div className="min-w-0 space-y-4">
-                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0">
-                    <h2 className="text-xl font-semibold">Client Website Design Studio</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Turn the public-site research into concrete review criteria before client admins, domains, and publish actions are enabled.
-                    </p>
+            <section className="min-w-0 space-y-5">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div className="min-w-0">
+                  <h2 className="text-xl font-semibold">Client Website Design Studio</h2>
+                  <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+                    Configure the client site, review the public experience, and keep permissions and launch actions gated until the activation evidence is complete.
+                  </p>
+                </div>
+                <Badge variant="outline" className="self-start border-slate-300 bg-white">
+                  <Palette className="mr-1 h-3 w-3" />
+                  Local design review
+                </Badge>
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-[240px_minmax(0,1fr)_360px]">
+                <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                  <div className="flex items-center justify-between gap-3 px-1">
+                    <div className="text-sm font-semibold">Client sites</div>
+                    <Badge variant="secondary">{snapshot.clientWebsiteStudio.sites.length}</Badge>
                   </div>
-                  <Badge variant="outline" className="self-start">
-                    <Palette className="mr-1 h-3 w-3" />
-                    Local design review
-                  </Badge>
+                  <div className="mt-3 space-y-2">
+                    {snapshot.clientWebsiteStudio.sites.map((site) => {
+                      const isSelected = site.key === clientWebsiteStudioSiteKey;
+                      return (
+                        <button
+                          key={site.key}
+                          type="button"
+                          onClick={() => setClientWebsiteStudioSiteKey(site.key)}
+                          className={`w-full rounded-md border px-3 py-3 text-left text-sm transition ${
+                            isSelected
+                              ? "border-slate-900 bg-slate-950 text-white"
+                              : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                          }`}
+                        >
+                          <div className="font-medium">{site.label}</div>
+                          <div className={`mt-1 text-xs ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                            {site.tenantSlug}
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-1">
+                            <Badge variant={site.mobileReadiness === "ready" ? "secondary" : "outline"}>Mobile</Badge>
+                            <Badge variant={site.navReadiness === "ready" ? "secondary" : "outline"}>Nav</Badge>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <Card>
-                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <CardTitle className="text-base">Client Site Frame</CardTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {selectedClientWebsiteStudioSite?.label} - {selectedClientWebsiteStudioSite?.audience}
-                      </p>
+                <Card className="min-w-0 border-slate-200 bg-white shadow-sm">
+                  <CardHeader className="space-y-0 border-b border-slate-100">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">Live Site Frame</CardTitle>
+                        <p className="mt-1 text-sm leading-6 text-slate-600">
+                          {selectedClientWebsiteStudioSite?.label} - {selectedClientWebsiteStudioSite?.audience}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {(["Desktop", "Tablet", "Mobile"] as const).map((device) => (
+                          <Badge key={device} variant={device === "Desktop" ? "secondary" : "outline"} className="rounded-md">
+                            {device}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                    <Badge variant="secondary" data-testid="text-kinflo-client-website-readiness">
-                      {clientWebsiteStudioReadyCount}/{clientWebsiteStudioReadiness.length} ready
-                    </Badge>
                   </CardHeader>
-                  <CardContent className="space-y-5">
-                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-                      <div className="min-w-0 space-y-4">
-                        <div className="space-y-2">
-                          <Label>Client site</Label>
-                          <Select value={clientWebsiteStudioSiteKey} onValueChange={setClientWebsiteStudioSiteKey}>
-                            <SelectTrigger data-testid="select-kinflo-client-website-site">
-                              <SelectValue placeholder="Select client site" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {snapshot.clientWebsiteStudio.sites.map((site) => (
-                                <SelectItem key={site.key} value={site.key}>
-                                  {site.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                  <CardContent className="space-y-5 pt-5">
+                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                      <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+                        <div className="flex items-center gap-2">
+                          <Globe2 className="h-3.5 w-3.5" />
+                          <span>{clientWebsiteStudioPreviewPath}</span>
                         </div>
-
-                        <div className="grid gap-3 md:grid-cols-2">
-                          <div className="rounded-md border p-3">
-                            <div className="text-xs font-medium uppercase text-muted-foreground">Primary CTA</div>
-                            <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.primaryCTA}</div>
+                        <Badge variant="outline" className="border-slate-300">Preview only</Badge>
+                      </div>
+                      <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_220px]">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap gap-3 text-xs font-medium text-slate-500">
+                            {(selectedClientWebsiteLaunchBlueprint?.defaultPages ?? []).slice(0, 5).map((page) => (
+                              <span key={page}>{page}</span>
+                            ))}
                           </div>
-                          <div className="rounded-md border p-3">
-                            <div className="text-xs font-medium uppercase text-muted-foreground">Status</div>
-                            <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.status.replaceAll("_", " ")}</div>
-                          </div>
-                        </div>
-
-                        <div className="rounded-md border p-4">
-                          <div className="flex items-start gap-3">
-                            <Globe2 className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium">Hero direction</div>
-                              <p className="mt-1 text-sm text-muted-foreground">{selectedClientWebsiteStudioSite?.heroDirection}</p>
-                            </div>
+                          <h3 className="mt-6 max-w-2xl text-3xl font-semibold leading-tight tracking-normal text-slate-950">
+                            {selectedClientWebsiteStudioSite?.heroDirection}
+                          </h3>
+                          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
+                            {selectedClientWebsiteStudioSite?.trustSignal}
+                          </p>
+                          <div className="mt-5 flex flex-wrap gap-2">
+                            <Button size="sm" asChild data-testid="button-open-client-website-preview">
+                              <Link href={clientWebsiteStudioPreviewPath}>
+                                <ExternalLink className="mr-2 h-4 w-4" />
+                                Open preview
+                              </Link>
+                            </Button>
+                            <Button size="sm" disabled variant="outline" data-testid="button-client-website-publish-gated">
+                              <Rocket className="mr-2 h-4 w-4" />
+                              Publish gated
+                            </Button>
                           </div>
                         </div>
-
-                        <div className="rounded-md border p-4">
-                          <div className="flex items-start gap-3">
-                            <ShieldCheck className="mt-0.5 h-4 w-4 text-muted-foreground" />
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium">Trust signal</div>
-                              <p className="mt-1 text-sm text-muted-foreground">{selectedClientWebsiteStudioSite?.trustSignal}</p>
-                            </div>
+                        <div className="rounded-md border border-slate-200 bg-white p-4">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Design readiness</span>
+                            <span className="text-slate-500">{clientWebsiteStudioReadinessPercent}%</span>
+                          </div>
+                          <Progress value={clientWebsiteStudioReadinessPercent} className="mt-2" />
+                          <Badge variant="secondary" className="mt-3" data-testid="text-kinflo-client-website-readiness">
+                            {clientWebsiteStudioReadyCount}/{clientWebsiteStudioReadiness.length} ready
+                          </Badge>
+                          <div className="mt-4 space-y-2">
+                            {clientWebsiteStudioReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-slate-600">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      <div className="rounded-md border p-4">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="font-medium">Design readiness</span>
-                          <span className="text-muted-foreground">{clientWebsiteStudioReadinessPercent}%</span>
-                        </div>
-                        <Progress value={clientWebsiteStudioReadinessPercent} className="mt-2" />
-                        <div className="mt-3 space-y-2">
-                          {clientWebsiteStudioReadiness.map((item) => (
-                            <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
-                              {item.done ? (
-                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                              ) : (
-                                <CircleDashed className="h-3.5 w-3.5" />
-                              )}
-                              <span>{item.label}</span>
-                            </div>
-                          ))}
-                        </div>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div className="rounded-md border border-slate-200 p-4">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Primary CTA</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.primaryCTA}</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-4">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Status</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.status.replaceAll("_", " ")}</div>
                       </div>
                     </div>
 
@@ -2945,11 +3020,11 @@ export default function AdminKinfloShell() {
                           && pattern.appliesTo.includes(selectedClientWebsiteStudioSite.key),
                         );
                         return (
-                          <div key={pattern.key} className="rounded-md border p-4">
+                          <div key={pattern.key} className="rounded-md border border-slate-200 p-4">
                             <div className="flex items-start justify-between gap-3">
                               <div>
                                 <div className="text-sm font-medium">{pattern.label}</div>
-                                <p className="mt-1 text-sm text-muted-foreground">{pattern.evidence}</p>
+                                <p className="mt-1 text-sm leading-6 text-slate-600">{pattern.evidence}</p>
                               </div>
                               <Badge variant={applies ? "secondary" : "outline"}>{applies ? "Apply" : "Context"}</Badge>
                             </div>
@@ -2957,160 +3032,154 @@ export default function AdminKinfloShell() {
                         );
                       })}
                     </div>
+                  </CardContent>
+                </Card>
 
-                    <div className="rounded-md border p-4" data-testid="section-kinflo-client-website-blueprint">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <ListChecks className="h-4 w-4 text-muted-foreground" />
-                            <h3 className="text-base font-semibold">Launch Blueprint</h3>
-                          </div>
-                          <p className="mt-1 text-sm text-muted-foreground" data-testid="text-kinflo-client-website-blueprint">
-                            {selectedClientWebsiteLaunchBlueprint?.label}
-                          </p>
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <Label>Client site</Label>
+                    <Select value={clientWebsiteStudioSiteKey} onValueChange={setClientWebsiteStudioSiteKey}>
+                      <SelectTrigger className="mt-2" data-testid="select-kinflo-client-website-site">
+                        <SelectValue placeholder="Select client site" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {snapshot.clientWebsiteStudio.sites.map((site) => (
+                          <SelectItem key={site.key} value={site.key}>
+                            {site.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-website-blueprint">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <ListChecks className="h-4 w-4 text-slate-500" />
+                          <h3 className="text-base font-semibold">Launch Blueprint</h3>
                         </div>
-                        <Badge variant="outline">{selectedClientWebsiteLaunchBlueprint?.ownerRole}</Badge>
+                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-website-blueprint">
+                          {selectedClientWebsiteLaunchBlueprint?.label}
+                        </p>
                       </div>
+                      <Badge variant="outline">{selectedClientWebsiteLaunchBlueprint?.ownerRole}</Badge>
+                    </div>
 
-                      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-                        <div className="min-w-0 space-y-4">
-                          <div>
-                            <div className="text-sm font-medium">Default pages</div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {selectedClientWebsiteLaunchBlueprint?.defaultPages.map((page) => (
-                                <Badge key={page} variant="secondary">{page}</Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">Launch sequence</div>
-                            <div className="mt-2 space-y-2">
-                              {selectedClientWebsiteLaunchBlueprint?.launchSequence.map((step) => (
-                                <div key={step} className="flex items-start gap-2 text-sm text-muted-foreground">
-                                  <CircleDashed className="mt-0.5 h-4 w-4" />
-                                  <span>{step}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div>
-                            <div className="text-sm font-medium">Permission gates</div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {selectedClientWebsiteLaunchBlueprint?.adminPermissionGates.map((permission) => (
-                                <Badge key={permission} variant="outline">{permission}</Badge>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm font-medium">Blocked provider actions</div>
-                            <div className="mt-2 space-y-2">
-                              {selectedClientWebsiteLaunchBlueprint?.blockedProviderActions.map((action) => (
-                                <div key={action} className="flex items-start gap-2 text-xs text-muted-foreground">
-                                  <ShieldCheck className="mt-0.5 h-3.5 w-3.5" />
-                                  <span>{action}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div className="flex flex-wrap gap-2">
-                          {selectedClientWebsiteLaunchBlueprint?.convexFunctions.map((functionName) => (
-                            <Badge key={functionName} variant="outline">{functionName}</Badge>
+                    <div className="mt-4 space-y-4">
+                      <div>
+                        <div className="text-sm font-medium">Default pages</div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedClientWebsiteLaunchBlueprint?.defaultPages.map((page) => (
+                            <Badge key={page} variant="secondary">{page}</Badge>
                           ))}
                         </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          disabled={!selectedClientWebsiteLaunchBlueprint?.launchPacketId}
-                          onClick={() => {
-                            if (selectedClientWebsiteLaunchBlueprint?.launchPacketId) {
-                              setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId);
-                              setActiveTab("factory");
-                            }
-                          }}
-                          data-testid="button-open-client-website-blueprint-factory"
-                        >
-                          <Factory className="mr-2 h-4 w-4" />
-                          Open factory packet
-                        </Button>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">Permission gates</div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedClientWebsiteLaunchBlueprint?.adminPermissionGates.map((permission) => (
+                            <Badge key={permission} variant="outline">{permission}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">Blocked provider actions</div>
+                        <div className="mt-2 space-y-2">
+                          {selectedClientWebsiteLaunchBlueprint?.blockedProviderActions.map((action) => (
+                            <div key={action} className="flex items-start gap-2 text-xs text-slate-600">
+                              <ShieldCheck className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                              <span>{action}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">Launch sequence</div>
+                        <div className="mt-2 space-y-2">
+                          {selectedClientWebsiteLaunchBlueprint?.launchSequence.map((step) => (
+                            <div key={step} className="flex items-start gap-2 text-sm text-slate-600">
+                              <CircleDashed className="mt-0.5 h-4 w-4 text-slate-400" />
+                              <span>{step}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="text-sm text-muted-foreground">{snapshot.clientWebsiteStudio.providerBoundary}</div>
+                    <div className="mt-4 border-t border-slate-100 pt-4">
                       <div className="flex flex-wrap gap-2">
-                        <Button asChild data-testid="button-open-client-website-preview">
-                          <Link href={clientWebsiteStudioPreviewPath}>
-                            <ExternalLink className="mr-2 h-4 w-4" />
-                            Open preview
-                          </Link>
-                        </Button>
-                        <Button disabled variant="outline" data-testid="button-client-website-publish-gated">
-                          <Rocket className="mr-2 h-4 w-4" />
-                          Publish gated
-                        </Button>
+                        {selectedClientWebsiteLaunchBlueprint?.convexFunctions.map((functionName) => (
+                          <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
+                        ))}
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Research Sources</CardTitle>
-                    <p className="text-sm text-muted-foreground">Public inspiration translated into KinFlo review criteria.</p>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {snapshot.clientWebsiteStudio.researchSources.map((source) => (
-                      <a
-                        key={source.url}
-                        href={source.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm hover:bg-muted/50"
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="mt-4 w-full"
+                        disabled={!selectedClientWebsiteLaunchBlueprint?.launchPacketId}
+                        onClick={() => {
+                          if (selectedClientWebsiteLaunchBlueprint?.launchPacketId) {
+                            setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId);
+                            setActiveTab("factory");
+                          }
+                        }}
+                        data-testid="button-open-client-website-blueprint-factory"
                       >
-                        <span className="min-w-0">{source.label}</span>
-                        <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      </a>
-                    ))}
-                  </CardContent>
-                </Card>
+                        <Factory className="mr-2 h-4 w-4" />
+                        Open factory packet
+                      </Button>
+                    </div>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Convex Design Contract</CardTitle>
-                    <p className="text-sm text-muted-foreground">Mapped only. Live writes stay off until hosted activation approval.</p>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {snapshot.clientWebsiteStudio.convexFunctions.map((functionName) => (
-                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
-                        <span className="min-w-0 break-all">{functionName}</span>
-                        <Badge variant="outline">Mapped</Badge>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="text-sm font-medium">Activation Evidence</div>
+                    <div className="mt-3 space-y-2">
+                      {snapshot.clientWebsiteStudio.activationEvidence.map((item) => (
+                        <div key={item} className="flex items-start gap-2 text-sm text-slate-600">
+                          <CircleDashed className="mt-0.5 h-4 w-4 text-slate-400" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Activation Evidence</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    {snapshot.clientWebsiteStudio.activationEvidence.map((item) => (
-                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <CircleDashed className="mt-0.5 h-4 w-4" />
-                        <span>{item}</span>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="text-sm font-medium">Research Sources</div>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">Public inspiration translated into KinFlo review criteria.</p>
+                    <div className="mt-3 space-y-2">
+                      {snapshot.clientWebsiteStudio.researchSources.map((source) => (
+                        <a
+                          key={source.url}
+                          href={source.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-between gap-3 rounded-md border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50"
+                        >
+                          <span className="min-w-0">{source.label}</span>
+                          <ExternalLink className="h-4 w-4 shrink-0 text-slate-400" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                    <div className="text-sm font-medium">Convex Design Contract</div>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">Mapped only. Live writes stay off until hosted activation approval.</p>
+                    <div className="mt-3 space-y-2">
+                      {snapshot.clientWebsiteStudio.convexFunctions.map((functionName) => (
+                        <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border border-slate-200 px-3 py-2 text-sm">
+                          <span className="min-w-0 break-all">{functionName}</span>
+                          <Badge variant="outline">Mapped</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
+                    {snapshot.clientWebsiteStudio.providerBoundary}
+                  </div>
+                </div>
               </div>
             </section>
           </TabsContent>
