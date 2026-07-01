@@ -70,6 +70,7 @@ for (const path of [
   "convex/siteFactory.ts",
   "convex/publicSite.ts",
   "convex/activation.ts",
+  "convex/entitlements.ts",
   "convex/crm.ts",
   "docs/phase3-convex-activation-smoke.md",
   "docs/phase16-site-factory-launch-packets.md",
@@ -117,6 +118,12 @@ requireIncludes("convex/crm.ts", [
   "export const submitLead",
   "export const listLeads",
   "export const getLeadTimeline",
+]);
+
+requireIncludes("convex/entitlements.ts", [
+  "export const entitlementUsageSnapshot",
+  "export const checkEntitlementLimit",
+  "export async function requireEntitlementLimit",
 ]);
 
 requireIncludes("docs/phase17-convex-activation-preflight.md", [

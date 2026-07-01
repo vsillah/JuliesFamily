@@ -6,6 +6,12 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { requirePermission } from "./accessPolicy";
+import {
+  defaultBillingPlanCatalog,
+  defaultPlanForKey,
+  loadEffectiveTenantEntitlement,
+  requireEntitlementLimit,
+} from "./entitlements";
 import { invitationStatus, recordStatus, siteStatus, tenantRole } from "./schema";
 
 type QueryCtx = GenericQueryCtx<any>;
@@ -35,67 +41,6 @@ function normalizeEmail(value?: string) {
     throw new Error("Valid email is required");
   }
   return email;
-}
-
-const defaultBillingPlanCatalog = [
-  {
-    key: "pilot",
-    label: "Pilot",
-    status: "active",
-    monthlyPriceCents: 0,
-    annualPriceCents: 0,
-    limits: {
-      sites: 2,
-      admins: 3,
-      contacts: 500,
-      campaigns: 2,
-      aiCredits: 100,
-      customDomains: 0,
-      automations: 2,
-    },
-    features: ["site factory", "CRM lead capture", "manual override entitlements"],
-    notes: "Early client and proof-of-concept plan before Stripe Billing is connected.",
-  },
-  {
-    key: "growth",
-    label: "Growth",
-    status: "active",
-    monthlyPriceCents: 9700,
-    annualPriceCents: 97000,
-    limits: {
-      sites: 5,
-      admins: 8,
-      contacts: 5000,
-      campaigns: 10,
-      aiCredits: 1000,
-      customDomains: 3,
-      automations: 10,
-    },
-    features: ["multi-site management", "campaign microsites", "custom domains", "automation safety limits"],
-    notes: "Default commercial plan once Stripe Billing is approved.",
-  },
-  {
-    key: "scale",
-    label: "Scale",
-    status: "active",
-    monthlyPriceCents: 29700,
-    annualPriceCents: 297000,
-    limits: {
-      sites: 20,
-      admins: 25,
-      contacts: 25000,
-      campaigns: 50,
-      aiCredits: 5000,
-      customDomains: 10,
-      automations: 50,
-    },
-    features: ["expanded site factory", "advanced CRM", "AI review workflows", "priority launch support"],
-    notes: "Higher-volume client plan; Stripe price IDs stay gated until provider setup.",
-  },
-];
-
-function defaultPlanForKey(planKey: string) {
-  return defaultBillingPlanCatalog.find((plan) => plan.key === planKey);
 }
 
 async function syncCurrentUser(ctx: MutationCtx) {
@@ -171,6 +116,10 @@ async function requireTenantPermission(ctx: AnyCtx, tenantId: any, permission: s
 
 async function requireSitePermission(ctx: AnyCtx, siteId: any, permission: string) {
   return await requirePermission(ctx, { siteId, permission });
+}
+
+function isAdminEntitlementRole(role: string) {
+  return role === "owner" || role === "admin";
 }
 
 async function writeAuditEvent(
@@ -316,27 +265,7 @@ export const entitlementSnapshot = query({
   },
   handler: async (ctx, args) => {
     await requirePermission(ctx, { permission: "billing:manage" });
-    const tenant = await ctx.db.get(args.tenantId);
-    if (!tenant) {
-      throw new Error("Tenant not found");
-    }
-
-    const entitlement = await ctx.db
-      .query("tenantEntitlements")
-      .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
-      .first();
-    const planKey = entitlement?.planKey ?? tenant.planKey ?? "pilot";
-    const persistedPlan = await ctx.db
-      .query("billingPlans")
-      .withIndex("by_key", (q) => q.eq("key", planKey))
-      .first();
-
-    return {
-      tenant,
-      plan: persistedPlan ?? defaultPlanForKey(planKey) ?? defaultBillingPlanCatalog[0],
-      entitlement,
-      providerBoundary: "Stripe Billing gated; manual override entitlements remain active for early customers and pilots.",
-    };
+    return await loadEffectiveTenantEntitlement(ctx, args.tenantId);
   },
 });
 
@@ -507,6 +436,10 @@ export const createSite = mutation({
       throw new Error(`Site slug already exists for tenant: ${slug}`);
     }
 
+    const entitlementGuard = await requireEntitlementLimit(ctx, {
+      tenantId: args.tenantId,
+      key: "sites",
+    });
     const timestamp = now();
     const siteId = await ctx.db.insert("sites", {
       tenantId: args.tenantId,
@@ -548,7 +481,7 @@ export const createSite = mutation({
       action: "site_created",
       resourceType: "site",
       resourceId: siteId,
-      metadata: { name: args.name, slug, templateKey: args.templateKey },
+      metadata: { name: args.name, slug, templateKey: args.templateKey, entitlementGuard },
     });
 
     return siteId;
@@ -681,6 +614,17 @@ export const grantMembership = mutation({
       .filter((q) => q.eq(q.field("siteId"), args.siteId))
       .first();
 
+    const shouldCountAdminSeat =
+      args.status === "active" &&
+      isAdminEntitlementRole(args.role) &&
+      (!existing || !isAdminEntitlementRole(existing.role) || existing.status !== "active");
+    if (shouldCountAdminSeat) {
+      await requireEntitlementLimit(ctx, {
+        tenantId: args.tenantId,
+        key: "admins",
+      });
+    }
+
     const timestamp = now();
     if (existing) {
       await ctx.db.patch(existing._id, {
@@ -754,6 +698,15 @@ export const createInvitation = mutation({
       .first();
 
     if (existingPending) {
+      const shouldCountAdminInvite =
+        isAdminEntitlementRole(args.role) && !isAdminEntitlementRole(existingPending.role);
+      if (shouldCountAdminInvite) {
+        await requireEntitlementLimit(ctx, {
+          tenantId: args.tenantId,
+          key: "admins",
+        });
+      }
+
       await ctx.db.patch(existingPending._id, definedFields({
         role: args.role,
         tokenHash: args.tokenHash,
@@ -774,6 +727,13 @@ export const createInvitation = mutation({
       });
 
       return existingPending._id;
+    }
+
+    if (isAdminEntitlementRole(args.role)) {
+      await requireEntitlementLimit(ctx, {
+        tenantId: args.tenantId,
+        key: "admins",
+      });
     }
 
     const invitationId = await ctx.db.insert("invitations", definedFields({

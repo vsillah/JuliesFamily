@@ -83,6 +83,7 @@ for (const path of [
   "docs/phase19-template-quality-contracts.md",
   "docs/phase20-site-creation-wizard-contract.md",
   "docs/phase21-plan-entitlement-contracts.md",
+  "docs/phase22-entitlement-guard-contracts.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -92,6 +93,7 @@ for (const path of [
   "convex/activation.ts",
   "convex/roleCatalog.ts",
   "convex/accessPolicy.ts",
+  "convex/entitlements.ts",
   "convex/crm.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/pages/KinfloPublicSitePreview.tsx",
@@ -269,6 +271,20 @@ requireIncludes("docs/phase21-plan-entitlement-contracts.md", [
   "No hosted Convex deployment is created",
 ]);
 
+requireIncludes("docs/phase22-entitlement-guard-contracts.md", [
+  "convex/entitlements.ts",
+  "loadEffectiveTenantEntitlement",
+  "loadEntitlementUsageSnapshot",
+  "requireEntitlementLimit",
+  "entitlements.entitlementUsageSnapshot",
+  "entitlements.checkEntitlementLimit",
+  "controlPlane.createSite",
+  "siteFactory.createSiteFromTemplate",
+  "crm.submitLead",
+  "contract_placeholder",
+  "No hosted Convex deployment is created",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -279,6 +295,7 @@ requireIncludes("package.json", [
   "convex/activation.ts",
   "convex/roleCatalog.ts",
   "convex/accessPolicy.ts",
+  "convex/entitlements.ts",
   "convex/crm.ts",
 ]);
 
@@ -307,6 +324,7 @@ requireIncludes("scripts/validate-convex-activation-preflight.mjs", [
   "External writes: 0",
   "Hosted deployment touched: no",
   "activation.seedSmokeSite",
+  "convex/entitlements.ts",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
@@ -316,6 +334,8 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "createKinfloConvexReactClient",
   "fixture_only",
   "env_configured_codegen_pending",
+  "entitlements.entitlementUsageSnapshot",
+  "entitlements.checkEntitlementLimit",
   "crm.submitLead",
   "publicSite.resolvePublishedSite",
 ]);
@@ -366,12 +386,25 @@ requireIncludes("convex/controlPlane.ts", [
   "export const revokeInvitation",
   "export const acceptInvitation",
   "requirePermission",
+  "requireEntitlementLimit",
   "billing:manage",
   "billing_plan_synced",
   "tenant_entitlement_override",
   "member:invite",
   "member:manage",
   "invitation_accepted",
+]);
+
+requireIncludes("convex/entitlements.ts", [
+  "export const defaultBillingPlanCatalog",
+  "export async function loadEffectiveTenantEntitlement",
+  "export async function loadEntitlementUsageSnapshot",
+  "export async function requireEntitlementLimit",
+  "export const entitlementUsageSnapshot",
+  "export const checkEntitlementLimit",
+  "contract_placeholder",
+  "Entitlement limit exceeded",
+  "billing:manage",
 ]);
 
 requireIncludes("convex/roleCatalog.ts", [
@@ -402,6 +435,7 @@ requireIncludes("convex/siteBuilder.ts", [
 
 requireIncludes("convex/siteFactory.ts", [
   "requirePermission",
+  "requireEntitlementLimit",
   "site:create",
   "qualityContract",
   "configurableFields",
@@ -418,6 +452,7 @@ requireIncludes("convex/activation.ts", [
 
 requireIncludes("convex/crm.ts", [
   "export const submitLead",
+  "requireEntitlementLimit",
   "export const listLeads",
   "export const getLeadTimeline",
   "export const upsertPipelineStage",
@@ -450,6 +485,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Convex runtime boundary",
   "Template quality contracts",
   "ShellSiteCreationWizard",
+  "Entitlement guard contracts",
   "siteCreationWizard",
   "configurableFields",
   "imageDirection",

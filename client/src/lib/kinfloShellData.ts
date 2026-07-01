@@ -608,6 +608,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Template quality contracts", status: "done" },
   { label: "Site creation wizard contract", status: "done" },
   { label: "Plan entitlement contracts", status: "done" },
+  { label: "Entitlement guard contracts", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];

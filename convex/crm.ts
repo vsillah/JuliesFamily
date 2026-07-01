@@ -6,6 +6,7 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { requirePermission } from "./accessPolicy";
+import { requireEntitlementLimit } from "./entitlements";
 import { leadStatus, taskPriority, taskStatus } from "./schema";
 
 type QueryCtx = GenericQueryCtx<any>;
@@ -122,6 +123,10 @@ export const submitLead = mutation({
         updatedAt: timestamp,
       }));
     } else {
+      await requireEntitlementLimit(ctx, {
+        tenantId: site.tenantId,
+        key: "contacts",
+      });
       leadId = await ctx.db.insert("leads", {
         tenantId: site.tenantId,
         siteId: site._id,

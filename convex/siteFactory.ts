@@ -5,6 +5,7 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { requirePermission } from "./accessPolicy";
+import { requireEntitlementLimit } from "./entitlements";
 
 type MutationCtx = GenericMutationCtx<any>;
 
@@ -299,6 +300,10 @@ export const createSiteFromTemplate = mutation({
       throw new Error(`Site slug already exists for tenant: ${siteSlug}`);
     }
 
+    const entitlementGuard = await requireEntitlementLimit(ctx, {
+      tenantId: args.tenantId,
+      key: "sites",
+    });
     const timestamp = now();
     const siteId = await ctx.db.insert("sites", {
       tenantId: args.tenantId,
@@ -401,6 +406,7 @@ export const createSiteFromTemplate = mutation({
         navigationCount: template.navigation.length,
         featureFlags: template.featureFlags,
         qualityContract: template.qualityContract,
+        entitlementGuard,
       },
     });
 

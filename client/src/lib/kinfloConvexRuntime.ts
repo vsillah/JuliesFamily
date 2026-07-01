@@ -8,6 +8,8 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   controlPlaneCreateTenant: "controlPlane.createTenant",
   controlPlaneCreateInvitation: "controlPlane.createInvitation",
   controlPlaneListAuditEvents: "controlPlane.listAuditEvents",
+  entitlementsUsageSnapshot: "entitlements.entitlementUsageSnapshot",
+  entitlementsCheckLimit: "entitlements.checkEntitlementLimit",
   siteFactoryListStarterTemplates: "siteFactory.listStarterTemplates",
   siteFactoryCreateSiteFromTemplate: "siteFactory.createSiteFromTemplate",
   siteBuilderGetSiteDraft: "siteBuilder.getSiteDraft",
