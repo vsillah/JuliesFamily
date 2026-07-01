@@ -38,6 +38,7 @@
     "kinflo:validate-client-website-blueprints": "node scripts/validate-kinflo-client-website-blueprints.mjs",
     "kinflo:validate-convex-launch-blueprint-query": "node scripts/validate-kinflo-convex-launch-blueprint-query.mjs",
     "kinflo:validate-client-admin-permission-presets": "node scripts/validate-kinflo-client-admin-permission-presets.mjs",
+    "kinflo:validate-client-studio-polish": "node scripts/validate-kinflo-client-studio-polish.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

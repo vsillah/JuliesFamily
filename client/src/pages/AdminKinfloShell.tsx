@@ -544,6 +544,13 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.adminPermissionPresets[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.adminPermissionPresets],
   );
+  const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
+  const clientWebsiteStudioReviewStats = [
+    { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
+    { label: "Readiness", value: `${clientWebsiteStudioReadyCount}/${clientWebsiteStudioReadiness.length}` },
+    { label: "Permission", value: selectedClientWebsiteAdminPermissionPreset?.scope ?? "Pending" },
+    { label: "Provider state", value: "Gated" },
+  ];
   const selectedAssetSite = useMemo(
     () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
     [assetSiteKey, snapshot.assetLibrary.siteOptions],
@@ -2895,8 +2902,20 @@ export default function AdminKinfloShell() {
                 </Badge>
               </div>
 
-              <div className="grid gap-4 xl:grid-cols-[240px_minmax(0,1fr)_360px]">
-                <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+              <div
+                className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4"
+                data-testid="section-kinflo-client-studio-operating-frame"
+              >
+                {clientWebsiteStudioReviewStats.map((stat) => (
+                  <div key={stat.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                    <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{stat.label}</div>
+                    <div className="mt-1 truncate text-sm font-semibold text-slate-950">{stat.value}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)_380px]">
+                <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm" data-testid="section-kinflo-client-site-rail">
                   <div className="flex items-center justify-between gap-3 px-1">
                     <div className="text-sm font-semibold">Client sites</div>
                     <Badge variant="secondary">{snapshot.clientWebsiteStudio.sites.length}</Badge>
@@ -2909,19 +2928,26 @@ export default function AdminKinfloShell() {
                           key={site.key}
                           type="button"
                           onClick={() => setClientWebsiteStudioSiteKey(site.key)}
+                          aria-pressed={isSelected}
                           className={`w-full rounded-md border px-3 py-3 text-left text-sm transition ${
                             isSelected
-                              ? "border-slate-900 bg-slate-950 text-white"
+                              ? "border-slate-900 bg-slate-950 text-white shadow-sm"
                               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                           }`}
                         >
-                          <div className="font-medium">{site.label}</div>
-                          <div className={`mt-1 text-xs ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
-                            {site.tenantSlug}
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="truncate font-medium">{site.label}</div>
+                              <div className={`mt-1 truncate text-xs ${isSelected ? "text-slate-300" : "text-slate-500"}`}>
+                                {site.tenantSlug}
+                              </div>
+                            </div>
+                            <span className={`mt-1 h-2 w-2 rounded-full ${isSelected ? "bg-emerald-300" : "bg-slate-300"}`} />
                           </div>
-                          <div className="mt-3 flex flex-wrap gap-1">
+                          <div className="mt-3 flex flex-wrap gap-1.5">
                             <Badge variant={site.mobileReadiness === "ready" ? "secondary" : "outline"}>Mobile</Badge>
                             <Badge variant={site.navReadiness === "ready" ? "secondary" : "outline"}>Nav</Badge>
+                            <Badge variant={site.heroReadiness === "ready" ? "secondary" : "outline"}>Hero</Badge>
                           </div>
                         </button>
                       );
@@ -2929,18 +2955,22 @@ export default function AdminKinfloShell() {
                   </div>
                 </div>
 
-                <Card className="min-w-0 border-slate-200 bg-white shadow-sm">
+                <Card className="min-w-0 border-slate-200 bg-white shadow-sm" data-testid="section-kinflo-client-preview-workbench">
                   <CardHeader className="space-y-0 border-b border-slate-100">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div className="min-w-0">
-                        <CardTitle className="text-base">Live Site Frame</CardTitle>
+                        <CardTitle className="text-base">Preview Workbench</CardTitle>
                         <p className="mt-1 text-sm leading-6 text-slate-600">
                           {selectedClientWebsiteStudioSite?.label} - {selectedClientWebsiteStudioSite?.audience}
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="flex flex-wrap gap-1 rounded-md border border-slate-200 bg-slate-50 p-1">
                         {(["Desktop", "Tablet", "Mobile"] as const).map((device) => (
-                          <Badge key={device} variant={device === "Desktop" ? "secondary" : "outline"} className="rounded-md">
+                          <Badge
+                            key={device}
+                            variant={device === "Desktop" ? "secondary" : "outline"}
+                            className={`rounded-md border ${device === "Desktop" ? "border-slate-900 bg-white text-slate-950" : "border-transparent bg-transparent text-slate-500"}`}
+                          >
                             {device}
                           </Badge>
                         ))}
@@ -2948,22 +2978,26 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-5 pt-5">
-                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
                       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
                         <div className="flex items-center gap-2">
                           <Globe2 className="h-3.5 w-3.5" />
-                          <span>{clientWebsiteStudioPreviewPath}</span>
+                          <span className="truncate">{clientWebsiteStudioPreviewPath}</span>
                         </div>
-                        <Badge variant="outline" className="border-slate-300">Preview only</Badge>
+                        <Badge variant="outline" className="border-slate-300 bg-white">Preview only</Badge>
                       </div>
-                      <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr)_220px]">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap gap-3 text-xs font-medium text-slate-500">
+                      <div className="grid gap-5 p-4 2xl:grid-cols-[minmax(0,1fr)_220px] lg:p-5">
+                        <div className="min-w-0 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                          <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                            <div className="min-w-0 text-sm font-semibold text-slate-950">{selectedClientWebsiteStudioSite?.label}</div>
+                            <Badge variant="secondary" className="shrink-0">{clientWebsiteStudioStatusLabel}</Badge>
+                          </div>
+                          <div className="mt-5 flex flex-wrap gap-3 text-xs font-medium text-slate-500">
                             {(selectedClientWebsiteLaunchBlueprint?.defaultPages ?? []).slice(0, 5).map((page) => (
                               <span key={page}>{page}</span>
                             ))}
                           </div>
-                          <h3 className="mt-6 max-w-2xl text-3xl font-semibold leading-tight tracking-normal text-slate-950">
+                          <h3 className="mt-6 max-w-2xl text-3xl font-semibold leading-tight tracking-normal text-slate-950 md:text-4xl">
                             {selectedClientWebsiteStudioSite?.heroDirection}
                           </h3>
                           <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
@@ -2980,6 +3014,20 @@ export default function AdminKinfloShell() {
                               <Rocket className="mr-2 h-4 w-4" />
                               Publish gated
                             </Button>
+                          </div>
+                          <div className="mt-6 grid gap-2 border-t border-slate-100 pt-4 sm:grid-cols-3">
+                            <div>
+                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">CTA</div>
+                              <div className="mt-1 truncate text-sm font-medium">{selectedClientWebsiteStudioSite?.primaryCTA}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Audience</div>
+                              <div className="mt-1 truncate text-sm font-medium">{selectedClientWebsiteStudioSite?.audience}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Launch</div>
+                              <div className="mt-1 text-sm font-medium">Approval gated</div>
+                            </div>
                           </div>
                         </div>
                         <div className="rounded-md border border-slate-200 bg-white p-4">
@@ -3008,17 +3056,6 @@ export default function AdminKinfloShell() {
                     </div>
 
                     <div className="grid gap-3 md:grid-cols-2">
-                      <div className="rounded-md border border-slate-200 p-4">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Primary CTA</div>
-                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.primaryCTA}</div>
-                      </div>
-                      <div className="rounded-md border border-slate-200 p-4">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Status</div>
-                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.status.replaceAll("_", " ")}</div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3 md:grid-cols-2">
                       {snapshot.clientWebsiteStudio.designPatterns.map((pattern) => {
                         const applies = Boolean(
                           selectedClientWebsiteStudioSite
@@ -3040,7 +3077,20 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
-                <div className="space-y-4">
+                <div className="space-y-4 xl:sticky xl:top-6 xl:self-start" data-testid="section-kinflo-client-launch-rail">
+                  <div className="rounded-lg border border-slate-900 bg-slate-950 p-4 text-white shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-medium text-slate-300">Launch command rail</div>
+                        <div className="mt-1 text-lg font-semibold">{selectedClientWebsiteStudioSite?.label}</div>
+                      </div>
+                      <Badge className="bg-white text-slate-950 hover:bg-white">Review</Badge>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-300">
+                      Blueprint, permissions, evidence, and provider boundaries stay visible while the public site is reviewed.
+                    </p>
+                  </div>
+
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                     <Label>Client site</Label>
                     <Select value={clientWebsiteStudioSiteKey} onValueChange={setClientWebsiteStudioSiteKey}>

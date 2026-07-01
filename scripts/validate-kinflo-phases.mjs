@@ -124,6 +124,7 @@ for (const path of [
   "docs/phase56-client-website-launch-blueprints.md",
   "docs/phase57-convex-launch-blueprint-query.md",
   "docs/phase58-client-admin-permission-presets.md",
+  "docs/phase59-client-studio-polish.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -179,6 +180,7 @@ for (const path of [
   "scripts/validate-kinflo-client-website-blueprints.mjs",
   "scripts/validate-kinflo-convex-launch-blueprint-query.mjs",
   "scripts/validate-kinflo-client-admin-permission-presets.mjs",
+  "scripts/validate-kinflo-client-studio-polish.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -869,6 +871,21 @@ requireIncludes("docs/phase58-client-admin-permission-presets.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase59-client-studio-polish.md", [
+  "npm run kinflo:validate-client-studio-polish",
+  "Client Website Design Studio",
+  "client-facing confidence",
+  "super-admin operating clarity",
+  "401 Invalid authentication credentials",
+  "ig_083c9fef54153981016a459a5d3aa481949583932dbbd16611.png",
+  "section-kinflo-client-studio-operating-frame",
+  "section-kinflo-client-preview-workbench",
+  "section-kinflo-client-launch-rail",
+  "Local state only: yes",
+  "No generated API imported",
+  "No live Convex execution",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -899,6 +916,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-website-blueprints\"",
   "\"kinflo:validate-convex-launch-blueprint-query\"",
   "\"kinflo:validate-client-admin-permission-presets\"",
+  "\"kinflo:validate-client-studio-polish\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1244,6 +1262,17 @@ requireIncludes("scripts/validate-kinflo-client-admin-permission-presets.mjs", [
   "section-kinflo-client-admin-permission-preset",
   "button-client-admin-permission-gated",
   "Admin handoff action: gated",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-studio-polish.mjs", [
+  "section-kinflo-client-studio-operating-frame",
+  "section-kinflo-client-site-rail",
+  "section-kinflo-client-preview-workbench",
+  "section-kinflo-client-preview-canvas",
+  "section-kinflo-client-launch-rail",
+  "client-facing confidence plus super-admin operating clarity",
+  "Claude Code frame pass completed: no, authentication failed",
   "Live Convex execution: no",
 ]);
 
@@ -1932,6 +1961,13 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-admin-permission-preset",
   "text-kinflo-client-admin-permission-preset",
   "button-client-admin-permission-gated",
+  "section-kinflo-client-studio-operating-frame",
+  "section-kinflo-client-site-rail",
+  "section-kinflo-client-preview-workbench",
+  "section-kinflo-client-preview-canvas",
+  "section-kinflo-client-launch-rail",
+  "clientWebsiteStudioReviewStats",
+  "clientWebsiteStudioStatusLabel",
   "setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId)",
   "Launch Blueprint",
   "previewPath",
