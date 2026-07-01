@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Boxes,
@@ -79,6 +79,12 @@ export default function AdminKinfloShell() {
   const { isAdmin } = useUserRole();
   const [, navigate] = useLocation();
   const snapshot = getKinfloShellSnapshot();
+  const [activeTab, setActiveTab] = useState("tenants");
+  const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
+  const selectedLaunchPacket = useMemo(
+    () => snapshot.siteLaunchPackets.find((packet) => packet.id === selectedLaunchPacketId) ?? snapshot.siteLaunchPackets[0],
+    [selectedLaunchPacketId, snapshot.siteLaunchPackets],
+  );
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
@@ -115,11 +121,11 @@ export default function AdminKinfloShell() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button disabled data-testid="button-create-tenant-disabled">
+              <Button onClick={() => setActiveTab("factory")} data-testid="button-create-tenant">
                 <Plus className="mr-2 h-4 w-4" />
                 New Tenant
               </Button>
-              <Button variant="outline" disabled data-testid="button-create-site-disabled">
+              <Button variant="outline" onClick={() => setActiveTab("factory")} data-testid="button-create-site">
                 <Globe2 className="mr-2 h-4 w-4" />
                 New Site
               </Button>
@@ -178,10 +184,11 @@ export default function AdminKinfloShell() {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="tenants" className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-7">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
+            <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
             <TabsTrigger value="experience">Experience</TabsTrigger>
@@ -280,6 +287,135 @@ export default function AdminKinfloShell() {
                   </TableBody>
                 </Table>
               </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="factory" className="mt-6">
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+              <div className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Site Factory Launch Packets</h2>
+                    <p className="text-sm text-muted-foreground">Prepare tenant, site, template, invite, and permission scope before live Convex mutations are enabled.</p>
+                  </div>
+                  <Badge variant="outline">
+                    <Factory className="mr-1 h-3 w-3" />
+                    Provider-light
+                  </Badge>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {snapshot.siteLaunchPackets.map((packet) => {
+                    const selected = packet.id === selectedLaunchPacket?.id;
+                    return (
+                      <Card key={packet.id} className={selected ? "border-primary" : undefined}>
+                        <CardHeader>
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <CardTitle className="text-base">{packet.label}</CardTitle>
+                              <p className="mt-1 text-sm text-muted-foreground">{packet.tenant} · {packet.template}</p>
+                            </div>
+                            {selected ? <Badge>Prepared</Badge> : <Badge variant="outline">Queued</Badge>}
+                          </div>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid gap-3 text-sm sm:grid-cols-2">
+                            <div>
+                              <div className="text-xs text-muted-foreground">Subdomain</div>
+                              <div className="font-medium">{packet.subdomain}</div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-muted-foreground">Owner role</div>
+                              <div className="font-medium">{packet.ownerRole}</div>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <Button size="sm" onClick={() => setSelectedLaunchPacketId(packet.id)}>
+                              <Rocket className="mr-2 h-3 w-3" />
+                              Prepare
+                            </Button>
+                            <Button size="sm" variant="outline" asChild>
+                              <Link href={packet.previewPath}>
+                                <ExternalLink className="mr-2 h-3 w-3" />
+                                Preview
+                              </Link>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {selectedLaunchPacket ? (
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Prepared Launch Packet</CardTitle>
+                      <p className="text-sm text-muted-foreground">{selectedLaunchPacket.siteName} for {selectedLaunchPacket.tenant}</p>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="rounded-md border p-3 text-sm">
+                        <div className="font-medium">{selectedLaunchPacket.ownerEmail}</div>
+                        <div className="mt-1 text-muted-foreground">{selectedLaunchPacket.ownerRole} · invitation prepared as token-hash-only contract</div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">Configuration</div>
+                        <div className="mt-2 space-y-2">
+                          {selectedLaunchPacket.configurationSummary.map((item) => (
+                            <div key={item} className="flex gap-2 text-sm text-muted-foreground">
+                              <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium">Permission gates</div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {selectedLaunchPacket.permissionGates.map((permission) => (
+                            <Badge key={permission} variant="secondary">{permission}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Convex Contract</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedLaunchPacket.convexMutations.map((mutationName) => (
+                          <Badge key={mutationName} variant="outline">{mutationName}</Badge>
+                        ))}
+                      </div>
+                      <div className="rounded-lg border">
+                        {selectedLaunchPacket.launchChecklist.map((gate, index) => {
+                          const done = gate.status === "done";
+                          return (
+                            <div
+                              key={gate.label}
+                              className={`flex items-center justify-between gap-3 px-4 py-3 text-sm ${
+                                index === 0 ? "" : "border-t"
+                              }`}
+                            >
+                              <span>{gate.label}</span>
+                              {done ? (
+                                <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : null}
             </section>
           </TabsContent>
 

@@ -77,6 +77,7 @@ for (const path of [
   "docs/phase13-crm-shell-workspace.md",
   "docs/phase14-public-lead-capture-adapter.md",
   "docs/phase15-public-site-preview-renderer.md",
+  "docs/phase16-site-factory-launch-packets.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -207,6 +208,14 @@ requireIncludes("docs/phase15-public-site-preview-renderer.md", [
   "crm.submitLead",
 ]);
 
+requireIncludes("docs/phase16-site-factory-launch-packets.md", [
+  "ShellSiteLaunchPacket",
+  "controlPlane.createTenant",
+  "siteFactory.createSiteFromTemplate",
+  "controlPlane.createInvitation",
+  "token-hash-only",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -329,6 +338,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellLeadCaptureContract",
   "fixtureLeads",
   "fixtureLeadCaptureContracts",
+  "ShellSiteLaunchPacket",
+  "fixtureSiteLaunchPackets",
+  "Site factory launch packets",
   "Public site preview renderer",
   "/kinflo-sites/",
   "crm.submitLead",
@@ -337,6 +349,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "getKinfloShellSnapshot",
   "Data Mode",
+  "Site Factory Launch Packets",
+  "setActiveTab(\"factory\")",
   "CRM Lead Workspace",
   "Public Intake",
   "previewPath",

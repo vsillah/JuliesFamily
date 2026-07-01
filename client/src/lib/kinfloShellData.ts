@@ -102,6 +102,27 @@ export type ShellLeadCaptureContract = {
   fallback: string;
 };
 
+export type ShellSiteLaunchStep = {
+  label: string;
+  status: KinfloShellStatus;
+};
+
+export type ShellSiteLaunchPacket = {
+  id: string;
+  label: string;
+  tenant: string;
+  siteName: string;
+  template: string;
+  subdomain: string;
+  ownerEmail: string;
+  ownerRole: string;
+  previewPath: string;
+  configurationSummary: string[];
+  permissionGates: string[];
+  convexMutations: string[];
+  launchChecklist: ShellSiteLaunchStep[];
+};
+
 export type ShellLaunchGate = {
   label: string;
   status: KinfloShellStatus;
@@ -119,6 +140,7 @@ export type KinfloShellSnapshot = {
   pipelineStages: ShellPipelineStage[];
   tasks: ShellTask[];
   leadCaptureContracts: ShellLeadCaptureContract[];
+  siteLaunchPackets: ShellSiteLaunchPacket[];
   launchGates: ShellLaunchGate[];
 };
 
@@ -302,6 +324,71 @@ const fixtureLeadCaptureContracts: ShellLeadCaptureContract[] = [
   },
 ];
 
+const fixtureSiteLaunchPackets: ShellSiteLaunchPacket[] = [
+  {
+    id: "advisor-client-starter",
+    label: "Advisor Client Starter",
+    tenant: "Advisor Client Starter",
+    siteName: "Advisor Client Site",
+    template: "Advisor Consultant",
+    subdomain: "advisor-client",
+    ownerEmail: "client-admin@example.invalid",
+    ownerRole: "tenant.admin",
+    previewPath: "/kinflo-sites/advisor-client-site",
+    configurationSummary: [
+      "Create tenant with Client Build plan",
+      "Seed advisory template pages, navigation, and theme tokens",
+      "Invite client admin with tenant and site permissions",
+      "Keep publish state in draft until domain and content review pass",
+    ],
+    permissionGates: ["tenant:create", "site:create", "member:invite", "content:edit", "content:publish"],
+    convexMutations: [
+      "controlPlane.createTenant",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "controlPlane.listAuditEvents",
+    ],
+    launchChecklist: [
+      { label: "Tenant packet prepared", status: "done" },
+      { label: "Starter template selected", status: "done" },
+      { label: "Client admin invite scoped", status: "done" },
+      { label: "Domain verification", status: "pending" },
+      { label: "Live Convex mutation smoke", status: "pending" },
+    ],
+  },
+  {
+    id: "campaign-microsite-lab",
+    label: "Campaign Microsite Lab",
+    tenant: "Campaign Microsite Lab",
+    siteName: "Campaign Microsite",
+    template: "Campaign Microsite",
+    subdomain: "campaign-lab",
+    ownerEmail: "campaign-editor@example.invalid",
+    ownerRole: "site.editor",
+    previewPath: "/kinflo-sites/campaign-microsite",
+    configurationSummary: [
+      "Create campaign tenant or attach to existing tenant",
+      "Seed focused campaign blocks and lead capture",
+      "Scope editor access to the campaign site only",
+      "Route public form submissions to the site CRM pipeline",
+    ],
+    permissionGates: ["site:create", "member:invite", "content:edit", "lead:view"],
+    convexMutations: [
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "crm.submitLead",
+      "crm.listLeads",
+    ],
+    launchChecklist: [
+      { label: "Campaign preview prepared", status: "done" },
+      { label: "Site editor scope selected", status: "done" },
+      { label: "Lead capture contract ready", status: "done" },
+      { label: "Campaign copy approval", status: "pending" },
+      { label: "Live public form smoke", status: "pending" },
+    ],
+  },
+];
+
 const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Phase 0 source import", status: "done" },
   { label: "Secret handling baseline", status: "done" },
@@ -318,6 +405,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "CRM lead spine", status: "done" },
   { label: "Public lead capture adapter", status: "done" },
   { label: "Public site preview renderer", status: "done" },
+  { label: "Site factory launch packets", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -374,7 +462,10 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
         "activation.readiness",
         "controlPlane.listTenants",
         "controlPlane.listSitesForTenant",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
         "siteFactory.listStarterTemplates",
+        "siteFactory.createSiteFromTemplate",
         "siteBuilder.getSiteDraft",
         "publicSite.resolvePublishedSite",
         "crm.submitLead",
@@ -393,6 +484,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
     pipelineStages: fixturePipelineStages,
     tasks: fixtureTasks,
     leadCaptureContracts: fixtureLeadCaptureContracts,
+    siteLaunchPackets: fixtureSiteLaunchPackets,
     launchGates: fixtureLaunchGates,
   }),
 };
