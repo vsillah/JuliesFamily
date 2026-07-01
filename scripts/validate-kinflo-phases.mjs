@@ -118,7 +118,10 @@ for (const path of [
   "docs/phase50-adapter-switch-plan.md",
   "docs/phase51-adapter-switch-parity.md",
   "docs/phase52-adapter-switch-shell.md",
+  "docs/phase53-hosted-activation-ledger.md",
+  "docs/phase54-kinflo-os-design-direction.md",
   "docs/convex-hosted-activation-packet.json",
+  "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
@@ -166,6 +169,8 @@ for (const path of [
   "scripts/validate-kinflo-adapter-switch-plan.mjs",
   "scripts/validate-kinflo-adapter-switch-parity.mjs",
   "scripts/validate-kinflo-adapter-switch-shell.mjs",
+  "scripts/validate-kinflo-hosted-activation-ledger.mjs",
+  "scripts/validate-kinflo-design-direction.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -777,6 +782,32 @@ requireIncludes("docs/phase52-adapter-switch-shell.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase53-hosted-activation-ledger.md", [
+  "npm run kinflo:validate-hosted-activation-ledger",
+  "docs/convex-hosted-activation-ledger.json",
+  "Hosted Activation Ledger",
+  "hostedActivationRunbook",
+  "Ledger steps: 7",
+  "Completion rules: 5",
+  "Evidence targets: 6",
+  "Local state only: yes",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase54-kinflo-os-design-direction.md", [
+  "npm run kinflo:validate-design-direction",
+  "Command Brief",
+  "Claude Code",
+  "401 Invalid authentication credentials",
+  "https://www.925studios.co/blog/saas-dashboard-design-examples-2026",
+  "https://www.saasui.design/blog/7-saas-ui-design-trends-2026",
+  "https://webflow.com/blog/saas-website-design-examples",
+  "https://stripe.com/",
+  "Local state only: yes",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -801,6 +832,8 @@ requireIncludes("package.json", [
   "\"kinflo:validate-adapter-switch-plan\"",
   "\"kinflo:validate-adapter-switch-parity\"",
   "\"kinflo:validate-adapter-switch-shell\"",
+  "\"kinflo:validate-hosted-activation-ledger\"",
+  "\"kinflo:validate-design-direction\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1082,6 +1115,27 @@ requireIncludes("scripts/validate-kinflo-adapter-switch-shell.mjs", [
   "select-kinflo-adapter-switch-batch",
   "button-adapter-switch-gated",
   "adapter switch shell keeps switchAllowed false",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-activation-ledger.mjs", [
+  "docs/convex-hosted-activation-ledger.json",
+  "prepare_only_evidence_ledger",
+  "Hosted Activation Ledger",
+  "hostedActivationRunbook",
+  "select-kinflo-hosted-activation-step",
+  "button-hosted-activation-gated",
+  "hosted activation ledger shell does not import generated API",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-design-direction.mjs", [
+  "Command Brief",
+  "section-kinflo-command-brief",
+  "Claude Code frame pass completed: no, authentication failed",
+  "design direction shell does not import generated API",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -1454,6 +1508,12 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "adapterSwitchReadiness: fixtureAdapterSwitchReadiness",
   "read-only-core",
   "provider_light_switch_plan",
+  "ShellHostedActivationRunbook",
+  "fixtureHostedActivationRunbook",
+  "hostedActivationRunbook: fixtureHostedActivationRunbook",
+  "prepare_only_evidence_ledger",
+  "repo-sharing-risk",
+  "provider-write-approvals",
   "ShellLead",
   "ShellLeadCaptureContract",
   "fixtureLeads",
@@ -1515,6 +1575,19 @@ requireIncludes("docs/convex-hosted-activation-packet.json", [
   "\"secretsReadOrPrinted\": false",
   "launchReadiness.getSiteLaunchReadiness",
   "npm run convex:codegen",
+]);
+
+requireIncludes("docs/convex-hosted-activation-ledger.json", [
+  "\"phase\": 53",
+  "\"status\": \"prepare_only_evidence_ledger\"",
+  "\"hostedDeploymentTouched\": false",
+  "\"generatedApiImported\": false",
+  "\"liveConvexExecution\": false",
+  "\"providerApisTouched\": false",
+  "\"secretsReadOrPrinted\": false",
+  "\"repo-sharing-risk\"",
+  "\"hosted-convex-project\"",
+  "\"provider-write-approvals\"",
 ]);
 
 requireIncludes("docs/convex-adapter-switch-plan.json", [
@@ -1693,6 +1766,15 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "button-adapter-switch-gated",
   "snapshot.adapterSwitchReadiness.activationEvidence",
   "snapshot.adapterSwitchReadiness.documents",
+  "Command Brief",
+  "section-kinflo-command-brief",
+  "commandBrief",
+  "Hosted Activation Ledger",
+  "select-kinflo-hosted-activation-step",
+  "button-hosted-activation-gated",
+  "snapshot.hostedActivationRunbook.documents",
+  "snapshot.hostedActivationRunbook.completionRules",
+  "snapshot.hostedActivationRunbook.evidenceTargets",
   "select-kinflo-launch-readiness-site",
   "text-kinflo-launch-readiness-status",
   "text-kinflo-launch-readiness-blocker",

@@ -56,6 +56,7 @@ import {
   type ShellAiReviewRecord,
   type ShellCampaignDraft,
   type ShellDomainDraft,
+  type ShellHostedActivationStepStatus,
   type ShellIntegrationDraft,
   type ShellLaunchReadinessSite,
   type ShellMetricIconKey,
@@ -118,6 +119,16 @@ function launchReadinessStatusBadge(status: ShellLaunchReadinessSite["stages"][n
   return <Badge variant="outline">Pending</Badge>;
 }
 
+function hostedActivationStatusBadge(status: ShellHostedActivationStepStatus) {
+  if (status === "ready_after_approval") {
+    return <Badge className="bg-sky-600 hover:bg-sky-600">Ready after approval</Badge>;
+  }
+  if (status === "blocked_provider_gate") {
+    return <Badge variant="destructive">Provider gate</Badge>;
+  }
+  return <Badge variant="outline">Pending approval</Badge>;
+}
+
 export default function AdminKinfloShell() {
   const { isLoading } = useAuth();
   const { isAdmin } = useUserRole();
@@ -127,6 +138,7 @@ export default function AdminKinfloShell() {
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
   const [adapterSwitchBatchId, setAdapterSwitchBatchId] = useState(snapshot.adapterSwitchReadiness.defaultBatchId);
+  const [hostedActivationStepId, setHostedActivationStepId] = useState(snapshot.hostedActivationRunbook.defaultStepId);
   const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
   const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
@@ -252,6 +264,44 @@ export default function AdminKinfloShell() {
       liveExecutionBlocked: surfaces.filter((surface) => !surface.liveConvexExecution).length,
     };
   }, [snapshot.adapterSwitchReadiness.batches]);
+  const selectedHostedActivationStep = useMemo(
+    () => snapshot.hostedActivationRunbook.steps.find((step) => step.id === hostedActivationStepId)
+      ?? snapshot.hostedActivationRunbook.steps[0],
+    [hostedActivationStepId, snapshot.hostedActivationRunbook.steps],
+  );
+  const hostedActivationTotals = useMemo(() => {
+    const steps = snapshot.hostedActivationRunbook.steps;
+    return {
+      total: steps.length,
+      pendingApproval: steps.filter((step) => step.status === "pending_approval").length,
+      providerGated: steps.filter((step) => step.status === "blocked_provider_gate").length,
+      readyAfterApproval: steps.filter((step) => step.status === "ready_after_approval").length,
+      liveExecutionBlocked: steps.filter((step) => !step.liveConvexExecution).length,
+    };
+  }, [snapshot.hostedActivationRunbook.steps]);
+  const commandBrief = useMemo(() => {
+    const primarySite = snapshot.launchReadiness.sites[0];
+    return {
+      headline: primarySite?.label ?? "KinFlo OS",
+      decision: primarySite?.launchDecision === "ready_for_review" ? "Ready for staged review" : "Needs launch review",
+      blocker: primarySite?.blockerSummary ?? snapshot.dataMode.activationGate,
+      nextGate: snapshot.hostedActivationRunbook.steps.find((step) => step.status === "blocked_provider_gate")
+        ?? snapshot.hostedActivationRunbook.steps[0],
+      proof: [
+        `${launchReadinessCounts.ready}/${launchReadinessCounts.total} launch checks ready`,
+        `${adapterSwitchTotals.total} adapter surfaces mapped`,
+        `${hostedActivationTotals.providerGated} hosted gates blocked`,
+      ],
+    };
+  }, [
+    adapterSwitchTotals.total,
+    hostedActivationTotals.providerGated,
+    launchReadinessCounts.ready,
+    launchReadinessCounts.total,
+    snapshot.dataMode.activationGate,
+    snapshot.hostedActivationRunbook.steps,
+    snapshot.launchReadiness.sites,
+  ]);
   const selectedWizardTemplate = useMemo(
     () => snapshot.templates.find((template) => template.key === wizardTemplateKey) ?? snapshot.templates[0],
     [snapshot.templates, wizardTemplateKey],
@@ -830,7 +880,54 @@ export default function AdminKinfloShell() {
       </div>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <section className="mt-6 grid gap-4 rounded-lg border bg-background p-4 shadow-sm lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:p-5" data-testid="section-kinflo-command-brief">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">Command Brief</Badge>
+              <Badge variant="outline">{snapshot.dataMode.runtimeLabel}</Badge>
+            </div>
+            <h2 className="mt-4 max-w-3xl text-2xl font-semibold leading-tight tracking-normal md:text-3xl">
+              {commandBrief.decision}
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
+              {commandBrief.headline}: {commandBrief.blocker}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {commandBrief.proof.map((item) => (
+                <Badge key={item} variant="outline" className="bg-muted/40">
+                  {item}
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-md border bg-muted/30 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-medium">Next gate</div>
+                <p className="mt-1 text-lg font-semibold leading-tight">{commandBrief.nextGate?.label}</p>
+              </div>
+              {commandBrief.nextGate ? hostedActivationStatusBadge(commandBrief.nextGate.status) : null}
+            </div>
+            <p className="mt-3 text-sm leading-6 text-muted-foreground">{commandBrief.nextGate?.evidenceTarget}</p>
+            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+              <Button size="sm" variant="outline" onClick={() => setActiveTab("launch-readiness")}>
+                <Rocket className="mr-2 h-3 w-3" />
+                Launch
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => setActiveTab("adapter-switch")}>
+                <Workflow className="mr-2 h-3 w-3" />
+                Switch
+              </Button>
+              <Button size="sm" onClick={() => setActiveTab("hosted-activation")}>
+                <KeyRound className="mr-2 h-3 w-3" />
+                Activation
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {snapshot.metrics.map((metric) => {
             const Icon = metricIcons[metric.iconKey];
             return (
@@ -948,6 +1045,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="launch-readiness">Launch</TabsTrigger>
             <TabsTrigger value="adapter-switch">Switch</TabsTrigger>
+            <TabsTrigger value="hosted-activation">Activation</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="plans">Plans</TabsTrigger>
             <TabsTrigger value="brand">Brand</TabsTrigger>
@@ -1395,6 +1493,200 @@ export default function AdminKinfloShell() {
                     <div className="flex items-start gap-2">
                       <ShieldCheck className="mt-0.5 h-4 w-4" />
                       <span>No DNS, SSL, email, SMS, storage, payment, or AI provider writes are performed.</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="hosted-activation" className="mt-6">
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Hosted Activation Ledger</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Track the human-owned approval and evidence gates before KinFlo moves from fixture proof to hosted Convex execution.
+                    </p>
+                  </div>
+                  <Badge variant="outline">
+                    <ListChecks className="mr-1 h-3 w-3" />
+                    Review-only
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Hosted Activation Evidence Packet</CardTitle>
+                        <Badge variant="secondary">{snapshot.hostedActivationRunbook.status.replace(/_/g, " ")}</Badge>
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">{snapshot.hostedActivationRunbook.providerBoundary}</p>
+                    </div>
+                    <div className="w-full lg:w-[320px]">
+                      <Label>Activation step</Label>
+                      <Select value={hostedActivationStepId} onValueChange={setHostedActivationStepId}>
+                        <SelectTrigger className="mt-2" data-testid="select-kinflo-hosted-activation-step">
+                          <SelectValue placeholder="Select activation step" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {snapshot.hostedActivationRunbook.steps.map((step) => (
+                            <SelectItem key={step.id} value={step.id}>
+                              {step.order}. {step.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-3 md:grid-cols-4">
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Steps</div>
+                        <div className="mt-1 text-2xl font-semibold" data-testid="text-kinflo-hosted-activation-steps">
+                          {hostedActivationTotals.total}
+                        </div>
+                      </div>
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Pending approval</div>
+                        <div className="mt-1 text-2xl font-semibold">{hostedActivationTotals.pendingApproval}</div>
+                      </div>
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Provider gated</div>
+                        <div className="mt-1 text-2xl font-semibold">{hostedActivationTotals.providerGated}</div>
+                      </div>
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Live blocked</div>
+                        <div className="mt-1 text-2xl font-semibold">{hostedActivationTotals.liveExecutionBlocked}</div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border p-4">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-medium">{selectedHostedActivationStep?.label}</h3>
+                            {selectedHostedActivationStep ? hostedActivationStatusBadge(selectedHostedActivationStep.status) : null}
+                          </div>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Owner: {selectedHostedActivationStep?.owner} · Required before {selectedHostedActivationStep?.requiredBefore}
+                          </p>
+                        </div>
+                        <Button size="sm" disabled data-testid="button-hosted-activation-gated">
+                          <KeyRound className="mr-2 h-3 w-3" />
+                          Hosted action gated
+                        </Button>
+                      </div>
+
+                      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                        <div className="rounded-md bg-muted/40 p-3">
+                          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Command or action</div>
+                          <p className="mt-2 text-sm">{selectedHostedActivationStep?.commandOrAction}</p>
+                        </div>
+                        <div className="rounded-md bg-muted/40 p-3">
+                          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Evidence target</div>
+                          <p className="mt-2 text-sm">{selectedHostedActivationStep?.evidenceTarget}</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
+                        <div className="rounded-md border px-3 py-2">
+                          <div className="text-xs text-muted-foreground">Provider writes</div>
+                          <div className="font-medium">{selectedHostedActivationStep?.providerWrites ? "yes" : "no"}</div>
+                        </div>
+                        <div className="rounded-md border px-3 py-2">
+                          <div className="text-xs text-muted-foreground">Live Convex execution</div>
+                          <div className="font-medium">{selectedHostedActivationStep?.liveConvexExecution ? "yes" : "no"}</div>
+                        </div>
+                        <div className="rounded-md border px-3 py-2">
+                          <div className="text-xs text-muted-foreground">Ready after approval</div>
+                          <div className="font-medium">{selectedHostedActivationStep?.status === "ready_after_approval" ? "yes" : "no"}</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 rounded-md border p-3 text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground">Rollback: </span>
+                        {selectedHostedActivationStep?.rollback}
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 lg:grid-cols-2">
+                      {snapshot.hostedActivationRunbook.steps.map((step) => (
+                        <div key={step.id} className="rounded-md border p-3" data-testid={`card-hosted-activation-${step.id}`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium">{step.order}. {step.label}</div>
+                              <p className="mt-1 text-xs text-muted-foreground">{step.requiredBefore}</p>
+                            </div>
+                            {hostedActivationStatusBadge(step.status)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Completion Rules</CardTitle>
+                    <p className="text-sm text-muted-foreground">These rules prevent local evidence from being mistaken for hosted activation.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.hostedActivationRunbook.completionRules.map((rule) => (
+                      <div key={rule} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <ShieldCheck className="mt-0.5 h-4 w-4" />
+                        <span>{rule}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Evidence Targets</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.hostedActivationRunbook.evidenceTargets.map((target) => (
+                      <div key={target} className="rounded-md border px-3 py-2 text-sm text-muted-foreground">
+                        {target}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Source Documents</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.hostedActivationRunbook.documents.map((documentPath) => (
+                      <div key={documentPath} className="rounded-md border px-3 py-2 text-sm">
+                        <span className="break-all">{documentPath}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Provider Boundary</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-2">
+                      <ShieldCheck className="mt-0.5 h-4 w-4" />
+                      <span>No hosted Convex deployment is created.</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <ShieldCheck className="mt-0.5 h-4 w-4" />
+                      <span>No generated API is imported.</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <ShieldCheck className="mt-0.5 h-4 w-4" />
+                      <span>No live Convex query, mutation, or action is executed.</span>
                     </div>
                   </CardContent>
                 </Card>
