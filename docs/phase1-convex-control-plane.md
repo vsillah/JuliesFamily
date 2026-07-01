@@ -63,6 +63,10 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - checking named permissions in control-plane mutations,
   - checking named permissions in site-builder mutations,
   - keeping bootstrap-only platform-admin checks separate from normal tenant/site operations.
+- CRM lead spine functions for:
+  - public lead submission,
+  - site-scoped lead review,
+  - lead assignment, tasks, and append-only lead timeline events.
 
 ## Explicit Boundaries
 

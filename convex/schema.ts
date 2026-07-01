@@ -39,6 +39,29 @@ export const publishStatus = v.union(
   v.literal("archived"),
 );
 
+export const leadStatus = v.union(
+  v.literal("active"),
+  v.literal("nurture"),
+  v.literal("disqualified"),
+  v.literal("unresponsive"),
+  v.literal("converted"),
+  v.literal("archived"),
+);
+
+export const taskStatus = v.union(
+  v.literal("pending"),
+  v.literal("in_progress"),
+  v.literal("completed"),
+  v.literal("cancelled"),
+);
+
+export const taskPriority = v.union(
+  v.literal("low"),
+  v.literal("medium"),
+  v.literal("high"),
+  v.literal("urgent"),
+);
+
 export const navPlacement = v.union(
   v.literal("header"),
   v.literal("footer"),
@@ -315,6 +338,106 @@ export default defineSchema({
   })
     .index("by_site_createdAt", ["siteId", "createdAt"])
     .index("by_page_createdAt", ["pageId", "createdAt"]),
+
+  leads: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    email: v.string(),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    persona: v.optional(v.string()),
+    journeyStage: v.optional(v.string()),
+    status: leadStatus,
+    pipelineStageKey: v.string(),
+    source: v.optional(v.string()),
+    engagementScore: v.number(),
+    lastInteractionAt: v.optional(v.number()),
+    convertedAt: v.optional(v.number()),
+    notes: v.optional(v.string()),
+    tags: v.optional(v.array(v.string())),
+    consent: v.optional(v.any()),
+    metadata: v.optional(v.any()),
+    assignedTo: v.optional(v.id("users")),
+    createdBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_site_status", ["siteId", "status"])
+    .index("by_site_email", ["siteId", "email"])
+    .index("by_assigned_to", ["assignedTo"])
+    .index("by_site_pipeline", ["siteId", "pipelineStageKey"]),
+
+  leadEvents: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    leadId: v.id("leads"),
+    type: v.string(),
+    title: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    data: v.optional(v.any()),
+    actorUserId: v.optional(v.id("users")),
+    createdAt: v.number(),
+  })
+    .index("by_lead_createdAt", ["leadId", "createdAt"])
+    .index("by_site_createdAt", ["siteId", "createdAt"]),
+
+  pipelineStages: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.optional(v.id("sites")),
+    name: v.string(),
+    slug: v.string(),
+    description: v.optional(v.string()),
+    position: v.number(),
+    color: v.optional(v.string()),
+    isActive: v.boolean(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_tenant_slug", ["tenantId", "slug"])
+    .index("by_site_position", ["siteId", "position"]),
+
+  leadAssignments: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    leadId: v.id("leads"),
+    assignedTo: v.id("users"),
+    assignedBy: v.id("users"),
+    assignmentType: v.string(),
+    notes: v.optional(v.string()),
+    status: recordStatus,
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_lead", ["leadId"])
+    .index("by_assigned_to", ["assignedTo"])
+    .index("by_site_status", ["siteId", "status"]),
+
+  tasks: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    leadId: v.optional(v.id("leads")),
+    assignedTo: v.optional(v.id("users")),
+    createdBy: v.id("users"),
+    title: v.string(),
+    description: v.optional(v.string()),
+    taskType: v.string(),
+    priority: taskPriority,
+    status: taskStatus,
+    dueAt: v.optional(v.number()),
+    completedAt: v.optional(v.number()),
+    isAutomated: v.boolean(),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_site_status", ["siteId", "status"])
+    .index("by_lead", ["leadId"])
+    .index("by_assigned_to", ["assignedTo"])
+    .index("by_dueAt", ["dueAt"]),
 
   auditEvents: defineTable({
     scopeType: v.union(v.literal("platform"), v.literal("tenant"), v.literal("site")),

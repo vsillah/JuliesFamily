@@ -14,7 +14,7 @@
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",
     "kinflo:dry-run-imports": "node scripts/dry-run-convex-import-contracts.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
-    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts",
+    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/crm.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

@@ -29,6 +29,11 @@ const requiredNewCollections = [
   "contentBlocks",
   "contentVisibilityRules",
   "assets",
+  "leads",
+  "leadEvents",
+  "pipelineStages",
+  "leadAssignments",
+  "tasks",
   "auditEvents",
 ];
 

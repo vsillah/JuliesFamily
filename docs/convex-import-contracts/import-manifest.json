@@ -97,6 +97,45 @@
       "notes": "Raw invite tokens and email delivery are outside the provider-light contract."
     },
     {
+      "id": "lead-assignments-from-lead-assignments",
+      "phase": 3,
+      "sourceTables": ["leadAssignments"],
+      "targetCollection": "leadAssignments",
+      "targetStatus": "implemented",
+      "scope": "site",
+      "operation": "upsert",
+      "idempotencyKey": "lead-assignment:source-table:leadAssignments:source-id",
+      "requiredFields": ["tenantId", "siteId", "leadId", "assignedTo", "assignedBy", "assignmentType", "status", "createdAt", "updatedAt"],
+      "externalWrites": false,
+      "notes": "Legacy assignments become site-scoped lead assignments after users and leads are mapped."
+    },
+    {
+      "id": "lead-events-from-interactions-and-pipeline-history",
+      "phase": 3,
+      "sourceTables": ["interactions", "pipelineHistory"],
+      "targetCollection": "leadEvents",
+      "targetStatus": "implemented",
+      "scope": "site",
+      "operation": "append",
+      "idempotencyKey": "lead-event:source-table:source-id",
+      "requiredFields": ["tenantId", "siteId", "leadId", "type", "createdAt"],
+      "externalWrites": false,
+      "notes": "Interactions and pipeline changes become append-only lead timeline events."
+    },
+    {
+      "id": "leads-from-leads",
+      "phase": 3,
+      "sourceTables": ["leads"],
+      "targetCollection": "leads",
+      "targetStatus": "implemented",
+      "scope": "site",
+      "operation": "upsert",
+      "idempotencyKey": "lead:source-table:leads:source-id",
+      "requiredFields": ["tenantId", "siteId", "email", "status", "pipelineStageKey", "engagementScore", "createdAt", "updatedAt"],
+      "externalWrites": false,
+      "notes": "Legacy leads become site-scoped CRM records tied to a tenant and public site."
+    },
+    {
       "id": "memberships-from-users-and-organizations",
       "phase": 1,
       "sourceTables": ["users", "organizations"],
@@ -149,6 +188,19 @@
       "notes": "Legacy site sections become routable pages before content block attachment."
     },
     {
+      "id": "pipeline-stages-from-pipeline-stages",
+      "phase": 3,
+      "sourceTables": ["pipelineStages"],
+      "targetCollection": "pipelineStages",
+      "targetStatus": "implemented",
+      "scope": "tenant/site",
+      "operation": "upsert",
+      "idempotencyKey": "pipeline-stage:source-table:pipelineStages:source-id",
+      "requiredFields": ["tenantId", "name", "slug", "position", "isActive", "createdBy", "createdAt", "updatedAt"],
+      "externalWrites": false,
+      "notes": "Legacy pipeline stage configuration becomes tenant defaults with optional site overrides."
+    },
+    {
       "id": "publish-events-from-initial-publication",
       "phase": 2,
       "sourceTables": [],
@@ -186,6 +238,19 @@
       "requiredFields": ["tenantId", "name", "slug", "status", "createdBy", "createdAt", "updatedAt"],
       "externalWrites": false,
       "notes": "No legacy table cleanly represents multi-site tenancy, so first sites are created from templates."
+    },
+    {
+      "id": "tasks-from-tasks",
+      "phase": 3,
+      "sourceTables": ["tasks"],
+      "targetCollection": "tasks",
+      "targetStatus": "implemented",
+      "scope": "site",
+      "operation": "upsert",
+      "idempotencyKey": "task:source-table:tasks:source-id",
+      "requiredFields": ["tenantId", "siteId", "createdBy", "title", "taskType", "priority", "status", "isAutomated", "createdAt", "updatedAt"],
+      "externalWrites": false,
+      "notes": "Legacy follow-up tasks become site-scoped CRM tasks."
     },
     {
       "id": "tenants-from-organizations",

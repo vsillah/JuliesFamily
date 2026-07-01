@@ -73,6 +73,7 @@ for (const path of [
   "docs/phase9-access-policy.md",
   "docs/phase10-permission-guard-migration.md",
   "docs/phase11-convex-import-contracts.md",
+  "docs/phase12-crm-lead-spine.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -82,6 +83,7 @@ for (const path of [
   "convex/activation.ts",
   "convex/roleCatalog.ts",
   "convex/accessPolicy.ts",
+  "convex/crm.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-drizzle-convex-map.mjs",
@@ -170,6 +172,13 @@ requireIncludes("docs/phase11-convex-import-contracts.md", [
   "idempotencyKey",
 ]);
 
+requireIncludes("docs/phase12-crm-lead-spine.md", [
+  "crm.submitLead",
+  "lead:manage",
+  "leadEvents",
+  "externalWrites: false",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -179,6 +188,7 @@ requireIncludes("package.json", [
   "convex/activation.ts",
   "convex/roleCatalog.ts",
   "convex/accessPolicy.ts",
+  "convex/crm.ts",
 ]);
 
 requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
@@ -205,6 +215,8 @@ requireIncludes("docs/convex-import-contracts/import-manifest.json", [
   "\"hostedDeploymentRequired\": false",
   "\"targetCollection\": \"tenants\"",
   "\"targetCollection\": \"contentBlocks\"",
+  "\"targetCollection\": \"leads\"",
+  "\"targetCollection\": \"leadEvents\"",
   "\"idempotencyKey\"",
 ]);
 
@@ -213,6 +225,10 @@ requireIncludes("convex/schema.ts", [
   "sites: defineTable",
   "domains: defineTable",
   "contentBlocks: defineTable",
+  "leads: defineTable",
+  "leadEvents: defineTable",
+  "pipelineStages: defineTable",
+  "tasks: defineTable",
   "auditEvents: defineTable",
   "invitations: defineTable",
 ]);
@@ -235,6 +251,7 @@ requireIncludes("convex/roleCatalog.ts", [
   "export const listDefaultRoles",
   "export const listRoleDefinitions",
   "export const syncDefaultRoles",
+  "lead:manage",
   "role_catalog_synced",
 ]);
 
@@ -262,6 +279,18 @@ requireIncludes("convex/activation.ts", [
   "export const readiness",
   "export const seedSmokeSite",
   "resolverArgs",
+]);
+
+requireIncludes("convex/crm.ts", [
+  "export const submitLead",
+  "export const listLeads",
+  "export const getLeadTimeline",
+  "export const upsertPipelineStage",
+  "export const updateLead",
+  "export const assignLead",
+  "export const createTask",
+  "lead:manage",
+  "lead:view",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [
