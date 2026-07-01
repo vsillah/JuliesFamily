@@ -22,6 +22,9 @@ Functions:
 - `crm.listLeads`
 - `crm.getLeadTimeline`
 - `crm.upsertPipelineStage`
+- `crm.listJourneyProgressionRules`
+- `crm.upsertJourneyProgressionRule`
+- `crm.transitionLeadStage`
 - `crm.updateLead`
 - `crm.assignLead`
 - `crm.createTask`
@@ -36,6 +39,8 @@ Admin CRM operations use named permissions:
 - `lead:manage` for pipeline stages, updates, assignments, and tasks.
 
 Lead events are append-only timeline records so imports, form submissions, assignments, and admin changes can be audited without rewriting history.
+
+Phase 34 extends the CRM spine so stage movement is no longer only a lead field update. `crm.transitionLeadStage` and stage changes through `crm.updateLead` write `pipelineEvents`, `journeyProgressionEvents`, timeline events, and audit events before live Convex activation.
 
 ## Current Boundary
 

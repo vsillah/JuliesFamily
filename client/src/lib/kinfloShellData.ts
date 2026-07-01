@@ -614,8 +614,19 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
   {
     surface: "CRM lead workspace",
     fixtureSource: "lead, pipeline, task, and intake fixtures",
-    convexFunctions: ["crm.submitLead", "crm.listLeads", "crm.getLeadTimeline"],
-    activationEvidence: ["public form creates lead", "tenant admin sees scoped lead", "timeline event appended"],
+    convexFunctions: [
+      "crm.submitLead",
+      "crm.listLeads",
+      "crm.getLeadTimeline",
+      "crm.listJourneyProgressionRules",
+      "crm.upsertJourneyProgressionRule",
+      "crm.transitionLeadStage",
+    ],
+    activationEvidence: [
+      "public form creates lead",
+      "tenant admin sees scoped lead",
+      "pipeline transition appends pipeline, journey, timeline, and audit events",
+    ],
     status: "fixture_fallback",
   },
   {

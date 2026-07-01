@@ -75,6 +75,108 @@ async function writeAuditEvent(
   });
 }
 
+async function findPipelineStage(
+  ctx: AnyCtx,
+  args: {
+    tenantId: any;
+    siteId: any;
+    stageKey: string;
+  },
+) {
+  const stages = await ctx.db
+    .query("pipelineStages")
+    .withIndex("by_tenant_slug", (q) => q.eq("tenantId", args.tenantId))
+    .filter((q) => q.eq(q.field("slug"), args.stageKey))
+    .collect();
+
+  return stages.find((stage) => (
+    stage.isActive
+    && !stage.archivedAt
+    && (stage.siteId === args.siteId || stage.siteId === undefined)
+  ));
+}
+
+async function requirePipelineStage(
+  ctx: AnyCtx,
+  args: {
+    tenantId: any;
+    siteId: any;
+    stageKey: string;
+  },
+) {
+  const stage = await findPipelineStage(ctx, args);
+  if (!stage) {
+    throw new Error(`Active pipeline stage not found: ${args.stageKey}`);
+  }
+  return stage;
+}
+
+async function recordLeadStageTransition(
+  ctx: MutationCtx,
+  args: {
+    lead: any;
+    actorUserId: any;
+    fromStageKey?: string;
+    toStageKey: string;
+    ruleId?: any;
+    eventType: string;
+    reason?: string;
+    metadata?: unknown;
+  },
+) {
+  const timestamp = now();
+  const transitionData = {
+    fromStageKey: args.fromStageKey,
+    toStageKey: args.toStageKey,
+    eventType: args.eventType,
+    reason: args.reason,
+    ruleId: args.ruleId,
+    metadata: args.metadata,
+  };
+
+  const pipelineEventId = await ctx.db.insert("pipelineEvents", {
+    tenantId: args.lead.tenantId,
+    siteId: args.lead.siteId,
+    leadId: args.lead._id,
+    fromStageKey: args.fromStageKey,
+    toStageKey: args.toStageKey,
+    actorUserId: args.actorUserId,
+    reason: args.reason,
+    metadata: args.metadata,
+    createdAt: timestamp,
+  });
+
+  const journeyProgressionEventId = await ctx.db.insert("journeyProgressionEvents", {
+    tenantId: args.lead.tenantId,
+    siteId: args.lead.siteId,
+    leadId: args.lead._id,
+    ruleId: args.ruleId,
+    fromStageKey: args.fromStageKey,
+    toStageKey: args.toStageKey,
+    eventType: args.eventType,
+    data: args.metadata,
+    actorUserId: args.actorUserId,
+    createdAt: timestamp,
+  });
+
+  await ctx.db.insert("leadEvents", {
+    tenantId: args.lead.tenantId,
+    siteId: args.lead.siteId,
+    leadId: args.lead._id,
+    type: "pipeline_stage_changed",
+    title: "Pipeline stage changed",
+    data: {
+      ...transitionData,
+      pipelineEventId,
+      journeyProgressionEventId,
+    },
+    actorUserId: args.actorUserId,
+    createdAt: timestamp,
+  });
+
+  return { pipelineEventId, journeyProgressionEventId };
+}
+
 export const submitLead = mutation({
   args: {
     siteId: v.id("sites"),
@@ -211,6 +313,18 @@ export const getLeadTimeline = query({
       .order("desc")
       .take(100);
 
+    const pipelineEvents = await ctx.db
+      .query("pipelineEvents")
+      .withIndex("by_lead_createdAt", (q) => q.eq("leadId", lead._id))
+      .order("desc")
+      .take(100);
+
+    const journeyProgressionEvents = await ctx.db
+      .query("journeyProgressionEvents")
+      .withIndex("by_lead_createdAt", (q) => q.eq("leadId", lead._id))
+      .order("desc")
+      .take(100);
+
     const assignments = await ctx.db
       .query("leadAssignments")
       .withIndex("by_lead", (q) => q.eq("leadId", lead._id))
@@ -221,7 +335,7 @@ export const getLeadTimeline = query({
       .withIndex("by_lead", (q) => q.eq("leadId", lead._id))
       .collect();
 
-    return { lead, events, assignments, tasks };
+    return { lead, events, pipelineEvents, journeyProgressionEvents, assignments, tasks };
   },
 });
 
@@ -302,6 +416,208 @@ export const upsertPipelineStage = mutation({
   },
 });
 
+export const listJourneyProgressionRules = query({
+  args: {
+    siteId: v.id("sites"),
+    isActive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    await requirePermission(ctx, { siteId: args.siteId, permission: "lead:view" });
+
+    const rules = await ctx.db
+      .query("journeyProgressionRules")
+      .withIndex("by_site_active", (q) => q.eq("siteId", args.siteId))
+      .collect();
+
+    return rules
+      .filter((rule) => args.isActive === undefined || rule.isActive === args.isActive)
+      .filter((rule) => !rule.archivedAt)
+      .sort((a, b) => a.label.localeCompare(b.label));
+  },
+});
+
+export const upsertJourneyProgressionRule = mutation({
+  args: {
+    siteId: v.id("sites"),
+    ruleId: v.optional(v.id("journeyProgressionRules")),
+    key: v.string(),
+    label: v.string(),
+    fromStageKey: v.optional(v.string()),
+    toStageKey: v.string(),
+    eventType: v.string(),
+    conditions: v.optional(v.any()),
+    isActive: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    const actor = await requirePermission(ctx, { siteId: args.siteId, permission: "lead:manage" });
+    const { site } = await requireSite(ctx, args.siteId);
+    const key = slugify(args.key);
+    const fromStageKey = args.fromStageKey ? slugify(args.fromStageKey) : undefined;
+    const toStageKey = slugify(args.toStageKey);
+    if (!key) {
+      throw new Error("Journey progression rule key is required");
+    }
+    if (!toStageKey) {
+      throw new Error("Journey progression target stage is required");
+    }
+
+    if (fromStageKey) {
+      await requirePipelineStage(ctx, {
+        tenantId: site.tenantId,
+        siteId: site._id,
+        stageKey: fromStageKey,
+      });
+    }
+    await requirePipelineStage(ctx, {
+      tenantId: site.tenantId,
+      siteId: site._id,
+      stageKey: toStageKey,
+    });
+
+    const timestamp = now();
+    if (args.ruleId) {
+      const rule = await ctx.db.get(args.ruleId);
+      if (!rule || rule.siteId !== site._id || rule.tenantId !== site.tenantId) {
+        throw new Error("Journey progression rule not found for site");
+      }
+      await ctx.db.patch(rule._id, definedFields({
+        key,
+        label: args.label.trim(),
+        fromStageKey,
+        toStageKey,
+        eventType: args.eventType,
+        conditions: args.conditions,
+        isActive: args.isActive ?? rule.isActive,
+        updatedAt: timestamp,
+      }));
+      return rule._id;
+    }
+
+    const duplicate = await ctx.db
+      .query("journeyProgressionRules")
+      .withIndex("by_tenant_key", (q) => q.eq("tenantId", site.tenantId))
+      .filter((q) => q.eq(q.field("key"), key))
+      .filter((q) => q.eq(q.field("siteId"), site._id))
+      .first();
+    if (duplicate && !duplicate.archivedAt) {
+      throw new Error("Journey progression rule key already exists for site");
+    }
+
+    const ruleId = await ctx.db.insert("journeyProgressionRules", {
+      tenantId: site.tenantId,
+      siteId: site._id,
+      key,
+      label: args.label.trim(),
+      fromStageKey,
+      toStageKey,
+      eventType: args.eventType,
+      conditions: args.conditions,
+      isActive: args.isActive ?? true,
+      createdBy: actor._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    await writeAuditEvent(ctx, {
+      tenantId: site.tenantId,
+      siteId: site._id,
+      actorUserId: actor._id,
+      action: "journey_progression_rule_upserted",
+      resourceType: "journeyProgressionRule",
+      resourceId: ruleId,
+      metadata: { key, fromStageKey, toStageKey },
+    });
+
+    return ruleId;
+  },
+});
+
+export const transitionLeadStage = mutation({
+  args: {
+    leadId: v.id("leads"),
+    toStageKey: v.string(),
+    ruleId: v.optional(v.id("journeyProgressionRules")),
+    eventType: v.optional(v.string()),
+    reason: v.optional(v.string()),
+    metadata: v.optional(v.any()),
+  },
+  handler: async (ctx, args) => {
+    const lead = await ctx.db.get(args.leadId);
+    if (!lead) {
+      throw new Error("Lead not found");
+    }
+    const actor = await requirePermission(ctx, { siteId: lead.siteId, permission: "lead:manage" });
+    const fromStageKey = lead.pipelineStageKey;
+    const toStageKey = slugify(args.toStageKey);
+    if (!toStageKey) {
+      throw new Error("Pipeline target stage is required");
+    }
+    if (fromStageKey === toStageKey) {
+      throw new Error("Lead is already in that pipeline stage");
+    }
+
+    await requirePipelineStage(ctx, {
+      tenantId: lead.tenantId,
+      siteId: lead.siteId,
+      stageKey: toStageKey,
+    });
+
+    let rule;
+    if (args.ruleId) {
+      rule = await ctx.db.get(args.ruleId);
+      if (!rule || rule.tenantId !== lead.tenantId || rule.siteId !== lead.siteId || !rule.isActive || rule.archivedAt) {
+        throw new Error("Active journey progression rule not found for lead site");
+      }
+      if (rule.fromStageKey && rule.fromStageKey !== fromStageKey) {
+        throw new Error("Journey progression rule does not match the lead's current stage");
+      }
+      if (rule.toStageKey !== toStageKey) {
+        throw new Error("Journey progression rule target stage mismatch");
+      }
+    }
+
+    const timestamp = now();
+    await ctx.db.patch(lead._id, {
+      pipelineStageKey: toStageKey,
+      lastInteractionAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    const transition = await recordLeadStageTransition(ctx, {
+      lead,
+      actorUserId: actor._id,
+      fromStageKey,
+      toStageKey,
+      ruleId: args.ruleId,
+      eventType: rule?.eventType ?? args.eventType ?? "manual_stage_transition",
+      reason: args.reason,
+      metadata: args.metadata,
+    });
+
+    await writeAuditEvent(ctx, {
+      tenantId: lead.tenantId,
+      siteId: lead.siteId,
+      actorUserId: actor._id,
+      action: "lead_stage_transitioned",
+      resourceType: "lead",
+      resourceId: lead._id,
+      metadata: {
+        fromStageKey,
+        toStageKey,
+        ruleId: args.ruleId,
+        ...transition,
+      },
+    });
+
+    return {
+      leadId: lead._id,
+      fromStageKey,
+      toStageKey,
+      ...transition,
+    };
+  },
+});
+
 export const updateLead = mutation({
   args: {
     leadId: v.id("leads"),
@@ -319,10 +635,20 @@ export const updateLead = mutation({
     }
     const actor = await requirePermission(ctx, { siteId: lead.siteId, permission: "lead:manage" });
     const timestamp = now();
+    const nextPipelineStageKey = args.pipelineStageKey ? slugify(args.pipelineStageKey) : undefined;
+    const hasStageChange = Boolean(nextPipelineStageKey && nextPipelineStageKey !== lead.pipelineStageKey);
+
+    if (hasStageChange) {
+      await requirePipelineStage(ctx, {
+        tenantId: lead.tenantId,
+        siteId: lead.siteId,
+        stageKey: nextPipelineStageKey!,
+      });
+    }
 
     await ctx.db.patch(lead._id, definedFields({
       status: args.status,
-      pipelineStageKey: args.pipelineStageKey,
+      pipelineStageKey: nextPipelineStageKey,
       assignedTo: args.assignedTo,
       notes: args.notes,
       tags: args.tags,
@@ -347,6 +673,19 @@ export const updateLead = mutation({
       createdAt: timestamp,
     });
 
+    let transition;
+    if (hasStageChange) {
+      transition = await recordLeadStageTransition(ctx, {
+        lead,
+        actorUserId: actor._id,
+        fromStageKey: lead.pipelineStageKey,
+        toStageKey: nextPipelineStageKey!,
+        eventType: "manual_lead_update",
+        reason: "crm.updateLead",
+        metadata: args.metadata,
+      });
+    }
+
     await writeAuditEvent(ctx, {
       tenantId: lead.tenantId,
       siteId: lead.siteId,
@@ -354,7 +693,7 @@ export const updateLead = mutation({
       action: "lead_updated",
       resourceType: "lead",
       resourceId: lead._id,
-      metadata: { status: args.status, pipelineStageKey: args.pipelineStageKey },
+      metadata: { status: args.status, pipelineStageKey: nextPipelineStageKey, transition },
     });
   },
 });

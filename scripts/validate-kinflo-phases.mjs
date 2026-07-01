@@ -99,6 +99,7 @@ for (const path of [
   "docs/phase31-local-admin-smoke-fixture.md",
   "docs/phase32-phase0-readiness-manifest.md",
   "docs/phase33-convex-schema-coverage.md",
+  "docs/phase34-crm-progression-contracts.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -121,6 +122,7 @@ for (const path of [
   "scripts/validate-drizzle-convex-map.mjs",
   "scripts/validate-kinflo-phase0-readiness.mjs",
   "scripts/validate-kinflo-schema-coverage.mjs",
+  "scripts/validate-kinflo-crm-progression.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -488,11 +490,23 @@ requireIncludes("docs/phase33-convex-schema-coverage.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase34-crm-progression-contracts.md", [
+  "npm run kinflo:validate-crm-progression",
+  "crm.listJourneyProgressionRules",
+  "crm.upsertJourneyProgressionRule",
+  "crm.transitionLeadStage",
+  "pipelineEvents",
+  "journeyProgressionEvents",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"kinflo:validate-phase0-readiness\"",
   "\"kinflo:validate-schema-coverage\"",
+  "\"kinflo:validate-crm-progression\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -536,6 +550,16 @@ requireIncludes("scripts/validate-kinflo-schema-coverage.mjs", [
   "Phase 3 minimum collections",
   "pipelineEvents",
   "journeyProgressionRules",
+  "journeyProgressionEvents",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-crm-progression.mjs", [
+  "crm.listJourneyProgressionRules",
+  "crm.upsertJourneyProgressionRule",
+  "crm.transitionLeadStage",
+  "pipelineEvents",
   "journeyProgressionEvents",
   "Generated API imported: no",
   "Live Convex execution: no",
@@ -675,6 +699,9 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "entitlements.checkEntitlementLimit",
   "siteBuilder.upsertDomain",
   "crm.submitLead",
+  "crm.listJourneyProgressionRules",
+  "crm.upsertJourneyProgressionRule",
+  "crm.transitionLeadStage",
   "publicSite.resolvePublishedSite",
 ]);
 
@@ -688,6 +715,9 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "roleCatalogSyncDefaultRoles",
   "accessPolicyViewerPermissionSnapshot",
   "siteBuilderPublishPage",
+  "crmListJourneyProgressionRules",
+  "crmUpsertJourneyProgressionRule",
+  "crmTransitionLeadStage",
   "crmCreateTask",
 ]);
 
@@ -815,6 +845,13 @@ requireIncludes("convex/crm.ts", [
   "export const listLeads",
   "export const getLeadTimeline",
   "export const upsertPipelineStage",
+  "export const listJourneyProgressionRules",
+  "export const upsertJourneyProgressionRule",
+  "export const transitionLeadStage",
+  "recordLeadStageTransition",
+  "pipelineEvents",
+  "journeyProgressionEvents",
+  "lead_stage_transitioned",
   "export const updateLead",
   "export const assignLead",
   "export const createTask",
@@ -835,6 +872,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellLeadCaptureContract",
   "fixtureLeads",
   "fixtureLeadCaptureContracts",
+  "crm.transitionLeadStage",
+  "crm.upsertJourneyProgressionRule",
   "ShellSiteLaunchPacket",
   "fixtureSiteLaunchPackets",
   "ShellBillingPlan",
