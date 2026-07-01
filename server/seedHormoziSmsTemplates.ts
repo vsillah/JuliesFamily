@@ -3,6 +3,12 @@ import { smsTemplates } from "@shared/schema";
 import type { InsertSmsTemplate } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
+type HormoziSmsSeedTemplate = InsertSmsTemplate & {
+  category: string;
+  variables: string[];
+  characterCount: number;
+};
+
 /**
  * Hormozi SMS Templates - Optimized for SMS brevity and immediacy
  * Based on Alex Hormozi's "$100M Leads" communication strategies
@@ -31,7 +37,7 @@ import { eq } from "drizzle-orm";
  * - clear_cta: Single, clear action
  */
 
-const hormoziSmsTemplates: InsertSmsTemplate[] = [
+const hormoziSmsTemplates: HormoziSmsSeedTemplate[] = [
   // COLD OUTREACH - A-C-A Framework
   {
     name: "Cold: A-C-A Introduction",
@@ -615,8 +621,15 @@ export async function seedHormoziSmsTemplates() {
         continue;
       }
       
-      // Insert the template
-      await db.insert(smsTemplates).values(template);
+      const {
+        category: _category,
+        variables: _variables,
+        characterCount: _characterCount,
+        ...insertTemplate
+      } = template;
+
+      // Insert only columns that exist in sms_templates.
+      await db.insert(smsTemplates).values(insertTemplate);
       
       console.log(`✓ Inserted template: ${template.name}`);
       insertedCount++;

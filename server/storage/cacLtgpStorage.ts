@@ -36,6 +36,7 @@ export interface ICacLtgpStorage {
   
   // Channel Spend Ledger
   createSpendEntry(entry: InsertChannelSpendLedger): Promise<ChannelSpendLedger>;
+  getAllSpendEntries(): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByChannel(channelId: string): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByCampaign(campaignId: string): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByPeriod(periodKey: string): Promise<ChannelSpendLedger[]>;
