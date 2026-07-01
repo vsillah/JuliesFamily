@@ -62,6 +62,7 @@ for (const path of [
   "docs/kinflo-saas-adoption-plan.md",
   "docs/phase0-baseline.md",
   "docs/phase0-env-inventory.md",
+  "docs/phase0-secret-remediation.md",
   "docs/drizzle-to-convex-migration-map.md",
   "docs/phase1-convex-control-plane.md",
   "docs/phase2-kinflo-shell.md",
@@ -113,6 +114,7 @@ for (const path of [
   "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
   "scripts/inventory-kinflo-env.mjs",
+  "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
   "scripts/dry-run-convex-import-contracts.mjs",
   "scripts/validate-convex-activation-preflight.mjs",
@@ -141,6 +143,17 @@ requireIncludes("docs/phase0-env-inventory.md", [
   "Reads local secret files: no",
   "Prints secret values: no",
   "Hosted deployment touched: no",
+]);
+
+requireIncludes("docs/phase0-secret-remediation.md", [
+  "npm run kinflo:audit-secret-history",
+  "Tracked secret-like files: 0",
+  "Historical secret-like path references: 2",
+  "Requires credential rotation review: yes",
+  "Requires history purge decision before public/client share: yes",
+  "Reads historical secret contents: no",
+  "Prints secret values: no",
+  "This phase does not rotate credentials automatically.",
 ]);
 
 requireIncludes("docs/drizzle-to-convex-migration-map.md", [
@@ -399,6 +412,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"kinflo:inventory-env\"",
+  "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
   "\"kinflo:dry-run-imports\"",
   "\"kinflo:activation-preflight\"",
@@ -429,6 +443,15 @@ requireIncludes("scripts/inventory-kinflo-env.mjs", [
   "Tracked secret-like files",
   "Prints secret values: no",
   "Hosted deployment touched: no",
+]);
+
+requireIncludes("scripts/audit-kinflo-secret-history.mjs", [
+  "git",
+  ".env.local",
+  "Historical secret-like path references",
+  "Requires credential rotation review",
+  "Reads historical secret contents: no",
+  "Prints secret values: no",
 ]);
 
 requireIncludes("scripts/validate-convex-import-contracts.mjs", [

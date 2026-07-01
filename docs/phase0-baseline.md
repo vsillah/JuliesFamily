@@ -126,6 +126,14 @@ npm run kinflo:inventory-env
 
 Current result: pass.
 
+Current command run:
+
+```bash
+npm run kinflo:audit-secret-history
+```
+
+Current result: pass, with historical remediation still required before public or client sharing.
+
 Current TypeScript status:
 
 - Repo-wide TypeScript diagnostics: 0.
@@ -150,6 +158,7 @@ Current Phase 0 and provider-light continuation state:
 - Generated Convex API files under `convex/_generated/` are not tracked.
 - `.env.example` contains blank Convex activation placeholders only.
 - The source env inventory has a repeatable no-secret command wired through `npm run kinflo:inventory-env`.
+- The secret history audit has a repeatable no-content command wired through `npm run kinflo:audit-secret-history`.
 - The Drizzle-to-Convex migration map has a validator wired through `npm run kinflo:validate-map`.
 - The provider-light phase packet has a validator wired through `npm run kinflo:validate-phases`.
 - The Convex scaffold, KinFlo shell, import contracts, activation preflight, runtime boundary, live handoff, generated API contract, and live smoke manifest have been added behind provider gates.
@@ -176,6 +185,7 @@ Completed:
 - Typecheck baseline established and later cleared to zero repo-wide diagnostics.
 - Migration map produced.
 - Env var inventory completed without reading or printing secret values.
+- Secret history audit completed without reading or printing historical secret values.
 - Secret/env guard rails validated by local scripts.
 - Provider-light Convex continuation packet added without a hosted deployment.
 
@@ -183,6 +193,7 @@ Not completed:
 
 - No credentials were rotated.
 - No git history purge was performed.
+- Historical `.env.local` path evidence remains in two commits until Vambah approves the purge or accepts the private-repo residual risk.
 - Audit vulnerabilities were not fixed.
 - Hosted Convex activation was not performed.
 - Generated Convex API bindings were not produced or committed.
