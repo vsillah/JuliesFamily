@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
 import {
-  resolveKinfloPublicSitePreview,
+  resolveKinfloPublicSitePreviewWithContext,
   type KinfloPublicBlock,
   type KinfloPublicSitePreview as KinfloPublicSitePreviewPayload,
 } from "@/lib/kinfloPublicSitePreview";
@@ -186,7 +186,17 @@ function BlockSection({
 
 export default function KinfloPublicSitePreview() {
   const [, params] = useRoute("/kinflo-sites/:siteSlug");
-  const preview = resolveKinfloPublicSitePreview(params?.siteSlug);
+  const searchParams = new URLSearchParams(window.location.search);
+  const preview = resolveKinfloPublicSitePreviewWithContext(params?.siteSlug, {
+    route: searchParams.get("route") ?? undefined,
+    persona: searchParams.get("persona") ?? undefined,
+    journeyStage: searchParams.get("journeyStage") ?? undefined,
+    device: searchParams.get("device") === "tablet" || searchParams.get("device") === "mobile"
+      ? searchParams.get("device") as "tablet" | "mobile"
+      : searchParams.get("device") === "desktop"
+        ? "desktop"
+        : undefined,
+  });
   const headerNav = preview.navigationItems
     .filter((item) => item.placement === "header")
     .sort((a, b) => a.order - b.order);
@@ -195,6 +205,7 @@ export default function KinfloPublicSitePreview() {
     .sort((a, b) => a.order - b.order);
   const contextPersona = preview.context.persona ?? "anonymous";
   const contextJourneyStage = preview.context.journeyStage ?? "default";
+  const contextDevice = preview.context.device ?? "responsive";
 
   return (
     <div
@@ -220,7 +231,7 @@ export default function KinfloPublicSitePreview() {
             {preview.context.convexFunction}
           </Badge>
           <Badge variant="secondary" className="hidden whitespace-nowrap lg:inline-flex" data-testid="public-preview-context">
-            {contextPersona} / {contextJourneyStage}
+            {contextPersona} / {contextJourneyStage} / {contextDevice}
           </Badge>
         </div>
       </header>

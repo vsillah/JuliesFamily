@@ -80,9 +80,17 @@ export type KinfloPublicSitePreview = {
     route: string;
     persona?: string;
     journeyStage?: string;
+    device?: "desktop" | "tablet" | "mobile";
     source: "fixture-public-renderer";
     convexFunction: "publicSite.resolvePublishedSite";
   };
+};
+
+export type KinfloPublicSitePreviewOptions = {
+  route?: string;
+  persona?: string;
+  journeyStage?: string;
+  device?: "desktop" | "tablet" | "mobile";
 };
 
 const publishedAt = Date.UTC(2026, 6, 1);
@@ -340,5 +348,27 @@ export function listKinfloPublicSitePreviews() {
 }
 
 export function resolveKinfloPublicSitePreview(siteSlug = "julies-family") {
-  return previews.find((preview) => preview.site.slug === siteSlug) ?? previews[0];
+  const preview = previews.find((item) => item.site.slug === siteSlug) ?? previews[0];
+  return preview;
+}
+
+export function resolveKinfloPublicSitePreviewWithContext(
+  siteSlug = "julies-family",
+  options: KinfloPublicSitePreviewOptions = {},
+) {
+  const preview = resolveKinfloPublicSitePreview(siteSlug);
+  const route = options.route?.trim() || preview.context.route;
+  const persona = options.persona?.trim() || undefined;
+  const journeyStage = options.journeyStage?.trim() || undefined;
+
+  return {
+    ...preview,
+    context: {
+      ...preview.context,
+      route,
+      persona,
+      journeyStage,
+      device: options.device,
+    },
+  };
 }

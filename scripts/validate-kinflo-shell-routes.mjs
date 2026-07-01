@@ -64,6 +64,7 @@ requireIncludes(adminShellPath, [
   "Content Draft Studio",
   "Brand Theme Studio",
   "Navigation Builder",
+  "Preview QA Studio",
   "select-kinflo-experience-theme",
   "select-kinflo-experience-density",
   "button-save-experience-preferences",
@@ -96,6 +97,14 @@ requireIncludes(adminShellPath, [
   "checkbox-kinflo-navigation-visible",
   "button-save-navigation",
   "Live navigation save gated",
+  "select-kinflo-preview-site",
+  "input-kinflo-preview-route",
+  "select-kinflo-preview-device",
+  "select-kinflo-preview-persona",
+  "select-kinflo-preview-journey-stage",
+  "text-kinflo-preview-url",
+  "button-open-preview-qa",
+  "button-publish-preview-qa",
   'data-testid="button-create-tenant"',
   'data-testid="button-create-site"',
   'data-testid="select-kinflo-wizard-template"',
@@ -111,6 +120,8 @@ requireIncludes(publicPreviewPath, [
   'data-testid="public-preview-services"',
   'data-testid="public-preview-intake"',
   "Runtime fallback is `/api/leads`; Convex target is `crm.submitLead`.",
+  "resolveKinfloPublicSitePreviewWithContext",
+  "public-preview-context",
 ]);
 
 requireIncludes(shellDataPath, [

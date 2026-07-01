@@ -107,6 +107,7 @@ for (const path of [
   "docs/phase39-content-draft-shell.md",
   "docs/phase40-brand-theme-shell.md",
   "docs/phase41-navigation-builder-shell.md",
+  "docs/phase42-preview-qa-shell.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -138,6 +139,7 @@ for (const path of [
   "scripts/validate-kinflo-content-shell.mjs",
   "scripts/validate-kinflo-brand-shell.mjs",
   "scripts/validate-kinflo-navigation-shell.mjs",
+  "scripts/validate-kinflo-preview-shell.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -308,6 +310,7 @@ requireIncludes("docs/phase15-public-site-preview-renderer.md", [
   "/kinflo-sites/:siteSlug",
   "publicSite.resolvePublishedSite",
   "crm.submitLead",
+  "Phase 42 adds provider-light query context",
 ]);
 
 requireIncludes("docs/phase16-site-factory-launch-packets.md", [
@@ -601,6 +604,19 @@ requireIncludes("docs/phase41-navigation-builder-shell.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase42-preview-qa-shell.md", [
+  "npm run kinflo:validate-preview-shell",
+  "Preview QA Studio",
+  "Open preview",
+  "Live publish gated",
+  "publicSite.resolvePublishedSite",
+  "siteBuilder.publishPage",
+  "crm.submitLead",
+  "Local state only: yes",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -614,6 +630,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-content-shell\"",
   "\"kinflo:validate-brand-shell\"",
   "\"kinflo:validate-navigation-shell\"",
+  "\"kinflo:validate-preview-shell\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -746,6 +763,18 @@ requireIncludes("scripts/validate-kinflo-navigation-shell.mjs", [
   "siteBuilder.getSiteDraft",
   "siteBuilder.upsertNavigationItem",
   "publicSite.resolvePublishedSite",
+  "Local state only: yes",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-preview-shell.mjs", [
+  "Preview QA Studio",
+  "Open preview",
+  "Live publish gated",
+  "publicSite.resolvePublishedSite",
+  "siteBuilder.publishPage",
+  "crm.submitLead",
   "Local state only: yes",
   "Generated API imported: no",
   "Live Convex execution: no",
@@ -1102,6 +1131,10 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureNavigationDraft",
   "Live navigation save is gated until hosted Convex auth, generated API bindings, public preview smoke, and audit review are approved.",
   "Navigation builder shell",
+  "ShellPreviewStudioDraft",
+  "fixturePreviewStudio",
+  "Preview QA is local until hosted Convex reads, generated API bindings, lead smoke, and visual QA are approved.",
+  "Preview QA shell",
   "ShellLead",
   "ShellLeadCaptureContract",
   "fixtureLeads",
@@ -1230,16 +1263,29 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Live navigation save gated",
   "snapshot.navigationDraft.convexFunctions",
   "snapshot.navigationDraft.activationEvidence",
+  "Preview QA Studio",
+  "select-kinflo-preview-site",
+  "input-kinflo-preview-route",
+  "select-kinflo-preview-device",
+  "select-kinflo-preview-persona",
+  "select-kinflo-preview-journey-stage",
+  "text-kinflo-preview-url",
+  "button-open-preview-qa",
+  "button-publish-preview-qa",
+  "snapshot.previewStudio.convexFunctions",
+  "snapshot.previewStudio.activationEvidence",
   "previewPath",
   "Follow-up Tasks",
   "/admin/guide",
 ]);
 
 requireIncludes("client/src/pages/KinfloPublicSitePreview.tsx", [
-  "resolveKinfloPublicSitePreview",
+  "resolveKinfloPublicSitePreviewWithContext",
   "LeadCaptureForm",
   "public-preview-hero",
   "public-preview-intake",
+  "new URLSearchParams(window.location.search)",
+  "public-preview-context",
 ]);
 
 requireIncludes("client/src/lib/kinfloLeadCapture.ts", [
@@ -1257,6 +1303,9 @@ requireIncludes("client/src/lib/kinfloPublicSitePreview.ts", [
   "publicSite.resolvePublishedSite",
   "persona?: string",
   "journeyStage?: string",
+  "KinfloPublicSitePreviewOptions",
+  "resolveKinfloPublicSitePreviewWithContext",
+  "device?: \"desktop\" | \"tablet\" | \"mobile\"",
   "resolveKinfloPublicSitePreview",
   "listKinfloPublicSitePreviews",
 ]);

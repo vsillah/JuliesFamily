@@ -9,6 +9,7 @@ This phase adds a provider-light frontend renderer for KinFlo public sites. It p
 - Added `/kinflo-sites/:siteSlug` as the preview route.
 - Added preview links to the Sites tab in `/admin/kinflo-os`.
 - Marked the public site preview renderer as a completed launch gate in the KinFlo shell fixture.
+- Phase 42 adds provider-light query context for preview QA: `route`, `persona`, `journeyStage`, and `device`.
 
 ## Renderer Contract
 
@@ -33,6 +34,8 @@ The renderer currently supports:
 Lead magnet and form blocks render `LeadCaptureForm` with a site-scoped `siteId`, preserving the Phase 14 `crm.submitLead` contract while keeping `/api/leads` as the temporary runtime fallback.
 
 Phase 35 tightens the `publicSite.resolvePublishedSite` visibility contract: global rules still apply to anonymous context, but persona and journey-stage rules only apply when the request context explicitly matches them.
+
+Phase 42 keeps that context visible in the public preview route so the admin shell can open audience-specific review URLs before live Convex reads are enabled.
 
 ## Provider Boundary
 

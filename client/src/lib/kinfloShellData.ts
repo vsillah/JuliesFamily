@@ -190,6 +190,28 @@ export type ShellNavigationDraft = {
   activationEvidence: string[];
 };
 
+export type ShellPreviewDeviceOption = {
+  key: "desktop" | "tablet" | "mobile";
+  label: string;
+  width: number;
+  evidence: string;
+};
+
+export type ShellPreviewStudioDraft = {
+  defaultSiteSlug: string;
+  defaultRoute: string;
+  defaultPersona: string;
+  defaultJourneyStage: string;
+  defaultDevice: "desktop" | "tablet" | "mobile";
+  siteOptions: { slug: string; label: string; previewPath: string }[];
+  personaOptions: { key: string; label: string }[];
+  journeyStageOptions: { key: string; label: string }[];
+  deviceOptions: ShellPreviewDeviceOption[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -326,6 +348,7 @@ export type KinfloShellSnapshot = {
   contentDraft: ShellContentDraft;
   brandTheme: ShellBrandThemeDraft;
   navigationDraft: ShellNavigationDraft;
+  previewStudio: ShellPreviewStudioDraft;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -702,6 +725,50 @@ const fixtureNavigationDraft: ShellNavigationDraft = {
     "navigation write is guarded by site:update",
     "public preview resolves updated header and footer order",
     "audit event records navigation_item_upserted",
+  ],
+};
+
+const fixturePreviewStudio: ShellPreviewStudioDraft = {
+  defaultSiteSlug: "advisor-client-site",
+  defaultRoute: "/",
+  defaultPersona: "provider",
+  defaultJourneyStage: "consideration",
+  defaultDevice: "desktop",
+  siteOptions: [
+    { slug: "julies-family", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { slug: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { slug: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  personaOptions: [
+    { key: "anonymous", label: "Anonymous" },
+    { key: "parent", label: "Parent" },
+    { key: "provider", label: "Provider" },
+    { key: "donor", label: "Donor" },
+    { key: "volunteer", label: "Volunteer" },
+  ],
+  journeyStageOptions: [
+    { key: "default", label: "Default" },
+    { key: "awareness", label: "Awareness" },
+    { key: "consideration", label: "Consideration" },
+    { key: "decision", label: "Decision" },
+    { key: "retention", label: "Retention" },
+  ],
+  deviceOptions: [
+    { key: "desktop", label: "Desktop", width: 1440, evidence: "full navigation, hero, intake, and footer visible without overflow" },
+    { key: "tablet", label: "Tablet", width: 834, evidence: "stacked sections preserve primary CTA and intake context" },
+    { key: "mobile", label: "Mobile", width: 390, evidence: "no horizontal overflow and readable public conversion path" },
+  ],
+  providerBoundary: "Preview QA is local until hosted Convex reads, generated API bindings, lead smoke, and visual QA are approved.",
+  convexFunctions: [
+    "publicSite.resolvePublishedSite",
+    "siteBuilder.publishPage",
+    "crm.submitLead",
+  ],
+  activationEvidence: [
+    "site preview resolves selected site and route",
+    "audience context is explicit in the preview URL",
+    "desktop, tablet, and mobile checks pass before publish",
+    "public intake smoke confirms crm.submitLead contract",
   ],
 };
 
@@ -1085,6 +1152,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Content draft shell", status: "done" },
   { label: "Brand theme shell", status: "done" },
   { label: "Navigation builder shell", status: "done" },
+  { label: "Preview QA shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1154,6 +1222,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       contentDraft: fixtureContentDraft,
       brandTheme: fixtureBrandTheme,
       navigationDraft: fixtureNavigationDraft,
+      previewStudio: fixturePreviewStudio,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

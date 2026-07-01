@@ -146,6 +146,11 @@ export default function AdminKinfloShell() {
   const [navigationLabel, setNavigationLabel] = useState(defaultNavigationItem?.label ?? "");
   const [navigationHref, setNavigationHref] = useState(defaultNavigationItem?.href ?? "");
   const [navigationVisible, setNavigationVisible] = useState(defaultNavigationItem?.isVisible ?? true);
+  const [previewSiteSlug, setPreviewSiteSlug] = useState(snapshot.previewStudio.defaultSiteSlug);
+  const [previewRoute, setPreviewRoute] = useState(snapshot.previewStudio.defaultRoute);
+  const [previewPersona, setPreviewPersona] = useState(snapshot.previewStudio.defaultPersona);
+  const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
+  const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -302,6 +307,37 @@ export default function AdminKinfloShell() {
   ];
   const navigationReadyCount = navigationReadiness.filter((item) => item.done).length;
   const navigationReadinessPercent = Math.round((navigationReadyCount / navigationReadiness.length) * 100);
+  const selectedPreviewSite = useMemo(
+    () => snapshot.previewStudio.siteOptions.find((site) => site.slug === previewSiteSlug) ?? snapshot.previewStudio.siteOptions[0],
+    [previewSiteSlug, snapshot.previewStudio.siteOptions],
+  );
+  const selectedPreviewDevice = useMemo(
+    () => snapshot.previewStudio.deviceOptions.find((device) => device.key === previewDevice) ?? snapshot.previewStudio.deviceOptions[0],
+    [previewDevice, snapshot.previewStudio.deviceOptions],
+  );
+  const previewQuery = useMemo(() => {
+    const params = new URLSearchParams();
+    const route = previewRoute.trim() || "/";
+    params.set("route", route);
+    if (previewPersona !== "anonymous") {
+      params.set("persona", previewPersona);
+    }
+    if (previewJourneyStage !== "default") {
+      params.set("journeyStage", previewJourneyStage);
+    }
+    params.set("device", previewDevice);
+    return params.toString();
+  }, [previewDevice, previewJourneyStage, previewPersona, previewRoute]);
+  const previewHref = `${selectedPreviewSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}?${previewQuery}`;
+  const previewReadiness = [
+    { label: "Site selected", done: Boolean(selectedPreviewSite) },
+    { label: "Route set", done: Boolean(previewRoute.trim()) },
+    { label: "Audience context explicit", done: Boolean(previewPersona && previewJourneyStage) },
+    { label: "Device checkpoint selected", done: Boolean(selectedPreviewDevice) },
+    { label: "Live lead smoke pending", done: false },
+  ];
+  const previewReadyCount = previewReadiness.filter((item) => item.done).length;
+  const previewReadinessPercent = Math.round((previewReadyCount / previewReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -529,13 +565,14 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-11">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-12">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="plans">Plans</TabsTrigger>
             <TabsTrigger value="brand">Brand</TabsTrigger>
             <TabsTrigger value="navigation">Nav</TabsTrigger>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -1554,6 +1591,206 @@ export default function AdminKinfloShell() {
                     Preview Route
                   </Link>
                 </Button>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="preview" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Preview QA Studio</h2>
+                    <p className="text-sm text-muted-foreground">Review a site route by audience and device before live publish and lead-capture smoke are enabled.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <MonitorSmartphone className="mr-1 h-3 w-3" />
+                    Provider-light preview
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Public Preview Packet</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedPreviewSite?.label} · {selectedPreviewDevice?.label}
+                      </p>
+                    </div>
+                    <Badge variant="secondary">{previewReadyCount}/{previewReadiness.length} ready</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={previewSiteSlug} onValueChange={setPreviewSiteSlug}>
+                          <SelectTrigger data-testid="select-kinflo-preview-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.previewStudio.siteOptions.map((site) => (
+                              <SelectItem key={site.slug} value={site.slug}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="kinflo-preview-route">Route</Label>
+                        <Input
+                          id="kinflo-preview-route"
+                          value={previewRoute}
+                          onChange={(event) => setPreviewRoute(event.target.value)}
+                          data-testid="input-kinflo-preview-route"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Device</Label>
+                        <Select value={previewDevice} onValueChange={(value) => setPreviewDevice(value as typeof previewDevice)}>
+                          <SelectTrigger data-testid="select-kinflo-preview-device">
+                            <SelectValue placeholder="Select device" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.previewStudio.deviceOptions.map((device) => (
+                              <SelectItem key={device.key} value={device.key}>
+                                {device.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Persona</Label>
+                        <Select value={previewPersona} onValueChange={setPreviewPersona}>
+                          <SelectTrigger data-testid="select-kinflo-preview-persona">
+                            <SelectValue placeholder="Select persona" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.previewStudio.personaOptions.map((persona) => (
+                              <SelectItem key={persona.key} value={persona.key}>
+                                {persona.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Journey stage</Label>
+                        <Select value={previewJourneyStage} onValueChange={setPreviewJourneyStage}>
+                          <SelectTrigger data-testid="select-kinflo-preview-journey-stage">
+                            <SelectValue placeholder="Select journey stage" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.previewStudio.journeyStageOptions.map((stage) => (
+                              <SelectItem key={stage.key} value={stage.key}>
+                                {stage.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 rounded-md border p-4 text-sm">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="font-medium">{selectedPreviewSite?.label}</div>
+                            <div className="mt-1 break-all text-xs text-muted-foreground" data-testid="text-kinflo-preview-url">
+                              {previewHref}
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="self-start">{selectedPreviewDevice?.width}px</Badge>
+                        </div>
+                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                          <div className="rounded-md bg-muted/40 px-3 py-2">
+                            <div className="text-xs text-muted-foreground">Persona</div>
+                            <div className="font-medium">{previewPersona}</div>
+                          </div>
+                          <div className="rounded-md bg-muted/40 px-3 py-2">
+                            <div className="text-xs text-muted-foreground">Journey</div>
+                            <div className="font-medium">{previewJourneyStage}</div>
+                          </div>
+                          <div className="rounded-md bg-muted/40 px-3 py-2">
+                            <div className="text-xs text-muted-foreground">Device</div>
+                            <div className="font-medium">{selectedPreviewDevice?.label}</div>
+                          </div>
+                        </div>
+                        <div className="mt-4 rounded-md border px-3 py-2 text-muted-foreground">
+                          {selectedPreviewDevice?.evidence}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium">Readiness</span>
+                          <span className="text-muted-foreground">{previewReadinessPercent}%</span>
+                        </div>
+                        <Progress value={previewReadinessPercent} className="mt-2" />
+                        <div className="mt-3 space-y-2">
+                          {previewReadiness.map((item) => (
+                            <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                              {item.done ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="h-3.5 w-3.5" />
+                              )}
+                              <span>{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.previewStudio.providerBoundary}</div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button asChild data-testid="button-open-preview-qa">
+                          <Link href={previewHref}>
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Open preview
+                          </Link>
+                        </Button>
+                        <Button disabled variant="outline" data-testid="button-publish-preview-qa">
+                          <Rocket className="mr-2 h-4 w-4" />
+                          Live publish gated
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Preview Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Preview reads and publish/lead checks stay gated until generated bindings and smoke approval.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.previewStudio.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.previewStudio.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </TabsContent>
