@@ -71,6 +71,7 @@ for (const path of [
   "docs/phase17-convex-activation-preflight.md",
   "docs/phase18-convex-runtime-boundary.md",
   "docs/phase24-live-convex-handoff.md",
+  "docs/phase25-live-adapter-contract.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/activation.ts",
@@ -84,6 +85,7 @@ for (const path of [
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-convex-activation-preflight.mjs",
   "scripts/validate-convex-live-handoff.mjs",
+  "scripts/validate-kinflo-live-adapter.mjs",
 ]) {
   requireFile(path);
 }
@@ -104,6 +106,7 @@ requireIncludes("package.json", [
   "\"convex:codegen\"",
   "\"kinflo:activation-preflight\"",
   "\"kinflo:live-handoff\"",
+  "\"kinflo:validate-live-adapter\"",
 ]);
 
 requireIncludes("docs/phase24-live-convex-handoff.md", [
@@ -120,6 +123,13 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
   "Cross-tenant permission smoke",
   "Rollback plan",
   "No hosted Convex deployment is created",
+  "No generated Convex API files are committed",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase25-live-adapter-contract.md", [
+  "selectKinfloShellDataAdapter",
+  "liveKinfloShellAdapter",
   "No generated Convex API files are committed",
   "No live Convex query, mutation, or action is executed",
 ]);
@@ -194,6 +204,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Live Convex handoff checklist",
   "Convex deployment and generated API",
   "Live admin smoke",
+  "selectKinfloShellDataAdapter",
+  "liveKinfloShellAdapter",
 ]);
 
 requireIncludes("scripts/validate-convex-activation-preflight.mjs", [

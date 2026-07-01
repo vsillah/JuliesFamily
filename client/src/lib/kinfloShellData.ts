@@ -28,6 +28,19 @@ export type ShellDataMode = {
   convexFunctions: string[];
 };
 
+export type ShellLiveAdapterStatus =
+  | "fixture_fallback"
+  | "generated_api_pending"
+  | "live_smoke_pending";
+
+export type ShellLiveAdapterBinding = {
+  surface: string;
+  fixtureSource: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+  status: ShellLiveAdapterStatus;
+};
+
 export type ShellMetric = {
   label: string;
   value: string;
@@ -176,6 +189,7 @@ export type ShellLaunchGate = {
 export type KinfloShellSnapshot = {
   dataMode: ShellDataMode;
   metrics: ShellMetric[];
+  liveAdapterBindings: ShellLiveAdapterBinding[];
   tenants: ShellTenant[];
   sites: ShellSite[];
   billingPlans: ShellBillingPlan[];
@@ -557,6 +571,62 @@ const fixtureSiteLaunchPackets: ShellSiteLaunchPacket[] = [
   },
 ];
 
+const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
+  {
+    surface: "Activation readiness",
+    fixtureSource: "data mode header and launch gates",
+    convexFunctions: ["activation.readiness", "activation.seedSmokeSite"],
+    activationEvidence: ["readiness counts", "activation smoke audit event"],
+    status: "generated_api_pending",
+  },
+  {
+    surface: "Tenant control plane",
+    fixtureSource: "tenant, site, role, and audit tables",
+    convexFunctions: [
+      "controlPlane.listTenants",
+      "controlPlane.listSitesForTenant",
+      "controlPlane.listAuditEvents",
+    ],
+    activationEvidence: ["super admin tenant list", "tenant-scoped site list", "audit trail smoke"],
+    status: "fixture_fallback",
+  },
+  {
+    surface: "Site factory",
+    fixtureSource: "launch packets and site creation wizard",
+    convexFunctions: ["siteFactory.listStarterTemplates", "siteFactory.createSiteFromTemplate"],
+    activationEvidence: ["template list", "draft site created from template", "owner invite scoped"],
+    status: "fixture_fallback",
+  },
+  {
+    surface: "Domain metadata",
+    fixtureSource: "site domain rows and launch checklist",
+    convexFunctions: ["siteBuilder.upsertDomain", "entitlements.checkEntitlementLimit"],
+    activationEvidence: ["customDomains limit enforced", "primary verified hostname set", "duplicate hostname rejected"],
+    status: "generated_api_pending",
+  },
+  {
+    surface: "Public renderer",
+    fixtureSource: "public preview resolver",
+    convexFunctions: ["publicSite.resolvePublishedSite"],
+    activationEvidence: ["published site resolves", "draft site hidden", "verified domain required"],
+    status: "fixture_fallback",
+  },
+  {
+    surface: "CRM lead workspace",
+    fixtureSource: "lead, pipeline, task, and intake fixtures",
+    convexFunctions: ["crm.submitLead", "crm.listLeads", "crm.getLeadTimeline"],
+    activationEvidence: ["public form creates lead", "tenant admin sees scoped lead", "timeline event appended"],
+    status: "fixture_fallback",
+  },
+  {
+    surface: "Plans and entitlements",
+    fixtureSource: "plan cards and tenant entitlement table",
+    convexFunctions: ["entitlements.entitlementUsageSnapshot", "entitlements.checkEntitlementLimit"],
+    activationEvidence: ["usage snapshot matches site data", "manual override honored", "limit rejection audited"],
+    status: "generated_api_pending",
+  },
+];
+
 const fixtureSiteCreationWizard: ShellSiteCreationWizard = {
   defaultSiteName: "Advisor Client Site",
   defaultSubdomain: "advisor-client",
@@ -671,6 +741,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
         convexFunctions: runtime.functionNames,
       },
       metrics: buildMetrics(),
+      liveAdapterBindings: fixtureLiveAdapterBindings,
       tenants: fixtureTenants,
       sites: fixtureSites,
       billingPlans: fixtureBillingPlans,
@@ -689,6 +760,24 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
   },
 };
 
-export function getKinfloShellSnapshot(adapter: KinfloShellDataAdapter = fixtureKinfloShellAdapter) {
+export const liveKinfloShellAdapter: KinfloShellDataAdapter = {
+  mode: "convex",
+  getSnapshot: () => {
+    const runtime = getKinfloConvexRuntime();
+
+    if (!runtime.canUseLiveData) {
+      throw new Error("Live KinFlo shell adapter is gated until Convex URL, generated API bindings, and activation smoke are ready.");
+    }
+
+    throw new Error("Live KinFlo shell adapter requires generated Convex API bindings before fixture reads can be replaced.");
+  },
+};
+
+export function selectKinfloShellDataAdapter() {
+  const runtime = getKinfloConvexRuntime();
+  return runtime.canUseLiveData ? liveKinfloShellAdapter : fixtureKinfloShellAdapter;
+}
+
+export function getKinfloShellSnapshot(adapter: KinfloShellDataAdapter = selectKinfloShellDataAdapter()) {
   return adapter.getSnapshot();
 }

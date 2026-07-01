@@ -77,7 +77,9 @@ for (const path of [
   "docs/phase16-site-factory-launch-packets.md",
   "docs/phase17-convex-activation-preflight.md",
   "docs/phase24-live-convex-handoff.md",
+  "docs/phase25-live-adapter-contract.md",
   "scripts/validate-convex-live-handoff.mjs",
+  "scripts/validate-kinflo-live-adapter.mjs",
 ]) {
   requireFile(path);
 }
@@ -94,6 +96,7 @@ requireIncludes("package.json", [
   "\"convex:check\"",
   "\"kinflo:activation-preflight\"",
   "\"kinflo:live-handoff\"",
+  "\"kinflo:validate-live-adapter\"",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -149,6 +152,13 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
   "npm run convex:codegen",
   "Generated API bindings are reviewed",
   "No hosted Convex deployment is created",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase25-live-adapter-contract.md", [
+  "selectKinfloShellDataAdapter",
+  "liveKinfloShellAdapter",
+  "No generated Convex API files are committed",
   "No live Convex query, mutation, or action is executed",
 ]);
 

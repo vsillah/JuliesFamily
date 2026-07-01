@@ -46,6 +46,7 @@ import {
 import {
   getKinfloShellSnapshot,
   type ExperienceIconKey,
+  type ShellLiveAdapterStatus,
   type KinfloShellStatus,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
@@ -79,6 +80,16 @@ function statusBadge(status: KinfloShellStatus) {
     return <Badge className="bg-amber-600 hover:bg-amber-600">Nurture</Badge>;
   }
   return <Badge variant="outline">Draft</Badge>;
+}
+
+function liveAdapterStatusBadge(status: ShellLiveAdapterStatus) {
+  if (status === "live_smoke_pending") {
+    return <Badge className="bg-amber-600 hover:bg-amber-600">Smoke pending</Badge>;
+  }
+  if (status === "generated_api_pending") {
+    return <Badge variant="secondary">Codegen pending</Badge>;
+  }
+  return <Badge variant="outline">Fixture fallback</Badge>;
 }
 
 export default function AdminKinfloShell() {
@@ -228,6 +239,45 @@ export default function AdminKinfloShell() {
                 {snapshot.dataMode.convexFunctions.map((functionName) => (
                   <Badge key={functionName} variant="secondary">{functionName}</Badge>
                 ))}
+              </div>
+            </div>
+            <div className="lg:col-span-2">
+              <div className="text-sm font-medium">Live adapter readiness</div>
+              <div className="mt-2 overflow-hidden rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Surface</TableHead>
+                      <TableHead>Fixture source</TableHead>
+                      <TableHead>Convex functions</TableHead>
+                      <TableHead>Evidence</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {snapshot.liveAdapterBindings.map((binding) => (
+                      <TableRow key={binding.surface}>
+                        <TableCell className="font-medium">{binding.surface}</TableCell>
+                        <TableCell>{binding.fixtureSource}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {binding.convexFunctions.map((functionName) => (
+                              <Badge key={functionName} variant="secondary">{functionName}</Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {binding.activationEvidence.map((item) => (
+                              <Badge key={item} variant="outline">{item}</Badge>
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell>{liveAdapterStatusBadge(binding.status)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             </div>
           </CardContent>

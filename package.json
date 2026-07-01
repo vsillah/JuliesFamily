@@ -15,6 +15,7 @@
     "kinflo:dry-run-imports": "node scripts/dry-run-convex-import-contracts.mjs",
     "kinflo:activation-preflight": "node scripts/validate-convex-activation-preflight.mjs",
     "kinflo:live-handoff": "node scripts/validate-convex-live-handoff.mjs",
+    "kinflo:validate-live-adapter": "node scripts/validate-kinflo-live-adapter.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
     "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts",
     "db:push": "drizzle-kit push"

@@ -86,6 +86,7 @@ for (const path of [
   "docs/phase22-entitlement-guard-contracts.md",
   "docs/phase23-custom-domain-entitlement-contracts.md",
   "docs/phase24-live-convex-handoff.md",
+  "docs/phase25-live-adapter-contract.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -108,6 +109,7 @@ for (const path of [
   "scripts/dry-run-convex-import-contracts.mjs",
   "scripts/validate-convex-activation-preflight.mjs",
   "scripts/validate-convex-live-handoff.mjs",
+  "scripts/validate-kinflo-live-adapter.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -316,6 +318,23 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase25-live-adapter-contract.md", [
+  "ShellLiveAdapterBinding",
+  "Live adapter readiness table",
+  "fixtureLiveAdapterBindings",
+  "liveKinfloShellAdapter",
+  "selectKinfloShellDataAdapter",
+  "npm run kinflo:validate-live-adapter",
+  "controlPlane.listTenants",
+  "siteFactory.createSiteFromTemplate",
+  "siteBuilder.upsertDomain",
+  "publicSite.resolvePublishedSite",
+  "crm.submitLead",
+  "entitlements.entitlementUsageSnapshot",
+  "No generated Convex API files are committed",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -323,6 +342,7 @@ requireIncludes("package.json", [
   "\"kinflo:dry-run-imports\"",
   "\"kinflo:activation-preflight\"",
   "\"kinflo:live-handoff\"",
+  "\"kinflo:validate-live-adapter\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -362,9 +382,17 @@ requireIncludes("scripts/validate-convex-activation-preflight.mjs", [
 
 requireIncludes("scripts/validate-convex-live-handoff.mjs", [
   "docs/phase24-live-convex-handoff.md",
+  "docs/phase25-live-adapter-contract.md",
   "generatedApiAvailable = false",
   "External writes: 0",
   "Hosted deployment touched: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-live-adapter.mjs", [
+  "docs/phase25-live-adapter-contract.md",
+  "ShellLiveAdapterBinding",
+  "Generated API imported: no",
   "Live Convex execution: no",
 ]);
 
@@ -513,6 +541,10 @@ requireIncludes("convex/crm.ts", [
 requireIncludes("client/src/lib/kinfloShellData.ts", [
   "KinfloShellSnapshot",
   "fixtureKinfloShellAdapter",
+  "liveKinfloShellAdapter",
+  "selectKinfloShellDataAdapter",
+  "ShellLiveAdapterBinding",
+  "fixtureLiveAdapterBindings",
   "getKinfloConvexRuntime",
   "runtimeMode",
   "ShellLead",
@@ -547,6 +579,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "getKinfloShellSnapshot",
   "Data Mode",
+  "Live adapter readiness",
+  "snapshot.liveAdapterBindings",
   "runtimeLabel",
   "Convex gated",
   "Template contracts define configurable fields",
