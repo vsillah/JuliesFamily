@@ -666,10 +666,14 @@ export default defineSchema({
     promptSummary: v.string(),
     sourceInputs: v.optional(v.any()),
     outputSummary: v.string(),
+    publishTarget: v.optional(v.string()),
+    providerBoundary: v.string(),
     status: approvalStatus,
     reviewerId: v.optional(v.id("users")),
+    reviewerNotes: v.optional(v.string()),
     createdBy: v.id("users"),
     createdAt: v.number(),
+    updatedAt: v.number(),
     reviewedAt: v.optional(v.number()),
   })
     .index("by_site_status", ["siteId", "status"])

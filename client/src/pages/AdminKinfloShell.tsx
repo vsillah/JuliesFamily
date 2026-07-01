@@ -53,6 +53,7 @@ import {
   type ExperienceIconKey,
   type ShellLiveAdapterStatus,
   type KinfloShellStatus,
+  type ShellAiReviewRecord,
   type ShellCampaignDraft,
   type ShellDomainDraft,
   type ShellIntegrationDraft,
@@ -194,6 +195,15 @@ export default function AdminKinfloShell() {
   const [campaignStatus, setCampaignStatus] = useState<ShellCampaignDraft["status"]>(defaultCampaign?.status ?? "draft");
   const [campaignObjective, setCampaignObjective] = useState(defaultCampaign?.objective ?? "");
   const [campaignApprovalOwner, setCampaignApprovalOwner] = useState(defaultCampaign?.approvalOwner ?? "");
+  const defaultAiRecord = snapshot.aiReview.records.find((record) => record.key === snapshot.aiReview.defaultRecordKey)
+    ?? snapshot.aiReview.records[0];
+  const [aiReviewSiteKey, setAiReviewSiteKey] = useState(snapshot.aiReview.defaultSiteKey);
+  const [selectedAiRecordKey, setSelectedAiRecordKey] = useState(defaultAiRecord?.key ?? "");
+  const [aiPromptSummary, setAiPromptSummary] = useState(defaultAiRecord?.promptSummary ?? "");
+  const [aiOutputSummary, setAiOutputSummary] = useState(defaultAiRecord?.outputSummary ?? "");
+  const [aiPublishTarget, setAiPublishTarget] = useState(defaultAiRecord?.publishTarget ?? "");
+  const [aiReviewerNotes, setAiReviewerNotes] = useState(defaultAiRecord?.reviewerNotes ?? "");
+  const [aiReviewStatus, setAiReviewStatus] = useState<ShellAiReviewRecord["status"]>(defaultAiRecord?.status ?? "pending");
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -513,6 +523,38 @@ export default function AdminKinfloShell() {
   ];
   const campaignReadyCount = campaignReadiness.filter((item) => item.done).length;
   const campaignReadinessPercent = Math.round((campaignReadyCount / campaignReadiness.length) * 100);
+  const selectedAiReviewSite = useMemo(
+    () => snapshot.aiReview.siteOptions.find((site) => site.key === aiReviewSiteKey) ?? snapshot.aiReview.siteOptions[0],
+    [aiReviewSiteKey, snapshot.aiReview.siteOptions],
+  );
+  const filteredAiRecords = useMemo(
+    () => snapshot.aiReview.records.filter((record) => record.siteKey === aiReviewSiteKey),
+    [aiReviewSiteKey, snapshot.aiReview.records],
+  );
+  const selectedAiRecord = useMemo(
+    () => filteredAiRecords.find((record) => record.key === selectedAiRecordKey) ?? filteredAiRecords[0],
+    [filteredAiRecords, selectedAiRecordKey],
+  );
+  const aiReviewDraftDirty = Boolean(
+    selectedAiRecord
+    && (
+      aiPromptSummary !== selectedAiRecord.promptSummary
+      || aiOutputSummary !== selectedAiRecord.outputSummary
+      || aiPublishTarget !== selectedAiRecord.publishTarget
+      || aiReviewerNotes !== selectedAiRecord.reviewerNotes
+      || aiReviewStatus !== selectedAiRecord.status
+    ),
+  );
+  const aiReviewReadiness = [
+    { label: "Site selected", done: Boolean(selectedAiReviewSite) },
+    { label: "AI record selected", done: Boolean(selectedAiRecord) },
+    { label: "Source inputs recorded", done: Boolean(selectedAiRecord?.sourceInputs.length) },
+    { label: "Publish target named", done: Boolean(aiPublishTarget.trim()) },
+    { label: "Reviewer notes recorded", done: Boolean(aiReviewerNotes.trim()) },
+    { label: "Live AI generation and publish pending", done: false },
+  ];
+  const aiReviewReadyCount = aiReviewReadiness.filter((item) => item.done).length;
+  const aiReviewReadinessPercent = Math.round((aiReviewReadyCount / aiReviewReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -675,6 +717,27 @@ export default function AdminKinfloShell() {
 
   const handleCampaignChange = (campaignKey: string) => {
     hydrateCampaign(snapshot.campaignAutomation.campaigns.find((campaign) => campaign.key === campaignKey));
+  };
+
+  const hydrateAiReviewRecord = (record?: ShellAiReviewRecord) => {
+    if (!record) {
+      return;
+    }
+    setSelectedAiRecordKey(record.key);
+    setAiPromptSummary(record.promptSummary);
+    setAiOutputSummary(record.outputSummary);
+    setAiPublishTarget(record.publishTarget);
+    setAiReviewerNotes(record.reviewerNotes);
+    setAiReviewStatus(record.status);
+  };
+
+  const handleAiReviewSiteChange = (siteKey: string) => {
+    setAiReviewSiteKey(siteKey);
+    hydrateAiReviewRecord(snapshot.aiReview.records.find((record) => record.siteKey === siteKey));
+  };
+
+  const handleAiReviewRecordChange = (recordKey: string) => {
+    hydrateAiReviewRecord(snapshot.aiReview.records.find((record) => record.key === recordKey));
   };
 
   useEffect(() => {
@@ -851,6 +914,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="domains">Domains</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+            <TabsTrigger value="ai-review">AI Review</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -2976,6 +3040,236 @@ export default function AdminKinfloShell() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {snapshot.campaignAutomation.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="ai-review" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">AI Review</h2>
+                    <p className="text-sm text-muted-foreground">Track prompt provenance, source inputs, reviewer notes, and publish targets before generated content can move downstream.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <ShieldCheck className="mr-1 h-3 w-3" />
+                    Provider gated
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">AI Provenance Packet</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedAiReviewSite?.label} · {selectedAiRecord?.reviewer}
+                      </p>
+                    </div>
+                    <Badge variant={aiReviewDraftDirty ? "default" : "secondary"}>
+                      {aiReviewDraftDirty ? "Local edits" : "Fixture AI record"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={aiReviewSiteKey} onValueChange={handleAiReviewSiteChange}>
+                          <SelectTrigger data-testid="select-kinflo-ai-review-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.aiReview.siteOptions.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>AI record</Label>
+                        <Select value={selectedAiRecord?.key ?? ""} onValueChange={handleAiReviewRecordChange}>
+                          <SelectTrigger data-testid="select-kinflo-ai-review-record">
+                            <SelectValue placeholder="Select AI record" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredAiRecords.map((record) => (
+                              <SelectItem key={record.key} value={record.key}>
+                                {record.publishTarget}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={aiReviewStatus} onValueChange={(value) => setAiReviewStatus(value as ShellAiReviewRecord["status"])}>
+                          <SelectTrigger data-testid="select-kinflo-ai-review-status">
+                            <SelectValue placeholder="Select review status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.aiReview.statusOptions.map((status) => (
+                              <SelectItem key={status.key} value={status.key}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-ai-prompt-summary">Prompt summary</Label>
+                          <textarea
+                            id="kinflo-ai-prompt-summary"
+                            value={aiPromptSummary}
+                            onChange={(event) => setAiPromptSummary(event.target.value)}
+                            rows={3}
+                            className="min-h-[96px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-ai-prompt-summary"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-ai-output-summary">Output summary</Label>
+                          <textarea
+                            id="kinflo-ai-output-summary"
+                            value={aiOutputSummary}
+                            onChange={(event) => setAiOutputSummary(event.target.value)}
+                            rows={3}
+                            className="min-h-[96px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-ai-output-summary"
+                          />
+                        </div>
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="kinflo-ai-publish-target">Publish target</Label>
+                            <Input
+                              id="kinflo-ai-publish-target"
+                              value={aiPublishTarget}
+                              onChange={(event) => setAiPublishTarget(event.target.value)}
+                              data-testid="input-kinflo-ai-publish-target"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="kinflo-ai-reviewer-notes">Reviewer notes</Label>
+                            <Input
+                              id="kinflo-ai-reviewer-notes"
+                              value={aiReviewerNotes}
+                              onChange={(event) => setAiReviewerNotes(event.target.value)}
+                              data-testid="input-kinflo-ai-reviewer-notes"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="rounded-md border p-3 text-sm">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="break-words font-medium">{aiPublishTarget}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">{selectedAiRecord?.campaignKey ?? "site content"}</div>
+                            </div>
+                            <Badge variant={aiReviewStatus === "approved" ? "secondary" : "outline"}>{aiReviewStatus}</Badge>
+                          </div>
+                          <div className="mt-3 text-xs text-muted-foreground">{selectedAiRecord?.providerBoundary}</div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{aiReviewReadinessPercent}%</span>
+                          </div>
+                          <Progress value={aiReviewReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {aiReviewReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border">
+                      <div className="border-b px-4 py-3 text-sm font-medium">Source Inputs</div>
+                      <div className="divide-y">
+                        {(selectedAiRecord?.sourceInputs ?? []).map((source) => (
+                          <div key={source} className="flex items-start gap-2 px-4 py-3 text-sm text-muted-foreground">
+                            <CircleDashed className="mt-0.5 h-4 w-4" />
+                            <span>{source}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.aiReview.providerBoundary}</div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button disabled variant="outline" data-testid="button-review-ai-record">
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          Live AI review gated
+                        </Button>
+                        <Button disabled data-testid="button-publish-ai-output">
+                          <Edit3 className="mr-2 h-4 w-4" />
+                          Live AI publish gated
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex AI Review Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">AI records stay provenance and review metadata until provider generation and publish smokes are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.aiReview.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Review Checklist</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.aiReview.reviewChecklist.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.aiReview.activationEvidence.map((item) => (
                       <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                         <CircleDashed className="mt-0.5 h-4 w-4" />
                         <span>{item}</span>

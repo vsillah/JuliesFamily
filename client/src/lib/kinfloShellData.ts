@@ -350,6 +350,34 @@ export type ShellCampaignAutomation = {
   safetyChecklist: string[];
 };
 
+export type ShellAiReviewStatus = "pending" | "approved" | "rejected";
+
+export type ShellAiReviewRecord = {
+  key: string;
+  siteKey: string;
+  campaignKey?: string;
+  promptSummary: string;
+  sourceInputs: string[];
+  outputSummary: string;
+  publishTarget: string;
+  status: ShellAiReviewStatus;
+  reviewer: string;
+  reviewerNotes: string;
+  providerBoundary: string;
+};
+
+export type ShellAiReviewQueue = {
+  defaultSiteKey: string;
+  defaultRecordKey: string;
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  statusOptions: { key: ShellAiReviewStatus; label: string }[];
+  records: ShellAiReviewRecord[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+  reviewChecklist: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -491,6 +519,7 @@ export type KinfloShellSnapshot = {
   domainReadiness: ShellDomainReadinessDraft;
   integrationReadiness: ShellIntegrationReadiness;
   campaignAutomation: ShellCampaignAutomation;
+  aiReview: ShellAiReviewQueue;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -1298,6 +1327,82 @@ const fixtureCampaignAutomation: ShellCampaignAutomation = {
   ],
 };
 
+const fixtureAiReview: ShellAiReviewQueue = {
+  defaultSiteKey: "campaign-microsite",
+  defaultRecordKey: "campaign-proof-ai-draft",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  statusOptions: [
+    { key: "pending", label: "Pending" },
+    { key: "approved", label: "Approved" },
+    { key: "rejected", label: "Rejected" },
+  ],
+  records: [
+    {
+      key: "campaign-proof-ai-draft",
+      siteKey: "campaign-microsite",
+      campaignKey: "campaign-ai-proof",
+      promptSummary: "Draft proof points for a campaign microsite using approved source notes and no private chat excerpts.",
+      sourceInputs: ["approved campaign brief", "public program summary", "reviewer-provided proof notes"],
+      outputSummary: "Three proof bullets and one supporter CTA prepared for human review.",
+      publishTarget: "Campaign microsite proof block",
+      status: "pending",
+      reviewer: "Campaign Editor",
+      reviewerNotes: "Confirm source-safe language and remove any claim without evidence before publish.",
+      providerBoundary: "AI output is a proposal record only until reviewer approval and content publish smoke are complete.",
+    },
+    {
+      key: "advisor-intake-ai-draft",
+      siteKey: "advisor-client-site",
+      campaignKey: "advisor-intake-nurture",
+      promptSummary: "Summarize the intake value proposition for a first-touch advisory email.",
+      sourceInputs: ["advisor template offer", "intake form questions", "tenant-approved positioning"],
+      outputSummary: "Email opening and next-step paragraph ready for tenant admin review.",
+      publishTarget: "Advisor intake nurture email step",
+      status: "approved",
+      reviewer: "Tenant Admin",
+      reviewerNotes: "Approved for local fixture preview only; SendGrid smoke still required before delivery.",
+      providerBoundary: "Approved review state does not send email or write generated copy to a provider.",
+    },
+    {
+      key: "julie-reminder-ai-draft",
+      siteKey: "julies-family-public",
+      campaignKey: "julie-family-reminders",
+      promptSummary: "Draft a parent-friendly reminder for an upcoming learning session.",
+      sourceInputs: ["program schedule", "family-facing reminder policy", "SMS consent checklist"],
+      outputSummary: "Short reminder draft rejected until opt-in and quiet-hour language are explicit.",
+      publishTarget: "Family reminder SMS step",
+      status: "rejected",
+      reviewer: "Program Lead",
+      reviewerNotes: "Needs explicit opt-out language and source confirmation before SMS review.",
+      providerBoundary: "Rejected AI output remains local provenance and is not eligible for provider send.",
+    },
+  ],
+  providerBoundary: "AI review stores prompt summaries, source inputs, output summaries, reviewer notes, and publish targets only. No AI provider call, content publish, email send, SMS send, or public-site mutation runs from this shell.",
+  convexFunctions: [
+    "aiReview.listAiGenerationRecords",
+    "aiReview.upsertAiGenerationRecord",
+    "aiReview.reviewAiGenerationRecord",
+  ],
+  activationEvidence: [
+    "ai:draft can create provenance records",
+    "ai:review is required for approval or rejection",
+    "source inputs and publish target are recorded before publish",
+    "review writes audit evidence without AI provider calls",
+    "approved AI output still requires content or campaign smoke before public use",
+  ],
+  reviewChecklist: [
+    "Confirm source inputs are approved for this tenant and site",
+    "Reject private chat excerpts, secrets, and unsupported claims",
+    "Name the target block, email, SMS, or campaign step before approval",
+    "Record reviewer notes before generated copy reaches publish workflow",
+    "Keep AI provider calls and public publish behind separate hosted smokes",
+  ],
+};
+
 const fixtureExperienceControls: ShellExperienceControl[] = [
   { label: "Theme Tokens", value: "Palette, typography, spacing, radii", iconKey: "theme" },
   { label: "Navigation", value: "Header and footer placement per site", iconKey: "navigation" },
@@ -1597,6 +1702,13 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
     status: "generated_api_pending",
   },
   {
+    surface: "AI review provenance",
+    fixtureSource: "AI prompt, source, output, reviewer, and publish-target records",
+    convexFunctions: ["aiReview.listAiGenerationRecords", "aiReview.upsertAiGenerationRecord", "aiReview.reviewAiGenerationRecord"],
+    activationEvidence: ["ai:draft scoped", "ai:review required", "provider calls gated"],
+    status: "generated_api_pending",
+  },
+  {
     surface: "Public renderer",
     fixtureSource: "public preview resolver",
     convexFunctions: ["publicSite.resolvePublishedSite"],
@@ -1697,6 +1809,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Domain readiness shell", status: "done" },
   { label: "Integration readiness shell", status: "done" },
   { label: "Campaign automation shell", status: "done" },
+  { label: "AI review provenance shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1771,6 +1884,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       domainReadiness: fixtureDomainReadiness,
       integrationReadiness: fixtureIntegrationReadiness,
       campaignAutomation: fixtureCampaignAutomation,
+      aiReview: fixtureAiReview,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

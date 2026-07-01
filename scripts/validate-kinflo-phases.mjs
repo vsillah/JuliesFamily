@@ -112,6 +112,7 @@ for (const path of [
   "docs/phase44-domain-readiness-shell.md",
   "docs/phase45-integration-readiness-shell.md",
   "docs/phase46-campaign-automation-shell.md",
+  "docs/phase47-ai-review-provenance-shell.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -127,6 +128,7 @@ for (const path of [
   "convex/preferences.ts",
   "convex/integrations.ts",
   "convex/campaigns.ts",
+  "convex/aiReview.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/pages/KinfloPublicSitePreview.tsx",
   "client/src/lib/kinfloShellData.ts",
@@ -150,6 +152,7 @@ for (const path of [
   "scripts/validate-kinflo-domain-shell.mjs",
   "scripts/validate-kinflo-integration-shell.mjs",
   "scripts/validate-kinflo-campaign-shell.mjs",
+  "scripts/validate-kinflo-ai-review-shell.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -688,6 +691,22 @@ requireIncludes("docs/phase46-campaign-automation-shell.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase47-ai-review-provenance-shell.md", [
+  "npm run kinflo:validate-ai-review-shell",
+  "AI Review",
+  "Live AI review gated",
+  "Live AI publish gated",
+  "aiReview.listAiGenerationRecords",
+  "aiReview.upsertAiGenerationRecord",
+  "aiReview.reviewAiGenerationRecord",
+  "aiGenerationRecords",
+  "Local state only: yes",
+  "AI provider touched: no",
+  "Generated content published: no",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -706,6 +725,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-domain-shell\"",
   "\"kinflo:validate-integration-shell\"",
   "\"kinflo:validate-campaign-shell\"",
+  "\"kinflo:validate-ai-review-shell\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -729,6 +749,7 @@ requireIncludes("package.json", [
   "convex/preferences.ts",
   "convex/integrations.ts",
   "convex/campaigns.ts",
+  "convex/aiReview.ts",
 ]);
 
 requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
@@ -910,6 +931,21 @@ requireIncludes("scripts/validate-kinflo-campaign-shell.mjs", [
   "Local state only: yes",
   "Provider APIs touched: no",
   "Live sends: no",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-ai-review-shell.mjs", [
+  "AI Review",
+  "Live AI review gated",
+  "Live AI publish gated",
+  "aiReview.listAiGenerationRecords",
+  "aiReview.upsertAiGenerationRecord",
+  "aiReview.reviewAiGenerationRecord",
+  "aiGenerationRecords",
+  "Local state only: yes",
+  "AI provider touched: no",
+  "Generated content published: no",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -1470,6 +1506,21 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "snapshot.campaignAutomation.convexFunctions",
   "snapshot.campaignAutomation.safetyChecklist",
   "snapshot.campaignAutomation.activationEvidence",
+  "AI Review",
+  "select-kinflo-ai-review-site",
+  "select-kinflo-ai-review-record",
+  "select-kinflo-ai-review-status",
+  "textarea-kinflo-ai-prompt-summary",
+  "textarea-kinflo-ai-output-summary",
+  "input-kinflo-ai-publish-target",
+  "input-kinflo-ai-reviewer-notes",
+  "button-review-ai-record",
+  "button-publish-ai-output",
+  "Live AI review gated",
+  "Live AI publish gated",
+  "snapshot.aiReview.convexFunctions",
+  "snapshot.aiReview.reviewChecklist",
+  "snapshot.aiReview.activationEvidence",
   "previewPath",
   "Follow-up Tasks",
   "/admin/guide",

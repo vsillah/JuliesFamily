@@ -3,6 +3,9 @@ import { ConvexReactClient } from "convex/react";
 export const KINFLO_CONVEX_FUNCTIONS = {
   activationReadiness: "activation.readiness",
   activationSeedSmokeSite: "activation.seedSmokeSite",
+  aiReviewListRecords: "aiReview.listAiGenerationRecords",
+  aiReviewReviewRecord: "aiReview.reviewAiGenerationRecord",
+  aiReviewUpsertRecord: "aiReview.upsertAiGenerationRecord",
   accessPolicyCanPerform: "accessPolicy.canPerform",
   accessPolicyViewerPermissionSnapshot: "accessPolicy.viewerPermissionSnapshot",
   controlPlaneAcceptInvitation: "controlPlane.acceptInvitation",

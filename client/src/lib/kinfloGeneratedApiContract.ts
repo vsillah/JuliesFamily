@@ -4,6 +4,7 @@ import {
 } from "./kinfloConvexRuntime";
 
 export type KinfloGeneratedApiModule =
+  | "aiReview"
   | "accessPolicy"
   | "activation"
   | "campaigns"
@@ -54,6 +55,9 @@ function binding(
 }
 
 export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
+  binding("aiReviewListRecords", "query", "AI review", "site-scoped AI generation records are visible only to AI draft/review users"),
+  binding("aiReviewUpsertRecord", "mutation", "AI review", "AI generation provenance records source inputs and publish target without calling an AI provider"),
+  binding("aiReviewReviewRecord", "mutation", "AI review", "AI generation review records reviewer approval state without publishing generated content"),
   binding("controlPlaneUpsertCurrentUser", "mutation", "identity", "signed-in user is synced before any admin mutation"),
   binding("controlPlaneBootstrapPlatformAdmin", "mutation", "identity", "first platform admin can bootstrap once"),
   binding("controlPlaneViewer", "query", "identity", "viewer query returns current synced user"),
