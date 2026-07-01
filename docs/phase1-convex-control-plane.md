@@ -47,6 +47,9 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - resolving a verified hostname or subdomain,
   - loading the published page for a route,
   - returning only published blocks with persona/journey visibility applied.
+- Activation functions for:
+  - checking live Convex readiness,
+  - seeding an idempotent smoke tenant/site for the first hosted smoke.
 
 ## Explicit Boundaries
 
@@ -69,13 +72,13 @@ Phase 1 intentionally avoids:
 
 ## First Smoke Target
 
-After Convex auth/deployment setup is approved, the first smoke should prove:
+After Convex auth/deployment setup is approved, the first smoke should use `activation.seedSmokeSite` and prove:
 
 1. A signed-in Vambah account runs `bootstrapPlatformAdmin`.
 2. The platform admin creates a tenant.
 3. The platform admin creates a site under that tenant.
 4. A default theme token record is created for the site.
-5. A draft homepage is created with navigation and content blocks, either manually or from a starter template.
+5. A draft homepage is created with navigation and content blocks from a starter template.
 6. Publishing the page creates a page revision and publish event.
 7. A published site/page can be resolved by verified hostname or subdomain.
 8. Audit events exist for tenant, site, page, block, template, domain, and publish actions.

@@ -36,7 +36,7 @@ type StarterTemplate = {
 
 const now = () => Date.now();
 
-const starterTemplates: StarterTemplate[] = [
+export const starterTemplates: StarterTemplate[] = [
   {
     key: "nonprofit-learning-center",
     label: "Nonprofit Learning Center",

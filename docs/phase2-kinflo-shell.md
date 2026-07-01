@@ -25,6 +25,7 @@ The UI state mirrors the Convex scaffold added in Phase 1:
 - `siteBuilder.ts` for pages, navigation, content blocks, visibility rules, domains, assets, and publishing.
 - `siteFactory.ts` for starter template creation.
 - `publicSite.ts` for public published-site resolution.
+- `activation.ts` for readiness checks and the first idempotent live smoke seed.
 
 ## Next Activation Gate
 
@@ -33,7 +34,7 @@ After Convex auth and deployment setup are approved:
 1. Run `npm run convex:codegen`.
 2. Replace the shell fixture rows with Convex queries.
 3. Wire tenant/site creation buttons to Convex mutations.
-4. Add a live smoke that proves:
+4. Run the activation smoke that proves:
    - Vambah can bootstrap as platform admin,
    - a tenant can be created,
    - a site can be created from a starter template,
