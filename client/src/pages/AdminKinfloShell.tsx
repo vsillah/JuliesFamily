@@ -54,6 +54,7 @@ import {
   type ShellLiveAdapterStatus,
   type KinfloShellStatus,
   type ShellDomainDraft,
+  type ShellIntegrationDraft,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
 
@@ -172,6 +173,16 @@ export default function AdminKinfloShell() {
   const [domainIsPrimary, setDomainIsPrimary] = useState(defaultDomain?.isPrimary ?? false);
   const [domainVerificationToken, setDomainVerificationToken] = useState(defaultDomain?.verificationToken ?? "");
   const [domainRollbackPlan, setDomainRollbackPlan] = useState(defaultDomain?.rollbackPlan ?? "");
+  const defaultIntegration = snapshot.integrationReadiness.integrations.find(
+    (integration) => integration.key === snapshot.integrationReadiness.defaultIntegrationKey,
+  ) ?? snapshot.integrationReadiness.integrations[0];
+  const [integrationTenantSlug, setIntegrationTenantSlug] = useState(snapshot.integrationReadiness.defaultTenantSlug);
+  const [integrationSiteKey, setIntegrationSiteKey] = useState(snapshot.integrationReadiness.defaultSiteKey);
+  const [selectedIntegrationKey, setSelectedIntegrationKey] = useState(defaultIntegration?.key ?? "");
+  const [integrationProvider, setIntegrationProvider] = useState<ShellIntegrationDraft["provider"]>(defaultIntegration?.provider ?? "sendgrid");
+  const [integrationStatus, setIntegrationStatus] = useState<ShellIntegrationDraft["status"]>(defaultIntegration?.status ?? "not_configured");
+  const [integrationEnvKeys, setIntegrationEnvKeys] = useState(defaultIntegration?.envKeys.join("\n") ?? "");
+  const [integrationApprovalNotes, setIntegrationApprovalNotes] = useState(defaultIntegration?.approvalNotes ?? "");
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -422,6 +433,40 @@ export default function AdminKinfloShell() {
   ];
   const domainReadyCount = domainReadiness.filter((item) => item.done).length;
   const domainReadinessPercent = Math.round((domainReadyCount / domainReadiness.length) * 100);
+  const filteredIntegrationSites = useMemo(
+    () => snapshot.integrationReadiness.siteOptions.filter((site) => site.tenantSlug === integrationTenantSlug),
+    [integrationTenantSlug, snapshot.integrationReadiness.siteOptions],
+  );
+  const filteredIntegrations = useMemo(
+    () => snapshot.integrationReadiness.integrations.filter((integration) => integration.tenantSlug === integrationTenantSlug),
+    [integrationTenantSlug, snapshot.integrationReadiness.integrations],
+  );
+  const selectedIntegration = useMemo(
+    () => filteredIntegrations.find((integration) => integration.key === selectedIntegrationKey) ?? filteredIntegrations[0],
+    [filteredIntegrations, selectedIntegrationKey],
+  );
+  const selectedIntegrationProvider = useMemo(
+    () => snapshot.integrationReadiness.providerOptions.find((provider) => provider.key === integrationProvider) ?? snapshot.integrationReadiness.providerOptions[0],
+    [integrationProvider, snapshot.integrationReadiness.providerOptions],
+  );
+  const integrationDraftDirty = Boolean(
+    selectedIntegration
+    && (
+      integrationProvider !== selectedIntegration.provider
+      || integrationStatus !== selectedIntegration.status
+      || integrationEnvKeys !== selectedIntegration.envKeys.join("\n")
+      || integrationApprovalNotes !== selectedIntegration.approvalNotes
+    ),
+  );
+  const integrationReadiness = [
+    { label: "Tenant selected", done: Boolean(integrationTenantSlug) },
+    { label: "Provider selected", done: Boolean(selectedIntegrationProvider) },
+    { label: "Env key names recorded", done: integrationEnvKeys.split("\n").some((key) => Boolean(key.trim())) },
+    { label: "Approval notes recorded", done: Boolean(integrationApprovalNotes.trim()) },
+    { label: "Live provider smoke pending", done: false },
+  ];
+  const integrationReadyCount = integrationReadiness.filter((item) => item.done).length;
+  const integrationReadinessPercent = Math.round((integrationReadyCount / integrationReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -536,6 +581,33 @@ export default function AdminKinfloShell() {
 
   const handleDomainChange = (domainKey: string) => {
     hydrateDomain(snapshot.domainReadiness.domains.find((domain) => domain.key === domainKey));
+  };
+
+  const hydrateIntegration = (integration?: ShellIntegrationDraft) => {
+    if (!integration) {
+      return;
+    }
+    setSelectedIntegrationKey(integration.key);
+    setIntegrationProvider(integration.provider);
+    setIntegrationStatus(integration.status);
+    setIntegrationEnvKeys(integration.envKeys.join("\n"));
+    setIntegrationApprovalNotes(integration.approvalNotes);
+    if (integration.siteKey) {
+      setIntegrationSiteKey(integration.siteKey);
+    }
+  };
+
+  const handleIntegrationTenantChange = (tenantSlug: string) => {
+    setIntegrationTenantSlug(tenantSlug);
+    const nextSite = snapshot.integrationReadiness.siteOptions.find((site) => site.tenantSlug === tenantSlug);
+    if (nextSite) {
+      setIntegrationSiteKey(nextSite.key);
+    }
+    hydrateIntegration(snapshot.integrationReadiness.integrations.find((integration) => integration.tenantSlug === tenantSlug));
+  };
+
+  const handleIntegrationChange = (integrationKey: string) => {
+    hydrateIntegration(snapshot.integrationReadiness.integrations.find((integration) => integration.key === integrationKey));
   };
 
   useEffect(() => {
@@ -710,6 +782,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="preview">Preview</TabsTrigger>
             <TabsTrigger value="assets">Assets</TabsTrigger>
             <TabsTrigger value="domains">Domains</TabsTrigger>
+            <TabsTrigger value="integrations">Integrations</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -2383,6 +2456,227 @@ export default function AdminKinfloShell() {
                     Preview before DNS
                   </Link>
                 </Button>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="integrations" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Integration Readiness</h2>
+                    <p className="text-sm text-muted-foreground">Prepare email, SMS, payment, storage, and AI providers without storing secrets or calling provider APIs.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <KeyRound className="mr-1 h-3 w-3" />
+                    Provider writes gated
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Provider Settings Draft</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedIntegration?.label ?? "Integration"} · {selectedIntegrationProvider?.category ?? "provider"}
+                      </p>
+                    </div>
+                    <Badge variant={integrationDraftDirty ? "default" : "secondary"}>
+                      {integrationDraftDirty ? "Local edits" : "Fixture integration"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                      <div className="space-y-2">
+                        <Label>Tenant</Label>
+                        <Select value={integrationTenantSlug} onValueChange={handleIntegrationTenantChange}>
+                          <SelectTrigger data-testid="select-kinflo-integration-tenant">
+                            <SelectValue placeholder="Select tenant" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.integrationReadiness.tenantOptions.map((tenant) => (
+                              <SelectItem key={tenant.slug} value={tenant.slug}>
+                                {tenant.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={integrationSiteKey} onValueChange={setIntegrationSiteKey}>
+                          <SelectTrigger data-testid="select-kinflo-integration-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredIntegrationSites.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Provider packet</Label>
+                        <Select value={selectedIntegration?.key ?? ""} onValueChange={handleIntegrationChange}>
+                          <SelectTrigger data-testid="select-kinflo-integration-record">
+                            <SelectValue placeholder="Select provider packet" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredIntegrations.map((integration) => (
+                              <SelectItem key={integration.key} value={integration.key}>
+                                {integration.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={integrationStatus} onValueChange={(value) => setIntegrationStatus(value as ShellIntegrationDraft["status"])}>
+                          <SelectTrigger data-testid="select-kinflo-integration-status">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.integrationReadiness.statusOptions.map((status) => (
+                              <SelectItem key={status.key} value={status.key}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 space-y-4">
+                        <div className="space-y-2">
+                          <Label>Provider</Label>
+                          <Select value={integrationProvider} onValueChange={(value) => setIntegrationProvider(value as ShellIntegrationDraft["provider"])}>
+                            <SelectTrigger data-testid="select-kinflo-integration-provider">
+                              <SelectValue placeholder="Select provider" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {snapshot.integrationReadiness.providerOptions.map((provider) => (
+                                <SelectItem key={provider.key} value={provider.key}>
+                                  {provider.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-integration-env-keys">Env key names</Label>
+                          <textarea
+                            id="kinflo-integration-env-keys"
+                            value={integrationEnvKeys}
+                            onChange={(event) => setIntegrationEnvKeys(event.target.value)}
+                            rows={4}
+                            className="min-h-[112px] w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-integration-env-keys"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-integration-approval-notes">Approval notes</Label>
+                          <textarea
+                            id="kinflo-integration-approval-notes"
+                            value={integrationApprovalNotes}
+                            onChange={(event) => setIntegrationApprovalNotes(event.target.value)}
+                            rows={4}
+                            className="min-h-[112px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-integration-approval-notes"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="rounded-md border p-3 text-sm">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="break-words font-medium">{selectedIntegration?.useCase}</div>
+                              <div className="mt-2 text-xs text-muted-foreground">{selectedIntegration?.smokeGate}</div>
+                            </div>
+                            <Badge variant={integrationStatus === "active" ? "secondary" : "outline"}>{integrationStatus}</Badge>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{integrationReadinessPercent}%</span>
+                          </div>
+                          <Progress value={integrationReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {integrationReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.integrationReadiness.providerBoundary}</div>
+                      <Button disabled data-testid="button-save-integration-readiness">
+                        <KeyRound className="mr-2 h-4 w-4" />
+                        Live provider save gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Integration Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Provider settings store readiness metadata only until hosted activation and per-provider smokes are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.integrationReadiness.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Safety Checklist</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.integrationReadiness.safetyChecklist.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.integrationReadiness.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </TabsContent>

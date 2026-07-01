@@ -90,6 +90,30 @@ export const domainStatus = v.union(
   v.literal("disabled"),
 );
 
+export const integrationProvider = v.union(
+  v.literal("sendgrid"),
+  v.literal("twilio"),
+  v.literal("stripe_billing"),
+  v.literal("stripe_connect"),
+  v.literal("cloudinary"),
+  v.literal("object_storage"),
+  v.literal("ai_gateway"),
+);
+
+export const integrationStatus = v.union(
+  v.literal("not_configured"),
+  v.literal("ready_for_env"),
+  v.literal("review_pending"),
+  v.literal("active"),
+  v.literal("paused"),
+);
+
+export const integrationScope = v.union(
+  v.literal("platform"),
+  v.literal("tenant"),
+  v.literal("site"),
+);
+
 export default defineSchema({
   users: defineTable({
     subject: v.string(),
@@ -155,6 +179,25 @@ export default defineSchema({
     .index("by_hostname", ["hostname"])
     .index("by_site", ["siteId"])
     .index("by_tenant_status", ["tenantId", "status"]),
+
+  integrationSettings: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.optional(v.id("sites")),
+    provider: integrationProvider,
+    scope: integrationScope,
+    status: integrationStatus,
+    envKeys: v.array(v.string()),
+    providerBoundary: v.string(),
+    approvalNotes: v.optional(v.string()),
+    createdBy: v.id("users"),
+    updatedBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    pausedAt: v.optional(v.number()),
+  })
+    .index("by_tenant_provider", ["tenantId", "provider"])
+    .index("by_site_provider", ["siteId", "provider"])
+    .index("by_status", ["status"]),
 
   memberships: defineTable({
     userId: v.id("users"),

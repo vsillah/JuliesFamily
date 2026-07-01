@@ -9,6 +9,7 @@ export type KinfloGeneratedApiModule =
   | "controlPlane"
   | "crm"
   | "entitlements"
+  | "integrations"
   | "preferences"
   | "publicSite"
   | "roleCatalog"
@@ -80,6 +81,8 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("controlPlaneSetTenantEntitlementOverride", "mutation", "plans and entitlements", "manual override writes audit event without Stripe writes"),
   binding("entitlementsUsageSnapshot", "query", "plans and entitlements", "usage snapshot reports enforced and placeholder limits"),
   binding("entitlementsCheckLimit", "query", "plans and entitlements", "limit check returns current, limit, remaining, and allowed"),
+  binding("integrationsListSettings", "query", "integration readiness", "integration settings are scoped by tenant or site permission"),
+  binding("integrationsUpsertSetting", "mutation", "integration readiness", "provider readiness records env key names, status, and audit evidence without provider writes"),
   binding("preferencesGetMyPreferences", "query", "experience preferences", "viewer can read own tenant/site scoped preferences after scope permission check"),
   binding("preferencesUpsertMyPreferences", "mutation", "experience preferences", "viewer can update own tenant/site scoped preferences after scope permission check"),
   binding("siteFactoryListStarterTemplates", "query", "site factory", "starter templates include quality contract metadata"),

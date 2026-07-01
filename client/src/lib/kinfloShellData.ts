@@ -262,6 +262,52 @@ export type ShellDomainReadinessDraft = {
   dnsChecklist: string[];
 };
 
+export type ShellIntegrationProvider =
+  | "sendgrid"
+  | "twilio"
+  | "stripe_billing"
+  | "stripe_connect"
+  | "cloudinary"
+  | "object_storage"
+  | "ai_gateway";
+
+export type ShellIntegrationStatus =
+  | "not_configured"
+  | "ready_for_env"
+  | "review_pending"
+  | "active"
+  | "paused";
+
+export type ShellIntegrationDraft = {
+  key: string;
+  provider: ShellIntegrationProvider;
+  label: string;
+  scope: "platform" | "tenant" | "site";
+  tenantSlug: string;
+  siteKey?: string;
+  status: ShellIntegrationStatus;
+  envKeys: string[];
+  useCase: string;
+  providerBoundary: string;
+  approvalNotes: string;
+  smokeGate: string;
+};
+
+export type ShellIntegrationReadiness = {
+  defaultTenantSlug: string;
+  defaultSiteKey: string;
+  defaultIntegrationKey: string;
+  tenantOptions: { slug: string; label: string }[];
+  siteOptions: { key: string; label: string; tenantSlug: string }[];
+  providerOptions: { key: ShellIntegrationProvider; label: string; category: string }[];
+  statusOptions: { key: ShellIntegrationStatus; label: string }[];
+  integrations: ShellIntegrationDraft[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+  safetyChecklist: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -401,6 +447,7 @@ export type KinfloShellSnapshot = {
   previewStudio: ShellPreviewStudioDraft;
   assetLibrary: ShellAssetLibraryDraft;
   domainReadiness: ShellDomainReadinessDraft;
+  integrationReadiness: ShellIntegrationReadiness;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -965,6 +1012,113 @@ const fixtureDomainReadiness: ShellDomainReadinessDraft = {
   ],
 };
 
+const fixtureIntegrationReadiness: ShellIntegrationReadiness = {
+  defaultTenantSlug: "advisor-client-starter",
+  defaultSiteKey: "advisor-client-site",
+  defaultIntegrationKey: "advisor-sendgrid",
+  tenantOptions: [
+    { slug: "julies-family", label: "Julie's Family Learning Program" },
+    { slug: "advisor-client-starter", label: "Advisor Client Starter" },
+    { slug: "campaign-microsite-lab", label: "Campaign Microsite Lab" },
+  ],
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", tenantSlug: "julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", tenantSlug: "advisor-client-starter" },
+    { key: "campaign-microsite", label: "Campaign Microsite", tenantSlug: "campaign-microsite-lab" },
+  ],
+  providerOptions: [
+    { key: "sendgrid", label: "SendGrid Email", category: "communications" },
+    { key: "twilio", label: "Twilio SMS", category: "communications" },
+    { key: "stripe_billing", label: "Stripe Billing", category: "payments" },
+    { key: "stripe_connect", label: "Stripe Connect", category: "payments" },
+    { key: "cloudinary", label: "Cloudinary Media", category: "storage" },
+    { key: "object_storage", label: "Object Storage", category: "storage" },
+    { key: "ai_gateway", label: "AI Gateway", category: "AI" },
+  ],
+  statusOptions: [
+    { key: "not_configured", label: "Not configured" },
+    { key: "ready_for_env", label: "Ready for env" },
+    { key: "review_pending", label: "Review pending" },
+    { key: "active", label: "Active" },
+    { key: "paused", label: "Paused" },
+  ],
+  integrations: [
+    {
+      key: "advisor-sendgrid",
+      provider: "sendgrid",
+      label: "Advisor intake email",
+      scope: "site",
+      tenantSlug: "advisor-client-starter",
+      siteKey: "advisor-client-site",
+      status: "ready_for_env",
+      envKeys: ["SENDGRID_API_KEY", "SENDGRID_FROM_EMAIL"],
+      useCase: "Send client intake confirmations and internal lead notifications after hosted smoke approval.",
+      providerBoundary: "SendGrid is mapped as env-key references only until sender identity, unsubscribe policy, and live email smoke are approved.",
+      approvalNotes: "Use sandbox recipients first; do not send client email until tenant owner approval is recorded.",
+      smokeGate: "Signed-in site admin creates one test lead and confirms queued email audit metadata before delivery is enabled.",
+    },
+    {
+      key: "advisor-stripe-billing",
+      provider: "stripe_billing",
+      label: "Advisor subscription billing",
+      scope: "tenant",
+      tenantSlug: "advisor-client-starter",
+      status: "review_pending",
+      envKeys: ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET", "VITE_STRIPE_PUBLIC_KEY"],
+      useCase: "Collect monthly SaaS subscription payments after plan catalog and entitlement sync are approved.",
+      providerBoundary: "Stripe Billing remains disabled until price IDs, webhook replay checks, and cancellation flow smoke pass.",
+      approvalNotes: "Keep manual entitlements as the source of truth until billing webhooks are verified.",
+      smokeGate: "Test-mode Checkout, invoice payment, cancellation, and entitlement downgrade replay pass without production charges.",
+    },
+    {
+      key: "julie-twilio",
+      provider: "twilio",
+      label: "Family SMS reminders",
+      scope: "site",
+      tenantSlug: "julies-family",
+      siteKey: "julies-family-public",
+      status: "not_configured",
+      envKeys: ["TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_FROM_NUMBER"],
+      useCase: "Send opt-in program reminders only after consent capture and message templates are approved.",
+      providerBoundary: "Twilio is held behind consent, rate-limit, opt-out, and manual-send gates before any SMS leaves the system.",
+      approvalNotes: "SMS is lower priority than email; require explicit opt-in proof before activation.",
+      smokeGate: "One verified test number receives an opt-in, reminder, and STOP response in test mode or controlled live smoke.",
+    },
+    {
+      key: "campaign-ai-gateway",
+      provider: "ai_gateway",
+      label: "Campaign copy assistant",
+      scope: "tenant",
+      tenantSlug: "campaign-microsite-lab",
+      status: "paused",
+      envKeys: ["AI_GATEWAY_API_KEY", "AI_GATEWAY_BASE_URL"],
+      useCase: "Draft review-only campaign copy with tenant usage caps and approval before publish.",
+      providerBoundary: "AI generation stays review-only until usage caps, provenance records, and approval workflows are enforced.",
+      approvalNotes: "Do not publish generated content without human approval and source-safe review.",
+      smokeGate: "Generated draft creates a proposal packet, records usage, and requires approval before touching public content.",
+    },
+  ],
+  providerBoundary: "Integration readiness stores provider, scope, status, env key names, and approval notes only. Secrets stay in environment managers, and provider writes remain gated.",
+  convexFunctions: [
+    "integrations.listIntegrationSettings",
+    "integrations.upsertIntegrationSetting",
+    "accessPolicy.viewerPermissionSnapshot",
+  ],
+  activationEvidence: [
+    "integration:manage permission gates tenant and site settings",
+    "env key names are recorded without secret values",
+    "upsert writes audit evidence without calling provider SDKs",
+    "live email, SMS, payment, storage, and AI smokes stay manually approved gates",
+  ],
+  safetyChecklist: [
+    "Record env key names, not values",
+    "Confirm tenant or site scope before enabling a provider",
+    "Keep sandbox/test mode until a provider-specific smoke passes",
+    "Name the approval owner before activation",
+    "Keep manual rollback path for every external provider",
+  ],
+};
+
 const fixtureExperienceControls: ShellExperienceControl[] = [
   { label: "Theme Tokens", value: "Palette, typography, spacing, radii", iconKey: "theme" },
   { label: "Navigation", value: "Header and footer placement per site", iconKey: "navigation" },
@@ -1250,6 +1404,13 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
     status: "generated_api_pending",
   },
   {
+    surface: "Integration readiness",
+    fixtureSource: "provider settings, env key references, and activation gates",
+    convexFunctions: ["integrations.listIntegrationSettings", "integrations.upsertIntegrationSetting"],
+    activationEvidence: ["integration:manage scoped", "secret values excluded", "provider writes gated"],
+    status: "generated_api_pending",
+  },
+  {
     surface: "Public renderer",
     fixtureSource: "public preview resolver",
     convexFunctions: ["publicSite.resolvePublishedSite"],
@@ -1348,6 +1509,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Preview QA shell", status: "done" },
   { label: "Asset library shell", status: "done" },
   { label: "Domain readiness shell", status: "done" },
+  { label: "Integration readiness shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1420,6 +1582,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       previewStudio: fixturePreviewStudio,
       assetLibrary: fixtureAssetLibrary,
       domainReadiness: fixtureDomainReadiness,
+      integrationReadiness: fixtureIntegrationReadiness,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

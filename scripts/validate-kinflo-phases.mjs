@@ -110,6 +110,7 @@ for (const path of [
   "docs/phase42-preview-qa-shell.md",
   "docs/phase43-asset-library-shell.md",
   "docs/phase44-domain-readiness-shell.md",
+  "docs/phase45-integration-readiness-shell.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -123,6 +124,7 @@ for (const path of [
   "convex/entitlements.ts",
   "convex/crm.ts",
   "convex/preferences.ts",
+  "convex/integrations.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/pages/KinfloPublicSitePreview.tsx",
   "client/src/lib/kinfloShellData.ts",
@@ -144,6 +146,7 @@ for (const path of [
   "scripts/validate-kinflo-preview-shell.mjs",
   "scripts/validate-kinflo-asset-shell.mjs",
   "scripts/validate-kinflo-domain-shell.mjs",
+  "scripts/validate-kinflo-integration-shell.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -648,6 +651,21 @@ requireIncludes("docs/phase44-domain-readiness-shell.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase45-integration-readiness-shell.md", [
+  "npm run kinflo:validate-integration-shell",
+  "Integration Readiness",
+  "Live provider save gated",
+  "integrations.listIntegrationSettings",
+  "integrations.upsertIntegrationSetting",
+  "accessPolicy.viewerPermissionSnapshot",
+  "integrationSettings",
+  "Local state only: yes",
+  "Provider APIs touched: no",
+  "Secret values stored: no",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -664,6 +682,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-preview-shell\"",
   "\"kinflo:validate-asset-shell\"",
   "\"kinflo:validate-domain-shell\"",
+  "\"kinflo:validate-integration-shell\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -685,6 +704,7 @@ requireIncludes("package.json", [
   "convex/entitlements.ts",
   "convex/crm.ts",
   "convex/preferences.ts",
+  "convex/integrations.ts",
 ]);
 
 requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
@@ -834,6 +854,20 @@ requireIncludes("scripts/validate-kinflo-domain-shell.mjs", [
   "Local state only: yes",
   "DNS provider touched: no",
   "SSL provider touched: no",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-integration-shell.mjs", [
+  "Integration Readiness",
+  "Live provider save gated",
+  "integrations.listIntegrationSettings",
+  "integrations.upsertIntegrationSetting",
+  "accessPolicy.viewerPermissionSnapshot",
+  "integrationSettings",
+  "Local state only: yes",
+  "Provider APIs touched: no",
+  "Secret values stored: no",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -1366,6 +1400,19 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "snapshot.domainReadiness.convexFunctions",
   "snapshot.domainReadiness.dnsChecklist",
   "snapshot.domainReadiness.activationEvidence",
+  "Integration Readiness",
+  "select-kinflo-integration-tenant",
+  "select-kinflo-integration-site",
+  "select-kinflo-integration-record",
+  "select-kinflo-integration-provider",
+  "select-kinflo-integration-status",
+  "textarea-kinflo-integration-env-keys",
+  "textarea-kinflo-integration-approval-notes",
+  "button-save-integration-readiness",
+  "Live provider save gated",
+  "snapshot.integrationReadiness.convexFunctions",
+  "snapshot.integrationReadiness.safetyChecklist",
+  "snapshot.integrationReadiness.activationEvidence",
   "previewPath",
   "Follow-up Tasks",
   "/admin/guide",
