@@ -8,7 +8,7 @@ import { setupAuth, isAuthenticated } from "./auth0";
 import { applyImpersonation, requireActualAdmin } from "./impersonationMiddleware";
 import { requireTier } from "./tierMiddleware";
 import { TIERS } from "@shared/tiers";
-import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, batchContentReorderSchema, pipelineHistory, emailLogs, type User, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema, insertProgramSchema } from "@shared/schema";
+import { insertLeadSchema, insertInteractionSchema, insertLeadMagnetSchema, insertImageAssetSchema, insertContentItemSchema, insertContentVisibilitySchema, insertAbTestSchema, insertAbTestVariantSchema, insertAbTestAssignmentSchema, insertAbTestEventSchema, insertGoogleReviewSchema, insertDonationSchema, insertWishlistItemSchema, insertEmailCampaignSchema, insertEmailSequenceStepSchema, insertEmailCampaignEnrollmentSchema, insertSmsTemplateSchema, insertSmsSendSchema, insertAdminPreferencesSchema, insertDonationCampaignSchema, insertIcpCriteriaSchema, insertOutreachEmailSchema, insertBackupSnapshotSchema, insertBackupScheduleSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, insertSegmentSchema, updateSegmentSchema, insertEmailUnsubscribeSchema, batchContentReorderSchema, pipelineHistory, emailLogs, donations, type User, type Lead, type UserRole, userRoleEnum, updateLeadSchema, updateContentItemSchema, updateDonationCampaignSchema, insertAcquisitionChannelSchema, insertMarketingCampaignSchema, insertChannelSpendLedgerSchema, insertLeadAttributionSchema, insertEconomicsSettingsSchema, insertStudentSubmissionSchema, insertProgramSchema } from "@shared/schema";
 import { createCacLtgpAnalyticsService } from "./services/cacLtgpAnalytics";
 import { AdminEntitlementService } from "./services/adminEntitlementService";
 import { authLimiter, adminLimiter, paymentLimiter, leadLimiter, unsubscribeVerifyLimiter, unsubscribeProcessLimiter } from "./security";
@@ -21,7 +21,7 @@ import { z } from "zod";
 import { uploadToCloudinary, getOptimizedImageUrl, deleteFromCloudinary } from "./cloudinary";
 import multer from "multer";
 import { analyzeSocialPostScreenshot, analyzeYouTubeVideoThumbnail, analyzeImageForNaming } from "./gemini";
-import { sendTemplatedEmail } from "./email";
+import { renderTemplate, sendTemplatedEmail } from "./email";
 import { generateValueEquationCopy, generateAbTestVariants } from "./copywriter";
 import { createTaskForNewLead, createTaskForStageChange, createTasksForMissedFollowUps, syncTaskToCalendar } from "./taskAutomation";
 import Stripe from "stripe";
@@ -34,13 +34,30 @@ import { nanoid } from "nanoid";
 
 // Extend Express Request to properly type authenticated user
 interface AuthenticatedRequest extends Request {
-  user: User & { id: string };
+  user: User & { id: string; claims?: { sub?: string } };
 }
+
+const getPersonName = (person: Pick<User, "firstName" | "lastName" | "email" | "id"> | Pick<Lead, "firstName" | "lastName" | "email" | "id"> | null | undefined): string => {
+  if (!person) return "";
+  return [person.firstName, person.lastName].filter(Boolean).join(" ").trim() || person.email || person.id;
+};
+
+const getAuthUserId = (req: Request): string | undefined => {
+  const user = (req as any).user;
+  return user?.id || user?.claims?.sub;
+};
 
 // Reference: blueprint:javascript_stripe
 const stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.startsWith("sk_test_...")
   ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-10-29.clover" })
   : null;
+
+const getStripeClient = (): Stripe => {
+  if (!stripe) {
+    throw new Error("Stripe is not configured");
+  }
+  return stripe;
+};
 
 // Role-based authorization middleware
 // Generic role checker - checks if user has any of the specified roles
@@ -261,6 +278,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Update role using updateUser (requires actorId for audit logging)
         const updated = await storage.updateUser(user.id, { role }, user.id);
+        if (!updated) {
+          return res.status(404).json({ message: "User not found" });
+        }
         console.log(`[Test Helper] Successfully updated user role to ${updated.role}`);
         
         res.json({ success: true, user: updated });
@@ -792,13 +812,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const conversationHistory = await storage.getChatbotConversationsBySession(sessionId);
+      const chatbotHistory = conversationHistory
+        .filter((entry) => entry.role === "user" || entry.role === "assistant")
+        .map((entry) => ({
+          role: entry.role as "user" | "assistant",
+          content: entry.content,
+          toolCalls: Array.isArray(entry.toolCalls) ? entry.toolCalls : undefined,
+          toolResults: Array.isArray(entry.toolResults) ? entry.toolResults : undefined,
+        }));
       
       const { processChatMessage } = await import('./services/chatbotService');
       const result = await processChatMessage(
         currentUser.id,
         sessionId,
         message,
-        conversationHistory
+        chatbotHistory
       );
       
       await storage.createChatbotConversation({
@@ -962,8 +990,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createTableBackup(
         tableName,
         currentUser.id,
-        backupName,
-        description
+        backupName ?? undefined,
+        description ?? undefined
       );
 
       res.status(201).json(result);
@@ -1605,7 +1633,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const sanitizedPath = `/objects/${rawPath.replace(/\.\./g, "").replace(/^\/+/, "")}`;
     
     try {
-      const objectFile = await objectStorageService.getObjectEntityFile(sanitizedPath);
+      const objectFile = await objectStorageService.getObjectEntityFile(sanitizedPath) as any;
       const canAccess = await objectStorageService.canAccessObjectEntity({
         objectFile,
         userId: userId,
@@ -1836,7 +1864,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Funnel Progression API Endpoints
   
   // Trigger funnel progression evaluation for a lead
-  app.post('/api/funnel/evaluate/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: AuthenticatedRequest, res) => {
+  app.post('/api/funnel/evaluate/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: any, res) => {
     try {
       const { leadId } = req.params;
       const { triggerEvent } = req.body;
@@ -1844,7 +1872,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await evaluateLeadProgression(
         leadId,
         triggerEvent as EventType | undefined,
-        req.user.id
+        getAuthUserId(req)
       );
       
       res.json(result);
@@ -1867,7 +1895,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Manually advance/regress a lead's funnel stage (admin override)
-  app.post('/api/funnel/manual-progress/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: AuthenticatedRequest, res) => {
+  app.post('/api/funnel/manual-progress/:leadId', ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: any, res) => {
     try {
       const { leadId } = req.params;
       const { toStage, reason } = req.body;
@@ -2569,7 +2597,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Update leads with qualification results
       const updatedLeads = [];
-      for (const [leadId, result] of results.entries()) {
+      for (const [leadId, result] of Array.from(results.entries())) {
         const updated = await storage.updateLead(leadId, {
           qualificationScore: result.score,
           qualificationStatus: result.status,
@@ -2727,7 +2755,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         toName: `${lead.firstName} ${lead.lastName}`,
         subject: outreachEmail.subject,
         html: outreachEmail.bodyHtml,
-        text: outreachEmail.bodyText,
+        text: outreachEmail.bodyText ?? undefined,
         metadata: {
           leadId: lead.id,
           outreachEmailId: outreachEmail.id,
@@ -3427,7 +3455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get current student's project (authenticated students only)
   app.get('/api/student/my-project', ...authWithImpersonation, async (req, res) => {
     try {
-      const oidcSub = req.user?.claims?.sub;
+      const oidcSub = (req.user as any)?.claims?.sub;
       if (!oidcSub) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -3459,7 +3487,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userPassions: string[] | null = null;
       
       // First, try to get from authenticated user profile
-      const oidcSub = req.user?.claims?.sub;
+      const oidcSub = (req.user as any)?.claims?.sub;
       if (oidcSub) {
         const user = await storage.getUserByOidcSub(oidcSub);
         if (user?.passions) {
@@ -3523,7 +3551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Only check for authenticated users in retention stage
     if (funnelStage !== 'retention') return result;
     
-    const oidcSub = req.user?.claims?.sub;
+    const oidcSub = (req.user as any)?.claims?.sub;
     if (!oidcSub) return result;
     
     const user = await storage.getUserByOidcSub(oidcSub);
@@ -3557,7 +3585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let userPassions: string[] | null = null;
       
       // First, try to get from authenticated user profile
-      const oidcSub = req.user?.claims?.sub;
+      const oidcSub = (req.user as any)?.claims?.sub;
       if (oidcSub) {
         const user = await storage.getUserByOidcSub(oidcSub);
         if (user?.passions) {
@@ -4032,7 +4060,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedItem = await storage.updateContentItem(id, {
         isActive: status === 'approved',
         metadata: {
-          ...item.metadata,
+          ...(typeof item.metadata === "object" && item.metadata !== null ? item.metadata : {}),
           status,
           reviewedBy: currentUser.id,
           reviewedAt: new Date().toISOString(),
@@ -4222,13 +4250,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user UUID if authenticated
       let userId = null;
-      if (req.user?.claims?.sub) {
-        const currentUser = await storage.getUserByOidcSub(req.user.claims.sub);
+      if ((req.user as any)?.claims?.sub) {
+        const currentUser = await storage.getUserByOidcSub((req.user as any).claims.sub);
         userId = currentUser?.id || null;
       }
 
       // Check if assignment already exists (prioritize userId > visitorId > sessionId)
-      let assignment = await storage.getAssignmentPersistent(testId, userId, visitorId, sessionId);
+      let assignment = await storage.getAssignmentPersistent(testId, userId ?? undefined, visitorId, sessionId);
       
       if (!assignment) {
         // Get test and variants
@@ -4441,7 +4469,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Import automation scheduler service
       const { AutomationSchedulerService } = await import('./services/automationScheduler');
-      const scheduler = new AutomationSchedulerService(storage);
+      const { AutomationEngineService } = await import('./services/automationEngine');
+      const { TestLifecycleManagerService } = await import('./services/testLifecycleManager');
+      const { WinnerPromotionService } = await import('./services/winnerPromotion');
+      const { BaselineAggregatorService } = await import('./services/baselineAggregator');
+      const { MetricEvaluatorService } = await import('./services/metricEvaluator');
+      const { AiContentGeneratorService } = await import('./services/aiContentGenerator');
+      const { StatisticalCalculatorService } = await import('./services/statisticalCalculator');
+      const baselineAggregator = new BaselineAggregatorService(storage);
+      const metricEvaluator = new MetricEvaluatorService(storage);
+      const aiGenerator = new AiContentGeneratorService(storage);
+      const testLifecycle = new TestLifecycleManagerService(storage, aiGenerator);
+      const statisticalCalculator = new StatisticalCalculatorService();
+      const automationEngine = new AutomationEngineService(storage, baselineAggregator, metricEvaluator);
+      const winnerPromotion = new WinnerPromotionService(storage, statisticalCalculator, metricEvaluator, testLifecycle);
+      const scheduler = new AutomationSchedulerService(storage, automationEngine, testLifecycle, winnerPromotion, baselineAggregator);
       
       const result = await scheduler.runAutomationCycle();
       res.json(result);
@@ -5133,7 +5175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Set createdBy
-      (validatedData as any).createdBy = req.user!.id;
+      (validatedData as any).createdBy = getAuthUserId(req);
       
       const schedule = await storage.createEmailReportSchedule(validatedData as any);
       res.json(schedule);
@@ -5240,7 +5282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { executeScheduleNow } = await import('./services/emailReportScheduler');
       
       // Execute the schedule immediately
-      await executeScheduleNow(id, req.user!.id);
+      await executeScheduleNow(id, getAuthUserId(req));
       
       res.json({ success: true, message: "Report sent successfully" });
     } catch (error: any) {
@@ -5265,10 +5307,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create segment
   app.post('/api/segments', ...authWithImpersonation, requireSuperAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
+      const createdBy = getAuthUserId(req);
+      if (!createdBy) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const validatedData = insertSegmentSchema.parse(req.body);
       const segment = await storage.createSegment({
         ...validatedData,
-        createdBy: req.user!.id
+        createdBy
       });
       res.status(201).json(segment);
     } catch (error: any) {
@@ -5893,7 +5939,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const uniqueClicks = uniqueClickLogIds.size;
       
       // Calculate unique engagement (emails with at least one open OR click)
-      const uniqueEngagedLogIds = new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      const uniqueEngagedLogIds = new Set([...Array.from(uniqueOpenLogIds), ...Array.from(uniqueClickLogIds)]);
       const uniqueEngaged = uniqueEngagedLogIds.size;
       
       // Calculate rates
@@ -6000,7 +6046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const uniqueOpens = uniqueOpenLogIds.size;
       const uniqueClickLogIds = new Set(emailClicks.map(click => click.emailLogId));
       const uniqueClicks = uniqueClickLogIds.size;
-      const uniqueEngagedLogIds = new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      const uniqueEngagedLogIds = new Set([...Array.from(uniqueOpenLogIds), ...Array.from(uniqueClickLogIds)]);
       
       const openRate = totalSent > 0 ? (uniqueOpens / totalSent) * 100 : 0;
       const clickRate = totalSent > 0 ? (uniqueClicks / totalSent) * 100 : 0;
@@ -6015,7 +6061,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const firstClick = logClicks.length > 0 ? logClicks[0].clickedAt : null;
         
         return {
-          'Recipient Email': log.leadEmail || 'N/A',
+          'Recipient Email': log.recipientEmail || 'N/A',
           'Status': log.status,
           'Sent At': log.sentAt ? new Date(log.sentAt).toISOString() : 'Not sent',
           'Total Opens': logOpens.length,
@@ -6029,7 +6075,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Add campaign summary row at top
       const summaryRow = {
         'Recipient Email': `CAMPAIGN SUMMARY: ${campaign.name}`,
-        'Status': campaign.status,
+        'Status': campaign.isActive ? 'active' : 'inactive',
         'Sent At': `Total Sent: ${totalSent}`,
         'Total Opens': `Open Rate: ${openRate.toFixed(1)}%`,
         'First Opened': `Unique Opens: ${uniqueOpens}`,
@@ -6080,7 +6126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const uniqueOpens = uniqueOpenLogIds.size;
       const uniqueClickLogIds = new Set(emailClicks.map(click => click.emailLogId));
       const uniqueClicks = uniqueClickLogIds.size;
-      const uniqueEngagedLogIds = new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      const uniqueEngagedLogIds = new Set([...Array.from(uniqueOpenLogIds), ...Array.from(uniqueClickLogIds)]);
       
       const openRate = totalSent > 0 ? (uniqueOpens / totalSent) * 100 : 0;
       const clickRate = totalSent > 0 ? (uniqueClicks / totalSent) * 100 : 0;
@@ -6090,8 +6136,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Sheet 1: Campaign Summary (using proper types for Excel formatting)
       const summaryData = [
         { Metric: 'Campaign Name', Value: campaign.name },
-        { Metric: 'Status', Value: campaign.status },
-        { Metric: 'Subject Line', Value: campaign.subject || 'N/A' },
+        { Metric: 'Status', Value: campaign.isActive ? 'active' : 'inactive' },
+        { Metric: 'Subject Line', Value: 'N/A' },
         { Metric: 'Created At', Value: campaign.createdAt ? new Date(campaign.createdAt) : 'N/A' },
         { Metric: '', Value: '' }, // Spacer
         { Metric: 'Total Sent', Value: totalSent },
@@ -6115,7 +6161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const lastOpen = logOpens.length > 0 ? logOpens[logOpens.length - 1].openedAt : null;
         
         return {
-          'Recipient Email': log.leadEmail || 'N/A',
+          'Recipient Email': log.recipientEmail || 'N/A',
           'Status': log.status,
           'Sent At': log.sentAt ? new Date(log.sentAt) : 'Not sent',
           'Total Opens': logOpens.length,
@@ -6133,8 +6179,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Link URL': link.url,
         'Total Clicks': link.totalClicks,
         'Unique Clicks': link.uniqueClicks,
-        'Click-Through Rate': link.clickThroughRate / 100, // Store as decimal for percentage format
-        'Unique Recipients': link.uniqueRecipients,
+        'Click-Through Rate': link.ctr / 100, // Store as decimal for percentage format
+        'Unique Recipients': link.uniqueClicks,
       }));
       
       // Helper function to apply Excel cell formatting
@@ -6320,7 +6366,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const insights = await storage.getSendTimeInsights(
         scope as 'global' | 'campaign' | 'persona',
         scopeId as string | undefined,
-        shouldForceRecalculate
+        { forceRecompute: shouldForceRecalculate }
       );
       
       res.json(insights);
@@ -6733,13 +6779,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Send email via SendGrid
-      await sendTemplatedEmail({
+      const { sendEmail } = await import('./email');
+      await sendEmail(storage, {
         to: lead.email,
+        toName: getPersonName(lead),
         subject,
         html: htmlBody,
         text: textBody || undefined,
-        templateName: 'hormozi_personalized',
-        variables: {}
+        metadata: { leadId: lead.id, source: 'hormozi_personalized' },
+        leadId: lead.id,
       });
       
       // Create interaction record
@@ -7166,11 +7214,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Assign lead to team member
-  app.post("/api/leads/:leadId/assignment", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: AuthenticatedRequest, res) => {
+  app.post("/api/leads/:leadId/assignment", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: any, res) => {
     try {
       const { leadId } = req.params;
       const { assignedTo, assignmentType, notes } = req.body;
-      const userId = req.user.id;
+      const userId = getAuthUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
 
       // Validate required fields
       if (!assignedTo) {
@@ -7235,10 +7286,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Create a new task
-  app.post("/api/tasks", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: AuthenticatedRequest, res) => {
+  app.post("/api/tasks", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: any, res) => {
     try {
       const taskData = req.body;
-      const userId = req.user.id;
+      const userId = getAuthUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
 
       // Set createdBy to current user
       taskData.createdBy = userId;
@@ -7329,11 +7383,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update lead pipeline stage
-  app.patch("/api/leads/:leadId/pipeline-stage", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: AuthenticatedRequest, res) => {
+  app.patch("/api/leads/:leadId/pipeline-stage", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req: any, res) => {
     try {
       const { leadId } = req.params;
       const { pipelineStage, reason } = req.body;
-      const userId = req.user.id;
+      const userId = getAuthUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
 
       if (!pipelineStage) {
         return res.status(400).json({ message: "pipelineStage is required" });
@@ -7454,11 +7511,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const exitEntry = allHistory.find(
             h => h.leadId === entry.leadId && 
                  h.fromStage === stageSlug && 
-                 new Date(h.createdAt).getTime() > new Date(entry.createdAt).getTime()
+                 (h.createdAt ? new Date(h.createdAt).getTime() : 0) > (entry.createdAt ? new Date(entry.createdAt).getTime() : 0)
           );
           
           if (exitEntry) {
-            const timeInStage = new Date(exitEntry.createdAt).getTime() - new Date(entry.createdAt).getTime();
+            const timeInStage = (exitEntry.createdAt ? new Date(exitEntry.createdAt).getTime() : 0) - (entry.createdAt ? new Date(entry.createdAt).getTime() : 0);
             stageTimesMs.push(timeInStage);
           }
         });
@@ -7569,7 +7626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerId = await getOrCreateStripeCustomer(userId);
 
       // Create Stripe payment intent
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await getStripeClient().paymentIntents.create({
         amount: amountInCents,
         currency: "usd",
         customer: customerId,
@@ -7641,7 +7698,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('Raw body not available for signature verification');
       }
       
-      event = stripe.webhooks.constructEvent(
+      event = getStripeClient().webhooks.constructEvent(
         rawBody,
         sig as string,
         process.env.STRIPE_WEBHOOK_SECRET
@@ -7805,7 +7862,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   // Send email notification via SendGrid (if available)
                   if (channels.includes('email')) {
                     const emailSubject = `New donation to ${campaign.name}!`;
-                    const emailBody = `Great News!\n\n${donorDisplayName} just donated $${amountDollars} to ${campaign.name}!\n\nCampaign Progress: $${((campaign.raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised\n\nYou're receiving this notification because you're a member of this campaign. You can manage your notification preferences from your campaign dashboard.`;
+	                    const raisedAmount = campaign.raisedAmount || 0;
+	                    const emailBody = `Great News!\n\n${donorDisplayName} just donated $${amountDollars} to ${campaign.name}!\n\nCampaign Progress: $${((raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised\n\nYou're receiving this notification because you're a member of this campaign. You can manage your notification preferences from your campaign dashboard.`;
                     const emailHtml = `
                       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                         <h2 style="color: #333;">Great News! 🎉</h2>
@@ -7817,7 +7875,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                             Campaign Progress
                           </p>
                           <p style="margin: 10px 0 0 0; color: #666;">
-                            $${((campaign.raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised
+	                            $${((raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised
                           </p>
                         </div>
                         <p style="color: #666; font-size: 14px;">
@@ -8158,21 +8216,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Find leads with matching passions using array overlap
       const allLeads = await storage.getAllLeads();
+      const campaignPassions = Array.isArray(campaign.passionTags) ? campaign.passionTags as string[] : [];
       const matchedLeads = allLeads.filter(lead => {
-        if (!lead.passions || lead.passions.length === 0) return false;
-        if (!campaign.passionTags || campaign.passionTags.length === 0) return true; // Target all if no passions specified
-        return (lead.passions as string[]).some(passion => 
-          (campaign.passionTags as string[]).includes(passion)
-        );
+        const leadPassions = Array.isArray(lead.passions) ? lead.passions as string[] : [];
+        if (leadPassions.length === 0) return false;
+        if (campaignPassions.length === 0) return true; // Target all if no passions specified
+        return leadPassions.some(passion => campaignPassions.includes(passion));
       });
       
       if (matchedLeads.length === 0) {
         return res.status(400).json({ message: "No leads match the campaign's target passions" });
       }
       
-      // Import personalizers and send functions
-      const { personalizeEmailTemplate } = await import('./emailPersonalizer');
-      const { personalizeSmsTemplate } = await import('./smsPersonalizer');
+      // Import send functions
       const { sendEmail } = await import('./email');
       const { sendSMS } = await import('./twilio');
       
@@ -8191,23 +8247,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const emailTemplate = await storage.getEmailTemplate(campaign.emailTemplateId);
             if (emailTemplate) {
-              const personalized = await personalizeEmailTemplate({
-                lead,
-                recentInteractions: [],
-                template: emailTemplate,
-                campaignContext: {
-                  campaignName: campaign.name,
-                  campaignDescription: campaign.description,
-                  campaignStory: campaign.story,
-                  goalAmount: campaign.goalAmount / 100,
-                }
-              });
+              const variables = {
+                firstName: lead.firstName || "",
+                lastName: lead.lastName || "",
+                email: lead.email,
+                campaignName: campaign.name,
+                campaignDescription: campaign.description || "",
+                campaignStory: campaign.story || "",
+                goalAmount: (campaign.goalAmount / 100).toFixed(2),
+              };
               
               const result = await sendEmail(storage, {
                 to: lead.email,
-                toName: lead.name,
-                subject: personalized.subject,
-                html: personalized.body,
+                toName: getPersonName(lead),
+                subject: renderTemplate(emailTemplate.subject, variables),
+                html: renderTemplate(emailTemplate.htmlBody, variables),
+                text: emailTemplate.textBody ? renderTemplate(emailTemplate.textBody, variables) : undefined,
                 templateId: emailTemplate.id,
                 metadata: { campaignId: campaign.id, leadId: lead.id }
               });
@@ -8229,20 +8284,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           try {
             const smsTemplate = await storage.getSmsTemplate(campaign.smsTemplateId);
             if (smsTemplate) {
-              const personalized = await personalizeSmsTemplate({
-                lead,
-                recentInteractions: [],
-                template: smsTemplate,
-                campaignContext: {
-                  campaignName: campaign.name,
-                  campaignDescription: campaign.description,
-                }
-              });
+              const variables = {
+                firstName: lead.firstName || "",
+                lastName: lead.lastName || "",
+                campaignName: campaign.name,
+                campaignDescription: campaign.description || "",
+              };
+              const messageContent = renderTemplate(smsTemplate.messageTemplate, variables);
               
               // Send SMS (now includes TCPA compliance check)
               const result = await sendSMS(
                 lead.phone,
-                personalized.message,
+                messageContent,
                 { campaignId: campaign.id, leadId: lead.id, templateId: smsTemplate.id }
               );
               
@@ -8253,8 +8306,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   templateId: smsTemplate.id,
                   leadId: lead.id,
                   recipientPhone: lead.phone,
-                  recipientName: lead.name,
-                  messageContent: personalized.message,
+                  recipientName: getPersonName(lead),
+                  messageContent,
                   status: 'sent',
                   smsProvider: 'twilio',
                   providerMessageId: result.messageId,
@@ -8298,7 +8351,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (user.stripeCustomerId) return user.stripeCustomerId;
     
     // Search Stripe for existing customer (idempotency)
-    const existing = await stripe.customers.list({ email: user.email, limit: 1 });
+    const stripeClient = getStripeClient();
+    const existing = await stripeClient.customers.list({ email: user.email || undefined, limit: 1 });
     if (existing.data.length > 0) {
       const customerId = existing.data[0].id;
       await storage.updateUser(user.id, { stripeCustomerId: customerId });
@@ -8306,7 +8360,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // Create new customer
-    const customer = await stripe.customers.create({
+    const customer = await stripeClient.customers.create({
       email: user.email!,
       name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
       metadata: { oidcSubId }
@@ -8325,7 +8379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerId = await getOrCreateStripeCustomer(userId);
       
       // Fetch payment methods from Stripe
-      const paymentMethods = await stripe.paymentMethods.list({
+      const paymentMethods = await getStripeClient().paymentMethods.list({
         customer: customerId,
         type: 'card'
       });
@@ -8358,7 +8412,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const customerId = await getOrCreateStripeCustomer(userId);
       
       // Create SetupIntent
-      const setupIntent = await stripe.setupIntents.create({
+      const setupIntent = await getStripeClient().setupIntents.create({
         customer: customerId,
         payment_method_types: ['card']
       });
@@ -8628,7 +8682,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let sentCount = 0;
       
       // Send email to each donor
-      for (const donorEmail of uniqueDonorEmails) {
+      for (const donorEmail of Array.from(uniqueDonorEmails)) {
         try {
           const emailSubject = `Thank you from ${testimonial.authorName} - ${campaign.name}`;
           const emailHtml = `
@@ -9296,7 +9350,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             ...enrollment,
             user: user ? {
               id: user.id,
-              name: user.name,
+              name: getPersonName(user),
               email: user.email,
             } : null,
             classesCompleted: progress?.classesCompleted || 0,
@@ -9331,7 +9385,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         attendance,
         user: user ? {
           id: user.id,
-          name: user.name,
+          name: getPersonName(user),
           email: user.email,
         } : null,
         progress,
@@ -9677,7 +9731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { shiftId } = req.query;
       
-      let enrollments;
+      let enrollments: unknown[] = [];
       if (shiftId) {
         enrollments = await storage.getShiftEnrollments(shiftId as string);
       } else {

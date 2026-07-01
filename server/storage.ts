@@ -134,6 +134,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   createLead(lead: InsertLead): Promise<Lead>;
   getLead(id: string): Promise<Lead | undefined>;
   getLeadByEmail(email: string): Promise<Lead | undefined>;
+  getLeadByPhone(phone: string): Promise<Lead | undefined>;
   getAllLeads(): Promise<Lead[]>;
   getLeadsByPersona(persona: string): Promise<Lead[]>;
   getLeadsByFunnelStage(funnelStage: string): Promise<Lead[]>;
@@ -282,6 +283,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   // Automated A/B Testing - Automation Runs (Append-only + Query)
   createAbTestAutomationRun(run: InsertAbTestAutomationRun): Promise<AbTestAutomationRun>;
   getAbTestAutomationRun(id: string): Promise<AbTestAutomationRun | undefined>;
+  getAllAbTestAutomationRuns(limit?: number): Promise<AbTestAutomationRun[]>;
   getAbTestAutomationRuns(filters: {
     ruleId?: string;
     status?: string;
@@ -383,6 +385,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   deleteWishlistItem(id: string): Promise<boolean>;
   
   // Email Template operations
+  getEmailTemplate(id: string): Promise<EmailTemplate | undefined>;
   getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined>;
   getAllEmailTemplates(): Promise<EmailTemplate[]>;
   createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
@@ -465,6 +468,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   // SMS Template operations
   createSmsTemplate(template: InsertSmsTemplate): Promise<SmsTemplate>;
   getAllSmsTemplates(): Promise<SmsTemplate[]>;
+  getSmsTemplate(id: string): Promise<SmsTemplate | undefined>;
   getSmsTemplateById(id: string): Promise<SmsTemplate | undefined>;
   getSmsTemplatesByPersona(persona: string): Promise<SmsTemplate[]>;
   updateSmsTemplate(id: string, updates: Partial<InsertSmsTemplate>): Promise<SmsTemplate | undefined>;
@@ -1401,6 +1405,11 @@ export class DatabaseStorage implements IStorage {
 
   async getLeadByEmail(email: string): Promise<Lead | undefined> {
     const [lead] = await db.select().from(leads).where(eq(leads.email, email));
+    return lead;
+  }
+
+  async getLeadByPhone(phone: string): Promise<Lead | undefined> {
+    const [lead] = await db.select().from(leads).where(eq(leads.phone, phone));
     return lead;
   }
 
@@ -2740,6 +2749,10 @@ export class DatabaseStorage implements IStorage {
     return run;
   }
 
+  async getAllAbTestAutomationRuns(limit: number = 50): Promise<AbTestAutomationRun[]> {
+    return this.getAbTestAutomationRuns({ limit });
+  }
+
   async getAbTestAutomationRuns(filters: {
     ruleId?: string;
     status?: string;
@@ -3299,6 +3312,14 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Email Template operations
+  async getEmailTemplate(id: string): Promise<EmailTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.id, id));
+    return template;
+  }
+
   async getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined> {
     const [template] = await db
       .select()
@@ -4093,6 +4114,10 @@ export class DatabaseStorage implements IStorage {
   async getSmsTemplateById(id: string): Promise<SmsTemplate | undefined> {
     const [template] = await db.select().from(smsTemplates).where(eq(smsTemplates.id, id));
     return template;
+  }
+
+  async getSmsTemplate(id: string): Promise<SmsTemplate | undefined> {
+    return this.getSmsTemplateById(id);
   }
 
   async getSmsTemplatesByPersona(persona: string): Promise<SmsTemplate[]> {
