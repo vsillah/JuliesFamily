@@ -13,6 +13,7 @@ import {
   KeyRound,
   LayoutDashboard,
   ListChecks,
+  MailPlus,
   MonitorSmartphone,
   Palette,
   Plus,
@@ -121,6 +122,10 @@ export default function AdminKinfloShell() {
   const [experienceNotificationChannels, setExperienceNotificationChannels] = useState(
     snapshot.experiencePreferences.notificationChannels,
   );
+  const [accessInviteEmail, setAccessInviteEmail] = useState(snapshot.accessDelegation.defaultEmail);
+  const [accessTenantSlug, setAccessTenantSlug] = useState(snapshot.accessDelegation.defaultTenantSlug);
+  const [accessSiteKey, setAccessSiteKey] = useState(snapshot.accessDelegation.defaultSiteKey);
+  const [accessRoleKey, setAccessRoleKey] = useState(snapshot.accessDelegation.defaultRoleKey);
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -152,6 +157,31 @@ export default function AdminKinfloShell() {
   const selectedNotificationSummary = experienceNotificationChannels.length > 0
     ? experienceNotificationChannels.join(", ")
     : "none";
+  const filteredAccessSites = useMemo(
+    () => snapshot.accessDelegation.siteOptions.filter((site) => site.tenantSlug === accessTenantSlug),
+    [accessTenantSlug, snapshot.accessDelegation.siteOptions],
+  );
+  const selectedAccessRole = useMemo(
+    () => snapshot.accessDelegation.roleOptions.find((role) => role.key === accessRoleKey) ?? snapshot.accessDelegation.roleOptions[0],
+    [accessRoleKey, snapshot.accessDelegation.roleOptions],
+  );
+  const selectedAccessTenant = useMemo(
+    () => snapshot.accessDelegation.tenantOptions.find((tenant) => tenant.slug === accessTenantSlug) ?? snapshot.accessDelegation.tenantOptions[0],
+    [accessTenantSlug, snapshot.accessDelegation.tenantOptions],
+  );
+  const selectedAccessSite = useMemo(
+    () => snapshot.accessDelegation.siteOptions.find((site) => site.key === accessSiteKey) ?? filteredAccessSites[0],
+    [accessSiteKey, filteredAccessSites, snapshot.accessDelegation.siteOptions],
+  );
+  const accessReadiness = [
+    { label: "Invite email entered", done: accessInviteEmail.includes("@") },
+    { label: "Tenant selected", done: Boolean(selectedAccessTenant) },
+    { label: "Scope selected", done: selectedAccessRole?.scope === "tenant" || Boolean(selectedAccessSite) },
+    { label: "Role permissions previewed", done: Boolean(selectedAccessRole?.permissions.length) },
+    { label: "Live invitation smoke pending", done: false },
+  ];
+  const accessReadyCount = accessReadiness.filter((item) => item.done).length;
+  const accessReadinessPercent = Math.round((accessReadyCount / accessReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -179,6 +209,14 @@ export default function AdminKinfloShell() {
       }
       return current.filter((item) => item !== channel);
     });
+  };
+
+  const handleAccessTenantChange = (tenantSlug: string) => {
+    setAccessTenantSlug(tenantSlug);
+    const nextSite = snapshot.accessDelegation.siteOptions.find((site) => site.tenantSlug === tenantSlug);
+    if (nextSite) {
+      setAccessSiteKey(nextSite.key);
+    }
   };
 
   useEffect(() => {
@@ -1322,7 +1360,7 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="access" className="mt-6">
-            <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-4">
                   <h2 className="text-xl font-semibold">Permission Model</h2>
@@ -1349,13 +1387,164 @@ export default function AdminKinfloShell() {
                           <TableCell>{role.access}</TableCell>
                           <TableCell>{role.owner}</TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Access Delegation Packet</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Prepare a scoped client admin or editor invitation before live Convex writes are enabled.
+                      </p>
+                    </div>
+                    <Badge variant="secondary">{accessReadyCount}/{accessReadiness.length} ready</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="kinflo-access-email">Invite email</Label>
+                        <Input
+                          id="kinflo-access-email"
+                          type="email"
+                          value={accessInviteEmail}
+                          onChange={(event) => setAccessInviteEmail(event.target.value)}
+                          data-testid="input-kinflo-access-email"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Tenant</Label>
+                        <Select value={accessTenantSlug} onValueChange={handleAccessTenantChange}>
+                          <SelectTrigger data-testid="select-kinflo-access-tenant">
+                            <SelectValue placeholder="Select tenant" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.accessDelegation.tenantOptions.map((tenant) => (
+                              <SelectItem key={tenant.slug} value={tenant.slug}>
+                                {tenant.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Site scope</Label>
+                        <Select value={accessSiteKey} onValueChange={setAccessSiteKey}>
+                          <SelectTrigger data-testid="select-kinflo-access-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredAccessSites.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Role</Label>
+                        <Select value={accessRoleKey} onValueChange={setAccessRoleKey}>
+                          <SelectTrigger data-testid="select-kinflo-access-role">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.accessDelegation.roleOptions.map((role) => (
+                              <SelectItem key={role.key} value={role.key}>
+                                {role.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {selectedAccessRole ? (
+                      <div className="rounded-md border p-3 text-sm">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <div className="font-medium">{selectedAccessRole.label}</div>
+                            <div className="mt-1 text-muted-foreground">{selectedAccessRole.description}</div>
+                          </div>
+                          <Badge variant="outline" className="w-fit">{selectedAccessRole.scope} scope</Badge>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {selectedAccessRole.permissions.map((permission) => (
+                            <Badge key={permission} variant="secondary">{permission}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
+                      <div className="rounded-md border p-3 text-sm">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Prepared scope</div>
+                        <div className="mt-2 space-y-1">
+                          <div className="font-medium">{accessInviteEmail}</div>
+                          <div className="text-muted-foreground">{selectedAccessTenant?.label}</div>
+                          <div className="text-muted-foreground">{selectedAccessRole?.scope === "tenant" ? "All tenant sites" : selectedAccessSite?.label}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium">Readiness</span>
+                          <span className="text-muted-foreground">{accessReadinessPercent}%</span>
+                        </div>
+                        <Progress value={accessReadinessPercent} className="mt-2" />
+                        <div className="mt-3 space-y-2">
+                          {accessReadiness.map((item) => (
+                            <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                              {item.done ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="h-3.5 w-3.5" />
+                              )}
+                              <span>{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        {snapshot.accessDelegation.providerBoundary}
+                      </div>
+                      <Button disabled data-testid="button-create-access-invite">
+                        <MailPlus className="mr-2 h-4 w-4" />
+                        Live invite gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
               <div className="space-y-3">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Invitation Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Invitation writes stay disabled until auth, email, and cross-tenant smoke gates pass.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.accessDelegation.convexMutations.map((mutationName) => (
+                      <div key={mutationName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span>{mutationName}</span>
+                        <Badge variant="outline">gated</Badge>
+                      </div>
+                    ))}
+                    <div className="space-y-2">
+                      {snapshot.accessDelegation.activationEvidence.map((item) => (
+                        <div key={item} className="flex gap-2 text-sm text-muted-foreground">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Launch Gates</h2>
                   <ShieldCheck className="h-5 w-5 text-muted-foreground" />

@@ -14,7 +14,7 @@ The smoke checks that:
 
 - `/admin/kinflo-os` is wired to `AdminKinfloShell`.
 - `/kinflo-sites/:siteSlug` is wired to `KinfloPublicSitePreview`.
-- the admin shell still exposes the operating surfaces for data mode, live adapter readiness, site factory launch packets, site creation wizard, plans and entitlements, CRM lead workspace, public intake, and experience preferences.
+- the admin shell still exposes the operating surfaces for data mode, live adapter readiness, site factory launch packets, site creation wizard, plans and entitlements, CRM lead workspace, public intake, experience preferences, and access delegation.
 - the public preview still exposes hero, services, and intake test ids.
 - the public preview fixture slugs exist for:
   - `julies-family`

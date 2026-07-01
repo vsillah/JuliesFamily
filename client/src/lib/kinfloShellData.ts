@@ -132,6 +132,27 @@ export type ShellRole = {
   owner: string;
 };
 
+export type ShellAccessRoleOption = {
+  key: string;
+  label: string;
+  scope: "tenant" | "site";
+  description: string;
+  permissions: string[];
+};
+
+export type ShellAccessDelegation = {
+  defaultEmail: string;
+  defaultTenantSlug: string;
+  defaultSiteKey: string;
+  defaultRoleKey: string;
+  tenantOptions: { slug: string; label: string }[];
+  siteOptions: { key: string; label: string; tenantSlug: string }[];
+  roleOptions: ShellAccessRoleOption[];
+  providerBoundary: string;
+  convexMutations: string[];
+  activationEvidence: string[];
+};
+
 export type ShellLead = {
   name: string;
   email: string;
@@ -216,6 +237,7 @@ export type KinfloShellSnapshot = {
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
+  accessDelegation: ShellAccessDelegation;
   leads: ShellLead[];
   pipelineStages: ShellPipelineStage[];
   tasks: ShellTask[];
@@ -471,6 +493,58 @@ const fixtureRoles: ShellRole[] = [
   { role: "Site Admin", scope: "Site", access: "Pages, navigation, blocks, lead workflow", owner: "Program lead" },
   { role: "Editor", scope: "Site", access: "Draft content, asset records, lead visibility", owner: "Content support" },
 ];
+
+const fixtureAccessDelegation: ShellAccessDelegation = {
+  defaultEmail: "client-admin@example.invalid",
+  defaultTenantSlug: "advisor-client-starter",
+  defaultSiteKey: "advisor-client-site",
+  defaultRoleKey: "tenant.admin",
+  tenantOptions: [
+    { slug: "julies-family", label: "Julie's Family Learning Program" },
+    { slug: "advisor-client-starter", label: "Advisor Client Starter" },
+    { slug: "campaign-microsite-lab", label: "Campaign Microsite Lab" },
+  ],
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", tenantSlug: "julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", tenantSlug: "advisor-client-starter" },
+    { key: "campaign-microsite", label: "Campaign Microsite", tenantSlug: "campaign-microsite-lab" },
+  ],
+  roleOptions: [
+    {
+      key: "tenant.admin",
+      label: "Tenant Admin",
+      scope: "tenant",
+      description: "Can manage tenant sites, members, content, lead workflow, and domain metadata.",
+      permissions: ["site:create", "member:invite", "content:edit", "content:publish", "lead:manage", "domain:manage"],
+    },
+    {
+      key: "site.admin",
+      label: "Site Admin",
+      scope: "site",
+      description: "Can manage one site, its pages, public preview, lead intake, and site workflow.",
+      permissions: ["content:edit", "content:publish", "lead:view", "lead:manage", "asset:manage"],
+    },
+    {
+      key: "site.editor",
+      label: "Site Editor",
+      scope: "site",
+      description: "Can edit draft content and review lead visibility without publishing or inviting users.",
+      permissions: ["content:edit", "lead:view", "asset:manage"],
+    },
+  ],
+  providerBoundary: "Live invitation creation is gated until hosted Convex auth, generated API bindings, email delivery, and smoke cleanup are approved.",
+  convexMutations: [
+    "controlPlane.createInvitation",
+    "controlPlane.grantMembership",
+    "controlPlane.acceptInvitation",
+    "controlPlane.listAuditEvents",
+  ],
+  activationEvidence: [
+    "client admin invitation is scoped to tenant and site",
+    "token-hash-only invitation contract is preserved",
+    "cross-tenant access denial passes before live invites",
+  ],
+};
 
 const fixtureLeads: ShellLead[] = [
   {
@@ -752,6 +826,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Live smoke dry runner", status: "done" },
   { label: "TypeScript baseline gate", status: "done" },
   { label: "Admin preferences shell", status: "done" },
+  { label: "Access delegation shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -821,6 +896,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,
+      accessDelegation: fixtureAccessDelegation,
       leads: fixtureLeads,
       pipelineStages: fixturePipelineStages,
       tasks: fixtureTasks,
