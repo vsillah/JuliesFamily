@@ -101,6 +101,28 @@ export type ShellTemplate = {
   launchCriteria: string[];
 };
 
+export type ShellContentDraftBlock = {
+  key: string;
+  type: "hero" | "services" | "events" | "testimonials" | "lead_magnet" | "form" | "campaign" | "custom";
+  label: string;
+  title: string;
+  body: string;
+  status: "draft" | "published";
+  persona: string;
+  journeyStage: string;
+};
+
+export type ShellContentDraft = {
+  defaultSiteKey: string;
+  defaultPageSlug: string;
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  pageOptions: { slug: string; label: string; status: "draft" | "published" }[];
+  blocks: ShellContentDraftBlock[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -234,6 +256,7 @@ export type KinfloShellSnapshot = {
   billingPlans: ShellBillingPlan[];
   tenantEntitlements: ShellTenantEntitlement[];
   templates: ShellTemplate[];
+  contentDraft: ShellContentDraft;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -449,6 +472,69 @@ const fixtureTemplates: ShellTemplate[] = [
     launchCriteria: ["Goal verified", "Lead source set", "Campaign copy approved", "Tracking reviewed"],
   },
 ];
+
+const fixtureContentDraft: ShellContentDraft = {
+  defaultSiteKey: "advisor-client-site",
+  defaultPageSlug: "home",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  pageOptions: [
+    { slug: "home", label: "Homepage", status: "draft" },
+    { slug: "services", label: "Services", status: "draft" },
+    { slug: "intake", label: "Intake", status: "draft" },
+  ],
+  blocks: [
+    {
+      key: "hero",
+      type: "hero",
+      label: "Hero",
+      title: "Build a client-ready website without starting from zero",
+      body: "Use KinFlo to configure the offer, proof, intake, and follow-up system from one tenant-safe shell.",
+      status: "draft",
+      persona: "client prospect",
+      journeyStage: "awareness",
+    },
+    {
+      key: "services",
+      type: "services",
+      label: "Services",
+      title: "Advisory services with a clear path to action",
+      body: "Package consultation, implementation support, and operating-system setup as reusable site content blocks.",
+      status: "draft",
+      persona: "client prospect",
+      journeyStage: "consideration",
+    },
+    {
+      key: "intake",
+      type: "form",
+      label: "Intake",
+      title: "Start with the right questions",
+      body: "Collect fit, urgency, goals, and preferred follow-up channel before a client enters the CRM pipeline.",
+      status: "draft",
+      persona: "qualified lead",
+      journeyStage: "decision",
+    },
+  ],
+  providerBoundary: "Live content save and publish are gated until generated Convex API bindings, hosted auth, and content smoke cleanup are approved.",
+  convexFunctions: [
+    "siteBuilder.getSiteDraft",
+    "siteBuilder.createPage",
+    "siteBuilder.updatePage",
+    "siteBuilder.createContentBlock",
+    "siteBuilder.updateContentBlock",
+    "siteBuilder.upsertVisibilityRule",
+    "siteBuilder.publishPage",
+  ],
+  activationEvidence: [
+    "site admin can edit assigned site draft content",
+    "editor cannot publish without content:publish",
+    "visibility rules require explicit persona or journey context",
+    "publish writes audit evidence and public preview resolves updated content",
+  ],
+};
 
 const fixtureExperienceControls: ShellExperienceControl[] = [
   { label: "Theme Tokens", value: "Palette, typography, spacing, radii", iconKey: "theme" },
@@ -827,6 +913,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "TypeScript baseline gate", status: "done" },
   { label: "Admin preferences shell", status: "done" },
   { label: "Access delegation shell", status: "done" },
+  { label: "Content draft shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -893,6 +980,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       billingPlans: fixtureBillingPlans,
       tenantEntitlements: fixtureTenantEntitlements,
       templates: fixtureTemplates,
+      contentDraft: fixtureContentDraft,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

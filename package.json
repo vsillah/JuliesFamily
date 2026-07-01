@@ -18,6 +18,7 @@
     "kinflo:validate-admin-preferences": "node scripts/validate-kinflo-admin-preferences.mjs",
     "kinflo:validate-experience-shell": "node scripts/validate-kinflo-experience-shell.mjs",
     "kinflo:validate-access-shell": "node scripts/validate-kinflo-access-shell.mjs",
+    "kinflo:validate-content-shell": "node scripts/validate-kinflo-content-shell.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   CircleDashed,
   CreditCard,
+  Edit3,
   ExternalLink,
   Factory,
   FormInput,
@@ -126,6 +127,11 @@ export default function AdminKinfloShell() {
   const [accessTenantSlug, setAccessTenantSlug] = useState(snapshot.accessDelegation.defaultTenantSlug);
   const [accessSiteKey, setAccessSiteKey] = useState(snapshot.accessDelegation.defaultSiteKey);
   const [accessRoleKey, setAccessRoleKey] = useState(snapshot.accessDelegation.defaultRoleKey);
+  const [contentSiteKey, setContentSiteKey] = useState(snapshot.contentDraft.defaultSiteKey);
+  const [contentPageSlug, setContentPageSlug] = useState(snapshot.contentDraft.defaultPageSlug);
+  const [selectedContentBlockKey, setSelectedContentBlockKey] = useState(snapshot.contentDraft.blocks[0]?.key ?? "");
+  const [contentDraftTitle, setContentDraftTitle] = useState(snapshot.contentDraft.blocks[0]?.title ?? "");
+  const [contentDraftBody, setContentDraftBody] = useState(snapshot.contentDraft.blocks[0]?.body ?? "");
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -182,6 +188,31 @@ export default function AdminKinfloShell() {
   ];
   const accessReadyCount = accessReadiness.filter((item) => item.done).length;
   const accessReadinessPercent = Math.round((accessReadyCount / accessReadiness.length) * 100);
+  const selectedContentSite = useMemo(
+    () => snapshot.contentDraft.siteOptions.find((site) => site.key === contentSiteKey) ?? snapshot.contentDraft.siteOptions[0],
+    [contentSiteKey, snapshot.contentDraft.siteOptions],
+  );
+  const selectedContentPage = useMemo(
+    () => snapshot.contentDraft.pageOptions.find((page) => page.slug === contentPageSlug) ?? snapshot.contentDraft.pageOptions[0],
+    [contentPageSlug, snapshot.contentDraft.pageOptions],
+  );
+  const selectedContentBlock = useMemo(
+    () => snapshot.contentDraft.blocks.find((block) => block.key === selectedContentBlockKey) ?? snapshot.contentDraft.blocks[0],
+    [selectedContentBlockKey, snapshot.contentDraft.blocks],
+  );
+  const contentDraftDirty = Boolean(
+    selectedContentBlock
+    && (contentDraftTitle !== selectedContentBlock.title || contentDraftBody !== selectedContentBlock.body),
+  );
+  const contentReadiness = [
+    { label: "Assigned site selected", done: Boolean(selectedContentSite) },
+    { label: "Page selected", done: Boolean(selectedContentPage) },
+    { label: "Block selected", done: Boolean(selectedContentBlock) },
+    { label: "Draft text present", done: Boolean(contentDraftTitle.trim() && contentDraftBody.trim()) },
+    { label: "Live publish smoke pending", done: false },
+  ];
+  const contentReadyCount = contentReadiness.filter((item) => item.done).length;
+  const contentReadinessPercent = Math.round((contentReadyCount / contentReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -216,6 +247,15 @@ export default function AdminKinfloShell() {
     const nextSite = snapshot.accessDelegation.siteOptions.find((site) => site.tenantSlug === tenantSlug);
     if (nextSite) {
       setAccessSiteKey(nextSite.key);
+    }
+  };
+
+  const handleContentBlockChange = (blockKey: string) => {
+    const nextBlock = snapshot.contentDraft.blocks.find((block) => block.key === blockKey);
+    setSelectedContentBlockKey(blockKey);
+    if (nextBlock) {
+      setContentDraftTitle(nextBlock.title);
+      setContentDraftBody(nextBlock.body);
     }
   };
 
@@ -381,11 +421,12 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-8">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-9">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="plans">Plans</TabsTrigger>
+            <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
             <TabsTrigger value="experience">Experience</TabsTrigger>
@@ -951,6 +992,208 @@ export default function AdminKinfloShell() {
                     <Button className="w-full" disabled>
                       <CreditCard className="mr-2 h-4 w-4" />
                       Live billing sync gated
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="content" className="mt-6">
+            <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Content Draft Studio</h2>
+                    <p className="text-sm text-muted-foreground">Configure page copy and block visibility before live siteBuilder mutations are enabled.</p>
+                  </div>
+                  <Badge variant="outline">
+                    <Edit3 className="mr-1 h-3 w-3" />
+                    Provider-light draft
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Draft Page Content</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedContentSite?.label} · {selectedContentPage?.label}
+                      </p>
+                    </div>
+                    <Badge variant={contentDraftDirty ? "default" : "secondary"}>
+                      {contentDraftDirty ? "Local edits" : "Fixture draft"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={contentSiteKey} onValueChange={setContentSiteKey}>
+                          <SelectTrigger data-testid="select-kinflo-content-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.contentDraft.siteOptions.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Page</Label>
+                        <Select value={contentPageSlug} onValueChange={setContentPageSlug}>
+                          <SelectTrigger data-testid="select-kinflo-content-page">
+                            <SelectValue placeholder="Select page" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.contentDraft.pageOptions.map((page) => (
+                              <SelectItem key={page.slug} value={page.slug}>
+                                {page.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Block</Label>
+                        <Select value={selectedContentBlockKey} onValueChange={handleContentBlockChange}>
+                          <SelectTrigger data-testid="select-kinflo-content-block">
+                            <SelectValue placeholder="Select block" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.contentDraft.blocks.map((block) => (
+                              <SelectItem key={block.key} value={block.key}>
+                                {block.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_260px]">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-content-title">Block title</Label>
+                          <Input
+                            id="kinflo-content-title"
+                            value={contentDraftTitle}
+                            onChange={(event) => setContentDraftTitle(event.target.value)}
+                            data-testid="input-kinflo-content-title"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-content-body">Block body</Label>
+                          <textarea
+                            id="kinflo-content-body"
+                            value={contentDraftBody}
+                            onChange={(event) => setContentDraftBody(event.target.value)}
+                            rows={6}
+                            className="min-h-[140px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-content-body"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        {selectedContentBlock ? (
+                          <div className="rounded-md border p-3 text-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="font-medium">{selectedContentBlock.label}</div>
+                                <div className="mt-1 text-xs text-muted-foreground">{selectedContentBlock.type} · {selectedContentBlock.status}</div>
+                              </div>
+                              <Badge variant="outline">{selectedContentBlock.journeyStage}</Badge>
+                            </div>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <Badge variant="secondary">{selectedContentBlock.persona}</Badge>
+                              <Badge variant="secondary">{selectedContentBlock.journeyStage}</Badge>
+                            </div>
+                          </div>
+                        ) : null}
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{contentReadinessPercent}%</span>
+                          </div>
+                          <Progress value={contentReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {contentReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border p-3 text-sm">
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Preview packet</div>
+                      <div className="mt-2 font-medium">{contentDraftTitle}</div>
+                      <p className="mt-1 text-muted-foreground">{contentDraftBody}</p>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.contentDraft.providerBoundary}</div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button disabled data-testid="button-save-content-draft">
+                          <Edit3 className="mr-2 h-4 w-4" />
+                          Live draft save gated
+                        </Button>
+                        <Button disabled variant="outline" data-testid="button-publish-content-draft">
+                          <Rocket className="mr-2 h-4 w-4" />
+                          Live publish gated
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Content Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Draft and publish writes stay gated until generated bindings and live smoke pass.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.contentDraft.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span>{functionName}</span>
+                        <Badge variant="outline">gated</Badge>
+                      </div>
+                    ))}
+                    <div className="space-y-2">
+                      {snapshot.contentDraft.activationEvidence.map((item) => (
+                        <div key={item} className="flex gap-2 text-sm text-muted-foreground">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Preview Route</CardTitle>
+                    <p className="text-sm text-muted-foreground">Public preview still resolves through the fixture renderer until live publish smoke passes.</p>
+                  </CardHeader>
+                  <CardContent>
+                    <Button variant="outline" asChild>
+                      <Link href={selectedContentSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}>
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Open public preview
+                      </Link>
                     </Button>
                   </CardContent>
                 </Card>
