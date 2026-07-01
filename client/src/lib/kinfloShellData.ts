@@ -212,6 +212,32 @@ export type ShellPreviewStudioDraft = {
   activationEvidence: string[];
 };
 
+export type ShellAssetDraft = {
+  key: string;
+  name: string;
+  kind: "logo" | "hero" | "program" | "campaign" | "document";
+  status: "draft" | "approved" | "archived";
+  siteKey: string;
+  usage: string;
+  storageProvider: "fixture" | "cloudinary" | "r2" | "s3";
+  storageKey: string;
+  publicUrl?: string;
+  altText: string;
+  provenance: string;
+};
+
+export type ShellAssetLibraryDraft = {
+  defaultSiteKey: string;
+  defaultAssetKey: string;
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  kindOptions: { key: ShellAssetDraft["kind"]; label: string }[];
+  statusOptions: { key: ShellAssetDraft["status"]; label: string }[];
+  assets: ShellAssetDraft[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -349,6 +375,7 @@ export type KinfloShellSnapshot = {
   brandTheme: ShellBrandThemeDraft;
   navigationDraft: ShellNavigationDraft;
   previewStudio: ShellPreviewStudioDraft;
+  assetLibrary: ShellAssetLibraryDraft;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -772,6 +799,78 @@ const fixturePreviewStudio: ShellPreviewStudioDraft = {
   ],
 };
 
+const fixtureAssetLibrary: ShellAssetLibraryDraft = {
+  defaultSiteKey: "advisor-client-site",
+  defaultAssetKey: "advisor-hero-proof",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  kindOptions: [
+    { key: "logo", label: "Logo" },
+    { key: "hero", label: "Hero" },
+    { key: "program", label: "Program" },
+    { key: "campaign", label: "Campaign" },
+    { key: "document", label: "Document" },
+  ],
+  statusOptions: [
+    { key: "draft", label: "Draft" },
+    { key: "approved", label: "Approved" },
+    { key: "archived", label: "Archived" },
+  ],
+  assets: [
+    {
+      key: "advisor-hero-proof",
+      name: "Advisor collaboration hero",
+      kind: "hero",
+      status: "approved",
+      siteKey: "advisor-client-site",
+      usage: "Homepage hero and proof section",
+      storageProvider: "fixture",
+      storageKey: "generated_images/Professional_partnership_collaboration_meeting_f14bd523.png",
+      altText: "Professionals reviewing a shared implementation plan around a table",
+      provenance: "KinFlo generated image fixture reviewed for advisory template fit",
+    },
+    {
+      key: "julie-program-community",
+      name: "Community learning program",
+      kind: "program",
+      status: "approved",
+      siteKey: "julies-family-public",
+      usage: "Program overview and family intake pages",
+      storageProvider: "fixture",
+      storageKey: "generated_images/Hero_education_classroom_scene_8eef647c.png",
+      altText: "Families and learners in a bright community classroom",
+      provenance: "Julie public preview fixture, source retained in repo assets",
+    },
+    {
+      key: "campaign-momentum",
+      name: "Campaign momentum hero",
+      kind: "campaign",
+      status: "draft",
+      siteKey: "campaign-microsite",
+      usage: "Campaign hero and supporter progress block",
+      storageProvider: "fixture",
+      storageKey: "generated_images/Hands_together_showing_community_b0e0e375.png",
+      altText: "Community members placing hands together in support of a shared goal",
+      provenance: "Campaign microsite fixture awaiting copy and usage approval",
+    },
+  ],
+  providerBoundary: "Asset uploads are gated until object storage, generated Convex API bindings, file-size policy, and provenance review are approved.",
+  convexFunctions: [
+    "siteBuilder.getSiteDraft",
+    "siteBuilder.createAssetRecord",
+    "publicSite.resolvePublishedSite",
+  ],
+  activationEvidence: [
+    "asset metadata writes require asset:manage",
+    "storage provider upload is approved before public URL use",
+    "alt text and provenance are required before approval",
+    "public preview confirms approved asset usage on the selected site",
+  ],
+};
+
 const fixtureExperienceControls: ShellExperienceControl[] = [
   { label: "Theme Tokens", value: "Palette, typography, spacing, radii", iconKey: "theme" },
   { label: "Navigation", value: "Header and footer placement per site", iconKey: "navigation" },
@@ -1153,6 +1252,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Brand theme shell", status: "done" },
   { label: "Navigation builder shell", status: "done" },
   { label: "Preview QA shell", status: "done" },
+  { label: "Asset library shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1223,6 +1323,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       brandTheme: fixtureBrandTheme,
       navigationDraft: fixtureNavigationDraft,
       previewStudio: fixturePreviewStudio,
+      assetLibrary: fixtureAssetLibrary,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

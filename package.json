@@ -22,6 +22,7 @@
     "kinflo:validate-brand-shell": "node scripts/validate-kinflo-brand-shell.mjs",
     "kinflo:validate-navigation-shell": "node scripts/validate-kinflo-navigation-shell.mjs",
     "kinflo:validate-preview-shell": "node scripts/validate-kinflo-preview-shell.mjs",
+    "kinflo:validate-asset-shell": "node scripts/validate-kinflo-asset-shell.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

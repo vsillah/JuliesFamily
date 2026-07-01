@@ -11,6 +11,7 @@ import {
   Factory,
   FormInput,
   Globe2,
+  ImageIcon,
   KeyRound,
   LayoutDashboard,
   ListChecks,
@@ -151,6 +152,16 @@ export default function AdminKinfloShell() {
   const [previewPersona, setPreviewPersona] = useState(snapshot.previewStudio.defaultPersona);
   const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
+  const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
+    ?? snapshot.assetLibrary.assets[0];
+  const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
+  const [selectedAssetKey, setSelectedAssetKey] = useState(defaultAsset?.key ?? "");
+  const [assetName, setAssetName] = useState(defaultAsset?.name ?? "");
+  const [assetKind, setAssetKind] = useState(defaultAsset?.kind ?? "hero");
+  const [assetStatus, setAssetStatus] = useState(defaultAsset?.status ?? "draft");
+  const [assetUsage, setAssetUsage] = useState(defaultAsset?.usage ?? "");
+  const [assetAltText, setAssetAltText] = useState(defaultAsset?.altText ?? "");
+  const [assetProvenance, setAssetProvenance] = useState(defaultAsset?.provenance ?? "");
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -338,6 +349,38 @@ export default function AdminKinfloShell() {
   ];
   const previewReadyCount = previewReadiness.filter((item) => item.done).length;
   const previewReadinessPercent = Math.round((previewReadyCount / previewReadiness.length) * 100);
+  const selectedAssetSite = useMemo(
+    () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
+    [assetSiteKey, snapshot.assetLibrary.siteOptions],
+  );
+  const filteredAssets = useMemo(
+    () => snapshot.assetLibrary.assets.filter((asset) => asset.siteKey === assetSiteKey),
+    [assetSiteKey, snapshot.assetLibrary.assets],
+  );
+  const selectedAsset = useMemo(
+    () => filteredAssets.find((asset) => asset.key === selectedAssetKey) ?? filteredAssets[0],
+    [filteredAssets, selectedAssetKey],
+  );
+  const assetDraftDirty = Boolean(
+    selectedAsset
+    && (
+      assetName !== selectedAsset.name
+      || assetKind !== selectedAsset.kind
+      || assetStatus !== selectedAsset.status
+      || assetUsage !== selectedAsset.usage
+      || assetAltText !== selectedAsset.altText
+      || assetProvenance !== selectedAsset.provenance
+    ),
+  );
+  const assetReadiness = [
+    { label: "Site selected", done: Boolean(selectedAssetSite) },
+    { label: "Asset selected", done: Boolean(selectedAsset) },
+    { label: "Usage and alt text present", done: Boolean(assetUsage.trim() && assetAltText.trim()) },
+    { label: "Provenance recorded", done: Boolean(assetProvenance.trim()) },
+    { label: "Object storage upload pending", done: false },
+  ];
+  const assetReadyCount = assetReadiness.filter((item) => item.done).length;
+  const assetReadinessPercent = Math.round((assetReadyCount / assetReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -401,6 +444,36 @@ export default function AdminKinfloShell() {
 
   const handleNavigationItemChange = (itemKey: string) => {
     hydrateNavigationItem(snapshot.navigationDraft.items.find((item) => item.key === itemKey));
+  };
+
+  const hydrateAsset = (asset?: {
+    key: string;
+    name: string;
+    kind: typeof assetKind;
+    status: typeof assetStatus;
+    usage: string;
+    altText: string;
+    provenance: string;
+  }) => {
+    if (!asset) {
+      return;
+    }
+    setSelectedAssetKey(asset.key);
+    setAssetName(asset.name);
+    setAssetKind(asset.kind);
+    setAssetStatus(asset.status);
+    setAssetUsage(asset.usage);
+    setAssetAltText(asset.altText);
+    setAssetProvenance(asset.provenance);
+  };
+
+  const handleAssetSiteChange = (siteKey: string) => {
+    setAssetSiteKey(siteKey);
+    hydrateAsset(snapshot.assetLibrary.assets.find((asset) => asset.siteKey === siteKey));
+  };
+
+  const handleAssetChange = (assetKey: string) => {
+    hydrateAsset(snapshot.assetLibrary.assets.find((asset) => asset.key === assetKey));
   };
 
   useEffect(() => {
@@ -565,7 +638,7 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-12">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:flex md:w-auto md:flex-wrap">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
@@ -573,6 +646,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="brand">Brand</TabsTrigger>
             <TabsTrigger value="navigation">Nav</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="assets">Assets</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -1791,6 +1865,233 @@ export default function AdminKinfloShell() {
                     ))}
                   </CardContent>
                 </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="assets" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Asset Library</h2>
+                    <p className="text-sm text-muted-foreground">Prepare media metadata, usage, alt text, and provenance before storage-provider uploads are enabled.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <ImageIcon className="mr-1 h-3 w-3" />
+                    Provider-light assets
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Asset Metadata Draft</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedAssetSite?.label} · {selectedAsset?.storageProvider}
+                      </p>
+                    </div>
+                    <Badge variant={assetDraftDirty ? "default" : "secondary"}>
+                      {assetDraftDirty ? "Local edits" : "Fixture asset"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={assetSiteKey} onValueChange={handleAssetSiteChange}>
+                          <SelectTrigger data-testid="select-kinflo-asset-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.assetLibrary.siteOptions.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Asset</Label>
+                        <Select value={selectedAsset?.key ?? ""} onValueChange={handleAssetChange}>
+                          <SelectTrigger data-testid="select-kinflo-asset-record">
+                            <SelectValue placeholder="Select asset" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {filteredAssets.map((asset) => (
+                              <SelectItem key={asset.key} value={asset.key}>
+                                {asset.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Kind</Label>
+                        <Select value={assetKind} onValueChange={(value) => setAssetKind(value as typeof assetKind)}>
+                          <SelectTrigger data-testid="select-kinflo-asset-kind">
+                            <SelectValue placeholder="Select kind" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.assetLibrary.kindOptions.map((kind) => (
+                              <SelectItem key={kind.key} value={kind.key}>
+                                {kind.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select value={assetStatus} onValueChange={(value) => setAssetStatus(value as typeof assetStatus)}>
+                          <SelectTrigger data-testid="select-kinflo-asset-status">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.assetLibrary.statusOptions.map((status) => (
+                              <SelectItem key={status.key} value={status.key}>
+                                {status.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-asset-name">Name</Label>
+                          <Input
+                            id="kinflo-asset-name"
+                            value={assetName}
+                            onChange={(event) => setAssetName(event.target.value)}
+                            data-testid="input-kinflo-asset-name"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-asset-usage">Usage</Label>
+                          <Input
+                            id="kinflo-asset-usage"
+                            value={assetUsage}
+                            onChange={(event) => setAssetUsage(event.target.value)}
+                            data-testid="input-kinflo-asset-usage"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-asset-alt-text">Alt text</Label>
+                          <textarea
+                            id="kinflo-asset-alt-text"
+                            value={assetAltText}
+                            onChange={(event) => setAssetAltText(event.target.value)}
+                            rows={3}
+                            className="min-h-[88px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-asset-alt-text"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-asset-provenance">Provenance</Label>
+                          <textarea
+                            id="kinflo-asset-provenance"
+                            value={assetProvenance}
+                            onChange={(event) => setAssetProvenance(event.target.value)}
+                            rows={3}
+                            className="min-h-[88px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            data-testid="textarea-kinflo-asset-provenance"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="rounded-md border p-3 text-sm">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="font-medium">{assetName}</div>
+                              <div className="mt-1 break-all text-xs text-muted-foreground">{selectedAsset?.storageKey}</div>
+                            </div>
+                            <Badge variant={assetStatus === "approved" ? "secondary" : "outline"}>{assetStatus}</Badge>
+                          </div>
+                          <div className="mt-3 grid gap-2">
+                            <div className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">Kind</div>
+                              <div className="font-medium">{assetKind}</div>
+                            </div>
+                            <div className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">Usage</div>
+                              <div className="font-medium">{assetUsage}</div>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{assetReadinessPercent}%</span>
+                          </div>
+                          <Progress value={assetReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {assetReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.assetLibrary.providerBoundary}</div>
+                      <Button disabled data-testid="button-create-asset-record">
+                        <ImageIcon className="mr-2 h-4 w-4" />
+                        Live asset upload gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Asset Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Asset records stay metadata-only until object storage and generated bindings are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.assetLibrary.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.assetLibrary.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={selectedAssetSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Preview asset usage
+                  </Link>
+                </Button>
               </div>
             </section>
           </TabsContent>
