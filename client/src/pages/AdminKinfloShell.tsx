@@ -4,6 +4,7 @@ import {
   Boxes,
   CheckCircle2,
   CircleDashed,
+  CreditCard,
   ExternalLink,
   Factory,
   FormInput,
@@ -17,6 +18,7 @@ import {
   Rocket,
   Settings2,
   ShieldCheck,
+  SlidersHorizontal,
   UserRoundCheck,
   UserRoundCog,
   Workflow,
@@ -91,6 +93,7 @@ export default function AdminKinfloShell() {
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
   const [wizardBrandTone, setWizardBrandTone] = useState(snapshot.siteCreationWizard.brandToneOptions[0] ?? "");
   const [wizardOwnerRole, setWizardOwnerRole] = useState(snapshot.siteCreationWizard.ownerRoleOptions[0] ?? "");
+  const [selectedPlanKey, setSelectedPlanKey] = useState(snapshot.billingPlans[0]?.key ?? "");
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -101,6 +104,10 @@ export default function AdminKinfloShell() {
   const selectedWizardTemplate = useMemo(
     () => snapshot.templates.find((template) => template.key === wizardTemplateKey) ?? snapshot.templates[0],
     [snapshot.templates, wizardTemplateKey],
+  );
+  const selectedPlan = useMemo(
+    () => snapshot.billingPlans.find((plan) => plan.key === selectedPlanKey) ?? snapshot.billingPlans[0],
+    [selectedPlanKey, snapshot.billingPlans],
   );
   const requiredPageKeys = useMemo(
     () => snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
@@ -227,10 +234,11 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-7">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-8">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
+            <TabsTrigger value="plans">Plans</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
             <TabsTrigger value="experience">Experience</TabsTrigger>
@@ -611,6 +619,195 @@ export default function AdminKinfloShell() {
                   </Card>
                 </div>
               ) : null}
+            </section>
+          </TabsContent>
+
+          <TabsContent value="plans" className="mt-6">
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+              <div className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Plans And Entitlements</h2>
+                    <p className="text-sm text-muted-foreground">Plan limits, feature gates, and manual override state before Stripe Billing is connected.</p>
+                  </div>
+                  <Badge variant="outline">
+                    <CreditCard className="mr-1 h-3 w-3" />
+                    Stripe Billing gated
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Plan Catalog</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Select a provider-light KinFlo plan to inspect limits before live billing sync.
+                      </p>
+                    </div>
+                    <div className="w-full md:w-56">
+                      <Select value={selectedPlanKey} onValueChange={setSelectedPlanKey}>
+                        <SelectTrigger data-testid="select-kinflo-plan">
+                          <SelectValue placeholder="Select plan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {snapshot.billingPlans.map((plan) => (
+                            <SelectItem key={plan.key} value={plan.key}>
+                              {plan.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardHeader>
+                  {selectedPlan ? (
+                    <CardContent className="space-y-5">
+                      <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-lg font-semibold">{selectedPlan.label}</h3>
+                            {statusBadge(selectedPlan.status)}
+                          </div>
+                          <p className="mt-1 text-sm text-muted-foreground">{selectedPlan.fit}</p>
+                        </div>
+                        <div className="rounded-md border p-3">
+                          <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Target price</div>
+                          <div className="mt-1 text-xl font-semibold">{selectedPlan.price}</div>
+                        </div>
+                      </div>
+
+                      <div className="overflow-hidden rounded-lg border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Limit</TableHead>
+                              <TableHead className="text-right">Included</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {selectedPlan.limits.map((limit) => (
+                              <TableRow key={limit.label}>
+                                <TableCell>{limit.label}</TableCell>
+                                <TableCell className="text-right font-medium">{limit.value}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <div className="text-sm font-medium">Feature gates</div>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {selectedPlan.features.map((feature) => (
+                              <Badge key={feature} variant="secondary">{feature}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium">Provider gates</div>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {selectedPlan.gatedModules.map((moduleName) => (
+                              <Badge key={moduleName} variant="outline">{moduleName}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  ) : null}
+                </Card>
+
+                <div className="overflow-hidden rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tenant</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Source</TableHead>
+                        <TableHead>Review</TableHead>
+                        <TableHead className="text-right">State</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {snapshot.tenantEntitlements.map((entitlement) => (
+                        <TableRow key={entitlement.tenantSlug}>
+                          <TableCell>
+                            <div className="font-medium">{entitlement.tenant}</div>
+                            <div className="text-xs text-muted-foreground">{entitlement.tenantSlug}</div>
+                          </TableCell>
+                          <TableCell>{entitlement.planLabel}</TableCell>
+                          <TableCell>{entitlement.source}</TableCell>
+                          <TableCell>{entitlement.nextReview}</TableCell>
+                          <TableCell className="text-right">{statusBadge(entitlement.status)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                    <div className="rounded-md border bg-background p-2">
+                      <SlidersHorizontal className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Entitlement Overrides</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">Manual override rows stay reviewable until Stripe Billing writes the canonical subscription state.</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {snapshot.tenantEntitlements.map((entitlement) => (
+                      <div key={entitlement.tenantSlug} className="rounded-md border p-3 text-sm">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-medium">{entitlement.tenant}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{entitlement.planLabel} · {entitlement.source}</div>
+                          </div>
+                          <Badge variant="outline">manual override</Badge>
+                        </div>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {entitlement.usage.map((usage) => (
+                            <div key={usage.label} className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">{usage.label}</div>
+                              <div className="font-medium">{usage.value} / {usage.limit}</div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {entitlement.featureOverrides.map((override) => (
+                            <Badge key={override} variant="secondary">{override}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">These calls stay behind `billing:manage` until hosted Convex activation.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {[
+                      "controlPlane.listPlanCatalog",
+                      "controlPlane.syncDefaultBillingPlans",
+                      "controlPlane.entitlementSnapshot",
+                      "controlPlane.setTenantEntitlementOverride",
+                    ].map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span>{functionName}</span>
+                        <Badge variant="outline">billing:manage</Badge>
+                      </div>
+                    ))}
+                    <Button className="w-full" disabled>
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Live billing sync gated
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
             </section>
           </TabsContent>
 

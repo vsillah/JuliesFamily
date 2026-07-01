@@ -150,6 +150,8 @@ New billing collections:
 
 | New collection | Scope | Phase | Notes |
 | --- | --- | --- | --- |
+| `billingPlans` | platform | 5 | Provider-light KinFlo plan catalog; Stripe price IDs attach only after billing setup. |
+| `tenantEntitlements` | tenant | 5 | Manual override entitlement state for founding customers and pilots before Stripe subscription sync. |
 | `billingCustomers` | tenant | 5 | Stripe customer/subscription references for KinFlo plans. |
 | `subscriptions` | tenant | 5 | Plan, status, renewal, entitlement snapshot. |
 | `usageCounters` | tenant/site | 5 | Contacts, sites, admins, campaigns, AI credits, storage. |

@@ -32,6 +32,19 @@
       "notes": "Normalize legacy action metadata into scoped audit events before live import."
     },
     {
+      "id": "billing-plans-seeded-from-default-catalog",
+      "phase": 5,
+      "sourceTables": [],
+      "targetCollection": "billingPlans",
+      "targetStatus": "implemented",
+      "scope": "platform",
+      "operation": "seed-after-approval",
+      "idempotencyKey": "billing-plan:key",
+      "requiredFields": ["key", "label", "status", "limits", "features", "createdAt", "updatedAt"],
+      "externalWrites": false,
+      "notes": "Seed the provider-light default plan catalog before Stripe price IDs are attached."
+    },
+    {
       "id": "content-blocks-from-content-items",
       "phase": 2,
       "sourceTables": ["contentItems"],
@@ -251,6 +264,19 @@
       "requiredFields": ["tenantId", "siteId", "createdBy", "title", "taskType", "priority", "status", "isAutomated", "createdAt", "updatedAt"],
       "externalWrites": false,
       "notes": "Legacy follow-up tasks become site-scoped CRM tasks."
+    },
+    {
+      "id": "tenant-entitlements-seeded-from-plan-overrides",
+      "phase": 5,
+      "sourceTables": [],
+      "targetCollection": "tenantEntitlements",
+      "targetStatus": "implemented",
+      "scope": "tenant",
+      "operation": "seed-after-approval",
+      "idempotencyKey": "tenant-entitlement:tenant-id",
+      "requiredFields": ["tenantId", "planKey", "source", "status", "createdAt", "updatedAt"],
+      "externalWrites": false,
+      "notes": "Manual override entitlements are seeded before Stripe Billing owns subscription state."
     },
     {
       "id": "tenants-from-organizations",

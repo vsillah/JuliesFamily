@@ -37,6 +37,67 @@ function normalizeEmail(value?: string) {
   return email;
 }
 
+const defaultBillingPlanCatalog = [
+  {
+    key: "pilot",
+    label: "Pilot",
+    status: "active",
+    monthlyPriceCents: 0,
+    annualPriceCents: 0,
+    limits: {
+      sites: 2,
+      admins: 3,
+      contacts: 500,
+      campaigns: 2,
+      aiCredits: 100,
+      customDomains: 0,
+      automations: 2,
+    },
+    features: ["site factory", "CRM lead capture", "manual override entitlements"],
+    notes: "Early client and proof-of-concept plan before Stripe Billing is connected.",
+  },
+  {
+    key: "growth",
+    label: "Growth",
+    status: "active",
+    monthlyPriceCents: 9700,
+    annualPriceCents: 97000,
+    limits: {
+      sites: 5,
+      admins: 8,
+      contacts: 5000,
+      campaigns: 10,
+      aiCredits: 1000,
+      customDomains: 3,
+      automations: 10,
+    },
+    features: ["multi-site management", "campaign microsites", "custom domains", "automation safety limits"],
+    notes: "Default commercial plan once Stripe Billing is approved.",
+  },
+  {
+    key: "scale",
+    label: "Scale",
+    status: "active",
+    monthlyPriceCents: 29700,
+    annualPriceCents: 297000,
+    limits: {
+      sites: 20,
+      admins: 25,
+      contacts: 25000,
+      campaigns: 50,
+      aiCredits: 5000,
+      customDomains: 10,
+      automations: 50,
+    },
+    features: ["expanded site factory", "advanced CRM", "AI review workflows", "priority launch support"],
+    notes: "Higher-volume client plan; Stripe price IDs stay gated until provider setup.",
+  },
+];
+
+function defaultPlanForKey(planKey: string) {
+  return defaultBillingPlanCatalog.find((plan) => plan.key === planKey);
+}
+
 async function syncCurrentUser(ctx: MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
@@ -192,6 +253,170 @@ export const listTenants = query({
   handler: async (ctx) => {
     await requirePlatformAdmin(ctx);
     return await ctx.db.query("tenants").collect();
+  },
+});
+
+export const listPlanCatalog = query({
+  args: {},
+  handler: async (ctx) => {
+    await requirePermission(ctx, { permission: "billing:manage" });
+    const plans = await ctx.db.query("billingPlans").collect();
+    return plans.length > 0 ? plans : defaultBillingPlanCatalog;
+  },
+});
+
+export const syncDefaultBillingPlans = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const actor = await requirePermission(ctx, { permission: "billing:manage" });
+    const timestamp = now();
+    const syncedPlanIds = [];
+
+    for (const plan of defaultBillingPlanCatalog) {
+      const existing = await ctx.db
+        .query("billingPlans")
+        .withIndex("by_key", (q) => q.eq("key", plan.key))
+        .first();
+
+      if (existing) {
+        await ctx.db.patch(existing._id, {
+          ...plan,
+          updatedAt: timestamp,
+        });
+        syncedPlanIds.push(existing._id);
+      } else {
+        const planId = await ctx.db.insert("billingPlans", {
+          ...plan,
+          createdBy: actor._id,
+          createdAt: timestamp,
+          updatedAt: timestamp,
+        });
+        syncedPlanIds.push(planId);
+      }
+    }
+
+    await writeAuditEvent(ctx, {
+      scopeType: "platform",
+      actorUserId: actor._id,
+      action: "billing_plan_synced",
+      resourceType: "billingPlan",
+      metadata: { planKeys: defaultBillingPlanCatalog.map((plan) => plan.key) },
+    });
+
+    return {
+      syncedCount: syncedPlanIds.length,
+      planIds: syncedPlanIds,
+    };
+  },
+});
+
+export const entitlementSnapshot = query({
+  args: {
+    tenantId: v.id("tenants"),
+  },
+  handler: async (ctx, args) => {
+    await requirePermission(ctx, { permission: "billing:manage" });
+    const tenant = await ctx.db.get(args.tenantId);
+    if (!tenant) {
+      throw new Error("Tenant not found");
+    }
+
+    const entitlement = await ctx.db
+      .query("tenantEntitlements")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
+      .first();
+    const planKey = entitlement?.planKey ?? tenant.planKey ?? "pilot";
+    const persistedPlan = await ctx.db
+      .query("billingPlans")
+      .withIndex("by_key", (q) => q.eq("key", planKey))
+      .first();
+
+    return {
+      tenant,
+      plan: persistedPlan ?? defaultPlanForKey(planKey) ?? defaultBillingPlanCatalog[0],
+      entitlement,
+      providerBoundary: "Stripe Billing gated; manual override entitlements remain active for early customers and pilots.",
+    };
+  },
+});
+
+export const setTenantEntitlementOverride = mutation({
+  args: {
+    tenantId: v.id("tenants"),
+    planKey: v.string(),
+    source: v.union(
+      v.literal("manual"),
+      v.literal("founding"),
+      v.literal("pilot"),
+      v.literal("stripe_billing_gated"),
+    ),
+    status: recordStatus,
+    limits: v.optional(v.any()),
+    featureOverrides: v.optional(v.any()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const actor = await requirePermission(ctx, { permission: "billing:manage" });
+    const tenant = await ctx.db.get(args.tenantId);
+    if (!tenant) {
+      throw new Error("Tenant not found");
+    }
+
+    const persistedPlan = await ctx.db
+      .query("billingPlans")
+      .withIndex("by_key", (q) => q.eq("key", args.planKey))
+      .first();
+    if (!persistedPlan && !defaultPlanForKey(args.planKey)) {
+      throw new Error(`Unknown billing plan: ${args.planKey}`);
+    }
+
+    const timestamp = now();
+    const existing = await ctx.db
+      .query("tenantEntitlements")
+      .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
+      .first();
+    const patch = definedFields({
+      tenantId: args.tenantId,
+      planKey: args.planKey,
+      source: args.source,
+      status: args.status,
+      limits: args.limits,
+      featureOverrides: args.featureOverrides,
+      notes: args.notes,
+      updatedAt: timestamp,
+    });
+
+    let entitlementId = existing?._id;
+    if (existing) {
+      await ctx.db.patch(existing._id, patch);
+    } else {
+      entitlementId = await ctx.db.insert("tenantEntitlements", {
+        ...patch,
+        createdBy: actor._id,
+        createdAt: timestamp,
+      });
+    }
+
+    await ctx.db.patch(args.tenantId, {
+      planKey: args.planKey,
+      updatedAt: timestamp,
+    });
+
+    await writeAuditEvent(ctx, {
+      scopeType: "tenant",
+      tenantId: args.tenantId,
+      actorUserId: actor._id,
+      action: "tenant_entitlement_override",
+      resourceType: "tenantEntitlement",
+      resourceId: entitlementId,
+      metadata: {
+        planKey: args.planKey,
+        source: args.source,
+        providerBoundary: "Stripe Billing gated",
+      },
+    });
+
+    return entitlementId;
   },
 });
 

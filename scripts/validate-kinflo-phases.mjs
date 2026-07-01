@@ -82,6 +82,7 @@ for (const path of [
   "docs/phase18-convex-runtime-boundary.md",
   "docs/phase19-template-quality-contracts.md",
   "docs/phase20-site-creation-wizard-contract.md",
+  "docs/phase21-plan-entitlement-contracts.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -257,6 +258,17 @@ requireIncludes("docs/phase20-site-creation-wizard-contract.md", [
   "No hosted Convex deployment is created",
 ]);
 
+requireIncludes("docs/phase21-plan-entitlement-contracts.md", [
+  "billingPlans",
+  "tenantEntitlements",
+  "controlPlane.listPlanCatalog",
+  "controlPlane.setTenantEntitlementOverride",
+  "billing:manage",
+  "Entitlement Overrides",
+  "Stripe Billing gated",
+  "No hosted Convex deployment is created",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -322,6 +334,8 @@ requireIncludes("docs/convex-import-contracts/import-manifest.json", [
   "\"targetCollection\": \"contentBlocks\"",
   "\"targetCollection\": \"leads\"",
   "\"targetCollection\": \"leadEvents\"",
+  "\"targetCollection\": \"billingPlans\"",
+  "\"targetCollection\": \"tenantEntitlements\"",
   "\"idempotencyKey\"",
 ]);
 
@@ -336,14 +350,25 @@ requireIncludes("convex/schema.ts", [
   "tasks: defineTable",
   "auditEvents: defineTable",
   "invitations: defineTable",
+  "billingPlans: defineTable",
+  "tenantEntitlements: defineTable",
+  ".index(\"by_key\", [\"key\"])",
+  ".index(\"by_tenant\", [\"tenantId\"])",
 ]);
 
 requireIncludes("convex/controlPlane.ts", [
+  "export const listPlanCatalog",
+  "export const syncDefaultBillingPlans",
+  "export const entitlementSnapshot",
+  "export const setTenantEntitlementOverride",
   "export const createInvitation",
   "export const listInvitations",
   "export const revokeInvitation",
   "export const acceptInvitation",
   "requirePermission",
+  "billing:manage",
+  "billing_plan_synced",
+  "tenant_entitlement_override",
   "member:invite",
   "member:manage",
   "invitation_accepted",
@@ -414,6 +439,12 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureLeadCaptureContracts",
   "ShellSiteLaunchPacket",
   "fixtureSiteLaunchPackets",
+  "ShellBillingPlan",
+  "ShellTenantEntitlement",
+  "billingPlans",
+  "tenantEntitlements",
+  "manual override",
+  "Stripe Billing gated",
   "Site factory launch packets",
   "Public site preview renderer",
   "Convex runtime boundary",
@@ -437,6 +468,12 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Image direction",
   "Launch criteria",
   "Site Creation Wizard",
+  "Plans And Entitlements",
+  "Entitlement Overrides",
+  "Stripe Billing gated",
+  "select-kinflo-plan",
+  "controlPlane.setTenantEntitlementOverride",
+  "billing:manage",
   "Live mutation gated",
   "select-kinflo-wizard-template",
   "checkbox-page-",

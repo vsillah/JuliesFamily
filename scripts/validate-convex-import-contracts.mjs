@@ -42,6 +42,8 @@ const requiredImplementedCollections = [
   "leadAssignments",
   "tasks",
   "auditEvents",
+  "billingPlans",
+  "tenantEntitlements",
 ];
 
 const checks = [];

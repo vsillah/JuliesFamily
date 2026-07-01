@@ -308,6 +308,45 @@ export default defineSchema({
     updatedAt: v.number(),
   }).index("by_site", ["siteId"]),
 
+  billingPlans: defineTable({
+    key: v.string(),
+    label: v.string(),
+    status: recordStatus,
+    monthlyPriceCents: v.optional(v.number()),
+    annualPriceCents: v.optional(v.number()),
+    limits: v.any(),
+    features: v.array(v.string()),
+    stripePriceIds: v.optional(v.any()),
+    notes: v.optional(v.string()),
+    createdBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_key", ["key"])
+    .index("by_status", ["status"]),
+
+  tenantEntitlements: defineTable({
+    tenantId: v.id("tenants"),
+    planKey: v.string(),
+    source: v.union(
+      v.literal("manual"),
+      v.literal("founding"),
+      v.literal("pilot"),
+      v.literal("stripe_billing_gated"),
+    ),
+    status: recordStatus,
+    limits: v.optional(v.any()),
+    featureOverrides: v.optional(v.any()),
+    stripeCustomerId: v.optional(v.string()),
+    stripeSubscriptionId: v.optional(v.string()),
+    notes: v.optional(v.string()),
+    createdBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_tenant", ["tenantId"])
+    .index("by_plan_status", ["planKey", "status"]),
+
   featureFlags: defineTable({
     tenantId: v.optional(v.id("tenants")),
     siteId: v.optional(v.id("sites")),

@@ -44,6 +44,29 @@ export type ShellTenant = {
   status: KinfloShellStatus;
 };
 
+export type ShellBillingPlan = {
+  key: string;
+  label: string;
+  price: string;
+  fit: string;
+  status: KinfloShellStatus;
+  limits: { label: string; value: string }[];
+  features: string[];
+  gatedModules: string[];
+};
+
+export type ShellTenantEntitlement = {
+  tenant: string;
+  tenantSlug: string;
+  planKey: string;
+  planLabel: string;
+  source: string;
+  status: KinfloShellStatus;
+  usage: { label: string; value: string; limit: string }[];
+  featureOverrides: string[];
+  nextReview: string;
+};
+
 export type ShellSite = {
   name: string;
   tenant: string;
@@ -155,6 +178,8 @@ export type KinfloShellSnapshot = {
   metrics: ShellMetric[];
   tenants: ShellTenant[];
   sites: ShellSite[];
+  billingPlans: ShellBillingPlan[];
+  tenantEntitlements: ShellTenantEntitlement[];
   templates: ShellTemplate[];
   experienceControls: ShellExperienceControl[];
   roles: ShellRole[];
@@ -226,6 +251,114 @@ const fixtureSites: ShellSite[] = [
     template: "Advisor Consultant",
     status: "draft",
     previewPath: "/kinflo-sites/advisor-client-site",
+  },
+];
+
+const fixtureBillingPlans: ShellBillingPlan[] = [
+  {
+    key: "pilot",
+    label: "Pilot",
+    price: "$0 while provider-gated",
+    fit: "Early customers, proof sites, and launch partners",
+    status: "active",
+    limits: [
+      { label: "Sites", value: "2" },
+      { label: "Admins", value: "3" },
+      { label: "Contacts", value: "500" },
+      { label: "Campaigns", value: "2" },
+      { label: "AI credits", value: "100" },
+      { label: "Custom domains", value: "0" },
+      { label: "Automations", value: "2" },
+    ],
+    features: ["Site factory", "CRM lead capture", "Manual override entitlements"],
+    gatedModules: ["Stripe Billing gated", "Stripe Connect later", "Production import smoke pending"],
+  },
+  {
+    key: "growth",
+    label: "Growth",
+    price: "$97/mo target",
+    fit: "Client businesses that need multiple sites and reusable campaigns",
+    status: "draft",
+    limits: [
+      { label: "Sites", value: "5" },
+      { label: "Admins", value: "8" },
+      { label: "Contacts", value: "5,000" },
+      { label: "Campaigns", value: "10" },
+      { label: "AI credits", value: "1,000" },
+      { label: "Custom domains", value: "3" },
+      { label: "Automations", value: "10" },
+    ],
+    features: ["Campaign microsites", "Custom domains", "Automation safety limits"],
+    gatedModules: ["Stripe price ID", "Hosted Convex billing sync", "Live invoice webhooks"],
+  },
+  {
+    key: "scale",
+    label: "Scale",
+    price: "$297/mo target",
+    fit: "Higher-volume clients with many client sites and operators",
+    status: "draft",
+    limits: [
+      { label: "Sites", value: "20" },
+      { label: "Admins", value: "25" },
+      { label: "Contacts", value: "25,000" },
+      { label: "Campaigns", value: "50" },
+      { label: "AI credits", value: "5,000" },
+      { label: "Custom domains", value: "10" },
+      { label: "Automations", value: "50" },
+    ],
+    features: ["Advanced CRM", "AI review workflows", "Priority launch support"],
+    gatedModules: ["Stripe price ID", "Usage metering", "Client-owned payment module"],
+  },
+];
+
+const fixtureTenantEntitlements: ShellTenantEntitlement[] = [
+  {
+    tenant: "Julie's Family Learning Program",
+    tenantSlug: "julies-family",
+    planKey: "pilot",
+    planLabel: "Pilot",
+    source: "founding tenant manual override",
+    status: "active",
+    usage: [
+      { label: "Sites", value: "2", limit: "2" },
+      { label: "Admins", value: "2", limit: "3" },
+      { label: "Contacts", value: "184", limit: "500" },
+      { label: "Campaigns", value: "1", limit: "2" },
+    ],
+    featureOverrides: ["custom domain review allowed", "public preview enabled", "AI generation review-only"],
+    nextReview: "After hosted Convex smoke",
+  },
+  {
+    tenant: "Advisor Client Starter",
+    tenantSlug: "advisor-client-starter",
+    planKey: "growth",
+    planLabel: "Growth",
+    source: "manual override before Stripe Billing",
+    status: "draft",
+    usage: [
+      { label: "Sites", value: "1", limit: "5" },
+      { label: "Admins", value: "1", limit: "8" },
+      { label: "Contacts", value: "0", limit: "5,000" },
+      { label: "Campaigns", value: "0", limit: "10" },
+    ],
+    featureOverrides: ["site factory enabled", "custom domain gated", "automations gated"],
+    nextReview: "Before client launch",
+  },
+  {
+    tenant: "Campaign Microsite Lab",
+    tenantSlug: "campaign-microsite-lab",
+    planKey: "pilot",
+    planLabel: "Pilot",
+    source: "pilot manual override",
+    status: "draft",
+    usage: [
+      { label: "Sites", value: "2", limit: "2" },
+      { label: "Admins", value: "1", limit: "3" },
+      { label: "Contacts", value: "0", limit: "500" },
+      { label: "Campaigns", value: "1", limit: "2" },
+    ],
+    featureOverrides: ["campaign microsite enabled", "AI credits capped", "Stripe Connect later"],
+    nextReview: "After campaign copy approval",
   },
 ];
 
@@ -474,6 +607,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Convex runtime boundary", status: "done" },
   { label: "Template quality contracts", status: "done" },
   { label: "Site creation wizard contract", status: "done" },
+  { label: "Plan entitlement contracts", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -536,6 +670,8 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       metrics: buildMetrics(),
       tenants: fixtureTenants,
       sites: fixtureSites,
+      billingPlans: fixtureBillingPlans,
+      tenantEntitlements: fixtureTenantEntitlements,
       templates: fixtureTemplates,
       experienceControls: fixtureExperienceControls,
       roles: fixtureRoles,

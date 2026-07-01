@@ -35,6 +35,8 @@ const requiredNewCollections = [
   "leadAssignments",
   "tasks",
   "auditEvents",
+  "billingPlans",
+  "tenantEntitlements",
 ];
 
 const requiredRuleText = [
