@@ -1,6 +1,8 @@
-# Phase 0 Baseline Report
+# Phase 0 Baseline And Completion Report
 
-Date: June 30, 2026
+Initial intake date: June 30, 2026
+
+Current validation date: July 1, 2026
 
 Workspace: `/Users/vambahsillah/Documents/KinFlo CRM`
 
@@ -63,7 +65,7 @@ High-priority audit themes:
 
 ## Validation Baseline
 
-Command run:
+Initial command run:
 
 ```bash
 npm run build
@@ -77,7 +79,7 @@ Notes:
 - Browserlist data is stale.
 - Main JS bundle is large at roughly 3 MB minified, 749 KB gzip.
 
-Command run:
+Initial command run:
 
 ```bash
 npm run check
@@ -100,14 +102,49 @@ Representative failure areas:
 - Admin provisioning `ProgramType` mismatches in `server/storage/adminProvisioningStorage.ts`.
 - Missing generated/type exports for several storage models, including campaign/channel/economics/SMS bulk related types.
 
+Current command run:
+
+```bash
+npm run check -- --pretty false
+```
+
+Current result: pass.
+
+Current command run:
+
+```bash
+npm run kinflo:check-baseline
+```
+
+Current result: pass.
+
+Current TypeScript status:
+
+- Repo-wide TypeScript diagnostics: 0.
+- Protected KinFlo diagnostics: 0.
+- The baseline gate is now a full pass-through around the real `npm run check`.
+- The remaining TypeScript drift documented above is retained as historical intake context only.
+
 ## Current Repo State
 
-Expected Phase 0 changes:
+Expected Phase 0 intake changes:
 
 - `.env.local` removed from tracking.
 - `docs/kinflo-saas-adoption-plan.md` added.
 - `docs/phase0-baseline.md` added.
 - `docs/drizzle-to-convex-migration-map.md` added.
+
+Current Phase 0 and provider-light continuation state:
+
+- `origin` points to `https://github.com/vsillah/JuliesFamily`.
+- The working branch is `codex/kinflo-phase-0-convex-plan`.
+- `.env.local` remains untracked and ignored.
+- Generated Convex API files under `convex/_generated/` are not tracked.
+- `.env.example` contains blank Convex activation placeholders only.
+- The Drizzle-to-Convex migration map has a validator wired through `npm run kinflo:validate-map`.
+- The provider-light phase packet has a validator wired through `npm run kinflo:validate-phases`.
+- The Convex scaffold, KinFlo shell, import contracts, activation preflight, runtime boundary, live handoff, generated API contract, and live smoke manifest have been added behind provider gates.
+- Hosted Convex setup remains pending; no hosted Convex deployment, generated API import, or live Convex query/mutation/action is part of this branch.
 
 Known local artifacts not intended for commit:
 
@@ -118,10 +155,6 @@ Known unrelated or preexisting local artifact:
 
 - `excalidraw.log`
 
-Known generated noise:
-
-- `npm install` normalized `package-lock.json` in the local working tree. Do not include that change in a Phase 0 commit unless intentionally accepting npm lockfile normalization.
-
 ## Phase 0 Gate Status
 
 Completed:
@@ -131,17 +164,20 @@ Completed:
 - Tracked `.env.local` risk quarantined without reading secrets.
 - Install baseline established.
 - Build baseline established.
-- Typecheck baseline established.
+- Typecheck baseline established and later cleared to zero repo-wide diagnostics.
 - Migration map produced.
+- Secret/env guard rails validated by local scripts.
+- Provider-light Convex continuation packet added without a hosted deployment.
 
 Not completed:
 
 - No credentials were rotated.
 - No git history purge was performed.
-- TypeScript failures were not fixed.
 - Audit vulnerabilities were not fixed.
-- No Convex code was added yet.
+- Hosted Convex activation was not performed.
+- Generated Convex API bindings were not produced or committed.
+- Live Convex smoke was not executed.
 
 Recommendation:
 
-Proceed to implementation only after deciding whether Phase 1 should first fix the type/audit baseline or isolate the new Convex shell behind fresh modules that do not depend on the broken Postgres storage layer.
+Proceed with review of the provider-light PR, then move to hosted Convex activation only after Vambah approves the ownership, auth, backup, and credential-rotation gates. The current branch is ready for staged review as a local Convex SaaS/control-plane packet, not as approval to provision providers or import production data.

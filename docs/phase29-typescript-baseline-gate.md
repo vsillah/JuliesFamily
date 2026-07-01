@@ -2,9 +2,9 @@
 
 This phase adds a machine-checkable TypeScript baseline gate for the KinFlo Convex migration lane.
 
-The repo-wide `npm run check` command still fails on pre-existing non-KinFlo TypeScript drift across admin UI, shared defaults, AB testing, storage, and server modules. This phase does not weaken TypeScript, change `tsconfig`, suppress errors globally, or declare the repo-wide check fixed.
+The repo-wide `npm run check` command originally failed on pre-existing non-KinFlo TypeScript drift across admin UI, shared defaults, AB testing, storage, and server modules. This phase does not weaken TypeScript, change `tsconfig`, or suppress errors globally.
 
-Instead, it makes the current failure state explicit while protecting the KinFlo migration surfaces from new TypeScript errors.
+The follow-up cleanup has now cleared the global baseline. The gate remains useful because it runs the real `npm run check`, reports total diagnostics, and keeps the protected KinFlo migration surfaces explicit.
 
 ## What Changed
 
@@ -20,16 +20,18 @@ Instead, it makes the current failure state explicit while protecting the KinFlo
 
 ## Current Baseline Status
 
-`npm run check` remains a known failing global gate.
+`npm run check` now passes.
 
-The current failure buckets are outside the KinFlo Convex migration surfaces and include:
+Current baseline evidence:
 
-- persona preview typing,
-- AB-test UI and tracking typing,
-- content/defaults schema typing,
-- admin automation/reporting typing,
-- server storage interface drift,
-- shared value equation/default content typing.
+- Repo-wide TypeScript diagnostics: 0.
+- Protected KinFlo diagnostics: 0.
+- External writes: 0.
+- Hosted deployment touched: no.
+- Generated API imported: no.
+- Live Convex execution: no.
+
+The original failure buckets were cleared through focused schema/type-contract alignment across client defaults, admin surfaces, server storage, reporting, provider services, and backend communication/audit helpers.
 
 ## Provider Boundary
 
@@ -45,8 +47,6 @@ No production import is performed by this phase.
 
 No DNS, SSL, Vercel domain, Stripe, SendGrid, Twilio, Cloudinary, R2, or S3 provider write is performed by this phase.
 
-## Exit Criteria For The Global TypeScript Track
+## Ongoing Gate
 
-The global TypeScript track is not complete until `npm run check` exits successfully without this baseline wrapper.
-
-Until then, every KinFlo phase should run `npm run kinflo:check-baseline` so new migration work cannot add TypeScript diagnostics to protected KinFlo or Convex surfaces.
+Every KinFlo phase should still run `npm run kinflo:check-baseline` so new migration work cannot reintroduce diagnostics to protected KinFlo or Convex surfaces. Because the repo-wide check now passes, any future diagnostic should be treated as a regression unless a new baseline is deliberately approved.
