@@ -33,7 +33,7 @@ These limits are measurable against current Convex collections and are enforced 
 - `contacts` from non-archived `leads`,
 - `customDomains` from non-disabled `domains`.
 
-The `customDomains` counter is available in the usage snapshot, but no domain creation mutation exists yet in the provider-light shell.
+The `customDomains` counter is available in the usage snapshot. Phase 23 wires that counter into the existing `siteBuilder.upsertDomain` mutation.
 
 ## Contract Placeholders
 

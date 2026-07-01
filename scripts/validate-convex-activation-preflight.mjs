@@ -67,6 +67,7 @@ for (const path of [
   "package.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
+  "convex/siteBuilder.ts",
   "convex/siteFactory.ts",
   "convex/publicSite.ts",
   "convex/activation.ts",
@@ -108,6 +109,12 @@ requireIncludes("convex/controlPlane.ts", [
 requireIncludes("convex/siteFactory.ts", [
   "export const listStarterTemplates",
   "export const createSiteFromTemplate",
+]);
+
+requireIncludes("convex/siteBuilder.ts", [
+  "export const upsertDomain",
+  "requireEntitlementLimit",
+  "customDomains",
 ]);
 
 requireIncludes("convex/publicSite.ts", [

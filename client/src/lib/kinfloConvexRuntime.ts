@@ -13,6 +13,7 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   siteFactoryListStarterTemplates: "siteFactory.listStarterTemplates",
   siteFactoryCreateSiteFromTemplate: "siteFactory.createSiteFromTemplate",
   siteBuilderGetSiteDraft: "siteBuilder.getSiteDraft",
+  siteBuilderUpsertDomain: "siteBuilder.upsertDomain",
   publicSiteResolvePublishedSite: "publicSite.resolvePublishedSite",
   crmSubmitLead: "crm.submitLead",
   crmListLeads: "crm.listLeads",

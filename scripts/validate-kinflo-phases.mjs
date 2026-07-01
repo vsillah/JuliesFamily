@@ -84,6 +84,7 @@ for (const path of [
   "docs/phase20-site-creation-wizard-contract.md",
   "docs/phase21-plan-entitlement-contracts.md",
   "docs/phase22-entitlement-guard-contracts.md",
+  "docs/phase23-custom-domain-entitlement-contracts.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -285,6 +286,17 @@ requireIncludes("docs/phase22-entitlement-guard-contracts.md", [
   "No hosted Convex deployment is created",
 ]);
 
+requireIncludes("docs/phase23-custom-domain-entitlement-contracts.md", [
+  "siteBuilder.upsertDomain",
+  "requireEntitlementLimit",
+  "customDomains",
+  "duplicate hostname protection",
+  "site.primaryDomain",
+  "publicSite.resolvePublishedSite",
+  "No DNS records are created",
+  "No hosted Convex deployment is created",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -336,6 +348,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "env_configured_codegen_pending",
   "entitlements.entitlementUsageSnapshot",
   "entitlements.checkEntitlementLimit",
+  "siteBuilder.upsertDomain",
   "crm.submitLead",
   "publicSite.resolvePublishedSite",
 ]);
@@ -428,9 +441,14 @@ requireIncludes("convex/accessPolicy.ts", [
 
 requireIncludes("convex/siteBuilder.ts", [
   "requirePermission",
+  "requireEntitlementLimit",
   "content:edit",
   "content:publish",
   "asset:manage",
+  "export const upsertDomain",
+  "customDomains",
+  "Domain already exists",
+  "primaryDomain",
 ]);
 
 requireIncludes("convex/siteFactory.ts", [
@@ -486,6 +504,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Template quality contracts",
   "ShellSiteCreationWizard",
   "Entitlement guard contracts",
+  "Custom domain entitlement guard",
   "siteCreationWizard",
   "configurableFields",
   "imageDirection",

@@ -6,6 +6,7 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { requirePermission } from "./accessPolicy";
+import { requireEntitlementLimit } from "./entitlements";
 import { assetStatus, contentBlockType, domainStatus, navPlacement, publishStatus } from "./schema";
 
 type QueryCtx = GenericQueryCtx<any>;
@@ -468,12 +469,26 @@ export const upsertDomain = mutation({
       throw new Error("Hostname must be a bare domain such as example.com");
     }
 
+    const existingForHostname = await ctx.db
+      .query("domains")
+      .withIndex("by_hostname", (q) => q.eq("hostname", hostname))
+      .first();
     const timestamp = now();
     if (args.domainId) {
       const domain = await ctx.db.get(args.domainId);
       if (!domain || domain.siteId !== args.siteId) {
         throw new Error("Domain not found for site");
       }
+      if (existingForHostname && existingForHostname._id !== domain._id) {
+        throw new Error(`Domain already exists: ${hostname}`);
+      }
+
+      const entitlementGuard = domain.status === "disabled" && args.status !== "disabled"
+        ? await requireEntitlementLimit(ctx, {
+            tenantId: site.tenantId,
+            key: "customDomains",
+          })
+        : undefined;
       await ctx.db.patch(domain._id, definedFields({
         hostname,
         status: args.status,
@@ -483,17 +498,47 @@ export const upsertDomain = mutation({
         verifiedAt: args.status === "verified" ? timestamp : domain.verifiedAt,
         disabledAt: args.status === "disabled" ? timestamp : domain.disabledAt,
       }));
+
+      if (args.isPrimary && args.status === "verified") {
+        const siteDomains = await ctx.db
+          .query("domains")
+          .withIndex("by_site", (q) => q.eq("siteId", args.siteId))
+          .collect();
+        for (const siteDomain of siteDomains) {
+          if (siteDomain._id !== domain._id && siteDomain.isPrimary) {
+            await ctx.db.patch(siteDomain._id, { isPrimary: false, updatedAt: timestamp });
+          }
+        }
+        await ctx.db.patch(site._id, { primaryDomain: hostname, updatedAt: timestamp });
+      }
+
+      await writeAuditEvent(ctx, {
+        tenantId: site.tenantId,
+        siteId: site._id,
+        actorUserId: user._id,
+        action: "domain_upserted",
+        resourceType: "domain",
+        resourceId: domain._id,
+        metadata: {
+          hostname,
+          status: args.status,
+          isPrimary: args.isPrimary ?? domain.isPrimary,
+          entitlementGuard,
+        },
+      });
       return domain._id;
     }
 
-    const existing = await ctx.db
-      .query("domains")
-      .withIndex("by_hostname", (q) => q.eq("hostname", hostname))
-      .first();
-    if (existing) {
+    if (existingForHostname) {
       throw new Error(`Domain already exists: ${hostname}`);
     }
 
+    const entitlementGuard = args.status !== "disabled"
+      ? await requireEntitlementLimit(ctx, {
+          tenantId: site.tenantId,
+          key: "customDomains",
+        })
+      : undefined;
     const domainId = await ctx.db.insert("domains", definedFields({
       tenantId: site.tenantId,
       siteId: site._id,
@@ -508,6 +553,19 @@ export const upsertDomain = mutation({
       disabledAt: args.status === "disabled" ? timestamp : undefined,
     }));
 
+    if (args.isPrimary && args.status === "verified") {
+      const siteDomains = await ctx.db
+        .query("domains")
+        .withIndex("by_site", (q) => q.eq("siteId", args.siteId))
+        .collect();
+      for (const siteDomain of siteDomains) {
+        if (siteDomain._id !== domainId && siteDomain.isPrimary) {
+          await ctx.db.patch(siteDomain._id, { isPrimary: false, updatedAt: timestamp });
+        }
+      }
+      await ctx.db.patch(site._id, { primaryDomain: hostname, updatedAt: timestamp });
+    }
+
     await writeAuditEvent(ctx, {
       tenantId: site.tenantId,
       siteId: site._id,
@@ -515,7 +573,7 @@ export const upsertDomain = mutation({
       action: "domain_upserted",
       resourceType: "domain",
       resourceId: domainId,
-      metadata: { hostname, status: args.status, isPrimary: args.isPrimary ?? false },
+      metadata: { hostname, status: args.status, isPrimary: args.isPrimary ?? false, entitlementGuard },
     });
 
     return domainId;
