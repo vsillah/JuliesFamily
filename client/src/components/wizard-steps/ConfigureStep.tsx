@@ -547,6 +547,7 @@ function renderVariantConfig(
               <div className="flex items-center justify-between mb-2">
                 <Label>Description</Label>
                 <CopyVariantGenerator
+                  originalContent={variant.configuration?.description || ""}
                   buttonText="Generate with AI"
                   buttonVariant="outline"
                   contentType={testType === 'hero_variation' ? 'hero' : 'cta'}

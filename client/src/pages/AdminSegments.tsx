@@ -190,7 +190,7 @@ function SegmentsContent() {
     setSegmentName(segment.name);
     setSegmentDescription(segment.description || "");
     setFilters(segment.filters as SegmentFilters);
-    setIsActive(segment.isActive);
+    setIsActive(segment.isActive ?? true);
     setShowSegmentDialog(true);
     setIsEditMode(true);
   };
