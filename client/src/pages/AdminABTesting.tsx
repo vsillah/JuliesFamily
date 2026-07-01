@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ToastAction } from "@/components/ui/toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +29,7 @@ import {
   Palette, FileJson, Zap
 } from "lucide-react";
 import { useLocation, Link } from "wouter";
-import type { AbTestWithVariants, AbTestVariant } from "@shared/schema";
+import type { AbTest, AbTestWithVariants, AbTestVariant } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { ABTestWizard, type TestConfiguration } from "@/components/ABTestWizard";
@@ -37,6 +38,31 @@ import type { AbTestVariantConfiguration } from "@shared/schema";
 import { UniversalSearch } from "@/components/UniversalSearch";
 import { TierGate } from "@/components/TierGate";
 import { TIERS } from "@shared/tiers";
+
+type WizardCompletion = Omit<TestConfiguration, "selectedCombinations"> & {
+  selectedCombinations: Set<string> | string[];
+};
+
+function selectedCombinationsToArray(combinations: Set<string> | string[]): string[] {
+  return Array.isArray(combinations) ? combinations : Array.from(combinations);
+}
+
+function deriveLegacyTarget(combinations: string[]) {
+  const [persona, funnelStage] = combinations[0]?.split(":") ?? [];
+
+  return {
+    targetPersona: persona && persona !== "all" ? persona : undefined,
+    targetFunnelStage: funnelStage && funnelStage !== "all" ? funnelStage : undefined,
+  };
+}
+
+function variantTrafficWeight(variant: Pick<AbTestVariant, "trafficWeight">): number {
+  return variant.trafficWeight ?? 0;
+}
+
+function variantIsControl(variant: Pick<AbTestVariant, "isControl">): boolean {
+  return variant.isControl ?? false;
+}
 
 export default function AdminABTesting() {
   const { user } = useAuth();
@@ -154,8 +180,11 @@ export default function AdminABTesting() {
   });
 
   // Handle wizard completion
-  const handleWizardComplete = async (config: TestConfiguration) => {
+  const handleWizardComplete = async (config: WizardCompletion) => {
     try {
+      const selectedCombinations = selectedCombinationsToArray(config.selectedCombinations);
+      const legacyTarget = deriveLegacyTarget(selectedCombinations);
+
       // Validate configuration
       if (config.variants.length < 2) {
         toast({
@@ -191,8 +220,9 @@ export default function AdminABTesting() {
         name: config.name,
         description: config.description,
         type: config.type,
-        targetPersona: config.targetPersona || undefined,
-        targetFunnelStage: config.targetFunnelStage || undefined,
+        selectedCombinations,
+        targetPersona: legacyTarget.targetPersona,
+        targetFunnelStage: legacyTarget.targetFunnelStage,
         trafficAllocation: config.trafficAllocation,
         status: 'active', // Start as active since it's fully configured
       };
@@ -211,8 +241,8 @@ export default function AdminABTesting() {
               isActive: true,
               order: 0,
               metadata: {
-                persona: config.targetPersona || null,
-                funnelStage: config.targetFunnelStage || null,
+                persona: legacyTarget.targetPersona || null,
+                funnelStage: legacyTarget.targetFunnelStage || null,
                 primaryButton: variant.configuration.primaryButton || '',
                 secondaryButton: variant.configuration.secondaryButton || '',
                 subtitle: `A/B Test Variant: ${variant.name}`,
@@ -462,20 +492,24 @@ export default function AdminABTesting() {
       toast({
         title: "AI Suggestions Applied",
         description: "Name and description have been generated. You can edit them further.",
-        action: {
-          label: "Undo",
-          onClick: () => {
-            setNewVariant({
-              ...newVariant,
-              name: previousName,
-              description: previousDescription,
-            });
-            toast({
-              title: "Reverted",
-              description: "AI suggestions have been undone.",
-            });
-          },
-        },
+        action: (
+          <ToastAction
+            altText="Undo AI suggestions"
+            onClick={() => {
+              setNewVariant({
+                ...newVariant,
+                name: previousName,
+                description: previousDescription,
+              });
+              toast({
+                title: "Reverted",
+                description: "AI suggestions have been undone.",
+              });
+            }}
+          >
+            Undo
+          </ToastAction>
+        ),
       });
     },
     onError: (error: any) => {
@@ -508,6 +542,7 @@ export default function AdminABTesting() {
         secondaryCtaLink: "",
         buttonVariant: "default",
         imageName: "",
+        configuration: null,
         jsonConfig: "",
       });
       toast({
@@ -608,7 +643,7 @@ export default function AdminABTesting() {
     if (!selectedTest) return;
 
     // VALIDATION: Check traffic allocation before submission
-    const existingAllocation = selectedTest.variants?.reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+    const existingAllocation = selectedTest.variants?.reduce((sum, v) => sum + variantTrafficWeight(v), 0) || 0;
     const proposedTotal = existingAllocation + newVariant.trafficWeight;
     
     if (proposedTotal > 100) {
@@ -682,8 +717,8 @@ export default function AdminABTesting() {
     setEditVariant({
       name: variant.name,
       description: variant.description || "",
-      trafficWeight: variant.trafficWeight,
-      isControl: variant.isControl,
+      trafficWeight: variant.trafficWeight ?? 50,
+      isControl: variantIsControl(variant),
       // Legacy presentation fields (for hero, cta, messaging)
       title: config?.title || "",
       ctaText: config?.ctaText || "",
@@ -712,7 +747,7 @@ export default function AdminABTesting() {
     // VALIDATION: Check traffic allocation (excluding current variant's weight)
     const otherVariantsWeight = selectedTest.variants
       ?.filter(v => v.id !== editingVariant.id)
-      .reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+      .reduce((sum, v) => sum + variantTrafficWeight(v), 0) || 0;
     const proposedTotal = otherVariantsWeight + editVariant.trafficWeight;
     
     if (proposedTotal > 100) {
@@ -725,8 +760,8 @@ export default function AdminABTesting() {
     }
 
     // VALIDATION: Prevent removing last control variant
-    if (!editVariant.isControl && editingVariant.isControl) {
-      const otherControls = selectedTest.variants?.filter(v => v.id !== editingVariant.id && v.isControl) || [];
+    if (!editVariant.isControl && variantIsControl(editingVariant)) {
+      const otherControls = selectedTest.variants?.filter(v => v.id !== editingVariant.id && variantIsControl(v)) || [];
       if (otherControls.length === 0) {
         toast({
           title: "Cannot Remove Control",
@@ -1476,7 +1511,7 @@ export default function AdminABTesting() {
               />
               {(() => {
                 // Current allocation from existing variants
-                const existingAllocation = selectedTest?.variants?.reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+                const existingAllocation = selectedTest?.variants?.reduce((sum, v) => sum + variantTrafficWeight(v), 0) || 0;
                 
                 // Proposed allocation including this new variant
                 const proposedTotal = existingAllocation + newVariant.trafficWeight;
@@ -1710,7 +1745,7 @@ export default function AdminABTesting() {
               <Button
                 onClick={handleCreateVariant}
                 disabled={createVariantMutation.isPending || !newVariant.name || (() => {
-                  const allocatedWeight = selectedTest?.variants?.reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+                  const allocatedWeight = selectedTest?.variants?.reduce((sum, v) => sum + variantTrafficWeight(v), 0) || 0;
                   return (allocatedWeight + newVariant.trafficWeight) > 100;
                 })()}
                 data-testid="button-submit-variant"
@@ -1805,7 +1840,7 @@ export default function AdminABTesting() {
                 if (!selectedTest || !editingVariant) return null;
                 const otherVariantsWeight = selectedTest.variants
                   ?.filter(v => v.id !== editingVariant.id)
-                  .reduce((sum, v) => sum + v.trafficWeight, 0) || 0;
+                  .reduce((sum, v) => sum + variantTrafficWeight(v), 0) || 0;
                 const proposedTotal = otherVariantsWeight + editVariant.trafficWeight;
                 const remainingAfterProposed = 100 - proposedTotal;
                 const isOverAllocated = proposedTotal > 100;
