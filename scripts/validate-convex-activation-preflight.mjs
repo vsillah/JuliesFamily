@@ -76,6 +76,8 @@ for (const path of [
   "docs/phase3-convex-activation-smoke.md",
   "docs/phase16-site-factory-launch-packets.md",
   "docs/phase17-convex-activation-preflight.md",
+  "docs/phase24-live-convex-handoff.md",
+  "scripts/validate-convex-live-handoff.mjs",
 ]) {
   requireFile(path);
 }
@@ -91,6 +93,7 @@ requireIncludes("package.json", [
   "\"convex:codegen\"",
   "\"convex:check\"",
   "\"kinflo:activation-preflight\"",
+  "\"kinflo:live-handoff\"",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -139,6 +142,14 @@ requireIncludes("docs/phase17-convex-activation-preflight.md", [
   "CONVEX_DEPLOYMENT",
   "VITE_CONVEX_URL",
   "activation.seedSmokeSite",
+]);
+
+requireIncludes("docs/phase24-live-convex-handoff.md", [
+  "npm run kinflo:live-handoff",
+  "npm run convex:codegen",
+  "Generated API bindings are reviewed",
+  "No hosted Convex deployment is created",
+  "No live Convex query, mutation, or action is executed",
 ]);
 
 const liveReadiness = {

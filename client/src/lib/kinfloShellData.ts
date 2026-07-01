@@ -610,6 +610,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Plan entitlement contracts", status: "done" },
   { label: "Entitlement guard contracts", status: "done" },
   { label: "Custom domain entitlement guard", status: "done" },
+  { label: "Live Convex handoff checklist", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];

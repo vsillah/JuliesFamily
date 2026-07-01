@@ -85,6 +85,7 @@ for (const path of [
   "docs/phase21-plan-entitlement-contracts.md",
   "docs/phase22-entitlement-guard-contracts.md",
   "docs/phase23-custom-domain-entitlement-contracts.md",
+  "docs/phase24-live-convex-handoff.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -106,6 +107,7 @@ for (const path of [
   "scripts/validate-convex-import-contracts.mjs",
   "scripts/dry-run-convex-import-contracts.mjs",
   "scripts/validate-convex-activation-preflight.mjs",
+  "scripts/validate-convex-live-handoff.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -297,12 +299,30 @@ requireIncludes("docs/phase23-custom-domain-entitlement-contracts.md", [
   "No hosted Convex deployment is created",
 ]);
 
+requireIncludes("docs/phase24-live-convex-handoff.md", [
+  "npm run kinflo:live-handoff",
+  "Hosted Convex project exists",
+  "CONVEX_DEPLOYMENT",
+  "VITE_CONVEX_URL",
+  "npm run convex:codegen",
+  "Generated API bindings are reviewed",
+  "activation.readiness",
+  "activation.seedSmokeSite",
+  "publicSite.resolvePublishedSite",
+  "crm.submitLead",
+  "Cross-tenant permission smoke",
+  "Rollback plan",
+  "No hosted Convex deployment is created",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"kinflo:validate-imports\"",
   "\"kinflo:dry-run-imports\"",
   "\"kinflo:activation-preflight\"",
+  "\"kinflo:live-handoff\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -337,6 +357,15 @@ requireIncludes("scripts/validate-convex-activation-preflight.mjs", [
   "Hosted deployment touched: no",
   "activation.seedSmokeSite",
   "convex/entitlements.ts",
+  "docs/phase24-live-convex-handoff.md",
+]);
+
+requireIncludes("scripts/validate-convex-live-handoff.mjs", [
+  "docs/phase24-live-convex-handoff.md",
+  "generatedApiAvailable = false",
+  "External writes: 0",
+  "Hosted deployment touched: no",
+  "Live Convex execution: no",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
@@ -505,6 +534,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellSiteCreationWizard",
   "Entitlement guard contracts",
   "Custom domain entitlement guard",
+  "Live Convex handoff checklist",
   "siteCreationWizard",
   "configurableFields",
   "imageDirection",

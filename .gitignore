@@ -9,3 +9,6 @@ vite.config.ts.*
 .env
 .env.local
 .env.*.local
+
+# Convex generated API remains gated until live activation approval.
+convex/_generated/
