@@ -89,6 +89,7 @@ for (const path of [
   "docs/phase25-live-adapter-contract.md",
   "docs/phase26-generated-api-contract.md",
   "docs/phase27-live-smoke-manifest.md",
+  "docs/phase28-live-smoke-dry-runner.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -116,6 +117,7 @@ for (const path of [
   "scripts/validate-kinflo-live-adapter.mjs",
   "scripts/validate-kinflo-generated-api-contract.mjs",
   "scripts/validate-kinflo-live-smoke-manifest.mjs",
+  "scripts/dry-run-kinflo-live-smoke.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -354,7 +356,17 @@ requireIncludes("docs/phase26-generated-api-contract.md", [
 requireIncludes("docs/phase27-live-smoke-manifest.md", [
   "docs/convex-live-smoke-manifest.json",
   "npm run kinflo:validate-live-smoke",
+  "npm run kinflo:dry-run-live-smoke",
   "KINFLO_GENERATED_API_BINDINGS",
+  "No generated Convex API files are committed",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase28-live-smoke-dry-runner.md", [
+  "npm run kinflo:dry-run-live-smoke",
+  "scripts/dry-run-kinflo-live-smoke.mjs",
+  "ordered activation packet",
   "No generated Convex API files are committed",
   "No generated API is imported",
   "No live Convex query, mutation, or action is executed",
@@ -370,6 +382,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-live-adapter\"",
   "\"kinflo:validate-generated-api\"",
   "\"kinflo:validate-live-smoke\"",
+  "\"kinflo:dry-run-live-smoke\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -438,6 +451,13 @@ requireIncludes("scripts/validate-kinflo-live-smoke-manifest.mjs", [
   "docs/convex-live-smoke-manifest.json",
   "KINFLO_GENERATED_API_BINDINGS",
   "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/dry-run-kinflo-live-smoke.mjs", [
+  "scripts/validate-kinflo-live-smoke-manifest.mjs",
+  "docs/convex-live-smoke-manifest.json",
+  "Ordered activation packet",
   "Live Convex execution: no",
 ]);
 
@@ -630,6 +650,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Custom domain entitlement guard",
   "Live Convex handoff checklist",
   "Live smoke manifest",
+  "Live smoke dry runner",
   "siteCreationWizard",
   "configurableFields",
   "imageDirection",

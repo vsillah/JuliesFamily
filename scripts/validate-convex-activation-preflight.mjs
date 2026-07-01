@@ -80,11 +80,13 @@ for (const path of [
   "docs/phase25-live-adapter-contract.md",
   "docs/phase26-generated-api-contract.md",
   "docs/phase27-live-smoke-manifest.md",
+  "docs/phase28-live-smoke-dry-runner.md",
   "docs/convex-live-smoke-manifest.json",
   "scripts/validate-convex-live-handoff.mjs",
   "scripts/validate-kinflo-live-adapter.mjs",
   "scripts/validate-kinflo-generated-api-contract.mjs",
   "scripts/validate-kinflo-live-smoke-manifest.mjs",
+  "scripts/dry-run-kinflo-live-smoke.mjs",
 ]) {
   requireFile(path);
 }
@@ -104,6 +106,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-live-adapter\"",
   "\"kinflo:validate-generated-api\"",
   "\"kinflo:validate-live-smoke\"",
+  "\"kinflo:dry-run-live-smoke\"",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -158,6 +161,7 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
   "npm run kinflo:live-handoff",
   "npm run convex:codegen",
   "npm run kinflo:validate-live-smoke",
+  "npm run kinflo:dry-run-live-smoke",
   "Generated API bindings are reviewed",
   "No hosted Convex deployment is created",
   "No live Convex query, mutation, or action is executed",
@@ -166,6 +170,13 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
 requireIncludes("docs/phase27-live-smoke-manifest.md", [
   "docs/convex-live-smoke-manifest.json",
   "npm run kinflo:validate-live-smoke",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase28-live-smoke-dry-runner.md", [
+  "npm run kinflo:dry-run-live-smoke",
+  "ordered activation packet",
   "No generated API is imported",
   "No live Convex query, mutation, or action is executed",
 ]);
