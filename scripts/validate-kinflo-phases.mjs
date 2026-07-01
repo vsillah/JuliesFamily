@@ -123,6 +123,7 @@ for (const path of [
   "docs/phase55-client-website-design-studio.md",
   "docs/phase56-client-website-launch-blueprints.md",
   "docs/phase57-convex-launch-blueprint-query.md",
+  "docs/phase58-client-admin-permission-presets.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -177,6 +178,7 @@ for (const path of [
   "scripts/validate-kinflo-client-website-studio.mjs",
   "scripts/validate-kinflo-client-website-blueprints.mjs",
   "scripts/validate-kinflo-convex-launch-blueprint-query.mjs",
+  "scripts/validate-kinflo-client-admin-permission-presets.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -855,6 +857,18 @@ requireIncludes("docs/phase57-convex-launch-blueprint-query.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase58-client-admin-permission-presets.md", [
+  "npm run kinflo:validate-client-admin-permission-presets",
+  "siteFactory.listClientWebsiteAdminPermissionPresets",
+  "clientWebsiteStudio.adminPermissionPresets",
+  "Permission presets: 3",
+  "Admin Permission Preset",
+  "Admin handoff action: gated",
+  "Local state only: yes",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -884,6 +898,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-website-studio\"",
   "\"kinflo:validate-client-website-blueprints\"",
   "\"kinflo:validate-convex-launch-blueprint-query\"",
+  "\"kinflo:validate-client-admin-permission-presets\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1222,6 +1237,16 @@ requireIncludes("scripts/validate-kinflo-convex-launch-blueprint-query.mjs", [
   "Live Convex execution: no",
 ]);
 
+requireIncludes("scripts/validate-kinflo-client-admin-permission-presets.mjs", [
+  "siteFactory.listClientWebsiteAdminPermissionPresets",
+  "export const listClientWebsiteAdminPermissionPresets",
+  "siteFactoryListClientWebsiteAdminPermissionPresets",
+  "section-kinflo-client-admin-permission-preset",
+  "button-client-admin-permission-gated",
+  "Admin handoff action: gated",
+  "Live Convex execution: no",
+]);
+
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
   "process\\.env",
   "import\\.meta\\.env",
@@ -1356,6 +1381,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "entitlements.checkEntitlementLimit",
   "preferences.getMyPreferences",
   "preferences.upsertMyPreferences",
+  "siteFactory.listClientWebsiteAdminPermissionPresets",
   "siteFactory.listClientWebsiteLaunchBlueprints",
   "siteBuilder.upsertDomain",
   "crm.submitLead",
@@ -1377,6 +1403,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "siteBuilderPublishPage",
   "preferencesGetMyPreferences",
   "preferencesUpsertMyPreferences",
+  "siteFactoryListClientWebsiteAdminPermissionPresets",
   "siteFactoryListClientWebsiteLaunchBlueprints",
   "crmListJourneyProgressionRules",
   "crmUpsertJourneyProgressionRule",
@@ -1500,6 +1527,10 @@ requireIncludes("convex/siteFactory.ts", [
   "clientWebsiteLaunchBlueprints",
   "export const listClientWebsiteLaunchBlueprints",
   "Read-only launch blueprint query",
+  "ClientWebsiteAdminPermissionPreset",
+  "clientWebsiteAdminPermissionPresets",
+  "export const listClientWebsiteAdminPermissionPresets",
+  "Read-only admin permission preset query",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -1587,7 +1618,10 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureClientWebsiteStudio",
   "clientWebsiteStudio: fixtureClientWebsiteStudio",
   "ShellClientWebsiteLaunchBlueprint",
+  "ShellClientWebsiteAdminPermissionPreset",
   "launchBlueprints",
+  "adminPermissionPresets",
+  "siteFactory.listClientWebsiteAdminPermissionPresets",
   "siteFactory.listClientWebsiteLaunchBlueprints",
   "mission-clarity",
   "branded-portal-handoff",
@@ -1894,6 +1928,10 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-website-blueprint",
   "text-kinflo-client-website-blueprint",
   "button-open-client-website-blueprint-factory",
+  "selectedClientWebsiteAdminPermissionPreset",
+  "section-kinflo-client-admin-permission-preset",
+  "text-kinflo-client-admin-permission-preset",
+  "button-client-admin-permission-gated",
   "setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId)",
   "Launch Blueprint",
   "previewPath",

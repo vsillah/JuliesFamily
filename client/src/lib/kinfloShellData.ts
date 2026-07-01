@@ -305,11 +305,25 @@ export type ShellClientWebsiteLaunchBlueprint = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteAdminPermissionPreset = {
+  siteKey: string;
+  label: string;
+  description: string;
+  ownerRole: string;
+  inviteRole: string;
+  scope: "platform" | "tenant" | "site";
+  permissionSet: string[];
+  approvalGates: string[];
+  blockedActions: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
   designPatterns: ShellClientWebsiteStudioPattern[];
   launchBlueprints: ShellClientWebsiteLaunchBlueprint[];
+  adminPermissionPresets: ShellClientWebsiteAdminPermissionPreset[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -1249,6 +1263,86 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  adminPermissionPresets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Founding platform steward",
+      description: "Super-admin only retrofit preset for the seeded Julie Family tenant until hosted auth, role sync, and public renderer smokes pass.",
+      ownerRole: "platform.super_admin",
+      inviteRole: "platform.super_admin",
+      scope: "platform",
+      permissionSet: ["site:view", "content:edit", "content:publish", "lead:view", "audit:view"],
+      approvalGates: [
+        "Confirm seeded tenant ownership",
+        "Review content provenance before publish",
+        "Keep client admin invitations disabled until role sync smoke passes",
+      ],
+      blockedActions: [
+        "client admin invitation",
+        "membership grant",
+        "content publish write",
+        "public lead write",
+      ],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "accessPolicy.viewerPermissionSnapshot",
+        "roleCatalog.listRoleDefinitions",
+        "controlPlane.grantMembership",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Tenant admin launch owner",
+      description: "Client-ready tenant admin preset for advisory sites with site creation, scoped invitation, content editing, and publish review gates.",
+      ownerRole: "tenant.admin",
+      inviteRole: "tenant.admin",
+      scope: "tenant",
+      permissionSet: ["tenant:view", "site:create", "member:invite", "content:edit", "content:publish", "lead:view"],
+      approvalGates: [
+        "Create tenant after plan and entitlement review",
+        "Invite client admin only after owner role is approved",
+        "Require preview and lead smoke before publish",
+      ],
+      blockedActions: [
+        "tenant create mutation",
+        "client admin invitation email",
+        "membership grant",
+        "public publish write",
+      ],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "controlPlane.grantMembership",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Site editor campaign operator",
+      description: "Site-scoped editor preset for campaign microsites where content, leads, and campaigns stay limited to the selected site.",
+      ownerRole: "site.editor",
+      inviteRole: "site.editor",
+      scope: "site",
+      permissionSet: ["site:view", "member:invite", "content:edit", "lead:view", "campaign:manage"],
+      approvalGates: [
+        "Attach editor only to the selected campaign site",
+        "Review campaign consent before provider activation",
+        "Keep publish and send actions blocked until launch readiness passes",
+      ],
+      blockedActions: [
+        "site editor invitation email",
+        "campaign send",
+        "AI copy publish",
+        "public form lead write",
+      ],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "controlPlane.createInvitation",
+        "accessPolicy.viewerPermissionSnapshot",
+        "campaigns.requestCampaignApproval",
+      ],
+    },
+  ],
   researchSources: [
     { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
     { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },
@@ -1257,6 +1351,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
   ],
   providerBoundary: "Client website studio changes are local review notes until hosted Convex, generated API bindings, visual QA, domain readiness, and publish approval are complete.",
   convexFunctions: [
+    "siteFactory.listClientWebsiteAdminPermissionPresets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
     "siteBuilder.getSiteDraft",
     "siteBuilder.updatePage",
@@ -2007,6 +2102,7 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
     fixtureSource: "launch packets and site creation wizard",
     convexFunctions: [
       "siteFactory.listStarterTemplates",
+      "siteFactory.listClientWebsiteAdminPermissionPresets",
       "siteFactory.listClientWebsiteLaunchBlueprints",
       "siteFactory.createSiteFromTemplate",
     ],

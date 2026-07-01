@@ -539,6 +539,11 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.launchBlueprints[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchBlueprints],
   );
+  const selectedClientWebsiteAdminPermissionPreset = useMemo(
+    () => snapshot.clientWebsiteStudio.adminPermissionPresets.find((preset) => preset.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.adminPermissionPresets[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.adminPermissionPresets],
+  );
   const selectedAssetSite = useMemo(
     () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
     [assetSiteKey, snapshot.assetLibrary.siteOptions],
@@ -3128,6 +3133,81 @@ export default function AdminKinfloShell() {
                       >
                         <Factory className="mr-2 h-4 w-4" />
                         Open factory packet
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-admin-permission-preset">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <KeyRound className="h-4 w-4 text-slate-500" />
+                          <h3 className="text-base font-semibold">Admin Permission Preset</h3>
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-admin-permission-preset">
+                          {selectedClientWebsiteAdminPermissionPreset?.label}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{selectedClientWebsiteAdminPermissionPreset?.scope} scope</Badge>
+                    </div>
+
+                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                      {selectedClientWebsiteAdminPermissionPreset?.description}
+                    </p>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Owner role</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteAdminPermissionPreset?.ownerRole}</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Invite role</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteAdminPermissionPreset?.inviteRole}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Permission set</div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedClientWebsiteAdminPermissionPreset?.permissionSet.map((permission) => (
+                          <Badge key={permission} variant="outline">{permission}</Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Approval gates</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsiteAdminPermissionPreset?.approvalGates.map((gate) => (
+                          <div key={gate} className="flex items-start gap-2 text-sm text-slate-600">
+                            <CircleDashed className="mt-0.5 h-4 w-4 text-slate-400" />
+                            <span>{gate}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Blocked permission actions</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsiteAdminPermissionPreset?.blockedActions.map((action) => (
+                          <div key={action} className="flex items-start gap-2 text-xs text-slate-600">
+                            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                            <span>{action}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClientWebsiteAdminPermissionPreset?.convexFunctions.map((functionName) => (
+                          <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
+                        ))}
+                      </div>
+                      <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-admin-permission-gated">
+                        <UserRoundCog className="mr-2 h-4 w-4" />
+                        Admin handoff gated
                       </Button>
                     </div>
                   </div>
