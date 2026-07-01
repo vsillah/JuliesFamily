@@ -122,6 +122,7 @@ for (const path of [
   "docs/phase54-kinflo-os-design-direction.md",
   "docs/phase55-client-website-design-studio.md",
   "docs/phase56-client-website-launch-blueprints.md",
+  "docs/phase57-convex-launch-blueprint-query.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -175,6 +176,7 @@ for (const path of [
   "scripts/validate-kinflo-design-direction.mjs",
   "scripts/validate-kinflo-client-website-studio.mjs",
   "scripts/validate-kinflo-client-website-blueprints.mjs",
+  "scripts/validate-kinflo-convex-launch-blueprint-query.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -841,6 +843,18 @@ requireIncludes("docs/phase56-client-website-launch-blueprints.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase57-convex-launch-blueprint-query.md", [
+  "npm run kinflo:validate-convex-launch-blueprint-query",
+  "siteFactory.listClientWebsiteLaunchBlueprints",
+  "clientWebsiteStudio.launchBlueprints",
+  "Launch blueprints: 3",
+  "Factory packet bridges: 2",
+  "Read-only query: yes",
+  "Local state only: yes",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -869,6 +883,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-design-direction\"",
   "\"kinflo:validate-client-website-studio\"",
   "\"kinflo:validate-client-website-blueprints\"",
+  "\"kinflo:validate-convex-launch-blueprint-query\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1197,6 +1212,16 @@ requireIncludes("scripts/validate-kinflo-client-website-blueprints.mjs", [
   "Live Convex execution: no",
 ]);
 
+requireIncludes("scripts/validate-kinflo-convex-launch-blueprint-query.mjs", [
+  "siteFactory.listClientWebsiteLaunchBlueprints",
+  "export const listClientWebsiteLaunchBlueprints",
+  "siteFactoryListClientWebsiteLaunchBlueprints",
+  "template.qualityContract",
+  "Read-only query: yes",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
   "process\\.env",
   "import\\.meta\\.env",
@@ -1331,6 +1356,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "entitlements.checkEntitlementLimit",
   "preferences.getMyPreferences",
   "preferences.upsertMyPreferences",
+  "siteFactory.listClientWebsiteLaunchBlueprints",
   "siteBuilder.upsertDomain",
   "crm.submitLead",
   "crm.listJourneyProgressionRules",
@@ -1351,6 +1377,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "siteBuilderPublishPage",
   "preferencesGetMyPreferences",
   "preferencesUpsertMyPreferences",
+  "siteFactoryListClientWebsiteLaunchBlueprints",
   "crmListJourneyProgressionRules",
   "crmUpsertJourneyProgressionRule",
   "crmTransitionLeadStage",
@@ -1469,6 +1496,10 @@ requireIncludes("convex/siteFactory.ts", [
   "imageDirection",
   "qaChecks",
   "launchCriteria",
+  "ClientWebsiteLaunchBlueprint",
+  "clientWebsiteLaunchBlueprints",
+  "export const listClientWebsiteLaunchBlueprints",
+  "Read-only launch blueprint query",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -1557,6 +1588,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "clientWebsiteStudio: fixtureClientWebsiteStudio",
   "ShellClientWebsiteLaunchBlueprint",
   "launchBlueprints",
+  "siteFactory.listClientWebsiteLaunchBlueprints",
   "mission-clarity",
   "branded-portal-handoff",
   "Advisor client starter blueprint",

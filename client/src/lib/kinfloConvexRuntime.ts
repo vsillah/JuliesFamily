@@ -63,6 +63,7 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   siteBuilderUpsertNavigationItem: "siteBuilder.upsertNavigationItem",
   siteBuilderUpsertVisibilityRule: "siteBuilder.upsertVisibilityRule",
   siteFactoryCreateSiteFromTemplate: "siteFactory.createSiteFromTemplate",
+  siteFactoryListClientWebsiteLaunchBlueprints: "siteFactory.listClientWebsiteLaunchBlueprints",
   siteFactoryListStarterTemplates: "siteFactory.listStarterTemplates",
 } as const;
 

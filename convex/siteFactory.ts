@@ -39,6 +39,19 @@ type StarterTemplate = {
   featureFlags: string[];
 };
 
+type ClientWebsiteLaunchBlueprint = {
+  siteKey: string;
+  label: string;
+  launchPacketId?: string;
+  templateKey: string;
+  ownerRole: string;
+  defaultPages: string[];
+  adminPermissionGates: string[];
+  launchSequence: string[];
+  blockedProviderActions: string[];
+  convexFunctions: string[];
+};
+
 const now = () => Date.now();
 
 export const starterTemplates: StarterTemplate[] = [
@@ -261,6 +274,115 @@ export const listStarterTemplates = query({
       featureFlags,
       qualityContract,
     })),
+});
+
+const clientWebsiteLaunchBlueprints: ClientWebsiteLaunchBlueprint[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Seeded tenant retrofit blueprint",
+    templateKey: "nonprofit-learning-center",
+    ownerRole: "platform.super_admin",
+    defaultPages: ["home", "programs", "volunteer", "donate", "contact"],
+    adminPermissionGates: ["site:view", "content:edit", "content:publish", "lead:view"],
+    launchSequence: [
+      "Treat Julie Family as the founding seeded tenant",
+      "Map existing program, donation, volunteer, and intake pages to reusable content blocks",
+      "Run visual QA before moving the public renderer off fixture data",
+      "Keep live publish blocked until hosted Convex and generated API smokes pass",
+    ],
+    blockedProviderActions: [
+      "hosted Convex deployment",
+      "generated API import",
+      "content publish write",
+      "CRM lead write",
+      "domain attachment",
+    ],
+    convexFunctions: [
+      "publicSite.resolvePublishedSite",
+      "siteBuilder.updatePage",
+      "siteBuilder.updateContentBlock",
+      "crm.submitLead",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client starter blueprint",
+    launchPacketId: "advisor-client-starter",
+    templateKey: "advisor-consultant",
+    ownerRole: "tenant.admin",
+    defaultPages: ["home", "services", "proof", "intake", "privacy"],
+    adminPermissionGates: ["tenant:create", "site:create", "member:invite", "content:edit", "content:publish"],
+    launchSequence: [
+      "Create tenant with Client Build plan",
+      "Create site from Advisor Consultant template",
+      "Seed proof-led homepage, services, intake, and privacy pages",
+      "Invite tenant admin after role and site scope are reviewed",
+      "Keep publish blocked until domain, hosted Convex, and lead smoke pass",
+    ],
+    blockedProviderActions: [
+      "tenant create mutation",
+      "client admin invitation email",
+      "domain verification",
+      "Stripe billing activation",
+      "public publish write",
+    ],
+    convexFunctions: [
+      "controlPlane.createTenant",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "siteBuilder.publishPage",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite launch blueprint",
+    launchPacketId: "campaign-microsite-lab",
+    templateKey: "campaign-microsite",
+    ownerRole: "site.editor",
+    defaultPages: ["home", "offer", "proof", "signup", "privacy"],
+    adminPermissionGates: ["site:create", "member:invite", "content:edit", "lead:view"],
+    launchSequence: [
+      "Attach campaign microsite to selected tenant or campaign lab",
+      "Seed focused offer, proof, signup, and privacy blocks",
+      "Scope editor permissions to the campaign site only",
+      "Route submissions to the site CRM pipeline after lead smoke approval",
+      "Keep campaign send blocked until consent and provider checks pass",
+    ],
+    blockedProviderActions: [
+      "site create mutation",
+      "campaign send",
+      "SMS/email provider smoke",
+      "AI copy publish",
+      "public form lead write",
+    ],
+    convexFunctions: [
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "crm.submitLead",
+      "campaigns.requestCampaignApproval",
+    ],
+  },
+];
+
+export const listClientWebsiteLaunchBlueprints = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteLaunchBlueprints.map((blueprint) => {
+      const template = starterTemplates.find((candidate) => candidate.key === blueprint.templateKey);
+      return {
+        ...blueprint,
+        template: template
+          ? {
+              key: template.key,
+              label: template.label,
+              description: template.description,
+              featureFlags: template.featureFlags,
+              qualityContract: template.qualityContract,
+            }
+          : undefined,
+        providerBoundary: "Read-only launch blueprint query. It does not create tenants, create sites, invite users, publish content, attach domains, send campaigns, call providers, import generated API, or execute hosted activation.",
+      };
+    }),
 });
 
 export const createSiteFromTemplate = mutation({

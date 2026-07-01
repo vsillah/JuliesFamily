@@ -1181,6 +1181,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
         "domain attachment",
       ],
       convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchBlueprints",
         "publicSite.resolvePublishedSite",
         "siteBuilder.updatePage",
         "siteBuilder.updateContentBlock",
@@ -1210,6 +1211,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
         "public publish write",
       ],
       convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchBlueprints",
         "controlPlane.createTenant",
         "siteFactory.createSiteFromTemplate",
         "controlPlane.createInvitation",
@@ -1239,6 +1241,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
         "public form lead write",
       ],
       convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchBlueprints",
         "siteFactory.createSiteFromTemplate",
         "controlPlane.createInvitation",
         "crm.submitLead",
@@ -1254,6 +1257,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
   ],
   providerBoundary: "Client website studio changes are local review notes until hosted Convex, generated API bindings, visual QA, domain readiness, and publish approval are complete.",
   convexFunctions: [
+    "siteFactory.listClientWebsiteLaunchBlueprints",
     "siteBuilder.getSiteDraft",
     "siteBuilder.updatePage",
     "publicSite.resolvePublishedSite",
@@ -2001,7 +2005,11 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
   {
     surface: "Site factory",
     fixtureSource: "launch packets and site creation wizard",
-    convexFunctions: ["siteFactory.listStarterTemplates", "siteFactory.createSiteFromTemplate"],
+    convexFunctions: [
+      "siteFactory.listStarterTemplates",
+      "siteFactory.listClientWebsiteLaunchBlueprints",
+      "siteFactory.createSiteFromTemplate",
+    ],
     activationEvidence: ["template list", "draft site created from template", "owner invite scoped"],
     status: "fixture_fallback",
   },
