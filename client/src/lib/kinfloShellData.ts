@@ -123,6 +123,53 @@ export type ShellContentDraft = {
   activationEvidence: string[];
 };
 
+export type ShellBrandPaletteOption = {
+  key: string;
+  label: string;
+  background: string;
+  foreground: string;
+  accent: string;
+  description: string;
+};
+
+export type ShellBrandTypographyOption = {
+  key: string;
+  label: string;
+  heading: string;
+  body: string;
+  scale: string;
+};
+
+export type ShellBrandButtonOption = {
+  key: string;
+  label: string;
+  style: string;
+  radius: number;
+};
+
+export type ShellBrandMediaOption = {
+  key: string;
+  label: string;
+  treatment: string;
+  ratio: string;
+};
+
+export type ShellBrandThemeDraft = {
+  defaultSiteKey: string;
+  defaultPaletteKey: string;
+  defaultTypographyKey: string;
+  defaultButtonKey: string;
+  defaultMediaKey: string;
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  paletteOptions: ShellBrandPaletteOption[];
+  typographyOptions: ShellBrandTypographyOption[];
+  buttonOptions: ShellBrandButtonOption[];
+  mediaOptions: ShellBrandMediaOption[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellExperienceControl = {
   label: string;
   value: string;
@@ -257,6 +304,7 @@ export type KinfloShellSnapshot = {
   tenantEntitlements: ShellTenantEntitlement[];
   templates: ShellTemplate[];
   contentDraft: ShellContentDraft;
+  brandTheme: ShellBrandThemeDraft;
   experienceControls: ShellExperienceControl[];
   experiencePreferences: ShellExperiencePreference;
   roles: ShellRole[];
@@ -533,6 +581,72 @@ const fixtureContentDraft: ShellContentDraft = {
     "editor cannot publish without content:publish",
     "visibility rules require explicit persona or journey context",
     "publish writes audit evidence and public preview resolves updated content",
+  ],
+};
+
+const fixtureBrandTheme: ShellBrandThemeDraft = {
+  defaultSiteKey: "advisor-client-site",
+  defaultPaletteKey: "trust-minimal",
+  defaultTypographyKey: "editorial-system",
+  defaultButtonKey: "grounded-actions",
+  defaultMediaKey: "documentary-proof",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  paletteOptions: [
+    {
+      key: "trust-minimal",
+      label: "Trust Minimal",
+      background: "#ffffff",
+      foreground: "#111827",
+      accent: "#0f766e",
+      description: "Quiet operational shell for advisory and client-services sites.",
+    },
+    {
+      key: "learning-warm",
+      label: "Learning Warmth",
+      background: "#fffaf3",
+      foreground: "#1f2937",
+      accent: "#b45309",
+      description: "Human learning programs with warm proof and family-facing calls to action.",
+    },
+    {
+      key: "campaign-clarity",
+      label: "Campaign Clarity",
+      background: "#f8fafc",
+      foreground: "#172554",
+      accent: "#dc2626",
+      description: "High-contrast microsites for urgency, launches, and conversion campaigns.",
+    },
+  ],
+  typographyOptions: [
+    { key: "editorial-system", label: "Editorial System", heading: "Fraunces", body: "Inter", scale: "Measured" },
+    { key: "operational-sans", label: "Operational Sans", heading: "Inter", body: "Inter", scale: "Compact" },
+    { key: "community-serif", label: "Community Serif", heading: "Source Serif 4", body: "Public Sans", scale: "Open" },
+  ],
+  buttonOptions: [
+    { key: "grounded-actions", label: "Grounded Actions", style: "Solid primary with quiet secondary links", radius: 8 },
+    { key: "compact-tools", label: "Compact Tools", style: "Dense admin controls with icon-first affordances", radius: 6 },
+    { key: "bold-campaign", label: "Bold Campaign", style: "High-contrast call-to-action buttons", radius: 10 },
+  ],
+  mediaOptions: [
+    { key: "documentary-proof", label: "Documentary Proof", treatment: "Real people, clear context, light correction", ratio: "4:3" },
+    { key: "cohort-momentum", label: "Cohort Momentum", treatment: "Groups, workshops, and collaborative moments", ratio: "16:9" },
+    { key: "product-focus", label: "Product Focus", treatment: "Screens, dashboards, and service outcomes", ratio: "3:2" },
+  ],
+  providerBoundary: "Live theme save is gated until hosted Convex auth, generated API bindings, visual QA, and public renderer smoke are approved.",
+  convexFunctions: [
+    "controlPlane.updateThemeTokens",
+    "siteBuilder.getSiteDraft",
+    "publicSite.resolvePublishedSite",
+  ],
+  activationEvidence: [
+    "site admin can update assigned theme tokens",
+    "theme changes write audit evidence",
+    "public preview resolves updated palette and typography",
+    "visual QA passes mobile and desktop before publish",
   ],
 };
 
@@ -914,6 +1028,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Admin preferences shell", status: "done" },
   { label: "Access delegation shell", status: "done" },
   { label: "Content draft shell", status: "done" },
+  { label: "Brand theme shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -981,6 +1096,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       tenantEntitlements: fixtureTenantEntitlements,
       templates: fixtureTemplates,
       contentDraft: fixtureContentDraft,
+      brandTheme: fixtureBrandTheme,
       experienceControls: fixtureExperienceControls,
       experiencePreferences: fixtureExperiencePreferences,
       roles: fixtureRoles,

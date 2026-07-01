@@ -132,6 +132,11 @@ export default function AdminKinfloShell() {
   const [selectedContentBlockKey, setSelectedContentBlockKey] = useState(snapshot.contentDraft.blocks[0]?.key ?? "");
   const [contentDraftTitle, setContentDraftTitle] = useState(snapshot.contentDraft.blocks[0]?.title ?? "");
   const [contentDraftBody, setContentDraftBody] = useState(snapshot.contentDraft.blocks[0]?.body ?? "");
+  const [brandSiteKey, setBrandSiteKey] = useState(snapshot.brandTheme.defaultSiteKey);
+  const [brandPaletteKey, setBrandPaletteKey] = useState(snapshot.brandTheme.defaultPaletteKey);
+  const [brandTypographyKey, setBrandTypographyKey] = useState(snapshot.brandTheme.defaultTypographyKey);
+  const [brandButtonKey, setBrandButtonKey] = useState(snapshot.brandTheme.defaultButtonKey);
+  const [brandMediaKey, setBrandMediaKey] = useState(snapshot.brandTheme.defaultMediaKey);
   const [wizardPageKeys, setWizardPageKeys] = useState(
     snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
   );
@@ -213,6 +218,42 @@ export default function AdminKinfloShell() {
   ];
   const contentReadyCount = contentReadiness.filter((item) => item.done).length;
   const contentReadinessPercent = Math.round((contentReadyCount / contentReadiness.length) * 100);
+  const selectedBrandSite = useMemo(
+    () => snapshot.brandTheme.siteOptions.find((site) => site.key === brandSiteKey) ?? snapshot.brandTheme.siteOptions[0],
+    [brandSiteKey, snapshot.brandTheme.siteOptions],
+  );
+  const selectedBrandPalette = useMemo(
+    () => snapshot.brandTheme.paletteOptions.find((palette) => palette.key === brandPaletteKey) ?? snapshot.brandTheme.paletteOptions[0],
+    [brandPaletteKey, snapshot.brandTheme.paletteOptions],
+  );
+  const selectedBrandTypography = useMemo(
+    () => snapshot.brandTheme.typographyOptions.find((typography) => typography.key === brandTypographyKey) ?? snapshot.brandTheme.typographyOptions[0],
+    [brandTypographyKey, snapshot.brandTheme.typographyOptions],
+  );
+  const selectedBrandButton = useMemo(
+    () => snapshot.brandTheme.buttonOptions.find((button) => button.key === brandButtonKey) ?? snapshot.brandTheme.buttonOptions[0],
+    [brandButtonKey, snapshot.brandTheme.buttonOptions],
+  );
+  const selectedBrandMedia = useMemo(
+    () => snapshot.brandTheme.mediaOptions.find((media) => media.key === brandMediaKey) ?? snapshot.brandTheme.mediaOptions[0],
+    [brandMediaKey, snapshot.brandTheme.mediaOptions],
+  );
+  const brandThemeDirty = (
+    brandSiteKey !== snapshot.brandTheme.defaultSiteKey
+    || brandPaletteKey !== snapshot.brandTheme.defaultPaletteKey
+    || brandTypographyKey !== snapshot.brandTheme.defaultTypographyKey
+    || brandButtonKey !== snapshot.brandTheme.defaultButtonKey
+    || brandMediaKey !== snapshot.brandTheme.defaultMediaKey
+  );
+  const brandReadiness = [
+    { label: "Site selected", done: Boolean(selectedBrandSite) },
+    { label: "Palette selected", done: Boolean(selectedBrandPalette) },
+    { label: "Typography selected", done: Boolean(selectedBrandTypography) },
+    { label: "Buttons and media selected", done: Boolean(selectedBrandButton && selectedBrandMedia) },
+    { label: "Live visual smoke pending", done: false },
+  ];
+  const brandReadyCount = brandReadiness.filter((item) => item.done).length;
+  const brandReadinessPercent = Math.round((brandReadyCount / brandReadiness.length) * 100);
   const wizardReadiness = [
     { label: "Template selected", done: Boolean(selectedWizardTemplate) },
     { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
@@ -421,11 +462,12 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-9">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-10">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="plans">Plans</TabsTrigger>
+            <TabsTrigger value="brand">Brand</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="crm">CRM</TabsTrigger>
@@ -995,6 +1037,233 @@ export default function AdminKinfloShell() {
                     </Button>
                   </CardContent>
                 </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="brand" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Brand Theme Studio</h2>
+                    <p className="text-sm text-muted-foreground">Configure the visual system a client site will inherit before live theme token writes are enabled.</p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <Palette className="mr-1 h-3 w-3" />
+                    Provider-light theme
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Theme Token Draft</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">{selectedBrandSite?.label}</p>
+                    </div>
+                    <Badge variant={brandThemeDirty ? "default" : "secondary"}>
+                      {brandThemeDirty ? "Local edits" : "Fixture theme"}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+                      <div className="space-y-2">
+                        <Label>Site</Label>
+                        <Select value={brandSiteKey} onValueChange={setBrandSiteKey}>
+                          <SelectTrigger data-testid="select-kinflo-brand-site">
+                            <SelectValue placeholder="Select site" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.brandTheme.siteOptions.map((site) => (
+                              <SelectItem key={site.key} value={site.key}>
+                                {site.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Palette</Label>
+                        <Select value={brandPaletteKey} onValueChange={setBrandPaletteKey}>
+                          <SelectTrigger data-testid="select-kinflo-brand-palette">
+                            <SelectValue placeholder="Select palette" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.brandTheme.paletteOptions.map((palette) => (
+                              <SelectItem key={palette.key} value={palette.key}>
+                                {palette.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Typography</Label>
+                        <Select value={brandTypographyKey} onValueChange={setBrandTypographyKey}>
+                          <SelectTrigger data-testid="select-kinflo-brand-typography">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.brandTheme.typographyOptions.map((typography) => (
+                              <SelectItem key={typography.key} value={typography.key}>
+                                {typography.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Buttons</Label>
+                        <Select value={brandButtonKey} onValueChange={setBrandButtonKey}>
+                          <SelectTrigger data-testid="select-kinflo-brand-buttons">
+                            <SelectValue placeholder="Select buttons" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.brandTheme.buttonOptions.map((button) => (
+                              <SelectItem key={button.key} value={button.key}>
+                                {button.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Media</Label>
+                        <Select value={brandMediaKey} onValueChange={setBrandMediaKey}>
+                          <SelectTrigger data-testid="select-kinflo-brand-media">
+                            <SelectValue placeholder="Select media" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.brandTheme.mediaOptions.map((media) => (
+                              <SelectItem key={media.key} value={media.key}>
+                                {media.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div
+                        className="rounded-md border p-5"
+                        style={{
+                          backgroundColor: selectedBrandPalette?.background,
+                          color: selectedBrandPalette?.foreground,
+                        }}
+                      >
+                        <div className="flex flex-wrap gap-2">
+                          {[selectedBrandPalette?.background, selectedBrandPalette?.foreground, selectedBrandPalette?.accent].map((color) => (
+                            <span
+                              key={color}
+                              className="h-8 w-8 rounded-full border"
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                        <div className="mt-5 max-w-2xl">
+                          <div className="text-sm font-medium opacity-75">{selectedBrandPalette?.label}</div>
+                          <h3 className="mt-2 text-2xl font-semibold">{selectedBrandTypography?.heading} for confident public pages</h3>
+                          <p className="mt-2 text-sm opacity-80">{selectedBrandPalette?.description}</p>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <Button
+                              disabled
+                              style={{
+                                backgroundColor: selectedBrandPalette?.accent,
+                                borderRadius: selectedBrandButton?.radius,
+                                color: selectedBrandPalette?.background,
+                              }}
+                            >
+                              Preview action
+                            </Button>
+                            <Button disabled variant="outline" style={{ borderRadius: selectedBrandButton?.radius }}>
+                              Secondary path
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="rounded-md border p-3 text-sm">
+                          <div className="font-medium">Token Packet</div>
+                          <div className="mt-3 space-y-2 text-muted-foreground">
+                            <div>Heading: {selectedBrandTypography?.heading}</div>
+                            <div>Body: {selectedBrandTypography?.body}</div>
+                            <div>Buttons: {selectedBrandButton?.style}</div>
+                            <div>Media: {selectedBrandMedia?.treatment}</div>
+                            <div>Ratio: {selectedBrandMedia?.ratio}</div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="font-medium">Readiness</span>
+                            <span className="text-muted-foreground">{brandReadinessPercent}%</span>
+                          </div>
+                          <Progress value={brandReadinessPercent} className="mt-2" />
+                          <div className="mt-3 space-y-2">
+                            {brandReadiness.map((item) => (
+                              <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {item.done ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                ) : (
+                                  <CircleDashed className="h-3.5 w-3.5" />
+                                )}
+                                <span>{item.label}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.brandTheme.providerBoundary}</div>
+                      <Button disabled data-testid="button-save-brand-theme">
+                        <Save className="mr-2 h-4 w-4" />
+                        Live theme save gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Theme Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Theme saves remain gated until generated API bindings and visual smoke are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.brandTheme.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.brandTheme.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Button asChild variant="outline" className="w-full">
+                  <Link href={selectedBrandSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}>
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Preview Route
+                  </Link>
+                </Button>
               </div>
             </section>
           </TabsContent>
