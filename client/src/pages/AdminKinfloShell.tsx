@@ -252,6 +252,7 @@ export default function AdminKinfloShell() {
                       <TableHead>Tenant</TableHead>
                       <TableHead>Domain</TableHead>
                       <TableHead>Template</TableHead>
+                      <TableHead>Preview</TableHead>
                       <TableHead className="text-right">State</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -265,6 +266,14 @@ export default function AdminKinfloShell() {
                         <TableCell>{site.tenant}</TableCell>
                         <TableCell>{site.domain}</TableCell>
                         <TableCell>{site.template}</TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link href={site.previewPath}>
+                              <ExternalLink className="mr-2 h-3 w-3" />
+                              Open
+                            </Link>
+                          </Button>
+                        </TableCell>
                         <TableCell className="text-right">{statusBadge(site.status)}</TableCell>
                       </TableRow>
                     ))}

@@ -76,6 +76,7 @@ for (const path of [
   "docs/phase12-crm-lead-spine.md",
   "docs/phase13-crm-shell-workspace.md",
   "docs/phase14-public-lead-capture-adapter.md",
+  "docs/phase15-public-site-preview-renderer.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -87,8 +88,10 @@ for (const path of [
   "convex/accessPolicy.ts",
   "convex/crm.ts",
   "client/src/pages/AdminKinfloShell.tsx",
+  "client/src/pages/KinfloPublicSitePreview.tsx",
   "client/src/lib/kinfloShellData.ts",
   "client/src/lib/kinfloLeadCapture.ts",
+  "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
   "scripts/validate-convex-import-contracts.mjs",
   "scripts/dry-run-convex-import-contracts.mjs",
@@ -194,6 +197,14 @@ requireIncludes("docs/phase14-public-lead-capture-adapter.md", [
   "crm.submitLead",
   "/api/leads",
   "publicSite.resolvePublishedSite",
+]);
+
+requireIncludes("docs/phase15-public-site-preview-renderer.md", [
+  "client/src/lib/kinfloPublicSitePreview.ts",
+  "client/src/pages/KinfloPublicSitePreview.tsx",
+  "/kinflo-sites/:siteSlug",
+  "publicSite.resolvePublishedSite",
+  "crm.submitLead",
 ]);
 
 requireIncludes("package.json", [
@@ -318,6 +329,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellLeadCaptureContract",
   "fixtureLeads",
   "fixtureLeadCaptureContracts",
+  "Public site preview renderer",
+  "/kinflo-sites/",
   "crm.submitLead",
 ]);
 
@@ -326,8 +339,16 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Data Mode",
   "CRM Lead Workspace",
   "Public Intake",
+  "previewPath",
   "Follow-up Tasks",
   "/admin/guide",
+]);
+
+requireIncludes("client/src/pages/KinfloPublicSitePreview.tsx", [
+  "resolveKinfloPublicSitePreview",
+  "LeadCaptureForm",
+  "public-preview-hero",
+  "public-preview-intake",
 ]);
 
 requireIncludes("client/src/lib/kinfloLeadCapture.ts", [
@@ -336,6 +357,13 @@ requireIncludes("client/src/lib/kinfloLeadCapture.ts", [
   "submitKinfloLeadCapture",
   "crm.submitLead",
   "/api/leads",
+]);
+
+requireIncludes("client/src/lib/kinfloPublicSitePreview.ts", [
+  "KinfloPublicSitePreview",
+  "publicSite.resolvePublishedSite",
+  "resolveKinfloPublicSitePreview",
+  "listKinfloPublicSitePreviews",
 ]);
 
 const failed = checks.filter((check) => !check.ok);

@@ -44,6 +44,7 @@ export type ShellSite = {
   route: string;
   template: string;
   status: KinfloShellStatus;
+  previewPath: string;
 };
 
 export type ShellTemplate = {
@@ -161,6 +162,7 @@ const fixtureSites: ShellSite[] = [
     route: "/",
     template: "Nonprofit Learning Center",
     status: "published",
+    previewPath: "/kinflo-sites/julies-family",
   },
   {
     name: "Tech Goes Home Cohort",
@@ -169,6 +171,7 @@ const fixtureSites: ShellSite[] = [
     route: "/programs/tech-goes-home",
     template: "Campaign Microsite",
     status: "preview",
+    previewPath: "/kinflo-sites/campaign-microsite",
   },
   {
     name: "Advisor Client Site",
@@ -177,6 +180,7 @@ const fixtureSites: ShellSite[] = [
     route: "/",
     template: "Advisor Consultant",
     status: "draft",
+    previewPath: "/kinflo-sites/advisor-client-site",
   },
 ];
 
@@ -313,6 +317,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Import contracts", status: "done" },
   { label: "CRM lead spine", status: "done" },
   { label: "Public lead capture adapter", status: "done" },
+  { label: "Public site preview renderer", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
