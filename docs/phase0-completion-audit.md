@@ -28,7 +28,8 @@ Create a real KinFlo working tree from the Julie's Family GitHub source, harden 
 | Keep generated Convex API files untracked. | Repo-complete | `npm run kinflo:validate-phases`, `npm run kinflo:inventory-env`, and `npm run kinflo:audit-secret-history` check generated/secret boundaries. | `convex/_generated/` remains out of git until hosted setup approval. |
 | Smoke-check provider-light shell route wiring. | Repo-complete | `npm run kinflo:validate-shell-routes` passes; [docs/phase30-shell-route-smoke.md](phase30-shell-route-smoke.md). | Static smoke protects `/admin/kinflo-os`, `/kinflo-sites/:siteSlug`, fixture slugs, and live-adapter fallback boundaries. Browser smoke confirms the public preview route. |
 | Prepare repeatable local admin browser smoke. | Repo-complete | `npm run kinflo:validate-local-admin-fixture` passes; [docs/phase31-local-admin-smoke-fixture.md](phase31-local-admin-smoke-fixture.md). | The database-free smoke server rendered `/admin/kinflo-os` and `/kinflo-sites/julies-family` with 0 console warnings/errors. The fixture is disabled by default, development-only in the main server, explicit-flag gated, and does not create users, providers, generated API files, or live Convex calls. |
-| Prepare staged implementation plan. | Repo-complete | [docs/kinflo-saas-adoption-plan.md](kinflo-saas-adoption-plan.md), phase docs 1-31, and PR #1. | Hosted activation, live smoke, and integration-captain merge remain future gates. |
+| Prepare structured Phase 0 readiness manifest. | Repo-complete | `npm run kinflo:validate-phase0-readiness` passes; [docs/phase0-readiness-manifest.json](phase0-readiness-manifest.json) and [docs/phase32-phase0-readiness-manifest.md](phase32-phase0-readiness-manifest.md). | The manifest keeps repo-complete requirements, human-owned gates, local validation commands, and provider-boundary flags in one machine-checkable handoff artifact. |
+| Prepare staged implementation plan. | Repo-complete | [docs/kinflo-saas-adoption-plan.md](kinflo-saas-adoption-plan.md), phase docs 1-32, and PR #1. | Hosted activation, live smoke, and integration-captain merge remain future gates. |
 
 ## Current Validation Set
 
@@ -36,6 +37,7 @@ The latest local validation set passed:
 
 - `npm run kinflo:audit-secret-history`
 - `npm run kinflo:inventory-env`
+- `npm run kinflo:validate-phase0-readiness`
 - `npm run kinflo:validate-phases`
 - `npm run kinflo:validate-map`
 - `npm run kinflo:check-baseline`
@@ -59,6 +61,7 @@ For this branch, Phase 0 is repo-complete when:
 - env references are inventoried without reading values,
 - historical secret exposure is documented as a human-owned remediation gate,
 - build/typecheck/provider-light validators pass,
+- the Phase 0 readiness manifest maps repo-complete requirements and human-owned gates,
 - the provider-light shell and public preview routes remain wired,
 - local admin browser smoke can be run through an explicit development-only fixture,
 - the Drizzle-to-Convex map covers all current Drizzle tables or explicitly defers them,

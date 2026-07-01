@@ -63,6 +63,7 @@ for (const path of [
   "docs/phase0-baseline.md",
   "docs/phase0-completion-audit.md",
   "docs/phase0-env-inventory.md",
+  "docs/phase0-readiness-manifest.json",
   "docs/phase0-secret-remediation.md",
   "docs/drizzle-to-convex-migration-map.md",
   "docs/phase1-convex-control-plane.md",
@@ -96,6 +97,7 @@ for (const path of [
   "docs/phase29-typescript-baseline-gate.md",
   "docs/phase30-shell-route-smoke.md",
   "docs/phase31-local-admin-smoke-fixture.md",
+  "docs/phase32-phase0-readiness-manifest.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -116,6 +118,7 @@ for (const path of [
   "client/src/lib/kinfloLeadCapture.ts",
   "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
+  "scripts/validate-kinflo-phase0-readiness.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -148,6 +151,7 @@ requireIncludes("docs/phase0-completion-audit.md", [
   "Human-owned gate pending",
   "npm run kinflo:audit-secret-history",
   "npm run kinflo:inventory-env",
+  "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-map",
   "npm run kinflo:check-baseline",
   "This branch satisfies those repo-complete conditions.",
@@ -161,6 +165,18 @@ requireIncludes("docs/phase0-env-inventory.md", [
   "Reads local secret files: no",
   "Prints secret values: no",
   "Hosted deployment touched: no",
+]);
+
+requireIncludes("docs/phase0-readiness-manifest.json", [
+  "\"phase\": 0",
+  "\"sourceRepository\": \"https://github.com/vsillah/JuliesFamily\"",
+  "\"providerBoundary\"",
+  "\"hostedConvexDeploymentCreated\": false",
+  "\"liveConvexExecution\": false",
+  "\"repoCompleteRequirements\"",
+  "\"humanOwnedGates\"",
+  "\"localValidationCommands\"",
+  "\"reviewStatus\": \"ready_for_staged_review\"",
 ]);
 
 requireIncludes("docs/phase0-secret-remediation.md", [
@@ -452,9 +468,18 @@ requireIncludes("docs/phase31-local-admin-smoke-fixture.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
+  "npm run kinflo:validate-phase0-readiness",
+  "Repo-complete requirements: 13",
+  "Human-owned gates: 4",
+  "No hosted Convex deployment is created",
+  "No credentials are read, printed, rotated, or copied",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
+  "\"kinflo:validate-phase0-readiness\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -481,6 +506,15 @@ requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
   "shared/schema.ts",
   "docs/drizzle-to-convex-migration-map.md",
   "allowedUnmappedTables",
+]);
+
+requireIncludes("scripts/validate-kinflo-phase0-readiness.mjs", [
+  "phase0-readiness-manifest.json",
+  "repoCompleteRequirements",
+  "humanOwnedGates",
+  "provider boundary",
+  "Hosted deployment touched: no",
+  "Live Convex execution: no",
 ]);
 
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
