@@ -181,6 +181,7 @@ export default function AdminKinfloShell() {
   const [previewPersona, setPreviewPersona] = useState(snapshot.previewStudio.defaultPersona);
   const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
+  const [clientWebsiteStudioSiteKey, setClientWebsiteStudioSiteKey] = useState(snapshot.clientWebsiteStudio.defaultSiteKey);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -482,6 +483,23 @@ export default function AdminKinfloShell() {
   ];
   const previewReadyCount = previewReadiness.filter((item) => item.done).length;
   const previewReadinessPercent = Math.round((previewReadyCount / previewReadiness.length) * 100);
+  const selectedClientWebsiteStudioSite = useMemo(
+    () => snapshot.clientWebsiteStudio.sites.find((site) => site.key === clientWebsiteStudioSiteKey)
+      ?? snapshot.clientWebsiteStudio.sites[0],
+    [clientWebsiteStudioSiteKey, snapshot.clientWebsiteStudio.sites],
+  );
+  const clientWebsiteStudioReadiness = [
+    { label: "Mobile public preview", done: selectedClientWebsiteStudioSite?.mobileReadiness === "ready" },
+    { label: "Visitor navigation path", done: selectedClientWebsiteStudioSite?.navReadiness === "ready" },
+    { label: "First-viewport hero proof", done: selectedClientWebsiteStudioSite?.heroReadiness === "ready" },
+    { label: "Branded portal handoff", done: selectedClientWebsiteStudioSite?.portalReadiness === "ready" },
+    { label: "Provider publish approval", done: false },
+  ];
+  const clientWebsiteStudioReadyCount = clientWebsiteStudioReadiness.filter((item) => item.done).length;
+  const clientWebsiteStudioReadinessPercent = Math.round(
+    (clientWebsiteStudioReadyCount / clientWebsiteStudioReadiness.length) * 100,
+  );
+  const clientWebsiteStudioPreviewPath = selectedClientWebsiteStudioSite?.previewPath ?? "/kinflo-sites/julies-family";
   const selectedAssetSite = useMemo(
     () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
     [assetSiteKey, snapshot.assetLibrary.siteOptions],
@@ -1051,6 +1069,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="brand">Brand</TabsTrigger>
             <TabsTrigger value="navigation">Nav</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="site-studio">Studio</TabsTrigger>
             <TabsTrigger value="assets">Assets</TabsTrigger>
             <TabsTrigger value="domains">Domains</TabsTrigger>
             <TabsTrigger value="integrations">Integrations</TabsTrigger>
@@ -2803,6 +2822,199 @@ export default function AdminKinfloShell() {
                   </CardHeader>
                   <CardContent className="space-y-2">
                     {snapshot.previewStudio.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="site-studio" className="mt-6">
+            <section className="grid max-w-[calc(100vw-2rem)] min-w-0 gap-6 sm:max-w-none xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-semibold">Client Website Design Studio</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Turn the public-site research into concrete review criteria before client admins, domains, and publish actions are enabled.
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="self-start">
+                    <Palette className="mr-1 h-3 w-3" />
+                    Local design review
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Client Site Frame</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {selectedClientWebsiteStudioSite?.label} - {selectedClientWebsiteStudioSite?.audience}
+                      </p>
+                    </div>
+                    <Badge variant="secondary" data-testid="text-kinflo-client-website-readiness">
+                      {clientWebsiteStudioReadyCount}/{clientWebsiteStudioReadiness.length} ready
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0 space-y-4">
+                        <div className="space-y-2">
+                          <Label>Client site</Label>
+                          <Select value={clientWebsiteStudioSiteKey} onValueChange={setClientWebsiteStudioSiteKey}>
+                            <SelectTrigger data-testid="select-kinflo-client-website-site">
+                              <SelectValue placeholder="Select client site" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {snapshot.clientWebsiteStudio.sites.map((site) => (
+                                <SelectItem key={site.key} value={site.key}>
+                                  {site.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="grid gap-3 md:grid-cols-2">
+                          <div className="rounded-md border p-3">
+                            <div className="text-xs font-medium uppercase text-muted-foreground">Primary CTA</div>
+                            <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.primaryCTA}</div>
+                          </div>
+                          <div className="rounded-md border p-3">
+                            <div className="text-xs font-medium uppercase text-muted-foreground">Status</div>
+                            <div className="mt-1 text-sm font-medium">{selectedClientWebsiteStudioSite?.status.replaceAll("_", " ")}</div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-md border p-4">
+                          <div className="flex items-start gap-3">
+                            <Globe2 className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium">Hero direction</div>
+                              <p className="mt-1 text-sm text-muted-foreground">{selectedClientWebsiteStudioSite?.heroDirection}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="rounded-md border p-4">
+                          <div className="flex items-start gap-3">
+                            <ShieldCheck className="mt-0.5 h-4 w-4 text-muted-foreground" />
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium">Trust signal</div>
+                              <p className="mt-1 text-sm text-muted-foreground">{selectedClientWebsiteStudioSite?.trustSignal}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-md border p-4">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium">Design readiness</span>
+                          <span className="text-muted-foreground">{clientWebsiteStudioReadinessPercent}%</span>
+                        </div>
+                        <Progress value={clientWebsiteStudioReadinessPercent} className="mt-2" />
+                        <div className="mt-3 space-y-2">
+                          {clientWebsiteStudioReadiness.map((item) => (
+                            <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                              {item.done ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="h-3.5 w-3.5" />
+                              )}
+                              <span>{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {snapshot.clientWebsiteStudio.designPatterns.map((pattern) => {
+                        const applies = Boolean(
+                          selectedClientWebsiteStudioSite
+                          && pattern.appliesTo.includes(selectedClientWebsiteStudioSite.key),
+                        );
+                        return (
+                          <div key={pattern.key} className="rounded-md border p-4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <div className="text-sm font-medium">{pattern.label}</div>
+                                <p className="mt-1 text-sm text-muted-foreground">{pattern.evidence}</p>
+                              </div>
+                              <Badge variant={applies ? "secondary" : "outline"}>{applies ? "Apply" : "Context"}</Badge>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">{snapshot.clientWebsiteStudio.providerBoundary}</div>
+                      <div className="flex flex-wrap gap-2">
+                        <Button asChild data-testid="button-open-client-website-preview">
+                          <Link href={clientWebsiteStudioPreviewPath}>
+                            <ExternalLink className="mr-2 h-4 w-4" />
+                            Open preview
+                          </Link>
+                        </Button>
+                        <Button disabled variant="outline" data-testid="button-client-website-publish-gated">
+                          <Rocket className="mr-2 h-4 w-4" />
+                          Publish gated
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Research Sources</CardTitle>
+                    <p className="text-sm text-muted-foreground">Public inspiration translated into KinFlo review criteria.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.clientWebsiteStudio.researchSources.map((source) => (
+                      <a
+                        key={source.url}
+                        href={source.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm hover:bg-muted/50"
+                      >
+                        <span className="min-w-0">{source.label}</span>
+                        <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      </a>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Design Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">Mapped only. Live writes stay off until hosted activation approval.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.clientWebsiteStudio.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.clientWebsiteStudio.activationEvidence.map((item) => (
                       <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                         <CircleDashed className="mt-0.5 h-4 w-4" />
                         <span>{item}</span>

@@ -269,6 +269,39 @@ export type ShellPreviewStudioDraft = {
   activationEvidence: string[];
 };
 
+export type ShellClientWebsiteStudioSite = {
+  key: string;
+  label: string;
+  tenantSlug: string;
+  previewPath: string;
+  audience: string;
+  primaryCTA: string;
+  trustSignal: string;
+  heroDirection: string;
+  mobileReadiness: "ready" | "needs_review";
+  navReadiness: "ready" | "needs_review";
+  heroReadiness: "ready" | "needs_review";
+  portalReadiness: "ready" | "needs_review";
+  status: "local_review" | "design_ready" | "publish_gated";
+};
+
+export type ShellClientWebsiteStudioPattern = {
+  key: string;
+  label: string;
+  evidence: string;
+  appliesTo: string[];
+};
+
+export type ShellClientWebsiteStudio = {
+  defaultSiteKey: string;
+  sites: ShellClientWebsiteStudioSite[];
+  designPatterns: ShellClientWebsiteStudioPattern[];
+  researchSources: { label: string; url: string }[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellAssetDraft = {
   key: string;
   name: string;
@@ -605,6 +638,7 @@ export type KinfloShellSnapshot = {
   brandTheme: ShellBrandThemeDraft;
   navigationDraft: ShellNavigationDraft;
   previewStudio: ShellPreviewStudioDraft;
+  clientWebsiteStudio: ShellClientWebsiteStudio;
   assetLibrary: ShellAssetLibraryDraft;
   domainReadiness: ShellDomainReadinessDraft;
   integrationReadiness: ShellIntegrationReadiness;
@@ -1033,6 +1067,103 @@ const fixturePreviewStudio: ShellPreviewStudioDraft = {
     "audience context is explicit in the preview URL",
     "desktop, tablet, and mobile checks pass before publish",
     "public intake smoke confirms crm.submitLead contract",
+  ],
+};
+
+const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
+  defaultSiteKey: "julies-family-public",
+  sites: [
+    {
+      key: "julies-family-public",
+      label: "Julie Family Public Site",
+      tenantSlug: "julies-family",
+      previewPath: "/kinflo-sites/julies-family",
+      audience: "Parents, volunteers, donors, and community partners",
+      primaryCTA: "Enroll or refer a family",
+      trustSignal: "Program outcomes, founder story, and community proof must be visible before the first scroll break.",
+      heroDirection: "A warm first-viewport program scene with a direct family learning promise and one clear enrollment path.",
+      mobileReadiness: "ready",
+      navReadiness: "ready",
+      heroReadiness: "ready",
+      portalReadiness: "needs_review",
+      status: "local_review",
+    },
+    {
+      key: "advisor-client-site",
+      label: "Advisor Client Site",
+      tenantSlug: "advisor-client-starter",
+      previewPath: "/kinflo-sites/advisor-client-site",
+      audience: "Service clients comparing offers, proof, and intake fit",
+      primaryCTA: "Start the intake",
+      trustSignal: "Proof, fit, and process clarity must be available before asking for a consultation.",
+      heroDirection: "A quiet operational surface that explains the client result, shows credibility, and routes to intake.",
+      mobileReadiness: "ready",
+      navReadiness: "needs_review",
+      heroReadiness: "ready",
+      portalReadiness: "needs_review",
+      status: "publish_gated",
+    },
+    {
+      key: "campaign-microsite",
+      label: "Campaign Microsite",
+      tenantSlug: "campaign-microsite-lab",
+      previewPath: "/kinflo-sites/campaign-microsite",
+      audience: "Warm leads arriving from email, SMS, and referral campaigns",
+      primaryCTA: "Claim the next step",
+      trustSignal: "Offer terms, proof, and privacy expectations must be legible before conversion.",
+      heroDirection: "A fast campaign page with a single offer, one visual proof point, and no competing navigation.",
+      mobileReadiness: "needs_review",
+      navReadiness: "ready",
+      heroReadiness: "needs_review",
+      portalReadiness: "needs_review",
+      status: "local_review",
+    },
+  ],
+  designPatterns: [
+    {
+      key: "mission-clarity",
+      label: "Mission clarity before decoration",
+      evidence: "Nonprofit and education exemplars prioritize a clear mission, immediate audience fit, and a visible next action.",
+      appliesTo: ["julies-family-public", "advisor-client-site"],
+    },
+    {
+      key: "parent-client-navigation",
+      label: "Parent and client navigation",
+      evidence: "Primary navigation should follow the visitor's intent: learn, verify, start, contact, and return to the portal.",
+      appliesTo: ["julies-family-public", "advisor-client-site"],
+    },
+    {
+      key: "mobile-first-public-preview",
+      label: "Mobile-first public preview",
+      evidence: "Public discovery and campaign traffic should pass the 390px review before any desktop polish is considered done.",
+      appliesTo: ["julies-family-public", "advisor-client-site", "campaign-microsite"],
+    },
+    {
+      key: "branded-portal-handoff",
+      label: "Branded portal handoff",
+      evidence: "The public page and logged-in portal need the same brand cues, role-aware expectations, and privacy boundary.",
+      appliesTo: ["julies-family-public", "advisor-client-site", "campaign-microsite"],
+    },
+  ],
+  researchSources: [
+    { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
+    { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },
+    { label: "Striped Horse school website design ideas", url: "https://www.stripedhorse.com/blog/school-website-design-ideas" },
+    { label: "WeWeb client portal buying guide", url: "https://www.weweb.io/blog/client-portals-buying-guide" },
+  ],
+  providerBoundary: "Client website studio changes are local review notes until hosted Convex, generated API bindings, visual QA, domain readiness, and publish approval are complete.",
+  convexFunctions: [
+    "siteBuilder.getSiteDraft",
+    "siteBuilder.updatePage",
+    "publicSite.resolvePublishedSite",
+    "siteBuilder.publishPage",
+  ],
+  activationEvidence: [
+    "Client site has a selected design direction",
+    "mobile public preview passes at 390px without overflow",
+    "public CTA and trust signal are visible before publish",
+    "portal handoff is reviewed before assigning client admin permissions",
+    "publish action remains gated until provider activation is approved",
   ],
 };
 
@@ -2450,6 +2581,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       brandTheme: fixtureBrandTheme,
       navigationDraft: fixtureNavigationDraft,
       previewStudio: fixturePreviewStudio,
+      clientWebsiteStudio: fixtureClientWebsiteStudio,
       assetLibrary: fixtureAssetLibrary,
       domainReadiness: fixtureDomainReadiness,
       integrationReadiness: fixtureIntegrationReadiness,
