@@ -79,6 +79,7 @@ for (const path of [
   "docs/phase15-public-site-preview-renderer.md",
   "docs/phase16-site-factory-launch-packets.md",
   "docs/phase17-convex-activation-preflight.md",
+  "docs/phase18-convex-runtime-boundary.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -92,6 +93,7 @@ for (const path of [
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/pages/KinfloPublicSitePreview.tsx",
   "client/src/lib/kinfloShellData.ts",
+  "client/src/lib/kinfloConvexRuntime.ts",
   "client/src/lib/kinfloLeadCapture.ts",
   "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
@@ -226,6 +228,15 @@ requireIncludes("docs/phase17-convex-activation-preflight.md", [
   "No hosted Convex deployment is created",
 ]);
 
+requireIncludes("docs/phase18-convex-runtime-boundary.md", [
+  "client/src/lib/kinfloConvexRuntime.ts",
+  "KINFLO_CONVEX_FUNCTIONS",
+  "createKinfloConvexReactClient",
+  "VITE_CONVEX_URL",
+  "generatedApiAvailable: false",
+  "No hosted Convex deployment is created",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -264,6 +275,17 @@ requireIncludes("scripts/validate-convex-activation-preflight.mjs", [
   "External writes: 0",
   "Hosted deployment touched: no",
   "activation.seedSmokeSite",
+]);
+
+requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
+  "KINFLO_CONVEX_FUNCTIONS",
+  "VITE_CONVEX_URL",
+  "generatedApiAvailable = false",
+  "createKinfloConvexReactClient",
+  "fixture_only",
+  "env_configured_codegen_pending",
+  "crm.submitLead",
+  "publicSite.resolvePublishedSite",
 ]);
 
 requireIncludes(".env.example", [
@@ -359,7 +381,8 @@ requireIncludes("convex/crm.ts", [
 requireIncludes("client/src/lib/kinfloShellData.ts", [
   "KinfloShellSnapshot",
   "fixtureKinfloShellAdapter",
-  "activation.readiness",
+  "getKinfloConvexRuntime",
+  "runtimeMode",
   "ShellLead",
   "ShellLeadCaptureContract",
   "fixtureLeads",
@@ -368,6 +391,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureSiteLaunchPackets",
   "Site factory launch packets",
   "Public site preview renderer",
+  "Convex runtime boundary",
   "/kinflo-sites/",
   "crm.submitLead",
 ]);
@@ -375,6 +399,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "getKinfloShellSnapshot",
   "Data Mode",
+  "runtimeLabel",
+  "Convex gated",
   "Site Factory Launch Packets",
   "setActiveTab(\"factory\")",
   "CRM Lead Workspace",
@@ -393,9 +419,11 @@ requireIncludes("client/src/pages/KinfloPublicSitePreview.tsx", [
 
 requireIncludes("client/src/lib/kinfloLeadCapture.ts", [
   "KINFLO_LEAD_CAPTURE_CONVEX_FUNCTION",
+  "KINFLO_CONVEX_FUNCTIONS.crmSubmitLead",
+  "getKinfloConvexRuntime",
+  "runtimeBoundary",
   "buildKinfloLeadCaptureContract",
   "submitKinfloLeadCapture",
-  "crm.submitLead",
   "/api/leads",
 ]);
 

@@ -159,13 +159,14 @@ export default function AdminKinfloShell() {
               <div className="flex flex-wrap items-center gap-2">
                 <CardTitle className="text-base">Data Mode</CardTitle>
                 <Badge variant="outline">{snapshot.dataMode.label}</Badge>
+                <Badge variant="secondary">{snapshot.dataMode.runtimeLabel}</Badge>
               </div>
               <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
                 {snapshot.dataMode.description}
               </p>
             </div>
             <Badge variant="secondary" className="w-fit">
-              {snapshot.dataMode.source === "fixture" ? "Convex pending" : "Convex live"}
+              {snapshot.dataMode.runtimeMode === "live_ready" ? "Convex live" : "Convex gated"}
             </Badge>
           </CardHeader>
           <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)]">

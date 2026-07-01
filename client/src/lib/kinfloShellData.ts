@@ -1,3 +1,8 @@
+import {
+  getKinfloConvexRuntime,
+  type KinfloConvexRuntimeMode,
+} from "./kinfloConvexRuntime";
+
 export type KinfloShellStatus =
   | "active"
   | "draft"
@@ -17,6 +22,8 @@ export type ShellDataMode = {
   label: string;
   description: string;
   source: "fixture" | "convex";
+  runtimeMode: KinfloConvexRuntimeMode;
+  runtimeLabel: string;
   activationGate: string;
   convexFunctions: string[];
 };
@@ -406,6 +413,8 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Public lead capture adapter", status: "done" },
   { label: "Public site preview renderer", status: "done" },
   { label: "Site factory launch packets", status: "done" },
+  { label: "Convex activation preflight", status: "done" },
+  { label: "Convex runtime boundary", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -452,41 +461,33 @@ function buildMetrics(): ShellMetric[] {
 
 export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
   mode: "fixture",
-  getSnapshot: () => ({
-    dataMode: {
-      label: "Fixture Data",
-      description: "Convex API bindings are not generated yet. This shell is using typed fixture data that mirrors the Convex control-plane contract.",
-      source: "fixture",
-      activationGate: "Run Convex deployment setup, codegen, and activation smoke before switching this page to live data.",
-      convexFunctions: [
-        "activation.readiness",
-        "controlPlane.listTenants",
-        "controlPlane.listSitesForTenant",
-        "controlPlane.createTenant",
-        "controlPlane.createInvitation",
-        "siteFactory.listStarterTemplates",
-        "siteFactory.createSiteFromTemplate",
-        "siteBuilder.getSiteDraft",
-        "publicSite.resolvePublishedSite",
-        "crm.submitLead",
-        "crm.listLeads",
-        "crm.getLeadTimeline",
-        "controlPlane.listAuditEvents",
-      ],
-    },
-    metrics: buildMetrics(),
-    tenants: fixtureTenants,
-    sites: fixtureSites,
-    templates: fixtureTemplates,
-    experienceControls: fixtureExperienceControls,
-    roles: fixtureRoles,
-    leads: fixtureLeads,
-    pipelineStages: fixturePipelineStages,
-    tasks: fixtureTasks,
-    leadCaptureContracts: fixtureLeadCaptureContracts,
-    siteLaunchPackets: fixtureSiteLaunchPackets,
-    launchGates: fixtureLaunchGates,
-  }),
+  getSnapshot: () => {
+    const runtime = getKinfloConvexRuntime();
+
+    return {
+      dataMode: {
+        label: "Fixture Data",
+        description: "Convex API bindings are not generated yet. This shell is using typed fixture data that mirrors the Convex control-plane contract.",
+        source: "fixture",
+        runtimeMode: runtime.mode,
+        runtimeLabel: runtime.label,
+        activationGate: runtime.activationGate,
+        convexFunctions: runtime.functionNames,
+      },
+      metrics: buildMetrics(),
+      tenants: fixtureTenants,
+      sites: fixtureSites,
+      templates: fixtureTemplates,
+      experienceControls: fixtureExperienceControls,
+      roles: fixtureRoles,
+      leads: fixtureLeads,
+      pipelineStages: fixturePipelineStages,
+      tasks: fixtureTasks,
+      leadCaptureContracts: fixtureLeadCaptureContracts,
+      siteLaunchPackets: fixtureSiteLaunchPackets,
+      launchGates: fixtureLaunchGates,
+    };
+  },
 };
 
 export function getKinfloShellSnapshot(adapter: KinfloShellDataAdapter = fixtureKinfloShellAdapter) {

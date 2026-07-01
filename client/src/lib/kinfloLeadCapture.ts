@@ -1,4 +1,10 @@
-export const KINFLO_LEAD_CAPTURE_CONVEX_FUNCTION = "crm.submitLead" as const;
+import {
+  getKinfloConvexRuntime,
+  KINFLO_CONVEX_FUNCTIONS,
+  type KinfloConvexRuntimeSnapshot,
+} from "./kinfloConvexRuntime";
+
+export const KINFLO_LEAD_CAPTURE_CONVEX_FUNCTION = KINFLO_CONVEX_FUNCTIONS.crmSubmitLead;
 
 export type KinfloLeadCaptureInput = {
   siteId?: string;
@@ -49,6 +55,7 @@ export type KinfloLeadCaptureContract = {
   convexPayload?: KinfloCrmSubmitLeadPayload;
   legacyPayload: KinfloLegacyLeadPayload;
   runtime: "legacy_api" | "convex_contract_ready";
+  runtimeBoundary: KinfloConvexRuntimeSnapshot;
   missingConvexFields: string[];
 };
 
@@ -70,6 +77,7 @@ function definedFields<T extends Record<string, unknown>>(value: T) {
 export function buildKinfloLeadCaptureContract(
   input: KinfloLeadCaptureInput,
 ): KinfloLeadCaptureContract {
+  const runtimeBoundary = getKinfloConvexRuntime();
   const journeyStage = clean(input.journeyStage) ?? "awareness";
   const source = clean(input.source) ?? "website";
   const missingConvexFields = clean(input.siteId) ? [] : ["siteId"];
@@ -110,6 +118,7 @@ export function buildKinfloLeadCaptureContract(
       metadata: input.metadata,
     },
     runtime: missingConvexFields.length === 0 ? "convex_contract_ready" : "legacy_api",
+    runtimeBoundary,
     missingConvexFields,
   };
 }
