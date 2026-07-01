@@ -2,13 +2,11 @@ import {
   mutationGeneric as mutation,
   queryGeneric as query,
   type GenericMutationCtx,
-  type GenericQueryCtx,
 } from "convex/server";
 import { v } from "convex/values";
+import { requirePermission } from "./accessPolicy";
 
-type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
-type AnyCtx = QueryCtx | MutationCtx;
 
 type StarterBlock = {
   type: "hero" | "services" | "events" | "testimonials" | "lead_magnet" | "form" | "campaign" | "custom";
@@ -203,47 +201,6 @@ function slugify(value: string) {
     .slice(0, 80);
 }
 
-async function getCurrentUser(ctx: AnyCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Authentication required");
-  }
-
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_subject", (q) => q.eq("subject", identity.subject))
-    .unique();
-
-  if (!user) {
-    throw new Error("User must be synced before using the site factory");
-  }
-
-  return user;
-}
-
-async function requireTenantAdmin(ctx: AnyCtx, tenantId: any) {
-  const user = await getCurrentUser(ctx);
-  if (user.platformRole === "super_admin") {
-    return user;
-  }
-
-  const membership = await ctx.db
-    .query("memberships")
-    .withIndex("by_tenant_user", (q) => q.eq("tenantId", tenantId))
-    .filter((q) => q.eq(q.field("userId"), user._id))
-    .first();
-
-  if (
-    !membership ||
-    membership.status !== "active" ||
-    !["owner", "admin"].includes(membership.role)
-  ) {
-    throw new Error("Tenant admin access required");
-  }
-
-  return user;
-}
-
 async function writeSiteAuditEvent(
   ctx: MutationCtx,
   args: {
@@ -289,7 +246,10 @@ export const createSiteFromTemplate = mutation({
     subdomain: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const actor = await requireTenantAdmin(ctx, args.tenantId);
+    const actor = await requirePermission(ctx, {
+      tenantId: args.tenantId,
+      permission: "site:create",
+    });
     const tenant = await ctx.db.get(args.tenantId);
     if (!tenant || tenant.status !== "active") {
       throw new Error("Active tenant not found");

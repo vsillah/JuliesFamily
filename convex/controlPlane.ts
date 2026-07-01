@@ -5,6 +5,7 @@ import {
   type GenericQueryCtx,
 } from "convex/server";
 import { v } from "convex/values";
+import { requirePermission } from "./accessPolicy";
 import { invitationStatus, recordStatus, siteStatus, tenantRole } from "./schema";
 
 type QueryCtx = GenericQueryCtx<any>;
@@ -100,34 +101,15 @@ async function getCurrentUser(ctx: AnyCtx) {
 }
 
 async function requirePlatformAdmin(ctx: AnyCtx) {
-  const user = await getCurrentUser(ctx);
-  if (user.platformRole !== "super_admin") {
-    throw new Error("Platform admin access required");
-  }
-  return user;
+  return await requirePermission(ctx, { permission: "platform:manage" });
 }
 
-async function requireTenantAdmin(ctx: AnyCtx, tenantId: string) {
-  const user = await getCurrentUser(ctx);
-  if (user.platformRole === "super_admin") {
-    return user;
-  }
+async function requireTenantPermission(ctx: AnyCtx, tenantId: any, permission: string) {
+  return await requirePermission(ctx, { tenantId, permission });
+}
 
-  const membership = await ctx.db
-    .query("memberships")
-    .withIndex("by_tenant_user", (q) => q.eq("tenantId", tenantId))
-    .filter((q) => q.eq(q.field("userId"), user._id))
-    .first();
-
-  if (
-    !membership ||
-    membership.status !== "active" ||
-    !["owner", "admin"].includes(membership.role)
-  ) {
-    throw new Error("Tenant admin access required");
-  }
-
-  return user;
+async function requireSitePermission(ctx: AnyCtx, siteId: any, permission: string) {
+  return await requirePermission(ctx, { siteId, permission });
 }
 
 async function writeAuditEvent(
@@ -221,7 +203,7 @@ export const createTenant = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const actor = await requirePlatformAdmin(ctx);
+    const actor = await requirePermission(ctx, { permission: "tenant:create" });
     const slug = slugify(args.slug ?? args.name);
     if (!slug) {
       throw new Error("Tenant slug is required");
@@ -280,7 +262,7 @@ export const createSite = mutation({
     subdomain: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const actor = await requireTenantAdmin(ctx, args.tenantId);
+    const actor = await requireTenantPermission(ctx, args.tenantId, "site:create");
     const tenant = await ctx.db.get(args.tenantId);
     if (!tenant || tenant.status !== "active") {
       throw new Error("Active tenant not found");
@@ -353,7 +335,7 @@ export const listSitesForTenant = query({
     tenantId: v.id("tenants"),
   },
   handler: async (ctx, args) => {
-    await requireTenantAdmin(ctx, args.tenantId);
+    await requireTenantPermission(ctx, args.tenantId, "tenant:view");
     return await ctx.db
       .query("sites")
       .withIndex("by_tenant", (q) => q.eq("tenantId", args.tenantId))
@@ -371,7 +353,7 @@ export const updateSiteStatus = mutation({
     if (!site) {
       throw new Error("Site not found");
     }
-    const actor = await requireTenantAdmin(ctx, site.tenantId);
+    const actor = await requireSitePermission(ctx, site._id, "site:update");
     const timestamp = now();
 
     await ctx.db.patch(site._id, {
@@ -409,7 +391,7 @@ export const updateThemeTokens = mutation({
     if (!site) {
       throw new Error("Site not found");
     }
-    const actor = await requireTenantAdmin(ctx, site.tenantId);
+    const actor = await requireSitePermission(ctx, site._id, "site:update");
 
     const existing = await ctx.db
       .query("themeTokens")
@@ -459,7 +441,7 @@ export const grantMembership = mutation({
     status: recordStatus,
   },
   handler: async (ctx, args) => {
-    const actor = await requireTenantAdmin(ctx, args.tenantId);
+    const actor = await requireTenantPermission(ctx, args.tenantId, "member:manage");
     if (args.siteId) {
       const site = await ctx.db.get(args.siteId);
       if (!site || site.tenantId !== args.tenantId) {
@@ -516,7 +498,11 @@ export const createInvitation = mutation({
     expiresAt: v.number(),
   },
   handler: async (ctx, args) => {
-    const actor = await requireTenantAdmin(ctx, args.tenantId);
+    const actor = await requirePermission(ctx, {
+      tenantId: args.tenantId,
+      siteId: args.siteId,
+      permission: "member:invite",
+    });
     const email = normalizeEmail(args.email);
     const timestamp = now();
 
@@ -600,7 +586,11 @@ export const listInvitations = query({
     status: v.optional(invitationStatus),
   },
   handler: async (ctx, args) => {
-    await requireTenantAdmin(ctx, args.tenantId);
+    await requirePermission(ctx, {
+      tenantId: args.tenantId,
+      siteId: args.siteId,
+      permission: "member:invite",
+    });
     const invitations = await ctx.db
       .query("invitations")
       .withIndex("by_tenant_status", (q) => q.eq("tenantId", args.tenantId))
@@ -622,7 +612,11 @@ export const revokeInvitation = mutation({
       throw new Error("Invitation not found");
     }
 
-    const actor = await requireTenantAdmin(ctx, invitation.tenantId);
+    const actor = await requirePermission(ctx, {
+      tenantId: invitation.tenantId,
+      siteId: invitation.siteId,
+      permission: "member:invite",
+    });
     const timestamp = now();
 
     await ctx.db.patch(invitation._id, {
@@ -748,7 +742,11 @@ export const listAuditEvents = query({
     if (args.scopeType === "platform") {
       await requirePlatformAdmin(ctx);
     } else if (args.tenantId) {
-      await requireTenantAdmin(ctx, args.tenantId);
+      await requirePermission(ctx, {
+        tenantId: args.tenantId,
+        siteId: args.siteId,
+        permission: "audit:view",
+      });
     } else {
       throw new Error("tenantId is required for tenant and site audit events");
     }

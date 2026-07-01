@@ -71,6 +71,7 @@ for (const path of [
   "docs/phase7-client-invitation-lifecycle.md",
   "docs/phase8-role-capability-catalog.md",
   "docs/phase9-access-policy.md",
+  "docs/phase10-permission-guard-migration.md",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "convex/siteBuilder.ts",
@@ -151,6 +152,13 @@ requireIncludes("docs/phase9-access-policy.md", [
   "hasPermission",
 ]);
 
+requireIncludes("docs/phase10-permission-guard-migration.md", [
+  "accessPolicy.requirePermission",
+  "content:publish",
+  "member:manage",
+  "site:create",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -180,6 +188,9 @@ requireIncludes("convex/controlPlane.ts", [
   "export const listInvitations",
   "export const revokeInvitation",
   "export const acceptInvitation",
+  "requirePermission",
+  "member:invite",
+  "member:manage",
   "invitation_accepted",
 ]);
 
@@ -197,7 +208,20 @@ requireIncludes("convex/accessPolicy.ts", [
   "export const viewerPermissionSnapshot",
   "export const canPerform",
   "export async function hasPermission",
+  "export async function requirePermission",
   "roleKeyForMembership",
+]);
+
+requireIncludes("convex/siteBuilder.ts", [
+  "requirePermission",
+  "content:edit",
+  "content:publish",
+  "asset:manage",
+]);
+
+requireIncludes("convex/siteFactory.ts", [
+  "requirePermission",
+  "site:create",
 ]);
 
 requireIncludes("convex/activation.ts", [

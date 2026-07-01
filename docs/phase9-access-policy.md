@@ -43,7 +43,7 @@ Site-scoped `owner` memberships resolve to `site.admin` so older invite/member f
 
 This is still provider-light. It does not run `convex dev`, does not generate Convex runtime files, and does not connect to a hosted Convex deployment.
 
-The module is read-only for this phase. Existing mutations can now migrate from hard-coded role checks to `hasPermission` in focused follow-up slices.
+Phase 10 begins wiring this policy layer into control-plane, site-builder, and site-factory mutations through `requirePermission`.
 
 ## First Hosted Smoke
 

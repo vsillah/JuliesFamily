@@ -5,6 +5,7 @@ import {
   type GenericQueryCtx,
 } from "convex/server";
 import { v } from "convex/values";
+import { requirePermission } from "./accessPolicy";
 import { assetStatus, contentBlockType, domainStatus, navPlacement, publishStatus } from "./schema";
 
 type QueryCtx = GenericQueryCtx<any>;
@@ -27,54 +28,17 @@ function definedFields(value: Record<string, unknown>) {
   );
 }
 
-async function getCurrentUser(ctx: AnyCtx) {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Authentication required");
-  }
-
-  const user = await ctx.db
-    .query("users")
-    .withIndex("by_subject", (q) => q.eq("subject", identity.subject))
-    .unique();
-
-  if (!user) {
-    throw new Error("User must be synced before using the site builder");
-  }
-
-  return user;
-}
-
-async function requireTenantAdmin(ctx: AnyCtx, tenantId: any) {
-  const user = await getCurrentUser(ctx);
-  if (user.platformRole === "super_admin") {
-    return user;
-  }
-
-  const membership = await ctx.db
-    .query("memberships")
-    .withIndex("by_tenant_user", (q) => q.eq("tenantId", tenantId))
-    .filter((q) => q.eq(q.field("userId"), user._id))
-    .first();
-
-  if (
-    !membership ||
-    membership.status !== "active" ||
-    !["owner", "admin"].includes(membership.role)
-  ) {
-    throw new Error("Tenant admin access required");
-  }
-
-  return user;
-}
-
-async function requireSiteAdmin(ctx: AnyCtx, siteId: any) {
+async function requireSitePermission(ctx: AnyCtx, siteId: any, permission: string) {
   const site = await ctx.db.get(siteId);
   if (!site) {
     throw new Error("Site not found");
   }
-  const user = await requireTenantAdmin(ctx, site.tenantId);
+  const user = await requirePermission(ctx, { siteId, permission });
   return { user, site };
+}
+
+async function requireTenantPermission(ctx: AnyCtx, tenantId: any, permission: string) {
+  return await requirePermission(ctx, { tenantId, permission });
 }
 
 async function writeAuditEvent(
@@ -108,7 +72,7 @@ export const getSiteDraft = query({
     siteId: v.id("sites"),
   },
   handler: async (ctx, args) => {
-    const { site } = await requireSiteAdmin(ctx, args.siteId);
+    const { site } = await requireSitePermission(ctx, args.siteId, "site:view");
     const theme = await ctx.db
       .query("themeTokens")
       .withIndex("by_site", (q) => q.eq("siteId", args.siteId))
@@ -140,7 +104,7 @@ export const createPage = mutation({
     templateKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { user, site } = await requireSiteAdmin(ctx, args.siteId);
+    const { user, site } = await requireSitePermission(ctx, args.siteId, "content:edit");
     const route = normalizeRoute(args.route);
     const existing = await ctx.db
       .query("pages")
@@ -192,7 +156,8 @@ export const updatePage = mutation({
     if (!page) {
       throw new Error("Page not found");
     }
-    const { user, site } = await requireSiteAdmin(ctx, page.siteId);
+    const permission = args.status === "published" ? "content:publish" : "content:edit";
+    const { user, site } = await requireSitePermission(ctx, page.siteId, permission);
     const route = args.route ? normalizeRoute(args.route) : undefined;
 
     if (route && route !== page.route) {
@@ -239,7 +204,7 @@ export const upsertNavigationItem = mutation({
     isVisible: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { user, site } = await requireSiteAdmin(ctx, args.siteId);
+    const { user, site } = await requireSitePermission(ctx, args.siteId, "site:update");
     const timestamp = now();
 
     if (args.itemId) {
@@ -299,7 +264,7 @@ export const createContentBlock = mutation({
     if (!page) {
       throw new Error("Page not found");
     }
-    const { user, site } = await requireSiteAdmin(ctx, page.siteId);
+    const { user, site } = await requireSitePermission(ctx, page.siteId, "content:edit");
     const timestamp = now();
     const blockId = await ctx.db.insert("contentBlocks", {
       siteId: page.siteId,
@@ -343,7 +308,8 @@ export const updateContentBlock = mutation({
     if (!block) {
       throw new Error("Content block not found");
     }
-    const { user, site } = await requireSiteAdmin(ctx, block.siteId);
+    const permission = args.status === "published" ? "content:publish" : "content:edit";
+    const { user, site } = await requireSitePermission(ctx, block.siteId, permission);
     const timestamp = now();
 
     await ctx.db.patch(block._id, definedFields({
@@ -383,7 +349,7 @@ export const upsertVisibilityRule = mutation({
     if (!block) {
       throw new Error("Content block not found");
     }
-    const { user, site } = await requireSiteAdmin(ctx, block.siteId);
+    const { user, site } = await requireSitePermission(ctx, block.siteId, "content:edit");
     const timestamp = now();
 
     if (args.ruleId) {
@@ -443,7 +409,11 @@ export const createAssetRecord = mutation({
     provenance: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
-    const user = await requireTenantAdmin(ctx, args.tenantId);
+    const user = await requirePermission(ctx, {
+      tenantId: args.tenantId,
+      siteId: args.siteId,
+      permission: "asset:manage",
+    });
     if (args.siteId) {
       const site = await ctx.db.get(args.siteId);
       if (!site || site.tenantId !== args.tenantId) {
@@ -492,7 +462,7 @@ export const upsertDomain = mutation({
     verificationToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { user, site } = await requireSiteAdmin(ctx, args.siteId);
+    const { user, site } = await requireSitePermission(ctx, args.siteId, "site:update");
     const hostname = args.hostname.trim().toLowerCase();
     if (!hostname || hostname.includes("/") || hostname.includes(":")) {
       throw new Error("Hostname must be a bare domain such as example.com");
@@ -561,7 +531,7 @@ export const publishPage = mutation({
     if (!page) {
       throw new Error("Page not found");
     }
-    const { user, site } = await requireSiteAdmin(ctx, page.siteId);
+    const { user, site } = await requireSitePermission(ctx, page.siteId, "content:publish");
     const blocks = await ctx.db
       .query("contentBlocks")
       .withIndex("by_page_order", (q) => q.eq("pageId", page._id))

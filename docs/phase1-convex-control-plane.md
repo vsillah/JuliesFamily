@@ -59,6 +59,10 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - resolving viewer permissions by tenant or site scope,
   - checking whether a viewer can perform a named permission,
   - providing a reusable `hasPermission` helper for follow-up mutation guards.
+- Permission guard migration for:
+  - checking named permissions in control-plane mutations,
+  - checking named permissions in site-builder mutations,
+  - keeping bootstrap-only platform-admin checks separate from normal tenant/site operations.
 
 ## Explicit Boundaries
 

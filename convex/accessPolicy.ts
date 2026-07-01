@@ -1,11 +1,14 @@
 import {
   queryGeneric as query,
+  type GenericMutationCtx,
   type GenericQueryCtx,
 } from "convex/server";
 import { v } from "convex/values";
 import { defaultRoleDefinitions } from "./roleCatalog";
 
 type QueryCtx = GenericQueryCtx<any>;
+type MutationCtx = GenericMutationCtx<any>;
+type AnyCtx = QueryCtx | MutationCtx;
 
 type PermissionScope = {
   tenantId?: any;
@@ -48,7 +51,7 @@ function activeOnly(memberships: Array<MembershipLike | null>) {
   );
 }
 
-async function getCurrentUser(ctx: QueryCtx) {
+async function getCurrentUser(ctx: AnyCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     return null;
@@ -60,7 +63,7 @@ async function getCurrentUser(ctx: QueryCtx) {
     .unique();
 }
 
-async function loadRoleDefinitions(ctx: QueryCtx) {
+async function loadRoleDefinitions(ctx: AnyCtx) {
   const persistedRoles = await ctx.db.query("roles").collect();
   const definitions = new Map(
     defaultRoleDefinitions.map((definition) => [definition.key, definition]),
@@ -79,7 +82,7 @@ async function loadRoleDefinitions(ctx: QueryCtx) {
 }
 
 async function collectScopedMemberships(
-  ctx: QueryCtx,
+  ctx: AnyCtx,
   userId: any,
   scope: PermissionScope,
 ) {
@@ -126,7 +129,7 @@ async function collectScopedMemberships(
 }
 
 async function buildPermissionSnapshot(
-  ctx: QueryCtx,
+  ctx: AnyCtx,
   user: any,
   scope: PermissionScope,
 ) {
@@ -161,7 +164,7 @@ async function buildPermissionSnapshot(
 }
 
 export async function hasPermission(
-  ctx: QueryCtx,
+  ctx: AnyCtx,
   args: PermissionScope & { permission: string },
 ) {
   const user = await getCurrentUser(ctx);
@@ -174,6 +177,27 @@ export async function hasPermission(
 
   const snapshot = await buildPermissionSnapshot(ctx, user, args);
   return snapshot.permissions.includes(args.permission);
+}
+
+export async function requirePermission(
+  ctx: AnyCtx,
+  args: PermissionScope & { permission: string },
+) {
+  const user = await getCurrentUser(ctx);
+  if (!user) {
+    throw new Error("Authentication required");
+  }
+
+  if (user.platformRole === "super_admin") {
+    return user;
+  }
+
+  const snapshot = await buildPermissionSnapshot(ctx, user, args);
+  if (!snapshot.permissions.includes(args.permission)) {
+    throw new Error(`Permission required: ${args.permission}`);
+  }
+
+  return user;
 }
 
 export const viewerPermissionSnapshot = query({
