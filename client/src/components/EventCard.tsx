@@ -46,15 +46,16 @@ export default function EventCard({
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
   // Track card visibility and engagement
-  const { ref: cardRef, isVisible, dwellTime, hasEngaged } = useViewportTracking({
+  const { ref: cardRef } = useViewportTracking<HTMLDivElement>({
     threshold: 0.5,
-    dwellThreshold: METRIC_THRESHOLDS.CARD_DWELL_TIME,
-    onEnterViewport: () => {
+    trackDwell: true,
+    dwellThreshold: METRIC_THRESHOLDS.CARD_DWELL_MINIMUM,
+    onView: () => {
       if (onCardView) {
         onCardView(position);
       }
     },
-    onDwellThresholdReached: (dwell) => {
+    onDwell: (dwell) => {
       if (onCardEngage) {
         onCardEngage(position, dwell);
       }
