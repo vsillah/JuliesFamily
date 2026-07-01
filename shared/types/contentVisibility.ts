@@ -15,6 +15,7 @@ export interface VisibleSections {
   events: boolean;
   donation: boolean;
   "student-dashboard": boolean;
+  "volunteer-dashboard": boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export const SECTION_ANCHOR_MAP: Record<string, keyof VisibleSections> = {
   "#lead-magnet": "lead-magnet",
   "#student-dashboard": "student-dashboard",
   "#dashboard": "student-dashboard", // Alias
+  "#volunteer-dashboard": "volunteer-dashboard",
 };
 
 /**
@@ -47,6 +49,7 @@ export function getSectionDisplayName(section: keyof VisibleSections): string {
     events: "Events",
     donation: "Donation",
     "student-dashboard": "Student Dashboard",
+    "volunteer-dashboard": "Volunteer Dashboard",
   };
   return displayNames[section] || section;
 }
