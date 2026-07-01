@@ -87,6 +87,7 @@ for (const path of [
   "docs/phase23-custom-domain-entitlement-contracts.md",
   "docs/phase24-live-convex-handoff.md",
   "docs/phase25-live-adapter-contract.md",
+  "docs/phase26-generated-api-contract.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -102,6 +103,7 @@ for (const path of [
   "client/src/pages/KinfloPublicSitePreview.tsx",
   "client/src/lib/kinfloShellData.ts",
   "client/src/lib/kinfloConvexRuntime.ts",
+  "client/src/lib/kinfloGeneratedApiContract.ts",
   "client/src/lib/kinfloLeadCapture.ts",
   "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
@@ -110,6 +112,7 @@ for (const path of [
   "scripts/validate-convex-activation-preflight.mjs",
   "scripts/validate-convex-live-handoff.mjs",
   "scripts/validate-kinflo-live-adapter.mjs",
+  "scripts/validate-kinflo-generated-api-contract.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -335,6 +338,16 @@ requireIncludes("docs/phase25-live-adapter-contract.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase26-generated-api-contract.md", [
+  "KINFLO_GENERATED_API_BINDINGS",
+  "resolveKinfloGeneratedApiBinding",
+  "npm run kinflo:validate-generated-api",
+  "no generated Convex API files are tracked",
+  "every generated API binding maps to an existing",
+  "No generated Convex API files are committed",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -343,6 +356,7 @@ requireIncludes("package.json", [
   "\"kinflo:activation-preflight\"",
   "\"kinflo:live-handoff\"",
   "\"kinflo:validate-live-adapter\"",
+  "\"kinflo:validate-generated-api\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -378,11 +392,13 @@ requireIncludes("scripts/validate-convex-activation-preflight.mjs", [
   "activation.seedSmokeSite",
   "convex/entitlements.ts",
   "docs/phase24-live-convex-handoff.md",
+  "docs/phase26-generated-api-contract.md",
 ]);
 
 requireIncludes("scripts/validate-convex-live-handoff.mjs", [
   "docs/phase24-live-convex-handoff.md",
   "docs/phase25-live-adapter-contract.md",
+  "docs/phase26-generated-api-contract.md",
   "generatedApiAvailable = false",
   "External writes: 0",
   "Hosted deployment touched: no",
@@ -391,7 +407,16 @@ requireIncludes("scripts/validate-convex-live-handoff.mjs", [
 
 requireIncludes("scripts/validate-kinflo-live-adapter.mjs", [
   "docs/phase25-live-adapter-contract.md",
+  "client/src/lib/kinfloGeneratedApiContract.ts",
   "ShellLiveAdapterBinding",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-generated-api-contract.mjs", [
+  "docs/phase26-generated-api-contract.md",
+  "KINFLO_GENERATED_API_BINDINGS",
+  "Convex export exists",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -403,11 +428,28 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "createKinfloConvexReactClient",
   "fixture_only",
   "env_configured_codegen_pending",
+  "controlPlane.listPlanCatalog",
+  "controlPlane.setTenantEntitlementOverride",
+  "roleCatalog.syncDefaultRoles",
+  "accessPolicy.viewerPermissionSnapshot",
   "entitlements.entitlementUsageSnapshot",
   "entitlements.checkEntitlementLimit",
   "siteBuilder.upsertDomain",
   "crm.submitLead",
   "publicSite.resolvePublishedSite",
+]);
+
+requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
+  "KINFLO_GENERATED_API_BINDINGS",
+  "KinfloGeneratedApiBinding",
+  "resolveKinfloGeneratedApiBinding",
+  "smokeEvidence",
+  "controlPlaneListPlanCatalog",
+  "controlPlaneSetTenantEntitlementOverride",
+  "roleCatalogSyncDefaultRoles",
+  "accessPolicyViewerPermissionSnapshot",
+  "siteBuilderPublishPage",
+  "crmCreateTask",
 ]);
 
 requireIncludes(".env.example", [

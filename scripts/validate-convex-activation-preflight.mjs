@@ -78,8 +78,10 @@ for (const path of [
   "docs/phase17-convex-activation-preflight.md",
   "docs/phase24-live-convex-handoff.md",
   "docs/phase25-live-adapter-contract.md",
+  "docs/phase26-generated-api-contract.md",
   "scripts/validate-convex-live-handoff.mjs",
   "scripts/validate-kinflo-live-adapter.mjs",
+  "scripts/validate-kinflo-generated-api-contract.mjs",
 ]) {
   requireFile(path);
 }
@@ -97,6 +99,7 @@ requireIncludes("package.json", [
   "\"kinflo:activation-preflight\"",
   "\"kinflo:live-handoff\"",
   "\"kinflo:validate-live-adapter\"",
+  "\"kinflo:validate-generated-api\"",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -158,6 +161,13 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
 requireIncludes("docs/phase25-live-adapter-contract.md", [
   "selectKinfloShellDataAdapter",
   "liveKinfloShellAdapter",
+  "No generated Convex API files are committed",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase26-generated-api-contract.md", [
+  "KINFLO_GENERATED_API_BINDINGS",
+  "npm run kinflo:validate-generated-api",
   "No generated Convex API files are committed",
   "No live Convex query, mutation, or action is executed",
 ]);

@@ -72,6 +72,7 @@ for (const path of [
   "docs/phase18-convex-runtime-boundary.md",
   "docs/phase24-live-convex-handoff.md",
   "docs/phase25-live-adapter-contract.md",
+  "docs/phase26-generated-api-contract.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/activation.ts",
@@ -82,10 +83,12 @@ for (const path of [
   "convex/entitlements.ts",
   "convex/crm.ts",
   "client/src/lib/kinfloConvexRuntime.ts",
+  "client/src/lib/kinfloGeneratedApiContract.ts",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-convex-activation-preflight.mjs",
   "scripts/validate-convex-live-handoff.mjs",
   "scripts/validate-kinflo-live-adapter.mjs",
+  "scripts/validate-kinflo-generated-api-contract.mjs",
 ]) {
   requireFile(path);
 }
@@ -107,6 +110,7 @@ requireIncludes("package.json", [
   "\"kinflo:activation-preflight\"",
   "\"kinflo:live-handoff\"",
   "\"kinflo:validate-live-adapter\"",
+  "\"kinflo:validate-generated-api\"",
 ]);
 
 requireIncludes("docs/phase24-live-convex-handoff.md", [
@@ -130,6 +134,13 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
 requireIncludes("docs/phase25-live-adapter-contract.md", [
   "selectKinfloShellDataAdapter",
   "liveKinfloShellAdapter",
+  "No generated Convex API files are committed",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase26-generated-api-contract.md", [
+  "KINFLO_GENERATED_API_BINDINGS",
+  "npm run kinflo:validate-generated-api",
   "No generated Convex API files are committed",
   "No live Convex query, mutation, or action is executed",
 ]);
@@ -198,6 +209,13 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "env_configured_codegen_pending",
   "live_ready",
   "createKinfloConvexReactClient",
+  "controlPlaneListPlanCatalog",
+  "controlPlaneSetTenantEntitlementOverride",
+]);
+
+requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
+  "KINFLO_GENERATED_API_BINDINGS",
+  "resolveKinfloGeneratedApiBinding",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [

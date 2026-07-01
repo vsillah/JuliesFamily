@@ -53,8 +53,10 @@ for (const path of [
   "docs/phase25-live-adapter-contract.md",
   "client/src/lib/kinfloShellData.ts",
   "client/src/lib/kinfloConvexRuntime.ts",
+  "client/src/lib/kinfloGeneratedApiContract.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "scripts/validate-kinflo-live-adapter.mjs",
+  "scripts/validate-kinflo-generated-api-contract.mjs",
   "package.json",
 ]) {
   requireFile(path);
@@ -108,10 +110,18 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "generatedApiAvailable = false",
   "canUseLiveData",
   "live_ready",
+  "controlPlaneListPlanCatalog",
+  "controlPlaneSetTenantEntitlementOverride",
+]);
+
+requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
+  "KINFLO_GENERATED_API_BINDINGS",
+  "resolveKinfloGeneratedApiBinding",
 ]);
 
 requireIncludes("package.json", [
   "\"kinflo:validate-live-adapter\"",
+  "\"kinflo:validate-generated-api\"",
 ]);
 
 const failed = checks.filter((check) => !check.ok);
