@@ -14,10 +14,13 @@ This phase introduces the first admin-facing SaaS shell for the multi-tenant Kin
   - scoped permissions,
   - launch gates.
 - Admin-only route guard using the existing client auth hooks.
+- Typed fixture data adapter in `client/src/lib/kinfloShellData.ts`.
 
 ## Current Boundary
 
 The shell is provider-light. It does not call Convex yet because the repo still has no configured Convex deployment or generated API bindings.
+
+The page now consumes a `KinfloShellSnapshot` from `client/src/lib/kinfloShellData.ts` instead of keeping fixture rows inline. That keeps the current UI reviewable while giving the future Convex-backed adapter a stable shape to satisfy.
 
 The UI state mirrors the Convex scaffold added in Phase 1:
 

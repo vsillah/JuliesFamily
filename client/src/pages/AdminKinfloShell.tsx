@@ -33,116 +33,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  getKinfloShellSnapshot,
+  type ExperienceIconKey,
+  type KinfloShellStatus,
+  type ShellMetricIconKey,
+} from "@/lib/kinfloShellData";
 
-const shellMetrics = [
-  { label: "Tenants", value: "3", detail: "1 platform seed, 2 templates queued", icon: Boxes },
-  { label: "Sites", value: "5", detail: "2 published, 3 in draft", icon: Globe2 },
-  { label: "Templates", value: "3", detail: "Learning, advisory, campaign", icon: Factory },
-  { label: "Launch Gates", value: "7/9", detail: "Convex auth and live smoke remain", icon: Rocket },
-];
+const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
+  tenants: Boxes,
+  sites: Globe2,
+  templates: Factory,
+  launchGates: Rocket,
+};
 
-const tenants = [
-  {
-    name: "Julie's Family Learning Program",
-    slug: "julies-family",
-    plan: "Founding Tenant",
-    sites: 2,
-    owner: "Vambah",
-    status: "active",
-  },
-  {
-    name: "Advisor Client Starter",
-    slug: "advisor-client-starter",
-    plan: "Client Build",
-    sites: 1,
-    owner: "Client Admin",
-    status: "draft",
-  },
-  {
-    name: "Campaign Microsite Lab",
-    slug: "campaign-microsite-lab",
-    plan: "Launch Lab",
-    sites: 2,
-    owner: "Campaign Editor",
-    status: "draft",
-  },
-];
+const experienceIcons: Record<ExperienceIconKey, typeof Palette> = {
+  theme: Palette,
+  navigation: LayoutDashboard,
+  audience: Workflow,
+  preview: MonitorSmartphone,
+};
 
-const sites = [
-  {
-    name: "Julie Family Public Site",
-    tenant: "julies-family",
-    domain: "juliesfamily.org",
-    route: "/",
-    template: "Nonprofit Learning Center",
-    status: "published",
-  },
-  {
-    name: "Tech Goes Home Cohort",
-    tenant: "julies-family",
-    domain: "tgh.juliesfamily.org",
-    route: "/programs/tech-goes-home",
-    template: "Campaign Microsite",
-    status: "preview",
-  },
-  {
-    name: "Advisor Client Site",
-    tenant: "advisor-client-starter",
-    domain: "pending",
-    route: "/",
-    template: "Advisor Consultant",
-    status: "draft",
-  },
-];
-
-const templates = [
-  {
-    key: "nonprofit-learning-center",
-    label: "Nonprofit Learning Center",
-    fit: "Family learning, cohorts, volunteers, donors",
-    blocks: ["Hero", "Services", "Events", "Testimonials", "Lead magnet"],
-  },
-  {
-    key: "advisor-consultant",
-    label: "Advisor Consultant",
-    fit: "Client services, offers, case studies, intake",
-    blocks: ["Hero", "Services", "Proof", "Form"],
-  },
-  {
-    key: "campaign-microsite",
-    label: "Campaign Microsite",
-    fit: "Launches, cohorts, fundraising, local campaigns",
-    blocks: ["Hero", "Campaign", "Proof", "Lead magnet"],
-  },
-];
-
-const experienceControls = [
-  { label: "Theme Tokens", value: "Palette, typography, spacing, radii", icon: Palette },
-  { label: "Navigation", value: "Header and footer placement per site", icon: LayoutDashboard },
-  { label: "Audience Rules", value: "Persona and journey-stage block visibility", icon: Workflow },
-  { label: "Responsive Preview", value: "Desktop, tablet, phone launch checks", icon: MonitorSmartphone },
-];
-
-const roles = [
-  { role: "Super Admin", scope: "Platform", access: "Tenants, templates, billing gates, audit events", owner: "Vambah" },
-  { role: "Tenant Owner", scope: "Tenant", access: "Sites, members, theme, domain metadata", owner: "Client lead" },
-  { role: "Site Admin", scope: "Site", access: "Pages, navigation, blocks, publish workflow", owner: "Program lead" },
-  { role: "Editor", scope: "Site", access: "Draft content and asset records", owner: "Content support" },
-];
-
-const launchGates = [
-  { label: "Phase 0 source import", status: "done" },
-  { label: "Secret handling baseline", status: "done" },
-  { label: "Drizzle-to-Convex map", status: "done" },
-  { label: "Convex control plane", status: "done" },
-  { label: "Site builder schema", status: "done" },
-  { label: "Template factory", status: "done" },
-  { label: "Public resolver", status: "done" },
-  { label: "Convex deployment and generated API", status: "pending" },
-  { label: "Live admin smoke", status: "pending" },
-];
-
-function statusBadge(status: string) {
+function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
     return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
   }
@@ -156,6 +68,7 @@ export default function AdminKinfloShell() {
   const { isLoading } = useAuth();
   const { isAdmin } = useUserRole();
   const [, navigate] = useLocation();
+  const snapshot = getKinfloShellSnapshot();
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
@@ -207,8 +120,8 @@ export default function AdminKinfloShell() {
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {shellMetrics.map((metric) => {
-            const Icon = metric.icon;
+          {snapshot.metrics.map((metric) => {
+            const Icon = metricIcons[metric.iconKey];
             return (
               <Card key={metric.label}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -223,6 +136,37 @@ export default function AdminKinfloShell() {
             );
           })}
         </div>
+
+        <Card className="mt-6">
+          <CardHeader className="flex flex-col gap-3 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <CardTitle className="text-base">Data Mode</CardTitle>
+                <Badge variant="outline">{snapshot.dataMode.label}</Badge>
+              </div>
+              <p className="mt-2 max-w-3xl text-sm text-muted-foreground">
+                {snapshot.dataMode.description}
+              </p>
+            </div>
+            <Badge variant="secondary" className="w-fit">
+              {snapshot.dataMode.source === "fixture" ? "Convex pending" : "Convex live"}
+            </Badge>
+          </CardHeader>
+          <CardContent className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)]">
+            <div>
+              <div className="text-sm font-medium">Activation gate</div>
+              <p className="mt-1 text-sm text-muted-foreground">{snapshot.dataMode.activationGate}</p>
+            </div>
+            <div>
+              <div className="text-sm font-medium">Convex contract</div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {snapshot.dataMode.convexFunctions.map((functionName) => (
+                  <Badge key={functionName} variant="secondary">{functionName}</Badge>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <Tabs defaultValue="tenants" className="mt-8">
           <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-5">
@@ -259,7 +203,7 @@ export default function AdminKinfloShell() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {tenants.map((tenant) => (
+                    {snapshot.tenants.map((tenant) => (
                       <TableRow key={tenant.slug}>
                         <TableCell>
                           <div className="font-medium">{tenant.name}</div>
@@ -301,7 +245,7 @@ export default function AdminKinfloShell() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sites.map((site) => (
+                    {snapshot.sites.map((site) => (
                       <TableRow key={`${site.tenant}-${site.name}`}>
                         <TableCell>
                           <div className="font-medium">{site.name}</div>
@@ -323,7 +267,7 @@ export default function AdminKinfloShell() {
             <section className="space-y-4">
               <h2 className="text-xl font-semibold">Starter Templates</h2>
               <div className="grid gap-4 lg:grid-cols-3">
-                {templates.map((template) => (
+                {snapshot.templates.map((template) => (
                   <Card key={template.key}>
                     <CardHeader>
                       <CardTitle className="text-base">{template.label}</CardTitle>
@@ -346,8 +290,8 @@ export default function AdminKinfloShell() {
             <section className="space-y-4">
               <h2 className="text-xl font-semibold">Configurable Experience Layer</h2>
               <div className="grid gap-4 md:grid-cols-2">
-                {experienceControls.map((control) => {
-                  const Icon = control.icon;
+                {snapshot.experienceControls.map((control) => {
+                  const Icon = experienceIcons[control.iconKey];
                   return (
                     <Card key={control.label}>
                       <CardHeader className="flex flex-row items-start gap-3 space-y-0">
@@ -387,7 +331,7 @@ export default function AdminKinfloShell() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {roles.map((role) => (
+                      {snapshot.roles.map((role) => (
                         <TableRow key={role.role}>
                           <TableCell className="font-medium">{role.role}</TableCell>
                           <TableCell>{role.scope}</TableCell>
@@ -406,7 +350,7 @@ export default function AdminKinfloShell() {
                   <ShieldCheck className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="rounded-lg border">
-                  {launchGates.map((gate, index) => {
+                  {snapshot.launchGates.map((gate, index) => {
                     const done = gate.status === "done";
                     return (
                       <div
