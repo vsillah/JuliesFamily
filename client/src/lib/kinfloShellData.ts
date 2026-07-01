@@ -683,6 +683,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Live Convex handoff checklist", status: "done" },
   { label: "Live smoke manifest", status: "done" },
   { label: "Live smoke dry runner", status: "done" },
+  { label: "TypeScript baseline gate", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];

@@ -19,6 +19,7 @@
     "kinflo:validate-generated-api": "node scripts/validate-kinflo-generated-api-contract.mjs",
     "kinflo:validate-live-smoke": "node scripts/validate-kinflo-live-smoke-manifest.mjs",
     "kinflo:dry-run-live-smoke": "node scripts/dry-run-kinflo-live-smoke.mjs",
+    "kinflo:check-baseline": "node scripts/validate-kinflo-typescript-baseline.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
     "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts",
     "db:push": "drizzle-kit push"

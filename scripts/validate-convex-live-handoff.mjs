@@ -75,6 +75,7 @@ for (const path of [
   "docs/phase26-generated-api-contract.md",
   "docs/phase27-live-smoke-manifest.md",
   "docs/phase28-live-smoke-dry-runner.md",
+  "docs/phase29-typescript-baseline-gate.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -94,6 +95,7 @@ for (const path of [
   "scripts/validate-kinflo-generated-api-contract.mjs",
   "scripts/validate-kinflo-live-smoke-manifest.mjs",
   "scripts/dry-run-kinflo-live-smoke.mjs",
+  "scripts/validate-kinflo-typescript-baseline.mjs",
 ]) {
   requireFile(path);
 }
@@ -118,6 +120,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-generated-api\"",
   "\"kinflo:validate-live-smoke\"",
   "\"kinflo:dry-run-live-smoke\"",
+  "\"kinflo:check-baseline\"",
 ]);
 
 requireIncludes("docs/phase24-live-convex-handoff.md", [
@@ -151,6 +154,13 @@ requireIncludes("docs/phase28-live-smoke-dry-runner.md", [
   "npm run kinflo:dry-run-live-smoke",
   "scripts/dry-run-kinflo-live-smoke.mjs",
   "ordered activation packet",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase29-typescript-baseline-gate.md", [
+  "npm run kinflo:check-baseline",
+  "npm run check",
+  "protected KinFlo",
   "No live Convex query, mutation, or action is executed",
 ]);
 
@@ -256,6 +266,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Live Convex handoff checklist",
   "Live smoke manifest",
   "Live smoke dry runner",
+  "TypeScript baseline gate",
   "Convex deployment and generated API",
   "Live admin smoke",
   "selectKinfloShellDataAdapter",
