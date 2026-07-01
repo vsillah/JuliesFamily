@@ -168,14 +168,23 @@ export class AutomationSchedulerService {
     try {
       // Get all unique content types from tests
       const tests = await this.storage.getAllAbTests();
-      const contentTypes = new Set(tests.map(t => t.contentType));
+      const variantsByTest = await Promise.all(
+        tests.map(async (test) => ({
+          test,
+          variants: await this.storage.getAbTestVariants(test.id),
+        }))
+      );
+      const contentTypes = new Set(
+        variantsByTest.flatMap(({ variants }) => variants.map((variant) => variant.contentType))
+      );
 
-      for (const contentType of contentTypes) {
+      for (const contentType of Array.from(contentTypes)) {
         // Get all content items for this type
         const contentItems = new Set(
-          tests
-            .filter(t => t.contentType === contentType)
-            .map(t => t.contentItemId)
+          variantsByTest
+            .flatMap(({ variants }) => variants)
+            .filter((variant) => variant.contentType === contentType && variant.contentItemId)
+            .map((variant) => variant.contentItemId as string)
         );
 
         // Update baselines for each content item
@@ -211,8 +220,8 @@ export class AutomationSchedulerService {
       return 0;
     }
 
-    const maxConcurrentTests = safetyLimits.maxConcurrentTests || 10;
-    const maxDailyGenerations = safetyLimits.maxDailyGenerations || 20;
+    const maxConcurrentTests = safetyLimits.maxConcurrentAutomatedTests || 10;
+    const maxDailyGenerations = safetyLimits.maxTestsPerDay || 20;
 
     // Check how many automated tests are currently active
     const allTests = await this.storage.getAllAbTests();
@@ -269,9 +278,8 @@ export class AutomationSchedulerService {
 
     await this.storage.upsertAbTestSafetyLimits({
       scope: 'global',
-      maxConcurrentTests: 10,
-      maxDailyGenerations: 20,
-      maxVariantsPerTest: 3,
+      maxConcurrentAutomatedTests: 10,
+      maxTestsPerDay: 20,
     });
   }
 

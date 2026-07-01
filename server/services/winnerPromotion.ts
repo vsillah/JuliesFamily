@@ -27,6 +27,13 @@ export interface PromotionResult {
   reason: string;
 }
 
+const getVariantConfiguration = (variant: AbTestVariant): Record<string, unknown> => {
+  if (typeof variant.configuration === 'object' && variant.configuration !== null) {
+    return variant.configuration as Record<string, unknown>;
+  }
+  return {};
+};
+
 export class WinnerPromotionService {
   constructor(
     private storage: IStorage,
@@ -104,11 +111,13 @@ export class WinnerPromotionService {
 
     // Get statistical configuration from automation rule
     const automationRules = await this.storage.getActiveAbTestAutomationRules();
-    const relevantRule = automationRules.find(r => r.contentType === test.contentType);
+    const testVariants = await this.storage.getAbTestVariants(testId);
+    const primaryContentType = testVariants[0]?.contentType || test.type;
+    const relevantRule = automationRules.find(r => r.contentType === primaryContentType);
     
     const config: StatisticalConfig = {
-      confidenceThreshold: relevantRule?.confidenceThreshold ? parseFloat(relevantRule.confidenceThreshold) : 0.95,
-      minimumSampleSize: relevantRule?.minimumSample || 100,
+      confidenceThreshold: (relevantRule?.confidenceThreshold || 95) / 100,
+      minimumSampleSize: relevantRule?.minimumTestSample || 100,
       minimumDetectableEffect: 5, // 5% minimum improvement
     };
 
@@ -249,11 +258,11 @@ export class WinnerPromotionService {
       throw new Error(`Variant ${winnerId} not found`);
     }
 
-    // Apply winner's presentation overrides to the content item
+    // Apply winner's configuration overrides to the content item
     await this.applyWinnerToContent(
-      test.contentType,
-      test.contentItemId,
-      winner.presentationOverrides as any
+      winner.contentType,
+      winner.contentItemId,
+      getVariantConfiguration(winner)
     );
 
     // Stop the test and mark winner
@@ -268,7 +277,7 @@ export class WinnerPromotionService {
    */
   private async applyWinnerToContent(
     contentType: string,
-    contentItemId: string,
+    contentItemId: string | null,
     presentationOverrides: any
   ): Promise<void> {
     // In production, this would update the actual content table
@@ -297,17 +306,17 @@ export class WinnerPromotionService {
     analytics: any;
   }>> {
     const completedTests = await this.storage.getAllAbTests();
-    const promotedTests = completedTests.filter(t => t.isAutomated && t.winnerId);
+    const promotedTests = completedTests.filter(t => t.isAutomated && t.winnerVariantId);
 
     const history = [];
     for (const test of promotedTests.slice(0, limit)) {
-      if (!test.winnerId) continue;
+      if (!test.winnerVariantId) continue;
 
-      const winner = await this.storage.getAbTestVariant(test.winnerId);
+      const winner = await this.storage.getAbTestVariant(test.winnerVariantId);
       if (!winner) continue;
 
       const analytics = await this.storage.getTestAnalytics(test.id);
-      const winnerAnalytics = analytics.find(a => a.variantId === test.winnerId);
+      const winnerAnalytics = analytics.find(a => a.variantId === test.winnerVariantId);
 
       history.push({
         test,
@@ -338,14 +347,14 @@ export class WinnerPromotionService {
 
     // Revert to control
     await this.applyWinnerToContent(
-      test.contentType,
-      test.contentItemId,
-      control.presentationOverrides as any
+      control.contentType,
+      control.contentItemId,
+      getVariantConfiguration(control)
     );
 
     // Update test to remove winner
     await this.storage.updateAbTest(testId, {
-      winnerId: null,
+      winnerVariantId: null,
     });
 
     console.log(`[WinnerPromotion] Rolled back test ${testId} to control variant`);

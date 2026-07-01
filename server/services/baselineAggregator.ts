@@ -46,8 +46,8 @@ export class BaselineAggregatorService {
       .innerJoin(abTests, eq(abTests.id, abTestVariants.testId))
       .where(
         and(
-          eq(abTests.contentType, filters.contentType),
-          eq(abTests.contentItemId, filters.contentItemId),
+          eq(abTestVariants.contentType, filters.contentType),
+          eq(abTestVariants.contentItemId, filters.contentItemId),
           gte(abTestEvents.createdAt, windowStart)
         )
       )
@@ -70,7 +70,7 @@ export class BaselineAggregatorService {
 
     // Get metric weight profile for this content type
     const weightProfiles = await this.storage.getMetricWeightProfilesByContentType(filters.contentType);
-    const defaultProfile = weightProfiles.find(p => p.isDefault) || weightProfiles[0];
+    const defaultProfile = weightProfiles.find(p => p.persona === filters.persona) || weightProfiles[0];
 
     let compositeScore = 0;
     if (defaultProfile) {
@@ -85,7 +85,6 @@ export class BaselineAggregatorService {
       funnelStage: filters.funnelStage || null,
       windowStart,
       windowEnd: new Date(),
-      windowDays,
       totalViews: metrics.totalViews,
       uniqueViews: metrics.uniqueViews,
       totalEvents: metrics.totalEvents,
@@ -119,7 +118,7 @@ export class BaselineAggregatorService {
     }
 
     // Join with assignments to filter by persona/funnel stage if specified
-    let queryBuilder = db
+    let queryBuilder: any = db
       .select({
         totalViews: sql<number>`COUNT(*) FILTER (WHERE ${abTestEvents.eventType} = 'page_view')`.as('totalViews'),
         uniqueViews: sql<number>`COUNT(DISTINCT ${abTestEvents.sessionId}) FILTER (WHERE ${abTestEvents.eventType} = 'page_view')`.as('uniqueViews'),
@@ -271,7 +270,6 @@ export class BaselineAggregatorService {
       funnelStage: filters.funnelStage || null,
       windowStart,
       windowEnd: new Date(),
-      windowDays: filters.windowDays || 30,
       totalViews: 0,
       uniqueViews: 0,
       totalEvents: 0,

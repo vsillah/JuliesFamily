@@ -199,6 +199,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   
   // A/B Test Variant operations
   createAbTestVariant(variant: InsertAbTestVariant): Promise<AbTestVariant>;
+  getAbTestVariant(id: string): Promise<AbTestVariant | undefined>;
   getAbTestVariants(testId: string): Promise<AbTestVariant[]>;
   updateAbTestVariant(id: string, updates: Partial<InsertAbTestVariant>): Promise<AbTestVariant | undefined>;
   deleteAbTestVariant(id: string): Promise<void>;
@@ -2115,6 +2116,14 @@ export class DatabaseStorage implements IStorage {
   // A/B Test Variant operations
   async createAbTestVariant(variantData: InsertAbTestVariant): Promise<AbTestVariant> {
     const [variant] = await db.insert(abTestVariants).values(variantData).returning();
+    return variant;
+  }
+
+  async getAbTestVariant(id: string): Promise<AbTestVariant | undefined> {
+    const [variant] = await db
+      .select()
+      .from(abTestVariants)
+      .where(eq(abTestVariants.id, id));
     return variant;
   }
 
