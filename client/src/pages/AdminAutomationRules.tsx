@@ -18,6 +18,22 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Link } from "wouter";
 import { TierGate } from "@/components/TierGate";
 import { TIERS } from "@shared/tiers";
+import type { MetricWeightProfile } from "@shared/schema";
+
+type AutomationRule = {
+  id: string;
+  name: string;
+  description?: string | null;
+  metricWeightProfileId?: string | null;
+  targetPersona?: string | null;
+  targetFunnelStage?: string | null;
+  contentType?: string | null;
+  baselineWindow?: number | null;
+  minimumSampleSize?: number | null;
+  compositeScoreThreshold?: number | null;
+  statisticalConfidence?: number | null;
+  isActive?: boolean | null;
+};
 
 export default function AdminAutomationRules() {
   const { user } = useAuth();
@@ -25,7 +41,7 @@ export default function AdminAutomationRules() {
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingRule, setEditingRule] = useState<any | null>(null);
+  const [editingRule, setEditingRule] = useState<AutomationRule | null>(null);
 
   const [ruleForm, setRuleForm] = useState({
     name: "",
@@ -42,12 +58,12 @@ export default function AdminAutomationRules() {
   });
 
   // Fetch automation rules
-  const { data: rules = [], isLoading: rulesLoading } = useQuery({
+  const { data: rules = [], isLoading: rulesLoading } = useQuery<AutomationRule[]>({
     queryKey: ["/api/automation/rules"],
   });
 
   // Fetch metric weight profiles for dropdown
-  const { data: metricProfiles = [] } = useQuery({
+  const { data: metricProfiles = [] } = useQuery<MetricWeightProfile[]>({
     queryKey: ["/api/automation/metric-weight-profiles"],
   });
 
@@ -178,7 +194,7 @@ export default function AdminAutomationRules() {
     }
   };
 
-  const handleEdit = (rule: any) => {
+  const handleEdit = (rule: AutomationRule) => {
     setEditingRule(rule);
     setRuleForm({
       name: rule.name,
@@ -187,11 +203,11 @@ export default function AdminAutomationRules() {
       targetPersona: rule.targetPersona || "all",
       targetFunnelStage: rule.targetFunnelStage || "all",
       contentType: rule.contentType || "all",
-      baselineWindow: rule.baselineWindow,
-      minimumSampleSize: rule.minimumSampleSize,
-      compositeScoreThreshold: rule.compositeScoreThreshold,
-      statisticalConfidence: rule.statisticalConfidence,
-      isActive: rule.isActive,
+      baselineWindow: rule.baselineWindow ?? 30,
+      minimumSampleSize: rule.minimumSampleSize ?? 100,
+      compositeScoreThreshold: rule.compositeScoreThreshold ?? 5000,
+      statisticalConfidence: rule.statisticalConfidence ?? 95,
+      isActive: rule.isActive ?? true,
     });
     setIsEditDialogOpen(true);
   };
@@ -202,8 +218,8 @@ export default function AdminAutomationRules() {
     }
   };
 
-  const handleToggleActive = (rule: any) => {
-    toggleRuleMutation.mutate({ id: rule.id, isActive: !rule.isActive });
+  const handleToggleActive = (rule: AutomationRule) => {
+    toggleRuleMutation.mutate({ id: rule.id, isActive: !(rule.isActive ?? false) });
   };
 
   const breadcrumbItems = [
@@ -284,8 +300,8 @@ export default function AdminAutomationRules() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {rules.map((rule: any) => {
-            const profile = metricProfiles.find((p: any) => p.id === rule.metricWeightProfileId);
+          {rules.map((rule) => {
+            const profile = metricProfiles.find((p) => p.id === rule.metricWeightProfileId);
             
             return (
               <Card key={rule.id} data-testid={`rule-${rule.id}`}>
@@ -523,7 +539,7 @@ export default function AdminAutomationRules() {
                       </Link>
                     </div>
                   ) : (
-                    metricProfiles.map((profile: any) => (
+                    metricProfiles.map((profile) => (
                       <SelectItem key={profile.id} value={profile.id}>
                         {profile.name}
                       </SelectItem>

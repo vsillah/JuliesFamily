@@ -13,14 +13,26 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Textarea } from "@/components/ui/textarea";
 import { TierGate } from "@/components/TierGate";
 import { TIERS } from "@shared/tiers";
+import type { AbTestSafetyLimit, MetricWeightProfile } from "@shared/schema";
+
+type AutomationSafetyLimits = Partial<AbTestSafetyLimit> & {
+  maxConcurrentTests?: number | null;
+  maxDailyGenerations?: number | null;
+  maxVariantsPerTest?: number | null;
+};
+
+type MetricProfileForm = Pick<
+  MetricWeightProfile,
+  "name" | "description" | "clickThroughWeight" | "engagementWeight" | "conversionWeight"
+>;
 
 export default function AdminAutomationConfig() {
   const { user } = useAuth();
   const { toast } = useToast();
 
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
-  const [editingProfile, setEditingProfile] = useState<any | null>(null);
-  const [newProfile, setNewProfile] = useState({
+  const [editingProfile, setEditingProfile] = useState<MetricWeightProfile | null>(null);
+  const [newProfile, setNewProfile] = useState<MetricProfileForm>({
     name: "",
     description: "",
     clickThroughWeight: 30,
@@ -29,12 +41,12 @@ export default function AdminAutomationConfig() {
   });
 
   // Fetch safety limits
-  const { data: safetyLimits, isLoading: limitsLoading } = useQuery({
+  const { data: safetyLimits, isLoading: limitsLoading } = useQuery<AutomationSafetyLimits | null>({
     queryKey: ["/api/automation/safety-limits"],
   });
 
   // Fetch metric weight profiles
-  const { data: metricProfiles = [], isLoading: profilesLoading } = useQuery({
+  const { data: metricProfiles = [], isLoading: profilesLoading } = useQuery<MetricWeightProfile[]>({
     queryKey: ["/api/automation/metric-weight-profiles"],
   });
 
@@ -48,9 +60,9 @@ export default function AdminAutomationConfig() {
   useEffect(() => {
     if (safetyLimits) {
       setLimits({
-        maxConcurrentTests: safetyLimits.maxConcurrentTests || 10,
-        maxDailyGenerations: safetyLimits.maxDailyGenerations || 20,
-        maxVariantsPerTest: safetyLimits.maxVariantsPerTest || 3,
+        maxConcurrentTests: safetyLimits.maxConcurrentTests ?? safetyLimits.maxConcurrentAutomatedTests ?? 10,
+        maxDailyGenerations: safetyLimits.maxDailyGenerations ?? safetyLimits.maxTestsPerDay ?? 20,
+        maxVariantsPerTest: safetyLimits.maxVariantsPerTest ?? safetyLimits.maxTestsPerPersona ?? 3,
       });
     }
   }, [safetyLimits]);
@@ -164,7 +176,7 @@ export default function AdminAutomationConfig() {
     }
   };
 
-  const handleEditProfile = (profile: any) => {
+  const handleEditProfile = (profile: MetricWeightProfile) => {
     setEditingProfile(profile);
     setNewProfile({
       name: profile.name,
@@ -329,7 +341,7 @@ export default function AdminAutomationConfig() {
             </div>
           ) : (
             <div className="space-y-3">
-              {metricProfiles.map((profile: any) => (
+              {metricProfiles.map((profile) => (
                 <div
                   key={profile.id}
                   className="border rounded-md p-4 space-y-2"
@@ -410,7 +422,7 @@ export default function AdminAutomationConfig() {
               <Label htmlFor="profileDescription">Description (Optional)</Label>
               <Textarea
                 id="profileDescription"
-                value={newProfile.description}
+                value={newProfile.description ?? ""}
                 onChange={(e) => setNewProfile({ ...newProfile, description: e.target.value })}
                 placeholder="Describe when to use this profile..."
                 rows={2}

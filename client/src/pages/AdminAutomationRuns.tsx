@@ -16,26 +16,68 @@ import { Link } from "wouter";
 import { TierGate } from "@/components/TierGate";
 import { TIERS } from "@shared/tiers";
 
+type AutomationCandidateSummary = {
+  contentType?: string | null;
+  contentItemId?: string | null;
+  persona?: string | null;
+  funnelStage?: string | null;
+  compositeScore?: number | null;
+  reason?: string | null;
+  testCreated?: boolean | null;
+};
+
+type AutomationRunResults = {
+  rulesEvaluated?: number;
+  contentEvaluated?: number;
+  candidatesIdentified?: number;
+  testsCreated?: number;
+  winnersPromoted?: number;
+  candidates?: AutomationCandidateSummary[];
+  safetyLimitsEnforced?: boolean;
+};
+
+type AutomationRunRecord = {
+  id: string;
+  status: string;
+  startedAt?: string | Date | null;
+  evaluationStart?: string | Date | null;
+  createdAt?: string | Date | null;
+  completedAt?: string | Date | null;
+  evaluationEnd?: string | Date | null;
+  error?: string | null;
+  errorMessage?: string | null;
+  results?: AutomationRunResults | null;
+  executionLog?: AutomationRunResults | null;
+};
+
+type AutomationRunSummary = {
+  candidatesFound?: number;
+  candidatesIdentified?: number;
+  testsCreated?: number;
+};
+
 export default function AdminAutomationRuns() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [expandedRuns, setExpandedRuns] = useState<Set<string>>(new Set());
 
   // Fetch automation runs
-  const { data: runs = [], isLoading: runsLoading } = useQuery({
+  const { data: runs = [], isLoading: runsLoading } = useQuery<AutomationRunRecord[]>({
     queryKey: ["/api/automation/runs"],
   });
 
   // Manual trigger mutation
-  const triggerMutation = useMutation({
+  const triggerMutation = useMutation<AutomationRunSummary>({
     mutationFn: async () => {
-      return await apiRequest("POST", "/api/automation/run");
+      const response = await apiRequest("POST", "/api/automation/run");
+      return await response.json();
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/automation/runs"] });
+      const candidates = result.candidatesIdentified ?? result.candidatesFound ?? 0;
       toast({
         title: "Automation triggered",
-        description: `Found ${result.candidatesIdentified || 0} candidates and created ${result.testsCreated || 0} tests`,
+        description: `Found ${candidates} candidates and created ${result.testsCreated || 0} tests`,
       });
     },
     onError: (error: Error) => {
@@ -162,9 +204,13 @@ export default function AdminAutomationRuns() {
         </Card>
       ) : (
         <div className="space-y-4">
-          {runs.map((run: any) => {
+          {runs.map((run) => {
             const isExpanded = expandedRuns.has(run.id);
-            const results = run.results || {};
+            const results = run.results || run.executionLog || {};
+            const startedAt = run.startedAt || run.evaluationStart || run.createdAt;
+            const completedAt = run.completedAt || run.evaluationEnd;
+            const errorMessage = run.error || run.errorMessage;
+            const winnersPromoted = results.winnersPromoted ?? 0;
             
             return (
               <Card key={run.id} data-testid={`run-${run.id}`}>
@@ -179,8 +225,8 @@ export default function AdminAutomationRuns() {
                         {getStatusBadge(run.status)}
                       </div>
                       <CardDescription>
-                        {run.startedAt &&
-                          `Started ${formatDistanceToNow(new Date(run.startedAt), { addSuffix: true })}`}
+                        {startedAt &&
+                          `Started ${formatDistanceToNow(new Date(startedAt), { addSuffix: true })}`}
                       </CardDescription>
                     </div>
                     <Button
@@ -214,26 +260,26 @@ export default function AdminAutomationRuns() {
                     </div>
                   </div>
 
-                  {results.winnersPromoted > 0 && (
+                  {winnersPromoted > 0 && (
                     <div className="mb-4 p-3 rounded-md bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800">
                       <div className="flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-yellow-600" />
                         <span className="text-sm font-medium">
-                          {results.winnersPromoted} winning variant{results.winnersPromoted !== 1 ? 's' : ''} automatically promoted
+                          {winnersPromoted} winning variant{winnersPromoted !== 1 ? 's' : ''} automatically promoted
                         </span>
                       </div>
                     </div>
                   )}
 
                   {/* Duration and Timestamp */}
-                  {run.completedAt && (
+                  {completedAt && (
                     <div className="text-sm text-muted-foreground mb-4">
-                      Completed {formatDistanceToNow(new Date(run.completedAt), { addSuffix: true })}
-                      {run.startedAt && run.completedAt && (
+                      Completed {formatDistanceToNow(new Date(completedAt), { addSuffix: true })}
+                      {startedAt && completedAt && (
                         <>
                           {" • Duration: "}
                           {Math.round(
-                            (new Date(run.completedAt).getTime() - new Date(run.startedAt).getTime()) / 1000
+                            (new Date(completedAt).getTime() - new Date(startedAt).getTime()) / 1000
                           )}s
                         </>
                       )}
@@ -241,13 +287,13 @@ export default function AdminAutomationRuns() {
                   )}
 
                   {/* Error Message */}
-                  {run.status === "failed" && run.error && (
+                  {run.status === "failed" && errorMessage && (
                     <div className="mb-4 p-3 rounded-md bg-destructive/10 border border-destructive/20">
                       <div className="flex items-start gap-2">
                         <XCircle className="w-4 h-4 text-destructive mt-0.5" />
                         <div className="flex-1">
                           <div className="font-medium text-sm mb-1">Error</div>
-                          <div className="text-sm text-muted-foreground">{run.error}</div>
+                          <div className="text-sm text-muted-foreground">{errorMessage}</div>
                         </div>
                       </div>
                     </div>
@@ -261,7 +307,7 @@ export default function AdminAutomationRuns() {
                         Candidates Identified ({results.candidates.length})
                       </h4>
                       <div className="space-y-2">
-                        {results.candidates.map((candidate: any, idx: number) => (
+                        {results.candidates.map((candidate, idx) => (
                           <div
                             key={idx}
                             className="border rounded-md p-3 text-sm"
