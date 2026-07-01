@@ -35,8 +35,9 @@ No DNS, SSL, Vercel domain, Stripe, SendGrid, Twilio, Cloudinary, R2, or S3 prov
 ## Activation Sequence After Approval
 
 1. Run `npm run kinflo:validate-generated-api`.
-2. Run `npm run kinflo:live-handoff`.
-3. Run `npm run convex:codegen`.
-4. Compare generated `api.<module>.<function>` handles against `KINFLO_GENERATED_API_BINDINGS`.
-5. Replace the first read-only adapter surface only after the matching smoke evidence is ready.
-6. Keep mutation surfaces gated until read-only surfaces pass and audit evidence is confirmed.
+2. Run `npm run kinflo:validate-live-smoke`.
+3. Run `npm run kinflo:live-handoff`.
+4. Run `npm run convex:codegen`.
+5. Compare generated `api.<module>.<function>` handles against `KINFLO_GENERATED_API_BINDINGS`.
+6. Replace the first read-only adapter surface only after the matching smoke evidence is ready.
+7. Keep mutation surfaces gated until read-only surfaces pass and audit evidence is confirmed.

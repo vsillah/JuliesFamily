@@ -681,6 +681,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Entitlement guard contracts", status: "done" },
   { label: "Custom domain entitlement guard", status: "done" },
   { label: "Live Convex handoff checklist", status: "done" },
+  { label: "Live smoke manifest", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -719,7 +720,7 @@ function buildMetrics(): ShellMetric[] {
     {
       label: "Launch Gates",
       value: `${completeGates}/${fixtureLaunchGates.length}`,
-      detail: "Convex auth and live smoke remain",
+      detail: "Convex auth, codegen, and live execution remain",
       iconKey: "launchGates",
     },
   ];

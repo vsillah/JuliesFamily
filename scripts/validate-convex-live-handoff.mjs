@@ -73,6 +73,8 @@ for (const path of [
   "docs/phase24-live-convex-handoff.md",
   "docs/phase25-live-adapter-contract.md",
   "docs/phase26-generated-api-contract.md",
+  "docs/phase27-live-smoke-manifest.md",
+  "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/activation.ts",
@@ -89,6 +91,7 @@ for (const path of [
   "scripts/validate-convex-live-handoff.mjs",
   "scripts/validate-kinflo-live-adapter.mjs",
   "scripts/validate-kinflo-generated-api-contract.mjs",
+  "scripts/validate-kinflo-live-smoke-manifest.mjs",
 ]) {
   requireFile(path);
 }
@@ -111,6 +114,7 @@ requireIncludes("package.json", [
   "\"kinflo:live-handoff\"",
   "\"kinflo:validate-live-adapter\"",
   "\"kinflo:validate-generated-api\"",
+  "\"kinflo:validate-live-smoke\"",
 ]);
 
 requireIncludes("docs/phase24-live-convex-handoff.md", [
@@ -118,6 +122,7 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
   "CONVEX_DEPLOYMENT",
   "VITE_CONVEX_URL",
   "npm run kinflo:activation-preflight",
+  "npm run kinflo:validate-live-smoke",
   "npm run convex:codegen",
   "Generated API bindings are reviewed",
   "activation.readiness",
@@ -129,6 +134,24 @@ requireIncludes("docs/phase24-live-convex-handoff.md", [
   "No hosted Convex deployment is created",
   "No generated Convex API files are committed",
   "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase27-live-smoke-manifest.md", [
+  "docs/convex-live-smoke-manifest.json",
+  "npm run kinflo:validate-live-smoke",
+  "KINFLO_GENERATED_API_BINDINGS",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/convex-live-smoke-manifest.json", [
+  "\"phase\": 27",
+  "\"providerWrites\": false",
+  "\"liveConvexExecution\": false",
+  "\"controlPlane.upsertCurrentUser\"",
+  "\"activation.seedSmokeSite\"",
+  "\"publicSite.resolvePublishedSite\"",
+  "\"crm.submitLead\"",
+  "\"siteBuilder.publishPage\"",
 ]);
 
 requireIncludes("docs/phase25-live-adapter-contract.md", [
@@ -220,6 +243,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Live Convex handoff checklist",
+  "Live smoke manifest",
   "Convex deployment and generated API",
   "Live admin smoke",
   "selectKinfloShellDataAdapter",

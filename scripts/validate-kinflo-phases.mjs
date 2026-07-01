@@ -88,6 +88,8 @@ for (const path of [
   "docs/phase24-live-convex-handoff.md",
   "docs/phase25-live-adapter-contract.md",
   "docs/phase26-generated-api-contract.md",
+  "docs/phase27-live-smoke-manifest.md",
+  "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -113,6 +115,7 @@ for (const path of [
   "scripts/validate-convex-live-handoff.mjs",
   "scripts/validate-kinflo-live-adapter.mjs",
   "scripts/validate-kinflo-generated-api-contract.mjs",
+  "scripts/validate-kinflo-live-smoke-manifest.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -348,6 +351,15 @@ requireIncludes("docs/phase26-generated-api-contract.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase27-live-smoke-manifest.md", [
+  "docs/convex-live-smoke-manifest.json",
+  "npm run kinflo:validate-live-smoke",
+  "KINFLO_GENERATED_API_BINDINGS",
+  "No generated Convex API files are committed",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -357,6 +369,7 @@ requireIncludes("package.json", [
   "\"kinflo:live-handoff\"",
   "\"kinflo:validate-live-adapter\"",
   "\"kinflo:validate-generated-api\"",
+  "\"kinflo:validate-live-smoke\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -417,6 +430,13 @@ requireIncludes("scripts/validate-kinflo-generated-api-contract.mjs", [
   "docs/phase26-generated-api-contract.md",
   "KINFLO_GENERATED_API_BINDINGS",
   "Convex export exists",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-live-smoke-manifest.mjs", [
+  "docs/convex-live-smoke-manifest.json",
+  "KINFLO_GENERATED_API_BINDINGS",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -609,6 +629,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Entitlement guard contracts",
   "Custom domain entitlement guard",
   "Live Convex handoff checklist",
+  "Live smoke manifest",
   "siteCreationWizard",
   "configurableFields",
   "imageDirection",
@@ -616,6 +637,23 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "launchCriteria",
   "/kinflo-sites/",
   "crm.submitLead",
+]);
+
+requireIncludes("docs/convex-live-smoke-manifest.json", [
+  "\"phase\": 27",
+  "\"providerWrites\": false",
+  "\"liveConvexExecution\": false",
+  "\"controlPlane.upsertCurrentUser\"",
+  "\"activation.seedSmokeSite\"",
+  "\"roleCatalog.syncDefaultRoles\"",
+  "\"accessPolicy.viewerPermissionSnapshot\"",
+  "\"controlPlane.listTenants\"",
+  "\"controlPlane.listPlanCatalog\"",
+  "\"siteFactory.createSiteFromTemplate\"",
+  "\"publicSite.resolvePublishedSite\"",
+  "\"crm.submitLead\"",
+  "\"siteBuilder.upsertDomain\"",
+  "\"siteBuilder.publishPage\"",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [

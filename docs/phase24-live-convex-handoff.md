@@ -21,6 +21,7 @@ The live switch is not approved until every item below has current evidence:
 - `VITE_CONVEX_URL` is configured outside committed source.
 - Convex auth issuer and client ID are configured outside committed source.
 - `npm run kinflo:activation-preflight` passes immediately before codegen.
+- `npm run kinflo:validate-live-smoke` passes and the ordered live smoke manifest is reviewed.
 - `npm run convex:codegen` is run after hosted setup approval.
 - Generated API bindings are reviewed before any fixture adapter is replaced.
 - `activation.readiness` runs against the hosted deployment.
@@ -48,9 +49,11 @@ No DNS, SSL, Vercel domain, Stripe Billing, Stripe Connect, SendGrid, Twilio, Cl
 1. Confirm `.env.local` remains untracked and secrets are entered only outside chat.
 2. Configure hosted Convex and auth.
 3. Run `npm run kinflo:activation-preflight`.
-4. Run `npm run kinflo:live-handoff` and save the output in the PR or deployment notes.
-5. Run `npm run convex:codegen`.
-6. Review generated API bindings and update the runtime boundary deliberately.
-7. Replace one adapter at a time, starting with activation/readiness and read-only shell data.
-8. Run live admin, public renderer, lead capture, entitlement, permission, and audit smokes.
-9. Only after those smokes pass, move `Convex deployment and generated API` and `Live admin smoke` launch gates from pending to done.
+4. Run `npm run kinflo:validate-generated-api`.
+5. Run `npm run kinflo:validate-live-smoke` and review `docs/convex-live-smoke-manifest.json`.
+6. Run `npm run kinflo:live-handoff` and save the output in the PR or deployment notes.
+7. Run `npm run convex:codegen`.
+8. Review generated API bindings and update the runtime boundary deliberately.
+9. Replace one adapter at a time, starting with activation/readiness and read-only shell data.
+10. Run live admin, public renderer, lead capture, entitlement, permission, and audit smokes in manifest order.
+11. Only after those smokes pass, move `Convex deployment and generated API` and `Live admin smoke` launch gates from pending to done.
