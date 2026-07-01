@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 1,
+  "phase": 49,
+  "name": "KinFlo hosted Convex activation packet",
+  "status": "prepare_only_review_packet",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "providerApisTouched": false,
+    "secretsReadOrPrinted": false,
+    "notes": "This packet prepares human approvals and evidence targets only. It does not provision Convex, run codegen, import generated API, execute live Convex functions, touch provider APIs, or read/print secrets."
+  },
+  "sourceOfTruth": {
+    "pullRequest": "https://github.com/vsillah/JuliesFamily/pull/1",
+    "phaseDocs": [
+      "docs/phase17-convex-activation-preflight.md",
+      "docs/phase24-live-convex-handoff.md",
+      "docs/phase27-live-smoke-manifest.md",
+      "docs/phase28-live-smoke-dry-runner.md",
+      "docs/phase48-launch-readiness-shell.md"
+    ],
+    "manifests": [
+      "docs/convex-live-smoke-manifest.json"
+    ],
+    "runtimeContracts": [
+      "client/src/lib/kinfloConvexRuntime.ts",
+      "client/src/lib/kinfloGeneratedApiContract.ts"
+    ]
+  },
+  "humanApprovalGates": [
+    {
+      "id": "repo-sharing-risk",
+      "owner": "Vambah",
+      "decision": "Approve history purge or private-repo residual-risk posture before public/client sharing.",
+      "requiredBefore": "external review"
+    },
+    {
+      "id": "hosted-convex-project",
+      "owner": "Vambah",
+      "decision": "Approve hosted Convex project ownership, billing, backup, auth, and environment setup.",
+      "requiredBefore": "convex codegen"
+    },
+    {
+      "id": "convex-codegen",
+      "owner": "Vambah",
+      "decision": "Approve running npm run convex:codegen and reviewing generated bindings.",
+      "requiredBefore": "generated API import"
+    },
+    {
+      "id": "fixture-to-live-adapter-switch",
+      "owner": "Vambah",
+      "decision": "Approve replacing fixture reads with generated API bindings one adapter at a time.",
+      "requiredBefore": "live shell data"
+    },
+    {
+      "id": "live-smoke-window",
+      "owner": "Vambah",
+      "decision": "Approve running the ordered live smoke manifest against hosted Convex.",
+      "requiredBefore": "live Convex execution"
+    },
+    {
+      "id": "provider-writes",
+      "owner": "Vambah",
+      "decision": "Approve each non-Convex provider separately: DNS, SSL, Vercel domain, Stripe, SendGrid, Twilio, storage, AI.",
+      "requiredBefore": "provider writes"
+    }
+  ],
+  "orderedPreActivationChecks": [
+    {
+      "order": 10,
+      "command": "npm run kinflo:audit-secret-history",
+      "evidence": "No tracked secret-like files; residual history risk decision recorded.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 20,
+      "command": "npm run kinflo:inventory-env",
+      "evidence": "Env references inventoried without secret values.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 30,
+      "command": "npm run kinflo:activation-preflight",
+      "evidence": "Preflight passes immediately before hosted setup/codegen.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 40,
+      "command": "npm run kinflo:validate-generated-api",
+      "evidence": "Runtime function registry and generated API contract remain aligned.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 50,
+      "command": "npm run kinflo:validate-live-smoke",
+      "evidence": "Live smoke manifest is parseable, ordered, and provider-light.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 60,
+      "command": "npm run kinflo:dry-run-live-smoke",
+      "evidence": "Ordered activation packet printed and saved in deployment notes.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 70,
+      "command": "npm run kinflo:live-handoff",
+      "evidence": "Live handoff checklist passes with generated API still gated.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 80,
+      "command": "npm run convex:check",
+      "evidence": "Convex modules typecheck before codegen approval.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    }
+  ],
+  "hostedExecutionSequenceAfterApproval": [
+    {
+      "order": 10,
+      "action": "Create or select hosted Convex project owned by Vambah.",
+      "evidence": "Convex dashboard project URL and owner/billing/backup notes captured outside chat.",
+      "requiresApproval": true
+    },
+    {
+      "order": 20,
+      "action": "Configure CONVEX_DEPLOYMENT, VITE_CONVEX_URL, CONVEX_AUTH_ISSUER, and CONVEX_AUTH_CLIENT_ID outside committed source.",
+      "evidence": "Env values confirmed present without printing secrets.",
+      "requiresApproval": true
+    },
+    {
+      "order": 30,
+      "action": "Run npm run convex:codegen after approval.",
+      "evidence": "Generated bindings reviewed against KINFLO_GENERATED_API_BINDINGS.",
+      "requiresApproval": true
+    },
+    {
+      "order": 40,
+      "action": "Run read-only hosted smokes first: activation.readiness, viewer, role/access reads, tenant/site reads, launchReadiness.getSiteLaunchReadiness.",
+      "evidence": "Read-only smoke outputs saved with tenant/site scope proof.",
+      "requiresApproval": true
+    },
+    {
+      "order": 50,
+      "action": "Run mutation smokes in docs/convex-live-smoke-manifest.json order.",
+      "evidence": "Audit events, rollback notes, and smoke record ids captured.",
+      "requiresApproval": true
+    },
+    {
+      "order": 60,
+      "action": "Switch adapters one surface at a time only after its smoke evidence passes.",
+      "evidence": "Runtime boundary diff reviewed and rollback path confirmed.",
+      "requiresApproval": true
+    }
+  ],
+  "rollbackRequirements": [
+    "Keep generatedApiAvailable false until a reviewed adapter switch is committed.",
+    "Archive or label all smoke tenants, sites, leads, invitations, domains, campaigns, and AI records as smoke data.",
+    "Return affected shell surfaces to fixture adapters if any read-only scope check fails.",
+    "Pause mutation/provider steps immediately on any cross-tenant permission failure.",
+    "Do not attach domains, send emails/SMS, create Stripe resources, upload storage objects, or call AI providers from this packet."
+  ],
+  "evidenceTargets": [
+    "activation.readiness hosted output",
+    "launchReadiness.getSiteLaunchReadiness hosted output for Julie and one new client site",
+    "publicSite.resolvePublishedSite hosted output for a published smoke page",
+    "crm.submitLead smoke lead id plus crm.listLeads scoped proof",
+    "controlPlane.listAuditEvents audit entries for identity, activation, site creation, invitation, publish, and lead capture",
+    "cross-tenant deny proof for client admin role"
+  ]
+}

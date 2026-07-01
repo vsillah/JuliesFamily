@@ -114,6 +114,8 @@ for (const path of [
   "docs/phase46-campaign-automation-shell.md",
   "docs/phase47-ai-review-provenance-shell.md",
   "docs/phase48-launch-readiness-shell.md",
+  "docs/phase49-hosted-activation-packet.md",
+  "docs/convex-hosted-activation-packet.json",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -156,6 +158,7 @@ for (const path of [
   "scripts/validate-kinflo-campaign-shell.mjs",
   "scripts/validate-kinflo-ai-review-shell.mjs",
   "scripts/validate-kinflo-launch-readiness-shell.mjs",
+  "scripts/validate-kinflo-hosted-activation-packet.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -723,6 +726,17 @@ requireIncludes("docs/phase48-launch-readiness-shell.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase49-hosted-activation-packet.md", [
+  "npm run kinflo:validate-hosted-activation-packet",
+  "docs/convex-hosted-activation-packet.json",
+  "prepare_only_review_packet",
+  "npm run convex:codegen",
+  "launchReadiness.getSiteLaunchReadiness",
+  "generatedApiAvailable = false",
+  "No hosted Convex deployment is created",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -743,6 +757,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-campaign-shell\"",
   "\"kinflo:validate-ai-review-shell\"",
   "\"kinflo:validate-launch-readiness-shell\"",
+  "\"kinflo:validate-hosted-activation-packet\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -977,6 +992,19 @@ requireIncludes("scripts/validate-kinflo-launch-readiness-shell.mjs", [
   "Provider APIs touched: no",
   "Live launch executed: no",
   "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-activation-packet.mjs", [
+  "docs/convex-hosted-activation-packet.json",
+  "prepare_only_review_packet",
+  "hostedDeploymentTouched",
+  "generatedApiImported",
+  "liveConvexExecution",
+  "providerApisTouched",
+  "secretsReadOrPrinted",
+  "convex/_generated/api",
+  "Hosted deployment touched: no",
   "Live Convex execution: no",
 ]);
 
@@ -1392,6 +1420,18 @@ requireIncludes("docs/convex-live-smoke-manifest.json", [
   "\"crm.submitLead\"",
   "\"siteBuilder.upsertDomain\"",
   "\"siteBuilder.publishPage\"",
+]);
+
+requireIncludes("docs/convex-hosted-activation-packet.json", [
+  "\"phase\": 49",
+  "\"status\": \"prepare_only_review_packet\"",
+  "\"hostedDeploymentTouched\": false",
+  "\"generatedApiImported\": false",
+  "\"liveConvexExecution\": false",
+  "\"providerApisTouched\": false",
+  "\"secretsReadOrPrinted\": false",
+  "launchReadiness.getSiteLaunchReadiness",
+  "npm run convex:codegen",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
