@@ -45,6 +45,7 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   entitlementsUsageSnapshot: "entitlements.entitlementUsageSnapshot",
   integrationsListSettings: "integrations.listIntegrationSettings",
   integrationsUpsertSetting: "integrations.upsertIntegrationSetting",
+  launchReadinessGetSite: "launchReadiness.getSiteLaunchReadiness",
   preferencesGetMyPreferences: "preferences.getMyPreferences",
   preferencesUpsertMyPreferences: "preferences.upsertMyPreferences",
   publicSiteResolvePublishedSite: "publicSite.resolvePublishedSite",

@@ -113,6 +113,7 @@ for (const path of [
   "docs/phase45-integration-readiness-shell.md",
   "docs/phase46-campaign-automation-shell.md",
   "docs/phase47-ai-review-provenance-shell.md",
+  "docs/phase48-launch-readiness-shell.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -129,6 +130,7 @@ for (const path of [
   "convex/integrations.ts",
   "convex/campaigns.ts",
   "convex/aiReview.ts",
+  "convex/launchReadiness.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/pages/KinfloPublicSitePreview.tsx",
   "client/src/lib/kinfloShellData.ts",
@@ -153,6 +155,7 @@ for (const path of [
   "scripts/validate-kinflo-integration-shell.mjs",
   "scripts/validate-kinflo-campaign-shell.mjs",
   "scripts/validate-kinflo-ai-review-shell.mjs",
+  "scripts/validate-kinflo-launch-readiness-shell.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -707,6 +710,19 @@ requireIncludes("docs/phase47-ai-review-provenance-shell.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase48-launch-readiness-shell.md", [
+  "npm run kinflo:validate-launch-readiness-shell",
+  "Launch Readiness",
+  "Live launch gated",
+  "launchReadiness.getSiteLaunchReadiness",
+  "aiGenerationRecords",
+  "Local state only: yes",
+  "Provider APIs touched: no",
+  "Live launch executed: no",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -726,6 +742,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-integration-shell\"",
   "\"kinflo:validate-campaign-shell\"",
   "\"kinflo:validate-ai-review-shell\"",
+  "\"kinflo:validate-launch-readiness-shell\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -750,6 +767,7 @@ requireIncludes("package.json", [
   "convex/integrations.ts",
   "convex/campaigns.ts",
   "convex/aiReview.ts",
+  "convex/launchReadiness.ts",
 ]);
 
 requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
@@ -946,6 +964,18 @@ requireIncludes("scripts/validate-kinflo-ai-review-shell.mjs", [
   "Local state only: yes",
   "AI provider touched: no",
   "Generated content published: no",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-launch-readiness-shell.mjs", [
+  "Launch Readiness",
+  "Live launch gated",
+  "launchReadiness.getSiteLaunchReadiness",
+  "aiGenerationRecords",
+  "Local state only: yes",
+  "Provider APIs touched: no",
+  "Live launch executed: no",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -1521,6 +1551,15 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "snapshot.aiReview.convexFunctions",
   "snapshot.aiReview.reviewChecklist",
   "snapshot.aiReview.activationEvidence",
+  "Launch Readiness",
+  "select-kinflo-launch-readiness-site",
+  "text-kinflo-launch-readiness-status",
+  "text-kinflo-launch-readiness-blocker",
+  "button-open-launch-preview",
+  "button-live-launch-gated",
+  "Live launch gated",
+  "snapshot.launchReadiness.convexFunctions",
+  "snapshot.launchReadiness.activationEvidence",
   "previewPath",
   "Follow-up Tasks",
   "/admin/guide",

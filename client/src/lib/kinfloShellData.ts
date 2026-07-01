@@ -497,6 +497,39 @@ export type ShellSiteCreationWizard = {
   convexMutations: string[];
 };
 
+export type ShellLaunchReadinessStatus = "ready" | "pending" | "blocked";
+
+export type ShellLaunchReadinessStage = {
+  key: string;
+  label: string;
+  surface: string;
+  status: ShellLaunchReadinessStatus;
+  owner: string;
+  evidence: string;
+  gate: string;
+  convexFunctions: string[];
+};
+
+export type ShellLaunchReadinessSite = {
+  key: string;
+  label: string;
+  tenant: string;
+  previewPath: string;
+  readinessPercent: number;
+  launchDecision: "ready_for_review" | "needs_work" | "blocked";
+  blockerSummary: string;
+  stages: ShellLaunchReadinessStage[];
+};
+
+export type ShellLaunchReadiness = {
+  defaultSiteKey: string;
+  siteOptions: { key: string; label: string; previewPath: string }[];
+  sites: ShellLaunchReadinessSite[];
+  providerBoundary: string;
+  convexFunctions: string[];
+  activationEvidence: string[];
+};
+
 export type ShellLaunchGate = {
   label: string;
   status: KinfloShellStatus;
@@ -530,6 +563,7 @@ export type KinfloShellSnapshot = {
   leadCaptureContracts: ShellLeadCaptureContract[];
   siteLaunchPackets: ShellSiteLaunchPacket[];
   siteCreationWizard: ShellSiteCreationWizard;
+  launchReadiness: ShellLaunchReadiness;
   launchGates: ShellLaunchGate[];
 };
 
@@ -1681,6 +1715,13 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
     status: "fixture_fallback",
   },
   {
+    surface: "Launch readiness",
+    fixtureSource: "site launch evidence across admin, content, preview, CRM, domain, integration, campaign, and AI gates",
+    convexFunctions: ["launchReadiness.getSiteLaunchReadiness", "activation.readiness"],
+    activationEvidence: ["site:view scoped", "read-only launch packet", "provider actions gated"],
+    status: "generated_api_pending",
+  },
+  {
     surface: "Domain metadata",
     fixtureSource: "site domain rows and launch checklist",
     convexFunctions: ["siteBuilder.upsertDomain", "entitlements.checkEntitlementLimit"],
@@ -1771,6 +1812,203 @@ const fixtureSiteCreationWizard: ShellSiteCreationWizard = {
   ],
 };
 
+const fixtureLaunchReadiness: ShellLaunchReadiness = {
+  defaultSiteKey: "advisor-client-site",
+  siteOptions: [
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+  ],
+  sites: [
+    {
+      key: "advisor-client-site",
+      label: "Advisor Client Site",
+      tenant: "Advisor Client Starter",
+      previewPath: "/kinflo-sites/advisor-client-site",
+      readinessPercent: 76,
+      launchDecision: "needs_work",
+      blockerSummary: "Ready for Vambah review; blocked from live launch until domain, provider smoke, and hosted Convex activation pass.",
+      stages: [
+        {
+          key: "site-factory",
+          label: "Tenant and site packet",
+          surface: "Site Factory",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "Advisor Client Starter launch packet and site creation wizard are complete.",
+          gate: "Live mutation gated",
+          convexFunctions: ["controlPlane.createTenant", "siteFactory.createSiteFromTemplate"],
+        },
+        {
+          key: "access",
+          label: "Client admin access",
+          surface: "Access Delegation",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "tenant.admin invite target and token-hash-only contract are prepared.",
+          gate: "Live invite gated",
+          convexFunctions: ["controlPlane.createInvitation", "controlPlane.grantMembership"],
+        },
+        {
+          key: "brand-content-nav",
+          label: "Brand, content, and navigation",
+          surface: "Brand, Content, Nav",
+          status: "ready",
+          owner: "Client admin",
+          evidence: "Theme, homepage blocks, and header/footer navigation are present in fixture preview.",
+          gate: "Live save and publish gated",
+          convexFunctions: ["controlPlane.updateThemeTokens", "siteBuilder.updateContentBlock", "siteBuilder.upsertNavigationItem"],
+        },
+        {
+          key: "preview-lead",
+          label: "Preview and lead capture",
+          surface: "Preview QA and CRM",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "Public preview route and crm.submitLead fallback contract are visible.",
+          gate: "Live lead smoke gated",
+          convexFunctions: ["publicSite.resolvePublishedSite", "crm.submitLead", "crm.listLeads"],
+        },
+        {
+          key: "domain",
+          label: "Domain readiness",
+          surface: "Domain Readiness",
+          status: "pending",
+          owner: "Super admin",
+          evidence: "Domain metadata exists, but DNS ownership and SSL provider proof are not live.",
+          gate: "Live DNS save gated",
+          convexFunctions: ["siteBuilder.upsertDomain", "entitlements.checkEntitlementLimit"],
+        },
+        {
+          key: "providers",
+          label: "Provider integrations",
+          surface: "Integration Readiness",
+          status: "pending",
+          owner: "Super admin",
+          evidence: "Provider records name env keys only; no SendGrid, Stripe, Twilio, storage, or AI smoke has run.",
+          gate: "Live provider save gated",
+          convexFunctions: ["integrations.listIntegrationSettings", "integrations.upsertIntegrationSetting"],
+        },
+        {
+          key: "growth",
+          label: "Campaign and AI review",
+          surface: "Campaigns and AI Review",
+          status: "pending",
+          owner: "Client admin",
+          evidence: "Campaign and AI provenance records are reviewable, but provider sends and generated content publish remain disabled.",
+          gate: "Live send and AI publish gated",
+          convexFunctions: ["campaigns.approveCampaignDraft", "aiReview.reviewAiGenerationRecord"],
+        },
+      ],
+    },
+    {
+      key: "campaign-microsite",
+      label: "Campaign Microsite",
+      tenant: "Campaign Microsite Lab",
+      previewPath: "/kinflo-sites/campaign-microsite",
+      readinessPercent: 68,
+      launchDecision: "needs_work",
+      blockerSummary: "Campaign preview is prepared; launch waits on copy approval, AI review approval, consent language, and live public form smoke.",
+      stages: [
+        {
+          key: "site-factory",
+          label: "Microsite packet",
+          surface: "Site Factory",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "Campaign microsite packet is queued with site.editor scope.",
+          gate: "Live mutation gated",
+          convexFunctions: ["siteFactory.createSiteFromTemplate", "controlPlane.createInvitation"],
+        },
+        {
+          key: "content",
+          label: "Campaign content",
+          surface: "Content Draft Studio",
+          status: "pending",
+          owner: "Campaign editor",
+          evidence: "Campaign proof block has AI provenance but needs final source-safe approval.",
+          gate: "Live publish gated",
+          convexFunctions: ["siteBuilder.updateContentBlock", "aiReview.reviewAiGenerationRecord"],
+        },
+        {
+          key: "lead-capture",
+          label: "Lead capture",
+          surface: "Public Intake",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "Campaign microsite signup contract maps to crm.submitLead.",
+          gate: "Live public form smoke gated",
+          convexFunctions: ["publicSite.resolvePublishedSite", "crm.submitLead"],
+        },
+        {
+          key: "campaign-send",
+          label: "Campaign automation",
+          surface: "Campaign Automation",
+          status: "blocked",
+          owner: "Super admin",
+          evidence: "Consent, unsubscribe, quiet-hour, and provider-send smokes are not complete.",
+          gate: "Live send gated",
+          convexFunctions: ["campaigns.requestCampaignApproval", "campaigns.approveCampaignDraft"],
+        },
+      ],
+    },
+    {
+      key: "julies-family-public",
+      label: "Julie Family Public Site",
+      tenant: "Julie's Family Learning Programs",
+      previewPath: "/kinflo-sites/julies-family",
+      readinessPercent: 84,
+      launchDecision: "ready_for_review",
+      blockerSummary: "Best current proof surface; still not production-active because hosted Convex/codegen/live smoke are pending.",
+      stages: [
+        {
+          key: "public-renderer",
+          label: "Public renderer",
+          surface: "Public Preview",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "Julie public preview renders hero, services, and intake from fixture-backed site data.",
+          gate: "Live renderer smoke gated",
+          convexFunctions: ["publicSite.resolvePublishedSite"],
+        },
+        {
+          key: "crm",
+          label: "CRM intake",
+          surface: "CRM Lead Workspace",
+          status: "ready",
+          owner: "Program lead",
+          evidence: "Family learning intake maps to crm.submitLead and scoped CRM review.",
+          gate: "Live lead write gated",
+          convexFunctions: ["crm.submitLead", "crm.listLeads"],
+        },
+        {
+          key: "domain-provider",
+          label: "Hosted activation",
+          surface: "Live Convex handoff",
+          status: "pending",
+          owner: "Super admin",
+          evidence: "Generated API, hosted auth, domain, and provider smokes remain pending.",
+          gate: "Convex deployment and generated API gated",
+          convexFunctions: ["launchReadiness.getSiteLaunchReadiness", "activation.readiness"],
+        },
+      ],
+    },
+  ],
+  providerBoundary: "Launch readiness is a local evidence packet only. It does not create tenants, invite users, publish content, attach domains, send campaigns, call AI providers, submit leads, or execute live Convex functions.",
+  convexFunctions: [
+    "launchReadiness.getSiteLaunchReadiness",
+    "activation.readiness",
+    "publicSite.resolvePublishedSite",
+    "crm.submitLead",
+  ],
+  activationEvidence: [
+    "site:view is required to read launch readiness",
+    "readiness combines existing site-scoped contracts into one review packet",
+    "provider actions stay behind their original disabled gates",
+    "live launch requires hosted Convex, generated API bindings, and browser smoke",
+  ],
+};
+
 const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Phase 0 source import", status: "done" },
   { label: "Secret handling baseline", status: "done" },
@@ -1810,6 +2048,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Integration readiness shell", status: "done" },
   { label: "Campaign automation shell", status: "done" },
   { label: "AI review provenance shell", status: "done" },
+  { label: "Launch readiness shell", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -1895,6 +2134,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       leadCaptureContracts: fixtureLeadCaptureContracts,
       siteLaunchPackets: fixtureSiteLaunchPackets,
       siteCreationWizard: fixtureSiteCreationWizard,
+      launchReadiness: fixtureLaunchReadiness,
       launchGates: fixtureLaunchGates,
     };
   },

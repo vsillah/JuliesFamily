@@ -5,9 +5,13 @@ const checks = [];
 const convexModuleNames = new Set([
   "accessPolicy",
   "activation",
+  "aiReview",
+  "campaigns",
   "controlPlane",
   "crm",
   "entitlements",
+  "integrations",
+  "launchReadiness",
   "preferences",
   "publicSite",
   "roleCatalog",

@@ -57,6 +57,7 @@ import {
   type ShellCampaignDraft,
   type ShellDomainDraft,
   type ShellIntegrationDraft,
+  type ShellLaunchReadinessSite,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
 
@@ -107,6 +108,16 @@ function liveAdapterStatusBadge(status: ShellLiveAdapterStatus) {
   return <Badge variant="outline">Fixture fallback</Badge>;
 }
 
+function launchReadinessStatusBadge(status: ShellLaunchReadinessSite["stages"][number]["status"]) {
+  if (status === "ready") {
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
+  }
+  if (status === "blocked") {
+    return <Badge variant="destructive">Blocked</Badge>;
+  }
+  return <Badge variant="outline">Pending</Badge>;
+}
+
 export default function AdminKinfloShell() {
   const { isLoading } = useAuth();
   const { isAdmin } = useUserRole();
@@ -114,6 +125,7 @@ export default function AdminKinfloShell() {
   const snapshot = getKinfloShellSnapshot();
   const [activeTab, setActiveTab] = useState("tenants");
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
+  const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
   const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
   const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
@@ -211,6 +223,19 @@ export default function AdminKinfloShell() {
     () => snapshot.siteLaunchPackets.find((packet) => packet.id === selectedLaunchPacketId) ?? snapshot.siteLaunchPackets[0],
     [selectedLaunchPacketId, snapshot.siteLaunchPackets],
   );
+  const selectedLaunchReadinessSite = useMemo(
+    () => snapshot.launchReadiness.sites.find((site) => site.key === launchReadinessSiteKey) ?? snapshot.launchReadiness.sites[0],
+    [launchReadinessSiteKey, snapshot.launchReadiness.sites],
+  );
+  const launchReadinessCounts = useMemo(() => {
+    const stages = selectedLaunchReadinessSite?.stages ?? [];
+    return {
+      ready: stages.filter((stage) => stage.status === "ready").length,
+      pending: stages.filter((stage) => stage.status === "pending").length,
+      blocked: stages.filter((stage) => stage.status === "blocked").length,
+      total: stages.length,
+    };
+  }, [selectedLaunchReadinessSite]);
   const selectedWizardTemplate = useMemo(
     () => snapshot.templates.find((template) => template.key === wizardTemplateKey) ?? snapshot.templates[0],
     [snapshot.templates, wizardTemplateKey],
@@ -905,6 +930,7 @@ export default function AdminKinfloShell() {
           <TabsList className="grid h-auto w-full grid-cols-2 md:flex md:w-auto md:flex-wrap">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
+            <TabsTrigger value="launch-readiness">Launch</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="plans">Plans</TabsTrigger>
             <TabsTrigger value="brand">Brand</TabsTrigger>
@@ -1013,6 +1039,153 @@ export default function AdminKinfloShell() {
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="launch-readiness" className="mt-6">
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Launch Readiness</h2>
+                    <p className="text-sm text-muted-foreground">One review packet for the client website launch path across setup, access, content, preview, CRM, domains, providers, campaigns, and AI review.</p>
+                  </div>
+                  <Badge variant="outline">
+                    <ListChecks className="mr-1 h-3 w-3" />
+                    Read-only
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <CardTitle className="text-base">Client Site Launch Packet</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">{selectedLaunchReadinessSite?.tenant}</p>
+                    </div>
+                    <div className="w-full lg:w-[280px]">
+                      <Label>Site</Label>
+                      <Select value={launchReadinessSiteKey} onValueChange={setLaunchReadinessSiteKey}>
+                        <SelectTrigger className="mt-2" data-testid="select-kinflo-launch-readiness-site">
+                          <SelectValue placeholder="Select launch site" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {snapshot.launchReadiness.siteOptions.map((site) => (
+                            <SelectItem key={site.key} value={site.key}>
+                              {site.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
+                      <div className="rounded-md border p-4">
+                        <div className="text-sm font-medium">Launch readiness</div>
+                        <div className="mt-3 text-3xl font-bold" data-testid="text-kinflo-launch-readiness-status">
+                          {selectedLaunchReadinessSite?.readinessPercent ?? 0}%
+                        </div>
+                        <Progress value={selectedLaunchReadinessSite?.readinessPercent ?? 0} className="mt-3" />
+                        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                          <Badge variant="secondary">{launchReadinessCounts.ready} ready</Badge>
+                          <Badge variant="outline">{launchReadinessCounts.pending} pending</Badge>
+                          <Badge variant={launchReadinessCounts.blocked > 0 ? "destructive" : "outline"}>
+                            {launchReadinessCounts.blocked} blocked
+                          </Badge>
+                        </div>
+                      </div>
+                      <div className="rounded-md border p-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <div className="text-sm font-medium">{selectedLaunchReadinessSite?.label}</div>
+                            <p className="mt-2 text-sm text-muted-foreground" data-testid="text-kinflo-launch-readiness-blocker">
+                              {selectedLaunchReadinessSite?.blockerSummary}
+                            </p>
+                          </div>
+                          <Badge variant={selectedLaunchReadinessSite?.launchDecision === "ready_for_review" ? "secondary" : "outline"}>
+                            {selectedLaunchReadinessSite?.launchDecision.replace(/_/g, " ")}
+                          </Badge>
+                        </div>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Button size="sm" variant="outline" asChild data-testid="button-open-launch-preview">
+                            <Link href={selectedLaunchReadinessSite?.previewPath ?? "/admin/kinflo-os"}>
+                              <ExternalLink className="mr-2 h-3 w-3" />
+                              Open preview
+                            </Link>
+                          </Button>
+                          <Button size="sm" disabled data-testid="button-live-launch-gated">
+                            <Rocket className="mr-2 h-3 w-3" />
+                            Live launch gated
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border">
+                      <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 border-b px-4 py-3 text-sm font-medium md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_120px]">
+                        <span>Stage</span>
+                        <span className="hidden md:block">Evidence</span>
+                        <span>Status</span>
+                      </div>
+                      <div className="divide-y">
+                        {(selectedLaunchReadinessSite?.stages ?? []).map((stage) => (
+                          <div key={stage.key} className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 px-4 py-3 text-sm md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_120px]">
+                            <div className="min-w-0">
+                              <div className="font-medium">{stage.label}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">{stage.surface} · {stage.owner}</div>
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {stage.convexFunctions.map((functionName) => (
+                                  <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="hidden min-w-0 text-muted-foreground md:block">
+                              <div>{stage.evidence}</div>
+                              <div className="mt-1 text-xs">{stage.gate}</div>
+                            </div>
+                            <div>{launchReadinessStatusBadge(stage.status)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border p-4 text-sm text-muted-foreground">
+                      {snapshot.launchReadiness.providerBoundary}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Convex Launch Contract</CardTitle>
+                    <p className="text-sm text-muted-foreground">The launch packet is a read-only query contract until generated API bindings and live smoke are approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.launchReadiness.convexFunctions.map((functionName) => (
+                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
+                        <span className="min-w-0 break-all">{functionName}</span>
+                        <Badge variant="outline">Mapped</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Activation Evidence</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.launchReadiness.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </TabsContent>
