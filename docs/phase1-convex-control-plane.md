@@ -37,6 +37,10 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - upserting persona/journey visibility rules,
   - creating asset metadata records,
   - publishing a page into a revision snapshot.
+- Site-factory functions for:
+  - listing starter templates,
+  - creating a new site from a reusable template pack,
+  - seeding theme tokens, navigation, pages, blocks, visibility defaults, feature flags, and audit events.
 
 ## Explicit Boundaries
 
@@ -54,7 +58,7 @@ Phase 1 intentionally avoids:
 - email/SMS delivery,
 - custom domains,
 - automated A/B test promotion,
-- client-facing onboarding wizard.
+- client-facing onboarding wizard UI.
 
 ## First Smoke Target
 
@@ -64,9 +68,9 @@ After Convex auth/deployment setup is approved, the first smoke should prove:
 2. The platform admin creates a tenant.
 3. The platform admin creates a site under that tenant.
 4. A default theme token record is created for the site.
-5. A draft homepage is created with navigation and content blocks.
+5. A draft homepage is created with navigation and content blocks, either manually or from a starter template.
 6. Publishing the page creates a page revision and publish event.
-7. Audit events exist for tenant, site, page, block, and publish actions.
+7. Audit events exist for tenant, site, page, block, template, and publish actions.
 8. A non-admin user cannot list all tenants or mutate an unassigned site.
 
 ## Implementation Notes
