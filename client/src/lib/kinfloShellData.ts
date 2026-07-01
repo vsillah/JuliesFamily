@@ -92,6 +92,15 @@ export type ShellTask = {
   status: KinfloShellStatus;
 };
 
+export type ShellLeadCaptureContract = {
+  label: string;
+  blockType: "lead_magnet" | "form" | "campaign";
+  convexFunction: string;
+  runtime: "legacy fallback" | "convex ready";
+  requiredFields: string[];
+  fallback: string;
+};
+
 export type ShellLaunchGate = {
   label: string;
   status: KinfloShellStatus;
@@ -108,6 +117,7 @@ export type KinfloShellSnapshot = {
   leads: ShellLead[];
   pipelineStages: ShellPipelineStage[];
   tasks: ShellTask[];
+  leadCaptureContracts: ShellLeadCaptureContract[];
   launchGates: ShellLaunchGate[];
 };
 
@@ -261,6 +271,33 @@ const fixtureTasks: ShellTask[] = [
   },
 ];
 
+const fixtureLeadCaptureContracts: ShellLeadCaptureContract[] = [
+  {
+    label: "Lead magnet download",
+    blockType: "lead_magnet",
+    convexFunction: "crm.submitLead",
+    runtime: "legacy fallback",
+    requiredFields: ["siteId", "email", "source"],
+    fallback: "/api/leads until generated Convex API bindings are approved",
+  },
+  {
+    label: "Advisor intake form",
+    blockType: "form",
+    convexFunction: "crm.submitLead",
+    runtime: "legacy fallback",
+    requiredFields: ["siteId", "email", "journeyStage"],
+    fallback: "/api/leads until generated Convex API bindings are approved",
+  },
+  {
+    label: "Campaign microsite signup",
+    blockType: "campaign",
+    convexFunction: "crm.submitLead",
+    runtime: "legacy fallback",
+    requiredFields: ["siteId", "email", "persona"],
+    fallback: "/api/leads until generated Convex API bindings are approved",
+  },
+];
+
 const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Phase 0 source import", status: "done" },
   { label: "Secret handling baseline", status: "done" },
@@ -275,6 +312,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Permission guard migration", status: "done" },
   { label: "Import contracts", status: "done" },
   { label: "CRM lead spine", status: "done" },
+  { label: "Public lead capture adapter", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -333,6 +371,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
         "controlPlane.listSitesForTenant",
         "siteFactory.listStarterTemplates",
         "siteBuilder.getSiteDraft",
+        "publicSite.resolvePublishedSite",
         "crm.submitLead",
         "crm.listLeads",
         "crm.getLeadTimeline",
@@ -348,6 +387,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
     leads: fixtureLeads,
     pipelineStages: fixturePipelineStages,
     tasks: fixtureTasks,
+    leadCaptureContracts: fixtureLeadCaptureContracts,
     launchGates: fixtureLaunchGates,
   }),
 };

@@ -13,8 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import type { Persona } from "@/contexts/PersonaContext";
+import { submitKinfloLeadCapture } from "@/lib/kinfloLeadCapture";
 
 interface LeadCaptureFormProps {
+  siteId?: string;
   defaultPersona?: Persona;
   defaultFunnelStage?: "awareness" | "consideration" | "decision" | "retention";
   leadMagnetId?: string;
@@ -24,6 +26,7 @@ interface LeadCaptureFormProps {
 }
 
 export default function LeadCaptureForm({
+  siteId,
   defaultPersona,
   defaultFunnelStage = "awareness",
   leadMagnetId,
@@ -42,27 +45,17 @@ export default function LeadCaptureForm({
 
   const submitLeadMutation = useMutation({
     mutationFn: async () => {
-      const payload = {
+      const submission = await submitKinfloLeadCapture({
+        siteId,
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone || undefined,
         persona: formData.persona,
-        funnelStage: defaultFunnelStage,
-        leadSource: leadMagnetId || "website",
-      };
-      
-      const response = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        journeyStage: defaultFunnelStage,
+        source: leadMagnetId || "website",
+        metadata: interactionMetadata,
       });
-      
-      if (!response.ok) {
-        throw new Error("Failed to submit lead");
-      }
-      
-      const lead = await response.json();
       
       // Record interaction if metadata provided
       if (interactionMetadata && leadMagnetId) {
@@ -71,7 +64,7 @@ export default function LeadCaptureForm({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              leadId: lead.id,
+              leadId: (submission.lead as { id?: string }).id,
               interactionType: "quiz_completion",
               channel: "website",
               data: interactionMetadata,
@@ -82,7 +75,7 @@ export default function LeadCaptureForm({
         }
       }
       
-      return lead;
+      return submission;
     },
     onSuccess: () => {
       toast({

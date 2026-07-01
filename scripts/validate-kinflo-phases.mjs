@@ -75,6 +75,7 @@ for (const path of [
   "docs/phase11-convex-import-contracts.md",
   "docs/phase12-crm-lead-spine.md",
   "docs/phase13-crm-shell-workspace.md",
+  "docs/phase14-public-lead-capture-adapter.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -87,6 +88,7 @@ for (const path of [
   "convex/crm.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
+  "client/src/lib/kinfloLeadCapture.ts",
   "scripts/validate-drizzle-convex-map.mjs",
   "scripts/validate-convex-import-contracts.mjs",
   "scripts/dry-run-convex-import-contracts.mjs",
@@ -185,6 +187,13 @@ requireIncludes("docs/phase13-crm-shell-workspace.md", [
   "crm.submitLead",
   "fixture-backed",
   "lead:view",
+]);
+
+requireIncludes("docs/phase14-public-lead-capture-adapter.md", [
+  "client/src/lib/kinfloLeadCapture.ts",
+  "crm.submitLead",
+  "/api/leads",
+  "publicSite.resolvePublishedSite",
 ]);
 
 requireIncludes("package.json", [
@@ -306,7 +315,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureKinfloShellAdapter",
   "activation.readiness",
   "ShellLead",
+  "ShellLeadCaptureContract",
   "fixtureLeads",
+  "fixtureLeadCaptureContracts",
   "crm.submitLead",
 ]);
 
@@ -314,8 +325,17 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "getKinfloShellSnapshot",
   "Data Mode",
   "CRM Lead Workspace",
+  "Public Intake",
   "Follow-up Tasks",
   "/admin/guide",
+]);
+
+requireIncludes("client/src/lib/kinfloLeadCapture.ts", [
+  "KINFLO_LEAD_CAPTURE_CONVEX_FUNCTION",
+  "buildKinfloLeadCaptureContract",
+  "submitKinfloLeadCapture",
+  "crm.submitLead",
+  "/api/leads",
 ]);
 
 const failed = checks.filter((check) => !check.ok);

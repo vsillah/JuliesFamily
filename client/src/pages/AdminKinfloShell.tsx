@@ -6,6 +6,7 @@ import {
   CircleDashed,
   ExternalLink,
   Factory,
+  FormInput,
   Globe2,
   KeyRound,
   LayoutDashboard,
@@ -341,6 +342,37 @@ export default function AdminKinfloShell() {
               </div>
 
               <div className="space-y-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                    <div className="rounded-md border bg-background p-2">
+                      <FormInput className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Public Intake</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">Lead blocks map to `crm.submitLead` with `/api/leads` as the temporary runtime fallback.</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.leadCaptureContracts.map((contract) => (
+                      <div key={contract.label} className="rounded-md border px-3 py-2 text-sm">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-medium">{contract.label}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{contract.blockType} · {contract.convexFunction}</div>
+                          </div>
+                          <Badge variant="outline">{contract.runtime}</Badge>
+                        </div>
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {contract.requiredFields.map((field) => (
+                            <Badge key={field} variant="secondary">{field}</Badge>
+                          ))}
+                        </div>
+                        <div className="mt-2 text-xs text-muted-foreground">{contract.fallback}</div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader className="flex flex-row items-start gap-3 space-y-0">
                     <div className="rounded-md border bg-background p-2">
