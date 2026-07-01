@@ -74,6 +74,7 @@ for (const path of [
   "docs/phase10-permission-guard-migration.md",
   "docs/phase11-convex-import-contracts.md",
   "docs/phase12-crm-lead-spine.md",
+  "docs/phase13-crm-shell-workspace.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -177,6 +178,13 @@ requireIncludes("docs/phase12-crm-lead-spine.md", [
   "lead:manage",
   "leadEvents",
   "externalWrites: false",
+]);
+
+requireIncludes("docs/phase13-crm-shell-workspace.md", [
+  "client/src/pages/AdminKinfloShell.tsx",
+  "crm.submitLead",
+  "fixture-backed",
+  "lead:view",
 ]);
 
 requireIncludes("package.json", [
@@ -297,11 +305,16 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "KinfloShellSnapshot",
   "fixtureKinfloShellAdapter",
   "activation.readiness",
+  "ShellLead",
+  "fixtureLeads",
+  "crm.submitLead",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "getKinfloShellSnapshot",
   "Data Mode",
+  "CRM Lead Workspace",
+  "Follow-up Tasks",
   "/admin/guide",
 ]);
 

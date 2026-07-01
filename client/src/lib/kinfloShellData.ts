@@ -3,10 +3,13 @@ export type KinfloShellStatus =
   | "draft"
   | "preview"
   | "published"
+  | "converted"
+  | "nurture"
   | "done"
-  | "pending";
+  | "pending"
+  | "archived";
 
-export type ShellMetricIconKey = "tenants" | "sites" | "templates" | "launchGates";
+export type ShellMetricIconKey = "tenants" | "sites" | "templates" | "leads" | "launchGates";
 
 export type ExperienceIconKey = "theme" | "navigation" | "audience" | "preview";
 
@@ -63,6 +66,32 @@ export type ShellRole = {
   owner: string;
 };
 
+export type ShellLead = {
+  name: string;
+  email: string;
+  site: string;
+  persona: string;
+  stage: string;
+  owner: string;
+  status: KinfloShellStatus;
+  lastEvent: string;
+};
+
+export type ShellPipelineStage = {
+  label: string;
+  slug: string;
+  leads: number;
+  color: string;
+};
+
+export type ShellTask = {
+  title: string;
+  lead: string;
+  owner: string;
+  due: string;
+  status: KinfloShellStatus;
+};
+
 export type ShellLaunchGate = {
   label: string;
   status: KinfloShellStatus;
@@ -76,6 +105,9 @@ export type KinfloShellSnapshot = {
   templates: ShellTemplate[];
   experienceControls: ShellExperienceControl[];
   roles: ShellRole[];
+  leads: ShellLead[];
+  pipelineStages: ShellPipelineStage[];
+  tasks: ShellTask[];
   launchGates: ShellLaunchGate[];
 };
 
@@ -167,10 +199,66 @@ const fixtureExperienceControls: ShellExperienceControl[] = [
 ];
 
 const fixtureRoles: ShellRole[] = [
-  { role: "Super Admin", scope: "Platform", access: "Tenants, templates, billing gates, audit events", owner: "Vambah" },
-  { role: "Tenant Owner", scope: "Tenant", access: "Sites, members, theme, domain metadata", owner: "Client lead" },
-  { role: "Site Admin", scope: "Site", access: "Pages, navigation, blocks, publish workflow", owner: "Program lead" },
-  { role: "Editor", scope: "Site", access: "Draft content and asset records", owner: "Content support" },
+  { role: "Super Admin", scope: "Platform", access: "Tenants, templates, billing gates, leads, audit events", owner: "Vambah" },
+  { role: "Tenant Owner", scope: "Tenant", access: "Sites, members, theme, leads, domain metadata", owner: "Client lead" },
+  { role: "Site Admin", scope: "Site", access: "Pages, navigation, blocks, lead workflow", owner: "Program lead" },
+  { role: "Editor", scope: "Site", access: "Draft content, asset records, lead visibility", owner: "Content support" },
+];
+
+const fixtureLeads: ShellLead[] = [
+  {
+    name: "Maria Alvarez",
+    email: "maria@example.invalid",
+    site: "Julie Family Public Site",
+    persona: "Parent",
+    stage: "new_lead",
+    owner: "Program lead",
+    status: "active",
+    lastEvent: "Submitted family learning intake",
+  },
+  {
+    name: "Devon Price",
+    email: "devon@example.invalid",
+    site: "Tech Goes Home Cohort",
+    persona: "Volunteer",
+    stage: "qualified",
+    owner: "Volunteer coordinator",
+    status: "nurture",
+    lastEvent: "Assigned follow-up task",
+  },
+  {
+    name: "Aisha Grant",
+    email: "aisha@example.invalid",
+    site: "Advisor Client Site",
+    persona: "Client prospect",
+    stage: "consultation",
+    owner: "Client Admin",
+    status: "converted",
+    lastEvent: "Moved to converted",
+  },
+];
+
+const fixturePipelineStages: ShellPipelineStage[] = [
+  { label: "New Lead", slug: "new_lead", leads: 1, color: "Slate" },
+  { label: "Qualified", slug: "qualified", leads: 1, color: "Sky" },
+  { label: "Consultation", slug: "consultation", leads: 1, color: "Emerald" },
+];
+
+const fixtureTasks: ShellTask[] = [
+  {
+    title: "Call Maria about evening classes",
+    lead: "Maria Alvarez",
+    owner: "Program lead",
+    due: "Next business day",
+    status: "pending",
+  },
+  {
+    title: "Send volunteer orientation packet",
+    lead: "Devon Price",
+    owner: "Volunteer coordinator",
+    due: "This week",
+    status: "active",
+  },
 ];
 
 const fixtureLaunchGates: ShellLaunchGate[] = [
@@ -181,6 +269,12 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Site builder schema", status: "done" },
   { label: "Template factory", status: "done" },
   { label: "Public resolver", status: "done" },
+  { label: "Invitation lifecycle", status: "done" },
+  { label: "Role catalog", status: "done" },
+  { label: "Access policy", status: "done" },
+  { label: "Permission guard migration", status: "done" },
+  { label: "Import contracts", status: "done" },
+  { label: "CRM lead spine", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -189,6 +283,7 @@ function buildMetrics(): ShellMetric[] {
   const publishedSites = fixtureSites.filter((site) => site.status === "published").length;
   const draftSites = fixtureSites.filter((site) => site.status === "draft").length;
   const completeGates = fixtureLaunchGates.filter((gate) => gate.status === "done").length;
+  const activeLeads = fixtureLeads.filter((lead) => lead.status === "active" || lead.status === "nurture").length;
 
   return [
     {
@@ -208,6 +303,12 @@ function buildMetrics(): ShellMetric[] {
       value: String(fixtureTemplates.length),
       detail: "Learning, advisory, campaign",
       iconKey: "templates",
+    },
+    {
+      label: "Leads",
+      value: String(fixtureLeads.length),
+      detail: `${activeLeads} active or nurturing`,
+      iconKey: "leads",
     },
     {
       label: "Launch Gates",
@@ -232,6 +333,9 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
         "controlPlane.listSitesForTenant",
         "siteFactory.listStarterTemplates",
         "siteBuilder.getSiteDraft",
+        "crm.submitLead",
+        "crm.listLeads",
+        "crm.getLeadTimeline",
         "controlPlane.listAuditEvents",
       ],
     },
@@ -241,6 +345,9 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
     templates: fixtureTemplates,
     experienceControls: fixtureExperienceControls,
     roles: fixtureRoles,
+    leads: fixtureLeads,
+    pipelineStages: fixturePipelineStages,
+    tasks: fixtureTasks,
     launchGates: fixtureLaunchGates,
   }),
 };

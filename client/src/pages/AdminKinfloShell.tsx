@@ -9,12 +9,14 @@ import {
   Globe2,
   KeyRound,
   LayoutDashboard,
+  ListChecks,
   MonitorSmartphone,
   Palette,
   Plus,
   Rocket,
   Settings2,
   ShieldCheck,
+  UserRoundCheck,
   UserRoundCog,
   Workflow,
 } from "lucide-react";
@@ -44,6 +46,7 @@ const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
   sites: Globe2,
   templates: Factory,
+  leads: UserRoundCheck,
   launchGates: Rocket,
 };
 
@@ -60,6 +63,12 @@ function statusBadge(status: KinfloShellStatus) {
   }
   if (status === "preview") {
     return <Badge className="bg-sky-600 hover:bg-sky-600">Preview</Badge>;
+  }
+  if (status === "converted") {
+    return <Badge className="bg-teal-600 hover:bg-teal-600">Converted</Badge>;
+  }
+  if (status === "nurture") {
+    return <Badge className="bg-amber-600 hover:bg-amber-600">Nurture</Badge>;
   }
   return <Badge variant="outline">Draft</Badge>;
 }
@@ -119,7 +128,7 @@ export default function AdminKinfloShell() {
       </div>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
           {snapshot.metrics.map((metric) => {
             const Icon = metricIcons[metric.iconKey];
             return (
@@ -169,10 +178,11 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs defaultValue="tenants" className="mt-8">
-          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-5">
+          <TabsList className="grid h-auto w-full grid-cols-2 md:w-auto md:grid-cols-6">
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="crm">CRM</TabsTrigger>
             <TabsTrigger value="experience">Experience</TabsTrigger>
             <TabsTrigger value="access">Access</TabsTrigger>
           </TabsList>
@@ -282,6 +292,103 @@ export default function AdminKinfloShell() {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="crm" className="mt-6">
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">CRM Lead Workspace</h2>
+                    <p className="text-sm text-muted-foreground">Site-scoped lead intake, assignment, and follow-up state.</p>
+                  </div>
+                  <Badge variant="outline">
+                    <UserRoundCheck className="mr-1 h-3 w-3" />
+                    crm.submitLead
+                  </Badge>
+                </div>
+                <div className="overflow-hidden rounded-lg border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Lead</TableHead>
+                        <TableHead>Site</TableHead>
+                        <TableHead>Persona</TableHead>
+                        <TableHead>Stage</TableHead>
+                        <TableHead>Owner</TableHead>
+                        <TableHead className="text-right">State</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {snapshot.leads.map((lead) => (
+                        <TableRow key={lead.email}>
+                          <TableCell>
+                            <div className="font-medium">{lead.name}</div>
+                            <div className="text-xs text-muted-foreground">{lead.email}</div>
+                          </TableCell>
+                          <TableCell>{lead.site}</TableCell>
+                          <TableCell>{lead.persona}</TableCell>
+                          <TableCell>{lead.stage}</TableCell>
+                          <TableCell>{lead.owner}</TableCell>
+                          <TableCell className="text-right">{statusBadge(lead.status)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                    <div className="rounded-md border bg-background p-2">
+                      <Workflow className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Pipeline</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">Phase 12 stages mirror `pipelineStages`.</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.pipelineStages.map((stage) => (
+                      <div key={stage.slug} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
+                        <div>
+                          <div className="font-medium">{stage.label}</div>
+                          <div className="text-xs text-muted-foreground">{stage.color}</div>
+                        </div>
+                        <Badge variant="secondary">{stage.leads}</Badge>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                    <div className="rounded-md border bg-background p-2">
+                      <ListChecks className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Follow-up Tasks</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">Task records stay scoped to lead and site.</p>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {snapshot.tasks.map((task) => (
+                      <div key={`${task.lead}-${task.title}`} className="rounded-md border px-3 py-2 text-sm">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="font-medium">{task.title}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{task.lead} · {task.owner}</div>
+                          </div>
+                          {statusBadge(task.status)}
+                        </div>
+                        <div className="mt-2 text-xs text-muted-foreground">{task.due}</div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               </div>
             </section>
           </TabsContent>
