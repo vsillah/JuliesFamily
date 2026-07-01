@@ -12,8 +12,8 @@ npm run kinflo:inventory-env
 
 Latest result:
 
-- Source env keys referenced: 57.
-- Documented in `.env.example`: 57.
+- Source env keys referenced: 58.
+- Documented in `.env.example`: 58.
 - Referenced but missing from `.env.example`: 0.
 - Listed in `.env.example` but not directly referenced in scanned source: 2.
 - Tracked secret-like files: 0.

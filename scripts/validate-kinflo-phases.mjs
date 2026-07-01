@@ -95,6 +95,7 @@ for (const path of [
   "docs/phase28-live-smoke-dry-runner.md",
   "docs/phase29-typescript-baseline-gate.md",
   "docs/phase30-shell-route-smoke.md",
+  "docs/phase31-local-admin-smoke-fixture.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -127,6 +128,8 @@ for (const path of [
   "scripts/dry-run-kinflo-live-smoke.mjs",
   "scripts/validate-kinflo-typescript-baseline.mjs",
   "scripts/validate-kinflo-shell-routes.mjs",
+  "scripts/validate-kinflo-local-admin-fixture.mjs",
+  "scripts/serve-kinflo-local-admin-smoke.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -153,7 +156,7 @@ requireIncludes("docs/phase0-completion-audit.md", [
 
 requireIncludes("docs/phase0-env-inventory.md", [
   "npm run kinflo:inventory-env",
-  "Source env keys referenced: 57",
+  "Source env keys referenced: 58",
   "Referenced but missing from `.env.example`: 0",
   "Reads local secret files: no",
   "Prints secret values: no",
@@ -436,6 +439,19 @@ requireIncludes("docs/phase30-shell-route-smoke.md", [
   "admin auth session",
 ]);
 
+requireIncludes("docs/phase31-local-admin-smoke-fixture.md", [
+  "npm run kinflo:validate-local-admin-fixture",
+  "npm run kinflo:serve-local-admin-smoke",
+  "KINFLO_ENABLE_LOCAL_ADMIN_FIXTURE=true",
+  "NODE_ENV=development",
+  "X-KinFlo-Local-Admin-Fixture",
+  "Current Browser Result",
+  "Console warnings/errors: 0",
+  "No production auth bypass is introduced",
+  "No hosted Convex deployment is created",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -451,6 +467,8 @@ requireIncludes("package.json", [
   "\"kinflo:dry-run-live-smoke\"",
   "\"kinflo:check-baseline\"",
   "\"kinflo:validate-shell-routes\"",
+  "\"kinflo:validate-local-admin-fixture\"",
+  "\"kinflo:serve-local-admin-smoke\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -560,6 +578,28 @@ requireIncludes("scripts/validate-kinflo-shell-routes.mjs", [
   "public preview fixture exists for",
   "Generated API imported: no",
   "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-local-admin-fixture.mjs", [
+  "KINFLO_ENABLE_LOCAL_ADMIN_FIXTURE",
+  "serve-kinflo-local-admin-smoke",
+  "NODE_ENV=development",
+  "Production auth bypass: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/serve-kinflo-local-admin-smoke.mjs", [
+  "createServer",
+  "kinflo-local-admin-smoke-fixture",
+  "/api/auth/user",
+  "X-KinFlo-Local-Admin-Fixture",
+  "/admin/kinflo-os",
+]);
+
+requireIncludes("server/routes.ts", [
+  "isKinfloLocalAdminFixtureEnabled",
+  "kinfloLocalAdminFixtureUser",
+  "X-KinFlo-Local-Admin-Fixture",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [

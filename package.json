@@ -23,6 +23,8 @@
     "kinflo:dry-run-live-smoke": "node scripts/dry-run-kinflo-live-smoke.mjs",
     "kinflo:check-baseline": "node scripts/validate-kinflo-typescript-baseline.mjs",
     "kinflo:validate-shell-routes": "node scripts/validate-kinflo-shell-routes.mjs",
+    "kinflo:validate-local-admin-fixture": "node scripts/validate-kinflo-local-admin-fixture.mjs",
+    "kinflo:serve-local-admin-smoke": "node scripts/serve-kinflo-local-admin-smoke.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
     "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts",
     "db:push": "drizzle-kit push"

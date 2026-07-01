@@ -112,6 +112,22 @@ const isAdmin: RequestHandler = requireAdmin;
 // Use this instead of bare isAuthenticated to enable impersonation
 const authWithImpersonation: RequestHandler[] = [isAuthenticated, applyImpersonation];
 
+const isKinfloLocalAdminFixtureEnabled = () =>
+  process.env.NODE_ENV === "development" && process.env.KINFLO_ENABLE_LOCAL_ADMIN_FIXTURE === "true";
+
+const kinfloLocalAdminFixtureUser = {
+  id: "kinflo-local-admin-fixture",
+  oidcSub: "local|kinflo-admin-fixture",
+  email: "kinflo-admin@example.invalid",
+  firstName: "KinFlo",
+  lastName: "Admin Fixture",
+  role: "super_admin",
+  isAdminSession: true,
+  persona: "provider",
+  funnelStage: "decision",
+  source: "kinflo-local-admin-fixture",
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication middleware
   await setupAuth(app);
@@ -218,43 +234,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth route: get current user
-  app.get('/api/auth/user', ...authWithImpersonation, async (req: any, res) => {
-    try {
-      const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
-      
-      // When impersonating, check the real admin's role (not the impersonated user's role)
-      // This allows admin controls to remain visible during impersonation
-      const realUser = req.adminUser || req.user;
-      const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
-      const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'super_admin');
-      
-      // Get persona and funnel stage from leads table if available
-      let funnelStage = "awareness"; // default
-      let persona = user?.persona || "default"; // fallback to user table or default
-      if (user?.email) {
-        const lead = await storage.getLeadByEmail(user.email);
-        if (lead) {
-          if (lead.funnelStage) {
-            funnelStage = lead.funnelStage;
-          }
-          if (lead.persona) {
-            persona = lead.persona; // Lead persona takes priority
+  if (isKinfloLocalAdminFixtureEnabled()) {
+    app.get('/api/auth/user', (_req, res) => {
+      res.set("X-KinFlo-Local-Admin-Fixture", "true");
+      res.json(kinfloLocalAdminFixtureUser);
+    });
+  } else {
+    app.get('/api/auth/user', ...authWithImpersonation, async (req: any, res) => {
+      try {
+        const oidcSub = req.user.claims.sub;
+        const user = await storage.getUserByOidcSub(oidcSub);
+
+        // When impersonating, check the real admin's role (not the impersonated user's role)
+        // This allows admin controls to remain visible during impersonation
+        const realUser = req.adminUser || req.user;
+        const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
+        const isAdminSession = realUserData && (realUserData.role === 'admin' || realUserData.role === 'super_admin');
+
+        // Get persona and funnel stage from leads table if available
+        let funnelStage = "awareness"; // default
+        let persona = user?.persona || "default"; // fallback to user table or default
+        if (user?.email) {
+          const lead = await storage.getLeadByEmail(user.email);
+          if (lead) {
+            if (lead.funnelStage) {
+              funnelStage = lead.funnelStage;
+            }
+            if (lead.persona) {
+              persona = lead.persona; // Lead persona takes priority
+            }
           }
         }
+
+        res.json({
+          ...user,
+          isAdminSession: isAdminSession || false,
+          persona: persona,
+          funnelStage: funnelStage
+        });
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
       }
-      
-      res.json({
-        ...user,
-        isAdminSession: isAdminSession || false,
-        persona: persona,
-        funnelStage: funnelStage
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+    });
+  }
 
   // Development-only: Update user role for testing
   // This endpoint allows tests to create/update users with specific roles
