@@ -72,6 +72,8 @@ for (const path of [
   "docs/phase8-role-capability-catalog.md",
   "docs/phase9-access-policy.md",
   "docs/phase10-permission-guard-migration.md",
+  "docs/phase11-convex-import-contracts.md",
+  "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "convex/siteBuilder.ts",
@@ -83,6 +85,8 @@ for (const path of [
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-drizzle-convex-map.mjs",
+  "scripts/validate-convex-import-contracts.mjs",
+  "scripts/dry-run-convex-import-contracts.mjs",
   "scripts/validate-kinflo-phases.mjs",
 ]) {
   requireFile(path);
@@ -159,9 +163,18 @@ requireIncludes("docs/phase10-permission-guard-migration.md", [
   "site:create",
 ]);
 
+requireIncludes("docs/phase11-convex-import-contracts.md", [
+  "npm run kinflo:validate-imports",
+  "npm run kinflo:dry-run-imports",
+  "externalWrites",
+  "idempotencyKey",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
+  "\"kinflo:validate-imports\"",
+  "\"kinflo:dry-run-imports\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
@@ -172,6 +185,27 @@ requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
   "shared/schema.ts",
   "docs/drizzle-to-convex-migration-map.md",
   "allowedUnmappedTables",
+]);
+
+requireIncludes("scripts/validate-convex-import-contracts.mjs", [
+  "docs/convex-import-contracts/import-manifest.json",
+  "externalWrites",
+  "idempotencyKey",
+  "convex/schema.ts",
+]);
+
+requireIncludes("scripts/dry-run-convex-import-contracts.mjs", [
+  "validate-convex-import-contracts.mjs",
+  "External writes: 0",
+  "Hosted deployment touched: no",
+]);
+
+requireIncludes("docs/convex-import-contracts/import-manifest.json", [
+  "\"externalWrites\": false",
+  "\"hostedDeploymentRequired\": false",
+  "\"targetCollection\": \"tenants\"",
+  "\"targetCollection\": \"contentBlocks\"",
+  "\"idempotencyKey\"",
 ]);
 
 requireIncludes("convex/schema.ts", [
