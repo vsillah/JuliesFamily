@@ -41,6 +41,34 @@ export type ShellLiveAdapterBinding = {
   status: ShellLiveAdapterStatus;
 };
 
+export type ShellAdapterSwitchMode = "read_only" | "mixed" | "write" | "provider_gated";
+
+export type ShellAdapterSwitchSurface = ShellLiveAdapterBinding & {
+  id: string;
+  requiredSmokeEvidence: string[];
+  rollback: string;
+  switchAllowed: boolean;
+  providerWrites: boolean;
+  liveConvexExecution: boolean;
+};
+
+export type ShellAdapterSwitchBatch = {
+  order: number;
+  id: string;
+  label: string;
+  mode: ShellAdapterSwitchMode;
+  surfaces: ShellAdapterSwitchSurface[];
+};
+
+export type ShellAdapterSwitchReadiness = {
+  status: "provider_light_switch_plan";
+  defaultBatchId: string;
+  batches: ShellAdapterSwitchBatch[];
+  providerBoundary: string;
+  activationEvidence: string[];
+  documents: string[];
+};
+
 export type ShellMetric = {
   label: string;
   value: string;
@@ -564,6 +592,7 @@ export type KinfloShellSnapshot = {
   siteLaunchPackets: ShellSiteLaunchPacket[];
   siteCreationWizard: ShellSiteCreationWizard;
   launchReadiness: ShellLaunchReadiness;
+  adapterSwitchReadiness: ShellAdapterSwitchReadiness;
   launchGates: ShellLaunchGate[];
 };
 
@@ -1783,6 +1812,157 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
   },
 ];
 
+function adapterSwitchSurface(
+  surface: string,
+  id: string,
+  rollback: string,
+  requiredSmokeEvidence?: string[],
+): ShellAdapterSwitchSurface {
+  const binding = fixtureLiveAdapterBindings.find((item) => item.surface === surface);
+
+  if (!binding) {
+    throw new Error(`Missing fixture live adapter binding for ${surface}`);
+  }
+
+  return {
+    ...binding,
+    id,
+    requiredSmokeEvidence: requiredSmokeEvidence ?? binding.activationEvidence,
+    rollback,
+    switchAllowed: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  };
+}
+
+const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
+  status: "provider_light_switch_plan",
+  defaultBatchId: "read-only-core",
+  providerBoundary: "Adapter switching is local review state only. Generated API imports, live Convex execution, provider writes, and fixture replacement remain gated until hosted approval and smoke evidence pass.",
+  activationEvidence: [
+    "Phase 50 adapter switch plan validates against KINFLO_GENERATED_API_BINDINGS.",
+    "Phase 51 parity gate proves the switch plan matches fixtureLiveAdapterBindings.",
+    "generatedApiAvailable remains false.",
+    "liveKinfloShellAdapter remains fail-closed.",
+    "Each surface keeps fixture rollback until hosted smoke evidence is reviewed.",
+  ],
+  documents: [
+    "docs/convex-adapter-switch-plan.json",
+    "docs/phase50-adapter-switch-plan.md",
+    "docs/phase51-adapter-switch-parity.md",
+  ],
+  batches: [
+    {
+      order: 10,
+      id: "read-only-core",
+      label: "Read-only core shell data",
+      mode: "read_only",
+      surfaces: [
+        adapterSwitchSurface(
+          "Tenant control plane",
+          "tenant-control-plane",
+          "Return tenant/site/audit tables to fixtureKinfloShellAdapter if scope filtering or audit visibility fails.",
+        ),
+        adapterSwitchSurface(
+          "Plans and entitlements",
+          "plans-and-entitlements",
+          "Restore fixture plan and entitlement cards if usage math, overrides, or limits diverge.",
+        ),
+        adapterSwitchSurface(
+          "Public renderer",
+          "public-renderer",
+          "Keep preview routes on local fixtures if published/draft filtering or public-safe data fails.",
+        ),
+        adapterSwitchSurface(
+          "Launch readiness",
+          "launch-readiness",
+          "Restore fixture launch readiness if any launch gate is overstated or cross-tenant evidence leaks.",
+        ),
+      ],
+    },
+    {
+      order: 20,
+      id: "user-scoped-preferences",
+      label: "User-scoped preference reads and writes",
+      mode: "mixed",
+      surfaces: [
+        adapterSwitchSurface(
+          "Admin experience preferences",
+          "admin-experience-preferences",
+          "Return preference controls to local state if tenant/site permission checks or personal defaults fail.",
+        ),
+      ],
+    },
+    {
+      order: 30,
+      id: "site-creation-and-admin",
+      label: "Site creation, invitations, and activation readiness",
+      mode: "write",
+      surfaces: [
+        adapterSwitchSurface(
+          "Activation readiness",
+          "activation-readiness",
+          "Keep activation smoke records labeled as smoke data and leave data mode on fixtures if seed output differs from manifest expectations.",
+        ),
+        adapterSwitchSurface(
+          "Site factory",
+          "site-factory",
+          "Archive the smoke site, revoke pending invites, and return launch packets to fixtures if template creation or owner scope fails.",
+        ),
+      ],
+    },
+    {
+      order: 40,
+      id: "public-crm-loop",
+      label: "Public lead capture and CRM workflow",
+      mode: "write",
+      surfaces: [
+        adapterSwitchSurface(
+          "CRM lead workspace",
+          "crm-lead-workspace",
+          "Mark smoke leads and workflow data as test-only, restore fixture CRM tables, and keep outbound notifications paused.",
+        ),
+      ],
+    },
+    {
+      order: 50,
+      id: "provider-readiness-records",
+      label: "Provider readiness metadata without provider writes",
+      mode: "provider_gated",
+      surfaces: [
+        adapterSwitchSurface(
+          "Domain metadata",
+          "domain-metadata",
+          "Deactivate smoke domain metadata and keep DNS, SSL, and Vercel attachment blocked if hostname or entitlement checks fail.",
+        ),
+        adapterSwitchSurface(
+          "Integration readiness",
+          "integration-readiness",
+          "Return integration readiness rows to fixtures and keep provider env activation blocked if settings expose secrets or scope incorrectly.",
+        ),
+      ],
+    },
+    {
+      order: 60,
+      id: "campaign-and-ai-governance",
+      label: "Campaign and AI governance records",
+      mode: "provider_gated",
+      surfaces: [
+        adapterSwitchSurface(
+          "Campaign automation",
+          "campaign-automation",
+          "Pause campaign records, restore fixture campaign review state, and keep email, SMS, and automation sends blocked.",
+        ),
+        adapterSwitchSurface(
+          "AI review provenance",
+          "ai-review-provenance",
+          "Keep generated output unpublished, return AI review rows to fixtures, and block AI provider calls until provenance smoke passes.",
+        ),
+      ],
+    },
+  ],
+};
+
 const fixtureSiteCreationWizard: ShellSiteCreationWizard = {
   defaultSiteName: "Advisor Client Site",
   defaultSubdomain: "advisor-client",
@@ -2135,6 +2315,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       siteLaunchPackets: fixtureSiteLaunchPackets,
       siteCreationWizard: fixtureSiteCreationWizard,
       launchReadiness: fixtureLaunchReadiness,
+      adapterSwitchReadiness: fixtureAdapterSwitchReadiness,
       launchGates: fixtureLaunchGates,
     };
   },

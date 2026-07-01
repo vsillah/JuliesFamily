@@ -126,6 +126,7 @@ export default function AdminKinfloShell() {
   const [activeTab, setActiveTab] = useState("tenants");
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
+  const [adapterSwitchBatchId, setAdapterSwitchBatchId] = useState(snapshot.adapterSwitchReadiness.defaultBatchId);
   const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
   const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
@@ -236,6 +237,21 @@ export default function AdminKinfloShell() {
       total: stages.length,
     };
   }, [selectedLaunchReadinessSite]);
+  const selectedAdapterSwitchBatch = useMemo(
+    () => snapshot.adapterSwitchReadiness.batches.find((batch) => batch.id === adapterSwitchBatchId)
+      ?? snapshot.adapterSwitchReadiness.batches[0],
+    [adapterSwitchBatchId, snapshot.adapterSwitchReadiness.batches],
+  );
+  const adapterSwitchTotals = useMemo(() => {
+    const surfaces = snapshot.adapterSwitchReadiness.batches.flatMap((batch) => batch.surfaces);
+    return {
+      total: surfaces.length,
+      blocked: surfaces.filter((surface) => !surface.switchAllowed).length,
+      generatedApiPending: surfaces.filter((surface) => surface.status === "generated_api_pending").length,
+      fixtureFallback: surfaces.filter((surface) => surface.status === "fixture_fallback").length,
+      liveExecutionBlocked: surfaces.filter((surface) => !surface.liveConvexExecution).length,
+    };
+  }, [snapshot.adapterSwitchReadiness.batches]);
   const selectedWizardTemplate = useMemo(
     () => snapshot.templates.find((template) => template.key === wizardTemplateKey) ?? snapshot.templates[0],
     [snapshot.templates, wizardTemplateKey],
@@ -931,6 +947,7 @@ export default function AdminKinfloShell() {
             <TabsTrigger value="tenants">Tenants</TabsTrigger>
             <TabsTrigger value="sites">Sites</TabsTrigger>
             <TabsTrigger value="launch-readiness">Launch</TabsTrigger>
+            <TabsTrigger value="adapter-switch">Switch</TabsTrigger>
             <TabsTrigger value="factory">Factory</TabsTrigger>
             <TabsTrigger value="plans">Plans</TabsTrigger>
             <TabsTrigger value="brand">Brand</TabsTrigger>
@@ -1184,6 +1201,201 @@ export default function AdminKinfloShell() {
                         <span>{item}</span>
                       </div>
                     ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </section>
+          </TabsContent>
+
+          <TabsContent value="adapter-switch" className="mt-6">
+            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="min-w-0 space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">Adapter Switch Readiness</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Review the controlled order for replacing fixture surfaces with generated Convex API bindings after hosted approval.
+                    </p>
+                  </div>
+                  <Badge variant="outline">
+                    <ShieldCheck className="mr-1 h-3 w-3" />
+                    Provider-light
+                  </Badge>
+                </div>
+
+                <Card>
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Fixture-To-Live Switch Packet</CardTitle>
+                        <Badge variant="secondary">{snapshot.adapterSwitchReadiness.status.replace(/_/g, " ")}</Badge>
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">{snapshot.adapterSwitchReadiness.providerBoundary}</p>
+                    </div>
+                    <div className="w-full lg:w-[300px]">
+                      <Label>Switch batch</Label>
+                      <Select value={adapterSwitchBatchId} onValueChange={setAdapterSwitchBatchId}>
+                        <SelectTrigger className="mt-2" data-testid="select-kinflo-adapter-switch-batch">
+                          <SelectValue placeholder="Select switch batch" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {snapshot.adapterSwitchReadiness.batches.map((batch) => (
+                            <SelectItem key={batch.id} value={batch.id}>
+                              {batch.order}. {batch.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-3 md:grid-cols-4">
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Surfaces</div>
+                        <div className="mt-1 text-2xl font-semibold" data-testid="text-kinflo-adapter-switch-surfaces">
+                          {adapterSwitchTotals.total}
+                        </div>
+                      </div>
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Switch blocked</div>
+                        <div className="mt-1 text-2xl font-semibold">{adapterSwitchTotals.blocked}</div>
+                      </div>
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Codegen pending</div>
+                        <div className="mt-1 text-2xl font-semibold">{adapterSwitchTotals.generatedApiPending}</div>
+                      </div>
+                      <div className="rounded-md border p-3">
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Live calls blocked</div>
+                        <div className="mt-1 text-2xl font-semibold">{adapterSwitchTotals.liveExecutionBlocked}</div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <div className="text-sm font-medium">{selectedAdapterSwitchBatch?.label}</div>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Batch {selectedAdapterSwitchBatch?.order} · {selectedAdapterSwitchBatch?.mode.replace(/_/g, " ")}
+                          </p>
+                        </div>
+                        <Badge variant="outline">
+                          {selectedAdapterSwitchBatch?.surfaces.length ?? 0} surfaces
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3">
+                      {(selectedAdapterSwitchBatch?.surfaces ?? []).map((surface) => (
+                        <div key={surface.id} className="rounded-md border p-4" data-testid={`card-adapter-switch-${surface.id}`}>
+                          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="font-medium">{surface.surface}</h3>
+                                {liveAdapterStatusBadge(surface.status)}
+                              </div>
+                              <p className="mt-1 text-sm text-muted-foreground">{surface.fixtureSource}</p>
+                            </div>
+                            <Button size="sm" disabled data-testid="button-adapter-switch-gated">
+                              <Workflow className="mr-2 h-3 w-3" />
+                              Live switch gated
+                            </Button>
+                          </div>
+
+                          <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                            <div className="min-w-0">
+                              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Convex functions</div>
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {surface.convexFunctions.map((functionName) => (
+                                  <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left">
+                                    {functionName}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Smoke evidence</div>
+                              <div className="mt-2 flex flex-wrap gap-1">
+                                {surface.requiredSmokeEvidence.map((item) => (
+                                  <Badge key={item} variant="outline" className="max-w-full whitespace-normal break-words text-left">
+                                    {item}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
+                            <div className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">Switch allowed</div>
+                              <div className="font-medium">{surface.switchAllowed ? "yes" : "no"}</div>
+                            </div>
+                            <div className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">Provider writes</div>
+                              <div className="font-medium">{surface.providerWrites ? "yes" : "no"}</div>
+                            </div>
+                            <div className="rounded-md bg-muted/40 px-3 py-2">
+                              <div className="text-xs text-muted-foreground">Live Convex execution</div>
+                              <div className="font-medium">{surface.liveConvexExecution ? "yes" : "no"}</div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 rounded-md border p-3 text-sm text-muted-foreground">
+                            <span className="font-medium text-foreground">Rollback: </span>
+                            {surface.rollback}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Switch Gate Evidence</CardTitle>
+                    <p className="text-sm text-muted-foreground">These checks must stay green before any hosted adapter replacement is approved.</p>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.adapterSwitchReadiness.activationEvidence.map((item) => (
+                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <CircleDashed className="mt-0.5 h-4 w-4" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Source Documents</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {snapshot.adapterSwitchReadiness.documents.map((documentPath) => (
+                      <div key={documentPath} className="rounded-md border px-3 py-2 text-sm">
+                        <span className="break-all">{documentPath}</span>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Provider Boundary</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm text-muted-foreground">
+                    <div className="flex items-start gap-2">
+                      <ShieldCheck className="mt-0.5 h-4 w-4" />
+                      <span>No generated API is imported.</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <ShieldCheck className="mt-0.5 h-4 w-4" />
+                      <span>No live Convex query, mutation, or action is executed.</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <ShieldCheck className="mt-0.5 h-4 w-4" />
+                      <span>No DNS, SSL, email, SMS, storage, payment, or AI provider writes are performed.</span>
+                    </div>
                   </CardContent>
                 </Card>
               </div>

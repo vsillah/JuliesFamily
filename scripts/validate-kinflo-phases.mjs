@@ -117,6 +117,7 @@ for (const path of [
   "docs/phase49-hosted-activation-packet.md",
   "docs/phase50-adapter-switch-plan.md",
   "docs/phase51-adapter-switch-parity.md",
+  "docs/phase52-adapter-switch-shell.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-adapter-switch-plan.json",
   "docs/convex-live-smoke-manifest.json",
@@ -164,6 +165,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-packet.mjs",
   "scripts/validate-kinflo-adapter-switch-plan.mjs",
   "scripts/validate-kinflo-adapter-switch-parity.mjs",
+  "scripts/validate-kinflo-adapter-switch-shell.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -764,6 +766,17 @@ requireIncludes("docs/phase51-adapter-switch-parity.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase52-adapter-switch-shell.md", [
+  "npm run kinflo:validate-adapter-switch-shell",
+  "Adapter Switch Readiness",
+  "adapterSwitchReadiness",
+  "Switch batches: 6",
+  "Switch surfaces: 12",
+  "Local state only: yes",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -787,6 +800,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-packet\"",
   "\"kinflo:validate-adapter-switch-plan\"",
   "\"kinflo:validate-adapter-switch-parity\"",
+  "\"kinflo:validate-adapter-switch-shell\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1058,6 +1072,16 @@ requireIncludes("scripts/validate-kinflo-adapter-switch-parity.mjs", [
   "switchAllowed remains false",
   "providerWrites remains false",
   "liveConvexExecution remains false",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-adapter-switch-shell.mjs", [
+  "Adapter Switch Readiness",
+  "adapterSwitchReadiness",
+  "select-kinflo-adapter-switch-batch",
+  "button-adapter-switch-gated",
+  "adapter switch shell keeps switchAllowed false",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -1425,6 +1449,11 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureDomainReadiness",
   "Domain metadata is local until hosted Convex, DNS ownership, SSL provisioning, Vercel domain attachment, and rollback approval are complete.",
   "Domain readiness shell",
+  "ShellAdapterSwitchReadiness",
+  "fixtureAdapterSwitchReadiness",
+  "adapterSwitchReadiness: fixtureAdapterSwitchReadiness",
+  "read-only-core",
+  "provider_light_switch_plan",
   "ShellLead",
   "ShellLeadCaptureContract",
   "fixtureLeads",
@@ -1659,6 +1688,11 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "snapshot.aiReview.reviewChecklist",
   "snapshot.aiReview.activationEvidence",
   "Launch Readiness",
+  "Adapter Switch Readiness",
+  "select-kinflo-adapter-switch-batch",
+  "button-adapter-switch-gated",
+  "snapshot.adapterSwitchReadiness.activationEvidence",
+  "snapshot.adapterSwitchReadiness.documents",
   "select-kinflo-launch-readiness-site",
   "text-kinflo-launch-readiness-status",
   "text-kinflo-launch-readiness-blocker",
