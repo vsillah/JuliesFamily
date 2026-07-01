@@ -16,6 +16,7 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - pages and page revisions,
   - content blocks and visibility rules,
   - asset records,
+  - domains,
   - theme tokens,
   - feature flags,
   - publish events,
@@ -36,11 +37,16 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - creating and updating content blocks,
   - upserting persona/journey visibility rules,
   - creating asset metadata records,
+  - upserting custom-domain metadata,
   - publishing a page into a revision snapshot.
 - Site-factory functions for:
   - listing starter templates,
   - creating a new site from a reusable template pack,
   - seeding theme tokens, navigation, pages, blocks, visibility defaults, feature flags, and audit events.
+- Public-site functions for:
+  - resolving a verified hostname or subdomain,
+  - loading the published page for a route,
+  - returning only published blocks with persona/journey visibility applied.
 
 ## Explicit Boundaries
 
@@ -56,7 +62,8 @@ Phase 1 intentionally avoids:
 - live public site rendering,
 - Stripe billing,
 - email/SMS delivery,
-- custom domains,
+- live custom-domain provisioning,
+- automated custom-domain verification,
 - automated A/B test promotion,
 - client-facing onboarding wizard UI.
 
@@ -70,8 +77,9 @@ After Convex auth/deployment setup is approved, the first smoke should prove:
 4. A default theme token record is created for the site.
 5. A draft homepage is created with navigation and content blocks, either manually or from a starter template.
 6. Publishing the page creates a page revision and publish event.
-7. Audit events exist for tenant, site, page, block, template, and publish actions.
-8. A non-admin user cannot list all tenants or mutate an unassigned site.
+7. A published site/page can be resolved by verified hostname or subdomain.
+8. Audit events exist for tenant, site, page, block, template, domain, and publish actions.
+9. A non-admin user cannot list all tenants or mutate an unassigned site.
 
 ## Implementation Notes
 

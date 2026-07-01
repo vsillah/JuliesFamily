@@ -5,7 +5,7 @@ import {
   type GenericQueryCtx,
 } from "convex/server";
 import { v } from "convex/values";
-import { assetStatus, contentBlockType, navPlacement, publishStatus } from "./schema";
+import { assetStatus, contentBlockType, domainStatus, navPlacement, publishStatus } from "./schema";
 
 type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
@@ -479,6 +479,76 @@ export const createAssetRecord = mutation({
     });
 
     return assetId;
+  },
+});
+
+export const upsertDomain = mutation({
+  args: {
+    siteId: v.id("sites"),
+    domainId: v.optional(v.id("domains")),
+    hostname: v.string(),
+    status: domainStatus,
+    isPrimary: v.optional(v.boolean()),
+    verificationToken: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { user, site } = await requireSiteAdmin(ctx, args.siteId);
+    const hostname = args.hostname.trim().toLowerCase();
+    if (!hostname || hostname.includes("/") || hostname.includes(":")) {
+      throw new Error("Hostname must be a bare domain such as example.com");
+    }
+
+    const timestamp = now();
+    if (args.domainId) {
+      const domain = await ctx.db.get(args.domainId);
+      if (!domain || domain.siteId !== args.siteId) {
+        throw new Error("Domain not found for site");
+      }
+      await ctx.db.patch(domain._id, definedFields({
+        hostname,
+        status: args.status,
+        isPrimary: args.isPrimary ?? domain.isPrimary,
+        verificationToken: args.verificationToken,
+        updatedAt: timestamp,
+        verifiedAt: args.status === "verified" ? timestamp : domain.verifiedAt,
+        disabledAt: args.status === "disabled" ? timestamp : domain.disabledAt,
+      }));
+      return domain._id;
+    }
+
+    const existing = await ctx.db
+      .query("domains")
+      .withIndex("by_hostname", (q) => q.eq("hostname", hostname))
+      .first();
+    if (existing) {
+      throw new Error(`Domain already exists: ${hostname}`);
+    }
+
+    const domainId = await ctx.db.insert("domains", definedFields({
+      tenantId: site.tenantId,
+      siteId: site._id,
+      hostname,
+      status: args.status,
+      isPrimary: args.isPrimary ?? false,
+      verificationToken: args.verificationToken,
+      createdBy: user._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      verifiedAt: args.status === "verified" ? timestamp : undefined,
+      disabledAt: args.status === "disabled" ? timestamp : undefined,
+    }));
+
+    await writeAuditEvent(ctx, {
+      tenantId: site.tenantId,
+      siteId: site._id,
+      actorUserId: user._id,
+      action: "domain_upserted",
+      resourceType: "domain",
+      resourceId: domainId,
+      metadata: { hostname, status: args.status, isPrimary: args.isPrimary ?? false },
+    });
+
+    return domainId;
   },
 });
 

@@ -61,6 +61,12 @@ export const assetStatus = v.union(
   v.literal("archived"),
 );
 
+export const domainStatus = v.union(
+  v.literal("pending"),
+  v.literal("verified"),
+  v.literal("disabled"),
+);
+
 export default defineSchema({
   users: defineTable({
     subject: v.string(),
@@ -109,6 +115,23 @@ export default defineSchema({
     .index("by_tenant_slug", ["tenantId", "slug"])
     .index("by_subdomain", ["subdomain"])
     .index("by_status", ["status"]),
+
+  domains: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    hostname: v.string(),
+    status: domainStatus,
+    isPrimary: v.boolean(),
+    verificationToken: v.optional(v.string()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    verifiedAt: v.optional(v.number()),
+    disabledAt: v.optional(v.number()),
+  })
+    .index("by_hostname", ["hostname"])
+    .index("by_site", ["siteId"])
+    .index("by_tenant_status", ["tenantId", "status"]),
 
   memberships: defineTable({
     userId: v.id("users"),
