@@ -70,6 +70,7 @@ for (const path of [
   "docs/phase6-migration-map-validator.md",
   "docs/phase7-client-invitation-lifecycle.md",
   "docs/phase8-role-capability-catalog.md",
+  "docs/phase9-access-policy.md",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "convex/siteBuilder.ts",
@@ -77,6 +78,7 @@ for (const path of [
   "convex/publicSite.ts",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
+  "convex/accessPolicy.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-drizzle-convex-map.mjs",
@@ -143,12 +145,19 @@ requireIncludes("docs/phase8-role-capability-catalog.md", [
   "site.editor",
 ]);
 
+requireIncludes("docs/phase9-access-policy.md", [
+  "accessPolicy.viewerPermissionSnapshot",
+  "accessPolicy.canPerform",
+  "hasPermission",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"convex:check\"",
   "convex/activation.ts",
   "convex/roleCatalog.ts",
+  "convex/accessPolicy.ts",
 ]);
 
 requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
@@ -176,10 +185,19 @@ requireIncludes("convex/controlPlane.ts", [
 
 requireIncludes("convex/roleCatalog.ts", [
   "defaultRoleDefinitions",
+  "tenant.editor",
+  "tenant.viewer",
   "export const listDefaultRoles",
   "export const listRoleDefinitions",
   "export const syncDefaultRoles",
   "role_catalog_synced",
+]);
+
+requireIncludes("convex/accessPolicy.ts", [
+  "export const viewerPermissionSnapshot",
+  "export const canPerform",
+  "export async function hasPermission",
+  "roleKeyForMembership",
 ]);
 
 requireIncludes("convex/activation.ts", [

@@ -17,6 +17,8 @@ Default role keys:
 - `platform.super_admin`
 - `tenant.owner`
 - `tenant.admin`
+- `tenant.editor`
+- `tenant.viewer`
 - `site.admin`
 - `site.editor`
 - `site.viewer`

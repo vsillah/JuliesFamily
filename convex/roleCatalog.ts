@@ -67,6 +67,29 @@ export const defaultRoleDefinitions: RoleDefinition[] = [
     ],
   },
   {
+    key: "tenant.editor",
+    label: "Tenant Editor",
+    scope: "tenant",
+    permissions: [
+      "tenant:view",
+      "site:view",
+      "content:edit",
+      "asset:manage",
+      "lead:view",
+    ],
+  },
+  {
+    key: "tenant.viewer",
+    label: "Tenant Viewer",
+    scope: "tenant",
+    permissions: [
+      "tenant:view",
+      "site:view",
+      "content:view",
+      "lead:view",
+    ],
+  },
+  {
     key: "site.admin",
     label: "Site Admin",
     scope: "site",
