@@ -17,6 +17,7 @@ It does not import `convex/_generated/api`, mount a `ConvexProvider`, run codege
 
 - Activation readiness: `activation.readiness`, `activation.seedSmokeSite`.
 - Tenant control plane: `controlPlane.listTenants`, `controlPlane.listSitesForTenant`, `controlPlane.listAuditEvents`.
+- Admin experience preferences: `preferences.getMyPreferences`, `preferences.upsertMyPreferences`.
 - Site factory: `siteFactory.listStarterTemplates`, `siteFactory.createSiteFromTemplate`.
 - Domain metadata: `siteBuilder.upsertDomain`, `entitlements.checkEntitlementLimit`.
 - Public renderer: `publicSite.resolvePublishedSite`.

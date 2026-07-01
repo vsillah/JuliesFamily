@@ -36,6 +36,8 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   crmUpsertPipelineStage: "crm.upsertPipelineStage",
   entitlementsCheckLimit: "entitlements.checkEntitlementLimit",
   entitlementsUsageSnapshot: "entitlements.entitlementUsageSnapshot",
+  preferencesGetMyPreferences: "preferences.getMyPreferences",
+  preferencesUpsertMyPreferences: "preferences.upsertMyPreferences",
   publicSiteResolvePublishedSite: "publicSite.resolvePublishedSite",
   roleCatalogListDefaultRoles: "roleCatalog.listDefaultRoles",
   roleCatalogListRoleDefinitions: "roleCatalog.listRoleDefinitions",

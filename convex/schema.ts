@@ -172,6 +172,26 @@ export default defineSchema({
     .index("by_site_user", ["siteId", "userId"])
     .index("by_tenant_role", ["tenantId", "role"]),
 
+  adminPreferences: defineTable({
+    userId: v.id("users"),
+    tenantId: v.optional(v.id("tenants")),
+    siteId: v.optional(v.id("sites")),
+    notificationPreferences: v.optional(v.any()),
+    workflowPreferences: v.optional(v.any()),
+    interfacePreferences: v.optional(v.any()),
+    communicationPreferences: v.optional(v.any()),
+    defaultLandingPage: v.optional(v.string()),
+    theme: v.optional(v.union(v.literal("light"), v.literal("dark"), v.literal("system"))),
+    itemsPerPage: v.optional(v.number()),
+    dataDensity: v.optional(v.union(v.literal("compact"), v.literal("comfortable"), v.literal("spacious"))),
+    defaultContentFilter: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_tenant", ["tenantId"])
+    .index("by_site", ["siteId"]),
+
   roles: defineTable({
     key: v.string(),
     label: v.string(),

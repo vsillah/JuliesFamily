@@ -38,7 +38,7 @@ No provider, payment, email, SMS, storage, DNS, or production data write is perf
 
 Latest result:
 
-- Schema collections: 27.
+- Schema collections: 28.
 - Phase 1 minimum collections: 9.
 - Phase 2 minimum collections: 7.
 - Phase 3 minimum collections: 8.

@@ -29,6 +29,8 @@ The manifest is deterministic and reviewable:
 - hosted Convex deployment state is not referenced,
 - local `/Users/` paths and email-shaped references are rejected.
 
+Phase 36 adds `admin-preferences-from-admin-preferences` so legacy admin UI, workflow, notification, and communication settings have a provider-light path into scoped Convex `adminPreferences` records.
+
 ## Current Boundary
 
 This phase does not run `convex dev`, does not generate Convex runtime files, does not import production data, and does not create a hosted Convex deployment.

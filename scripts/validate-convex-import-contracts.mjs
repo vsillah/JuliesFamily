@@ -24,6 +24,7 @@ const requiredImplementedCollections = [
   "tenants",
   "sites",
   "domains",
+  "adminPreferences",
   "memberships",
   "roles",
   "invitations",

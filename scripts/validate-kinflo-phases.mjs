@@ -101,6 +101,7 @@ for (const path of [
   "docs/phase33-convex-schema-coverage.md",
   "docs/phase34-crm-progression-contracts.md",
   "docs/phase35-public-visibility-contract.md",
+  "docs/phase36-admin-preferences-contract.md",
   "docs/convex-live-smoke-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
@@ -113,6 +114,7 @@ for (const path of [
   "convex/accessPolicy.ts",
   "convex/entitlements.ts",
   "convex/crm.ts",
+  "convex/preferences.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/pages/KinfloPublicSitePreview.tsx",
   "client/src/lib/kinfloShellData.ts",
@@ -125,6 +127,7 @@ for (const path of [
   "scripts/validate-kinflo-schema-coverage.mjs",
   "scripts/validate-kinflo-crm-progression.mjs",
   "scripts/validate-kinflo-public-visibility.mjs",
+  "scripts/validate-kinflo-admin-preferences.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -401,6 +404,7 @@ requireIncludes("docs/phase25-live-adapter-contract.md", [
   "selectKinfloShellDataAdapter",
   "npm run kinflo:validate-live-adapter",
   "controlPlane.listTenants",
+  "preferences.getMyPreferences",
   "siteFactory.createSiteFromTemplate",
   "siteBuilder.upsertDomain",
   "publicSite.resolvePublishedSite",
@@ -487,7 +491,7 @@ requireIncludes("docs/phase33-convex-schema-coverage.md", [
   "Phase 1 multi-tenant control plane",
   "Phase 2 configurable public renderer",
   "Phase 3 CRM lead spine",
-  "Schema collections: 27",
+  "Schema collections: 28",
   "No generated API is imported",
   "No live Convex query, mutation, or action is executed",
 ]);
@@ -512,6 +516,16 @@ requireIncludes("docs/phase35-public-visibility-contract.md", [
   "No live Convex query, mutation, or action is executed",
 ]);
 
+requireIncludes("docs/phase36-admin-preferences-contract.md", [
+  "npm run kinflo:validate-admin-preferences",
+  "preferences.getMyPreferences",
+  "preferences.upsertMyPreferences",
+  "adminPreferences",
+  "tenant/site scoped preferences require matching access",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -519,6 +533,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-schema-coverage\"",
   "\"kinflo:validate-crm-progression\"",
   "\"kinflo:validate-public-visibility\"",
+  "\"kinflo:validate-admin-preferences\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -539,6 +554,7 @@ requireIncludes("package.json", [
   "convex/accessPolicy.ts",
   "convex/entitlements.ts",
   "convex/crm.ts",
+  "convex/preferences.ts",
 ]);
 
 requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
@@ -582,6 +598,15 @@ requireIncludes("scripts/validate-kinflo-public-visibility.mjs", [
   "publicSite.resolvePublishedSite",
   "targeted persona rules require matching context",
   "targeted journey rules require matching context",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-admin-preferences.mjs", [
+  "preferences.getMyPreferences",
+  "preferences.upsertMyPreferences",
+  "adminPreferences",
+  "tenant/site scoped preferences require matching access",
   "Generated API imported: no",
   "Live Convex execution: no",
 ]);
@@ -718,6 +743,8 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "accessPolicy.viewerPermissionSnapshot",
   "entitlements.entitlementUsageSnapshot",
   "entitlements.checkEntitlementLimit",
+  "preferences.getMyPreferences",
+  "preferences.upsertMyPreferences",
   "siteBuilder.upsertDomain",
   "crm.submitLead",
   "crm.listJourneyProgressionRules",
@@ -736,6 +763,8 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "roleCatalogSyncDefaultRoles",
   "accessPolicyViewerPermissionSnapshot",
   "siteBuilderPublishPage",
+  "preferencesGetMyPreferences",
+  "preferencesUpsertMyPreferences",
   "crmListJourneyProgressionRules",
   "crmUpsertJourneyProgressionRule",
   "crmTransitionLeadStage",
@@ -752,6 +781,7 @@ requireIncludes(".env.example", [
 requireIncludes("docs/convex-import-contracts/import-manifest.json", [
   "\"externalWrites\": false",
   "\"hostedDeploymentRequired\": false",
+  "\"targetCollection\": \"adminPreferences\"",
   "\"targetCollection\": \"tenants\"",
   "\"targetCollection\": \"contentBlocks\"",
   "\"targetCollection\": \"leads\"",
@@ -765,6 +795,7 @@ requireIncludes("convex/schema.ts", [
   "tenants: defineTable",
   "sites: defineTable",
   "domains: defineTable",
+  "adminPreferences: defineTable",
   "contentBlocks: defineTable",
   "leads: defineTable",
   "leadEvents: defineTable",
@@ -870,6 +901,15 @@ requireIncludes("convex/publicSite.ts", [
   "applyVisibility(block, rules, args.persona, args.journeyStage)",
 ]);
 
+requireIncludes("convex/preferences.ts", [
+  "export const getMyPreferences",
+  "export const upsertMyPreferences",
+  "requirePreferenceScope",
+  "permission: \"tenant:view\"",
+  "permission: \"site:view\"",
+  "defaultLandingPage: \"/admin/kinflo-os\"",
+]);
+
 requireIncludes("convex/crm.ts", [
   "export const submitLead",
   "requireEntitlementLimit",
@@ -899,6 +939,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureLiveAdapterBindings",
   "getKinfloConvexRuntime",
   "runtimeMode",
+  "Admin experience preferences",
+  "preferences.getMyPreferences",
+  "preferences.upsertMyPreferences",
   "ShellLead",
   "ShellLeadCaptureContract",
   "fixtureLeads",

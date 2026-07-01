@@ -591,6 +591,13 @@ const fixtureLiveAdapterBindings: ShellLiveAdapterBinding[] = [
     status: "fixture_fallback",
   },
   {
+    surface: "Admin experience preferences",
+    fixtureSource: "data mode, filters, density, and landing-page defaults",
+    convexFunctions: ["preferences.getMyPreferences", "preferences.upsertMyPreferences"],
+    activationEvidence: ["viewer reads own scoped preferences", "tenant/site scoped preferences require matching access"],
+    status: "fixture_fallback",
+  },
+  {
     surface: "Site factory",
     fixtureSource: "launch packets and site creation wizard",
     convexFunctions: ["siteFactory.listStarterTemplates", "siteFactory.createSiteFromTemplate"],

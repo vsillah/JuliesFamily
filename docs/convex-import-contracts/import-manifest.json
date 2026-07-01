@@ -6,6 +6,19 @@
   "blockedUntil": "Convex deployment, auth ownership, backup, and generated binding setup are approved.",
   "contracts": [
     {
+      "id": "admin-preferences-from-admin-preferences",
+      "phase": 3,
+      "sourceTables": ["adminPreferences"],
+      "targetCollection": "adminPreferences",
+      "targetStatus": "implemented",
+      "scope": "user/tenant/site",
+      "operation": "upsert",
+      "idempotencyKey": "admin-preference:source-table:adminPreferences:source-id",
+      "requiredFields": ["userId", "createdAt", "updatedAt"],
+      "externalWrites": false,
+      "notes": "Legacy admin UI, workflow, notification, and communication preferences become user-owned records with optional tenant/site scope attached during import mapping."
+    },
+    {
       "id": "assets-from-image-assets",
       "phase": 2,
       "sourceTables": ["imageAssets"],

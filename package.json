@@ -15,6 +15,7 @@
     "kinflo:validate-schema-coverage": "node scripts/validate-kinflo-schema-coverage.mjs",
     "kinflo:validate-crm-progression": "node scripts/validate-kinflo-crm-progression.mjs",
     "kinflo:validate-public-visibility": "node scripts/validate-kinflo-public-visibility.mjs",
+    "kinflo:validate-admin-preferences": "node scripts/validate-kinflo-admin-preferences.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",
@@ -30,7 +31,7 @@
     "kinflo:validate-local-admin-fixture": "node scripts/validate-kinflo-local-admin-fixture.mjs",
     "kinflo:serve-local-admin-smoke": "node scripts/serve-kinflo-local-admin-smoke.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
-    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts",
+    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts convex/preferences.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

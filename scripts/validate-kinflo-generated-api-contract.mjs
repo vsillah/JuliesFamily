@@ -8,6 +8,7 @@ const convexModuleNames = new Set([
   "controlPlane",
   "crm",
   "entitlements",
+  "preferences",
   "publicSite",
   "roleCatalog",
   "siteBuilder",
@@ -132,6 +133,8 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "roleCatalogSyncDefaultRoles",
   "accessPolicyViewerPermissionSnapshot",
   "siteBuilderPublishPage",
+  "preferencesGetMyPreferences",
+  "preferencesUpsertMyPreferences",
   "crmCreateTask",
 ]);
 
