@@ -27,6 +27,11 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -81,10 +86,46 @@ export default function AdminKinfloShell() {
   const snapshot = getKinfloShellSnapshot();
   const [activeTab, setActiveTab] = useState("tenants");
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
+  const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
+  const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
+  const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
+  const [wizardBrandTone, setWizardBrandTone] = useState(snapshot.siteCreationWizard.brandToneOptions[0] ?? "");
+  const [wizardOwnerRole, setWizardOwnerRole] = useState(snapshot.siteCreationWizard.ownerRoleOptions[0] ?? "");
+  const [wizardPageKeys, setWizardPageKeys] = useState(
+    snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
+  );
   const selectedLaunchPacket = useMemo(
     () => snapshot.siteLaunchPackets.find((packet) => packet.id === selectedLaunchPacketId) ?? snapshot.siteLaunchPackets[0],
     [selectedLaunchPacketId, snapshot.siteLaunchPackets],
   );
+  const selectedWizardTemplate = useMemo(
+    () => snapshot.templates.find((template) => template.key === wizardTemplateKey) ?? snapshot.templates[0],
+    [snapshot.templates, wizardTemplateKey],
+  );
+  const requiredPageKeys = useMemo(
+    () => snapshot.siteCreationWizard.pageOptions.filter((page) => page.required).map((page) => page.key),
+    [snapshot.siteCreationWizard.pageOptions],
+  );
+  const requiredPagesSelected = requiredPageKeys.every((pageKey) => wizardPageKeys.includes(pageKey));
+  const wizardReadiness = [
+    { label: "Template selected", done: Boolean(selectedWizardTemplate) },
+    { label: "Site and subdomain named", done: Boolean(wizardSiteName.trim() && wizardSubdomain.trim()) },
+    { label: "Required pages selected", done: requiredPagesSelected },
+    { label: "Owner role scoped", done: Boolean(wizardOwnerRole) },
+    { label: "Preview route prepared", done: Boolean(selectedLaunchPacket?.previewPath) },
+    { label: "Live Convex smoke pending", done: false },
+  ];
+  const wizardReadyCount = wizardReadiness.filter((item) => item.done).length;
+  const wizardReadinessPercent = Math.round((wizardReadyCount / wizardReadiness.length) * 100);
+
+  const toggleWizardPage = (pageKey: string, checked: boolean) => {
+    setWizardPageKeys((current) => {
+      if (checked) {
+        return current.includes(pageKey) ? current : [...current, pageKey];
+      }
+      return current.filter((item) => item !== pageKey);
+    });
+  };
 
   useEffect(() => {
     if (!isLoading && !isAdmin) {
@@ -305,6 +346,157 @@ export default function AdminKinfloShell() {
                   </Badge>
                 </div>
 
+                <Card>
+                  <CardHeader>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <CardTitle className="text-base">Site Creation Wizard</CardTitle>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          Configure a launch-ready site packet before live Convex mutations are enabled.
+                        </p>
+                      </div>
+                      <Badge variant="secondary">{wizardReadyCount}/{wizardReadiness.length} ready</Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div className="space-y-2">
+                        <Label htmlFor="kinflo-wizard-site-name">Site name</Label>
+                        <Input
+                          id="kinflo-wizard-site-name"
+                          value={wizardSiteName}
+                          onChange={(event) => setWizardSiteName(event.target.value)}
+                          data-testid="input-kinflo-wizard-site-name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="kinflo-wizard-subdomain">Subdomain</Label>
+                        <Input
+                          id="kinflo-wizard-subdomain"
+                          value={wizardSubdomain}
+                          onChange={(event) => setWizardSubdomain(event.target.value)}
+                          data-testid="input-kinflo-wizard-subdomain"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Template</Label>
+                        <Select value={wizardTemplateKey} onValueChange={setWizardTemplateKey}>
+                          <SelectTrigger data-testid="select-kinflo-wizard-template">
+                            <SelectValue placeholder="Select template" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.templates.map((template) => (
+                              <SelectItem key={template.key} value={template.key}>
+                                {template.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Owner role</Label>
+                        <Select value={wizardOwnerRole} onValueChange={setWizardOwnerRole}>
+                          <SelectTrigger data-testid="select-kinflo-wizard-owner-role">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.siteCreationWizard.ownerRoleOptions.map((role) => (
+                              <SelectItem key={role} value={role}>
+                                {role}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2 md:col-span-2">
+                        <Label>Brand tone</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {snapshot.siteCreationWizard.brandToneOptions.map((tone) => (
+                            <Button
+                              key={tone}
+                              type="button"
+                              size="sm"
+                              variant={wizardBrandTone === tone ? "default" : "outline"}
+                              onClick={() => setWizardBrandTone(tone)}
+                              data-testid={`button-brand-tone-${tone.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}
+                            >
+                              {tone}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+                      <div>
+                        <div className="text-sm font-medium">Pages</div>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {snapshot.siteCreationWizard.pageOptions.map((page) => (
+                            <label key={page.key} className="flex items-start gap-2 rounded-md border px-3 py-2 text-sm">
+                              <Checkbox
+                                checked={wizardPageKeys.includes(page.key)}
+                                disabled={page.required}
+                                onCheckedChange={(checked) => toggleWizardPage(page.key, checked === true)}
+                                data-testid={`checkbox-page-${page.key}`}
+                              />
+                              <span>
+                                <span className="font-medium">{page.label}</span>
+                                {page.required ? <span className="ml-2 text-xs text-muted-foreground">required</span> : null}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium">Readiness</span>
+                          <span className="text-muted-foreground">{wizardReadinessPercent}%</span>
+                        </div>
+                        <Progress value={wizardReadinessPercent} className="mt-2" />
+                        <div className="mt-3 space-y-2">
+                          {wizardReadiness.map((item) => (
+                            <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
+                              {item.done ? (
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="h-3.5 w-3.5" />
+                              )}
+                              <span>{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedWizardTemplate ? (
+                      <div className="rounded-md border p-3 text-sm">
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <div className="font-medium">{selectedWizardTemplate.label}</div>
+                            <div className="mt-1 text-muted-foreground">{selectedWizardTemplate.imageDirection}</div>
+                          </div>
+                          <Badge variant="outline">{wizardBrandTone}</Badge>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {selectedWizardTemplate.launchCriteria.map((criterion) => (
+                            <Badge key={criterion} variant="secondary">{criterion}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="text-sm text-muted-foreground">
+                        Draft route: <span className="font-medium text-foreground">/{wizardSubdomain || "subdomain"}</span>
+                      </div>
+                      <Button disabled>
+                        <Rocket className="mr-2 h-4 w-4" />
+                        Live mutation gated
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <div className="grid gap-4 lg:grid-cols-2">
                   {snapshot.siteLaunchPackets.map((packet) => {
                     const selected = packet.id === selectedLaunchPacket?.id;
@@ -389,7 +581,9 @@ export default function AdminKinfloShell() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="flex flex-wrap gap-2">
-                        {selectedLaunchPacket.convexMutations.map((mutationName) => (
+                        {[...selectedLaunchPacket.convexMutations, ...snapshot.siteCreationWizard.convexMutations]
+                          .filter((mutationName, index, all) => all.indexOf(mutationName) === index)
+                          .map((mutationName) => (
                           <Badge key={mutationName} variant="outline">{mutationName}</Badge>
                         ))}
                       </div>

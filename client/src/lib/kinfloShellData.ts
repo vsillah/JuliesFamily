@@ -134,6 +134,17 @@ export type ShellSiteLaunchPacket = {
   launchChecklist: ShellSiteLaunchStep[];
 };
 
+export type ShellSiteCreationWizard = {
+  defaultSiteName: string;
+  defaultSubdomain: string;
+  defaultTemplateKey: string;
+  brandToneOptions: string[];
+  ownerRoleOptions: string[];
+  pageOptions: { key: string; label: string; required: boolean }[];
+  readinessChecks: string[];
+  convexMutations: string[];
+};
+
 export type ShellLaunchGate = {
   label: string;
   status: KinfloShellStatus;
@@ -152,6 +163,7 @@ export type KinfloShellSnapshot = {
   tasks: ShellTask[];
   leadCaptureContracts: ShellLeadCaptureContract[];
   siteLaunchPackets: ShellSiteLaunchPacket[];
+  siteCreationWizard: ShellSiteCreationWizard;
   launchGates: ShellLaunchGate[];
 };
 
@@ -412,6 +424,35 @@ const fixtureSiteLaunchPackets: ShellSiteLaunchPacket[] = [
   },
 ];
 
+const fixtureSiteCreationWizard: ShellSiteCreationWizard = {
+  defaultSiteName: "Advisor Client Site",
+  defaultSubdomain: "advisor-client",
+  defaultTemplateKey: "advisor-consultant",
+  brandToneOptions: ["Calm advisory", "Community program", "Campaign urgency"],
+  ownerRoleOptions: ["tenant.admin", "site.admin", "site.editor"],
+  pageOptions: [
+    { key: "home", label: "Home", required: true },
+    { key: "services", label: "Services", required: true },
+    { key: "proof", label: "Proof", required: false },
+    { key: "intake", label: "Intake", required: true },
+    { key: "privacy", label: "Privacy", required: true },
+  ],
+  readinessChecks: [
+    "Template selected",
+    "Site and subdomain named",
+    "Required pages selected",
+    "Owner role scoped",
+    "Preview route prepared",
+    "Live Convex smoke pending",
+  ],
+  convexMutations: [
+    "controlPlane.createTenant",
+    "siteFactory.createSiteFromTemplate",
+    "controlPlane.createInvitation",
+    "publicSite.resolvePublishedSite",
+  ],
+};
+
 const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Phase 0 source import", status: "done" },
   { label: "Secret handling baseline", status: "done" },
@@ -432,6 +473,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Convex activation preflight", status: "done" },
   { label: "Convex runtime boundary", status: "done" },
   { label: "Template quality contracts", status: "done" },
+  { label: "Site creation wizard contract", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];
@@ -502,6 +544,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       tasks: fixtureTasks,
       leadCaptureContracts: fixtureLeadCaptureContracts,
       siteLaunchPackets: fixtureSiteLaunchPackets,
+      siteCreationWizard: fixtureSiteCreationWizard,
       launchGates: fixtureLaunchGates,
     };
   },

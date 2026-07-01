@@ -81,6 +81,7 @@ for (const path of [
   "docs/phase17-convex-activation-preflight.md",
   "docs/phase18-convex-runtime-boundary.md",
   "docs/phase19-template-quality-contracts.md",
+  "docs/phase20-site-creation-wizard-contract.md",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -247,6 +248,15 @@ requireIncludes("docs/phase19-template-quality-contracts.md", [
   "No hosted Convex deployment is created",
 ]);
 
+requireIncludes("docs/phase20-site-creation-wizard-contract.md", [
+  "ShellSiteCreationWizard",
+  "Site Creation Wizard",
+  "Live mutation gated",
+  "controlPlane.createTenant",
+  "siteFactory.createSiteFromTemplate",
+  "No hosted Convex deployment is created",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -408,6 +418,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Public site preview renderer",
   "Convex runtime boundary",
   "Template quality contracts",
+  "ShellSiteCreationWizard",
+  "siteCreationWizard",
   "configurableFields",
   "imageDirection",
   "qaChecks",
@@ -424,6 +436,10 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Template contracts define configurable fields",
   "Image direction",
   "Launch criteria",
+  "Site Creation Wizard",
+  "Live mutation gated",
+  "select-kinflo-wizard-template",
+  "checkbox-page-",
   "Site Factory Launch Packets",
   "setActiveTab(\"factory\")",
   "CRM Lead Workspace",
