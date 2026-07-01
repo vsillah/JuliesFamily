@@ -69,12 +69,14 @@ for (const path of [
   "docs/phase5-local-readiness-validator.md",
   "docs/phase6-migration-map-validator.md",
   "docs/phase7-client-invitation-lifecycle.md",
+  "docs/phase8-role-capability-catalog.md",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "convex/siteBuilder.ts",
   "convex/siteFactory.ts",
   "convex/publicSite.ts",
   "convex/activation.ts",
+  "convex/roleCatalog.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-drizzle-convex-map.mjs",
@@ -135,11 +137,18 @@ requireIncludes("docs/phase7-client-invitation-lifecycle.md", [
   "tokenHash",
 ]);
 
+requireIncludes("docs/phase8-role-capability-catalog.md", [
+  "roleCatalog.syncDefaultRoles",
+  "platform.super_admin",
+  "site.editor",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"convex:check\"",
   "convex/activation.ts",
+  "convex/roleCatalog.ts",
 ]);
 
 requireIncludes("scripts/validate-drizzle-convex-map.mjs", [
@@ -163,6 +172,14 @@ requireIncludes("convex/controlPlane.ts", [
   "export const revokeInvitation",
   "export const acceptInvitation",
   "invitation_accepted",
+]);
+
+requireIncludes("convex/roleCatalog.ts", [
+  "defaultRoleDefinitions",
+  "export const listDefaultRoles",
+  "export const listRoleDefinitions",
+  "export const syncDefaultRoles",
+  "role_catalog_synced",
 ]);
 
 requireIncludes("convex/activation.ts", [

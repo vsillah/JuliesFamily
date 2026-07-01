@@ -51,6 +51,10 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
 - Activation functions for:
   - checking live Convex readiness,
   - seeding an idempotent smoke tenant/site for the first hosted smoke.
+- Role catalog functions for:
+  - listing default platform/tenant/site roles,
+  - syncing default role capability bundles,
+  - listing persisted role definitions.
 
 ## Explicit Boundaries
 
@@ -76,15 +80,16 @@ Phase 1 intentionally avoids:
 After Convex auth/deployment setup is approved, the first smoke should use `activation.seedSmokeSite` and prove:
 
 1. A signed-in Vambah account runs `bootstrapPlatformAdmin`.
-2. The platform admin creates a tenant.
-3. The platform admin creates a site under that tenant.
-4. A default theme token record is created for the site.
-5. A draft homepage is created with navigation and content blocks from a starter template.
-6. Publishing the page creates a page revision and publish event.
-7. A published site/page can be resolved by verified hostname or subdomain.
-8. Audit events exist for tenant, site, page, block, template, domain, and publish actions.
-9. A client admin invitation can be created, accepted by the matching email, and converted into a scoped membership.
-10. A non-admin user cannot list all tenants or mutate an unassigned site.
+2. The platform admin runs `roleCatalog.syncDefaultRoles`.
+3. The platform admin creates a tenant.
+4. The platform admin creates a site under that tenant.
+5. A default theme token record is created for the site.
+6. A draft homepage is created with navigation and content blocks from a starter template.
+7. Publishing the page creates a page revision and publish event.
+8. A published site/page can be resolved by verified hostname or subdomain.
+9. Audit events exist for tenant, site, page, block, template, domain, role catalog, and publish actions.
+10. A client admin invitation can be created, accepted by the matching email, and converted into a scoped membership.
+11. A non-admin user cannot list all tenants or mutate an unassigned site.
 
 ## Implementation Notes
 

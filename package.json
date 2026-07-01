@@ -12,7 +12,7 @@
     "kinflo:validate-map": "node scripts/validate-drizzle-convex-map.mjs",
     "kinflo:validate-phases": "node scripts/validate-kinflo-phases.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
-    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts",
+    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
