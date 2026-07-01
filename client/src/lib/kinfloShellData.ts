@@ -59,6 +59,10 @@ export type ShellTemplate = {
   label: string;
   fit: string;
   blocks: string[];
+  configurableFields: string[];
+  imageDirection: string;
+  qaChecks: string[];
+  launchCriteria: string[];
 };
 
 export type ShellExperienceControl = {
@@ -219,18 +223,30 @@ const fixtureTemplates: ShellTemplate[] = [
     label: "Nonprofit Learning Center",
     fit: "Family learning, cohorts, volunteers, donors",
     blocks: ["Hero", "Services", "Events", "Testimonials", "Lead magnet"],
+    configurableFields: ["Mission", "Program list", "Volunteer path", "Donor CTA", "Family intake"],
+    imageDirection: "Warm documentary photography with real learning moments, clear faces, and visible community context.",
+    qaChecks: ["Mobile hero crop", "Program scan depth", "Lead capture clarity", "Donor/volunteer path separation"],
+    launchCriteria: ["Homepage copy approved", "Program page linked", "Intake destination tested", "Accessibility contrast checked"],
   },
   {
     key: "advisor-consultant",
     label: "Advisor Consultant",
     fit: "Client services, offers, case studies, intake",
     blocks: ["Hero", "Services", "Proof", "Form"],
+    configurableFields: ["Offer stack", "Proof points", "Case-study slots", "Booking CTA", "Qualification questions"],
+    imageDirection: "Editorial professional imagery with visible collaboration, calm work surfaces, and no generic handshake stock.",
+    qaChecks: ["Offer hierarchy", "Proof before intake", "CTA specificity", "Mobile form length"],
+    launchCriteria: ["Primary offer selected", "Proof block approved", "Booking/intake path tested", "Terms link present"],
   },
   {
     key: "campaign-microsite",
     label: "Campaign Microsite",
     fit: "Launches, cohorts, fundraising, local campaigns",
     blocks: ["Hero", "Campaign", "Proof", "Lead magnet"],
+    configurableFields: ["Campaign goal", "Deadline", "Progress metric", "Supporter CTA", "Conversion source"],
+    imageDirection: "High-trust campaign visuals that show people, progress, and a concrete next action.",
+    qaChecks: ["Goal visibility", "Progress accuracy", "Single CTA dominance", "Share/mobile scan"],
+    launchCriteria: ["Goal verified", "Lead source set", "Campaign copy approved", "Tracking reviewed"],
   },
 ];
 
@@ -415,6 +431,7 @@ const fixtureLaunchGates: ShellLaunchGate[] = [
   { label: "Site factory launch packets", status: "done" },
   { label: "Convex activation preflight", status: "done" },
   { label: "Convex runtime boundary", status: "done" },
+  { label: "Template quality contracts", status: "done" },
   { label: "Convex deployment and generated API", status: "pending" },
   { label: "Live admin smoke", status: "pending" },
 ];

@@ -422,19 +422,63 @@ export default function AdminKinfloShell() {
 
           <TabsContent value="templates" className="mt-6">
             <section className="space-y-4">
-              <h2 className="text-xl font-semibold">Starter Templates</h2>
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div>
+                <h2 className="text-xl font-semibold">Starter Templates</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Template contracts define configurable fields, image direction, QA checks, and launch criteria before live site creation.
+                </p>
+              </div>
+              <div className="grid gap-4 xl:grid-cols-3">
                 {snapshot.templates.map((template) => (
                   <Card key={template.key}>
                     <CardHeader>
                       <CardTitle className="text-base">{template.label}</CardTitle>
                       <p className="text-sm text-muted-foreground">{template.fit}</p>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
+                    <CardContent className="space-y-4">
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Blocks</div>
+                        <div className="mt-2 flex flex-wrap gap-2">
                         {template.blocks.map((block) => (
                           <Badge key={block} variant="secondary">{block}</Badge>
                         ))}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Configure</div>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {template.configurableFields.map((field) => (
+                            <Badge key={field} variant="outline">{field}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-md border p-3 text-sm text-muted-foreground">
+                        <div className="mb-1 font-medium text-foreground">Image direction</div>
+                        {template.imageDirection}
+                      </div>
+                      <div className="grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-1">
+                        <div>
+                          <div className="font-medium">QA checks</div>
+                          <div className="mt-2 space-y-1 text-muted-foreground">
+                            {template.qaChecks.map((check) => (
+                              <div key={check} className="flex gap-2">
+                                <ListChecks className="mt-0.5 h-3.5 w-3.5" />
+                                <span>{check}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="font-medium">Launch criteria</div>
+                          <div className="mt-2 space-y-1 text-muted-foreground">
+                            {template.launchCriteria.map((criterion) => (
+                              <div key={criterion} className="flex gap-2">
+                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5" />
+                                <span>{criterion}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

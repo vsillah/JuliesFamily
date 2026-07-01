@@ -27,6 +27,12 @@ type StarterTemplate = {
   label: string;
   description: string;
   defaultTheme: Record<string, unknown>;
+  qualityContract: {
+    configurableFields: string[];
+    imageDirection: string;
+    qaChecks: string[];
+    launchCriteria: string[];
+  };
   navigation: { label: string; href: string; placement: "header" | "footer"; order: number }[];
   pages: StarterPage[];
   featureFlags: string[];
@@ -52,6 +58,12 @@ export const starterTemplates: StarterTemplate[] = [
       },
       radii: { card: 8, control: 6 },
       media: { treatment: "authentic-community-photography" },
+    },
+    qualityContract: {
+      configurableFields: ["mission", "program list", "volunteer path", "donor CTA", "family intake"],
+      imageDirection: "Warm documentary photography with real learning moments, clear faces, and visible community context.",
+      qaChecks: ["mobile hero crop", "program scan depth", "lead capture clarity", "donor/volunteer path separation"],
+      launchCriteria: ["homepage copy approved", "program page linked", "intake destination tested", "accessibility contrast checked"],
     },
     navigation: [
       { label: "Programs", href: "/programs", placement: "header", order: 10 },
@@ -105,6 +117,12 @@ export const starterTemplates: StarterTemplate[] = [
       radii: { card: 6, control: 6 },
       media: { treatment: "clean-proof-led-editorial" },
     },
+    qualityContract: {
+      configurableFields: ["offer stack", "proof points", "case-study slots", "booking CTA", "qualification questions"],
+      imageDirection: "Editorial professional imagery with visible collaboration, calm work surfaces, and no generic handshake stock.",
+      qaChecks: ["offer hierarchy", "proof before intake", "CTA specificity", "mobile form length"],
+      launchCriteria: ["primary offer selected", "proof block approved", "booking/intake path tested", "terms link present"],
+    },
     navigation: [
       { label: "Services", href: "/services", placement: "header", order: 10 },
       { label: "Proof", href: "/proof", placement: "header", order: 20 },
@@ -156,6 +174,12 @@ export const starterTemplates: StarterTemplate[] = [
       },
       radii: { card: 8, control: 6 },
       media: { treatment: "campaign-proof-and-progress" },
+    },
+    qualityContract: {
+      configurableFields: ["campaign goal", "deadline", "progress metric", "supporter CTA", "conversion source"],
+      imageDirection: "High-trust campaign visuals that show people, progress, and a concrete next action.",
+      qaChecks: ["goal visibility", "progress accuracy", "single CTA dominance", "share/mobile scan"],
+      launchCriteria: ["goal verified", "lead source set", "campaign copy approved", "tracking reviewed"],
     },
     navigation: [
       { label: "Overview", href: "/", placement: "header", order: 10 },
@@ -229,11 +253,12 @@ async function writeSiteAuditEvent(
 export const listStarterTemplates = query({
   args: {},
   handler: async () =>
-    starterTemplates.map(({ key, label, description, featureFlags }) => ({
+    starterTemplates.map(({ key, label, description, featureFlags, qualityContract }) => ({
       key,
       label,
       description,
       featureFlags,
+      qualityContract,
     })),
 });
 
@@ -375,6 +400,7 @@ export const createSiteFromTemplate = mutation({
         pageCount: template.pages.length,
         navigationCount: template.navigation.length,
         featureFlags: template.featureFlags,
+        qualityContract: template.qualityContract,
       },
     });
 
