@@ -9,6 +9,95 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePersona } from "@/contexts/PersonaContext";
 import type { ContentItem } from "@shared/schema";
 
+interface TechGoesHomeEnrollmentSummary {
+  totalClassesRequired?: number;
+  certificateIssued?: boolean | null;
+  chromebookReceived?: boolean | null;
+  internetActivated?: boolean | null;
+}
+
+interface TechGoesHomeCardData {
+  enrolled: boolean;
+  classesCompleted: number;
+  classesRemaining: number;
+  hoursCompleted: number;
+  percentComplete: number;
+  isEligibleForRewards: boolean;
+  totalClassesRequired?: number;
+  enrollment?: {
+    certificateIssued?: boolean;
+    chromebookReceived?: boolean;
+    internetActivated?: boolean;
+  };
+}
+
+interface EnrolledTechGoesHomeProgress {
+  enrolled: true;
+  classesCompleted: number;
+  classesRemaining: number;
+  hoursCompleted: number;
+  percentComplete: number;
+  isEligibleForRewards: boolean;
+  enrollment: TechGoesHomeEnrollmentSummary;
+}
+
+interface UnenrolledTechGoesHomeProgress {
+  enrolled: false;
+  message?: string;
+}
+
+type TechGoesHomeProgress = EnrolledTechGoesHomeProgress | UnenrolledTechGoesHomeProgress;
+
+interface StudentDashboardCardContent {
+  title: string;
+  description: string;
+  buttonText: string;
+  buttonLink: string;
+  goalText?: string;
+  motivationalText?: string;
+}
+
+interface StudentDashboardCardMetadata {
+  buttonText?: string;
+  buttonLink?: string;
+  goalText?: string;
+  motivationalText?: string;
+}
+
+function readCardMetadata(metadata: unknown): StudentDashboardCardMetadata {
+  if (!metadata || typeof metadata !== "object") {
+    return {};
+  }
+
+  return metadata as StudentDashboardCardMetadata;
+}
+
+function hasEnrollmentSummary(
+  progress: EnrolledTechGoesHomeProgress | TechGoesHomeCardData
+): progress is EnrolledTechGoesHomeProgress {
+  return Boolean(progress.enrollment && "totalClassesRequired" in progress.enrollment);
+}
+
+function toProgressCardData(progress: EnrolledTechGoesHomeProgress | TechGoesHomeCardData | undefined): TechGoesHomeCardData | undefined {
+  if (!progress) {
+    return undefined;
+  }
+
+  if (!hasEnrollmentSummary(progress)) {
+    return progress;
+  }
+
+  return {
+    ...progress,
+    totalClassesRequired: progress.enrollment?.totalClassesRequired,
+    enrollment: {
+      certificateIssued: progress.enrollment?.certificateIssued ?? undefined,
+      chromebookReceived: progress.enrollment?.chromebookReceived ?? undefined,
+      internetActivated: progress.enrollment?.internetActivated ?? undefined,
+    },
+  };
+}
+
 export default function TechGoesHomeLanding() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -21,14 +110,14 @@ export default function TechGoesHomeLanding() {
   });
 
   // Fetch student's actual progress if logged in
-  const { data: studentProgress, isLoading: isLoadingProgress, error: progressError } = useQuery({
+  const { data: studentProgress, isLoading: isLoadingProgress, error: progressError } = useQuery<TechGoesHomeProgress>({
     queryKey: ['/api/tgh/progress'],
     enabled: !!user,
     retry: false
   });
 
   // Fetch demo progress for non-logged-in users
-  const { data: demoProgress, isLoading: isLoadingDemo } = useQuery({
+  const { data: demoProgress, isLoading: isLoadingDemo } = useQuery<TechGoesHomeCardData>({
     queryKey: ['/api/tgh/demo-progress'],
     enabled: !user
   });
@@ -49,14 +138,20 @@ export default function TechGoesHomeLanding() {
   });
 
   // Normalize first content item for the card (if available)
-  const cardContent = dashboardCardContent[0] ? {
-    title: dashboardCardContent[0].title,
-    description: dashboardCardContent[0].description,
-    buttonText: (dashboardCardContent[0].metadata as any)?.buttonText || "View Dashboard",
-    buttonLink: (dashboardCardContent[0].metadata as any)?.buttonLink || "/student/tech-goes-home",
-    goalText: (dashboardCardContent[0].metadata as any)?.goalText,
-    motivationalText: (dashboardCardContent[0].metadata as any)?.motivationalText,
-  } : undefined;
+  const cardContent: StudentDashboardCardContent | undefined = dashboardCardContent[0]
+    ? (() => {
+        const metadata = readCardMetadata(dashboardCardContent[0].metadata);
+
+        return {
+          title: dashboardCardContent[0].title,
+          description: dashboardCardContent[0].description ?? "",
+          buttonText: metadata.buttonText || "View Dashboard",
+          buttonLink: metadata.buttonLink || "/student/tech-goes-home",
+          goalText: metadata.goalText,
+          motivationalText: metadata.motivationalText,
+        };
+      })()
+    : undefined;
 
   // Enrollment mutation
   const enrollMutation = useMutation({
@@ -91,7 +186,7 @@ export default function TechGoesHomeLanding() {
 
   // Determine card mode and data based on auth and loading states
   let cardMode: "demo" | "summary" | "full" = "demo";
-  let progressData = demoProgress;
+  let progressData: EnrolledTechGoesHomeProgress | TechGoesHomeCardData | undefined = demoProgress;
   let isLoadingCard = false;
   let hasProgressError = false;
 
@@ -243,7 +338,7 @@ export default function TechGoesHomeLanding() {
             ) : (
               <TechGoesHomeProgressCard 
                 mode={cardMode}
-                data={progressData}
+                data={toProgressCardData(progressData)}
                 content={cardContent}
                 onEnroll={handleEnroll}
                 showEnrollButton={cardMode === "demo" && !!user}
