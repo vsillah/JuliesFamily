@@ -29,6 +29,7 @@ This phase introduces the Convex-backed SaaS spine without creating a hosted Con
   - updating site status,
   - updating site theme tokens,
   - granting memberships,
+  - creating, listing, revoking, and accepting tenant/site invitations,
   - listing audit events.
 - Site-builder functions for:
   - reading a site draft bundle,
@@ -82,7 +83,8 @@ After Convex auth/deployment setup is approved, the first smoke should use `acti
 6. Publishing the page creates a page revision and publish event.
 7. A published site/page can be resolved by verified hostname or subdomain.
 8. Audit events exist for tenant, site, page, block, template, domain, and publish actions.
-9. A non-admin user cannot list all tenants or mutate an unassigned site.
+9. A client admin invitation can be created, accepted by the matching email, and converted into a scoped membership.
+10. A non-admin user cannot list all tenants or mutate an unassigned site.
 
 ## Implementation Notes
 

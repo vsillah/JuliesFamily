@@ -5,7 +5,7 @@ import {
   type GenericQueryCtx,
 } from "convex/server";
 import { v } from "convex/values";
-import { recordStatus, siteStatus, tenantRole } from "./schema";
+import { invitationStatus, recordStatus, siteStatus, tenantRole } from "./schema";
 
 type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
@@ -26,6 +26,14 @@ function definedFields(value: Record<string, unknown>) {
   return Object.fromEntries(
     Object.entries(value).filter(([, fieldValue]) => fieldValue !== undefined),
   );
+}
+
+function normalizeEmail(value?: string) {
+  const email = value?.trim().toLowerCase();
+  if (!email || !email.includes("@")) {
+    throw new Error("Valid email is required");
+  }
+  return email;
 }
 
 async function syncCurrentUser(ctx: MutationCtx) {
@@ -495,6 +503,237 @@ export const grantMembership = mutation({
       resourceType: "membership",
       metadata: { userId: args.userId, role: args.role, status: args.status },
     });
+  },
+});
+
+export const createInvitation = mutation({
+  args: {
+    tenantId: v.id("tenants"),
+    siteId: v.optional(v.id("sites")),
+    email: v.string(),
+    role: tenantRole,
+    tokenHash: v.string(),
+    expiresAt: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const actor = await requireTenantAdmin(ctx, args.tenantId);
+    const email = normalizeEmail(args.email);
+    const timestamp = now();
+
+    if (args.expiresAt <= timestamp) {
+      throw new Error("Invitation expiry must be in the future");
+    }
+    if (!args.tokenHash.trim()) {
+      throw new Error("Invitation token hash is required");
+    }
+
+    if (args.siteId) {
+      const site = await ctx.db.get(args.siteId);
+      if (!site || site.tenantId !== args.tenantId) {
+        throw new Error("Site does not belong to tenant");
+      }
+    }
+
+    const existingPending = await ctx.db
+      .query("invitations")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .filter((q) => q.eq(q.field("tenantId"), args.tenantId))
+      .filter((q) => q.eq(q.field("siteId"), args.siteId))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .first();
+
+    if (existingPending) {
+      await ctx.db.patch(existingPending._id, definedFields({
+        role: args.role,
+        tokenHash: args.tokenHash,
+        invitedBy: actor._id,
+        expiresAt: args.expiresAt,
+        updatedAt: timestamp,
+      }));
+
+      await writeAuditEvent(ctx, {
+        scopeType: args.siteId ? "site" : "tenant",
+        tenantId: args.tenantId,
+        siteId: args.siteId,
+        actorUserId: actor._id,
+        action: "invitation_updated",
+        resourceType: "invitation",
+        resourceId: existingPending._id,
+        metadata: { email, role: args.role },
+      });
+
+      return existingPending._id;
+    }
+
+    const invitationId = await ctx.db.insert("invitations", definedFields({
+      tenantId: args.tenantId,
+      siteId: args.siteId,
+      email,
+      role: args.role,
+      status: "pending",
+      tokenHash: args.tokenHash,
+      invitedBy: actor._id,
+      expiresAt: args.expiresAt,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }));
+
+    await writeAuditEvent(ctx, {
+      scopeType: args.siteId ? "site" : "tenant",
+      tenantId: args.tenantId,
+      siteId: args.siteId,
+      actorUserId: actor._id,
+      action: "invitation_created",
+      resourceType: "invitation",
+      resourceId: invitationId,
+      metadata: { email, role: args.role },
+    });
+
+    return invitationId;
+  },
+});
+
+export const listInvitations = query({
+  args: {
+    tenantId: v.id("tenants"),
+    siteId: v.optional(v.id("sites")),
+    status: v.optional(invitationStatus),
+  },
+  handler: async (ctx, args) => {
+    await requireTenantAdmin(ctx, args.tenantId);
+    const invitations = await ctx.db
+      .query("invitations")
+      .withIndex("by_tenant_status", (q) => q.eq("tenantId", args.tenantId))
+      .filter((q) => q.eq(q.field("siteId"), args.siteId))
+      .collect();
+    return invitations
+      .filter((invitation) => !args.status || invitation.status === args.status)
+      .map(({ tokenHash, ...invitation }) => invitation);
+  },
+});
+
+export const revokeInvitation = mutation({
+  args: {
+    invitationId: v.id("invitations"),
+  },
+  handler: async (ctx, args) => {
+    const invitation = await ctx.db.get(args.invitationId);
+    if (!invitation) {
+      throw new Error("Invitation not found");
+    }
+
+    const actor = await requireTenantAdmin(ctx, invitation.tenantId);
+    const timestamp = now();
+
+    await ctx.db.patch(invitation._id, {
+      status: "revoked",
+      updatedAt: timestamp,
+    });
+
+    await writeAuditEvent(ctx, {
+      scopeType: invitation.siteId ? "site" : "tenant",
+      tenantId: invitation.tenantId,
+      siteId: invitation.siteId,
+      actorUserId: actor._id,
+      action: "invitation_revoked",
+      resourceType: "invitation",
+      resourceId: invitation._id,
+      metadata: { email: invitation.email, role: invitation.role },
+    });
+  },
+});
+
+export const acceptInvitation = mutation({
+  args: {
+    tokenHash: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await syncCurrentUser(ctx);
+    const email = normalizeEmail(user.email);
+    const tokenHash = args.tokenHash.trim();
+    if (!tokenHash) {
+      throw new Error("Invitation token hash is required");
+    }
+
+    const invitation = await ctx.db
+      .query("invitations")
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .filter((q) => q.eq(q.field("tokenHash"), tokenHash))
+      .filter((q) => q.eq(q.field("status"), "pending"))
+      .first();
+
+    if (!invitation) {
+      throw new Error("Pending invitation not found");
+    }
+
+    const timestamp = now();
+    if (invitation.expiresAt <= timestamp) {
+      await ctx.db.patch(invitation._id, {
+        status: "expired",
+        updatedAt: timestamp,
+      });
+      throw new Error("Invitation has expired");
+    }
+
+    if (invitation.siteId) {
+      const site = await ctx.db.get(invitation.siteId);
+      if (!site || site.tenantId !== invitation.tenantId) {
+        throw new Error("Invitation site scope is invalid");
+      }
+    }
+
+    const existingMembership = await ctx.db
+      .query("memberships")
+      .withIndex("by_tenant_user", (q) => q.eq("tenantId", invitation.tenantId))
+      .filter((q) => q.eq(q.field("userId"), user._id))
+      .filter((q) => q.eq(q.field("siteId"), invitation.siteId))
+      .first();
+
+    let membershipId = existingMembership?._id;
+    if (existingMembership) {
+      await ctx.db.patch(existingMembership._id, {
+        role: invitation.role,
+        status: "active",
+        updatedAt: timestamp,
+      });
+    } else {
+      membershipId = await ctx.db.insert("memberships", definedFields({
+        userId: user._id,
+        tenantId: invitation.tenantId,
+        siteId: invitation.siteId,
+        role: invitation.role,
+        status: "active",
+        invitedEmail: invitation.email,
+        createdBy: invitation.invitedBy,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      }));
+    }
+
+    await ctx.db.patch(invitation._id, {
+      status: "accepted",
+      acceptedBy: user._id,
+      updatedAt: timestamp,
+    });
+
+    await writeAuditEvent(ctx, {
+      scopeType: invitation.siteId ? "site" : "tenant",
+      tenantId: invitation.tenantId,
+      siteId: invitation.siteId,
+      actorUserId: user._id,
+      action: "invitation_accepted",
+      resourceType: "membership",
+      resourceId: membershipId,
+      metadata: { invitationId: invitation._id, role: invitation.role },
+    });
+
+    return {
+      invitationId: invitation._id,
+      membershipId,
+      tenantId: invitation.tenantId,
+      siteId: invitation.siteId,
+      role: invitation.role,
+    };
   },
 });
 

@@ -68,6 +68,7 @@ for (const path of [
   "docs/phase4-shell-data-adapter.md",
   "docs/phase5-local-readiness-validator.md",
   "docs/phase6-migration-map-validator.md",
+  "docs/phase7-client-invitation-lifecycle.md",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "convex/siteBuilder.ts",
@@ -128,6 +129,12 @@ requireIncludes("docs/phase6-migration-map-validator.md", [
   "shared/schema.ts",
 ]);
 
+requireIncludes("docs/phase7-client-invitation-lifecycle.md", [
+  "controlPlane.createInvitation",
+  "controlPlane.acceptInvitation",
+  "tokenHash",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -147,6 +154,15 @@ requireIncludes("convex/schema.ts", [
   "domains: defineTable",
   "contentBlocks: defineTable",
   "auditEvents: defineTable",
+  "invitations: defineTable",
+]);
+
+requireIncludes("convex/controlPlane.ts", [
+  "export const createInvitation",
+  "export const listInvitations",
+  "export const revokeInvitation",
+  "export const acceptInvitation",
+  "invitation_accepted",
 ]);
 
 requireIncludes("convex/activation.ts", [
