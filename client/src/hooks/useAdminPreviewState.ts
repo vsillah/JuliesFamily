@@ -28,7 +28,7 @@ export function useAdminPreviewState() {
     const adminPersonaOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
     const loadedPersona = (adminPersonaOverride && adminPersonaOverride !== "none") 
       ? adminPersonaOverride as Persona 
-      : persona;
+      : persona === "default" ? null : persona;
     setSelectedPersona(loadedPersona);
 
     const adminFunnelOverride = sessionStorage.getItem(ADMIN_FUNNEL_KEY);

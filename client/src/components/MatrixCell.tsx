@@ -1,26 +1,18 @@
 import type { Persona, FunnelStage } from "@shared/defaults/personas";
 import type { ContentItem, ContentVisibility, ImageAsset, AbTest } from "@shared/schema";
 import MiniContentCard from "./MiniContentCard";
+import type { MatrixContentType } from "./PersonaMatrixGrid";
 
-const CONTENT_TYPES = ['hero', 'cta', 'service', 'event', 'testimonial', 'lead_magnet', 'student_dashboard_card'] as const;
-type ContentType = typeof CONTENT_TYPES[number];
+const CONTENT_TYPES: MatrixContentType[] = ['hero', 'cta', 'service', 'event', 'testimonial', 'lead_magnet', 'student_dashboard_card', 'volunteer_dashboard_card'];
 
 interface MatrixCellProps {
   persona: Persona;
   stage: FunnelStage;
-  contentItems: {
-    hero: ContentItem[];
-    cta: ContentItem[];
-    service: ContentItem[];
-    event: ContentItem[];
-    testimonial: ContentItem[];
-    lead_magnet: ContentItem[];
-    student_dashboard_card: ContentItem[];
-  };
+  contentItems: Record<MatrixContentType, ContentItem[]>;
   visibilitySettings: ContentVisibility[];
   images: ImageAsset[];
   abTests: AbTest[];
-  onCardClick: (contentType: ContentType, contentItem: ContentItem | null) => void;
+  onCardClick: (contentType: MatrixContentType, contentItem: ContentItem | null) => void;
   isSelected: boolean;
 }
 
@@ -36,12 +28,12 @@ export default function MatrixCell({
 }: MatrixCellProps) {
   
   // Helper to get content items for a specific type
-  const getContentForType = (type: ContentType): ContentItem[] => {
+  const getContentForType = (type: MatrixContentType): ContentItem[] => {
     return contentItems[type] || [];
   };
 
   // Helper to get the specific content item assigned to this persona×stage×type combination
-  const getAssignedContentItem = (type: ContentType): ContentItem | null => {
+  const getAssignedContentItem = (type: MatrixContentType): ContentItem | null => {
     const allItems = getContentForType(type);
     if (allItems.length === 0) return null;
 
@@ -72,7 +64,7 @@ export default function MatrixCell({
   };
 
   // Helper to check if there are active A/B tests for this permutation and content type
-  const getActiveTestsForItem = (contentItem: ContentItem | null, type: ContentType): AbTest[] => {
+  const getActiveTestsForItem = (contentItem: ContentItem | null, type: MatrixContentType): AbTest[] => {
     if (!contentItem) return [];
     
     return abTests.filter(test => 

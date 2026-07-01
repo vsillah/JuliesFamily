@@ -33,6 +33,11 @@ const iconComponents = {
 };
 
 type FunnelStage = "awareness" | "consideration" | "decision" | "retention";
+type AbTestVariant = {
+  id: string;
+  name: string;
+  isControl: boolean;
+};
 
 const funnelStageConfigs = [
   { id: "awareness", label: "Awareness (TOFU)", description: "Just discovered us" },
@@ -53,7 +58,7 @@ interface VariantSelectorProps {
 }
 
 function VariantSelector({ test, selectedVariantId, onVariantChange }: VariantSelectorProps) {
-  const { data: variants, isLoading } = useQuery({
+  const { data: variants = [], isLoading } = useQuery<AbTestVariant[]>({
     queryKey: [`/api/ab-tests/${test.id}/variants`],
   });
 
@@ -65,7 +70,7 @@ function VariantSelector({ test, selectedVariantId, onVariantChange }: VariantSe
     );
   }
 
-  if (!variants || variants.length === 0) {
+  if (variants.length === 0) {
     return null;
   }
 
@@ -97,7 +102,7 @@ function VariantSelector({ test, selectedVariantId, onVariantChange }: VariantSe
         </SelectTrigger>
         <SelectContent className="z-[1200]">
           <SelectItem value="random">Random Assignment (50/50)</SelectItem>
-          {variants.map((variant: any) => (
+          {variants.map((variant) => (
             <SelectItem key={variant.id} value={variant.id}>
               {variant.isControl ? "Control" : "Treatment"} - {variant.name}
             </SelectItem>
@@ -106,7 +111,7 @@ function VariantSelector({ test, selectedVariantId, onVariantChange }: VariantSe
       </Select>
       {selectedVariantId && selectedVariantId !== "random" && (
         <p className="text-xs text-muted-foreground">
-          {variants.find((v: any) => v.id === selectedVariantId)?.isControl 
+          {variants.find((v) => v.id === selectedVariantId)?.isControl
             ? "Control: Original content without overrides" 
             : "Treatment: Modified content with A/B configuration"}
         </p>
@@ -124,7 +129,9 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
   const { user } = useAuth();
   const { persona, setPersona } = usePersona();
   const [showDialog, setShowDialog] = useState(false);
-  const [selectedPersona, setSelectedPersona] = useState<Persona>(persona);
+  const [selectedPersona, setSelectedPersona] = useState<Persona | null>(
+    persona === "default" ? null : persona
+  );
   const [selectedFunnel, setSelectedFunnel] = useState<FunnelStage | "none">(
     sessionStorage.getItem(ADMIN_FUNNEL_KEY) as FunnelStage || "none"
   );
@@ -144,7 +151,7 @@ export function AdminPersonaSwitcher({ isScrolled = false, onOpenDialog }: Admin
     if (adminPersonaOverride && adminPersonaOverride !== "none") {
       setSelectedPersona(adminPersonaOverride as Persona);
     } else {
-      setSelectedPersona(persona);
+      setSelectedPersona(persona === "default" ? null : persona);
     }
 
     const adminFunnelOverride = sessionStorage.getItem(ADMIN_FUNNEL_KEY);

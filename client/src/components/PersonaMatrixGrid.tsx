@@ -15,15 +15,10 @@ import type { ContentItem, ContentVisibility, ImageAsset, AbTest } from "@shared
 import MatrixCell from "./MatrixCell";
 import MatrixEditPanel from "./MatrixEditPanel";
 
+export type MatrixContentType = 'hero' | 'cta' | 'service' | 'event' | 'testimonial' | 'lead_magnet' | 'student_dashboard_card' | 'volunteer_dashboard_card';
+
 interface PersonaMatrixGridProps {
-  contentItems: {
-    hero: ContentItem[];
-    cta: ContentItem[];
-    service: ContentItem[];
-    event: ContentItem[];
-    testimonial: ContentItem[];
-    lead_magnet: ContentItem[];
-  };
+  contentItems: Record<MatrixContentType, ContentItem[]>;
   visibilitySettings: ContentVisibility[];
   images: ImageAsset[];
   abTests: AbTest[];
@@ -33,7 +28,7 @@ interface PersonaMatrixGridProps {
 export interface SelectedCard {
   persona: Persona;
   stage: FunnelStage;
-  contentType: 'hero' | 'cta' | 'service' | 'event' | 'testimonial' | 'lead_magnet';
+  contentType: MatrixContentType;
   contentItem: ContentItem | null;
 }
 
