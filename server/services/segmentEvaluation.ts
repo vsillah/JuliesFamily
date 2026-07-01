@@ -113,7 +113,7 @@ export class SegmentEvaluationService {
     const conditions = this.buildFilterConditions(filters);
     
     // Build and execute query
-    let query = db.select().from(leads);
+    let query: any = db.select().from(leads);
     
     if (conditions.length > 0) {
       query = query.where(and(...conditions)!);
@@ -135,8 +135,8 @@ export class SegmentEvaluationService {
     // Execute count query
     const whereClause = conditions.length > 0 ? and(...conditions)! : undefined;
     
-    let query = db
-      .select({ count: sql<number>`count(*)` })
+    let query: any = db
+      .select({ count: sql<number>`count(*)`.as('count') })
       .from(leads);
     
     // Only add WHERE clause if conditions exist
@@ -162,8 +162,8 @@ export class SegmentEvaluationService {
     const baseWhereClause = baseConditions.length > 0 ? and(...baseConditions)! : undefined;
     
     // Get total matched (before unsubscribe filters)
-    let totalQuery = db
-      .select({ count: sql<number>`count(*)` })
+    let totalQuery: any = db
+      .select({ count: sql<number>`count(*)`.as('count') })
       .from(leads);
     
     if (baseWhereClause) {
@@ -187,8 +187,8 @@ export class SegmentEvaluationService {
         )
       )`);
       
-      let emailUnsubQuery = db
-        .select({ count: sql<number>`count(*)` })
+      let emailUnsubQuery: any = db
+        .select({ count: sql<number>`count(*)`.as('count') })
         .from(leads);
       
       if (emailUnsubConditions.length > 0) {
@@ -213,8 +213,8 @@ export class SegmentEvaluationService {
         )
       )`);
       
-      let smsUnsubQuery = db
-        .select({ count: sql<number>`count(*)` })
+      let smsUnsubQuery: any = db
+        .select({ count: sql<number>`count(*)`.as('count') })
         .from(leads);
       
       if (smsUnsubConditions.length > 0) {

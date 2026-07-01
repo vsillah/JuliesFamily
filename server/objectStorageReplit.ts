@@ -41,7 +41,7 @@ function getClient(): Storage {
 /** Lazy proxy so Storage is only created when actually used (e.g. when provider is replit). */
 export const objectStorageClient = new Proxy({} as Storage, {
   get(_, prop) {
-    return (getClient() as Record<string, unknown>)[prop as string];
+    return (getClient() as unknown as Record<string, unknown>)[prop as string];
   },
 });
 
@@ -213,7 +213,7 @@ export class ObjectStorageService {
     aclPolicy: ObjectAclPolicy
   ): Promise<string> {
     const objectFile = await this.getObjectEntityFile(objectPath);
-    await setObjectAclPolicy(objectFile, aclPolicy);
+    await setObjectAclPolicy(objectFile as unknown as IStorageFile, aclPolicy);
     return objectPath;
   }
 
@@ -226,7 +226,7 @@ export class ObjectStorageService {
       return normalizedPath;
     }
     const objectFile = await this.getObjectEntityFile(normalizedPath);
-    await setObjectAclPolicy(objectFile, aclPolicy);
+    await setObjectAclPolicy(objectFile as unknown as IStorageFile, aclPolicy);
     return normalizedPath;
   }
 
@@ -264,9 +264,9 @@ export class ObjectStorageService {
     const bucket = client.bucket(bucketName);
     const newFile = bucket.file(objectName);
     await originalFile.copy(newFile);
-    const aclPolicy = await getObjectAclPolicy(originalFile);
+    const aclPolicy = await getObjectAclPolicy(originalFile as unknown as IStorageFile);
     if (aclPolicy) {
-      await setObjectAclPolicy(newFile, aclPolicy);
+      await setObjectAclPolicy(newFile as unknown as IStorageFile, aclPolicy);
     }
     await originalFile.delete();
     return `/objects/${directory}${newFilename}`;

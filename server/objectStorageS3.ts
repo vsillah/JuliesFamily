@@ -179,7 +179,7 @@ export class ObjectStorageService {
     if (paths.length === 0) {
       throw new Error("PUBLIC_OBJECT_SEARCH_PATHS or S3_PUBLIC_PREFIXES must be set (comma-separated prefixes)");
     }
-    return [...new Set(paths)];
+    return Array.from(new Set(paths));
   }
 
   getPrivateObjectDir(): string {
