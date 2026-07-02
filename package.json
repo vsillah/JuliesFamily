@@ -46,6 +46,8 @@
     "kinflo:dry-run-client-launch-packet": "node scripts/dry-run-kinflo-client-launch-packet.mjs",
     "kinflo:validate-client-starter-content-packs": "node scripts/validate-kinflo-client-starter-content-packs.mjs",
     "kinflo:dry-run-client-starter-content-packs": "node scripts/dry-run-kinflo-client-starter-content-packs.mjs",
+    "kinflo:validate-client-onboarding-readiness": "node scripts/validate-kinflo-client-onboarding-readiness.mjs",
+    "kinflo:dry-run-client-onboarding-readiness": "node scripts/dry-run-kinflo-client-onboarding-readiness.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

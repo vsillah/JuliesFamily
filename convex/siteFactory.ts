@@ -101,6 +101,24 @@ type ClientWebsiteStarterContentPack = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteOnboardingReadiness = {
+  siteKey: string;
+  label: string;
+  readinessScore: number;
+  completedTasks: number;
+  totalTasks: number;
+  criticalBlockers: string[];
+  taskGroups: {
+    groupKey: string;
+    label: string;
+    ownerRole: string;
+    tasks: { taskKey: string; label: string; status: "complete" | "ready" | "blocked"; evidence: string }[];
+  }[];
+  nextAction: string;
+  blockedActivationActions: string[];
+  convexFunctions: string[];
+};
+
 const now = () => Date.now();
 
 export const starterTemplates: StarterTemplate[] = [
@@ -612,6 +630,153 @@ export const listClientWebsiteStarterContentPacks = query({
         providerBoundary: "Read-only starter content pack query. It does not create pages, write content blocks, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
       };
     }),
+});
+
+const clientWebsiteOnboardingReadiness: ClientWebsiteOnboardingReadiness[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family founding onboarding tracker",
+    readinessScore: 67,
+    completedTasks: 8,
+    totalTasks: 12,
+    criticalBlockers: [
+      "Hosted Convex read-only smoke not approved",
+      "Public lead write smoke not approved",
+      "History purge or private-repo residual-risk decision still pending",
+    ],
+    taskGroups: [
+      {
+        groupKey: "content-provenance",
+        label: "Content provenance",
+        ownerRole: "platform.super_admin",
+        tasks: [
+          { taskKey: "source-map", label: "Map Julie source pages to reusable content blocks", status: "complete", evidence: "starter content pack and launch packet reference founding tenant provenance" },
+          { taskKey: "copy-review", label: "Review family, volunteer, donor, and partner copy paths", status: "ready", evidence: "handoff notes separate donor and volunteer intent" },
+          { taskKey: "publish-proof", label: "Approve public publish evidence", status: "blocked", evidence: "publish write remains hosted activation gated" },
+        ],
+      },
+      {
+        groupKey: "admin-handoff",
+        label: "Admin handoff",
+        ownerRole: "platform.super_admin",
+        tasks: [
+          { taskKey: "owner-scope", label: "Confirm founding platform steward scope", status: "complete", evidence: "admin permission preset keeps platform.super_admin owner role" },
+          { taskKey: "lead-routing", label: "Confirm family intake and lead routing", status: "blocked", evidence: "crm.submitLead remains live-smoke gated" },
+          { taskKey: "preview-link", label: "Keep preview link ready for review", status: "complete", evidence: "/kinflo-sites/julies-family preview path exists in launch packet" },
+        ],
+      },
+    ],
+    nextAction: "Approve hosted read-only smoke before moving founding tenant content off fixtures.",
+    blockedActivationActions: ["publish public site", "write CRM lead", "switch adapter", "send external launch packet"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteOnboardingReadiness",
+      "siteFactory.listClientWebsiteStarterContentPacks",
+      "launchReadiness.getSiteLaunchReadiness",
+      "publicSite.resolvePublishedSite",
+      "crm.submitLead",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client onboarding tracker",
+    readinessScore: 58,
+    completedTasks: 7,
+    totalTasks: 12,
+    criticalBlockers: [
+      "Tenant creation mutation not approved",
+      "Tenant admin invitation delivery not approved",
+      "Domain and lead capture smokes not approved",
+    ],
+    taskGroups: [
+      {
+        groupKey: "tenant-setup",
+        label: "Tenant setup",
+        ownerRole: "platform.super_admin",
+        tasks: [
+          { taskKey: "plan-review", label: "Select Client Build plan and entitlement limits", status: "complete", evidence: "provisioning order requests client-build plan" },
+          { taskKey: "tenant-create", label: "Create advisor tenant", status: "blocked", evidence: "controlPlane.createTenant remains provider-light gated" },
+          { taskKey: "admin-invite", label: "Prepare tenant admin invite", status: "ready", evidence: "admin permission preset selects tenant.admin invite role" },
+        ],
+      },
+      {
+        groupKey: "site-launch",
+        label: "Site launch",
+        ownerRole: "tenant.admin",
+        tasks: [
+          { taskKey: "starter-copy", label: "Review proof-led starter pages", status: "ready", evidence: "starter pack includes home, services, and proof pages" },
+          { taskKey: "lead-smoke", label: "Run intake lead smoke", status: "blocked", evidence: "crm.submitLead remains live-smoke gated" },
+          { taskKey: "packet-review", label: "Review launch packet with owner", status: "ready", evidence: "launch packet export preview is assembled but export remains gated" },
+        ],
+      },
+    ],
+    nextAction: "Approve tenant creation and admin invite smoke order before client handoff.",
+    blockedActivationActions: ["create tenant", "send tenant admin invite", "attach custom domain", "publish public site"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteOnboardingReadiness",
+      "controlPlane.createTenant",
+      "controlPlane.createInvitation",
+      "siteFactory.createSiteFromTemplate",
+      "launchReadiness.getSiteLaunchReadiness",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite onboarding tracker",
+    readinessScore: 42,
+    completedTasks: 5,
+    totalTasks: 12,
+    criticalBlockers: [
+      "Campaign consent review not approved",
+      "Provider send and SMS/email smokes not approved",
+      "Public form lead write not approved",
+    ],
+    taskGroups: [
+      {
+        groupKey: "campaign-consent",
+        label: "Campaign consent",
+        ownerRole: "platform.super_admin",
+        tasks: [
+          { taskKey: "goal-review", label: "Confirm campaign objective and audience", status: "complete", evidence: "campaign launch packet includes objective and consent section" },
+          { taskKey: "consent-review", label: "Approve consent language and unsubscribe expectations", status: "blocked", evidence: "provider send remains gated" },
+          { taskKey: "source-review", label: "Confirm conversion source tracking", status: "ready", evidence: "starter signup page includes privacy expectation block" },
+        ],
+      },
+      {
+        groupKey: "conversion-path",
+        label: "Conversion path",
+        ownerRole: "site.editor",
+        tasks: [
+          { taskKey: "copy-review", label: "Review focused offer and impact copy", status: "ready", evidence: "starter pack includes home, signup, and impact pages" },
+          { taskKey: "lead-routing", label: "Smoke public form lead routing", status: "blocked", evidence: "crm.submitLead remains live-smoke gated" },
+          { taskKey: "campaign-approval", label: "Request campaign approval", status: "blocked", evidence: "campaigns.requestCampaignApproval remains provider-light gated" },
+        ],
+      },
+    ],
+    nextAction: "Approve consent and provider-send review before live campaign launch.",
+    blockedActivationActions: ["send campaign", "write public form lead", "publish AI copy", "send SMS/email"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteOnboardingReadiness",
+      "campaigns.requestCampaignApproval",
+      "crm.submitLead",
+      "publicSite.resolvePublishedSite",
+      "launchReadiness.getSiteLaunchReadiness",
+    ],
+  },
+];
+
+export const listClientWebsiteOnboardingReadiness = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteOnboardingReadiness.map((readiness) => ({
+      ...readiness,
+      openTasks: readiness.totalTasks - readiness.completedTasks,
+      taskGroupCount: readiness.taskGroups.length,
+      blockedTaskCount: readiness.taskGroups.reduce(
+        (count, group) => count + group.tasks.filter((task) => task.status === "blocked").length,
+        0,
+      ),
+      providerBoundary: "Read-only onboarding readiness query. It does not create tenants, create sites, send invites, write onboarding tasks, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
+    })),
 });
 
 const clientWebsiteAdminPermissionPresets: ClientWebsiteAdminPermissionPreset[] = [

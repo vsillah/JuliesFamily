@@ -565,6 +565,11 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.starterContentPacks[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.starterContentPacks],
   );
+  const selectedClientWebsiteOnboardingReadiness = useMemo(
+    () => snapshot.clientWebsiteStudio.onboardingReadiness.find((readiness) => readiness.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.onboardingReadiness[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.onboardingReadiness],
+  );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
   const clientWebsiteStudioReviewStats = [
     { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
@@ -3427,6 +3432,101 @@ export default function AdminKinfloShell() {
                       <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-starter-content-seed-gated">
                         <Edit3 className="mr-2 h-4 w-4" />
                         Content seed gated
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-onboarding-readiness">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <ListChecks className="h-4 w-4 text-slate-500" />
+                          <h3 className="text-base font-semibold">Onboarding Readiness</h3>
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-onboarding-readiness">
+                          {selectedClientWebsiteOnboardingReadiness?.label}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{selectedClientWebsiteOnboardingReadiness?.status.replaceAll("_", " ")}</Badge>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Score</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteOnboardingReadiness?.readinessScore}%</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Tasks</div>
+                        <div className="mt-1 text-sm font-medium">
+                          {selectedClientWebsiteOnboardingReadiness?.completedTasks}/{selectedClientWebsiteOnboardingReadiness?.totalTasks}
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Open</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteOnboardingReadiness?.openTasks}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 p-3">
+                      <div className="text-xs font-medium uppercase tracking-normal text-amber-800">Critical blockers</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsiteOnboardingReadiness?.criticalBlockers.map((blocker) => (
+                          <div key={blocker} className="flex items-start gap-2 text-xs text-amber-900">
+                            <ShieldCheck className="mt-0.5 h-3.5 w-3.5" />
+                            <span>{blocker}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {selectedClientWebsiteOnboardingReadiness?.taskGroups.map((group) => (
+                        <div key={group.groupKey} className="rounded-md border border-slate-200 p-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-medium">{group.label}</div>
+                              <div className="mt-1 text-xs text-slate-500">{group.ownerRole}</div>
+                            </div>
+                            <Badge variant="secondary">{group.tasks.length} tasks</Badge>
+                          </div>
+                          <div className="mt-3 space-y-2">
+                            {group.tasks.map((task) => (
+                              <div key={task.taskKey} className="rounded-md border border-slate-100 p-2">
+                                <div className="flex items-start gap-2">
+                                  {task.status === "complete" ? (
+                                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 text-emerald-600" />
+                                  ) : (
+                                    <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                                  )}
+                                  <div className="min-w-0">
+                                    <div className="text-xs font-medium text-slate-700">{task.label}</div>
+                                    <div className="mt-1 text-xs leading-5 text-slate-500">{task.evidence}</div>
+                                  </div>
+                                  <Badge variant={task.status === "blocked" ? "destructive" : "outline"} className="ml-auto whitespace-nowrap">
+                                    {task.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-4 rounded-md border border-slate-200 p-3">
+                      <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Next action</div>
+                      <div className="mt-1 text-sm leading-6 text-slate-700">{selectedClientWebsiteOnboardingReadiness?.nextAction}</div>
+                    </div>
+
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClientWebsiteOnboardingReadiness?.blockedActivationActions.map((action) => (
+                          <Badge key={action} variant="outline" className="whitespace-normal text-left">{action}</Badge>
+                        ))}
+                      </div>
+                      <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-onboarding-readiness-gated">
+                        <ListChecks className="mr-2 h-4 w-4" />
+                        Onboarding activation gated
                       </Button>
                     </div>
                   </div>
