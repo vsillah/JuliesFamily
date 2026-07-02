@@ -83,6 +83,24 @@ type ClientWebsiteProvisioningOrder = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteStarterContentPack = {
+  siteKey: string;
+  packLabel: string;
+  templateKey: string;
+  persona: string;
+  journeyStage: string;
+  pages: {
+    pageKey: string;
+    title: string;
+    route: string;
+    purpose: string;
+    blocks: { blockKey: string; type: StarterBlock["type"]; title: string; intent: string }[];
+  }[];
+  handoffNotes: string[];
+  blockedSeedingActions: string[];
+  convexFunctions: string[];
+};
+
 const now = () => Date.now();
 
 export const starterTemplates: StarterTemplate[] = [
@@ -412,6 +430,186 @@ export const listClientWebsiteLaunchBlueprints = query({
             }
           : undefined,
         providerBoundary: "Read-only launch blueprint query. It does not create tenants, create sites, invite users, publish content, attach domains, send campaigns, call providers, import generated API, or execute hosted activation.",
+      };
+    }),
+});
+
+const clientWebsiteStarterContentPacks: ClientWebsiteStarterContentPack[] = [
+  {
+    siteKey: "julies-family-public",
+    packLabel: "Family learning public content pack",
+    templateKey: "nonprofit-learning-center",
+    persona: "parent, volunteer, donor, and community partner",
+    journeyStage: "awareness-to-decision",
+    pages: [
+      {
+        pageKey: "home",
+        title: "Home",
+        route: "/",
+        purpose: "Make the learning promise, audience, and enrollment path clear before the first scroll.",
+        blocks: [
+          { blockKey: "hero", type: "hero", title: "Warm family learning promise", intent: "State the family outcome and primary enrollment/referral action." },
+          { blockKey: "program-proof", type: "services", title: "Program proof", intent: "Show practical programs and the community context behind them." },
+        ],
+      },
+      {
+        pageKey: "programs",
+        title: "Programs",
+        route: "/programs",
+        purpose: "Organize learning, mentoring, family support, and digital access options into reusable blocks.",
+        blocks: [
+          { blockKey: "program-list", type: "services", title: "Program pathways", intent: "Let visitors compare programs without calling first." },
+          { blockKey: "family-fit", type: "form", title: "Family fit intake", intent: "Route parents and referral partners into the right CRM path." },
+        ],
+      },
+      {
+        pageKey: "volunteer",
+        title: "Volunteer",
+        route: "/volunteer",
+        purpose: "Give volunteers one concrete service path and a safe handoff into follow-up.",
+        blocks: [
+          { blockKey: "volunteer-roles", type: "services", title: "Volunteer roles", intent: "Explain what support is needed and how to begin." },
+          { blockKey: "volunteer-intake", type: "form", title: "Volunteer interest", intent: "Capture interest without sending provider email yet." },
+        ],
+      },
+    ],
+    handoffNotes: [
+      "Keep original Julie Family source provenance visible before replacing fixture copy.",
+      "Confirm family intake routing before publishing public forms.",
+      "Review donor and volunteer paths separately so audiences do not compete.",
+    ],
+    blockedSeedingActions: ["write page records", "write content blocks", "publish content", "write CRM lead"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteStarterContentPacks",
+      "siteBuilder.createPage",
+      "siteBuilder.createContentBlock",
+      "siteBuilder.updateContentBlock",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    packLabel: "Advisor proof-led content pack",
+    templateKey: "advisor-consultant",
+    persona: "service client evaluating fit and proof",
+    journeyStage: "consideration-to-decision",
+    pages: [
+      {
+        pageKey: "home",
+        title: "Home",
+        route: "/",
+        purpose: "Explain the result, proof, and intake path without a marketing-heavy hero.",
+        blocks: [
+          { blockKey: "result-hero", type: "hero", title: "Client result statement", intent: "Lead with what changes for the client." },
+          { blockKey: "proof-strip", type: "testimonials", title: "Proof strip", intent: "Show credible outcomes before asking for intake." },
+        ],
+      },
+      {
+        pageKey: "services",
+        title: "Services",
+        route: "/services",
+        purpose: "Package offers, workshops, audits, and implementation help into clear buying paths.",
+        blocks: [
+          { blockKey: "offer-stack", type: "services", title: "Offer stack", intent: "Make scope, outcomes, and next action scannable." },
+          { blockKey: "qualification", type: "form", title: "Qualification questions", intent: "Capture enough context to route the lead." },
+        ],
+      },
+      {
+        pageKey: "proof",
+        title: "Proof",
+        route: "/proof",
+        purpose: "Collect case-study, credibility, and process evidence for the launch packet.",
+        blocks: [
+          { blockKey: "case-study", type: "testimonials", title: "Case study slots", intent: "Give the client a repeatable proof structure." },
+          { blockKey: "process", type: "custom", title: "Process clarity", intent: "Set expectations before consultation." },
+        ],
+      },
+    ],
+    handoffNotes: [
+      "Proof and process clarity must be reviewed before intake goes live.",
+      "Services copy should stay operational and specific, not generic consulting language.",
+      "The tenant admin invite remains gated until role scope is approved.",
+    ],
+    blockedSeedingActions: ["write page records", "write content blocks", "send tenant admin invite", "publish public site"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteStarterContentPacks",
+      "siteBuilder.createPage",
+      "siteBuilder.createContentBlock",
+      "siteBuilder.updateContentBlock",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    packLabel: "Campaign conversion content pack",
+    templateKey: "campaign-microsite",
+    persona: "warm campaign lead from email, SMS, referral, or event traffic",
+    journeyStage: "decision",
+    pages: [
+      {
+        pageKey: "home",
+        title: "Home",
+        route: "/",
+        purpose: "Keep the campaign promise, proof, and next action in one fast path.",
+        blocks: [
+          { blockKey: "campaign-hero", type: "hero", title: "Single offer hero", intent: "Make one promise and one conversion action dominant." },
+          { blockKey: "campaign-proof", type: "campaign", title: "Campaign proof", intent: "Show progress, urgency, and credibility." },
+        ],
+      },
+      {
+        pageKey: "signup",
+        title: "Signup",
+        route: "/signup",
+        purpose: "Capture the campaign conversion with clear consent and source context.",
+        blocks: [
+          { blockKey: "signup-form", type: "form", title: "Campaign signup", intent: "Collect conversion data after consent review." },
+          { blockKey: "privacy-note", type: "custom", title: "Privacy expectation", intent: "Set expectations before public form writes." },
+        ],
+      },
+      {
+        pageKey: "impact",
+        title: "Impact",
+        route: "/impact",
+        purpose: "Show the evidence that justifies the campaign ask.",
+        blocks: [
+          { blockKey: "impact-metric", type: "campaign", title: "Impact metric", intent: "Summarize progress with one clear number." },
+          { blockKey: "supporter-proof", type: "testimonials", title: "Supporter proof", intent: "Add human credibility without distracting from signup." },
+        ],
+      },
+    ],
+    handoffNotes: [
+      "Campaign copy cannot move to provider send until consent is approved.",
+      "Lead routing must be reviewed before public forms write to CRM.",
+      "AI copy publish and campaign send remain blocked until provider smokes pass.",
+    ],
+    blockedSeedingActions: ["write page records", "write content blocks", "write public form lead", "send campaign"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteStarterContentPacks",
+      "siteBuilder.createPage",
+      "siteBuilder.createContentBlock",
+      "siteBuilder.updateContentBlock",
+      "campaigns.requestCampaignApproval",
+    ],
+  },
+];
+
+export const listClientWebsiteStarterContentPacks = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteStarterContentPacks.map((pack) => {
+      const template = starterTemplates.find((candidate) => candidate.key === pack.templateKey);
+      return {
+        ...pack,
+        pageCount: pack.pages.length,
+        blockCount: pack.pages.reduce((count, page) => count + page.blocks.length, 0),
+        template: template
+          ? {
+              key: template.key,
+              label: template.label,
+              qualityContract: template.qualityContract,
+            }
+          : undefined,
+        providerBoundary: "Read-only starter content pack query. It does not create pages, write content blocks, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
       };
     }),
 });

@@ -367,6 +367,21 @@ export type ShellClientWebsiteLaunchPacket = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteStarterContentPack = {
+  siteKey: string;
+  label: string;
+  status: "provider-light-read-only-query-contract";
+  templateKey: string;
+  persona: string;
+  journeyStage: string;
+  pageCount: number;
+  blockCount: number;
+  pages: { pageKey: string; title: string; route: string; purpose: string; blockTitles: string[] }[];
+  handoffNotes: string[];
+  blockedSeedingActions: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
@@ -376,6 +391,7 @@ export type ShellClientWebsiteStudio = {
   provisioningOrders: ShellClientWebsiteProvisioningOrder[];
   provisioningExecution: ShellClientWebsiteProvisioningExecution;
   launchPackets: ShellClientWebsiteLaunchPacket[];
+  starterContentPacks: ShellClientWebsiteStarterContentPack[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -1672,6 +1688,146 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
         "campaigns.requestCampaignApproval",
         "crm.submitLead",
         "publicSite.resolvePublishedSite",
+      ],
+    },
+  ],
+  starterContentPacks: [
+    {
+      siteKey: "julies-family-public",
+      label: "Family learning public content pack",
+      status: "provider-light-read-only-query-contract",
+      templateKey: "nonprofit-learning-center",
+      persona: "parent, volunteer, donor, and community partner",
+      journeyStage: "awareness-to-decision",
+      pageCount: 3,
+      blockCount: 6,
+      pages: [
+        {
+          pageKey: "home",
+          title: "Home",
+          route: "/",
+          purpose: "Make the learning promise, audience, and enrollment path clear before the first scroll.",
+          blockTitles: ["Warm family learning promise", "Program proof"],
+        },
+        {
+          pageKey: "programs",
+          title: "Programs",
+          route: "/programs",
+          purpose: "Organize learning, mentoring, family support, and digital access options into reusable blocks.",
+          blockTitles: ["Program pathways", "Family fit intake"],
+        },
+        {
+          pageKey: "volunteer",
+          title: "Volunteer",
+          route: "/volunteer",
+          purpose: "Give volunteers one concrete service path and a safe handoff into follow-up.",
+          blockTitles: ["Volunteer roles", "Volunteer interest"],
+        },
+      ],
+      handoffNotes: [
+        "Keep original Julie Family source provenance visible before replacing fixture copy.",
+        "Confirm family intake routing before publishing public forms.",
+        "Review donor and volunteer paths separately so audiences do not compete.",
+      ],
+      blockedSeedingActions: ["write page records", "write content blocks", "publish content", "write CRM lead"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "siteBuilder.createPage",
+        "siteBuilder.createContentBlock",
+        "siteBuilder.updateContentBlock",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor proof-led content pack",
+      status: "provider-light-read-only-query-contract",
+      templateKey: "advisor-consultant",
+      persona: "service client evaluating fit and proof",
+      journeyStage: "consideration-to-decision",
+      pageCount: 3,
+      blockCount: 6,
+      pages: [
+        {
+          pageKey: "home",
+          title: "Home",
+          route: "/",
+          purpose: "Explain the result, proof, and intake path without a marketing-heavy hero.",
+          blockTitles: ["Client result statement", "Proof strip"],
+        },
+        {
+          pageKey: "services",
+          title: "Services",
+          route: "/services",
+          purpose: "Package offers, workshops, audits, and implementation help into clear buying paths.",
+          blockTitles: ["Offer stack", "Qualification questions"],
+        },
+        {
+          pageKey: "proof",
+          title: "Proof",
+          route: "/proof",
+          purpose: "Collect case-study, credibility, and process evidence for the launch packet.",
+          blockTitles: ["Case study slots", "Process clarity"],
+        },
+      ],
+      handoffNotes: [
+        "Proof and process clarity must be reviewed before intake goes live.",
+        "Services copy should stay operational and specific, not generic consulting language.",
+        "The tenant admin invite remains gated until role scope is approved.",
+      ],
+      blockedSeedingActions: ["write page records", "write content blocks", "send tenant admin invite", "publish public site"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "siteBuilder.createPage",
+        "siteBuilder.createContentBlock",
+        "siteBuilder.updateContentBlock",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign conversion content pack",
+      status: "provider-light-read-only-query-contract",
+      templateKey: "campaign-microsite",
+      persona: "warm campaign lead from email, SMS, referral, or event traffic",
+      journeyStage: "decision",
+      pageCount: 3,
+      blockCount: 6,
+      pages: [
+        {
+          pageKey: "home",
+          title: "Home",
+          route: "/",
+          purpose: "Keep the campaign promise, proof, and next action in one fast path.",
+          blockTitles: ["Single offer hero", "Campaign proof"],
+        },
+        {
+          pageKey: "signup",
+          title: "Signup",
+          route: "/signup",
+          purpose: "Capture the campaign conversion with clear consent and source context.",
+          blockTitles: ["Campaign signup", "Privacy expectation"],
+        },
+        {
+          pageKey: "impact",
+          title: "Impact",
+          route: "/impact",
+          purpose: "Show the evidence that justifies the campaign ask.",
+          blockTitles: ["Impact metric", "Supporter proof"],
+        },
+      ],
+      handoffNotes: [
+        "Campaign copy cannot move to provider send until consent is approved.",
+        "Lead routing must be reviewed before public forms write to CRM.",
+        "AI copy publish and campaign send remain blocked until provider smokes pass.",
+      ],
+      blockedSeedingActions: ["write page records", "write content blocks", "write public form lead", "send campaign"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "siteBuilder.createPage",
+        "siteBuilder.createContentBlock",
+        "siteBuilder.updateContentBlock",
+        "campaigns.requestCampaignApproval",
       ],
     },
   ],
