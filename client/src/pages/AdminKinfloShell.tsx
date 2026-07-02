@@ -238,6 +238,12 @@ const clientAdminHandoffMatrixTestIds = {
   gatedAction: "button-client-admin-handoff-matrix-gated",
 } as const;
 
+const clientHandoffWorkspaceTestIds = {
+  root: "tabs-kinflo-client-handoff-workspace",
+  selected: "section-kinflo-client-handoff-workspace-selected",
+  matrix: "section-kinflo-client-handoff-workspace-matrix",
+} as const;
+
 function readInitialShellTab(): ShellTabValue {
   if (typeof window === "undefined") {
     return "tenants";
@@ -4935,19 +4941,35 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <ClientHandoffPermissionStrip
-                site={selectedClientWebsiteStudioSite}
-                permissionPreset={selectedClientWebsiteAdminPermissionPreset}
-                launchPacket={selectedClientWebsiteLaunchPacket}
-                onboardingReadiness={selectedClientWebsiteOnboardingReadiness}
-                launchSimulation={selectedClientWebsiteLaunchSimulation}
-                testId={clientHandoffPermissionStripTestIds.root}
-              />
+              <Tabs defaultValue="selected" className="min-w-0" data-testid={clientHandoffWorkspaceTestIds.root}>
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <TabsList className="grid h-auto w-full grid-cols-2 bg-slate-100 p-1 lg:max-w-xl">
+                    <TabsTrigger value="selected" data-testid="tab-kinflo-client-handoff-selected">Selected site</TabsTrigger>
+                    <TabsTrigger value="matrix" data-testid="tab-kinflo-client-handoff-matrix">All site permissions</TabsTrigger>
+                  </TabsList>
+                  <p className="text-xs leading-5 text-slate-500 lg:max-w-lg">
+                    Client handoff stays reviewable without forcing the full permission matrix into the default page flow.
+                  </p>
+                </div>
 
-              <ClientAdminHandoffMatrix
-                matrix={snapshot.clientWebsiteStudio.adminHandoffMatrix}
-                testIds={clientAdminHandoffMatrixTestIds}
-              />
+                <TabsContent value="selected" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.selected}>
+                  <ClientHandoffPermissionStrip
+                    site={selectedClientWebsiteStudioSite}
+                    permissionPreset={selectedClientWebsiteAdminPermissionPreset}
+                    launchPacket={selectedClientWebsiteLaunchPacket}
+                    onboardingReadiness={selectedClientWebsiteOnboardingReadiness}
+                    launchSimulation={selectedClientWebsiteLaunchSimulation}
+                    testId={clientHandoffPermissionStripTestIds.root}
+                  />
+                </TabsContent>
+
+                <TabsContent value="matrix" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.matrix}>
+                  <ClientAdminHandoffMatrix
+                    matrix={snapshot.clientWebsiteStudio.adminHandoffMatrix}
+                    testIds={clientAdminHandoffMatrixTestIds}
+                  />
+                </TabsContent>
+              </Tabs>
 
               <div
                 className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"

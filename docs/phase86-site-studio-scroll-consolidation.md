@@ -34,10 +34,15 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 - Packet dossier: `section-kinflo-client-launch-dossier-packets`
 - QA dossier: `section-kinflo-client-launch-dossier-qa`
 - Decision dossier: `section-kinflo-client-launch-dossier-decision`
+- Handoff workspace tabs: `tabs-kinflo-client-handoff-workspace`
+- Selected-site handoff panel: `section-kinflo-client-handoff-workspace-selected`
+- All-site permission matrix panel: `section-kinflo-client-handoff-workspace-matrix`
 
 ## What Changed
 
 The Site Studio workbench now uses page-level stage tabs for `Sites`, `Preview`, and `Launch`, so narrow review widths do not stack the site rail, preview workbench, and launch rail into one long vertical document. The launch rail remains available as a focused stage with its own bounded scroll.
+
+The client handoff area now uses a compact handoff workspace with `Selected site` and `All site permissions` tabs. The default view keeps the selected site's permissions, blocked invite, missing artifact, and gated action visible while moving the full cross-site admin matrix behind a tab. Super-admin comparison remains one click away, but it no longer expands the default Site Studio page into a long permission document.
 
 The launch stage now switches into a narrow two-pane rail at review widths above 480px, keeping the command controls beside the launch dossier instead of stacking the command rail above every provisioning detail. Secondary explanatory copy, the duplicate client-site picker, and the full provider boundary text stay available on wider desktop review, but they are hidden from the narrow command rail so the page remains scannable.
 
