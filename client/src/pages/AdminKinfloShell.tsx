@@ -58,6 +58,7 @@ import {
   type KinfloShellStatus,
   type ShellAiReviewRecord,
   type ShellCampaignDraft,
+  type ShellClientAdminHandoffMatrix,
   type ShellClientWebsiteAdminPermissionPreset,
   type ShellClientWebsiteLaunchPacket,
   type ShellClientWebsiteLaunchSimulation,
@@ -227,6 +228,14 @@ const clientHandoffPermissionStripTestIds = {
   blockedInvite: "section-kinflo-client-handoff-permission-strip-blocked-invite",
   missingArtifact: "section-kinflo-client-handoff-permission-strip-missing-artifact",
   gatedAction: "section-kinflo-client-handoff-permission-strip-gated-action",
+} as const;
+
+const clientAdminHandoffMatrixTestIds = {
+  root: "section-kinflo-client-admin-handoff-matrix",
+  summary: "section-kinflo-client-admin-handoff-matrix-summary",
+  table: "section-kinflo-client-admin-handoff-matrix-table",
+  blocked: "section-kinflo-client-admin-handoff-matrix-blocked",
+  gatedAction: "button-client-admin-handoff-matrix-gated",
 } as const;
 
 function readInitialShellTab(): ShellTabValue {
@@ -480,6 +489,119 @@ function ClientHandoffPermissionStrip({
           <UserRoundCog className="mr-2 h-4 w-4" />
           Client handoff invite gated
         </Button>
+      </div>
+    </section>
+  );
+}
+
+function ClientAdminHandoffMatrix({
+  matrix,
+  testIds,
+}: {
+  matrix: ShellClientAdminHandoffMatrix;
+  testIds: typeof clientAdminHandoffMatrixTestIds;
+}) {
+  const summaryItems = [
+    { label: "Sites", value: matrix.totalSites },
+    { label: "Platform", value: matrix.platformScoped },
+    { label: "Tenant", value: matrix.tenantScoped },
+    { label: "Site", value: matrix.siteScoped },
+    { label: "Ready", value: matrix.readyForInvite },
+    { label: "Blocked", value: matrix.blockedInvites },
+  ];
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+              Admin handoff matrix
+            </Badge>
+            <Badge className="bg-slate-950 hover:bg-slate-950">{matrix.status.replaceAll("_", " ")}</Badge>
+          </div>
+          <h3 className="mt-3 text-base font-semibold text-slate-950">Client admin handoff matrix</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            Super-admin review across all client websites before any invitation, membership grant, provider write, or live permission mutation is enabled.
+          </p>
+        </div>
+        <Button disabled variant="outline" data-testid={testIds.gatedAction}>
+          <UserRoundCog className="mr-2 h-4 w-4" />
+          Admin handoff gated
+        </Button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-3 gap-2 lg:grid-cols-6" data-testid={testIds.summary}>
+        {summaryItems.map((item) => (
+          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 max-h-[360px] overflow-y-auto rounded-xl border border-slate-200" data-testid={testIds.table}>
+        <Table>
+          <TableHeader className="sticky top-0 bg-white">
+            <TableRow>
+              <TableHead>Site</TableHead>
+              <TableHead>Scope</TableHead>
+              <TableHead>Owner</TableHead>
+              <TableHead>Invite</TableHead>
+              <TableHead>Permissions</TableHead>
+              <TableHead>Gate</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {matrix.rows.map((row) => (
+              <TableRow key={row.siteKey}>
+                <TableCell className="min-w-[180px]">
+                  <div className="font-medium text-slate-950">{row.label}</div>
+                  <div className="text-xs text-slate-500">{row.tenantSlug}</div>
+                </TableCell>
+                <TableCell>
+                  <Badge variant="outline" className="bg-slate-50">{row.scope}</Badge>
+                </TableCell>
+                <TableCell className="text-sm">{row.ownerRole}</TableCell>
+                <TableCell className="text-sm">{row.inviteRole}</TableCell>
+                <TableCell>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { label: "see", value: row.viewPermissions.length },
+                      { label: "edit", value: row.editPermissions.length },
+                      { label: "publish", value: row.publishPermissions.length },
+                    ].map((item) => (
+                      <Badge key={item.label} variant="secondary" className="text-[10px]">
+                        {item.label}: {item.value}
+                      </Badge>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="min-w-[220px]">
+                  <div className="text-sm font-medium text-slate-950">{row.approvalGate}</div>
+                  <div className="mt-1 text-xs leading-5 text-slate-500">{row.missingArtifact}</div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.35fr)]">
+        <div className="max-h-[220px] overflow-y-auto rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid={testIds.blocked}>
+          <div className="text-sm font-semibold text-amber-950">Blocked handoff actions</div>
+          <div className="mt-2 grid gap-2 md:grid-cols-3">
+            {matrix.rows.map((row) => (
+              <div key={row.siteKey} className="rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900">
+                <div className="font-semibold">{row.blockedInviteAction}</div>
+                <div>{row.nextHumanGate}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+          {matrix.providerBoundary}
+        </p>
       </div>
     </section>
   );
@@ -4820,6 +4942,11 @@ export default function AdminKinfloShell() {
                 onboardingReadiness={selectedClientWebsiteOnboardingReadiness}
                 launchSimulation={selectedClientWebsiteLaunchSimulation}
                 testId={clientHandoffPermissionStripTestIds.root}
+              />
+
+              <ClientAdminHandoffMatrix
+                matrix={snapshot.clientWebsiteStudio.adminHandoffMatrix}
+                testIds={clientAdminHandoffMatrixTestIds}
               />
 
               <div

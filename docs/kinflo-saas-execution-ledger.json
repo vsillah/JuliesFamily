@@ -63,6 +63,7 @@
         "docs/phase90-hosted-smoke-gap-backlog.md",
         "docs/phase92-hosted-smoke-evidence-ledger.md",
         "docs/phase93-adapter-switch-cutover-checklist.md",
+        "docs/phase94-client-admin-handoff-matrix.md",
         "docs/convex-adapter-switch-evidence-matrix.json",
         "npm run kinflo:validate-adapter-switch-evidence",
         "npm run kinflo:validate-adapter-switch-runway",
@@ -71,6 +72,7 @@
         "npm run kinflo:validate-hosted-smoke-gap-backlog",
         "npm run kinflo:validate-hosted-smoke-evidence-ledger",
         "npm run kinflo:validate-adapter-switch-cutover-checklist",
+        "npm run kinflo:validate-client-admin-handoff-matrix",
         "npm run kinflo:validate-shell-routes"
       ],
       "nextGate": "Replace fixture adapter with generated Convex API only after hosted activation smoke passes."
@@ -158,7 +160,7 @@
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity, adapter-switch evidence, the Phase 87 switch runway, the Phase 88 generated API review board, the Phase 89 switch acceptance matrix, the Phase 90 hosted smoke gap backlog, the Phase 91 hosted smoke execution sequencer, the Phase 92 hosted smoke evidence ledger, and the Phase 93 adapter switch cutover checklist without importing convex/_generated/api.",
     "Keep the human-gate decision register and Phase 85 owner approval packet current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
-    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
+    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the Phase 94 client admin handoff matrix, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
   ],
   "blockedLiveActions": [
     "create hosted Convex deployment",
@@ -182,6 +184,7 @@
     "npm run kinflo:validate-workflow-navigation-rail",
     "npm run kinflo:validate-configuration-field-affordances",
     "npm run kinflo:validate-client-handoff-permission-strip",
+    "npm run kinflo:validate-client-admin-handoff-matrix",
     "npm run kinflo:validate-claude-frame-ingestion",
     "npm run kinflo:validate-site-studio-scroll-consolidation",
     "npm run kinflo:validate-adapter-switch-runway",

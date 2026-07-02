@@ -562,6 +562,38 @@ export type ShellClientWebsiteAdminPermissionPreset = {
   convexFunctions: string[];
 };
 
+export type ShellClientAdminHandoffMatrix = {
+  status: "provider-light-admin-handoff-matrix";
+  totalSites: number;
+  platformScoped: number;
+  tenantScoped: number;
+  siteScoped: number;
+  readyForInvite: number;
+  blockedInvites: number;
+  providerBoundary: string;
+  rows: {
+    siteKey: string;
+    label: string;
+    tenantSlug: string;
+    ownerRole: string;
+    inviteRole: string;
+    scope: "platform" | "tenant" | "site";
+    permissionCount: number;
+    viewPermissions: string[];
+    editPermissions: string[];
+    publishPermissions: string[];
+    blockedInviteAction: string;
+    approvalGate: string;
+    missingArtifact: string;
+    nextHumanGate: string;
+    canInvite: false;
+    canGrantMembership: false;
+    providerWrites: false;
+    liveConvexExecution: false;
+    convexFunctions: string[];
+  }[];
+};
+
 export type ShellClientWebsiteProvisioningOrder = {
   siteKey: string;
   label: string;
@@ -783,6 +815,7 @@ export type ShellClientWebsiteStudio = {
   designPatterns: ShellClientWebsiteStudioPattern[];
   launchBlueprints: ShellClientWebsiteLaunchBlueprint[];
   adminPermissionPresets: ShellClientWebsiteAdminPermissionPreset[];
+  adminHandoffMatrix: ShellClientAdminHandoffMatrix;
   provisioningOrders: ShellClientWebsiteProvisioningOrder[];
   provisioningExecution: ShellClientWebsiteProvisioningExecution;
   launchPackets: ShellClientWebsiteLaunchPacket[];
@@ -1851,6 +1884,96 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  adminHandoffMatrix: {
+    status: "provider-light-admin-handoff-matrix",
+    totalSites: 3,
+    platformScoped: 1,
+    tenantScoped: 1,
+    siteScoped: 1,
+    readyForInvite: 0,
+    blockedInvites: 3,
+    providerBoundary: "Client admin invitations, membership grants, and permission writes remain blocked until hosted auth, role sync, owner signoff, and site-scoped smoke evidence pass.",
+    rows: [
+      {
+        siteKey: "julies-family-public",
+        label: "Julie Family Public Site",
+        tenantSlug: "julies-family",
+        ownerRole: "platform.super_admin",
+        inviteRole: "platform.super_admin",
+        scope: "platform",
+        permissionCount: 5,
+        viewPermissions: ["site:view", "lead:view", "audit:view"],
+        editPermissions: ["content:edit"],
+        publishPermissions: ["content:publish"],
+        blockedInviteAction: "client admin invitation",
+        approvalGate: "Confirm seeded tenant ownership",
+        missingArtifact: "role sync smoke",
+        nextHumanGate: "Approve founding tenant stewardship before inviting any non-platform admin.",
+        canInvite: false,
+        canGrantMembership: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.listClientWebsiteAdminPermissionPresets",
+          "accessPolicy.viewerPermissionSnapshot",
+          "roleCatalog.listRoleDefinitions",
+          "controlPlane.grantMembership",
+        ],
+      },
+      {
+        siteKey: "advisor-client-site",
+        label: "Advisor Client Site",
+        tenantSlug: "advisor-client-starter",
+        ownerRole: "tenant.admin",
+        inviteRole: "tenant.admin",
+        scope: "tenant",
+        permissionCount: 6,
+        viewPermissions: ["tenant:view", "lead:view"],
+        editPermissions: ["site:create", "member:invite", "content:edit"],
+        publishPermissions: ["content:publish"],
+        blockedInviteAction: "client admin invitation email",
+        approvalGate: "Invite client admin only after owner role is approved",
+        missingArtifact: "tenant owner signoff",
+        nextHumanGate: "Approve tenant owner, plan entitlement, and hosted read smoke before invitation delivery.",
+        canInvite: false,
+        canGrantMembership: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.listClientWebsiteAdminPermissionPresets",
+          "controlPlane.createTenant",
+          "controlPlane.createInvitation",
+          "controlPlane.grantMembership",
+        ],
+      },
+      {
+        siteKey: "campaign-microsite",
+        label: "Campaign Microsite",
+        tenantSlug: "campaign-microsite-lab",
+        ownerRole: "site.editor",
+        inviteRole: "site.editor",
+        scope: "site",
+        permissionCount: 5,
+        viewPermissions: ["site:view", "lead:view"],
+        editPermissions: ["member:invite", "content:edit", "campaign:manage"],
+        publishPermissions: [],
+        blockedInviteAction: "site editor invitation email",
+        approvalGate: "Attach editor only to the selected campaign site",
+        missingArtifact: "campaign consent review",
+        nextHumanGate: "Approve campaign consent, site scope, and provider-send boundary before editor invite.",
+        canInvite: false,
+        canGrantMembership: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.listClientWebsiteAdminPermissionPresets",
+          "controlPlane.createInvitation",
+          "accessPolicy.viewerPermissionSnapshot",
+          "campaigns.requestCampaignApproval",
+        ],
+      },
+    ],
+  },
   provisioningOrders: [
     {
       siteKey: "julies-family-public",

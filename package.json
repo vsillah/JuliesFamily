@@ -73,6 +73,7 @@
     "kinflo:validate-workflow-navigation-rail": "node scripts/validate-kinflo-workflow-navigation-rail.mjs",
     "kinflo:validate-configuration-field-affordances": "node scripts/validate-kinflo-configuration-field-affordances.mjs",
     "kinflo:validate-client-handoff-permission-strip": "node scripts/validate-kinflo-client-handoff-permission-strip.mjs",
+    "kinflo:validate-client-admin-handoff-matrix": "node scripts/validate-kinflo-client-admin-handoff-matrix.mjs",
     "kinflo:validate-claude-frame-ingestion": "node scripts/validate-kinflo-claude-frame-ingestion.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-adapter-switch-runway": "node scripts/validate-kinflo-adapter-switch-runway.mjs",
