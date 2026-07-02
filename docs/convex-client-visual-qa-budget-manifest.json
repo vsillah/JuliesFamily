@@ -1,0 +1,92 @@
+{
+  "phase": 67,
+  "status": "provider-light-visual-qa-budget",
+  "convexFunction": "siteFactory.listClientWebsiteVisualQaBudgets",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "screenshotsCaptured": false,
+    "accessibilityCrawlerRun": false,
+    "lighthouseRun": false,
+    "providersCalled": false
+  },
+  "targetGate": "Responsive screenshots, accessibility checks, regression targets, and performance budgets are defined before hosted public/demo QA is treated as launch evidence.",
+  "blockedUntil": [
+    "Hosted Convex project ownership, billing, backup, auth, and env setup are approved",
+    "Generated Convex API files are produced and reviewed outside this provider-light branch",
+    "Desktop, tablet, and 390px hosted screenshot capture is approved",
+    "Accessibility crawler and keyboard smoke order is approved",
+    "Lighthouse or equivalent hosted performance trace is approved",
+    "Domain, storage, email, SMS, AI, billing, campaign, lead, publish, and provider gates pass where applicable"
+  ],
+  "visualQaBudgets": [
+    {
+      "siteKey": "julies-family-public",
+      "label": "Julie Family visual QA budget",
+      "screenshotCheckCount": 3,
+      "passingScreenshotCount": 2,
+      "accessibilityCheckCount": 3,
+      "blockedAccessibilityCount": 0,
+      "performanceBudgetCount": 3,
+      "performanceRiskCount": 2,
+      "regressionTargetCount": 3,
+      "blockedQaActions": ["hosted screenshot capture", "automated accessibility audit", "Lighthouse run", "publish public site"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "siteFactory.listClientWebsitePolishScorecards",
+        "publicSite.resolvePublishedSite",
+        "launchReadiness.getSiteLaunchReadiness"
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "label": "Advisor client visual QA budget",
+      "screenshotCheckCount": 3,
+      "passingScreenshotCount": 2,
+      "accessibilityCheckCount": 3,
+      "blockedAccessibilityCount": 0,
+      "performanceBudgetCount": 3,
+      "performanceRiskCount": 2,
+      "regressionTargetCount": 3,
+      "blockedQaActions": ["tenant handoff screenshot capture", "hosted intake accessibility smoke", "route-level performance trace", "send tenant admin invite"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "siteFactory.listClientWebsitePolishScorecards",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "publicSite.resolvePublishedSite"
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "label": "Campaign microsite visual QA budget",
+      "screenshotCheckCount": 3,
+      "passingScreenshotCount": 1,
+      "accessibilityCheckCount": 3,
+      "blockedAccessibilityCount": 1,
+      "performanceBudgetCount": 3,
+      "performanceRiskCount": 3,
+      "regressionTargetCount": 3,
+      "blockedQaActions": ["campaign send", "public form lead write", "provider-send performance trace", "mobile screenshot approval"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "siteFactory.listClientWebsitePolishScorecards",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite"
+      ]
+    }
+  ],
+  "totals": {
+    "visualQaBudgets": 3,
+    "screenshotChecks": 9,
+    "passingScreenshotChecks": 5,
+    "accessibilityChecks": 9,
+    "blockedAccessibilityChecks": 1,
+    "performanceBudgets": 9,
+    "performanceRisks": 7,
+    "regressionTargets": 9
+  }
+}

@@ -168,6 +168,37 @@ type ClientWebsitePolishScorecard = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteVisualQaBudget = {
+  siteKey: string;
+  label: string;
+  status: "provider-light-visual-qa-budget";
+  qaTarget: string;
+  screenshotPlan: {
+    viewport: "desktop" | "tablet" | "mobile";
+    route: string;
+    status: "pass" | "review" | "blocked";
+    requiredEvidence: string;
+  }[];
+  accessibilityChecks: {
+    key: string;
+    label: string;
+    status: "pass" | "review" | "blocked";
+    evidence: string;
+    nextAction: string;
+  }[];
+  performanceBudgets: {
+    metric: "lcp" | "js" | "image" | "interaction";
+    label: string;
+    budget: string;
+    currentEstimate: string;
+    status: "pass" | "review" | "blocked";
+    evidence: string;
+  }[];
+  regressionTargets: string[];
+  blockedQaActions: string[];
+  convexFunctions: string[];
+};
+
 const now = () => Date.now();
 
 export const starterTemplates: StarterTemplate[] = [
@@ -1109,6 +1140,114 @@ export const listClientWebsitePolishScorecards = query({
       blockedCount: scorecard.criteria.filter((criterion) => criterion.status === "blocked").length,
       viewportCheckCount: scorecard.viewportChecks.length,
       providerBoundary: "Read-only polish scorecard query. It does not create tenants, create sites, send invites, write content, replace assets, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
+    })),
+});
+
+const clientWebsiteVisualQaBudgets: ClientWebsiteVisualQaBudget[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family visual QA budget",
+    status: "provider-light-visual-qa-budget",
+    qaTarget: "Public demo should pass desktop and 390px mobile screenshot review before hosted publish is considered.",
+    screenshotPlan: [
+      { viewport: "desktop", route: "/kinflo-sites/julies-family", status: "pass", requiredEvidence: "Hero promise, proof, CTA, and navigation are visible without overlap." },
+      { viewport: "tablet", route: "/kinflo-sites/julies-family?device=tablet", status: "review", requiredEvidence: "Portal handoff still needs hosted renderer screenshot evidence." },
+      { viewport: "mobile", route: "/kinflo-sites/julies-family?device=mobile", status: "pass", requiredEvidence: "390px review keeps CTA, proof, and family learning promise readable." },
+    ],
+    accessibilityChecks: [
+      { key: "landmarks", label: "Landmarks and headings", status: "pass", evidence: "Preview shell keeps one clear hero heading and navigable page sections.", nextAction: "Confirm landmarks in hosted public renderer." },
+      { key: "contrast", label: "Contrast and readable controls", status: "review", evidence: "Fixture tokens are readable but automated contrast has not run against hosted output.", nextAction: "Run contrast audit after generated API review." },
+      { key: "keyboard", label: "Keyboard path", status: "review", evidence: "Primary actions are native buttons/links but focus order needs hosted smoke.", nextAction: "Run keyboard smoke on preview link and intake form." },
+    ],
+    performanceBudgets: [
+      { metric: "lcp", label: "Largest contentful paint", budget: "<= 2.5s on hosted preview", currentEstimate: "review pending", status: "review", evidence: "No hosted performance trace has been approved." },
+      { metric: "image", label: "Hero image weight", budget: "<= 450KB optimized first viewport", currentEstimate: "asset provider pending", status: "review", evidence: "Fixture imagery has not moved through Cloudinary/R2 optimization." },
+      { metric: "interaction", label: "CTA interaction", budget: "<= 200ms local response before provider writes", currentEstimate: "fixture-only", status: "pass", evidence: "Preview link and gated CTA render from local fixture state." },
+    ],
+    regressionTargets: ["first-viewport hero", "program proof strip", "family intake CTA"],
+    blockedQaActions: ["hosted screenshot capture", "automated accessibility audit", "Lighthouse run", "publish public site"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteVisualQaBudgets",
+      "siteFactory.listClientWebsitePolishScorecards",
+      "publicSite.resolvePublishedSite",
+      "launchReadiness.getSiteLaunchReadiness",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client visual QA budget",
+    status: "provider-light-visual-qa-budget",
+    qaTarget: "Advisor site should preserve proof-before-intake hierarchy across desktop, tablet, and mobile before tenant handoff.",
+    screenshotPlan: [
+      { viewport: "desktop", route: "/kinflo-sites/advisor-client-site", status: "pass", requiredEvidence: "Offer, proof, intake CTA, and launch state remain visible without decorative clutter." },
+      { viewport: "tablet", route: "/kinflo-sites/advisor-client-site?device=tablet", status: "pass", requiredEvidence: "Offer scan and proof summary stay readable in the mid-size layout." },
+      { viewport: "mobile", route: "/kinflo-sites/advisor-client-site?device=mobile", status: "review", requiredEvidence: "390px intake path needs hosted lead smoke evidence before handoff." },
+    ],
+    accessibilityChecks: [
+      { key: "heading-order", label: "Heading order", status: "pass", evidence: "The preview workbench keeps a single result statement before support sections.", nextAction: "Confirm semantic heading order after public renderer swap." },
+      { key: "form-labels", label: "Intake labels", status: "review", evidence: "Intake path remains fixture gated and needs hosted form label smoke.", nextAction: "Run form label and error-state smoke before client handoff." },
+      { key: "focus-visible", label: "Focus visibility", status: "review", evidence: "Controls use shared button primitives but hosted focus audit is pending.", nextAction: "Run keyboard focus pass on preview and portal links." },
+    ],
+    performanceBudgets: [
+      { metric: "lcp", label: "Largest contentful paint", budget: "<= 2.5s on hosted preview", currentEstimate: "review pending", status: "review", evidence: "Hosted performance trace not approved." },
+      { metric: "js", label: "Public page JavaScript", budget: "<= 180KB route JS after code split", currentEstimate: "Vite bundle still app-wide", status: "review", evidence: "Next.js or route splitting decision remains open." },
+      { metric: "interaction", label: "Preview open action", budget: "<= 200ms local response", currentEstimate: "fixture-only", status: "pass", evidence: "Open preview and gated publish controls respond from local shell state." },
+    ],
+    regressionTargets: ["offer hierarchy", "proof strip", "intake CTA"],
+    blockedQaActions: ["tenant handoff screenshot capture", "hosted intake accessibility smoke", "route-level performance trace", "send tenant admin invite"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteVisualQaBudgets",
+      "siteFactory.listClientWebsitePolishScorecards",
+      "controlPlane.createTenant",
+      "controlPlane.createInvitation",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite visual QA budget",
+    status: "provider-light-visual-qa-budget",
+    qaTarget: "Campaign microsite needs mobile-first visual QA, consent accessibility, and performance review before campaign traffic is sent.",
+    screenshotPlan: [
+      { viewport: "desktop", route: "/kinflo-sites/campaign-microsite", status: "pass", requiredEvidence: "Single offer, proof, and signup path stay focused." },
+      { viewport: "tablet", route: "/kinflo-sites/campaign-microsite?device=tablet", status: "review", requiredEvidence: "Consent and proof placement need screenshot comparison." },
+      { viewport: "mobile", route: "/kinflo-sites/campaign-microsite?device=mobile", status: "review", requiredEvidence: "390px first viewport still needs copy tightening and retest." },
+    ],
+    accessibilityChecks: [
+      { key: "consent-copy", label: "Consent copy visibility", status: "blocked", evidence: "Consent language and unsubscribe expectations remain approval gated.", nextAction: "Approve consent language before provider-send smoke." },
+      { key: "signup-labels", label: "Signup labels", status: "review", evidence: "Public form lead write is still gated.", nextAction: "Run form label and error-state smoke after lead route approval." },
+      { key: "reduced-motion", label: "Reduced motion posture", status: "pass", evidence: "Current fixture does not require motion to understand the offer path.", nextAction: "Keep any future campaign animation optional and non-blocking." },
+    ],
+    performanceBudgets: [
+      { metric: "lcp", label: "Largest contentful paint", budget: "<= 2.0s on campaign preview", currentEstimate: "review pending", status: "review", evidence: "Campaign route has no hosted trace yet." },
+      { metric: "image", label: "Proof asset weight", budget: "<= 300KB optimized proof asset", currentEstimate: "asset pending", status: "review", evidence: "Final campaign proof asset is not approved." },
+      { metric: "interaction", label: "Signup interaction", budget: "<= 200ms before provider write", currentEstimate: "blocked by lead smoke", status: "blocked", evidence: "Public form lead write remains gated." },
+    ],
+    regressionTargets: ["single offer hero", "consent block", "signup CTA"],
+    blockedQaActions: ["campaign send", "public form lead write", "provider-send performance trace", "mobile screenshot approval"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteVisualQaBudgets",
+      "siteFactory.listClientWebsitePolishScorecards",
+      "campaigns.requestCampaignApproval",
+      "crm.submitLead",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+];
+
+export const listClientWebsiteVisualQaBudgets = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteVisualQaBudgets.map((budget) => ({
+      ...budget,
+      screenshotCheckCount: budget.screenshotPlan.length,
+      passingScreenshotCount: budget.screenshotPlan.filter((check) => check.status === "pass").length,
+      accessibilityCheckCount: budget.accessibilityChecks.length,
+      blockedAccessibilityCount: budget.accessibilityChecks.filter((check) => check.status === "blocked").length,
+      performanceBudgetCount: budget.performanceBudgets.length,
+      performanceRiskCount: budget.performanceBudgets.filter((check) => check.status !== "pass").length,
+      regressionTargetCount: budget.regressionTargets.length,
+      providerBoundary: "Read-only visual QA budget query. It does not capture screenshots, run Lighthouse, run accessibility crawls, create tenants, create sites, send invites, write content, replace assets, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
     })),
 });
 
