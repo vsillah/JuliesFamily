@@ -154,6 +154,7 @@ for (const path of [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
+  "docs/phase89-adapter-switch-acceptance-matrix.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -262,6 +263,7 @@ for (const path of [
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
+  "scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1469,6 +1471,23 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase89-adapter-switch-acceptance-matrix.md", [
+  "Phase 89: Adapter Switch Acceptance Matrix",
+  "npm run kinflo:validate-adapter-switch-acceptance-matrix",
+  "ShellAdapterSwitchAcceptanceBatch",
+  "adapterSwitchReadiness.acceptanceMatrix",
+  "section-kinflo-adapter-switch-acceptance-matrix",
+  "section-kinflo-adapter-switch-acceptance-scroll",
+  "Switch batches: 6",
+  "Switch surfaces: 12",
+  "Total mapped functions: 32",
+  "Smoke-covered functions: 16",
+  "Smoke-gap functions: 16",
+  "Switch-ready batches: 0",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1507,6 +1526,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
   "\"docs/phase87-adapter-switch-runway.md\"",
   "\"docs/phase88-generated-api-review-board.md\"",
+  "\"docs/phase89-adapter-switch-acceptance-matrix.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
   "\"npm run kinflo:validate-active-object-signal\"",
@@ -1521,6 +1541,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-adapter-switch-runway\"",
   "\"npm run kinflo:validate-generated-api-review-board\"",
+  "\"npm run kinflo:validate-adapter-switch-acceptance-matrix\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1618,6 +1639,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:validate-generated-api-review-board\"",
+  "\"kinflo:validate-adapter-switch-acceptance-matrix\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2404,9 +2426,22 @@ requireIncludes("scripts/validate-kinflo-generated-api-review-board.mjs", [
   "KinFlo generated API review board validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs", [
+  "docs/phase89-adapter-switch-acceptance-matrix.md",
+  "ShellAdapterSwitchAcceptanceBatch",
+  "adapterSwitchReadiness.acceptanceMatrix",
+  "section-kinflo-adapter-switch-acceptance-matrix",
+  "switch acceptance totals match source contracts",
+  "no acceptance batch is switch-ready",
+  "adapter switch acceptance matrix does not execute live Convex",
+  "KinFlo adapter switch acceptance matrix validation",
+]);
+
 requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellAdapterSwitchRunwayStep",
+  "ShellAdapterSwitchAcceptanceBatch",
   "runwaySteps: [",
+  "acceptanceMatrix: [",
   "Read-only core first",
   "User preference bridge",
   "Site factory smoke",
@@ -2416,6 +2451,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellGeneratedApiReviewBoard",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
+  "launchReadiness.getSiteLaunchReadiness",
+  "aiReview.reviewAiGenerationRecord",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
@@ -2428,6 +2465,9 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
   "Codegen review gated",
+  "section-kinflo-adapter-switch-acceptance-matrix",
+  "section-kinflo-adapter-switch-acceptance-scroll",
+  "Switch Acceptance Matrix",
 ]);
 
 requireIncludes("docs/kinflo-claude-frame-ingestion-packet.json", [

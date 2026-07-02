@@ -998,6 +998,11 @@ export default function AdminKinfloShell() {
       ?? snapshot.adapterSwitchReadiness.batches[0],
     [adapterSwitchBatchId, snapshot.adapterSwitchReadiness.batches],
   );
+  const selectedAdapterSwitchAcceptance = useMemo(
+    () => snapshot.adapterSwitchReadiness.acceptanceMatrix.find((batch) => batch.batchId === adapterSwitchBatchId)
+      ?? snapshot.adapterSwitchReadiness.acceptanceMatrix[0],
+    [adapterSwitchBatchId, snapshot.adapterSwitchReadiness.acceptanceMatrix],
+  );
   const adapterSwitchTotals = useMemo(() => {
     const surfaces = snapshot.adapterSwitchReadiness.batches.flatMap((batch) => batch.surfaces);
     return {
@@ -2488,6 +2493,105 @@ export default function AdminKinfloShell() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-white p-4" data-testid="section-kinflo-adapter-switch-acceptance-matrix">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <ListChecks className="h-4 w-4 text-slate-500" />
+                            <h3 className="text-sm font-semibold">Switch Acceptance Matrix</h3>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-acceptance-matrix">
+                            Each batch must have generated contract coverage, hosted smoke coverage, rollback proof, and owner approval before the fixture adapter can be replaced.
+                          </p>
+                        </div>
+                        <Badge variant="outline">
+                          {snapshot.adapterSwitchReadiness.acceptanceMatrix.length} batches
+                        </Badge>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
+                        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900" data-testid="card-adapter-switch-selected-acceptance">
+                          <div className="font-semibold">{selectedAdapterSwitchAcceptance?.label}</div>
+                          <div className="mt-2 grid grid-cols-2 gap-2">
+                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
+                              <div className="text-amber-700">Functions</div>
+                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.functionCount}</div>
+                            </div>
+                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
+                              <div className="text-amber-700">Smoke gaps</div>
+                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.smokeMissingFunctions.length}</div>
+                            </div>
+                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
+                              <div className="text-amber-700">Contract</div>
+                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.generatedContractCoverage}</div>
+                            </div>
+                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
+                              <div className="text-amber-700">Switch</div>
+                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.canSwitch ? "ready" : "blocked"}</div>
+                            </div>
+                          </div>
+                          <div className="mt-3 rounded-md bg-white p-2">
+                            <span className="font-medium text-amber-950">Next gate: </span>
+                            {selectedAdapterSwitchAcceptance?.nextHumanGate}
+                          </div>
+                        </div>
+
+                        <div className="grid max-h-[420px] gap-3 overflow-y-auto pr-1 md:grid-cols-2" data-testid="section-kinflo-adapter-switch-acceptance-scroll">
+                          {snapshot.adapterSwitchReadiness.acceptanceMatrix.map((batch) => (
+                            <div
+                              key={batch.batchId}
+                              className={`rounded-md border p-3 ${batch.batchId === selectedAdapterSwitchBatch?.id ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white"}`}
+                              data-testid={`card-adapter-switch-acceptance-${batch.batchId}`}
+                            >
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Batch {batch.order}</div>
+                                  <div className="mt-1 text-sm font-semibold text-slate-950">{batch.label}</div>
+                                  <div className="mt-1 text-xs text-slate-600">{batch.surfaceCount} surfaces · {batch.functionCount} functions</div>
+                                </div>
+                                <Badge variant={batch.canSwitch ? "secondary" : "outline"} className="shrink-0">
+                                  {batch.canSwitch ? "ready" : batch.acceptancePosture.replaceAll("_", " ")}
+                                </Badge>
+                              </div>
+
+                              <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                                <div className="rounded-md border border-slate-100 px-2 py-1">
+                                  <div className="text-slate-500">Contract</div>
+                                  <div className="font-medium text-slate-950">{batch.generatedContractCoverage}</div>
+                                </div>
+                                <div className="rounded-md border border-slate-100 px-2 py-1">
+                                  <div className="text-slate-500">Covered</div>
+                                  <div className="font-medium text-slate-950">{batch.smokeCoveredFunctions}</div>
+                                </div>
+                                <div className="rounded-md border border-slate-100 px-2 py-1">
+                                  <div className="text-slate-500">Gaps</div>
+                                  <div className="font-medium text-slate-950">{batch.smokeMissingFunctions.length}</div>
+                                </div>
+                              </div>
+
+                              <div className="mt-3 flex flex-wrap gap-1">
+                                {batch.smokeMissingFunctions.slice(0, 3).map((functionName) => (
+                                  <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">
+                                    {functionName}
+                                  </Badge>
+                                ))}
+                                {batch.smokeMissingFunctions.length > 3 ? (
+                                  <Badge variant="secondary" className="text-[11px]">
+                                    +{batch.smokeMissingFunctions.length - 3} more
+                                  </Badge>
+                                ) : null}
+                              </div>
+
+                              <div className="mt-3 rounded-md bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                                <span className="font-medium text-slate-900">Rollback: </span>
+                                {batch.rollbackGate}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
 

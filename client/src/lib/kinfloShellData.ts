@@ -73,11 +73,29 @@ export type ShellAdapterSwitchRunwayStep = {
   providerWrites: boolean;
 };
 
+export type ShellAdapterSwitchAcceptanceBatch = {
+  order: number;
+  batchId: string;
+  label: string;
+  acceptancePosture: "blocked_smoke_gap" | "blocked_owner_gate";
+  surfaceCount: number;
+  functionCount: number;
+  generatedContractCoverage: "complete";
+  smokeCoveredFunctions: number;
+  smokeMissingFunctions: string[];
+  nextHumanGate: string;
+  rollbackGate: string;
+  canSwitch: boolean;
+  providerWrites: boolean;
+  liveConvexExecution: boolean;
+};
+
 export type ShellAdapterSwitchReadiness = {
   status: "provider_light_switch_plan";
   defaultBatchId: string;
   batches: ShellAdapterSwitchBatch[];
   runwaySteps: ShellAdapterSwitchRunwayStep[];
+  acceptanceMatrix: ShellAdapterSwitchAcceptanceBatch[];
   providerBoundary: string;
   activationEvidence: string[];
   documents: string[];
@@ -3923,6 +3941,121 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
       canAdvance: false,
       liveConvexExecution: false,
       providerWrites: false,
+    },
+  ],
+  acceptanceMatrix: [
+    {
+      order: 10,
+      batchId: "read-only-core",
+      label: "Read-only core shell data",
+      acceptancePosture: "blocked_smoke_gap",
+      surfaceCount: 4,
+      functionCount: 8,
+      generatedContractCoverage: "complete",
+      smokeCoveredFunctions: 7,
+      smokeMissingFunctions: ["launchReadiness.getSiteLaunchReadiness"],
+      nextHumanGate: "Add launch readiness read-only hosted smoke, then approve first-batch owner review.",
+      rollbackGate: "Keep tenant, entitlement, launch, and public renderer surfaces on fixtures until scope and public-safe resolver proof match.",
+      canSwitch: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      order: 20,
+      batchId: "user-scoped-preferences",
+      label: "User-scoped preference reads and writes",
+      acceptancePosture: "blocked_smoke_gap",
+      surfaceCount: 1,
+      functionCount: 2,
+      generatedContractCoverage: "complete",
+      smokeCoveredFunctions: 0,
+      smokeMissingFunctions: ["preferences.getMyPreferences", "preferences.upsertMyPreferences"],
+      nextHumanGate: "Approve user-scoped preference permission smoke before shell personalization can move off fixtures.",
+      rollbackGate: "Return density, default landing, filters, and site context to local fixture state if scope checks fail.",
+      canSwitch: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      order: 30,
+      batchId: "site-creation-and-admin",
+      label: "Site creation, invitations, and activation readiness",
+      acceptancePosture: "blocked_smoke_gap",
+      surfaceCount: 2,
+      functionCount: 6,
+      generatedContractCoverage: "complete",
+      smokeCoveredFunctions: 4,
+      smokeMissingFunctions: [
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "siteFactory.listClientWebsiteLaunchBlueprints",
+      ],
+      nextHumanGate: "Approve client permission preset and launch blueprint read smokes before template creation or invite smoke can advance.",
+      rollbackGate: "Archive any smoke site, revoke pending invites, and return launch packets to fixtures if template creation or owner scope fails.",
+      canSwitch: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      order: 40,
+      batchId: "public-crm-loop",
+      label: "Public lead capture and CRM workflow",
+      acceptancePosture: "blocked_smoke_gap",
+      surfaceCount: 1,
+      functionCount: 6,
+      generatedContractCoverage: "complete",
+      smokeCoveredFunctions: 3,
+      smokeMissingFunctions: [
+        "crm.listJourneyProgressionRules",
+        "crm.upsertJourneyProgressionRule",
+        "crm.transitionLeadStage",
+      ],
+      nextHumanGate: "Approve journey progression smoke, lead cleanup policy, and notification-provider pause before CRM mutation switch.",
+      rollbackGate: "Mark smoke leads and workflow data as test-only, restore fixture CRM tables, and keep outbound notifications paused.",
+      canSwitch: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      order: 50,
+      batchId: "provider-readiness-records",
+      label: "Provider readiness metadata without provider writes",
+      acceptancePosture: "blocked_smoke_gap",
+      surfaceCount: 2,
+      functionCount: 4,
+      generatedContractCoverage: "complete",
+      smokeCoveredFunctions: 2,
+      smokeMissingFunctions: [
+        "integrations.listIntegrationSettings",
+        "integrations.upsertIntegrationSetting",
+      ],
+      nextHumanGate: "Approve integration metadata smoke and secret-value exclusion before provider readiness records can use hosted Convex.",
+      rollbackGate: "Deactivate smoke domain metadata and return integration readiness rows to fixtures if entitlement, hostname, or secret-exclusion checks fail.",
+      canSwitch: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      order: 60,
+      batchId: "campaign-and-ai-governance",
+      label: "Campaign and AI governance records",
+      acceptancePosture: "blocked_smoke_gap",
+      surfaceCount: 2,
+      functionCount: 6,
+      generatedContractCoverage: "complete",
+      smokeCoveredFunctions: 0,
+      smokeMissingFunctions: [
+        "campaigns.listCampaignDrafts",
+        "campaigns.upsertCampaignDraft",
+        "campaigns.approveCampaignDraft",
+        "aiReview.listAiGenerationRecords",
+        "aiReview.upsertAiGenerationRecord",
+        "aiReview.reviewAiGenerationRecord",
+      ],
+      nextHumanGate: "Approve campaign governance, consent, AI provenance, and provider-call signoff before this batch can leave fixtures.",
+      rollbackGate: "Pause campaign records, keep generated output unpublished, restore fixtures, and block email, SMS, automation, and AI provider calls.",
+      canSwitch: false,
+      providerWrites: false,
+      liveConvexExecution: false,
     },
   ],
   batches: [

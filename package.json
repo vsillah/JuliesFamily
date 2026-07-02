@@ -77,6 +77,7 @@
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-adapter-switch-runway": "node scripts/validate-kinflo-adapter-switch-runway.mjs",
     "kinflo:validate-generated-api-review-board": "node scripts/validate-kinflo-generated-api-review-board.mjs",
+    "kinflo:validate-adapter-switch-acceptance-matrix": "node scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",
