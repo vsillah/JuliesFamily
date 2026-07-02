@@ -142,6 +142,7 @@ for (const path of [
   "docs/phase74-adapter-switch-evidence-matrix.md",
   "docs/phase75-design-frame-adoption-backlog.md",
   "docs/phase76-active-object-signal.md",
+  "docs/phase77-client-studio-workbench-grid.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -236,6 +237,7 @@ for (const path of [
   "scripts/validate-kinflo-adapter-switch-evidence.mjs",
   "scripts/validate-kinflo-design-frame-backlog.mjs",
   "scripts/validate-kinflo-active-object-signal.mjs",
+  "scripts/validate-kinflo-client-workbench-grid.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1264,6 +1266,19 @@ requireIncludes("docs/phase76-active-object-signal.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase77-client-studio-workbench-grid.md", [
+  "Phase 77: Client Studio Workbench Grid",
+  "npm run kinflo:validate-client-workbench-grid",
+  "section-kinflo-client-workbench-grid-contract",
+  "section-kinflo-client-workbench-grid",
+  "section-kinflo-client-page-tree",
+  "section-kinflo-client-device-frame",
+  "section-kinflo-client-fold-line",
+  "section-kinflo-client-compact-launch-controls",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1288,8 +1303,10 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"hosted-activation\"",
   "\"docs/phase73-hosted-activation-decision-register.md\"",
   "\"docs/phase76-active-object-signal.md\"",
+  "\"docs/phase77-client-studio-workbench-grid.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-active-object-signal\"",
+  "\"npm run kinflo:validate-client-workbench-grid\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1375,6 +1392,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-decisions\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
+  "\"kinflo:validate-client-workbench-grid\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2005,6 +2023,21 @@ requireIncludes("scripts/validate-kinflo-active-object-signal.mjs", [
   "active object signal does not import generated API",
   "active object signal does not execute live Convex",
   "KinFlo active object signal validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-workbench-grid.mjs", [
+  "docs/phase77-client-studio-workbench-grid.md",
+  "clientWebsiteWorkbenchGridContract",
+  "section-kinflo-client-workbench-grid-contract",
+  "section-kinflo-client-workbench-grid",
+  "section-kinflo-client-page-tree",
+  "section-kinflo-client-device-frame",
+  "section-kinflo-client-fold-line",
+  "section-kinflo-client-compact-launch-controls",
+  "button-client-compact-publish-gated",
+  "client workbench grid does not import generated API",
+  "client workbench grid does not execute live Convex",
+  "KinFlo client workbench grid validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
@@ -2847,10 +2880,20 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-command-stats",
   "section-kinflo-client-control-room-path",
   "section-kinflo-client-studio-operating-frame",
+  "section-kinflo-client-workbench-grid-contract",
+  "section-kinflo-client-workbench-grid",
   "section-kinflo-client-site-rail",
+  "section-kinflo-client-page-tree",
   "section-kinflo-client-preview-workbench",
   "section-kinflo-client-preview-canvas",
+  "section-kinflo-client-device-frame",
+  "section-kinflo-client-fold-line",
   "section-kinflo-client-launch-rail",
+  "section-kinflo-client-compact-launch-controls",
+  "button-client-compact-publish-gated",
+  "button-client-compact-handoff-gated",
+  "button-client-compact-domain-gated",
+  "clientWebsiteWorkbenchGridContract",
   "clientWebsiteStudioReviewStats",
   "clientWebsiteStudioCommandStats",
   "clientWebsiteStudioStatusLabel",

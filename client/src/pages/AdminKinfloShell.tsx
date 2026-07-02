@@ -616,6 +616,12 @@ export default function AdminKinfloShell() {
     { label: "Blocked gates", value: `${clientWebsiteLaunchDecisionBlockedCount}` },
     { label: "Signoffs", value: `${selectedClientWebsiteLaunchDecisionPacket?.requiredSignoffs.length ?? 0}` },
   ];
+  const clientWebsiteWorkbenchGridContract = [
+    { label: "Site rail", value: "Page tree and site queue", status: "Fixture" },
+    { label: "Preview canvas", value: "Device-framed local renderer", status: "Review" },
+    { label: "Evidence rail", value: "QA, permissions, rollback", status: "Gated" },
+    { label: "Launch controls", value: "Publish, handoff, domain disabled", status: "Blocked" },
+  ];
   const selectedAssetSite = useMemo(
     () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
     [assetSiteKey, snapshot.assetLibrary.siteOptions],
@@ -3261,7 +3267,27 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className="grid gap-4 xl:grid-cols-[272px_minmax(0,1fr)_388px]">
+              <div
+                className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm md:grid-cols-4"
+                data-testid="section-kinflo-client-workbench-grid-contract"
+              >
+                {clientWebsiteWorkbenchGridContract.map((item) => (
+                  <div key={item.label} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                        <div className="mt-1 truncate text-sm font-semibold text-slate-950">{item.value}</div>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 bg-white">{item.status}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(236px,272px)_minmax(0,1fr)_minmax(320px,388px)]"
+                data-testid="section-kinflo-client-workbench-grid"
+              >
                 <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid="section-kinflo-client-site-rail">
                   <div className="flex items-center justify-between gap-3 px-1">
                     <div>
@@ -3303,6 +3329,25 @@ export default function AdminKinfloShell() {
                       );
                     })}
                   </div>
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-client-page-tree">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold">Page tree</div>
+                        <div className="mt-0.5 text-xs text-slate-500">Launch blueprint pages</div>
+                      </div>
+                      <Badge variant="outline" className="bg-white">
+                        {selectedClientWebsiteLaunchBlueprint?.defaultPages.length ?? 0}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {(selectedClientWebsiteLaunchBlueprint?.defaultPages ?? []).map((page) => (
+                        <div key={page} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm">
+                          <span className="min-w-0 truncate">{page}</span>
+                          <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400" aria-hidden="true" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <Card className="min-w-0 overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm" data-testid="section-kinflo-client-preview-workbench">
@@ -3340,7 +3385,7 @@ export default function AdminKinfloShell() {
                         <Badge variant="outline" className="border-slate-300 bg-white">Preview only</Badge>
                       </div>
                       <div className="grid gap-5 p-4 2xl:grid-cols-[minmax(0,1fr)_220px] lg:p-5">
-                        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm" data-testid="section-kinflo-client-device-frame">
                           <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
                             <div className="min-w-0 text-sm font-semibold text-slate-950">{selectedClientWebsiteStudioSite?.label}</div>
                             <Badge variant="secondary" className="shrink-0">{clientWebsiteStudioStatusLabel}</Badge>
@@ -3356,6 +3401,12 @@ export default function AdminKinfloShell() {
                           <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
                             {selectedClientWebsiteStudioSite?.trustSignal}
                           </p>
+                          <div className="mt-5 border-t border-dashed border-slate-200 pt-3" data-testid="section-kinflo-client-fold-line">
+                            <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
+                              <span>390px fold check</span>
+                              <span>Hero, proof, and CTA must remain scannable before launch.</span>
+                            </div>
+                          </div>
                           <div className="mt-5 flex flex-wrap gap-2">
                             <Button size="sm" asChild data-testid="button-open-client-website-preview">
                               <Link href={clientWebsiteStudioPreviewPath}>
@@ -3487,6 +3538,42 @@ export default function AdminKinfloShell() {
                         <div className="text-[10px] uppercase tracking-normal text-slate-400">Signoffs</div>
                         <div className="mt-1 text-sm font-semibold">{selectedClientWebsiteLaunchDecisionPacket?.requiredSignoffs.length ?? 0}</div>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm" data-testid="section-kinflo-client-compact-launch-controls">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-amber-950">Compact launch controls</div>
+                        <p className="mt-1 text-xs leading-5 text-amber-900">
+                          Live operations stay disabled until hosted evidence and owner signoff are accepted.
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="border-amber-300 bg-white text-amber-900">
+                        Provider-light
+                      </Badge>
+                    </div>
+                    <div className="mt-3 grid gap-2">
+                      <Button disabled variant="outline" className="justify-start border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900" data-testid="button-client-compact-publish-gated">
+                        <Rocket className="mr-2 h-4 w-4" />
+                        Publish gated
+                      </Button>
+                      <Button disabled variant="outline" className="justify-start border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900" data-testid="button-client-compact-handoff-gated">
+                        <MailPlus className="mr-2 h-4 w-4" />
+                        Handoff gated
+                      </Button>
+                      <Button disabled variant="outline" className="justify-start border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900" data-testid="button-client-compact-domain-gated">
+                        <Globe2 className="mr-2 h-4 w-4" />
+                        Domain gated
+                      </Button>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      {selectedClientWebsiteLaunchDecisionPacket?.blockedLaunchActions.slice(0, 3).map((action) => (
+                        <div key={action} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
+                          <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                          <span>{action}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
