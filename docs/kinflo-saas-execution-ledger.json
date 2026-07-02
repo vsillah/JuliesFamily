@@ -88,11 +88,13 @@
         "docs/phase70-control-room-polish.md",
         "docs/convex-adapter-switch-evidence-matrix.json",
         "docs/phase75-design-frame-adoption-backlog.md",
+        "docs/phase76-active-object-signal.md",
         "docs/kinflo-design-frame-adoption-backlog.json",
         "npm run kinflo:validate-design-frame-backlog",
+        "npm run kinflo:validate-active-object-signal",
         "npm run kinflo:validate-control-room-polish"
       ],
-      "nextGate": "Capture the running Claude Desktop frame response, then implement accepted provider-light design deltas from the Phase 75 backlog."
+      "nextGate": "Continue implementing accepted provider-light design deltas from the Phase 75 backlog, then validate desktop and mobile browser frames before client handoff."
     },
     {
       "id": "hosted-activation",
@@ -114,7 +116,7 @@
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity and adapter-switch evidence with docs/convex-adapter-switch-evidence-matrix.json without importing convex/_generated/api.",
     "Keep the human-gate decision register current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
-    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, and the Phase 75 design-frame adoption backlog."
+    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, the active-object signal, and the Phase 75 design-frame adoption backlog."
   ],
   "blockedLiveActions": [
     "create hosted Convex deployment",
@@ -130,6 +132,7 @@
   ],
   "validationCommands": [
     "npm run kinflo:validate-saas-execution-ledger",
+    "npm run kinflo:validate-active-object-signal",
     "npm run kinflo:validate-hosted-activation-decisions",
     "npm run kinflo:validate-phase0-readiness",
     "npm run kinflo:validate-phases",

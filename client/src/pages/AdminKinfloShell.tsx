@@ -984,7 +984,7 @@ export default function AdminKinfloShell() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-950">
+    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <div className="border-b border-slate-200 bg-white/95">
         <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
           <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]} />
@@ -1010,15 +1010,59 @@ export default function AdminKinfloShell() {
               </Button>
             </div>
           </div>
+          <div
+            className="grid min-w-0 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]"
+            data-testid="section-kinflo-active-object-signal"
+          >
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                  {snapshot.activeObjectSignal.objectType}
+                </Badge>
+                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                  {snapshot.activeObjectSignal.environment}
+                </Badge>
+                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                  {snapshot.activeObjectSignal.readinessLabel}
+                </Badge>
+                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                  Owner: {snapshot.activeObjectSignal.owner}
+                </Badge>
+              </div>
+              <div className="mt-2 truncate text-base font-semibold leading-tight text-slate-950" data-testid="text-kinflo-active-object-name">
+                {snapshot.activeObjectSignal.label}
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-active-object-next-decision">
+                {snapshot.activeObjectSignal.nextDecision}
+              </p>
+            </div>
+            <div className="min-w-0 rounded-md border border-amber-200 bg-white p-3" data-testid="section-kinflo-active-object-unblock-condition">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="w-full border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-50 hover:text-amber-900"
+                disabled
+                data-testid="button-active-object-live-gated"
+              >
+                <ShieldCheck className="mr-2 h-3 w-3" />
+                {snapshot.activeObjectSignal.disabledActionLabel}
+              </Button>
+              <p className="mt-2 text-xs leading-5 text-amber-900" data-testid="text-kinflo-active-object-disabled-reason">
+                {snapshot.activeObjectSignal.disabledActionReason}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      <main className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-7xl overflow-x-hidden px-4 py-7 sm:px-6 lg:px-8">
         <section className="grid gap-5 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] lg:p-6" data-testid="section-kinflo-command-brief">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="bg-emerald-50 text-emerald-800 hover:bg-emerald-50">Command Brief</Badge>
               <Badge variant="outline" className="border-slate-300 bg-white">{snapshot.dataMode.runtimeLabel}</Badge>
+              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">{snapshot.activeObjectSignal.environment}</Badge>
             </div>
             <h2 className="mt-4 max-w-3xl text-2xl font-semibold leading-tight tracking-normal md:text-3xl">
               {commandBrief.decision}
@@ -1026,6 +1070,60 @@ export default function AdminKinfloShell() {
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
               {commandBrief.headline}: {commandBrief.blocker}
             </p>
+            <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4" data-testid="section-kinflo-active-object-detail">
+              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                <div className="min-w-0">
+                  <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{snapshot.activeObjectSignal.objectType}</div>
+                  <div className="mt-1 truncate text-lg font-semibold leading-tight text-slate-950">
+                    {snapshot.activeObjectSignal.label}
+                  </div>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                    {snapshot.activeObjectSignal.environmentDetail}
+                  </p>
+                </div>
+                <div className="grid shrink-0 grid-cols-2 gap-2 sm:min-w-72">
+                  <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                    <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Readiness</div>
+                    <div className="mt-1 text-sm font-semibold text-slate-950">{snapshot.activeObjectSignal.readinessLabel}</div>
+                  </div>
+                  <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                    <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Owner</div>
+                    <div className="mt-1 truncate text-sm font-semibold text-slate-950">{snapshot.activeObjectSignal.owner}</div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)]">
+                <div className="min-w-0">
+                  <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Next decision</div>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    {snapshot.activeObjectSignal.nextDecision}
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {snapshot.activeObjectSignal.requiredEvidence.map((item) => (
+                      <Badge key={item} variant="outline" className="border-slate-200 bg-white text-slate-700">
+                        {item}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="min-w-0 rounded-md border border-amber-200 bg-amber-50 p-3">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900"
+                    disabled
+                    data-testid="button-active-object-live-detail-gated"
+                  >
+                    <ShieldCheck className="mr-2 h-3 w-3" />
+                    {snapshot.activeObjectSignal.disabledActionLabel}
+                  </Button>
+                  <p className="mt-2 text-xs leading-5 text-amber-900">
+                    {snapshot.activeObjectSignal.disabledActionReason}
+                  </p>
+                </div>
+              </div>
+            </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {commandBrief.proof.map((item) => (
                 <Badge key={item} variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
@@ -1044,6 +1142,17 @@ export default function AdminKinfloShell() {
               {commandBrief.nextGate ? hostedActivationStatusBadge(commandBrief.nextGate.status) : null}
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-300">{commandBrief.nextGate?.evidenceTarget}</p>
+            <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-3" data-testid="section-kinflo-active-object-unblock-detail">
+              <div className="text-xs font-medium uppercase tracking-normal text-slate-400">Unblock condition</div>
+              <p className="mt-1 text-sm leading-6 text-slate-300">{snapshot.activeObjectSignal.unblockCondition}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {snapshot.activeObjectSignal.blockedLiveActions.map((action) => (
+                  <Badge key={action} variant="outline" className="border-slate-700 bg-slate-900 text-slate-200">
+                    {action}
+                  </Badge>
+                ))}
+              </div>
+            </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
               <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => setActiveTab("launch-readiness")}>
                 <Rocket className="mr-2 h-3 w-3" />
@@ -1176,8 +1285,9 @@ export default function AdminKinfloShell() {
           </CardContent>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ShellTabValue)} className="mt-7">
-          <TabsList className="flex h-auto w-full justify-start gap-1 overflow-x-auto rounded-md border border-slate-200 bg-white p-1">
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ShellTabValue)} className="mt-7 min-w-0">
+          <div className="w-full min-w-0 overflow-x-auto rounded-md border border-slate-200 bg-white">
+            <TabsList className="flex h-auto min-w-max justify-start gap-1 bg-white p-1">
             <TabsTrigger className="shrink-0" value="tenants">Tenants</TabsTrigger>
             <TabsTrigger className="shrink-0" value="sites">Sites</TabsTrigger>
             <TabsTrigger className="shrink-0" value="launch-readiness">Launch</TabsTrigger>
@@ -1199,7 +1309,8 @@ export default function AdminKinfloShell() {
             <TabsTrigger className="shrink-0" value="crm">CRM</TabsTrigger>
             <TabsTrigger className="shrink-0" value="experience">Experience</TabsTrigger>
             <TabsTrigger className="shrink-0" value="access">Access</TabsTrigger>
-          </TabsList>
+            </TabsList>
+          </div>
 
           <TabsContent value="tenants" className="mt-6">
             <section className="space-y-4">

@@ -141,6 +141,7 @@ for (const path of [
   "docs/phase73-hosted-activation-decision-register.md",
   "docs/phase74-adapter-switch-evidence-matrix.md",
   "docs/phase75-design-frame-adoption-backlog.md",
+  "docs/phase76-active-object-signal.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -234,6 +235,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-decisions.mjs",
   "scripts/validate-kinflo-adapter-switch-evidence.mjs",
   "scripts/validate-kinflo-design-frame-backlog.mjs",
+  "scripts/validate-kinflo-active-object-signal.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1248,6 +1250,18 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
   "No secret values are read or printed.",
+  "active-object signal",
+]);
+
+requireIncludes("docs/phase76-active-object-signal.md", [
+  "Phase 76: Active Object Signal",
+  "npm run kinflo:validate-active-object-signal",
+  "ShellActiveObjectSignal",
+  "activeObjectSignal",
+  "section-kinflo-active-object-signal",
+  "button-active-object-live-gated",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
 ]);
 
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
@@ -1273,7 +1287,9 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"design-polish\"",
   "\"hosted-activation\"",
   "\"docs/phase73-hosted-activation-decision-register.md\"",
+  "\"docs/phase76-active-object-signal.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
+  "\"npm run kinflo:validate-active-object-signal\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1357,6 +1373,8 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-console\"",
   "\"kinflo:validate-saas-execution-ledger\"",
   "\"kinflo:validate-hosted-activation-decisions\"",
+  "\"kinflo:validate-design-frame-backlog\"",
+  "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1977,6 +1995,18 @@ requireIncludes("scripts/validate-kinflo-saas-execution-ledger.mjs", [
   "KinFlo SaaS execution ledger validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-active-object-signal.mjs", [
+  "docs/phase76-active-object-signal.md",
+  "ShellActiveObjectSignal",
+  "section-kinflo-active-object-signal",
+  "button-active-object-live-gated",
+  "text-kinflo-active-object-disabled-reason",
+  "section-kinflo-active-object-unblock-condition",
+  "active object signal does not import generated API",
+  "active object signal does not execute live Convex",
+  "KinFlo active object signal validation",
+]);
+
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
   "docs/phase73-hosted-activation-decision-register.md",
   "section-kinflo-hosted-activation-decision-register",
@@ -2341,6 +2371,10 @@ requireIncludes("convex/crm.ts", [
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [
   "KinfloShellSnapshot",
+  "ShellActiveObjectSignal",
+  "fixtureActiveObjectSignal",
+  "activeObjectSignal: ShellActiveObjectSignal",
+  "activeObjectSignal: fixtureActiveObjectSignal",
   "fixtureKinfloShellAdapter",
   "liveKinfloShellAdapter",
   "selectKinfloShellDataAdapter",
@@ -2557,6 +2591,13 @@ requireIncludes("docs/convex-adapter-switch-plan.json", [
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "getKinfloShellSnapshot",
+  "section-kinflo-active-object-signal",
+  "text-kinflo-active-object-name",
+  "text-kinflo-active-object-next-decision",
+  "button-active-object-live-gated",
+  "text-kinflo-active-object-disabled-reason",
+  "section-kinflo-active-object-unblock-condition",
+  "snapshot.activeObjectSignal",
   "Data Mode",
   "Live adapter readiness",
   "snapshot.liveAdapterBindings",

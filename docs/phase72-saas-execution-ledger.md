@@ -18,7 +18,7 @@ npm run kinflo:validate-saas-execution-ledger
 
 ## Why This Exists
 
-The branch now contains Phase 0 intake proof, provider-light Convex modules, the Kinflo OS shell, site factory contracts, launch decision packets, design polish, adapter-switch evidence, design-frame adoption backlog, and hosted activation gates. The ledger makes the current operating state explicit so the next phase can move forward without treating local fixtures, docs, or dry runs as live readiness.
+The branch now contains Phase 0 intake proof, provider-light Convex modules, the Kinflo OS shell, site factory contracts, launch decision packets, design polish, adapter-switch evidence, the design-frame adoption backlog, the Phase 76 active-object signal, and hosted activation gates. The ledger makes the current operating state explicit so the next phase can move forward without treating local fixtures, docs, or dry runs as live readiness.
 
 ## Current Lane Status
 
@@ -49,7 +49,7 @@ The next repo-safe implementation work should stay in one of these lanes until V
 
 - tighten fixture-to-live parity and adapter-switch evidence through `docs/convex-adapter-switch-evidence-matrix.json`,
 - keep the human-gate decision register current without storing secrets,
-- continue tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, and the Phase 75 design-frame adoption backlog inside provider-light Kinflo OS surfaces.
+- continue tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, the active-object signal, and the Phase 75 design-frame adoption backlog inside provider-light Kinflo OS surfaces.
 
 ## Human Gates Still Required
 
@@ -65,6 +65,7 @@ The next repo-safe implementation work should stay in one of these lanes until V
 
 ```bash
 npm run kinflo:validate-saas-execution-ledger
+npm run kinflo:validate-active-object-signal
 npm run kinflo:validate-phases
 npm run convex:check
 npm run build

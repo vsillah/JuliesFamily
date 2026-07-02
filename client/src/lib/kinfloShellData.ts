@@ -128,6 +128,28 @@ export type ShellHostedActivationRunbook = {
   evidenceTargets: string[];
 };
 
+export type ShellActiveObjectSignal = {
+  objectType: string;
+  label: string;
+  tenantSlug: string;
+  siteKey: string;
+  environment: string;
+  environmentDetail: string;
+  readinessLabel: string;
+  readinessPercent: number;
+  launchPosture: string;
+  nextDecision: string;
+  owner: string;
+  requiredEvidence: string[];
+  blockedLiveActions: string[];
+  disabledActionLabel: string;
+  disabledActionReason: string;
+  unblockCondition: string;
+  providerBoundary: string;
+  evidenceLinks: string[];
+  convexFunctions: string[];
+};
+
 export type ShellMetric = {
   label: string;
   value: string;
@@ -910,6 +932,7 @@ export type ShellLaunchGate = {
 
 export type KinfloShellSnapshot = {
   dataMode: ShellDataMode;
+  activeObjectSignal: ShellActiveObjectSignal;
   metrics: ShellMetric[];
   liveAdapterBindings: ShellLiveAdapterBinding[];
   tenants: ShellTenant[];
@@ -1004,6 +1027,44 @@ const fixtureSites: ShellSite[] = [
     previewPath: "/kinflo-sites/advisor-client-site",
   },
 ];
+
+const fixtureActiveObjectSignal: ShellActiveObjectSignal = {
+  objectType: "Client site",
+  label: "Julie Family Public Site",
+  tenantSlug: "julies-family",
+  siteKey: "julies-family-public",
+  environment: "Fixture review",
+  environmentDetail: "Provider-light shell using typed local fixtures until hosted Convex activation and generated API review pass.",
+  readinessLabel: "3 of 5 Site Studio gates ready",
+  readinessPercent: 60,
+  launchPosture: "Review, not publish",
+  nextDecision: "Review final screenshot, accessibility, performance, and rollback evidence before accepting the public launch.",
+  owner: "platform.super_admin",
+  requiredEvidence: [
+    "hosted visual QA evidence",
+    "read-only hosted smoke transcript",
+    "publish rollback owner",
+  ],
+  blockedLiveActions: [
+    "publish public site",
+    "switch fixture adapter",
+    "run hosted smoke",
+  ],
+  disabledActionLabel: "Live publish gated",
+  disabledActionReason: "Hosted Convex activation, generated API review, visual QA evidence, domain readiness, and launch signoff are incomplete.",
+  unblockCondition: "Approve hosted ownership and codegen window, pass read-only smokes, accept the launch decision packet, then approve mutation order and rollback.",
+  providerBoundary: "This active-object signal is local evidence only. It does not publish content, write leads, switch adapters, execute hosted Convex, attach domains, send invites, or call providers.",
+  evidenceLinks: [
+    "docs/phase75-design-frame-adoption-backlog.md",
+    "docs/phase76-active-object-signal.md",
+    "docs/phase69-client-launch-decisions.md",
+  ],
+  convexFunctions: [
+    "launchReadiness.getSiteLaunchReadiness",
+    "siteFactory.listClientWebsiteLaunchDecisionPackets",
+    "activation.readiness",
+  ],
+};
 
 const fixtureBillingPlans: ShellBillingPlan[] = [
   {
@@ -4402,6 +4463,7 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
         activationGate: runtime.activationGate,
         convexFunctions: runtime.functionNames,
       },
+      activeObjectSignal: fixtureActiveObjectSignal,
       metrics: buildMetrics(),
       liveAdapterBindings: fixtureLiveAdapterBindings,
       tenants: fixtureTenants,
