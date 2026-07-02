@@ -157,6 +157,7 @@ for (const path of [
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
+  "docs/phase99-site-studio-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
   "docs/phase89-adapter-switch-acceptance-matrix.md",
@@ -275,6 +276,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
+  "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
   "scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
@@ -1565,6 +1567,19 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase99-site-studio-deep-links.md", [
+  "Phase 99: Site Studio Deep Links",
+  "npm run kinflo:validate-site-studio-deep-links",
+  "studioLane",
+  "studioStage",
+  "readInitialClientWebsiteStudioLane",
+  "readInitialClientWebsiteWorkbenchStage",
+  "selectClientWebsiteStudioLane",
+  "selectClientWebsiteWorkbenchStage",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase87-adapter-switch-runway.md", [
   "Phase 87: Adapter Switch Runway",
   "npm run kinflo:validate-adapter-switch-runway",
@@ -1721,6 +1736,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase85-hosted-activation-approval-packet.md\"",
   "\"docs/convex-hosted-activation-approval-packet.json\"",
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
+  "\"docs/phase99-site-studio-deep-links.md\"",
   "\"docs/phase87-adapter-switch-runway.md\"",
   "\"docs/phase88-generated-api-review-board.md\"",
   "\"docs/phase89-adapter-switch-acceptance-matrix.md\"",
@@ -1742,6 +1758,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-handoff-permission-strip\"",
   "\"npm run kinflo:validate-claude-frame-ingestion\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
+  "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-adapter-switch-runway\"",
   "\"npm run kinflo:validate-generated-api-review-board\"",
   "\"npm run kinflo:validate-adapter-switch-acceptance-matrix\"",
@@ -1849,6 +1866,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-profile-generated-api-coverage\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
+  "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:validate-generated-api-review-board\"",
   "\"kinflo:validate-adapter-switch-acceptance-matrix\"",
@@ -2711,6 +2729,19 @@ requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", 
   "KinFlo Site Studio scroll consolidation validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-site-studio-deep-links.mjs", [
+  "docs/phase99-site-studio-deep-links.md",
+  "studioLane",
+  "studioStage",
+  "readInitialClientWebsiteStudioLane",
+  "readInitialClientWebsiteWorkbenchStage",
+  "selectClientWebsiteStudioLane",
+  "selectClientWebsiteWorkbenchStage",
+  "Site Studio deep links do not import generated API",
+  "Site Studio deep links do not execute live Convex",
+  "KinFlo Site Studio deep-link validation",
+]);
+
 requireIncludes("scripts/validate-kinflo-adapter-switch-runway.mjs", [
   "docs/phase87-adapter-switch-runway.md",
   "docs/convex-adapter-switch-plan.json",
@@ -3546,7 +3577,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "select-kinflo-wizard-template",
   "checkbox-page-",
   "Site Factory Launch Packets",
-  "setActiveTab(\"factory\")",
+  "selectShellTab(\"factory\")",
   "CRM Lead Workspace",
   "Public Intake",
   "Experience Preferences",

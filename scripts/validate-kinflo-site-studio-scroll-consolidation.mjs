@@ -66,7 +66,8 @@ for (const path of [
 }
 
 const compactMarkers = [
-  "type ClientWebsiteStudioLane = \"queue\" | \"configuration\" | \"handoff\" | \"workbench\"",
+  "const clientWebsiteStudioLaneValues = [\"queue\", \"configuration\", \"handoff\", \"workbench\"] as const",
+  "type ClientWebsiteStudioLane = (typeof clientWebsiteStudioLaneValues)[number]",
   "clientWebsiteStudioLane",
   "setClientWebsiteStudioLane",
   "tabs-kinflo-client-studio-lanes",

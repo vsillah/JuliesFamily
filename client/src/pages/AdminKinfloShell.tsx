@@ -124,7 +124,10 @@ const shellTabValues = [
 ] as const;
 
 type ShellTabValue = (typeof shellTabValues)[number];
-type ClientWebsiteStudioLane = "queue" | "configuration" | "handoff" | "workbench";
+const clientWebsiteStudioLaneValues = ["queue", "configuration", "handoff", "workbench"] as const;
+type ClientWebsiteStudioLane = (typeof clientWebsiteStudioLaneValues)[number];
+const clientWebsiteWorkbenchStageValues = ["sites", "preview", "launch"] as const;
+type ClientWebsiteWorkbenchStage = (typeof clientWebsiteWorkbenchStageValues)[number];
 
 const shellTabLabels: Record<ShellTabValue, string> = {
   tenants: "Tenants",
@@ -276,6 +279,26 @@ function readInitialShellTab(): ShellTabValue {
   }
   const tab = new URLSearchParams(window.location.search).get("tab");
   return shellTabValues.includes(tab as ShellTabValue) ? (tab as ShellTabValue) : "tenants";
+}
+
+function readInitialClientWebsiteStudioLane(): ClientWebsiteStudioLane {
+  if (typeof window === "undefined") {
+    return "workbench";
+  }
+  const lane = new URLSearchParams(window.location.search).get("studioLane");
+  return clientWebsiteStudioLaneValues.includes(lane as ClientWebsiteStudioLane)
+    ? (lane as ClientWebsiteStudioLane)
+    : "workbench";
+}
+
+function readInitialClientWebsiteWorkbenchStage(): ClientWebsiteWorkbenchStage {
+  if (typeof window === "undefined") {
+    return "preview";
+  }
+  const stage = new URLSearchParams(window.location.search).get("studioStage");
+  return clientWebsiteWorkbenchStageValues.includes(stage as ClientWebsiteWorkbenchStage)
+    ? (stage as ClientWebsiteWorkbenchStage)
+    : "preview";
 }
 
 function statusBadge(status: KinfloShellStatus) {
@@ -1398,7 +1421,7 @@ function MobileInspectionMode({
 export default function AdminKinfloShell() {
   const { isLoading } = useAuth();
   const { isAdmin } = useUserRole();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const snapshot = getKinfloShellSnapshot();
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
@@ -1448,7 +1471,8 @@ export default function AdminKinfloShell() {
   const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
   const [clientWebsiteStudioSiteKey, setClientWebsiteStudioSiteKey] = useState(snapshot.clientWebsiteStudio.defaultSiteKey);
-  const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>("workbench");
+  const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>(readInitialClientWebsiteStudioLane);
+  const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -2212,6 +2236,61 @@ export default function AdminKinfloShell() {
     }
   }, [isAdmin, isLoading, navigate]);
 
+  useEffect(() => {
+    const nextTab = readInitialShellTab();
+    const nextLane = readInitialClientWebsiteStudioLane();
+    const nextStage = readInitialClientWebsiteWorkbenchStage();
+    setActiveTab((current) => (current === nextTab ? current : nextTab));
+    setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
+    setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
+  }, [location]);
+
+  const updateKinfloShellRoute = (updates: Record<string, string | undefined>) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    for (const [key, value] of Object.entries(updates)) {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    }
+    const query = params.toString();
+    navigate(query ? `/admin/kinflo-os?${query}` : "/admin/kinflo-os");
+  };
+
+  const selectShellTab = (tab: ShellTabValue) => {
+    setActiveTab(tab);
+    updateKinfloShellRoute({
+      tab,
+      studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
+      studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+    });
+  };
+
+  const selectClientWebsiteStudioLane = (lane: ClientWebsiteStudioLane) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane(lane);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioLane: lane,
+      studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+    });
+  };
+
+  const selectClientWebsiteWorkbenchStage = (stage: ClientWebsiteWorkbenchStage) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("workbench");
+    setClientWebsiteWorkbenchStage(stage);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioLane: "workbench",
+      studioStage: stage,
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -2241,11 +2320,11 @@ export default function AdminKinfloShell() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Button className="bg-slate-950 hover:bg-slate-800" onClick={() => setActiveTab("factory")} data-testid="button-create-tenant">
+              <Button className="bg-slate-950 hover:bg-slate-800" onClick={() => selectShellTab("factory")} data-testid="button-create-tenant">
                 <Plus className="mr-2 h-4 w-4" />
                 New Tenant
               </Button>
-              <Button variant="outline" className="border-slate-300 bg-white" onClick={() => setActiveTab("factory")} data-testid="button-create-site">
+              <Button variant="outline" className="border-slate-300 bg-white" onClick={() => selectShellTab("factory")} data-testid="button-create-site">
                 <Globe2 className="mr-2 h-4 w-4" />
                 New Site
               </Button>
@@ -2395,15 +2474,15 @@ export default function AdminKinfloShell() {
               </div>
             </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => setActiveTab("launch-readiness")}>
+              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => selectShellTab("launch-readiness")}>
                 <Rocket className="mr-2 h-3 w-3" />
                 Launch
               </Button>
-              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => setActiveTab("adapter-switch")}>
+              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => selectShellTab("adapter-switch")}>
                 <Workflow className="mr-2 h-3 w-3" />
                 Switch
               </Button>
-              <Button size="sm" className="bg-white text-slate-950 hover:bg-slate-200" onClick={() => setActiveTab("hosted-activation")}>
+              <Button size="sm" className="bg-white text-slate-950 hover:bg-slate-200" onClick={() => selectShellTab("hosted-activation")}>
                 <KeyRound className="mr-2 h-3 w-3" />
                 Activation
               </Button>
@@ -2526,7 +2605,7 @@ export default function AdminKinfloShell() {
           </CardContent>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ShellTabValue)} className="mt-7 min-w-0">
+        <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className="mt-7 min-w-0">
           <section
             className="mb-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
             data-testid="section-kinflo-workflow-navigation-rail"
@@ -2556,7 +2635,7 @@ export default function AdminKinfloShell() {
                   <button
                     key={lane.key}
                     type="button"
-                    onClick={() => setActiveTab(lane.primaryTab)}
+                    onClick={() => selectShellTab(lane.primaryTab)}
                     aria-pressed={isActiveLane}
                     className={`min-w-0 rounded-xl border p-3 text-left transition ${
                       isActiveLane
@@ -5378,7 +5457,7 @@ export default function AdminKinfloShell() {
                           type="button"
                           role="tab"
                           aria-selected={isActiveLane}
-                          onClick={() => setClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
+                          onClick={() => selectClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
                           className={`rounded-sm px-3 py-1.5 text-sm font-medium transition ${
                             isActiveLane
                               ? "bg-white text-slate-950 shadow-sm"
@@ -5468,7 +5547,7 @@ export default function AdminKinfloShell() {
                     className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
                     data-testid="section-kinflo-client-workbench-grid"
                   >
-                    <Tabs defaultValue="preview" className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
+                    <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
                       <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
                         <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
                         <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
@@ -6914,7 +6993,7 @@ export default function AdminKinfloShell() {
                         onClick={() => {
                           if (selectedClientWebsiteLaunchBlueprint?.launchPacketId) {
                             setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId);
-                            setActiveTab("factory");
+                            selectShellTab("factory");
                           }
                         }}
                         data-testid="button-open-client-website-blueprint-factory"
