@@ -18,7 +18,7 @@ npm run kinflo:validate-hosted-activation-decisions
 
 ## Decision Coverage
 
-Decision register items: 7
+Decision register items: 8
 
 - `credential-rotation-review`
 - `history-purge-or-private-risk`
@@ -26,6 +26,7 @@ Decision register items: 7
 - `env-and-codegen-window`
 - `read-only-smoke-authorization`
 - `mutation-and-rollback-order`
+- `adapter-switch-review`
 - `provider-write-and-client-launch-signoff`
 
 Each decision records:

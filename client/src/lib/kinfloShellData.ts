@@ -5647,6 +5647,18 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       providerBoundary: "This decision does not switch adapters or execute mutation smokes.",
     },
     {
+      id: "adapter-switch-review",
+      label: "Adapter switch review",
+      owner: "Vambah",
+      status: "blocked_until_prior_gate",
+      requiredBefore: "live shell data",
+      decisionNeeded: "Approve replacing fixture reads with generated API bindings one surface at a time after hosted smoke evidence passes.",
+      evidenceTarget: "Surface-level adapter switch evidence, rollback confirmation, generated binding review, and no cross-tenant scope leak.",
+      approvedState: "One approved surface can move from fixture data to generated API bindings in a scoped PR.",
+      blockedUntil: "Mutation smoke order, rollback path, and hosted evidence ledger are accepted.",
+      providerBoundary: "This decision does not import generated API files, switch adapters, or execute live shell reads.",
+    },
+    {
       id: "provider-write-and-client-launch-signoff",
       label: "Provider-write and client launch signoff",
       owner: "Vambah",

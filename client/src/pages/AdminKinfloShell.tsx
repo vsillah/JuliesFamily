@@ -70,6 +70,7 @@ import {
   type ShellClientWebsiteVisualQaBudget,
   type ShellClientWebsiteVisualQaEvidencePacket,
   type ShellDomainDraft,
+  type ShellHostedActivationDecision,
   type ShellHostedActivationStepStatus,
   type ShellIntegrationDraft,
   type ShellLaunchReadinessSite,
@@ -252,6 +253,14 @@ const clientWebsiteSpinUpQueueTestIds = {
   gatedAction: "button-client-website-spin-up-gated",
 } as const;
 
+const hostedActivationOwnerChecklistTestIds = {
+  root: "section-kinflo-hosted-activation-owner-checklist",
+  summary: "section-kinflo-hosted-activation-owner-checklist-summary",
+  scroll: "section-kinflo-hosted-activation-owner-checklist-scroll",
+  nextGate: "text-hosted-activation-owner-checklist-next-gate",
+  gatedAction: "button-hosted-activation-owner-checklist-gated",
+} as const;
+
 function readInitialShellTab(): ShellTabValue {
   if (typeof window === "undefined") {
     return "tenants";
@@ -304,6 +313,99 @@ function hostedActivationStatusBadge(status: ShellHostedActivationStepStatus) {
     return <Badge variant="destructive">Provider gate</Badge>;
   }
   return <Badge variant="outline">Pending approval</Badge>;
+}
+
+function HostedActivationOwnerChecklist({
+  decisions,
+  nextHumanGate,
+  providerBoundary,
+  testIds,
+}: {
+  decisions: ShellHostedActivationDecision[];
+  nextHumanGate: string;
+  providerBoundary: string;
+  testIds: typeof hostedActivationOwnerChecklistTestIds;
+}) {
+  const pendingOwnerDecisions = decisions.filter((decision) => decision.status === "pending_owner_decision").length;
+  const blockedUntilPriorGate = decisions.filter((decision) => decision.status === "blocked_until_prior_gate").length;
+  const readyToRecord = decisions.filter((decision) => decision.status === "ready_to_record").length;
+  const nextDecision = decisions.find((decision) => decision.status === "pending_owner_decision")
+    ?? decisions.find((decision) => decision.status === "blocked_until_prior_gate")
+    ?? decisions[0];
+  const summaryItems = [
+    { label: "Decisions", value: decisions.length },
+    { label: "Owner", value: pendingOwnerDecisions },
+    { label: "Prior gate", value: blockedUntilPriorGate },
+    { label: "Ready", value: readyToRecord },
+  ];
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+              Owner gate
+            </Badge>
+            <Badge className="bg-slate-950 hover:bg-slate-950">prepare only</Badge>
+          </div>
+          <h3 className="mt-3 text-base font-semibold text-slate-950">Hosted activation owner checklist</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600" data-testid={testIds.nextGate}>
+            {nextHumanGate}
+          </p>
+        </div>
+        <Button disabled variant="outline" data-testid={testIds.gatedAction}>
+          <KeyRound className="mr-2 h-4 w-4" />
+          Approval capture gated
+        </Button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
+        {summaryItems.map((item) => (
+          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
+        <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1" data-testid={testIds.scroll}>
+          {decisions.map((decision) => (
+            <div key={decision.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid={`card-hosted-activation-owner-checklist-${decision.id}`}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <div className="text-sm font-semibold text-slate-950">{decision.label}</div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    {decision.owner} · before {decision.requiredBefore}
+                  </div>
+                </div>
+                <Badge variant={decision.status === "pending_owner_decision" ? "secondary" : "outline"} className="self-start whitespace-nowrap">
+                  {decision.status.replaceAll("_", " ")}
+                </Badge>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-slate-600">{decision.decisionNeeded}</p>
+              <div className="mt-3 rounded-lg border border-white bg-white p-2 text-xs leading-5 text-slate-600">
+                <span className="font-medium text-slate-900">Evidence: </span>
+                {decision.evidenceTarget}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <aside className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+          <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Next owner action</div>
+          <div className="mt-2 text-sm font-semibold text-amber-950">{nextDecision?.label ?? "Owner decision pending"}</div>
+          <p className="mt-2 text-xs leading-5 text-amber-900">
+            {nextDecision?.blockedUntil ?? "Owner approval is required before hosted activation can move forward."}
+          </p>
+          <div className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900">
+            {providerBoundary}
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
 }
 
 function ConfigurationAffordanceStrip({
@@ -3141,6 +3243,13 @@ export default function AdminKinfloShell() {
                     Review-only
                   </Badge>
                 </div>
+
+                <HostedActivationOwnerChecklist
+                  decisions={snapshot.hostedActivationRunbook.decisionRegister}
+                  nextHumanGate={snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
+                  providerBoundary={snapshot.hostedActivationRunbook.activationConsole.providerBoundary}
+                  testIds={hostedActivationOwnerChecklistTestIds}
+                />
 
                 <Card className="overflow-hidden border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-console">
                   <CardHeader className="border-b border-slate-100 bg-slate-950 text-white">

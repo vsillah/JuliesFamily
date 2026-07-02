@@ -151,6 +151,7 @@ for (const path of [
   "docs/phase83-client-handoff-permission-strip.md",
   "docs/phase94-client-admin-handoff-matrix.md",
   "docs/phase95-client-website-spin-up-queue.md",
+  "docs/phase96-hosted-activation-owner-checklist.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
@@ -267,6 +268,7 @@ for (const path of [
   "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
   "scripts/validate-kinflo-client-admin-handoff-matrix.mjs",
   "scripts/validate-kinflo-client-website-spin-up-queue.mjs",
+  "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
@@ -1449,6 +1451,24 @@ requireIncludes("docs/phase95-client-website-spin-up-queue.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase96-hosted-activation-owner-checklist.md", [
+  "Phase 96: Hosted Activation Owner Checklist",
+  "npm run kinflo:validate-hosted-activation-owner-checklist",
+  "HostedActivationOwnerChecklist",
+  "hostedActivationRunbook.decisionRegister",
+  "section-kinflo-hosted-activation-owner-checklist",
+  "section-kinflo-hosted-activation-owner-checklist-summary",
+  "section-kinflo-hosted-activation-owner-checklist-scroll",
+  "text-hosted-activation-owner-checklist-next-gate",
+  "button-hosted-activation-owner-checklist-gated",
+  "Total decisions: 8",
+  "Pending owner decisions: 2",
+  "Blocked until prior gate: 6",
+  "Ready to record: 0",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase84-claude-frame-ingestion-packet.md", [
   "Phase 84: Claude Frame Ingestion Packet",
   "npm run kinflo:validate-claude-frame-ingestion",
@@ -1633,9 +1653,10 @@ requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "section-kinflo-hosted-activation-decision-register",
   "button-hosted-activation-decision-gated",
   "text-hosted-activation-decision-boundary",
-  "Decision register items: 7",
+  "Decision register items: 8",
   "credential-rotation-review",
   "history-purge-or-private-risk",
+  "adapter-switch-review",
   "provider-write-and-client-launch-signoff",
 ]);
 
@@ -1659,6 +1680,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase83-client-handoff-permission-strip.md\"",
   "\"docs/phase94-client-admin-handoff-matrix.md\"",
   "\"docs/phase95-client-website-spin-up-queue.md\"",
+  "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase84-claude-frame-ingestion-packet.md\"",
   "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
   "\"docs/phase85-hosted-activation-approval-packet.md\"",
@@ -1673,6 +1695,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase93-adapter-switch-cutover-checklist.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
+  "\"npm run kinflo:validate-hosted-activation-owner-checklist\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
   "\"npm run kinflo:validate-decision-gate-rail\"",
@@ -1774,6 +1797,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-saas-execution-ledger\"",
   "\"kinflo:validate-hosted-activation-decisions\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
+  "\"kinflo:validate-hosted-activation-owner-checklist\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
@@ -2565,6 +2589,20 @@ requireIncludes("scripts/validate-kinflo-client-website-spin-up-queue.mjs", [
   "client website spin-up queue does not import generated API",
   "client website spin-up queue does not execute live Convex",
   "KinFlo client website spin-up queue validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-activation-owner-checklist.mjs", [
+  "docs/phase96-hosted-activation-owner-checklist.md",
+  "HostedActivationOwnerChecklist",
+  "section-kinflo-hosted-activation-owner-checklist",
+  "section-kinflo-hosted-activation-owner-checklist-summary",
+  "section-kinflo-hosted-activation-owner-checklist-scroll",
+  "text-hosted-activation-owner-checklist-next-gate",
+  "button-hosted-activation-owner-checklist-gated",
+  "owner checklist decision ids count is 8",
+  "owner checklist does not import generated API",
+  "owner checklist does not execute live Convex",
+  "KinFlo hosted activation owner checklist validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-claude-frame-ingestion.mjs", [
@@ -3752,6 +3790,15 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-website-spin-up-scroll",
   "button-client-website-spin-up-gated",
   "snapshot.clientWebsiteStudio.spinUpQueue",
+  "HostedActivationOwnerChecklist",
+  "hostedActivationOwnerChecklistTestIds",
+  "section-kinflo-hosted-activation-owner-checklist",
+  "section-kinflo-hosted-activation-owner-checklist-summary",
+  "section-kinflo-hosted-activation-owner-checklist-scroll",
+  "text-hosted-activation-owner-checklist-next-gate",
+  "button-hosted-activation-owner-checklist-gated",
+  "decisions={snapshot.hostedActivationRunbook.decisionRegister}",
+  "Approval capture gated",
   "Admin handoff gated",
   "snapshot.clientWebsiteStudio.adminHandoffMatrix",
   "clientWebsiteWorkbenchGridContract",

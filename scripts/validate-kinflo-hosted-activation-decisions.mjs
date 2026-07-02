@@ -75,7 +75,7 @@ requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "section-kinflo-hosted-activation-decision-register",
   "button-hosted-activation-decision-gated",
   "text-hosted-activation-decision-boundary",
-  "Decision register items: 7",
+  "Decision register items: 8",
   "credential-rotation-review",
   "history-purge-or-private-risk",
   "provider-write-and-client-launch-signoff",
@@ -94,6 +94,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "env-and-codegen-window",
   "read-only-smoke-authorization",
   "mutation-and-rollback-order",
+  "adapter-switch-review",
   "provider-write-and-client-launch-signoff",
   "This decision does not read, print, move, rotate, or validate secret values.",
   "This decision does not run codegen, import generated API files, or print env values.",
@@ -122,14 +123,15 @@ const decisionIds = [
   "env-and-codegen-window",
   "read-only-smoke-authorization",
   "mutation-and-rollback-order",
+  "adapter-switch-review",
   "provider-write-and-client-launch-signoff",
 ];
 const presentDecisionIds = decisionIds.filter((decisionId) => shellData.includes(`id: "${decisionId}"`));
 
-if (presentDecisionIds.length === 7) {
-  pass("activation decision register includes seven decision ids");
+if (presentDecisionIds.length === 8) {
+  pass("activation decision register includes eight decision ids");
 } else {
-  fail("activation decision register includes seven decision ids", `Found ${presentDecisionIds.length}.`);
+  fail("activation decision register includes eight decision ids", `Found ${presentDecisionIds.length}.`);
 }
 
 if (shellData.includes("pending_owner_decision") && shellData.includes("blocked_until_prior_gate")) {
@@ -164,7 +166,7 @@ for (const check of checks) {
 
 console.log("\nKinFlo hosted activation decision register validation");
 console.log("Admin route: /admin/kinflo-os?tab=hosted-activation");
-console.log("Decision register items: 7");
+console.log("Decision register items: 8");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");

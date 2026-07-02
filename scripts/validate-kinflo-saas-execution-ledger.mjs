@@ -90,6 +90,7 @@ for (const path of [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase94-client-admin-handoff-matrix.md",
   "docs/phase95-client-website-spin-up-queue.md",
+  "docs/phase96-hosted-activation-owner-checklist.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
   "docs/phase89-adapter-switch-acceptance-matrix.md",
@@ -118,6 +119,7 @@ for (const path of [
   "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
   "scripts/validate-kinflo-client-admin-handoff-matrix.mjs",
   "scripts/validate-kinflo-client-website-spin-up-queue.mjs",
+  "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
@@ -227,6 +229,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-adapter-switch-cutover-checklist",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
+  "npm run kinflo:validate-hosted-activation-owner-checklist",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
   "npm run kinflo:validate-map",
@@ -261,6 +264,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 95 client website spin-up queue",
   "Phase 84 Claude frame ingestion packet",
   "Phase 85 hosted activation approval packet",
+  "Phase 96 hosted activation owner checklist",
   "Site Studio scroll consolidation",
   "Phase 87 adapter switch runway",
   "Phase 88 generated API review board",
@@ -269,7 +273,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 91 hosted smoke execution sequencer",
   "Phase 92 hosted smoke evidence ledger",
   "Phase 93 adapter switch cutover checklist",
-  "human-gate decision register and Phase 85 owner approval packet current without storing secrets",
+  "human-gate decision register, Phase 85 owner approval packet, and Phase 96 hosted activation owner checklist current without storing secrets",
 ]);
 
 requireIncludes("package.json", [
@@ -284,6 +288,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-handoff-permission-strip\"",
   "\"kinflo:validate-client-admin-handoff-matrix\"",
   "\"kinflo:validate-client-website-spin-up-queue\"",
+  "\"kinflo:validate-hosted-activation-owner-checklist\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-adapter-switch-runway\"",
