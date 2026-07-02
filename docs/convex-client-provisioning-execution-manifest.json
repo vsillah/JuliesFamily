@@ -1,0 +1,200 @@
+{
+  "schemaVersion": 1,
+  "phase": 61,
+  "name": "KinFlo client provisioning execution manifest",
+  "status": "provider-light-dry-run-contract",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "notes": "This manifest defines the dry-run execution order for client website provisioning orders. It does not create tenants, create sites, grant memberships, invite users, send email, activate billing, attach domains, publish content, write leads, call providers, import generated API, or execute hosted activation."
+  },
+  "blockedUntil": [
+    "Hosted Convex deployment is approved, provisioned, and owned by Vambah.",
+    "CONVEX_DEPLOYMENT and VITE_CONVEX_URL are configured outside committed source.",
+    "Generated Convex API codegen is approved, reviewed, and import-gated.",
+    "Read-only hosted smokes pass for viewer, roles, plan catalog, starter templates, launch blueprints, admin permission presets, provisioning orders, and public renderer.",
+    "Mutation smoke order is approved with cleanup and rollback owner.",
+    "Invitation delivery policy is approved before any email is sent.",
+    "Domain, storage, billing, AI, SMS, and email provider boundaries are reviewed before provider writes."
+  ],
+  "executionOrders": [
+    {
+      "siteKey": "julies-family-public",
+      "orderLabel": "Julie Family seeded retrofit order",
+      "tenantSlug": "julies-family",
+      "executionMode": "read_then_review",
+      "allowedBeforeHostedActivation": true,
+      "dryRunSteps": [
+        {
+          "id": "julie-seeded-tenant-confirmation",
+          "order": 10,
+          "mode": "read",
+          "functions": [
+            "siteFactory.listClientWebsiteProvisioningOrders",
+            "controlPlane.listTenants",
+            "controlPlane.listSitesForTenant"
+          ],
+          "evidence": [
+            "Julie Family tenant slug is present",
+            "founding platform steward is still the owner role",
+            "site remains unpublished from live Convex until renderer smoke passes"
+          ],
+          "blockedLiveActions": [
+            "membership grant",
+            "content publish write",
+            "public lead write"
+          ],
+          "rollback": "Keep Julie Family on fixture-backed public preview and preserve source provenance notes."
+        },
+        {
+          "id": "julie-content-provenance-review",
+          "order": 20,
+          "mode": "read",
+          "functions": [
+            "siteBuilder.getSiteDraft",
+            "publicSite.resolvePublishedSite"
+          ],
+          "evidence": [
+            "existing program, donation, volunteer, and intake content maps to reusable blocks",
+            "public renderer fixture-to-live smoke is listed before publish",
+            "content provenance review is captured"
+          ],
+          "blockedLiveActions": [
+            "generated API import",
+            "public publish write",
+            "domain attachment"
+          ],
+          "rollback": "Keep public renderer on fixtures and do not attach domains until provenance and renderer smoke pass."
+        }
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "orderLabel": "Advisor client tenant build order",
+      "tenantSlug": "advisor-client-starter",
+      "executionMode": "mutation_after_approval",
+      "allowedBeforeHostedActivation": false,
+      "dryRunSteps": [
+        {
+          "id": "advisor-plan-entitlement-review",
+          "order": 10,
+          "mode": "read",
+          "functions": [
+            "controlPlane.listPlanCatalog",
+            "controlPlane.entitlementSnapshot",
+            "entitlements.checkEntitlementLimit"
+          ],
+          "evidence": [
+            "Client Build plan is available",
+            "site, member, custom-domain, and campaign limits are understood",
+            "tenant creation is blocked until entitlement review passes"
+          ],
+          "blockedLiveActions": [
+            "controlPlane.createTenant mutation",
+            "Stripe billing activation"
+          ],
+          "rollback": "Keep order in blocked_provider_gate status and do not create a tenant."
+        },
+        {
+          "id": "advisor-tenant-site-invite-sequence",
+          "order": 20,
+          "mode": "write",
+          "functions": [
+            "controlPlane.createTenant",
+            "siteFactory.createSiteFromTemplate",
+            "controlPlane.createInvitation",
+            "controlPlane.grantMembership"
+          ],
+          "evidence": [
+            "tenant admin owner role is approved",
+            "Advisor Consultant template quality contract is reviewed",
+            "client admin invite is scoped to tenant and site",
+            "invitation email delivery remains blocked until policy approval"
+          ],
+          "blockedLiveActions": [
+            "client admin invitation email",
+            "membership grant",
+            "public publish write"
+          ],
+          "rollback": "Archive smoke tenant and site records, revoke pending invite, and preserve audit evidence."
+        },
+        {
+          "id": "advisor-domain-lead-publish-smoke",
+          "order": 30,
+          "mode": "mixed",
+          "functions": [
+            "siteBuilder.upsertDomain",
+            "crm.submitLead",
+            "siteBuilder.publishPage",
+            "publicSite.resolvePublishedSite"
+          ],
+          "evidence": [
+            "domain metadata writes do not create DNS or SSL provider records",
+            "lead smoke creates test-only scoped lead",
+            "publish remains blocked until public renderer and rollback review pass"
+          ],
+          "blockedLiveActions": [
+            "domain verification write",
+            "public publish write",
+            "CRM lead write"
+          ],
+          "rollback": "Deactivate smoke domain metadata, mark lead as test data, and keep public route on preview fallback."
+        }
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "orderLabel": "Campaign microsite scoped editor order",
+      "tenantSlug": "campaign-microsite-lab",
+      "executionMode": "campaign_after_consent",
+      "allowedBeforeHostedActivation": false,
+      "dryRunSteps": [
+        {
+          "id": "campaign-site-editor-scope-review",
+          "order": 10,
+          "mode": "read",
+          "functions": [
+            "siteFactory.listClientWebsiteProvisioningOrders",
+            "accessPolicy.viewerPermissionSnapshot",
+            "campaigns.listCampaignDrafts"
+          ],
+          "evidence": [
+            "site editor scope is limited to the campaign site",
+            "campaign consent review is required before provider activation",
+            "lead routing approval is listed before public form writes"
+          ],
+          "blockedLiveActions": [
+            "site editor invitation email",
+            "public form lead write",
+            "campaign send"
+          ],
+          "rollback": "Keep campaign microsite in draft and do not invite site editor until consent gates pass."
+        },
+        {
+          "id": "campaign-send-provider-review",
+          "order": 20,
+          "mode": "write",
+          "functions": [
+            "siteFactory.createSiteFromTemplate",
+            "controlPlane.createInvitation",
+            "crm.submitLead",
+            "campaigns.requestCampaignApproval"
+          ],
+          "evidence": [
+            "campaign site can be created only after tenant selection",
+            "campaign approval request is recorded without provider send",
+            "SMS/email provider smoke approval is required before send"
+          ],
+          "blockedLiveActions": [
+            "campaign send",
+            "AI copy publish",
+            "SMS/email provider smoke"
+          ],
+          "rollback": "Archive smoke campaign site, revoke editor invite, and keep campaign draft unsent."
+        }
+      ]
+    }
+  ]
+}

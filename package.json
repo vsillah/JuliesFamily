@@ -40,6 +40,8 @@
     "kinflo:validate-client-admin-permission-presets": "node scripts/validate-kinflo-client-admin-permission-presets.mjs",
     "kinflo:validate-client-studio-polish": "node scripts/validate-kinflo-client-studio-polish.mjs",
     "kinflo:validate-client-provisioning-orders": "node scripts/validate-kinflo-client-provisioning-orders.mjs",
+    "kinflo:validate-client-provisioning-execution": "node scripts/validate-kinflo-client-provisioning-execution.mjs",
+    "kinflo:dry-run-client-provisioning": "node scripts/dry-run-kinflo-client-provisioning.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

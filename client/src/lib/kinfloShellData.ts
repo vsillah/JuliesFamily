@@ -336,6 +336,22 @@ export type ShellClientWebsiteProvisioningOrder = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteProvisioningExecution = {
+  manifestPath: string;
+  status: "provider-light-dry-run-contract";
+  totalOrders: number;
+  dryRunSteps: number;
+  referencedFunctions: number;
+  providerBoundary: string;
+  blockedUntil: string[];
+  orderSteps: {
+    siteKey: string;
+    executionMode: string;
+    allowedBeforeHostedActivation: boolean;
+    steps: { id: string; mode: "read" | "write" | "mixed"; blockedLiveActions: string[] }[];
+  }[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
@@ -343,6 +359,7 @@ export type ShellClientWebsiteStudio = {
   launchBlueprints: ShellClientWebsiteLaunchBlueprint[];
   adminPermissionPresets: ShellClientWebsiteAdminPermissionPreset[];
   provisioningOrders: ShellClientWebsiteProvisioningOrder[];
+  provisioningExecution: ShellClientWebsiteProvisioningExecution;
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -1478,6 +1495,79 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  provisioningExecution: {
+    manifestPath: "docs/convex-client-provisioning-execution-manifest.json",
+    status: "provider-light-dry-run-contract",
+    totalOrders: 3,
+    dryRunSteps: 7,
+    referencedFunctions: 18,
+    providerBoundary: "Client provisioning execution remains a dry-run contract until hosted Convex activation, generated API review, read-only smokes, mutation smoke order, rollback owner, and provider approvals pass.",
+    blockedUntil: [
+      "Hosted Convex deployment is approved and configured outside committed source",
+      "Generated API import/codegen is reviewed and approved",
+      "Read-only hosted smokes pass for provisioning orders and public renderer",
+      "Mutation smoke cleanup and rollback owner are approved",
+      "Invitation delivery, domain, storage, billing, AI, SMS, and email provider gates are approved",
+    ],
+    orderSteps: [
+      {
+        siteKey: "julies-family-public",
+        executionMode: "read_then_review",
+        allowedBeforeHostedActivation: true,
+        steps: [
+          {
+            id: "julie-seeded-tenant-confirmation",
+            mode: "read",
+            blockedLiveActions: ["membership grant", "content publish write", "public lead write"],
+          },
+          {
+            id: "julie-content-provenance-review",
+            mode: "read",
+            blockedLiveActions: ["generated API import", "public publish write", "domain attachment"],
+          },
+        ],
+      },
+      {
+        siteKey: "advisor-client-site",
+        executionMode: "mutation_after_approval",
+        allowedBeforeHostedActivation: false,
+        steps: [
+          {
+            id: "advisor-plan-entitlement-review",
+            mode: "read",
+            blockedLiveActions: ["controlPlane.createTenant mutation", "Stripe billing activation"],
+          },
+          {
+            id: "advisor-tenant-site-invite-sequence",
+            mode: "write",
+            blockedLiveActions: ["client admin invitation email", "membership grant", "public publish write"],
+          },
+          {
+            id: "advisor-domain-lead-publish-smoke",
+            mode: "mixed",
+            blockedLiveActions: ["domain verification write", "public publish write", "CRM lead write"],
+          },
+        ],
+      },
+      {
+        siteKey: "campaign-microsite",
+        executionMode: "campaign_after_consent",
+        allowedBeforeHostedActivation: false,
+        steps: [
+          {
+            id: "campaign-site-editor-scope-review",
+            mode: "read",
+            blockedLiveActions: ["site editor invitation email", "public form lead write", "campaign send"],
+          },
+          {
+            id: "campaign-send-provider-review",
+            mode: "write",
+            blockedLiveActions: ["campaign send", "AI copy publish", "SMS/email provider smoke"],
+          },
+        ],
+      },
+    ],
+  },
   researchSources: [
     { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
     { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },
