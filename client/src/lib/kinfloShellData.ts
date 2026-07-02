@@ -352,6 +352,21 @@ export type ShellClientWebsiteProvisioningExecution = {
   }[];
 };
 
+export type ShellClientWebsiteLaunchPacket = {
+  siteKey: string;
+  label: string;
+  status: "provider-light-export-preview";
+  readinessScore: number;
+  previewPath: string;
+  adminInviteStatus: string;
+  manifestPath: string;
+  packetSections: string[];
+  handoffChecklist: string[];
+  blockedExportActions: string[];
+  copyBlocks: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
@@ -360,6 +375,7 @@ export type ShellClientWebsiteStudio = {
   adminPermissionPresets: ShellClientWebsiteAdminPermissionPreset[];
   provisioningOrders: ShellClientWebsiteProvisioningOrder[];
   provisioningExecution: ShellClientWebsiteProvisioningExecution;
+  launchPackets: ShellClientWebsiteLaunchPacket[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -1568,6 +1584,97 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       },
     ],
   },
+  launchPackets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family founding launch packet",
+      status: "provider-light-export-preview",
+      readinessScore: 80,
+      previewPath: "/kinflo-sites/julies-family",
+      adminInviteStatus: "super-admin-only",
+      manifestPath: "docs/convex-client-launch-packet-manifest.json",
+      packetSections: [
+        "Founding tenant provenance",
+        "Reusable public content map",
+        "Preview URL and launch evidence",
+        "Blocked provider actions",
+        "Post-approval smoke checklist",
+      ],
+      handoffChecklist: [
+        "Confirm Julie Family remains the seeded founding tenant.",
+        "Review public content provenance before moving fixture content live.",
+        "Keep publishing and lead writes blocked until hosted renderer smoke passes.",
+      ],
+      blockedExportActions: ["write packet file", "send packet email", "publish public site", "write CRM lead"],
+      copyBlocks: ["Launch summary", "Evidence checklist", "Blocked action register"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteProvisioningOrders",
+        "siteFactory.listClientWebsiteLaunchBlueprints",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client preview handoff packet",
+      status: "provider-light-export-preview",
+      readinessScore: 40,
+      previewPath: "/kinflo-sites/advisor-client-site",
+      adminInviteStatus: "tenant-admin-invite-gated",
+      manifestPath: "docs/convex-client-launch-packet-manifest.json",
+      packetSections: [
+        "Client plan and entitlement review",
+        "Tenant admin role and invite scope",
+        "Preview URL and intake path",
+        "Domain and lead smoke requirements",
+        "Provider approval blockers",
+      ],
+      handoffChecklist: [
+        "Review Client Build plan limits before tenant creation.",
+        "Confirm tenant admin owner before invitation delivery.",
+        "Run preview, lead, domain, and hosted Convex read-only smokes before publish.",
+      ],
+      blockedExportActions: ["write packet file", "send tenant admin invite", "activate Stripe billing", "attach custom domain", "publish public site"],
+      copyBlocks: ["Client-facing launch summary", "Admin invitation scope", "Provider gate register"],
+      convexFunctions: [
+        "controlPlane.listPlanCatalog",
+        "controlPlane.entitlementSnapshot",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite launch packet",
+      status: "provider-light-export-preview",
+      readinessScore: 20,
+      previewPath: "/kinflo-sites/campaign-microsite",
+      adminInviteStatus: "site-editor-invite-gated",
+      manifestPath: "docs/convex-client-launch-packet-manifest.json",
+      packetSections: [
+        "Campaign objective and consent status",
+        "Site editor permission scope",
+        "Signup and lead routing review",
+        "Campaign approval status",
+        "Provider send blockers",
+      ],
+      handoffChecklist: [
+        "Approve campaign consent before provider activation.",
+        "Scope editor access to the selected campaign site only.",
+        "Keep send, AI copy publish, and public form writes blocked until provider smokes pass.",
+      ],
+      blockedExportActions: ["write packet file", "send editor invite", "launch campaign send", "publish AI copy", "write public form lead"],
+      copyBlocks: ["Campaign launch summary", "Consent checklist", "Provider send blocker register"],
+      convexFunctions: [
+        "accessPolicy.viewerPermissionSnapshot",
+        "campaigns.listCampaignDrafts",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+  ],
   researchSources: [
     { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
     { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },

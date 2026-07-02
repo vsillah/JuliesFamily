@@ -42,6 +42,8 @@
     "kinflo:validate-client-provisioning-orders": "node scripts/validate-kinflo-client-provisioning-orders.mjs",
     "kinflo:validate-client-provisioning-execution": "node scripts/validate-kinflo-client-provisioning-execution.mjs",
     "kinflo:dry-run-client-provisioning": "node scripts/dry-run-kinflo-client-provisioning.mjs",
+    "kinflo:validate-client-launch-packet": "node scripts/validate-kinflo-client-launch-packet.mjs",
+    "kinflo:dry-run-client-launch-packet": "node scripts/dry-run-kinflo-client-launch-packet.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

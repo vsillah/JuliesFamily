@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "phase": 62,
+  "name": "KinFlo client launch packet manifest",
+  "status": "provider-light-export-preview",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "fileExportWritten": false,
+    "notes": "This manifest defines the export-preview contents for client launch packets. It does not create files, create tenants, invite users, send email, publish content, attach domains, write leads, call providers, import generated API, or execute hosted activation."
+  },
+  "blockedUntil": [
+    "Hosted Convex deployment and generated API review are approved.",
+    "Selected client site preview, provisioning order, and execution dry run have been reviewed.",
+    "Client admin invitation policy is approved before any invite is sent.",
+    "Public preview, lead capture, domain, storage, billing, AI, SMS, and email provider gates are reviewed.",
+    "Export destination, privacy posture, and source-safe client handoff language are approved."
+  ],
+  "packetOutputs": [
+    {
+      "siteKey": "julies-family-public",
+      "packetLabel": "Julie Family founding launch packet",
+      "tenantSlug": "julies-family",
+      "readinessScore": 80,
+      "previewPath": "/kinflo-sites/julies-family",
+      "adminInviteStatus": "super-admin-only",
+      "includedSections": [
+        "Founding tenant provenance",
+        "Reusable public content map",
+        "Preview URL and launch evidence",
+        "Blocked provider actions",
+        "Post-approval smoke checklist"
+      ],
+      "handoffChecklist": [
+        "Confirm Julie Family remains the seeded founding tenant.",
+        "Review public content provenance before moving fixture content live.",
+        "Keep publishing and lead writes blocked until hosted renderer smoke passes."
+      ],
+      "blockedExportActions": [
+        "write packet file",
+        "send packet email",
+        "publish public site",
+        "write CRM lead"
+      ],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteProvisioningOrders",
+        "siteFactory.listClientWebsiteLaunchBlueprints",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "publicSite.resolvePublishedSite"
+      ],
+      "copyBlocks": [
+        "Launch summary",
+        "Evidence checklist",
+        "Blocked action register"
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "packetLabel": "Advisor client preview handoff packet",
+      "tenantSlug": "advisor-client-starter",
+      "readinessScore": 40,
+      "previewPath": "/kinflo-sites/advisor-client-site",
+      "adminInviteStatus": "tenant-admin-invite-gated",
+      "includedSections": [
+        "Client plan and entitlement review",
+        "Tenant admin role and invite scope",
+        "Preview URL and intake path",
+        "Domain and lead smoke requirements",
+        "Provider approval blockers"
+      ],
+      "handoffChecklist": [
+        "Review Client Build plan limits before tenant creation.",
+        "Confirm tenant admin owner before invitation delivery.",
+        "Run preview, lead, domain, and hosted Convex read-only smokes before publish."
+      ],
+      "blockedExportActions": [
+        "write packet file",
+        "send tenant admin invite",
+        "activate Stripe billing",
+        "attach custom domain",
+        "publish public site"
+      ],
+      "convexFunctions": [
+        "controlPlane.listPlanCatalog",
+        "controlPlane.entitlementSnapshot",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "publicSite.resolvePublishedSite"
+      ],
+      "copyBlocks": [
+        "Client-facing launch summary",
+        "Admin invitation scope",
+        "Provider gate register"
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "packetLabel": "Campaign microsite launch packet",
+      "tenantSlug": "campaign-microsite-lab",
+      "readinessScore": 20,
+      "previewPath": "/kinflo-sites/campaign-microsite",
+      "adminInviteStatus": "site-editor-invite-gated",
+      "includedSections": [
+        "Campaign objective and consent status",
+        "Site editor permission scope",
+        "Signup and lead routing review",
+        "Campaign approval status",
+        "Provider send blockers"
+      ],
+      "handoffChecklist": [
+        "Approve campaign consent before provider activation.",
+        "Scope editor access to the selected campaign site only.",
+        "Keep send, AI copy publish, and public form writes blocked until provider smokes pass."
+      ],
+      "blockedExportActions": [
+        "write packet file",
+        "send editor invite",
+        "launch campaign send",
+        "publish AI copy",
+        "write public form lead"
+      ],
+      "convexFunctions": [
+        "accessPolicy.viewerPermissionSnapshot",
+        "campaigns.listCampaignDrafts",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite"
+      ],
+      "copyBlocks": [
+        "Campaign launch summary",
+        "Consent checklist",
+        "Provider send blocker register"
+      ]
+    }
+  ]
+}
