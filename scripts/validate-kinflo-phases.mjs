@@ -145,6 +145,7 @@ for (const path of [
   "docs/phase77-client-studio-workbench-grid.md",
   "docs/phase78-decision-gate-rail.md",
   "docs/phase79-proof-before-publish-cards.md",
+  "docs/phase80-mobile-inspection-mode.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -242,6 +243,7 @@ for (const path of [
   "scripts/validate-kinflo-client-workbench-grid.mjs",
   "scripts/validate-kinflo-decision-gate-rail.mjs",
   "scripts/validate-kinflo-proof-before-publish.mjs",
+  "scripts/validate-kinflo-mobile-inspection-mode.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1309,6 +1311,21 @@ requireIncludes("docs/phase79-proof-before-publish-cards.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase80-mobile-inspection-mode.md", [
+  "Phase 80: Mobile Inspection Mode",
+  "npm run kinflo:validate-mobile-inspection-mode",
+  "MobileInspectionMode",
+  "section-kinflo-client-mobile-inspection-mode",
+  "card-client-mobile-device-context",
+  "card-client-mobile-screenshot-evidence",
+  "card-client-mobile-touch-truncation",
+  "card-client-mobile-accessibility-performance",
+  "card-client-mobile-launch-decision",
+  "button-client-mobile-inspection-gated",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1336,11 +1353,13 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase77-client-studio-workbench-grid.md\"",
   "\"docs/phase78-decision-gate-rail.md\"",
   "\"docs/phase79-proof-before-publish-cards.md\"",
+  "\"docs/phase80-mobile-inspection-mode.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
   "\"npm run kinflo:validate-decision-gate-rail\"",
   "\"npm run kinflo:validate-proof-before-publish\"",
+  "\"npm run kinflo:validate-mobile-inspection-mode\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1429,6 +1448,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-workbench-grid\"",
   "\"kinflo:validate-decision-gate-rail\"",
   "\"kinflo:validate-proof-before-publish\"",
+  "\"kinflo:validate-mobile-inspection-mode\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2100,6 +2120,21 @@ requireIncludes("scripts/validate-kinflo-proof-before-publish.mjs", [
   "proof-before-publish cards do not import generated API",
   "proof-before-publish cards do not execute live Convex",
   "KinFlo proof-before-publish validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-mobile-inspection-mode.mjs", [
+  "docs/phase80-mobile-inspection-mode.md",
+  "MobileInspectionMode",
+  "section-kinflo-client-mobile-inspection-mode",
+  "card-client-mobile-device-context",
+  "card-client-mobile-screenshot-evidence",
+  "card-client-mobile-touch-truncation",
+  "card-client-mobile-accessibility-performance",
+  "card-client-mobile-launch-decision",
+  "button-client-mobile-inspection-gated",
+  "mobile inspection mode does not import generated API",
+  "mobile inspection mode does not execute live Convex",
+  "KinFlo mobile inspection mode validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
@@ -2962,6 +2997,14 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-proof-before-publish-cards",
   "button-client-proof-before-publish-gated",
   "ProofBeforePublishCards",
+  "section-kinflo-client-mobile-inspection-mode",
+  "card-client-mobile-device-context",
+  "card-client-mobile-screenshot-evidence",
+  "card-client-mobile-touch-truncation",
+  "card-client-mobile-accessibility-performance",
+  "card-client-mobile-launch-decision",
+  "button-client-mobile-inspection-gated",
+  "MobileInspectionMode",
   "clientWebsiteWorkbenchGridContract",
   "clientWebsiteStudioReviewStats",
   "clientWebsiteStudioCommandStats",

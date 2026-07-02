@@ -59,6 +59,9 @@ import {
   type ShellAiReviewRecord,
   type ShellCampaignDraft,
   type ShellClientWebsiteLaunchDecisionPacket,
+  type ShellClientWebsitePolishScorecard,
+  type ShellClientWebsiteStudioSite,
+  type ShellClientWebsiteVisualQaBudget,
   type ShellClientWebsiteVisualQaEvidencePacket,
   type ShellDomainDraft,
   type ShellHostedActivationStepStatus,
@@ -382,6 +385,175 @@ function ProofBeforePublishCards({
         <ShieldCheck className="mr-2 h-4 w-4" />
         Publish proof remains gated
       </Button>
+    </div>
+  );
+}
+
+function MobileInspectionMode({
+  site,
+  polishScorecard,
+  visualQaBudget,
+  evidencePacket,
+  decisionPacket,
+  persona,
+  journeyStage,
+  previewPath,
+}: {
+  site?: ShellClientWebsiteStudioSite;
+  polishScorecard?: ShellClientWebsitePolishScorecard;
+  visualQaBudget?: ShellClientWebsiteVisualQaBudget;
+  evidencePacket?: ShellClientWebsiteVisualQaEvidencePacket;
+  decisionPacket?: ShellClientWebsiteLaunchDecisionPacket;
+  persona?: string;
+  journeyStage?: string;
+  previewPath: string;
+}) {
+  const mobileViewport = polishScorecard?.viewportChecks.find((check) => check.viewport === "mobile");
+  const mobileScreenshot = visualQaBudget?.screenshotPlan.find((item) => item.viewport === "mobile");
+  const mobileEvidence = evidencePacket?.evidenceItems.find((item) => item.kind === "screenshot" && item.label.includes("390px"))
+    ?? evidencePacket?.evidenceItems.find((item) => item.kind === "screenshot");
+  const accessibilityEvidence = visualQaBudget?.accessibilityChecks.find((item) => item.status !== "pass")
+    ?? visualQaBudget?.accessibilityChecks[0];
+  const performanceEvidence = visualQaBudget?.performanceBudgets.find((item) => item.metric === "interaction")
+    ?? visualQaBudget?.performanceBudgets[0];
+  const blockedActions = decisionPacket?.blockedLaunchActions ?? visualQaBudget?.blockedQaActions ?? [];
+  const mobileQualityItems = [
+    accessibilityEvidence
+      ? { label: accessibilityEvidence.label, status: accessibilityEvidence.status, detail: accessibilityEvidence.nextAction }
+      : undefined,
+    performanceEvidence
+      ? { label: performanceEvidence.label, status: performanceEvidence.status, detail: performanceEvidence.evidence }
+      : undefined,
+  ].filter(Boolean) as { label: string; status: "pass" | "review" | "blocked"; detail: string }[];
+
+  return (
+    <div
+      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+      data-testid="section-kinflo-client-mobile-inspection-mode"
+    >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+              <MonitorSmartphone className="mr-1 h-3 w-3" />
+              390px inspection
+            </Badge>
+            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+              Local evidence only
+            </Badge>
+          </div>
+          <h3 className="mt-3 text-base font-semibold text-slate-950">Mobile inspection mode</h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Device, audience context, screenshot evidence, accessibility posture, and launch decision stay together before any client handoff or public publish path is enabled.
+          </p>
+        </div>
+        <Badge className="self-start border border-slate-300 bg-slate-950 text-white hover:bg-slate-950">
+          {polishScorecard?.mobileScore ?? 0}% mobile
+        </Badge>
+      </div>
+
+      <div className="mt-4 grid gap-3 2xl:grid-cols-[minmax(0,1fr)_minmax(260px,320px)]">
+        <div className="grid gap-3 2xl:grid-cols-2">
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid="card-client-mobile-device-context">
+            <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Device and audience</div>
+            <div className="mt-3 grid gap-2">
+              <div className="rounded-lg border border-slate-200 bg-white p-2">
+                <div className="text-xs text-slate-500">Device</div>
+                <div className="mt-1 text-sm font-semibold text-slate-950">390px mobile first viewport</div>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white p-2">
+                <div className="text-xs text-slate-500">Persona</div>
+                <div className="mt-1 text-sm font-semibold text-slate-950">{persona ?? site?.audience ?? "Audience pending"}</div>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-white p-2">
+                <div className="text-xs text-slate-500">Journey</div>
+                <div className="mt-1 text-sm font-semibold text-slate-950">{journeyStage ?? "review"}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid="card-client-mobile-screenshot-evidence">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Screenshot evidence</div>
+                <div className="mt-1 text-sm font-semibold text-slate-950">{mobileScreenshot?.status ?? mobileEvidence?.status ?? "review"}</div>
+              </div>
+              <ImageIcon className="h-4 w-4 text-slate-500" />
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-600">
+              {mobileScreenshot?.requiredEvidence ?? mobileEvidence?.requiredArtifact ?? "390px screenshot evidence is required before publish."}
+            </p>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              {mobileEvidence?.currentEvidence ?? mobileViewport?.evidence}
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid="card-client-mobile-touch-truncation">
+            <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Touch and truncation</div>
+            <div className="mt-3 space-y-2">
+              <div className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                <span>CTA remains visible: {site?.primaryCTA ?? "CTA pending"}</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <span>Headline wraps inside the first viewport before launch signoff.</span>
+              </div>
+              <div className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <span>Tap targets, collapsed navigation, and intake path stay review-gated.</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid="card-client-mobile-accessibility-performance">
+            <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Accessibility and performance</div>
+            <div className="mt-3 space-y-2">
+              {mobileQualityItems.map((item) => (
+                <div key={item?.label} className="rounded-lg border border-slate-200 bg-white p-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="truncate text-xs font-semibold text-slate-950">{item?.label}</div>
+                      <div className="mt-1 text-xs leading-5 text-slate-500">
+                        {item.detail}
+                      </div>
+                    </div>
+                    <Badge variant={item?.status === "blocked" ? "destructive" : item?.status === "pass" ? "secondary" : "outline"}>
+                      {item?.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-900 bg-slate-950 p-4 text-white" data-testid="card-client-mobile-launch-decision">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Launch decision</div>
+              <div className="mt-1 text-lg font-semibold">{decisionPacket?.launchDecision.replaceAll("_", " ") ?? "review"}</div>
+            </div>
+            <ShieldCheck className="h-5 w-5 shrink-0 text-amber-300" />
+          </div>
+          <p className="mt-3 text-sm leading-6 text-slate-300">{decisionPacket?.decisionPosture}</p>
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-3">
+            <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Preview path</div>
+            <div className="mt-1 break-all text-xs text-slate-300">{previewPath}?device=mobile</div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {blockedActions.slice(0, 4).map((action) => (
+              <Badge key={action} variant="outline" className="border-amber-200/30 bg-white/10 text-amber-50">
+                {action}
+              </Badge>
+            ))}
+          </div>
+          <Button disabled variant="secondary" className="mt-4 w-full justify-start" data-testid="button-client-mobile-inspection-gated">
+            <MonitorSmartphone className="mr-2 h-4 w-4" />
+            Mobile publish proof gated
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -3748,6 +3920,17 @@ export default function AdminKinfloShell() {
                         </p>
                       </div>
                     </div>
+
+                    <MobileInspectionMode
+                      site={selectedClientWebsiteStudioSite}
+                      polishScorecard={selectedClientWebsitePolishScorecard}
+                      visualQaBudget={selectedClientWebsiteVisualQaBudget}
+                      evidencePacket={selectedClientWebsiteVisualQaEvidencePacket}
+                      decisionPacket={selectedClientWebsiteLaunchDecisionPacket}
+                      persona={selectedClientWebsiteStarterContentPack?.persona}
+                      journeyStage={selectedClientWebsiteStarterContentPack?.journeyStage}
+                      previewPath={clientWebsiteStudioPreviewPath}
+                    />
 
                     <div className="grid gap-3 md:grid-cols-2">
                       {snapshot.clientWebsiteStudio.designPatterns.map((pattern) => {
