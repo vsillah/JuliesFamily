@@ -152,6 +152,7 @@ for (const path of [
   "docs/phase94-client-admin-handoff-matrix.md",
   "docs/phase95-client-website-spin-up-queue.md",
   "docs/phase97-client-website-configuration-profiles.md",
+  "docs/phase98-configuration-profile-generated-api-coverage.md",
   "docs/phase96-hosted-activation-owner-checklist.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
@@ -270,6 +271,7 @@ for (const path of [
   "scripts/validate-kinflo-client-admin-handoff-matrix.mjs",
   "scripts/validate-kinflo-client-website-spin-up-queue.mjs",
   "scripts/validate-kinflo-client-website-configuration-profiles.mjs",
+  "scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
   "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
@@ -1473,6 +1475,16 @@ requireIncludes("docs/phase97-client-website-configuration-profiles.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", [
+  "Phase 98: Configuration Profile Generated API Coverage",
+  "npm run kinflo:validate-configuration-profile-generated-api-coverage",
+  "siteFactoryListClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationProfiles",
+  "configuration profile read",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase96-hosted-activation-owner-checklist.md", [
   "Phase 96: Hosted Activation Owner Checklist",
   "npm run kinflo:validate-hosted-activation-owner-checklist",
@@ -1573,11 +1585,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 73",
-  "Query bindings: 35",
+  "Generated API bindings: 74",
+  "Query bindings: 36",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 28",
+  "Smoke-manifest review gaps: 29",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -1834,6 +1846,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-admin-handoff-matrix\"",
   "\"kinflo:validate-client-website-spin-up-queue\"",
   "\"kinflo:validate-client-website-configuration-profiles\"",
+  "\"kinflo:validate-configuration-profile-generated-api-coverage\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-adapter-switch-runway\"",
@@ -2715,9 +2728,20 @@ requireIncludes("scripts/validate-kinflo-generated-api-review-board.mjs", [
   "ShellGeneratedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
+  "siteFactoryListClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationProfiles",
   "review board distinguishes covered and gap surfaces",
   "generated API review board does not execute live Convex",
   "KinFlo generated API review board validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs", [
+  "docs/phase98-configuration-profile-generated-api-coverage.md",
+  "siteFactoryListClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationProfiles",
+  "configuration profile read",
+  "Generated API imported: no",
+  "Live Convex execution: no",
 ]);
 
 requireIncludes("scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs", [

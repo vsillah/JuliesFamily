@@ -186,6 +186,7 @@ export type ShellGeneratedApiReviewSurface = {
   totalBindings: number;
   queryBindings: number;
   mutationBindings: number;
+  requiredFunctions?: string[];
   reviewPosture: "ready_for_codegen_review" | "smoke_manifest_gap";
   smokeCoverage: string;
   owner: string;
@@ -5543,11 +5544,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 73,
-    queryBindings: 35,
+    totalBindings: 74,
+    queryBindings: 36,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 28,
+    smokeManifestGaps: 29,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -5600,9 +5601,16 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 12,
-        queryBindings: 11,
+        totalBindings: 13,
+        queryBindings: 12,
         mutationBindings: 1,
+        requiredFunctions: [
+          "siteFactory.listStarterTemplates",
+          "siteFactory.listClientWebsiteAdminPermissionPresets",
+          "siteFactory.listClientWebsiteConfigurationProfiles",
+          "siteFactory.listClientWebsiteLaunchBlueprints",
+          "siteFactory.createSiteFromTemplate",
+        ],
         reviewPosture: "smoke_manifest_gap",
         smokeCoverage: "client website studio read models remain outside the live smoke manifest",
         owner: "platform.super_admin",

@@ -137,9 +137,14 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "roleCatalogSyncDefaultRoles",
   "accessPolicyViewerPermissionSnapshot",
   "siteBuilderPublishPage",
+  "siteFactoryListClientWebsiteConfigurationProfiles",
   "preferencesGetMyPreferences",
   "preferencesUpsertMyPreferences",
   "crmCreateTask",
+]);
+
+requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
+  "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);
 
 requireIncludes("package.json", [

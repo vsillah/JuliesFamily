@@ -3526,6 +3526,21 @@ export default function AdminKinfloShell() {
                             </div>
                           </div>
 
+                          {surface.requiredFunctions && surface.requiredFunctions.length > 0 ? (
+                            <div className="mt-3 flex flex-wrap gap-1.5" aria-label={`${surface.surface} required generated API functions`}>
+                              {surface.requiredFunctions.slice(0, 5).map((functionName) => (
+                                <Badge key={functionName} variant="outline" className="max-w-full truncate border-slate-200 bg-slate-50 text-[11px] font-normal text-slate-700" title={functionName}>
+                                  {functionName}
+                                </Badge>
+                              ))}
+                              {surface.requiredFunctions.length > 5 ? (
+                                <Badge variant="secondary" className="text-[11px] font-normal">
+                                  +{surface.requiredFunctions.length - 5} more
+                                </Badge>
+                              ) : null}
+                            </div>
+                          ) : null}
+
                           <p className="mt-3 text-xs leading-5 text-slate-600">{surface.smokeCoverage}</p>
                           <div className="mt-3 rounded-md bg-slate-50 p-2 text-xs leading-5 text-slate-600">
                             <span className="font-medium text-slate-900">Blocked until: </span>

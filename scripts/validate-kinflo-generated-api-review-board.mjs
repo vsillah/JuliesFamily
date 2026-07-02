@@ -54,7 +54,7 @@ function parseJson(path) {
 }
 
 function extractReviewBoardBlock(contents) {
-  const match = contents.match(/generatedApiReviewBoard:\s*\{([\s\S]*?)\n\s*\},\n\s*decisionRegister:/);
+  const match = contents.match(/generatedApiReviewBoard:\s*\{([\s\S]*?)\n\s*\},\n\s*hostedSmokeGapBacklog:/);
   if (!match) {
     fail("generated API review board block exists", "Could not find hostedActivationRunbook.generatedApiReviewBoard.");
     return "";
@@ -116,11 +116,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 73",
-  "Query bindings: 35",
+  "Generated API bindings: 74",
+  "Query bindings: 36",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 28",
+  "Smoke-manifest review gaps: 29",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -128,15 +128,25 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
 
 requireIncludes(shellDataPath, [
   "ShellGeneratedApiReviewBoard",
+  "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 73",
-  "queryBindings: 35",
+  "totalBindings: 74",
+  "queryBindings: 36",
   "mutationBindings: 38",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 28",
+  "smokeManifestGaps: 29",
+  "siteFactory.listClientWebsiteConfigurationProfiles",
   "firstSwitchBatch: \"read-only-core\"",
   "npm run kinflo:validate-generated-api-review-board",
+]);
+
+requireIncludes(generatedContractPath, [
+  "siteFactoryListClientWebsiteConfigurationProfiles",
+]);
+
+requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
+  "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);
 
 requireIncludes(shellPath, [
@@ -145,6 +155,7 @@ requireIncludes(shellPath, [
   "button-generated-api-review-gated",
   "section-kinflo-generated-api-review-scroll",
   "card-generated-api-review-",
+  "surface.requiredFunctions",
   "snapshot.hostedActivationRunbook.generatedApiReviewBoard",
   "Codegen review gated",
   "generated Convex API module",
@@ -202,6 +213,15 @@ for (const [surface, counts] of bySurface) {
   } else {
     fail(`${surface} review surface count is represented`, `Expected ${counts.total} bindings for ${surface}.`);
   }
+}
+
+if (
+  reviewBoardBlock.includes("requiredFunctions: [") &&
+  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationProfiles\"")
+) {
+  pass("site factory configuration profile function is visible in review board");
+} else {
+  fail("site factory configuration profile function is visible in review board", "Expected the configuration profile generated API binding to appear in site factory requiredFunctions.");
 }
 
 const reviewPostures = Array.from(reviewBoardBlock.matchAll(/reviewPosture:\s*"([^"]+)"/g), (match) => match[1]);

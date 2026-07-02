@@ -1,0 +1,37 @@
+# Phase 98: Configuration Profile Generated API Coverage
+
+Phase 98 closes the contract gap between the Phase 97 configuration-profile shell and the hosted activation review path.
+
+Command:
+
+```bash
+npm run kinflo:validate-configuration-profile-generated-api-coverage
+```
+
+## What Changed
+
+- Runtime function key: `siteFactoryListClientWebsiteConfigurationProfiles`
+- Convex function path: `siteFactory.listClientWebsiteConfigurationProfiles`
+- Generated API binding surface: `site factory`
+- Adapter-switch surface: `site-factory`
+- Required switch evidence: `configuration profile read`
+
+The Site Factory adapter-switch surface now requires configuration profile read evidence before the fixture adapter can move toward generated Convex bindings.
+
+## Provider Boundary
+
+No hosted Convex deployment is created.
+
+No Convex codegen is run.
+
+No generated Convex API files are committed or imported.
+
+No live Convex query, mutation, or action is executed.
+
+No tenant/site launch, public publish, lead write, invite send, campaign send, provider call, domain verification, production import, or client sharing is performed.
+
+No secret values are read or printed.
+
+## Why This Matters
+
+Client websites are becoming configurable products, not one-off pages. The generated API review path must include each site's template, brand, navigation, CRM pipeline, editable surfaces, locked surfaces, and provider boundary before hosted activation can safely replace local fixtures.
