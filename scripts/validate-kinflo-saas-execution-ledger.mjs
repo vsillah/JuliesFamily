@@ -76,6 +76,8 @@ for (const path of [
   "docs/phase71-hosted-activation-console.md",
   "docs/phase74-adapter-switch-evidence-matrix.md",
   "docs/convex-adapter-switch-evidence-matrix.json",
+  "docs/phase75-design-frame-adoption-backlog.md",
+  "docs/kinflo-design-frame-adoption-backlog.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "client/src/pages/AdminKinfloShell.tsx",
@@ -83,6 +85,7 @@ for (const path of [
   "package.json",
   "scripts/validate-kinflo-saas-execution-ledger.mjs",
   "scripts/validate-kinflo-adapter-switch-evidence.mjs",
+  "scripts/validate-kinflo-design-frame-backlog.mjs",
 ]) {
   requireFile(path);
 }
@@ -183,6 +186,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "No secret values are read or printed.",
   "adapter-switch evidence",
   "docs/convex-adapter-switch-evidence-matrix.json",
+  "design-frame adoption backlog",
   "human-gate decision register current without storing secrets",
 ]);
 

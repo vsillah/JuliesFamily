@@ -63,6 +63,7 @@
     "kinflo:validate-hosted-activation-console": "node scripts/validate-kinflo-hosted-activation-console.mjs",
     "kinflo:validate-saas-execution-ledger": "node scripts/validate-kinflo-saas-execution-ledger.mjs",
     "kinflo:validate-hosted-activation-decisions": "node scripts/validate-kinflo-hosted-activation-decisions.mjs",
+    "kinflo:validate-design-frame-backlog": "node scripts/validate-kinflo-design-frame-backlog.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",
