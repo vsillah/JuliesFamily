@@ -88,10 +88,21 @@ export type ShellHostedActivationStep = {
   liveConvexExecution: boolean;
 };
 
+export type ShellHostedActivationConsole = {
+  status: "provider_light_activation_console";
+  decision: "blocked_until_approval";
+  nextHumanGate: string;
+  preActivationCommands: string[];
+  blockedLiveActions: string[];
+  evidenceSummary: string[];
+  providerBoundary: string;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
   providerBoundary: string;
+  activationConsole: ShellHostedActivationConsole;
   documents: string[];
   steps: ShellHostedActivationStep[];
   completionRules: string[];
@@ -3812,6 +3823,38 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger",
   defaultStepId: "repo-sharing-risk",
   providerBoundary: "Hosted activation remains a prepare-only evidence ledger. The shell records approvals, commands, evidence targets, and rollback notes, but it does not provision Convex, run codegen, import generated API, execute live Convex functions, or call providers.",
+  activationConsole: {
+    status: "provider_light_activation_console",
+    decision: "blocked_until_approval",
+    nextHumanGate: "Approve hosted Convex ownership, billing, backup, auth, env policy, and codegen window before generated API files are created.",
+    preActivationCommands: [
+      "npm run kinflo:audit-secret-history",
+      "npm run kinflo:inventory-env",
+      "npm run kinflo:activation-preflight",
+      "npm run kinflo:validate-generated-api",
+      "npm run kinflo:validate-live-smoke",
+      "npm run kinflo:dry-run-live-smoke",
+      "npm run kinflo:live-handoff",
+      "npm run convex:check",
+    ],
+    blockedLiveActions: [
+      "create hosted Convex deployment",
+      "run npm run convex:codegen",
+      "import convex/_generated/api",
+      "execute live Convex query, mutation, or action",
+      "switch fixture adapter to generated API",
+      "publish site, write lead, send invite, attach domain, send campaign, or call provider",
+    ],
+    evidenceSummary: [
+      "Repo history posture and sharing decision are recorded before external/client review.",
+      "Hosted Convex project URL and ownership notes are captured outside committed source.",
+      "Generated bindings are reviewed against KINFLO_GENERATED_API_BINDINGS before imports.",
+      "Read-only hosted smokes pass before mutation smokes.",
+      "Cross-tenant deny proof is captured before adapter switch.",
+      "Rollback path keeps generatedApiAvailable false until a reviewed switch lands.",
+    ],
+    providerBoundary: "This console is a read-only activation gate. It summarizes approvals, commands, evidence, and blocked actions only; it does not create providers, run codegen, import generated API, execute live Convex, or print secrets.",
+  },
   documents: [
     "docs/convex-hosted-activation-packet.json",
     "docs/convex-hosted-activation-ledger.json",

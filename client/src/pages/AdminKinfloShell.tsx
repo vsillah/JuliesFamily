@@ -1654,6 +1654,74 @@ export default function AdminKinfloShell() {
                   </Badge>
                 </div>
 
+                <Card className="overflow-hidden border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-console">
+                  <CardHeader className="border-b border-slate-100 bg-slate-950 text-white">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge className="border-white/10 bg-white/10 text-white hover:bg-white/10">
+                            Activation Console
+                          </Badge>
+                          <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                            {snapshot.hostedActivationRunbook.activationConsole.decision.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <CardTitle className="mt-4 text-xl">Hosted Convex remains approval-gated</CardTitle>
+                        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300" data-testid="text-kinflo-hosted-activation-next-gate">
+                          {snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
+                        </p>
+                      </div>
+                      <Button disabled variant="secondary" className="self-start" data-testid="button-hosted-activation-console-gated">
+                        <KeyRound className="mr-2 h-4 w-4" />
+                        Hosted activation gated
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-5 p-5">
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">Pre-activation command order</div>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {snapshot.hostedActivationRunbook.activationConsole.preActivationCommands.map((command) => (
+                            <div key={command} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium">
+                              {command}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <div className="text-sm font-medium">Evidence posture</div>
+                        <div className="mt-3 space-y-2">
+                          {snapshot.hostedActivationRunbook.activationConsole.evidenceSummary.slice(0, 4).map((item) => (
+                            <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                              <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-rose-200 bg-rose-50 p-4" data-testid="section-kinflo-hosted-activation-blocked-actions">
+                      <div className="flex items-center gap-2 text-sm font-medium text-rose-800">
+                        <ShieldCheck className="h-4 w-4" />
+                        Blocked live actions
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions.map((action) => (
+                          <Badge key={action} variant="outline" className="border-rose-200 bg-white text-rose-700">
+                            {action}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-sm leading-6 text-slate-600">
+                      {snapshot.hostedActivationRunbook.activationConsole.providerBoundary}
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
                     <div>

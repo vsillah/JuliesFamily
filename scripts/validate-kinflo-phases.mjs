@@ -136,6 +136,7 @@ for (const path of [
   "docs/phase68-client-visual-qa-evidence.md",
   "docs/phase69-client-launch-decisions.md",
   "docs/phase70-control-room-polish.md",
+  "docs/phase71-hosted-activation-console.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -221,6 +222,7 @@ for (const path of [
   "scripts/validate-kinflo-client-launch-decisions.mjs",
   "scripts/dry-run-kinflo-client-launch-decisions.mjs",
   "scripts/validate-kinflo-control-room-polish.mjs",
+  "scripts/validate-kinflo-hosted-activation-console.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1211,6 +1213,21 @@ requireIncludes("docs/phase70-control-room-polish.md", [
   "Tenant/site/invite/publish/lead/campaign actions executed: no",
 ]);
 
+requireIncludes("docs/phase71-hosted-activation-console.md", [
+  "npm run kinflo:validate-hosted-activation-console",
+  "Hosted Activation Console",
+  "hostedActivationRunbook.activationConsole",
+  "section-kinflo-hosted-activation-console",
+  "text-kinflo-hosted-activation-next-gate",
+  "section-kinflo-hosted-activation-blocked-actions",
+  "button-hosted-activation-console-gated",
+  "Pre-activation commands: 8",
+  "Evidence summary items: 6",
+  "Blocked live actions: 6",
+  "blocked_until_approval",
+  "provider_light_activation_console",
+]);
+
 requireIncludes("docs/convex-client-launch-decision-manifest.json", [
   "\"phase\": 69",
   "\"status\": \"provider-light-launch-decision\"",
@@ -1286,6 +1303,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-launch-decisions\"",
   "\"kinflo:dry-run-client-launch-decisions\"",
   "\"kinflo:validate-control-room-polish\"",
+  "\"kinflo:validate-hosted-activation-console\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1879,6 +1897,19 @@ requireIncludes("scripts/validate-kinflo-control-room-polish.mjs", [
   "Provider APIs touched: no",
 ]);
 
+requireIncludes("scripts/validate-kinflo-hosted-activation-console.mjs", [
+  "docs/phase71-hosted-activation-console.md",
+  "section-kinflo-hosted-activation-console",
+  "text-kinflo-hosted-activation-next-gate",
+  "button-hosted-activation-console-gated",
+  "section-kinflo-hosted-activation-blocked-actions",
+  "ShellHostedActivationConsole",
+  "provider_light_activation_console",
+  "blocked_until_approval",
+  "activation console does not import generated API",
+  "activation console does not execute live Convex",
+]);
+
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
   "process\\.env",
   "import\\.meta\\.env",
@@ -2343,8 +2374,15 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "read-only-core",
   "provider_light_switch_plan",
   "ShellHostedActivationRunbook",
+  "ShellHostedActivationConsole",
   "fixtureHostedActivationRunbook",
   "hostedActivationRunbook: fixtureHostedActivationRunbook",
+  "activationConsole",
+  "provider_light_activation_console",
+  "blocked_until_approval",
+  "Approve hosted Convex ownership, billing, backup, auth, env policy, and codegen window",
+  "run npm run convex:codegen",
+  "import convex/_generated/api",
   "prepare_only_evidence_ledger",
   "repo-sharing-risk",
   "provider-write-approvals",
@@ -2604,6 +2642,13 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-command-brief",
   "commandBrief",
   "Hosted Activation Ledger",
+  "section-kinflo-hosted-activation-console",
+  "text-kinflo-hosted-activation-next-gate",
+  "button-hosted-activation-console-gated",
+  "section-kinflo-hosted-activation-blocked-actions",
+  "snapshot.hostedActivationRunbook.activationConsole.preActivationCommands",
+  "snapshot.hostedActivationRunbook.activationConsole.evidenceSummary",
+  "snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions",
   "select-kinflo-hosted-activation-step",
   "button-hosted-activation-gated",
   "snapshot.hostedActivationRunbook.documents",
