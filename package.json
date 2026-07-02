@@ -32,6 +32,7 @@
     "kinflo:validate-adapter-switch-plan": "node scripts/validate-kinflo-adapter-switch-plan.mjs",
     "kinflo:validate-adapter-switch-parity": "node scripts/validate-kinflo-adapter-switch-parity.mjs",
     "kinflo:validate-adapter-switch-shell": "node scripts/validate-kinflo-adapter-switch-shell.mjs",
+    "kinflo:validate-adapter-switch-evidence": "node scripts/validate-kinflo-adapter-switch-evidence.mjs",
     "kinflo:validate-hosted-activation-ledger": "node scripts/validate-kinflo-hosted-activation-ledger.mjs",
     "kinflo:validate-design-direction": "node scripts/validate-kinflo-design-direction.mjs",
     "kinflo:validate-client-website-studio": "node scripts/validate-kinflo-client-website-studio.mjs",

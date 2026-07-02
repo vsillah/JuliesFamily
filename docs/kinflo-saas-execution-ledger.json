@@ -56,6 +56,9 @@
         "docs/phase2-kinflo-shell.md",
         "docs/phase37-experience-preferences-shell.md",
         "docs/phase48-launch-readiness-shell.md",
+        "docs/phase74-adapter-switch-evidence-matrix.md",
+        "docs/convex-adapter-switch-evidence-matrix.json",
+        "npm run kinflo:validate-adapter-switch-evidence",
         "npm run kinflo:validate-shell-routes"
       ],
       "nextGate": "Replace fixture adapter with generated Convex API only after hosted activation smoke passes."
@@ -83,6 +86,7 @@
         "docs/phase59-client-studio-polish.md",
         "docs/phase66-client-polish-scorecards.md",
         "docs/phase70-control-room-polish.md",
+        "docs/convex-adapter-switch-evidence-matrix.json",
         "npm run kinflo:validate-control-room-polish"
       ],
       "nextGate": "Claude Code frame retry after CLI auth is repaired, then apply only reviewed design deltas."
@@ -105,7 +109,7 @@
     }
   ],
   "nextRepoSafeActions": [
-    "Keep tightening fixture-to-live parity and adapter-switch evidence without importing convex/_generated/api.",
+    "Keep tightening fixture-to-live parity and adapter-switch evidence with docs/convex-adapter-switch-evidence-matrix.json without importing convex/_generated/api.",
     "Keep the human-gate decision register current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
     "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, and visual QA evidence."
   ],

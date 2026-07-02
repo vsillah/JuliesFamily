@@ -184,6 +184,8 @@
           "currentStatus": "fixture_fallback",
           "convexFunctions": [
             "siteFactory.listStarterTemplates",
+            "siteFactory.listClientWebsiteAdminPermissionPresets",
+            "siteFactory.listClientWebsiteLaunchBlueprints",
             "siteFactory.createSiteFromTemplate"
           ],
           "requiredSmokeEvidence": [

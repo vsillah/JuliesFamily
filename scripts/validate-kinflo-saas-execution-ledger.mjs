@@ -74,12 +74,15 @@ for (const path of [
   "docs/phase0-readiness-manifest.json",
   "docs/phase1-convex-control-plane.md",
   "docs/phase71-hosted-activation-console.md",
+  "docs/phase74-adapter-switch-evidence-matrix.md",
+  "docs/convex-adapter-switch-evidence-matrix.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
   "package.json",
   "scripts/validate-kinflo-saas-execution-ledger.mjs",
+  "scripts/validate-kinflo-adapter-switch-evidence.mjs",
 ]) {
   requireFile(path);
 }
@@ -178,6 +181,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
   "No secret values are read or printed.",
+  "adapter-switch evidence",
+  "docs/convex-adapter-switch-evidence-matrix.json",
   "human-gate decision register current without storing secrets",
 ]);
 

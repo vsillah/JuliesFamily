@@ -18,7 +18,7 @@ npm run kinflo:validate-saas-execution-ledger
 
 ## Why This Exists
 
-The branch now contains Phase 0 intake proof, provider-light Convex modules, the Kinflo OS shell, site factory contracts, launch decision packets, design polish, and hosted activation gates. The ledger makes the current operating state explicit so the next phase can move forward without treating local fixtures, docs, or dry runs as live readiness.
+The branch now contains Phase 0 intake proof, provider-light Convex modules, the Kinflo OS shell, site factory contracts, launch decision packets, design polish, adapter-switch evidence, and hosted activation gates. The ledger makes the current operating state explicit so the next phase can move forward without treating local fixtures, docs, or dry runs as live readiness.
 
 ## Current Lane Status
 
@@ -47,7 +47,7 @@ No secret values are read or printed.
 
 The next repo-safe implementation work should stay in one of these lanes until Vambah approves hosted activation:
 
-- tighten fixture-to-live parity and adapter-switch evidence,
+- tighten fixture-to-live parity and adapter-switch evidence through `docs/convex-adapter-switch-evidence-matrix.json`,
 - keep the human-gate decision register current without storing secrets,
 - continue tenant/site permissions, client admin handoff, launch decisions, and visual QA evidence inside provider-light Kinflo OS surfaces.
 
