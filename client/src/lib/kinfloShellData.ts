@@ -238,6 +238,39 @@ export type ShellHostedSmokeExecutionSequencer = {
   batches: ShellHostedSmokeExecutionBatch[];
 };
 
+export type ShellHostedSmokeEvidenceStatus = "pending_human_gate";
+
+export type ShellHostedSmokeEvidenceEntry = {
+  id: string;
+  batchId: string;
+  order: number;
+  label: string;
+  status: ShellHostedSmokeEvidenceStatus;
+  functionCount: number;
+  expectedTranscript: string;
+  evidenceSlots: string[];
+  acceptanceCriteria: string[];
+  abortIf: string;
+  rollbackReference: string;
+  owner: string;
+  blockedUntil: string;
+  canRecord: boolean;
+  providerWrites: boolean;
+  liveConvexExecution: boolean;
+};
+
+export type ShellHostedSmokeEvidenceLedger = {
+  status: "provider_light_hosted_smoke_evidence_ledger";
+  totalEvidenceEntries: number;
+  pendingEntries: number;
+  totalFunctions: number;
+  blockedEntries: number;
+  approvalGate: string;
+  providerBoundary: string;
+  sourceDocuments: string[];
+  entries: ShellHostedSmokeEvidenceEntry[];
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -246,6 +279,7 @@ export type ShellHostedActivationRunbook = {
   generatedApiReviewBoard: ShellGeneratedApiReviewBoard;
   hostedSmokeGapBacklog: ShellHostedSmokeGapBacklog;
   hostedSmokeExecutionSequencer: ShellHostedSmokeExecutionSequencer;
+  hostedSmokeEvidenceLedger: ShellHostedSmokeEvidenceLedger;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -4638,6 +4672,189 @@ const fixtureHostedSmokeExecutionSequencer: ShellHostedSmokeExecutionSequencer =
   ],
 };
 
+const fixtureHostedSmokeEvidenceLedger: ShellHostedSmokeEvidenceLedger = {
+  status: "provider_light_hosted_smoke_evidence_ledger",
+  totalEvidenceEntries: 6,
+  pendingEntries: 6,
+  totalFunctions: 16,
+  blockedEntries: 6,
+  approvalGate: "Evidence capture is prepared only. Hosted ownership, generated API review, smoke execution approval, rollback owner, and artifact storage path must be accepted before transcripts are recorded.",
+  providerBoundary: "This evidence ledger is local review metadata. It does not create a hosted Convex deployment, run codegen, import generated API files, execute live Convex functions, record hosted transcripts, write provider metadata, send campaigns, call AI providers, publish sites, or read secrets.",
+  sourceDocuments: [
+    "docs/phase91-hosted-smoke-execution-sequencer.md",
+    "docs/phase90-hosted-smoke-gap-backlog.md",
+    "docs/convex-adapter-switch-plan.json",
+    "docs/convex-live-smoke-manifest.json",
+  ],
+  entries: [
+    {
+      id: "evidence-read-only-core",
+      batchId: "read-only-core",
+      order: 10,
+      label: "Read-only launch readiness transcript",
+      status: "pending_human_gate",
+      functionCount: 1,
+      expectedTranscript: "Capture launch readiness response, site:view scope, provider-action block state, generated binding name, and cross-tenant deny proof.",
+      evidenceSlots: [
+        "hosted response excerpt without secrets",
+        "site:view allow result",
+        "cross-tenant deny result",
+        "provider action disabled proof",
+      ],
+      acceptanceCriteria: [
+        "launchReadiness.getSiteLaunchReadiness returns only the approved smoke site",
+        "provider actions remain disabled",
+        "no generated API binding name diverges from the contract",
+      ],
+      abortIf: "Stop if launch readiness leaks tenant data, provider actions enable, or the generated binding name diverges.",
+      rollbackReference: "Keep fixture launch readiness selected and leave generatedApiAvailable false.",
+      owner: "platform.super_admin",
+      blockedUntil: "Read-only hosted smoke window and artifact storage path are approved.",
+      canRecord: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "evidence-user-scoped-preferences",
+      batchId: "user-scoped-preferences",
+      order: 20,
+      label: "User preference isolation and cleanup transcript",
+      status: "pending_human_gate",
+      functionCount: 2,
+      expectedTranscript: "Capture preference read isolation, reversible upsert payload, cleanup confirmation, and restored fixture defaults.",
+      evidenceSlots: [
+        "signed-in user preference read",
+        "other-user deny proof",
+        "reversible upsert payload",
+        "cleanup confirmation",
+      ],
+      acceptanceCriteria: [
+        "preferences.getMyPreferences returns only the signed-in user's record",
+        "preferences.upsertMyPreferences is reversible for the smoke user",
+        "fixture defaults remain available after cleanup",
+      ],
+      abortIf: "Stop before mutation if preference scope leaks, cleanup ownership is unclear, or tenant/site defaults cross boundaries.",
+      rollbackReference: "Delete or overwrite the smoke preference and restore fixture density, filters, site context, and landing-page defaults.",
+      owner: "platform.super_admin",
+      blockedUntil: "Preference mutation smoke order and rollback owner are accepted.",
+      canRecord: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "evidence-site-creation-and-admin",
+      batchId: "site-creation-and-admin",
+      order: 30,
+      label: "Client site factory scope transcript",
+      status: "pending_human_gate",
+      functionCount: 2,
+      expectedTranscript: "Capture admin preset and launch blueprint reads, owner/invite role mapping, default page set, permission gates, and publish disabled state.",
+      evidenceSlots: [
+        "admin permission preset response",
+        "launch blueprint response",
+        "owner and invite role mapping",
+        "publish and invite disabled proof",
+      ],
+      acceptanceCriteria: [
+        "permission presets stay tenant and site scoped",
+        "launch blueprints match the selected launch packet",
+        "publish and invite actions remain gated",
+      ],
+      abortIf: "Stop if presets leak across tenants, blueprint content diverges from the selected site, or publish/invite actions enable.",
+      rollbackReference: "Keep fixture permission presets and launch blueprints selected until hosted mapping is accepted.",
+      owner: "platform.super_admin",
+      blockedUntil: "Client permission and launch blueprint read smokes are approved.",
+      canRecord: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "evidence-public-crm-loop",
+      batchId: "public-crm-loop",
+      order: 40,
+      label: "CRM journey and lead transition transcript",
+      status: "pending_human_gate",
+      functionCount: 3,
+      expectedTranscript: "Capture tenant-scoped rule reads, one reversible rule upsert, one smoke lead transition, timeline/audit append proof, and notification pause proof.",
+      evidenceSlots: [
+        "journey rule read response",
+        "reversible rule upsert proof",
+        "lead transition proof",
+        "timeline and audit append evidence",
+        "notification pause proof",
+      ],
+      acceptanceCriteria: [
+        "journey rules do not leak across sites",
+        "lead transition appends timeline and audit evidence",
+        "outbound notifications remain paused",
+      ],
+      abortIf: "Stop if outbound notifications are reachable, smoke lead data cannot be marked test-only, or audit events are missing.",
+      rollbackReference: "Delete or mark smoke CRM records as test-only, restore fixture journey rules, and keep notifications paused.",
+      owner: "platform.super_admin",
+      blockedUntil: "CRM mutation smoke order, cleanup policy, and rollback owner are accepted.",
+      canRecord: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "evidence-provider-readiness-records",
+      batchId: "provider-readiness-records",
+      order: 50,
+      label: "Provider metadata boundary transcript",
+      status: "pending_human_gate",
+      functionCount: 2,
+      expectedTranscript: "Capture integration settings without secret values, one metadata-only upsert, deactivation proof, and provider-call disabled proof.",
+      evidenceSlots: [
+        "integration settings read without secret values",
+        "metadata-only upsert payload",
+        "metadata deactivation proof",
+        "provider-call disabled proof",
+      ],
+      acceptanceCriteria: [
+        "secret values never appear in reads or transcripts",
+        "metadata writes do not call DNS, email, payment, storage, or AI providers",
+        "smoke metadata can be deactivated",
+      ],
+      abortIf: "Stop if any secret value appears, a provider call path is reachable, or metadata rows cannot be deactivated.",
+      rollbackReference: "Deactivate the smoke metadata record and return integration readiness rows to fixtures.",
+      owner: "platform.super_admin",
+      blockedUntil: "Metadata-only provider boundary and rollback owner are accepted.",
+      canRecord: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "evidence-campaign-and-ai-governance",
+      batchId: "campaign-and-ai-governance",
+      order: 60,
+      label: "Campaign and AI governance transcript",
+      status: "pending_human_gate",
+      functionCount: 6,
+      expectedTranscript: "Capture campaign draft read/upsert/approval without send, AI provenance read/upsert/review without generation, and publish/provider block proof.",
+      evidenceSlots: [
+        "campaign draft read response",
+        "reversible campaign draft upsert proof",
+        "approval-state change without send",
+        "AI provenance read and upsert proof",
+        "AI review decision proof",
+        "publish and provider-call disabled proof",
+      ],
+      acceptanceCriteria: [
+        "campaign approval does not send email, SMS, or automation messages",
+        "AI provenance smokes do not call generation providers",
+        "publish target remains blocked",
+      ],
+      abortIf: "Stop if email/SMS/automation send paths are reachable, AI generation can execute, or reviewer authority is ambiguous.",
+      rollbackReference: "Pause or delete smoke campaign records, revert AI review decisions, keep generated output unpublished, and restore fixture governance state.",
+      owner: "platform.super_admin",
+      blockedUntil: "Campaign and AI governance smoke order, consent, provider-send pause, and publish rollback are accepted.",
+      canRecord: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+  ],
+};
+
 const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger",
   defaultStepId: "repo-sharing-risk",
@@ -4836,6 +5053,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog,
   hostedSmokeExecutionSequencer: fixtureHostedSmokeExecutionSequencer,
+  hostedSmokeEvidenceLedger: fixtureHostedSmokeEvidenceLedger,
   decisionRegister: [
     {
       id: "credential-rotation-review",

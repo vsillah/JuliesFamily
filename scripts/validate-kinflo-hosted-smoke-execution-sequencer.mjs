@@ -50,7 +50,7 @@ function parseJson(path) {
 }
 
 function extractSequencerBlock(contents) {
-  const match = contents.match(/const fixtureHostedSmokeExecutionSequencer:\s*ShellHostedSmokeExecutionSequencer\s*=\s*\{([\s\S]*?)\n\};\n\nconst fixtureHostedActivationRunbook/);
+  const match = contents.match(/const fixtureHostedSmokeExecutionSequencer:\s*ShellHostedSmokeExecutionSequencer\s*=\s*\{([\s\S]*?)\n\};\n\nconst fixtureHostedSmokeEvidenceLedger/);
   if (!match) {
     fail("hosted smoke execution sequencer block exists", "Could not find fixtureHostedSmokeExecutionSequencer.");
     return "";

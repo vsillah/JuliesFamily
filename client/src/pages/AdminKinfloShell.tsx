@@ -3090,6 +3090,117 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
+                <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-smoke-evidence-ledger">
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Hosted Smoke Evidence Ledger</CardTitle>
+                        <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+                          {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.pendingEntries} pending
+                        </Badge>
+                      </div>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid="text-kinflo-hosted-smoke-evidence-ledger">
+                        {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.approvalGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-hosted-smoke-evidence-gated">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Evidence capture gated
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-3 md:grid-cols-4" data-testid="section-kinflo-hosted-smoke-evidence-summary">
+                      {[
+                        { label: "Entries", value: snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.totalEvidenceEntries },
+                        { label: "Functions", value: snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.totalFunctions },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.pendingEntries },
+                        { label: "Blocked", value: snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.blockedEntries },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid max-h-[560px] gap-3 overflow-y-auto pr-1 xl:grid-cols-2" data-testid="section-kinflo-hosted-smoke-evidence-scroll">
+                      {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries.map((entry) => (
+                        <div key={entry.id} className="rounded-lg border border-slate-200 bg-white p-4" data-testid={`card-hosted-smoke-evidence-${entry.batchId}`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Batch {entry.order}</div>
+                              <div className="mt-1 text-sm font-semibold text-slate-950">{entry.label}</div>
+                            </div>
+                            <Badge variant="outline" className="shrink-0 border-amber-200 bg-amber-50 text-amber-800">
+                              {entry.status.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+
+                          <p className="mt-3 text-xs leading-5 text-slate-600">{entry.expectedTranscript}</p>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Badge variant="outline">{entry.functionCount} functions</Badge>
+                            <Badge variant="outline">Owner: {entry.owner}</Badge>
+                            <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700">
+                              record: {entry.canRecord ? "yes" : "no"}
+                            </Badge>
+                          </div>
+
+                          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
+                              <div className="text-xs font-medium text-slate-900">Evidence slots</div>
+                              <div className="mt-2 space-y-1">
+                                {entry.evidenceSlots.map((slot) => (
+                                  <div key={slot} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                                    <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                    <span>{slot}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="rounded-md border border-emerald-100 bg-emerald-50 p-3">
+                              <div className="text-xs font-medium text-emerald-900">Acceptance criteria</div>
+                              <div className="mt-2 space-y-1">
+                                {entry.acceptanceCriteria.map((criterion) => (
+                                  <div key={criterion} className="flex items-start gap-2 text-xs leading-5 text-emerald-800">
+                                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                    <span>{criterion}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 grid gap-2 text-xs">
+                            <div className="rounded-md border border-rose-100 bg-rose-50 p-2">
+                              <span className="font-medium text-rose-900">Abort if: </span>
+                              <span className="text-rose-700">{entry.abortIf}</span>
+                            </div>
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <span className="font-medium text-slate-900">Rollback: </span>
+                              <span className="text-slate-600">{entry.rollbackReference}</span>
+                            </div>
+                          </div>
+                          <p className="mt-3 text-xs leading-5 text-slate-600">{entry.blockedUntil}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.sourceDocuments.map((documentPath) => (
+                        <div key={documentPath} className="rounded-md border border-slate-200 px-3 py-2 text-xs">
+                          <span className="break-all">{documentPath}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.providerBoundary}
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-decision-register">
                   <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
                     <div>
