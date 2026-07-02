@@ -719,6 +719,32 @@ export type ShellClientWebsiteConfigurationReviewPacket = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteConfigurationChangeSet = {
+  siteKey: string;
+  label: string;
+  changeSetStatus: "provider-light-draft-change-set";
+  draftChangeCount: number;
+  lockedChangeCount: number;
+  approvalEvidenceCount: number;
+  changeGroups: {
+    key: string;
+    label: string;
+    surface: "brand" | "navigation" | "content" | "crm" | "permissions";
+    status: "draft_review" | "locked_by_gate";
+    proposedChange: string;
+    impact: string;
+  }[];
+  saveBlockers: string[];
+  approvalEvidence: string[];
+  blockedLiveActions: string[];
+  nextGate: string;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -935,6 +961,7 @@ export type ShellClientWebsiteStudio = {
   spinUpQueue: ShellClientWebsiteSpinUpQueue;
   configurationProfiles: ShellClientWebsiteConfigurationProfiles;
   configurationReviewPackets: ShellClientWebsiteConfigurationReviewPacket[];
+  configurationChangeSets: ShellClientWebsiteConfigurationChangeSet[];
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
@@ -2573,6 +2600,94 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       liveConvexExecution: false,
       convexFunctions: [
         "siteFactory.listClientWebsiteConfigurationReviewPackets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "campaigns.requestCampaignApproval",
+      ],
+    },
+  ],
+  configurationChangeSets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family founding change set",
+      changeSetStatus: "provider-light-draft-change-set",
+      draftChangeCount: 4,
+      lockedChangeCount: 2,
+      approvalEvidenceCount: 4,
+      changeGroups: [
+        { key: "brand-trust", label: "Brand trust tone", surface: "brand", status: "draft_review", proposedChange: "Tune color and voice tokens toward family-learning trust while keeping the founding logo unchanged.", impact: "Improves public credibility without changing the live theme." },
+        { key: "program-nav", label: "Program navigation", surface: "navigation", status: "draft_review", proposedChange: "Prioritize family programs, volunteer, donate, and contact paths for public review.", impact: "Clarifies the primary visitor path before launch." },
+        { key: "origin-copy", label: "Origin story copy", surface: "content", status: "draft_review", proposedChange: "Map existing Julie Family pages into reusable provenance-aware content blocks.", impact: "Keeps source history visible before any content save." },
+        { key: "lead-route", label: "Family intake route", surface: "crm", status: "locked_by_gate", proposedChange: "Prepare family intake lead routing but keep public form writes disabled.", impact: "Shows the CRM target without sending leads." },
+      ],
+      saveBlockers: ["seeded tenant ownership note", "content provenance approval", "public renderer parity smoke", "lead route smoke"],
+      approvalEvidence: ["founding tenant note", "source page mapping", "fixture preview screenshot", "rollback owner acceptance"],
+      blockedLiveActions: ["configuration save mutation", "content block write", "public publish write", "CRM lead write"],
+      nextGate: "Approve tenant ownership, content provenance, and public renderer parity before enabling configuration save.",
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationChangeSets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteBuilder.updateContentBlock",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client draft change set",
+      changeSetStatus: "provider-light-draft-change-set",
+      draftChangeCount: 4,
+      lockedChangeCount: 3,
+      approvalEvidenceCount: 5,
+      changeGroups: [
+        { key: "credibility-brand", label: "Credibility brand system", surface: "brand", status: "draft_review", proposedChange: "Apply restrained advisory tokens and proof-led page rhythm for a client-ready review.", impact: "Gives the client a polished direction without writing theme records." },
+        { key: "service-nav", label: "Service navigation", surface: "navigation", status: "draft_review", proposedChange: "Queue Home, services, proof, intake, and privacy paths as the selected navigation structure.", impact: "Makes the proposed information architecture inspectable." },
+        { key: "proof-copy", label: "Proof-led starter copy", surface: "content", status: "draft_review", proposedChange: "Prepare starter content around outcomes, trust, intake, and advisory proof.", impact: "Moves the site toward handoff while preserving local-only review." },
+        { key: "admin-scope", label: "Tenant admin scope", surface: "permissions", status: "locked_by_gate", proposedChange: "Hold client admin permissions at review-only until owner and hosted read smoke are approved.", impact: "Prevents accidental invitation or tenant mutation." },
+      ],
+      saveBlockers: ["plan entitlement approval", "tenant owner approval", "hosted read smoke", "domain posture review", "client admin invite approval"],
+      approvalEvidence: ["plan limit review", "tenant owner signoff", "preview URL review", "domain posture note", "admin permission scope review"],
+      blockedLiveActions: ["tenant create mutation", "site create mutation", "configuration save mutation", "client admin invitation", "Stripe billing activation"],
+      nextGate: "Approve plan entitlement, tenant owner, hosted read smoke, domain posture, and admin scope before saving configuration.",
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationChangeSets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "controlPlane.createTenant",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite draft change set",
+      changeSetStatus: "provider-light-draft-change-set",
+      draftChangeCount: 4,
+      lockedChangeCount: 3,
+      approvalEvidenceCount: 4,
+      changeGroups: [
+        { key: "offer-brand", label: "Offer visual system", surface: "brand", status: "draft_review", proposedChange: "Queue a focused offer identity for a campaign landing page.", impact: "Creates a reviewable campaign look without provider writes." },
+        { key: "proof-block", label: "Proof block", surface: "content", status: "draft_review", proposedChange: "Prepare proof, offer, and signup copy blocks for internal review.", impact: "Shows the campaign story before public publish." },
+        { key: "lead-consent", label: "Lead consent path", surface: "crm", status: "locked_by_gate", proposedChange: "Model lead capture routing and consent checkpoints while keeping public form writes disabled.", impact: "Protects lead data until smoke and consent gates pass." },
+        { key: "editor-scope", label: "Campaign editor scope", surface: "permissions", status: "locked_by_gate", proposedChange: "Hold campaign editor invitation until site scope and provider-send boundary are approved.", impact: "Prevents editor access before the launch gate is clear." },
+      ],
+      saveBlockers: ["campaign consent review", "site scope approval", "lead routing review", "provider-send boundary", "AI copy approval"],
+      approvalEvidence: ["campaign consent note", "site editor scope review", "lead route smoke plan", "provider-send boundary note"],
+      blockedLiveActions: ["site create mutation", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+      nextGate: "Approve campaign consent, site scope, lead routing, provider-send boundary, and AI copy review before saving configuration.",
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationChangeSets",
         "siteFactory.listClientWebsiteConfigurationProfiles",
         "siteFactory.createSiteFromTemplate",
         "controlPlane.createInvitation",
@@ -5797,11 +5912,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 76,
-    queryBindings: 38,
+    totalBindings: 77,
+    queryBindings: 39,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 31,
+    smokeManifestGaps: 32,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -5854,12 +5969,13 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 15,
-        queryBindings: 14,
+        totalBindings: 16,
+        queryBindings: 15,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
           "siteFactory.listClientWebsiteAdminPermissionPresets",
+          "siteFactory.listClientWebsiteConfigurationChangeSets",
           "siteFactory.listClientWebsiteConfigurationReviewPackets",
           "siteFactory.listClientWebsiteConfigurationProfiles",
           "siteFactory.listClientWebsiteLaunchBlueprints",

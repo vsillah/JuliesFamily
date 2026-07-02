@@ -185,6 +185,7 @@
           "convexFunctions": [
             "siteFactory.listStarterTemplates",
             "siteFactory.listClientWebsiteAdminPermissionPresets",
+            "siteFactory.listClientWebsiteConfigurationChangeSets",
             "siteFactory.listClientWebsiteConfigurationReviewPackets",
             "siteFactory.listClientWebsiteConfigurationProfiles",
             "siteFactory.listClientWebsiteLaunchBlueprints",
@@ -192,6 +193,7 @@
           ],
           "requiredSmokeEvidence": [
             "template list",
+            "configuration change set read",
             "configuration review packet read",
             "configuration profile read",
             "draft site created from template",

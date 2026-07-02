@@ -103,6 +103,8 @@ for (const path of [
 requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", [
   "Phase 98: Configuration Profile Generated API Coverage",
   "npm run kinflo:validate-configuration-profile-generated-api-coverage",
+  "siteFactoryListClientWebsiteConfigurationChangeSets",
+  "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
@@ -113,11 +115,14 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
 ]);
 
 requireIncludes(runtimePath, [
+  "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);
 
 requireIncludes(generatedContractPath, [
+  "siteFactoryListClientWebsiteConfigurationChangeSets",
+  "client website configuration change sets include draft changes, save blockers, approval evidence, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "client website configuration review packets include selected-site surfaces, save blockers, required evidence, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationProfiles",
@@ -125,18 +130,20 @@ requireIncludes(generatedContractPath, [
 ]);
 
 requireIncludes(convexPath, [
+  "export const listClientWebsiteConfigurationChangeSets",
   "export const listClientWebsiteConfigurationReviewPackets",
   "export const listClientWebsiteConfigurationProfiles",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 76",
-  "Query bindings: 38",
-  "Smoke-manifest review gaps: 31",
+  "Generated API bindings: 77",
+  "Query bindings: 39",
+  "Smoke-manifest review gaps: 32",
 ]);
 
 requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
+  "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
 ]);
@@ -192,6 +199,20 @@ for (const [label, surface] of [
   } else {
     fail(`${label} includes configuration review packet smoke evidence`, "Configuration review packet read evidence must be required before adapter switch.");
   }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationChangeSets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationChangeSets")) {
+    pass(`${label} includes configuration change set function`);
+  } else {
+    fail(`${label} includes configuration change set function`, "Configuration change set read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration change set read")
+    || surface?.smokeEvidenceRequired?.includes("configuration change set read")) {
+    pass(`${label} includes configuration change set smoke evidence`);
+  } else {
+    fail(`${label} includes configuration change set smoke evidence`, "Configuration change set read evidence must be required before adapter switch.");
+  }
 }
 
 for (const path of [
@@ -228,8 +249,10 @@ for (const check of checks) {
 }
 
 console.log("\nKinFlo configuration profile generated API coverage validation");
+console.log("Runtime key: siteFactoryListClientWebsiteConfigurationChangeSets");
 console.log("Runtime key: siteFactoryListClientWebsiteConfigurationReviewPackets");
 console.log("Runtime key: siteFactoryListClientWebsiteConfigurationProfiles");
+console.log("Convex function: siteFactory.listClientWebsiteConfigurationChangeSets");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationReviewPackets");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationProfiles");
 console.log("Adapter surface: site-factory");

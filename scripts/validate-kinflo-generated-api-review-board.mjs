@@ -116,11 +116,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 76",
-  "Query bindings: 38",
+  "Generated API bindings: 77",
+  "Query bindings: 39",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 31",
+  "Smoke-manifest review gaps: 32",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -131,11 +131,12 @@ requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 76",
-  "queryBindings: 38",
+  "totalBindings: 77",
+  "queryBindings: 39",
   "mutationBindings: 38",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 31",
+  "smokeManifestGaps: 32",
+  "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
   "firstSwitchBatch: \"read-only-core\"",
@@ -143,11 +144,13 @@ requireIncludes(shellDataPath, [
 ]);
 
 requireIncludes(generatedContractPath, [
+  "siteFactoryListClientWebsiteConfigurationChangeSets",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
+  "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);
@@ -220,6 +223,7 @@ for (const [surface, counts] of bySurface) {
 
 if (
   reviewBoardBlock.includes("requiredFunctions: [") &&
+  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationChangeSets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationReviewPackets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationProfiles\"")
 ) {

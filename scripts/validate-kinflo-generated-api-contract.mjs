@@ -137,6 +137,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "roleCatalogSyncDefaultRoles",
   "accessPolicyViewerPermissionSnapshot",
   "siteBuilderPublishPage",
+  "siteFactoryListClientWebsiteConfigurationChangeSets",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "preferencesGetMyPreferences",
@@ -145,6 +146,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
+  "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);

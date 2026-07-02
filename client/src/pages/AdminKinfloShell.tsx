@@ -65,6 +65,7 @@ import {
   type ShellClientWebsiteOnboardingReadiness,
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
+  type ShellClientWebsiteConfigurationChangeSet,
   type ShellClientWebsiteConfigurationProfiles,
   type ShellClientWebsiteConfigurationReviewPacket,
   type ShellClientWebsiteSpinUpQueue,
@@ -987,10 +988,12 @@ function ClientWebsiteSpinUpQueue({
 function ClientWebsiteConfigurationProfiles({
   profiles,
   selectedReviewPacket,
+  selectedChangeSet,
   testIds,
 }: {
   profiles: ShellClientWebsiteConfigurationProfiles;
   selectedReviewPacket?: ShellClientWebsiteConfigurationReviewPacket;
+  selectedChangeSet?: ShellClientWebsiteConfigurationChangeSet;
   testIds: typeof clientWebsiteConfigurationProfileTestIds;
 }) {
   const summaryItems = [
@@ -1130,6 +1133,108 @@ function ClientWebsiteConfigurationProfiles({
             <Button disabled variant="outline" className="justify-start bg-white" data-testid="button-client-configuration-review-gated">
               <SlidersHorizontal className="mr-2 h-4 w-4" />
               Save still gated
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {selectedChangeSet ? (
+        <div
+          className="mt-4 rounded-xl border border-slate-200 bg-white p-3"
+          data-testid="section-kinflo-client-configuration-change-set"
+        >
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="bg-slate-50">{selectedChangeSet.changeSetStatus.replaceAll("_", " ")}</Badge>
+                <Badge className="bg-slate-950 hover:bg-slate-950">local draft only</Badge>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-slate-950">{selectedChangeSet.label}</div>
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                Proposed configuration changes are reviewable here, but the actual save remains blocked until ownership, hosted smoke, and provider boundaries are approved.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-xs lg:w-[360px]">
+              {[
+                { label: "Draft", value: selectedChangeSet.draftChangeCount },
+                { label: "Locked", value: selectedChangeSet.lockedChangeCount },
+                { label: "Evidence", value: selectedChangeSet.approvalEvidenceCount },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+                  <div className="mt-1 text-sm font-semibold text-slate-950">{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+            <div className="grid max-h-[210px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" data-testid="section-kinflo-client-configuration-change-set-draft">
+              {selectedChangeSet.changeGroups.map((group) => (
+                <div key={group.key} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-slate-950">{group.label}</div>
+                      <div className="mt-1 text-[11px] uppercase tracking-normal text-slate-500">{group.surface}</div>
+                    </div>
+                    <Badge variant={group.status === "draft_review" ? "secondary" : "outline"} className="shrink-0">
+                      {group.status.replaceAll("_", " ")}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-700">{group.proposedChange}</p>
+                  <p className="mt-2 rounded-md border border-slate-200 bg-white p-2 text-[11px] leading-4 text-slate-500">{group.impact}</p>
+                </div>
+              ))}
+            </div>
+
+            <Tabs defaultValue="blockers" className="min-w-0" data-testid="tabs-kinflo-client-configuration-change-set-detail">
+              <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                <TabsTrigger value="blockers" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-change-blockers">Blockers</TabsTrigger>
+                <TabsTrigger value="evidence" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-change-evidence">Evidence</TabsTrigger>
+                <TabsTrigger value="functions" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-change-functions">Functions</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="blockers" className="mt-2" data-testid="section-kinflo-client-configuration-change-blockers">
+                <div className="max-h-[150px] space-y-2 overflow-y-auto pr-1">
+                  {selectedChangeSet.saveBlockers.map((blocker) => (
+                    <div key={blocker} className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs leading-5 text-amber-900">
+                      <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      <span>{blocker}</span>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="evidence" className="mt-2" data-testid="section-kinflo-client-configuration-change-evidence">
+                <div className="max-h-[150px] space-y-2 overflow-y-auto pr-1">
+                  {selectedChangeSet.approvalEvidence.map((item) => (
+                    <div key={item} className="flex items-start gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-800">
+                      <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="functions" className="mt-2" data-testid="section-kinflo-client-configuration-change-functions">
+                <div className="flex max-h-[150px] flex-wrap gap-1.5 overflow-y-auto pr-1">
+                  {selectedChangeSet.convexFunctions.map((functionName) => (
+                    <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[10px]">
+                      {functionName}
+                    </Badge>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,1fr)_220px]">
+            <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+              {selectedChangeSet.nextGate}
+            </p>
+            <Button disabled variant="outline" className="justify-start" data-testid="button-client-configuration-change-set-gated">
+              <Save className="mr-2 h-4 w-4" />
+              Draft save gated
             </Button>
           </div>
         </div>
@@ -2058,6 +2163,11 @@ export default function AdminKinfloShell() {
     () => snapshot.clientWebsiteStudio.configurationReviewPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
       ?? snapshot.clientWebsiteStudio.configurationReviewPackets[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationReviewPackets],
+  );
+  const selectedClientWebsiteConfigurationChangeSet = useMemo(
+    () => snapshot.clientWebsiteStudio.configurationChangeSets.find((changeSet) => changeSet.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.configurationChangeSets[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationChangeSets],
   );
   const selectedClientWebsiteLaunchPacket = useMemo(
     () => snapshot.clientWebsiteStudio.launchPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
@@ -6137,6 +6247,7 @@ export default function AdminKinfloShell() {
                   <ClientWebsiteConfigurationProfiles
                     profiles={snapshot.clientWebsiteStudio.configurationProfiles}
                     selectedReviewPacket={selectedClientWebsiteConfigurationReviewPacket}
+                    selectedChangeSet={selectedClientWebsiteConfigurationChangeSet}
                     testIds={clientWebsiteConfigurationProfileTestIds}
                   />
                 </div>

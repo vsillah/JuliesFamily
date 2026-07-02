@@ -78,6 +78,7 @@
     "kinflo:validate-client-website-spin-up-queue": "node scripts/validate-kinflo-client-website-spin-up-queue.mjs",
     "kinflo:validate-client-website-configuration-profiles": "node scripts/validate-kinflo-client-website-configuration-profiles.mjs",
     "kinflo:validate-client-configuration-review-packet": "node scripts/validate-kinflo-client-configuration-review-packet.mjs",
+    "kinflo:validate-client-configuration-change-set": "node scripts/validate-kinflo-client-configuration-change-set.mjs",
     "kinflo:validate-configuration-profile-generated-api-coverage": "node scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
     "kinflo:validate-claude-frame-ingestion": "node scripts/validate-kinflo-claude-frame-ingestion.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",

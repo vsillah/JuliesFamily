@@ -11,15 +11,18 @@ npm run kinflo:validate-configuration-profile-generated-api-coverage
 ## What Changed
 
 - Runtime function key: `siteFactoryListClientWebsiteConfigurationReviewPackets`
+- Runtime function key: `siteFactoryListClientWebsiteConfigurationChangeSets`
 - Runtime function key: `siteFactoryListClientWebsiteConfigurationProfiles`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationReviewPackets`
+- Convex function path: `siteFactory.listClientWebsiteConfigurationChangeSets`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationProfiles`
 - Generated API binding surface: `site factory`
 - Adapter-switch surface: `site-factory`
 - Required switch evidence: `configuration review packet read`
+- Required switch evidence: `configuration change set read`
 - Required switch evidence: `configuration profile read`
 
-The Site Factory adapter-switch surface now requires configuration review packet and configuration profile read evidence before the fixture adapter can move toward generated Convex bindings.
+The Site Factory adapter-switch surface now requires configuration review packet, configuration change set, and configuration profile read evidence before the fixture adapter can move toward generated Convex bindings.
 
 ## Provider Boundary
 
@@ -37,4 +40,4 @@ No secret values are read or printed.
 
 ## Why This Matters
 
-Client websites are becoming configurable products, not one-off pages. The generated API review path must include each site's template, brand, navigation, CRM pipeline, editable surfaces, locked surfaces, and provider boundary before hosted activation can safely replace local fixtures.
+Client websites are becoming configurable products, not one-off pages. The generated API review path must include each site's template, brand, navigation, CRM pipeline, editable surfaces, locked surfaces, draft change set, and provider boundary before hosted activation can safely replace local fixtures.
