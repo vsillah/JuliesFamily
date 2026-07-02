@@ -5,6 +5,7 @@ import {
   Boxes,
   CheckCircle2,
   CircleDashed,
+  Command,
   CreditCard,
   Edit3,
   ExternalLink,
@@ -24,6 +25,7 @@ import {
   Save,
   Settings2,
   ShieldCheck,
+  Sparkles,
   SlidersHorizontal,
   UserRoundCheck,
   UserRoundCog,
@@ -596,11 +598,23 @@ export default function AdminKinfloShell() {
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchDecisionPackets],
   );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
+  const clientWebsiteLaunchDecisionLabel = selectedClientWebsiteLaunchDecisionPacket?.launchDecision.replaceAll("_", " ") ?? "review";
+  const clientWebsiteLaunchDecisionBlockedCount = selectedClientWebsiteLaunchDecisionPacket?.decisionCriteria.filter((item) => item.status === "blocked").length ?? 0;
+  const clientWebsiteLaunchDecisionReadyCount = selectedClientWebsiteLaunchDecisionPacket?.decisionCriteria.filter((item) => item.status === "ready").length ?? 0;
+  const clientWebsiteLaunchDecisionTone = selectedClientWebsiteLaunchDecisionPacket?.launchDecision === "no_go"
+    ? "border-rose-200 bg-rose-50 text-rose-700"
+    : "border-amber-200 bg-amber-50 text-amber-700";
   const clientWebsiteStudioReviewStats = [
     { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
     { label: "Readiness", value: `${clientWebsiteStudioReadyCount}/${clientWebsiteStudioReadiness.length}` },
     { label: "Permission", value: selectedClientWebsiteAdminPermissionPreset?.scope ?? "Pending" },
     { label: "Order", value: selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ") ?? "Pending" },
+  ];
+  const clientWebsiteStudioCommandStats = [
+    { label: "Decision", value: clientWebsiteLaunchDecisionLabel },
+    { label: "Ready proof", value: `${clientWebsiteLaunchDecisionReadyCount}` },
+    { label: "Blocked gates", value: `${clientWebsiteLaunchDecisionBlockedCount}` },
+    { label: "Signoffs", value: `${selectedClientWebsiteLaunchDecisionPacket?.requiredSignoffs.length ?? 0}` },
   ];
   const selectedAssetSite = useMemo(
     () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
@@ -2940,35 +2954,86 @@ export default function AdminKinfloShell() {
 
           <TabsContent value="site-studio" className="mt-6">
             <section className="min-w-0 space-y-5">
-              <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div className="min-w-0">
-                  <h2 className="text-xl font-semibold">Client Website Design Studio</h2>
-                  <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-                    Configure the client site, review the public experience, and keep permissions and launch actions gated until the activation evidence is complete.
-                  </p>
+              <div
+                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                data-testid="section-kinflo-client-control-room-frame"
+              >
+                <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
+                  <div className="min-w-0 p-5 sm:p-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                        <Command className="mr-1 h-3 w-3" />
+                        Control Room
+                      </Badge>
+                      <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                        Local review only
+                      </Badge>
+                    </div>
+                    <h2 className="mt-4 max-w-3xl text-2xl font-semibold leading-tight text-slate-950 sm:text-3xl">
+                      Client Website Design Studio
+                    </h2>
+                    <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                      Configure the selected client site, inspect the public experience, and keep every provider, publish, lead, invite, campaign, and launch action gated until the activation evidence is complete.
+                    </p>
+                    <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4" data-testid="section-kinflo-client-command-stats">
+                      {clientWebsiteStudioCommandStats.map((stat) => (
+                        <div key={stat.label} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+                          <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">{stat.label}</div>
+                          <div className="mt-1 truncate text-sm font-semibold text-slate-950">{stat.value}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="min-w-0 border-t border-slate-200 bg-slate-950 p-5 text-white lg:border-l lg:border-t-0 sm:p-6">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-400">Selected site</div>
+                        <div className="mt-1 text-lg font-semibold leading-snug">{selectedClientWebsiteStudioSite?.label}</div>
+                        <p className="mt-2 text-sm leading-6 text-slate-300">
+                          {selectedClientWebsiteLaunchDecisionPacket?.decisionPosture}
+                        </p>
+                      </div>
+                      <Badge className={`shrink-0 border ${clientWebsiteLaunchDecisionTone}`}>
+                        {clientWebsiteLaunchDecisionLabel}
+                      </Badge>
+                    </div>
+                    <div className="mt-5 grid grid-cols-3 gap-2">
+                      <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-normal text-slate-400">Readiness</div>
+                        <div className="mt-1 text-sm font-semibold">{clientWebsiteStudioReadinessPercent}%</div>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-normal text-slate-400">Blocked</div>
+                        <div className="mt-1 text-sm font-semibold">{clientWebsiteLaunchDecisionBlockedCount}</div>
+                      </div>
+                      <div className="min-w-0 rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-normal text-slate-400">Owner</div>
+                        <div className="mt-1 truncate text-sm font-semibold">{selectedClientWebsiteLaunchDecisionPacket?.approvalOwner}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <Badge variant="outline" className="self-start border-slate-300 bg-white">
-                  <Palette className="mr-1 h-3 w-3" />
-                  Local design review
-                </Badge>
               </div>
 
               <div
-                className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-4"
+                className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm md:grid-cols-4"
                 data-testid="section-kinflo-client-studio-operating-frame"
               >
                 {clientWebsiteStudioReviewStats.map((stat) => (
-                  <div key={stat.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div key={stat.label} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
                     <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{stat.label}</div>
                     <div className="mt-1 truncate text-sm font-semibold text-slate-950">{stat.value}</div>
                   </div>
                 ))}
               </div>
 
-              <div className="grid gap-4 xl:grid-cols-[260px_minmax(0,1fr)_380px]">
-                <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm" data-testid="section-kinflo-client-site-rail">
+              <div className="grid gap-4 xl:grid-cols-[272px_minmax(0,1fr)_388px]">
+                <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid="section-kinflo-client-site-rail">
                   <div className="flex items-center justify-between gap-3 px-1">
-                    <div className="text-sm font-semibold">Client sites</div>
+                    <div>
+                      <div className="text-sm font-semibold">Client sites</div>
+                      <div className="mt-0.5 text-xs text-slate-500">Role-adaptive review queue</div>
+                    </div>
                     <Badge variant="secondary">{snapshot.clientWebsiteStudio.sites.length}</Badge>
                   </div>
                   <div className="mt-3 space-y-2">
@@ -2980,7 +3045,7 @@ export default function AdminKinfloShell() {
                           type="button"
                           onClick={() => setClientWebsiteStudioSiteKey(site.key)}
                           aria-pressed={isSelected}
-                          className={`w-full rounded-md border px-3 py-3 text-left text-sm transition ${
+                          className={`w-full rounded-xl border px-3 py-3 text-left text-sm transition ${
                             isSelected
                               ? "border-slate-900 bg-slate-950 text-white shadow-sm"
                               : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
@@ -2993,12 +3058,12 @@ export default function AdminKinfloShell() {
                                 {site.tenantSlug}
                               </div>
                             </div>
-                            <span className={`mt-1 h-2 w-2 rounded-full ${isSelected ? "bg-emerald-300" : "bg-slate-300"}`} />
+                            <span className={`mt-1 h-2.5 w-2.5 rounded-full ${isSelected ? "bg-emerald-300 shadow-[0_0_0_3px_rgba(110,231,183,0.18)]" : "bg-slate-300"}`} />
                           </div>
                           <div className="mt-3 flex flex-wrap gap-1.5">
-                            <Badge variant={site.mobileReadiness === "ready" ? "secondary" : "outline"}>Mobile</Badge>
-                            <Badge variant={site.navReadiness === "ready" ? "secondary" : "outline"}>Nav</Badge>
-                            <Badge variant={site.heroReadiness === "ready" ? "secondary" : "outline"}>Hero</Badge>
+                            <Badge variant={site.mobileReadiness === "ready" ? "secondary" : "outline"} className={isSelected ? "border-white/10 bg-white/10 text-white hover:bg-white/10" : ""}>Mobile</Badge>
+                            <Badge variant={site.navReadiness === "ready" ? "secondary" : "outline"} className={isSelected ? "border-white/10 bg-white/10 text-white hover:bg-white/10" : ""}>Nav</Badge>
+                            <Badge variant={site.heroReadiness === "ready" ? "secondary" : "outline"} className={isSelected ? "border-white/10 bg-white/10 text-white hover:bg-white/10" : ""}>Hero</Badge>
                           </div>
                         </button>
                       );
@@ -3006,11 +3071,14 @@ export default function AdminKinfloShell() {
                   </div>
                 </div>
 
-                <Card className="min-w-0 border-slate-200 bg-white shadow-sm" data-testid="section-kinflo-client-preview-workbench">
+                <Card className="min-w-0 overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm" data-testid="section-kinflo-client-preview-workbench">
                   <CardHeader className="space-y-0 border-b border-slate-100">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div className="min-w-0">
-                        <CardTitle className="text-base">Preview Workbench</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                          <Sparkles className="h-4 w-4 text-slate-500" />
+                          Preview Workbench
+                        </CardTitle>
                         <p className="mt-1 text-sm leading-6 text-slate-600">
                           {selectedClientWebsiteStudioSite?.label} - {selectedClientWebsiteStudioSite?.audience}
                         </p>
@@ -3029,7 +3097,7 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-5 pt-5">
-                    <div className="overflow-hidden rounded-lg border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
+                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
                       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
                         <div className="flex items-center gap-2">
                           <Globe2 className="h-3.5 w-3.5" />
@@ -3038,7 +3106,7 @@ export default function AdminKinfloShell() {
                         <Badge variant="outline" className="border-slate-300 bg-white">Preview only</Badge>
                       </div>
                       <div className="grid gap-5 p-4 2xl:grid-cols-[minmax(0,1fr)_220px] lg:p-5">
-                        <div className="min-w-0 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                           <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
                             <div className="min-w-0 text-sm font-semibold text-slate-950">{selectedClientWebsiteStudioSite?.label}</div>
                             <Badge variant="secondary" className="shrink-0">{clientWebsiteStudioStatusLabel}</Badge>
@@ -3081,7 +3149,7 @@ export default function AdminKinfloShell() {
                             </div>
                           </div>
                         </div>
-                        <div className="rounded-md border border-slate-200 bg-white p-4">
+                        <div className="rounded-xl border border-slate-200 bg-white p-4">
                           <div className="flex items-center justify-between text-sm">
                             <span className="font-medium">Design readiness</span>
                             <span className="text-slate-500">{clientWebsiteStudioReadinessPercent}%</span>
@@ -3103,6 +3171,36 @@ export default function AdminKinfloShell() {
                             ))}
                           </div>
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:grid-cols-3" data-testid="section-kinflo-client-control-room-path">
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-emerald-800">
+                          <CheckCircle2 className="h-4 w-4" />
+                          Ready proof
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-emerald-700">
+                          {clientWebsiteLaunchDecisionReadyCount} criterion is accepted for local review and can support the handoff packet.
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-amber-800">
+                          <CircleDashed className="h-4 w-4" />
+                          Review queue
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-amber-700">
+                          Hosted evidence, owner signoff, and rollback acceptance stay visible before any client-facing launch.
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
+                          <ShieldCheck className="h-4 w-4" />
+                          Blocked actions
+                        </div>
+                        <p className="mt-2 text-xs leading-5 text-slate-600">
+                          {selectedClientWebsiteLaunchDecisionPacket?.blockedLaunchActions.length ?? 0} live actions remain disabled in this provider-light shell.
+                        </p>
                       </div>
                     </div>
 
@@ -3129,20 +3227,36 @@ export default function AdminKinfloShell() {
                 </Card>
 
                 <div className="space-y-4 xl:sticky xl:top-6 xl:self-start" data-testid="section-kinflo-client-launch-rail">
-                  <div className="rounded-lg border border-slate-900 bg-slate-950 p-4 text-white shadow-sm">
+                  <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white shadow-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-medium text-slate-300">Launch command rail</div>
                         <div className="mt-1 text-lg font-semibold">{selectedClientWebsiteStudioSite?.label}</div>
                       </div>
-                      <Badge className="bg-white text-slate-950 hover:bg-white">Review</Badge>
+                      <Badge className={`border ${clientWebsiteLaunchDecisionTone}`}>
+                        {clientWebsiteLaunchDecisionLabel}
+                      </Badge>
                     </div>
                     <p className="mt-3 text-sm leading-6 text-slate-300">
                       Blueprint, permissions, evidence, and provider boundaries stay visible while the public site is reviewed.
                     </p>
+                    <div className="mt-4 grid grid-cols-3 gap-2">
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-2">
+                        <div className="text-[10px] uppercase tracking-normal text-slate-400">Ready</div>
+                        <div className="mt-1 text-sm font-semibold">{clientWebsiteLaunchDecisionReadyCount}</div>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-2">
+                        <div className="text-[10px] uppercase tracking-normal text-slate-400">Blocked</div>
+                        <div className="mt-1 text-sm font-semibold">{clientWebsiteLaunchDecisionBlockedCount}</div>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/5 p-2">
+                        <div className="text-[10px] uppercase tracking-normal text-slate-400">Signoffs</div>
+                        <div className="mt-1 text-sm font-semibold">{selectedClientWebsiteLaunchDecisionPacket?.requiredSignoffs.length ?? 0}</div>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                     <Label>Client site</Label>
                     <Select value={clientWebsiteStudioSiteKey} onValueChange={setClientWebsiteStudioSiteKey}>
                       <SelectTrigger className="mt-2" data-testid="select-kinflo-client-website-site">

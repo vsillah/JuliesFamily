@@ -135,6 +135,7 @@ for (const path of [
   "docs/phase67-client-visual-qa-budgets.md",
   "docs/phase68-client-visual-qa-evidence.md",
   "docs/phase69-client-launch-decisions.md",
+  "docs/phase70-control-room-polish.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -219,6 +220,7 @@ for (const path of [
   "scripts/dry-run-kinflo-client-visual-qa-evidence.mjs",
   "scripts/validate-kinflo-client-launch-decisions.mjs",
   "scripts/dry-run-kinflo-client-launch-decisions.mjs",
+  "scripts/validate-kinflo-control-room-polish.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1196,6 +1198,19 @@ requireIncludes("docs/phase69-client-launch-decisions.md", [
   "No tenant creation, site publish, admin invite, lead write, campaign send, provider call, launch decision execution, generated API import, hosted deployment, or live Convex execution is performed",
 ]);
 
+requireIncludes("docs/phase70-control-room-polish.md", [
+  "npm run kinflo:validate-control-room-polish",
+  "Control Room",
+  "section-kinflo-client-control-room-frame",
+  "section-kinflo-client-command-stats",
+  "section-kinflo-client-control-room-path",
+  "401 Invalid authentication credentials",
+  "External writes: 0",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+  "Tenant/site/invite/publish/lead/campaign actions executed: no",
+]);
+
 requireIncludes("docs/convex-client-launch-decision-manifest.json", [
   "\"phase\": 69",
   "\"status\": \"provider-light-launch-decision\"",
@@ -1270,6 +1285,7 @@ requireIncludes("package.json", [
   "\"kinflo:dry-run-client-visual-qa-evidence\"",
   "\"kinflo:validate-client-launch-decisions\"",
   "\"kinflo:dry-run-client-launch-decisions\"",
+  "\"kinflo:validate-control-room-polish\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1848,6 +1864,19 @@ requireIncludes("scripts/dry-run-kinflo-client-launch-decisions.mjs", [
   "Generated API imported: no",
   "Live Convex execution: no",
   "Launch decision executed: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-control-room-polish.mjs", [
+  "docs/phase70-control-room-polish.md",
+  "section-kinflo-client-control-room-frame",
+  "section-kinflo-client-command-stats",
+  "section-kinflo-client-control-room-path",
+  "clientWebsiteStudioCommandStats",
+  "control room polish does not import generated API",
+  "control room polish does not execute live Convex",
+  "KinFlo control room polish validation",
+  "External writes: 0",
+  "Provider APIs touched: no",
 ]);
 
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
@@ -2644,13 +2673,20 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-launch-decision-packet",
   "text-kinflo-client-launch-decision-packet",
   "button-client-launch-decision-gated",
+  "section-kinflo-client-control-room-frame",
+  "section-kinflo-client-command-stats",
+  "section-kinflo-client-control-room-path",
   "section-kinflo-client-studio-operating-frame",
   "section-kinflo-client-site-rail",
   "section-kinflo-client-preview-workbench",
   "section-kinflo-client-preview-canvas",
   "section-kinflo-client-launch-rail",
   "clientWebsiteStudioReviewStats",
+  "clientWebsiteStudioCommandStats",
   "clientWebsiteStudioStatusLabel",
+  "clientWebsiteLaunchDecisionLabel",
+  "clientWebsiteLaunchDecisionBlockedCount",
+  "clientWebsiteLaunchDecisionTone",
   "setSelectedLaunchPacketId(selectedClientWebsiteLaunchBlueprint.launchPacketId)",
   "Launch Blueprint",
   "previewPath",

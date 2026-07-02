@@ -58,6 +58,7 @@
     "kinflo:dry-run-client-visual-qa-evidence": "node scripts/dry-run-kinflo-client-visual-qa-evidence.mjs",
     "kinflo:validate-client-launch-decisions": "node scripts/validate-kinflo-client-launch-decisions.mjs",
     "kinflo:dry-run-client-launch-decisions": "node scripts/dry-run-kinflo-client-launch-decisions.mjs",
+    "kinflo:validate-control-room-polish": "node scripts/validate-kinflo-control-room-polish.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",
