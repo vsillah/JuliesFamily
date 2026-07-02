@@ -66,11 +66,17 @@ for (const path of [
 }
 
 const compactMarkers = [
+  "tabs-kinflo-client-workbench-stage",
+  "tab-kinflo-client-workbench-sites",
+  "tab-kinflo-client-workbench-preview",
+  "tab-kinflo-client-workbench-launch",
+  "section-kinflo-client-workbench-sites",
+  "section-kinflo-client-workbench-preview",
+  "section-kinflo-client-workbench-launch",
   "section-kinflo-client-launch-rail",
-  "max-h-[calc(100vh-2rem)]",
+  "max-h-[calc(100vh-10rem)]",
   "overflow-y-auto",
   "pr-1",
-  "xl:max-h-[calc(100vh-3rem)]",
   "section-kinflo-client-provisioning-workbench",
   "section-kinflo-client-provisioning-summary-chips",
   "tabs-kinflo-client-provisioning-workbench",
@@ -86,6 +92,7 @@ const compactMarkers = [
 requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "Phase 86: Site Studio Scroll Consolidation",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
+  "tabs-kinflo-client-workbench-stage",
   "section-kinflo-client-launch-rail",
   "viewport-bounded launch rail",
   "section-kinflo-client-provisioning-workbench",

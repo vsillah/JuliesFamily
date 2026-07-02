@@ -4400,10 +4400,18 @@ export default function AdminKinfloShell() {
               />
 
               <div
-                className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(236px,272px)_minmax(0,1fr)_minmax(320px,388px)]"
+                className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
                 data-testid="section-kinflo-client-workbench-grid"
               >
-                <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid="section-kinflo-client-site-rail">
+                <Tabs defaultValue="preview" className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
+                  <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                    <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
+                    <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
+                    <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="sites" className="mt-4" data-testid="section-kinflo-client-workbench-sites">
+                    <div className="max-h-[calc(100vh-10rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3" data-testid="section-kinflo-client-site-rail">
                   <div className="flex items-center justify-between gap-3 px-1">
                     <div>
                       <div className="text-sm font-semibold">Client sites</div>
@@ -4463,9 +4471,11 @@ export default function AdminKinfloShell() {
                       ))}
                     </div>
                   </div>
-                </div>
+                    </div>
+                  </TabsContent>
 
-                <Card className="min-w-0 overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm" data-testid="section-kinflo-client-preview-workbench">
+                  <TabsContent value="preview" className="mt-4" data-testid="section-kinflo-client-workbench-preview">
+                    <Card className="min-w-0 overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm" data-testid="section-kinflo-client-preview-workbench">
                   <CardHeader className="space-y-0 border-b border-slate-100">
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                       <div className="min-w-0">
@@ -4490,7 +4500,7 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-5 pt-5">
+                  <CardContent className="max-h-[calc(100vh-10rem)] space-y-5 overflow-y-auto pt-5">
                     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
                       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
                         <div className="flex items-center gap-2">
@@ -4635,9 +4645,11 @@ export default function AdminKinfloShell() {
                       })}
                     </div>
                   </CardContent>
-                </Card>
+                    </Card>
+                  </TabsContent>
 
-                <div className="max-h-[calc(100vh-2rem)] space-y-4 overflow-y-auto pr-1 xl:sticky xl:top-6 xl:max-h-[calc(100vh-3rem)] xl:self-start" data-testid="section-kinflo-client-launch-rail">
+                  <TabsContent value="launch" className="mt-4" data-testid="section-kinflo-client-workbench-launch">
+                    <div className="max-h-[calc(100vh-10rem)] space-y-4 overflow-y-auto pr-1" data-testid="section-kinflo-client-launch-rail">
                   <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white shadow-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -5867,7 +5879,9 @@ export default function AdminKinfloShell() {
                   <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
                     {snapshot.clientWebsiteStudio.providerBoundary}
                   </div>
-                </div>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </div>
             </section>
           </TabsContent>

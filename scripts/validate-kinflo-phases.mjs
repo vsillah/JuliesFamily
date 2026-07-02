@@ -2391,10 +2391,13 @@ requireIncludes("scripts/validate-kinflo-claude-frame-ingestion.mjs", [
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [
   "docs/phase86-site-studio-scroll-consolidation.md",
+  "tabs-kinflo-client-workbench-stage",
+  "tab-kinflo-client-workbench-sites",
+  "tab-kinflo-client-workbench-preview",
+  "tab-kinflo-client-workbench-launch",
   "section-kinflo-client-launch-rail",
-  "max-h-[calc(100vh-2rem)]",
+  "max-h-[calc(100vh-10rem)]",
   "overflow-y-auto",
-  "xl:max-h-[calc(100vh-3rem)]",
   "section-kinflo-client-provisioning-workbench",
   "tabs-kinflo-client-provisioning-workbench",
   "section-kinflo-client-provisioning-order-scroll",
