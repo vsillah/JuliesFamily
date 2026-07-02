@@ -75,7 +75,7 @@ The prior right-rail provisioning content stacked a large provisioning order car
 - long lists use bounded internal scroll areas instead of increasing the full page height,
 - local setup, evidence, blocked-action, and function lists use 108px caps at narrow review widths, 145px caps at small widths, and expand to 230px on desktop,
 - the provisioning cockpit uses a compact two-column split by default so setup order and evidence controls do not stack into a tall proof column.
-- the provisioning workbench itself is capped at 360px on narrow review widths, with order and dry-run interiors capped at 190px before the small breakpoint so the page does not fall back into a tall proof stack.
+- the provisioning workbench itself is capped at 340px on narrow review widths, with order and dry-run interiors capped at 190px before the small breakpoint so the page does not fall back into a tall proof stack.
 - duplicate disabled gate buttons wait for desktop width because the narrow workbench already shows the gated state in the header badge.
 - the workbench card uses local vertical scrolling rather than clipping content when a nested panel has more detail than the compact viewport can show.
 

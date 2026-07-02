@@ -85,6 +85,7 @@
     "kinflo:validate-client-public-preview-context-links": "node scripts/validate-kinflo-client-public-preview-context-links.mjs",
     "kinflo:validate-client-preview-review-packet": "node scripts/validate-kinflo-client-preview-review-packet.mjs",
     "kinflo:validate-client-preview-review-contract": "node scripts/validate-kinflo-client-preview-review-contract.mjs",
+    "kinflo:validate-preview-review-shell-adapter": "node scripts/validate-kinflo-preview-review-shell-adapter.mjs",
     "kinflo:validate-site-studio-launch-dossier-deep-links": "node scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs",
     "kinflo:validate-adapter-switch-runway": "node scripts/validate-kinflo-adapter-switch-runway.mjs",
     "kinflo:validate-generated-api-review-board": "node scripts/validate-kinflo-generated-api-review-board.mjs",

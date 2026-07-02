@@ -873,6 +873,29 @@ export type ShellClientWebsiteLaunchDecisionPacket = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsitePreviewReviewPacket = {
+  siteKey: string;
+  label: string;
+  previewPath: string;
+  route: string;
+  persona: string;
+  journeyStage: string;
+  device: "desktop" | "tablet" | "mobile";
+  reviewSource: "site-studio-preview";
+  reviewPosture: "provider-light-preview-review";
+  launchDecision: "go" | "review" | "no_go";
+  context: { label: string; value: string }[];
+  evidenceChecklist: {
+    key: string;
+    label: string;
+    status: "accepted" | "ready" | "pending" | "blocked";
+    evidence: string;
+  }[];
+  blockedLiveActions: string[];
+  requiredBeforeClientShare: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
@@ -892,6 +915,7 @@ export type ShellClientWebsiteStudio = {
   visualQaBudgets: ShellClientWebsiteVisualQaBudget[];
   visualQaEvidencePackets: ShellClientWebsiteVisualQaEvidencePacket[];
   launchDecisionPackets: ShellClientWebsiteLaunchDecisionPacket[];
+  previewReviewPackets: ShellClientWebsitePreviewReviewPacket[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -3489,6 +3513,112 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
         "campaigns.requestCampaignApproval",
         "crm.submitLead",
         "publicSite.resolvePublishedSite",
+      ],
+    },
+  ],
+  previewReviewPackets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family public preview review packet",
+      previewPath: "/kinflo-sites/julies-family",
+      route: "/",
+      persona: "parent, volunteer, donor, and community partner",
+      journeyStage: "awareness-to-decision",
+      device: "desktop",
+      reviewSource: "site-studio-preview",
+      reviewPosture: "provider-light-preview-review",
+      launchDecision: "review",
+      context: [
+        { label: "Site", value: "julies-family-public" },
+        { label: "Route", value: "/" },
+        { label: "Persona", value: "parent, volunteer, donor, and community partner" },
+        { label: "Journey", value: "awareness-to-decision" },
+        { label: "Device/source", value: "desktop / site-studio-preview" },
+        { label: "Decision", value: "review" },
+      ],
+      evidenceChecklist: [
+        { key: "url-context", label: "Preview URL context", status: "accepted", evidence: "studioSite, route, persona, journeyStage, device, and source are present." },
+        { key: "visual-qa", label: "Visual QA packet", status: "ready", evidence: "4 fixture evidence items remain local." },
+        { key: "launch-decision", label: "Launch decision criteria", status: "pending", evidence: "1 ready / 2 blocked." },
+        { key: "hosted-smoke", label: "Hosted smoke evidence", status: "blocked", evidence: "Pending hosted Convex, generated API review, read-only smoke, and rollback approval." },
+      ],
+      blockedLiveActions: ["public publish write", "CRM lead write", "client sharing"],
+      requiredBeforeClientShare: ["hosted read-only smoke", "generated API review", "visual QA evidence accepted", "publish rollback owner assigned"],
+      convexFunctions: [
+        "siteFactory.listClientWebsitePreviewReviewPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client preview review packet",
+      previewPath: "/kinflo-sites/advisor-client-site",
+      route: "/",
+      persona: "service client evaluating fit and proof",
+      journeyStage: "consideration-to-decision",
+      device: "desktop",
+      reviewSource: "site-studio-preview",
+      reviewPosture: "provider-light-preview-review",
+      launchDecision: "review",
+      context: [
+        { label: "Site", value: "advisor-client-site" },
+        { label: "Route", value: "/" },
+        { label: "Persona", value: "service client evaluating fit and proof" },
+        { label: "Journey", value: "consideration-to-decision" },
+        { label: "Device/source", value: "desktop / site-studio-preview" },
+        { label: "Decision", value: "review" },
+      ],
+      evidenceChecklist: [
+        { key: "url-context", label: "Preview URL context", status: "accepted", evidence: "studioSite, route, persona, journeyStage, device, and source are present." },
+        { key: "visual-qa", label: "Visual QA packet", status: "ready", evidence: "4 fixture evidence items remain local." },
+        { key: "launch-decision", label: "Launch decision criteria", status: "pending", evidence: "1 ready / 2 blocked." },
+        { key: "hosted-smoke", label: "Hosted smoke evidence", status: "blocked", evidence: "Pending hosted Convex, generated API review, read-only smoke, and rollback approval." },
+      ],
+      blockedLiveActions: ["tenant create mutation", "client admin invitation", "public publish write", "CRM lead write", "client sharing"],
+      requiredBeforeClientShare: ["tenant owner approval", "hosted preview smoke", "lead route smoke", "client invite approval"],
+      convexFunctions: [
+        "siteFactory.listClientWebsitePreviewReviewPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite preview review packet",
+      previewPath: "/kinflo-sites/campaign-microsite",
+      route: "/",
+      persona: "warm campaign lead from email, SMS, referral, or event traffic",
+      journeyStage: "decision",
+      device: "desktop",
+      reviewSource: "site-studio-preview",
+      reviewPosture: "provider-light-preview-review",
+      launchDecision: "no_go",
+      context: [
+        { label: "Site", value: "campaign-microsite" },
+        { label: "Route", value: "/" },
+        { label: "Persona", value: "warm campaign lead from email, SMS, referral, or event traffic" },
+        { label: "Journey", value: "decision" },
+        { label: "Device/source", value: "desktop / site-studio-preview" },
+        { label: "Decision", value: "no_go" },
+      ],
+      evidenceChecklist: [
+        { key: "url-context", label: "Preview URL context", status: "accepted", evidence: "studioSite, route, persona, journeyStage, device, and source are present." },
+        { key: "visual-qa", label: "Visual QA packet", status: "pending", evidence: "4 fixture evidence items remain local." },
+        { key: "launch-decision", label: "Launch decision criteria", status: "blocked", evidence: "1 ready / 3 blocked." },
+        { key: "hosted-smoke", label: "Hosted smoke evidence", status: "blocked", evidence: "Pending hosted Convex, generated API review, read-only smoke, and rollback approval." },
+      ],
+      blockedLiveActions: ["campaign send", "public form lead write", "AI copy publish", "client sharing"],
+      requiredBeforeClientShare: ["campaign consent approval", "mobile screenshot approval", "lead smoke approval", "provider-send rollback owner assigned"],
+      convexFunctions: [
+        "siteFactory.listClientWebsitePreviewReviewPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
       ],
     },
   ],

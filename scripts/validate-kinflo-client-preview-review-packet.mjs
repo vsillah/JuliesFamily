@@ -60,6 +60,7 @@ for (const path of [
   "docs/phase107-client-preview-review-packet.md",
   "docs/phase72-saas-execution-ledger.md",
   "docs/kinflo-saas-execution-ledger.json",
+  "client/src/lib/kinfloShellData.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "package.json",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
@@ -90,18 +91,28 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-preview-review-context",
   "section-kinflo-client-preview-review-evidence",
   "section-kinflo-client-preview-review-gates",
-  "max-h-[360px]",
+  "max-h-[280px]",
   "grid-cols-[minmax(0,1fr)_minmax(130px,0.58fr)]",
   "max-h-32",
   "Preview review packet",
   "provider-light",
+  "selectedClientWebsitePreviewReviewPacket",
+  "snapshot.clientWebsiteStudio.previewReviewPackets.find",
+  "clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context",
+  "clientWebsitePreviewReviewEvidence = selectedClientWebsitePreviewReviewPacket?.evidenceChecklist.map",
+  "clientWebsitePreviewReviewBlockedActions = selectedClientWebsitePreviewReviewPacket?.blockedLiveActions",
+  "href={clientWebsiteStudioPreviewHref}",
+]);
+
+requireIncludes("client/src/lib/kinfloShellData.ts", [
+  "ShellClientWebsitePreviewReviewPacket",
+  "previewReviewPackets",
   "studioSite, route, persona, journeyStage, device, and source are present.",
   "Hosted smoke evidence",
   "Pending hosted Convex, generated API review, read-only smoke, and rollback approval.",
   "public publish write",
   "CRM lead write",
   "client sharing",
-  "href={clientWebsiteStudioPreviewHref}",
 ]);
 
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
@@ -118,7 +129,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-preview-review-packet\"",
 ]);
 
-const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
+const shellContents = `${read("client/src/lib/kinfloShellData.ts")}\n${read("client/src/pages/AdminKinfloShell.tsx")}`;
 const importsGeneratedApi =
   shellContents.includes("from \"convex/_generated/api\"") ||
   shellContents.includes("from 'convex/_generated/api'") ||
