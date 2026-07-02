@@ -6431,7 +6431,7 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="flex max-h-[min(560px,calc(100vh-9rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3 lg:max-h-none lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="flex max-h-[min(410px,calc(100vh-7rem))] flex-col overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3 lg:max-h-none lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -6439,23 +6439,23 @@ export default function AdminKinfloShell() {
                           <h3 className="text-base font-semibold">Provisioning workbench</h3>
                           <Badge variant="secondary" className="text-[10px]">Provisioning Order</Badge>
                         </div>
-                        <p className="mt-1 text-sm leading-5 text-slate-600" data-testid="text-kinflo-client-provisioning-order">
+                        <p className="mt-0.5 text-sm leading-5 text-slate-600" data-testid="text-kinflo-client-provisioning-order">
                           {selectedClientWebsiteProvisioningOrder?.label}
                         </p>
                       </div>
                       <Badge variant="outline">{selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ")}</Badge>
                     </div>
 
-                    <div className="mt-2 grid shrink-0 grid-cols-4 gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
+                    <div className="mt-2 grid shrink-0 grid-cols-4 gap-1.5 sm:gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
                       {[
                         { label: "Plan", value: selectedClientWebsiteProvisioningOrder?.requestedPlan },
                         { label: "Template", value: selectedClientWebsiteProvisioningOrder?.templateKey },
                         { label: "Owner", value: selectedClientWebsiteProvisioningOrder?.ownerRole },
                         { label: "Invite", value: selectedClientWebsiteProvisioningOrder?.inviteRole },
                       ].map((item) => (
-                        <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-2">
+                        <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1.5 sm:px-2 sm:py-2">
                           <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-                          <div className="mt-1 truncate text-xs font-semibold text-slate-950" title={item.value}>
+                          <div className="mt-0.5 truncate text-[11px] font-semibold text-slate-950 sm:text-xs" title={item.value}>
                             {item.value}
                           </div>
                         </div>
@@ -6470,7 +6470,7 @@ export default function AdminKinfloShell() {
 
                       <TabsContent value="order" className="mt-3 min-h-0 flex-1" data-testid="section-kinflo-client-provisioning-order">
                         <div
-                          className="grid max-h-[300px] min-h-0 gap-3 overflow-y-auto overflow-x-hidden md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:max-h-[360px]"
+                          className="grid max-h-[240px] min-h-0 grid-cols-[minmax(118px,0.82fr)_minmax(140px,1.18fr)] gap-2 overflow-y-auto overflow-x-hidden lg:max-h-[360px]"
                           data-testid="section-kinflo-client-provisioning-order-cockpit"
                         >
                           <div
@@ -6486,10 +6486,10 @@ export default function AdminKinfloShell() {
                               </div>
                               <Badge variant="outline" className="bg-white">Ordered</Badge>
                             </div>
-                            <div className="mt-2 max-h-[230px] space-y-2 overflow-y-auto pr-1">
+                            <div className="mt-2 max-h-[145px] space-y-2 overflow-y-auto pr-1 lg:max-h-[230px]">
                               {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step, index) => (
-                                <div key={step} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-600">
-                                  <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-500">
+                                <div key={step} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[11px] leading-4 text-slate-600 sm:grid-cols-[1.5rem_minmax(0,1fr)] sm:gap-2 sm:px-3 sm:py-2 sm:text-xs sm:leading-5">
+                                  <div className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-500 sm:h-6 sm:w-6">
                                     {index + 1}
                                   </div>
                                   <span className="min-w-0">{step}</span>
@@ -6504,12 +6504,12 @@ export default function AdminKinfloShell() {
                           >
                             <Tabs defaultValue="evidence" className="min-h-0" data-testid="tabs-kinflo-client-provisioning-order-detail">
                               <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
-                                <TabsTrigger value="evidence" data-testid="tab-kinflo-client-provisioning-evidence">Evidence</TabsTrigger>
-                                <TabsTrigger value="blocked" data-testid="tab-kinflo-client-provisioning-blocked">Blocked</TabsTrigger>
-                                <TabsTrigger value="functions" data-testid="tab-kinflo-client-provisioning-functions">Functions</TabsTrigger>
+                                <TabsTrigger value="evidence" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-evidence">Evidence</TabsTrigger>
+                                <TabsTrigger value="blocked" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-blocked">Blocked</TabsTrigger>
+                                <TabsTrigger value="functions" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-functions">Functions</TabsTrigger>
                               </TabsList>
 
-                              <TabsContent value="evidence" className="mt-3" data-testid="section-kinflo-client-provisioning-evidence-panel">
+                              <TabsContent value="evidence" className="mt-2 sm:mt-3" data-testid="section-kinflo-client-provisioning-evidence-panel">
                                 <div className="flex items-center justify-between gap-3">
                                   <div>
                                     <div className="text-sm font-medium">Approval evidence</div>
@@ -6519,16 +6519,16 @@ export default function AdminKinfloShell() {
                                   </div>
                                   <Badge variant="secondary">Proof first</Badge>
                                 </div>
-                                <div className="mt-2 grid max-h-[230px] gap-2 overflow-y-auto pr-1">
+                                <div className="mt-2 grid max-h-[145px] gap-2 overflow-y-auto pr-1 lg:max-h-[230px]">
                                   {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
-                                    <div key={item} className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-medium leading-5 text-emerald-800">
+                                    <div key={item} className="rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1.5 text-[11px] font-medium leading-4 text-emerald-800 sm:px-3 sm:py-2 sm:text-xs sm:leading-5">
                                       {item}
                                     </div>
                                   ))}
                                 </div>
                               </TabsContent>
 
-                              <TabsContent value="blocked" className="mt-3" data-testid="section-kinflo-client-provisioning-blocked-panel">
+                              <TabsContent value="blocked" className="mt-2 sm:mt-3" data-testid="section-kinflo-client-provisioning-blocked-panel">
                                 <div className="flex items-center justify-between gap-3">
                                   <div>
                                     <div className="text-sm font-medium">Blocked live actions</div>
@@ -6538,9 +6538,9 @@ export default function AdminKinfloShell() {
                                   </div>
                                   <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">Gated</Badge>
                                 </div>
-                                <div className="mt-2 grid max-h-[230px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                                <div className="mt-2 grid max-h-[145px] gap-2 overflow-y-auto pr-1 lg:max-h-[230px]">
                                   {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
-                                    <div key={action} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                                    <div key={action} className="flex items-start gap-1.5 rounded-md border border-slate-100 bg-slate-50 p-2 text-[11px] leading-4 text-slate-600 sm:gap-2 sm:text-xs sm:leading-5">
                                       <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                                       <span>{action}</span>
                                     </div>
@@ -6548,7 +6548,7 @@ export default function AdminKinfloShell() {
                                 </div>
                               </TabsContent>
 
-                              <TabsContent value="functions" className="mt-3" data-testid="section-kinflo-client-provisioning-functions-panel">
+                              <TabsContent value="functions" className="mt-2 sm:mt-3" data-testid="section-kinflo-client-provisioning-functions-panel">
                                 <div className="flex items-center justify-between gap-3">
                                   <div>
                                     <div className="text-sm font-medium">Convex contract</div>
@@ -6558,7 +6558,7 @@ export default function AdminKinfloShell() {
                                   </div>
                                   <Badge variant="outline" className="bg-white">Mapped</Badge>
                                 </div>
-                                <div className="mt-2 flex max-h-[230px] flex-wrap gap-2 overflow-y-auto pr-1">
+                                <div className="mt-2 flex max-h-[145px] flex-wrap gap-1.5 overflow-y-auto pr-1 lg:max-h-[230px]">
                                   {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
                                     <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">{functionName}</Badge>
                                   ))}
@@ -6567,14 +6567,14 @@ export default function AdminKinfloShell() {
                             </Tabs>
                           </div>
                         </div>
-                        <Button disabled variant="outline" className="mt-2 h-9 w-full" data-testid="button-client-provisioning-order-gated">
+                        <Button disabled variant="outline" className="mt-2 hidden h-9 w-full lg:flex" data-testid="button-client-provisioning-order-gated">
                           <Workflow className="mr-2 h-4 w-4" />
                           Provisioning gated
                         </Button>
                       </TabsContent>
 
                       <TabsContent value="dry-run" className="mt-3 min-h-0 flex-1" data-testid="section-kinflo-client-provisioning-execution">
-                        <div className="max-h-[300px] space-y-3 overflow-y-auto pr-1 lg:max-h-[360px]" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
+                        <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1 lg:max-h-[360px]" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
                           <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
@@ -6642,7 +6642,7 @@ export default function AdminKinfloShell() {
                           </div>
                         </div>
 
-                        <Button disabled variant="outline" className="mt-3 w-full" data-testid="button-client-provisioning-dry-run-gated">
+                        <Button disabled variant="outline" className="mt-3 hidden w-full lg:flex" data-testid="button-client-provisioning-dry-run-gated">
                           <ListChecks className="mr-2 h-4 w-4" />
                           Dry run gated
                         </Button>
