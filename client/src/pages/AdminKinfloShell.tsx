@@ -2582,20 +2582,20 @@ export default function AdminKinfloShell() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <div className="border-b border-slate-200 bg-white/95">
-        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 sm:px-6 lg:px-8">
+        <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
           <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]} />
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${activeTab === "site-studio" ? "gap-2" : "gap-4"}`}>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="bg-slate-950 text-white hover:bg-slate-950">Convex Phase 1</Badge>
                 <Badge variant="outline" className="border-slate-300 bg-white">Provider-light shell</Badge>
               </div>
-              <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-normal sm:text-4xl">KinFlo OS</h1>
-              <p className="mt-2 max-w-3xl text-base leading-7 text-slate-600">
+              <h1 className={`${activeTab === "site-studio" ? "mt-2 text-2xl sm:text-3xl" : "mt-3 text-3xl sm:text-4xl"} font-semibold leading-tight tracking-normal`}>KinFlo OS</h1>
+              <p className={`${activeTab === "site-studio" ? "hidden" : "mt-2"} max-w-3xl text-base leading-7 text-slate-600`}>
                 The operating shell for tenants, sites, templates, permissions, and configurable public experiences.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className={`${activeTab === "site-studio" ? "hidden sm:flex" : "flex"} flex-wrap gap-2`}>
               <Button className="bg-slate-950 hover:bg-slate-800" onClick={() => selectShellTab("factory")} data-testid="button-create-tenant">
                 <Plus className="mr-2 h-4 w-4" />
                 New Tenant
@@ -2652,7 +2652,7 @@ export default function AdminKinfloShell() {
         </div>
       </div>
 
-      <main className="mx-auto w-full max-w-7xl overflow-x-hidden px-4 py-7 sm:px-6 lg:px-8">
+      <main className={`mx-auto w-full max-w-7xl overflow-x-hidden px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "py-3" : "py-7"}`}>
         <section
           className={`grid rounded-lg border border-slate-200 bg-white shadow-sm ${
             activeTab === "site-studio"
@@ -2888,19 +2888,19 @@ export default function AdminKinfloShell() {
           </CardContent>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-3" : "mt-7"} min-w-0`}>
+        <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
           <section
-            className={`${activeTab === "site-studio" ? "mb-2 rounded-lg p-2" : "mb-3 rounded-2xl p-3"} border border-slate-200 bg-white shadow-sm`}
+            className={`${activeTab === "site-studio" ? "mb-1 rounded-md px-2 py-1.5" : "mb-3 rounded-2xl p-3"} border border-slate-200 bg-white shadow-sm`}
             data-testid="section-kinflo-workflow-navigation-rail"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className="text-sm font-semibold text-slate-950">Workflow navigation</div>
+                <div className={`${activeTab === "site-studio" ? "text-xs" : "text-sm"} font-semibold text-slate-950`}>Workflow navigation</div>
                 <p className={`${activeTab === "site-studio" ? "hidden" : "mt-1"} text-xs leading-5 text-slate-500`}>
                   Control, Build, Launch, Growth, Evidence, and Hosted Activation group every existing tab by work mode.
                 </p>
               </div>
-              <Badge variant="outline" className="self-start border-amber-200 bg-amber-50 text-amber-700">
+              <Badge variant="outline" className={`${activeTab === "site-studio" ? "text-[11px]" : ""} self-start border-amber-200 bg-amber-50 text-amber-700`}>
                 {workflowNavigationTabCoverage.length}/{shellTabValues.length} tabs reachable
               </Badge>
             </div>
@@ -2979,8 +2979,8 @@ export default function AdminKinfloShell() {
             </div>
           </section>
 
-          <div className="w-full min-w-0 overflow-x-auto rounded-md border border-slate-200 bg-white">
-            <TabsList className="flex h-auto min-w-max justify-start gap-1 bg-white p-1">
+          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 overflow-x-auto rounded-md border border-slate-200 bg-white`}>
+            <TabsList className={`${activeTab === "site-studio" ? "p-0.5" : "p-1"} flex h-auto min-w-max justify-start gap-1 bg-white`}>
             {shellTabValues.map((tabValue) => (
               <TabsTrigger key={tabValue} className="shrink-0" value={tabValue}>
                 {shellTabLabels[tabValue]}
@@ -5807,14 +5807,14 @@ export default function AdminKinfloShell() {
             </section>
           </TabsContent>
 
-          <TabsContent value="site-studio" className="mt-3">
+          <TabsContent value="site-studio" className="mt-2">
             <section className="min-w-0 space-y-2" data-testid="section-kinflo-client-studio-compact-shell">
               <div
                 className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
                 data-testid="section-kinflo-client-control-room-frame"
               >
                 <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
-                  <div className="min-w-0 p-3 sm:p-4">
+                  <div className="min-w-0 p-2 sm:p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
                         <Command className="mr-1 h-3 w-3" />
@@ -5824,7 +5824,7 @@ export default function AdminKinfloShell() {
                         Local review only
                       </Badge>
                     </div>
-                    <h2 className="mt-2 max-w-3xl text-xl font-semibold leading-tight text-slate-950 sm:text-2xl">
+                    <h2 className="mt-1 max-w-3xl text-lg font-semibold leading-tight text-slate-950 sm:mt-2 sm:text-2xl">
                       Client Website Design Studio
                     </h2>
                     <p className="mt-2 hidden max-w-3xl text-sm leading-5 text-slate-600 sm:block">
@@ -5839,11 +5839,11 @@ export default function AdminKinfloShell() {
                       ))}
                     </div>
                   </div>
-                  <div className="min-w-0 border-t border-slate-200 bg-slate-950 p-3 text-white lg:border-l lg:border-t-0 sm:p-4">
+                  <div className="min-w-0 border-t border-slate-200 bg-slate-950 p-2 text-white lg:border-l lg:border-t-0 sm:p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-400">Selected site</div>
-                        <div className="mt-1 text-lg font-semibold leading-snug">{selectedClientWebsiteStudioSite?.label}</div>
+                        <div className="text-[10px] font-medium uppercase tracking-normal text-slate-400 sm:text-xs">Selected site</div>
+                        <div className="mt-0.5 text-base font-semibold leading-snug sm:mt-1 sm:text-lg">{selectedClientWebsiteStudioSite?.label}</div>
                         <p className="mt-1 hidden text-sm leading-5 text-slate-300 sm:block">
                           {selectedClientWebsiteLaunchDecisionPacket?.decisionPosture}
                         </p>
@@ -5852,16 +5852,16 @@ export default function AdminKinfloShell() {
                         {clientWebsiteLaunchDecisionLabel}
                       </Badge>
                     </div>
-                    <div className="mt-3 grid grid-cols-3 gap-2">
-                      <div className="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                    <div className="mt-2 grid grid-cols-3 gap-2 sm:mt-3">
+                      <div className="rounded-md border border-white/10 bg-white/5 px-2 py-1.5 sm:px-3 sm:py-2">
                         <div className="text-[11px] uppercase tracking-normal text-slate-400">Readiness</div>
                         <div className="mt-1 text-sm font-semibold">{clientWebsiteStudioReadinessPercent}%</div>
                       </div>
-                      <div className="rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                      <div className="rounded-md border border-white/10 bg-white/5 px-2 py-1.5 sm:px-3 sm:py-2">
                         <div className="text-[11px] uppercase tracking-normal text-slate-400">Blocked</div>
                         <div className="mt-1 text-sm font-semibold">{clientWebsiteLaunchDecisionBlockedCount}</div>
                       </div>
-                      <div className="min-w-0 rounded-md border border-white/10 bg-white/5 px-3 py-2">
+                      <div className="min-w-0 rounded-md border border-white/10 bg-white/5 px-2 py-1.5 sm:px-3 sm:py-2">
                         <div className="text-[11px] uppercase tracking-normal text-slate-400">Owner</div>
                         <div className="mt-1 truncate text-sm font-semibold">{selectedClientWebsiteLaunchDecisionPacket?.approvalOwner}</div>
                       </div>
@@ -5901,10 +5901,10 @@ export default function AdminKinfloShell() {
 
               <div className="min-w-0" data-testid="tabs-kinflo-client-studio-lanes">
                 <div
-                  className="sticky top-0 z-20 flex flex-col gap-2 border-y border-slate-200 bg-white/95 py-2 backdrop-blur lg:flex-row lg:items-center lg:justify-between"
+                  className="sticky top-0 z-20 flex flex-col gap-1 border-y border-slate-200 bg-white/95 py-1.5 backdrop-blur sm:gap-2 sm:py-2 lg:flex-row lg:items-center lg:justify-between"
                   data-testid="section-kinflo-client-studio-lane-switcher"
                 >
-                  <div className="grid h-auto w-full grid-cols-2 gap-1 rounded-md bg-slate-100 p-1 sm:grid-cols-4 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
+                  <div className="grid h-auto w-full grid-cols-4 gap-1 rounded-md bg-slate-100 p-1 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
                     {[
                       { value: "queue", label: "Spin up", testId: "tab-kinflo-client-studio-lane-queue" },
                       { value: "configuration", label: "Configure", testId: "tab-kinflo-client-studio-lane-configuration" },
@@ -5919,7 +5919,7 @@ export default function AdminKinfloShell() {
                           role="tab"
                           aria-selected={isActiveLane}
                           onClick={() => selectClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
-                          className={`rounded-sm px-3 py-1.5 text-sm font-medium transition ${
+                          className={`rounded-sm px-2 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
                             isActiveLane
                               ? "bg-white text-slate-950 shadow-sm"
                               : "text-slate-600 hover:bg-white/70 hover:text-slate-900"

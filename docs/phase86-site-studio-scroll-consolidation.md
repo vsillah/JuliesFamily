@@ -56,7 +56,11 @@ The Site Studio workbench now uses page-level stage tabs for `Sites`, `Preview`,
 
 The compact shell trims duplicate mobile summary chrome before the active workbench. The control-room explanatory copy and command stats collapse on the narrow viewport, the operating/grid contract rows wait for desktop width, and the lane toolbar stays sticky so the user can switch surfaces without scrolling back through the page header.
 
+The Site Studio route now also compacts the surrounding KinFlo OS chrome: the global shell header uses the shorter `gap-2 py-3` density, the main content switches to `py-3`, the public action buttons wait for the `sm` breakpoint, the all-tab shell strip is hidden on narrow Site Studio review widths, and the workflow navigation rail becomes a small status strip instead of another full card. The active client workbench therefore starts much closer to the top of the first viewport.
+
 The page now has a top-level lane switcher above the major client website modules. Workbench is the default lane, while Spin up, Configure, and Handoff lanes stay available without adding to the default page height. This keeps super-admin setup, configuration profiles, permissions handoff, and the active client workbench in one operating surface instead of one stacked scroll.
+
+On narrow screens, the lane switcher now stays in one four-column row with `text-xs` controls. That prevents the lane toolbar itself from becoming a two-row vertical stack before the user reaches `Sites`, `Preview`, or `Launch`.
 
 The client handoff area now uses a compact handoff workspace with `Selected site` and `All site permissions` tabs. The default view keeps the selected site's permissions, blocked invite, missing artifact, and gated action visible while moving the full cross-site admin matrix behind a tab. Super-admin comparison remains one click away, but it no longer expands the default Site Studio page into a long permission document.
 
