@@ -131,6 +131,7 @@ for (const path of [
   "docs/phase63-client-starter-content-packs.md",
   "docs/phase64-client-onboarding-readiness.md",
   "docs/phase65-client-launch-simulation.md",
+  "docs/phase66-client-polish-scorecards.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -140,6 +141,7 @@ for (const path of [
   "docs/convex-client-starter-content-pack-manifest.json",
   "docs/convex-client-onboarding-readiness-manifest.json",
   "docs/convex-client-launch-simulation-manifest.json",
+  "docs/convex-client-polish-scorecard-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -203,6 +205,8 @@ for (const path of [
   "scripts/dry-run-kinflo-client-onboarding-readiness.mjs",
   "scripts/validate-kinflo-client-launch-simulation.mjs",
   "scripts/dry-run-kinflo-client-launch-simulation.mjs",
+  "scripts/validate-kinflo-client-polish-scorecards.mjs",
+  "scripts/dry-run-kinflo-client-polish-scorecards.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1063,6 +1067,38 @@ requireIncludes("docs/convex-client-launch-simulation-manifest.json", [
   "\"withinTarget\": true",
 ]);
 
+requireIncludes("docs/phase66-client-polish-scorecards.md", [
+  "npm run kinflo:validate-client-polish-scorecards",
+  "npm run kinflo:dry-run-client-polish-scorecards",
+  "docs/convex-client-polish-scorecard-manifest.json",
+  "siteFactory.listClientWebsitePolishScorecards",
+  "provider-light-polish-review",
+  "Polish scorecards: 3",
+  "Criteria: 12",
+  "Viewport checks: 9",
+  "Average overall score: 81",
+  "Average mobile score: 81",
+  "No content write, asset replacement, public publish, lead write, campaign send, provider call, generated API import, hosted deployment, or live Convex execution is performed",
+]);
+
+requireIncludes("docs/convex-client-polish-scorecard-manifest.json", [
+  "\"phase\": 66",
+  "\"status\": \"provider-light-polish-review\"",
+  "\"convexFunction\": \"siteFactory.listClientWebsitePolishScorecards\"",
+  "\"externalWrites\": false",
+  "\"hostedDeploymentTouched\": false",
+  "\"generatedApiImported\": false",
+  "\"liveConvexExecution\": false",
+  "\"contentWritten\": false",
+  "\"assetsReplaced\": false",
+  "\"sitePublished\": false",
+  "\"providersCalled\": false",
+  "\"criteria\": 12",
+  "\"viewportChecks\": 9",
+  "\"averageOverallScore\": 81",
+  "\"averageMobileScore\": 81",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -1105,6 +1141,8 @@ requireIncludes("package.json", [
   "\"kinflo:dry-run-client-onboarding-readiness\"",
   "\"kinflo:validate-client-launch-simulation\"",
   "\"kinflo:dry-run-client-launch-simulation\"",
+  "\"kinflo:validate-client-polish-scorecards\"",
+  "\"kinflo:dry-run-client-polish-scorecards\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1589,6 +1627,30 @@ requireIncludes("scripts/dry-run-kinflo-client-launch-simulation.mjs", [
   "Admin invite sent: no",
 ]);
 
+requireIncludes("scripts/validate-kinflo-client-polish-scorecards.mjs", [
+  "docs/convex-client-polish-scorecard-manifest.json",
+  "provider-light-polish-review",
+  "siteFactory.listClientWebsitePolishScorecards",
+  "ShellClientWebsitePolishScorecard",
+  "section-kinflo-client-polish-scorecard",
+  "button-client-polish-review-gated",
+  "manifest totals twelve polish criteria",
+  "Average overall score: 81",
+  "\"contentWritten\", false",
+]);
+
+requireIncludes("scripts/dry-run-kinflo-client-polish-scorecards.mjs", [
+  "scripts/validate-kinflo-client-polish-scorecards.mjs",
+  "KinFlo client polish scorecard dry run",
+  "Polish scorecard previews",
+  "Average mobile score",
+  "External writes: 0",
+  "Hosted deployment touched: no",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+  "Content written: no",
+]);
+
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
   "process\\.env",
   "import\\.meta\\.env",
@@ -1875,6 +1937,10 @@ requireIncludes("convex/siteFactory.ts", [
   "clientWebsiteAdminPermissionPresets",
   "export const listClientWebsiteAdminPermissionPresets",
   "Read-only admin permission preset query",
+  "ClientWebsitePolishScorecard",
+  "clientWebsitePolishScorecards",
+  "export const listClientWebsitePolishScorecards",
+  "Read-only polish scorecard query",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -1969,6 +2035,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellClientWebsiteStarterContentPack",
   "ShellClientWebsiteOnboardingReadiness",
   "ShellClientWebsiteLaunchSimulation",
+  "ShellClientWebsitePolishScorecard",
   "launchBlueprints",
   "adminPermissionPresets",
   "provisioningOrders",
@@ -1977,12 +2044,14 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "starterContentPacks",
   "onboardingReadiness",
   "launchSimulations",
+  "polishScorecards",
   "siteFactory.listClientWebsiteAdminPermissionPresets",
   "siteFactory.listClientWebsiteLaunchBlueprints",
   "siteFactory.listClientWebsiteProvisioningOrders",
   "siteFactory.listClientWebsiteStarterContentPacks",
   "siteFactory.listClientWebsiteOnboardingReadiness",
   "siteFactory.listClientWebsiteLaunchSimulations",
+  "siteFactory.listClientWebsitePolishScorecards",
   "docs/convex-client-provisioning-execution-manifest.json",
   "provider-light-dry-run-contract",
   "referencedFunctions: 18",
@@ -2315,6 +2384,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "selectedClientWebsiteStarterContentPack",
   "selectedClientWebsiteOnboardingReadiness",
   "selectedClientWebsiteLaunchSimulation",
+  "selectedClientWebsitePolishScorecard",
   "section-kinflo-client-provisioning-order",
   "text-kinflo-client-provisioning-order",
   "button-client-provisioning-order-gated",
@@ -2333,6 +2403,9 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-launch-simulation",
   "text-kinflo-client-launch-simulation",
   "button-client-launch-simulation-gated",
+  "section-kinflo-client-polish-scorecard",
+  "text-kinflo-client-polish-scorecard",
+  "button-client-polish-review-gated",
   "section-kinflo-client-studio-operating-frame",
   "section-kinflo-client-site-rail",
   "section-kinflo-client-preview-workbench",

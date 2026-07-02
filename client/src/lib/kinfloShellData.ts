@@ -426,6 +426,33 @@ export type ShellClientWebsiteLaunchSimulation = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsitePolishScorecard = {
+  siteKey: string;
+  label: string;
+  status: "provider-light-polish-review";
+  overallScore: number;
+  mobileScore: number;
+  proofScore: number;
+  accessibilityScore: number;
+  designStandard: string;
+  criteria: {
+    key: string;
+    label: string;
+    score: number;
+    status: "pass" | "review" | "blocked";
+    evidence: string;
+    nextAction: string;
+  }[];
+  viewportChecks: {
+    viewport: "desktop" | "tablet" | "mobile";
+    label: string;
+    status: "pass" | "review" | "blocked";
+    evidence: string;
+  }[];
+  blockedPolishActions: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
@@ -438,6 +465,7 @@ export type ShellClientWebsiteStudio = {
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
   launchSimulations: ShellClientWebsiteLaunchSimulation[];
+  polishScorecards: ShellClientWebsitePolishScorecard[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -2103,6 +2131,179 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  polishScorecards: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family Apple-grade polish scorecard",
+      status: "provider-light-polish-review",
+      overallScore: 82,
+      mobileScore: 84,
+      proofScore: 80,
+      accessibilityScore: 78,
+      designStandard: "Clear first-viewport family promise, compact proof, calm public navigation, and no provider writes before hosted activation.",
+      criteria: [
+        {
+          key: "first-viewport-signal",
+          label: "First-viewport signal",
+          score: 86,
+          status: "pass",
+          evidence: "Preview workbench shows the family learning promise, audience, and enrollment path before publish.",
+          nextAction: "Replace fixture imagery with approved documentary program photography after source review.",
+        },
+        {
+          key: "mobile-fit",
+          label: "Mobile fit",
+          score: 84,
+          status: "pass",
+          evidence: "Site Studio marks mobile public preview ready and keeps CTA text constrained.",
+          nextAction: "Run hosted 390px screenshot QA after generated API review.",
+        },
+        {
+          key: "proof-before-ask",
+          label: "Proof before ask",
+          score: 80,
+          status: "review",
+          evidence: "Launch packet and starter pack separate family, volunteer, donor, and partner proof paths.",
+          nextAction: "Confirm final founder story and outcome proof before publish.",
+        },
+        {
+          key: "accessibility-baseline",
+          label: "Accessibility baseline",
+          score: 78,
+          status: "review",
+          evidence: "Design system uses compact cards, visible focusable actions, and readable contrast tokens.",
+          nextAction: "Run automated contrast and keyboard QA on the hosted public renderer.",
+        },
+      ],
+      viewportChecks: [
+        { viewport: "desktop", label: "Desktop public preview", status: "pass", evidence: "Hero, proof, and CTA are visible without competing navigation." },
+        { viewport: "tablet", label: "Tablet public preview", status: "review", evidence: "Portal handoff still needs hosted renderer proof." },
+        { viewport: "mobile", label: "390px public preview", status: "pass", evidence: "Mobile readiness is marked ready in the Site Studio fixture." },
+      ],
+      blockedPolishActions: ["publish public site", "replace fixture assets with provider storage", "write CRM lead", "switch adapter"],
+      convexFunctions: [
+        "siteFactory.listClientWebsitePolishScorecards",
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "siteFactory.listClientWebsiteOnboardingReadiness",
+        "publicSite.resolvePublishedSite",
+        "launchReadiness.getSiteLaunchReadiness",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client Apple-grade polish scorecard",
+      status: "provider-light-polish-review",
+      overallScore: 85,
+      mobileScore: 86,
+      proofScore: 84,
+      accessibilityScore: 82,
+      designStandard: "Quiet advisory surface, proof before intake, tight offer hierarchy, and tenant-admin handoff blocked until approval.",
+      criteria: [
+        {
+          key: "offer-hierarchy",
+          label: "Offer hierarchy",
+          score: 88,
+          status: "pass",
+          evidence: "Starter content pack organizes home, services, and proof pages around a clear client result.",
+          nextAction: "Review final service packaging with the tenant owner before domain attachment.",
+        },
+        {
+          key: "mobile-fit",
+          label: "Mobile fit",
+          score: 86,
+          status: "pass",
+          evidence: "Mobile readiness is marked ready and the preview rail keeps the intake path visible.",
+          nextAction: "Run live 390px smoke after tenant creation approval.",
+        },
+        {
+          key: "proof-before-intake",
+          label: "Proof before intake",
+          score: 84,
+          status: "pass",
+          evidence: "Launch packet requires proof, fit, and process clarity before consultation asks.",
+          nextAction: "Attach approved case-study proof when client content is available.",
+        },
+        {
+          key: "permission-clarity",
+          label: "Permission clarity",
+          score: 82,
+          status: "review",
+          evidence: "Tenant admin invite posture is prepared but not sent.",
+          nextAction: "Approve tenant admin owner and invitation delivery smoke order.",
+        },
+      ],
+      viewportChecks: [
+        { viewport: "desktop", label: "Desktop work surface", status: "pass", evidence: "Preview workbench keeps result, proof, CTA, and launch state together." },
+        { viewport: "tablet", label: "Tablet offer scan", status: "pass", evidence: "Offer and proof summaries remain scannable in the launch rail." },
+        { viewport: "mobile", label: "390px intake path", status: "review", evidence: "Hosted lead smoke remains gated before intake can become live." },
+      ],
+      blockedPolishActions: ["create tenant", "send tenant admin invite", "attach custom domain", "publish public site"],
+      convexFunctions: [
+        "siteFactory.listClientWebsitePolishScorecards",
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite Apple-grade polish scorecard",
+      status: "provider-light-polish-review",
+      overallScore: 76,
+      mobileScore: 72,
+      proofScore: 78,
+      accessibilityScore: 77,
+      designStandard: "Single offer, one proof path, consent clarity, and campaign-send blockers visible before any provider activation.",
+      criteria: [
+        {
+          key: "single-offer-focus",
+          label: "Single offer focus",
+          score: 82,
+          status: "pass",
+          evidence: "Starter pack keeps campaign, signup, and impact pages focused on one conversion path.",
+          nextAction: "Confirm final campaign objective before editor handoff.",
+        },
+        {
+          key: "mobile-fit",
+          label: "Mobile fit",
+          score: 72,
+          status: "review",
+          evidence: "Site Studio still marks campaign mobile and hero readiness as needing review.",
+          nextAction: "Tighten first-viewport copy and retest at 390px before send approval.",
+        },
+        {
+          key: "consent-clarity",
+          label: "Consent clarity",
+          score: 74,
+          status: "blocked",
+          evidence: "Campaign consent review and provider-send checks remain blocked.",
+          nextAction: "Approve consent language, unsubscribe expectations, and source tracking.",
+        },
+        {
+          key: "proof-before-signup",
+          label: "Proof before signup",
+          score: 78,
+          status: "review",
+          evidence: "Impact page is prepared but final proof asset is not approved.",
+          nextAction: "Attach approved impact proof before campaign traffic is sent.",
+        },
+      ],
+      viewportChecks: [
+        { viewport: "desktop", label: "Desktop campaign path", status: "pass", evidence: "Offer, proof, and signup are represented in the starter content pack." },
+        { viewport: "tablet", label: "Tablet conversion scan", status: "review", evidence: "Consent and proof placement need one more visual pass." },
+        { viewport: "mobile", label: "390px campaign path", status: "review", evidence: "Mobile readiness remains needs_review in the Site Studio fixture." },
+      ],
+      blockedPolishActions: ["send campaign", "write public form lead", "publish AI copy", "send SMS/email"],
+      convexFunctions: [
+        "siteFactory.listClientWebsitePolishScorecards",
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "campaigns.requestCampaignApproval",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+  ],
   researchSources: [
     { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
     { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },
@@ -2115,6 +2316,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
     "siteFactory.listClientWebsiteLaunchBlueprints",
     "siteFactory.listClientWebsiteLaunchSimulations",
     "siteFactory.listClientWebsiteOnboardingReadiness",
+    "siteFactory.listClientWebsitePolishScorecards",
     "siteFactory.listClientWebsiteProvisioningOrders",
     "siteBuilder.getSiteDraft",
     "siteBuilder.updatePage",

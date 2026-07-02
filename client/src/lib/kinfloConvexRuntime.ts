@@ -67,6 +67,7 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   siteFactoryListClientWebsiteLaunchBlueprints: "siteFactory.listClientWebsiteLaunchBlueprints",
   siteFactoryListClientWebsiteLaunchSimulations: "siteFactory.listClientWebsiteLaunchSimulations",
   siteFactoryListClientWebsiteOnboardingReadiness: "siteFactory.listClientWebsiteOnboardingReadiness",
+  siteFactoryListClientWebsitePolishScorecards: "siteFactory.listClientWebsitePolishScorecards",
   siteFactoryListClientWebsiteProvisioningOrders: "siteFactory.listClientWebsiteProvisioningOrders",
   siteFactoryListClientWebsiteStarterContentPacks: "siteFactory.listClientWebsiteStarterContentPacks",
   siteFactoryListStarterTemplates: "siteFactory.listStarterTemplates",

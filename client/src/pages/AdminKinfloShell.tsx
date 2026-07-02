@@ -575,6 +575,11 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.launchSimulations[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchSimulations],
   );
+  const selectedClientWebsitePolishScorecard = useMemo(
+    () => snapshot.clientWebsiteStudio.polishScorecards.find((scorecard) => scorecard.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.polishScorecards[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.polishScorecards],
+  );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
   const clientWebsiteStudioReviewStats = [
     { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
@@ -3626,6 +3631,102 @@ export default function AdminKinfloShell() {
                       <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-launch-simulation-gated">
                         <Rocket className="mr-2 h-4 w-4" />
                         Live launch simulation gated
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-polish-scorecard">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Palette className="h-4 w-4 text-slate-500" />
+                          <h3 className="text-base font-semibold">Polish Scorecard</h3>
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-polish-scorecard">
+                          {selectedClientWebsitePolishScorecard?.label}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{selectedClientWebsitePolishScorecard?.status.replaceAll("_", " ")}</Badge>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Overall</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsitePolishScorecard?.overallScore}%</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Mobile</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsitePolishScorecard?.mobileScore}%</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Proof</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsitePolishScorecard?.proofScore}%</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Access</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsitePolishScorecard?.accessibilityScore}%</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-md border border-slate-200 p-3">
+                      <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Design standard</div>
+                      <div className="mt-1 text-sm leading-6 text-slate-700">{selectedClientWebsitePolishScorecard?.designStandard}</div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Criteria</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsitePolishScorecard?.criteria.map((criterion) => (
+                          <div key={criterion.key} className="rounded-md border border-slate-200 p-3">
+                            <div className="flex items-start gap-2">
+                              {criterion.status === "pass" ? (
+                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium">{criterion.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{criterion.evidence}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-600">{criterion.nextAction}</div>
+                              </div>
+                              <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
+                                <Badge variant={criterion.status === "blocked" ? "destructive" : "outline"}>{criterion.status}</Badge>
+                                <span className="text-xs text-slate-500">{criterion.score}%</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Viewport checks</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsitePolishScorecard?.viewportChecks.map((check) => (
+                          <div key={check.viewport} className="rounded-md border border-slate-200 p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium">{check.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{check.evidence}</div>
+                              </div>
+                              <Badge variant={check.status === "blocked" ? "destructive" : check.status === "pass" ? "secondary" : "outline"}>
+                                {check.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClientWebsitePolishScorecard?.blockedPolishActions.map((action) => (
+                          <Badge key={action} variant="outline" className="whitespace-normal text-left">{action}</Badge>
+                        ))}
+                      </div>
+                      <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-polish-review-gated">
+                        <Palette className="mr-2 h-4 w-4" />
+                        Polish review gated
                       </Button>
                     </div>
                   </div>
