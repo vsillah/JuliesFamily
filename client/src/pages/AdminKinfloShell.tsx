@@ -321,6 +321,37 @@ function readInitialClientWebsiteLaunchDossier(): ClientWebsiteLaunchDossier {
     : "provisioning";
 }
 
+function buildClientWebsiteStudioPreviewHref({
+  previewPath,
+  siteKey,
+  route,
+  persona,
+  journeyStage,
+  device,
+}: {
+  previewPath: string;
+  siteKey?: string;
+  route?: string;
+  persona?: string;
+  journeyStage?: string;
+  device: "desktop" | "tablet" | "mobile";
+}) {
+  const params = new URLSearchParams();
+  params.set("route", route?.trim() || "/");
+  params.set("device", device);
+  params.set("source", "site-studio-preview");
+  if (siteKey?.trim()) {
+    params.set("studioSite", siteKey);
+  }
+  if (persona?.trim()) {
+    params.set("persona", persona);
+  }
+  if (journeyStage?.trim()) {
+    params.set("journeyStage", journeyStage);
+  }
+  return `${previewPath}?${params.toString()}`;
+}
+
 function readInitialHostedActivationStepId(defaultStepId: string, stepIds: string[]): string {
   if (typeof window === "undefined") {
     return defaultStepId;
@@ -1451,7 +1482,7 @@ function MobileInspectionMode({
           <p className="mt-3 text-sm leading-6 text-slate-300">{decisionPacket?.decisionPosture}</p>
           <div className="mt-4 rounded-lg border border-white/10 bg-white/5 p-3">
             <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Preview path</div>
-            <div className="mt-1 break-all text-xs text-slate-300">{previewPath}?device=mobile</div>
+            <div className="mt-1 break-all text-xs text-slate-300">{previewPath}</div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
             {blockedActions.slice(0, 4).map((action) => (
@@ -1925,6 +1956,25 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.starterContentPacks[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.starterContentPacks],
   );
+  const clientWebsiteStudioPreviewRoute = selectedClientWebsiteStarterContentPack?.pages[0]?.route ?? "/";
+  const clientWebsiteStudioPreviewPersona = selectedClientWebsiteStarterContentPack?.persona ?? selectedClientWebsiteStudioSite?.audience;
+  const clientWebsiteStudioPreviewJourneyStage = selectedClientWebsiteStarterContentPack?.journeyStage ?? "review";
+  const clientWebsiteStudioPreviewHref = buildClientWebsiteStudioPreviewHref({
+    previewPath: clientWebsiteStudioPreviewPath,
+    siteKey: selectedClientWebsiteStudioSite?.key,
+    route: clientWebsiteStudioPreviewRoute,
+    persona: clientWebsiteStudioPreviewPersona,
+    journeyStage: clientWebsiteStudioPreviewJourneyStage,
+    device: "desktop",
+  });
+  const clientWebsiteStudioMobilePreviewHref = buildClientWebsiteStudioPreviewHref({
+    previewPath: clientWebsiteStudioPreviewPath,
+    siteKey: selectedClientWebsiteStudioSite?.key,
+    route: clientWebsiteStudioPreviewRoute,
+    persona: clientWebsiteStudioPreviewPersona,
+    journeyStage: clientWebsiteStudioPreviewJourneyStage,
+    device: "mobile",
+  });
   const selectedClientWebsiteOnboardingReadiness = useMemo(
     () => snapshot.clientWebsiteStudio.onboardingReadiness.find((readiness) => readiness.siteKey === selectedClientWebsiteStudioSite?.key)
       ?? snapshot.clientWebsiteStudio.onboardingReadiness[0],
@@ -6125,6 +6175,23 @@ export default function AdminKinfloShell() {
                               <span key={page}>{page}</span>
                             ))}
                           </div>
+                          <div
+                            className="mt-5 grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs sm:grid-cols-3"
+                            data-testid="section-kinflo-client-preview-link-context"
+                          >
+                            <div className="min-w-0">
+                              <div className="font-medium uppercase tracking-normal text-slate-500">Persona</div>
+                              <div className="mt-1 truncate font-semibold text-slate-950">{clientWebsiteStudioPreviewPersona}</div>
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-medium uppercase tracking-normal text-slate-500">Journey</div>
+                              <div className="mt-1 truncate font-semibold text-slate-950">{clientWebsiteStudioPreviewJourneyStage}</div>
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-medium uppercase tracking-normal text-slate-500">Source</div>
+                              <div className="mt-1 truncate font-semibold text-slate-950">site-studio-preview</div>
+                            </div>
+                          </div>
                           <h3 className="mt-6 max-w-2xl text-3xl font-semibold leading-tight tracking-normal text-slate-950 md:text-4xl">
                             {selectedClientWebsiteStudioSite?.heroDirection}
                           </h3>
@@ -6139,7 +6206,7 @@ export default function AdminKinfloShell() {
                           </div>
                           <div className="mt-5 flex flex-wrap gap-2">
                             <Button size="sm" asChild data-testid="button-open-client-website-preview">
-                              <Link href={clientWebsiteStudioPreviewPath}>
+                              <Link href={clientWebsiteStudioPreviewHref}>
                                 <ExternalLink className="mr-2 h-4 w-4" />
                                 Open preview
                               </Link>
@@ -6227,7 +6294,7 @@ export default function AdminKinfloShell() {
                       decisionPacket={selectedClientWebsiteLaunchDecisionPacket}
                       persona={selectedClientWebsiteStarterContentPack?.persona}
                       journeyStage={selectedClientWebsiteStarterContentPack?.journeyStage}
-                      previewPath={clientWebsiteStudioPreviewPath}
+                      previewPath={clientWebsiteStudioMobilePreviewHref}
                     />
 
                     <div className="grid gap-3 md:grid-cols-2">

@@ -160,6 +160,7 @@ for (const path of [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
   "docs/phase105-site-studio-site-deep-links.md",
+  "docs/phase106-client-public-preview-context-links.md",
   "docs/phase100-site-studio-launch-dossier-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
@@ -286,6 +287,7 @@ for (const path of [
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
+  "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
@@ -1663,6 +1665,17 @@ requireIncludes("docs/phase105-site-studio-site-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase106-client-public-preview-context-links.md", [
+  "Phase 106: Client Public Preview Context Links",
+  "npm run kinflo:validate-client-public-preview-context-links",
+  "buildClientWebsiteStudioPreviewHref",
+  "section-kinflo-client-preview-link-context",
+  "public-preview-context",
+  "source=site-studio-preview",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase100-site-studio-launch-dossier-deep-links.md", [
   "Phase 100: Site Studio Launch Dossier Deep Links",
   "npm run kinflo:validate-site-studio-launch-dossier-deep-links",
@@ -1836,6 +1849,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
   "\"docs/phase99-site-studio-deep-links.md\"",
   "\"docs/phase105-site-studio-site-deep-links.md\"",
+  "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase100-site-studio-launch-dossier-deep-links.md\"",
   "\"docs/phase87-adapter-switch-runway.md\"",
   "\"docs/phase88-generated-api-review-board.md\"",
@@ -1865,6 +1879,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
+  "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"npm run kinflo:validate-adapter-switch-runway\"",
   "\"npm run kinflo:validate-generated-api-review-board\"",
@@ -1979,6 +1994,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
+  "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:validate-generated-api-review-board\"",
@@ -2908,6 +2924,17 @@ requireIncludes("scripts/validate-kinflo-site-studio-site-deep-links.mjs", [
   "Site Studio site deep links do not import generated API",
   "Site Studio site deep links do not execute live Convex",
   "KinFlo Site Studio site deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [
+  "docs/phase106-client-public-preview-context-links.md",
+  "buildClientWebsiteStudioPreviewHref",
+  "section-kinflo-client-preview-link-context",
+  "public-preview-context",
+  "source=site-studio-preview",
+  "client public preview context links do not import generated API",
+  "client public preview context links do not execute live Convex",
+  "KinFlo client public preview context-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs", [

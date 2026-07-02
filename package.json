@@ -82,6 +82,7 @@
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-site-studio-deep-links": "node scripts/validate-kinflo-site-studio-deep-links.mjs",
     "kinflo:validate-site-studio-site-deep-links": "node scripts/validate-kinflo-site-studio-site-deep-links.mjs",
+    "kinflo:validate-client-public-preview-context-links": "node scripts/validate-kinflo-client-public-preview-context-links.mjs",
     "kinflo:validate-site-studio-launch-dossier-deep-links": "node scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs",
     "kinflo:validate-adapter-switch-runway": "node scripts/validate-kinflo-adapter-switch-runway.mjs",
     "kinflo:validate-generated-api-review-board": "node scripts/validate-kinflo-generated-api-review-board.mjs",

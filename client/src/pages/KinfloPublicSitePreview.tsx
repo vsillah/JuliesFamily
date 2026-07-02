@@ -191,6 +191,8 @@ export default function KinfloPublicSitePreview() {
     route: searchParams.get("route") ?? undefined,
     persona: searchParams.get("persona") ?? undefined,
     journeyStage: searchParams.get("journeyStage") ?? undefined,
+    studioSite: searchParams.get("studioSite") ?? undefined,
+    reviewSource: searchParams.get("source") ?? undefined,
     device: searchParams.get("device") === "tablet" || searchParams.get("device") === "mobile"
       ? searchParams.get("device") as "tablet" | "mobile"
       : searchParams.get("device") === "desktop"
@@ -206,6 +208,7 @@ export default function KinfloPublicSitePreview() {
   const contextPersona = preview.context.persona ?? "anonymous";
   const contextJourneyStage = preview.context.journeyStage ?? "default";
   const contextDevice = preview.context.device ?? "responsive";
+  const contextReviewSource = preview.context.reviewSource ?? preview.context.source;
 
   return (
     <div
@@ -231,7 +234,7 @@ export default function KinfloPublicSitePreview() {
             {preview.context.convexFunction}
           </Badge>
           <Badge variant="secondary" className="hidden whitespace-nowrap lg:inline-flex" data-testid="public-preview-context">
-            {contextPersona} / {contextJourneyStage} / {contextDevice}
+            {contextPersona} / {contextJourneyStage} / {contextDevice} / {contextReviewSource}
           </Badge>
         </div>
       </header>

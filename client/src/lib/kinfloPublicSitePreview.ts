@@ -81,6 +81,8 @@ export type KinfloPublicSitePreview = {
     persona?: string;
     journeyStage?: string;
     device?: "desktop" | "tablet" | "mobile";
+    studioSite?: string;
+    reviewSource?: string;
     source: "fixture-public-renderer";
     convexFunction: "publicSite.resolvePublishedSite";
   };
@@ -91,6 +93,8 @@ export type KinfloPublicSitePreviewOptions = {
   persona?: string;
   journeyStage?: string;
   device?: "desktop" | "tablet" | "mobile";
+  studioSite?: string;
+  reviewSource?: string;
 };
 
 const publishedAt = Date.UTC(2026, 6, 1);
@@ -360,6 +364,8 @@ export function resolveKinfloPublicSitePreviewWithContext(
   const route = options.route?.trim() || preview.context.route;
   const persona = options.persona?.trim() || undefined;
   const journeyStage = options.journeyStage?.trim() || undefined;
+  const studioSite = options.studioSite?.trim() || undefined;
+  const reviewSource = options.reviewSource?.trim() || undefined;
 
   return {
     ...preview,
@@ -369,6 +375,8 @@ export function resolveKinfloPublicSitePreviewWithContext(
       persona,
       journeyStage,
       device: options.device,
+      studioSite,
+      reviewSource,
     },
   };
 }
