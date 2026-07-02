@@ -1,0 +1,100 @@
+{
+  "phase": 65,
+  "status": "provider-light-launch-simulation",
+  "convexFunction": "siteFactory.listClientWebsiteLaunchSimulations",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "tenantCreated": false,
+    "siteCreated": false,
+    "adminInviteSent": false,
+    "providersCalled": false
+  },
+  "targetGate": "A new client site can be created from scratch in under 15 minutes with a preview link and admin invite.",
+  "blockedUntil": [
+    "Hosted Convex project ownership, billing, backup, auth, and env setup are approved",
+    "Generated Convex API files are produced and reviewed outside this provider-light branch",
+    "Tenant/site/invitation mutation smoke order is approved",
+    "Preview link and public resolver read-only smokes pass against hosted Convex",
+    "Client owner, invite recipient, launch packet privacy, and provider readiness are approved",
+    "Domain, storage, email, SMS, AI, billing, campaign, lead, and publish provider gates pass where applicable"
+  ],
+  "launchSimulations": [
+    {
+      "siteKey": "julies-family-public",
+      "label": "Julie Family founding launch simulation",
+      "targetMinutes": 15,
+      "estimatedMinutes": 12,
+      "withinTarget": true,
+      "previewPath": "/kinflo-sites/julies-family",
+      "previewLinkReady": true,
+      "adminInviteReady": true,
+      "adminInvitePosture": "platform-steward-handoff-prepared",
+      "timelineStepCount": 5,
+      "blockedStepCount": 1,
+      "handoffArtifacts": ["preview link", "starter content pack", "launch packet", "onboarding readiness tracker"],
+      "blockedLiveActions": ["publish public site", "write CRM lead", "switch adapter", "send external launch packet"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "siteFactory.listClientWebsiteOnboardingReadiness",
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "publicSite.resolvePublishedSite",
+        "controlPlane.createInvitation"
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "label": "Advisor client 15-minute launch simulation",
+      "targetMinutes": 15,
+      "estimatedMinutes": 14,
+      "withinTarget": true,
+      "previewPath": "/kinflo-sites/advisor-client-site",
+      "previewLinkReady": true,
+      "adminInviteReady": true,
+      "adminInvitePosture": "tenant-admin-invite-prepared-not-sent",
+      "timelineStepCount": 5,
+      "blockedStepCount": 1,
+      "handoffArtifacts": ["preview link", "tenant admin invite draft", "launch packet", "onboarding readiness tracker"],
+      "blockedLiveActions": ["create tenant", "send tenant admin invite", "attach custom domain", "publish public site"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "controlPlane.createTenant",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "publicSite.resolvePublishedSite"
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "label": "Campaign microsite 15-minute launch simulation",
+      "targetMinutes": 15,
+      "estimatedMinutes": 11,
+      "withinTarget": true,
+      "previewPath": "/kinflo-sites/campaign-microsite",
+      "previewLinkReady": true,
+      "adminInviteReady": true,
+      "adminInvitePosture": "site-editor-invite-prepared-not-sent",
+      "timelineStepCount": 5,
+      "blockedStepCount": 1,
+      "handoffArtifacts": ["preview link", "site editor invite draft", "campaign launch packet", "consent blocker register"],
+      "blockedLiveActions": ["send campaign", "write public form lead", "publish AI copy", "send SMS/email"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "controlPlane.createInvitation",
+        "campaigns.requestCampaignApproval",
+        "publicSite.resolvePublishedSite"
+      ]
+    }
+  ],
+  "totals": {
+    "simulations": 3,
+    "timelineSteps": 15,
+    "withinTarget": 3,
+    "previewLinksReady": 3,
+    "adminInvitesReady": 3,
+    "blockedSteps": 3
+  }
+}

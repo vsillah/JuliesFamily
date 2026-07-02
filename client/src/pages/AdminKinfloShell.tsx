@@ -570,6 +570,11 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.onboardingReadiness[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.onboardingReadiness],
   );
+  const selectedClientWebsiteLaunchSimulation = useMemo(
+    () => snapshot.clientWebsiteStudio.launchSimulations.find((simulation) => simulation.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.launchSimulations[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchSimulations],
+  );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
   const clientWebsiteStudioReviewStats = [
     { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
@@ -3527,6 +3532,100 @@ export default function AdminKinfloShell() {
                       <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-onboarding-readiness-gated">
                         <ListChecks className="mr-2 h-4 w-4" />
                         Onboarding activation gated
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-launch-simulation">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Rocket className="h-4 w-4 text-slate-500" />
+                          <h3 className="text-base font-semibold">15-Minute Launch Simulation</h3>
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-launch-simulation">
+                          {selectedClientWebsiteLaunchSimulation?.label}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{selectedClientWebsiteLaunchSimulation?.status.replaceAll("_", " ")}</Badge>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Estimate</div>
+                        <div className="mt-1 text-sm font-medium">
+                          {selectedClientWebsiteLaunchSimulation?.estimatedMinutes}/{selectedClientWebsiteLaunchSimulation?.targetMinutes} min
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Preview</div>
+                        <div className="mt-1 break-all text-sm font-medium">{selectedClientWebsiteLaunchSimulation?.previewPath}</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Invite</div>
+                        <div className="mt-1 break-words text-sm font-medium">{selectedClientWebsiteLaunchSimulation?.adminInvitePosture}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-md border border-slate-200 p-3">
+                      <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Outcome</div>
+                      <div className="mt-1 text-sm leading-6 text-slate-700">{selectedClientWebsiteLaunchSimulation?.launchOutcome}</div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <Badge variant={selectedClientWebsiteLaunchSimulation?.withinTarget ? "secondary" : "destructive"}>
+                          {selectedClientWebsiteLaunchSimulation?.withinTarget ? "within 15 min" : "over target"}
+                        </Badge>
+                        <Badge variant={selectedClientWebsiteLaunchSimulation?.previewLinkReady ? "secondary" : "outline"}>
+                          preview prepared
+                        </Badge>
+                        <Badge variant={selectedClientWebsiteLaunchSimulation?.adminInviteReady ? "secondary" : "outline"}>
+                          invite prepared
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Timeline</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsiteLaunchSimulation?.timeline.map((step) => (
+                          <div key={step.stepKey} className="rounded-md border border-slate-200 p-3">
+                            <div className="flex items-start gap-2">
+                              {step.status === "ready" ? (
+                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium">{step.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{step.evidence}</div>
+                              </div>
+                              <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
+                                <Badge variant={step.status === "blocked" ? "destructive" : "outline"}>{step.status}</Badge>
+                                <span className="text-xs text-slate-500">{step.estimatedMinutes} min</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Handoff artifacts</div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedClientWebsiteLaunchSimulation?.handoffArtifacts.map((artifact) => (
+                          <Badge key={artifact} variant="secondary" className="whitespace-normal text-left">{artifact}</Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClientWebsiteLaunchSimulation?.blockedLiveActions.map((action) => (
+                          <Badge key={action} variant="outline" className="whitespace-normal text-left">{action}</Badge>
+                        ))}
+                      </div>
+                      <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-launch-simulation-gated">
+                        <Rocket className="mr-2 h-4 w-4" />
+                        Live launch simulation gated
                       </Button>
                     </div>
                   </div>

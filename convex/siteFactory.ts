@@ -119,6 +119,28 @@ type ClientWebsiteOnboardingReadiness = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteLaunchSimulation = {
+  siteKey: string;
+  label: string;
+  targetMinutes: number;
+  estimatedMinutes: number;
+  previewPath: string;
+  previewLinkReady: boolean;
+  adminInviteReady: boolean;
+  adminInvitePosture: string;
+  launchOutcome: string;
+  timeline: {
+    stepKey: string;
+    label: string;
+    estimatedMinutes: number;
+    status: "ready" | "blocked" | "review";
+    evidence: string;
+  }[];
+  handoffArtifacts: string[];
+  blockedLiveActions: string[];
+  convexFunctions: string[];
+};
+
 const now = () => Date.now();
 
 export const starterTemplates: StarterTemplate[] = [
@@ -776,6 +798,102 @@ export const listClientWebsiteOnboardingReadiness = query({
         0,
       ),
       providerBoundary: "Read-only onboarding readiness query. It does not create tenants, create sites, send invites, write onboarding tasks, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
+    })),
+});
+
+const clientWebsiteLaunchSimulations: ClientWebsiteLaunchSimulation[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family founding launch simulation",
+    targetMinutes: 15,
+    estimatedMinutes: 12,
+    previewPath: "/kinflo-sites/julies-family",
+    previewLinkReady: true,
+    adminInviteReady: true,
+    adminInvitePosture: "platform-steward-handoff-prepared",
+    launchOutcome: "Founding tenant can be reviewed from a preview link with platform steward scope prepared, but live publish and lead writes stay gated.",
+    timeline: [
+      { stepKey: "select-template", label: "Select nonprofit learning center template", estimatedMinutes: 1, status: "ready", evidence: "starter template and launch blueprint are already mapped" },
+      { stepKey: "review-content-pack", label: "Review starter content pack", estimatedMinutes: 3, status: "ready", evidence: "family, programs, and volunteer pages are assembled" },
+      { stepKey: "confirm-brand", label: "Confirm brand and preview posture", estimatedMinutes: 2, status: "review", evidence: "public preview path is available for visual review" },
+      { stepKey: "prepare-invite", label: "Prepare platform steward handoff", estimatedMinutes: 2, status: "ready", evidence: "admin permission preset keeps platform steward scope explicit" },
+      { stepKey: "review-blockers", label: "Review hosted and repository blockers", estimatedMinutes: 4, status: "blocked", evidence: "hosted Convex smoke and repository sharing decision remain gated" },
+    ],
+    handoffArtifacts: ["preview link", "starter content pack", "launch packet", "onboarding readiness tracker"],
+    blockedLiveActions: ["publish public site", "write CRM lead", "switch adapter", "send external launch packet"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteLaunchSimulations",
+      "siteFactory.listClientWebsiteOnboardingReadiness",
+      "siteFactory.listClientWebsiteStarterContentPacks",
+      "publicSite.resolvePublishedSite",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client 15-minute launch simulation",
+    targetMinutes: 15,
+    estimatedMinutes: 14,
+    previewPath: "/kinflo-sites/advisor-client-site",
+    previewLinkReady: true,
+    adminInviteReady: true,
+    adminInvitePosture: "tenant-admin-invite-prepared-not-sent",
+    launchOutcome: "Advisor client site can reach preview-and-handoff review inside the target window after tenant creation and invite delivery are approved.",
+    timeline: [
+      { stepKey: "select-plan-template", label: "Select Client Build plan and advisor template", estimatedMinutes: 2, status: "ready", evidence: "provisioning order selects client-build and advisor-consultant" },
+      { stepKey: "assemble-pages", label: "Assemble proof-led starter pages", estimatedMinutes: 3, status: "ready", evidence: "home, services, and proof pages are prepared" },
+      { stepKey: "prepare-preview", label: "Prepare preview link", estimatedMinutes: 2, status: "ready", evidence: "public preview path is available" },
+      { stepKey: "prepare-admin-invite", label: "Prepare tenant admin invite", estimatedMinutes: 3, status: "review", evidence: "tenant.admin invite role is selected but not sent" },
+      { stepKey: "review-launch-blockers", label: "Review domain, lead, and hosted activation blockers", estimatedMinutes: 4, status: "blocked", evidence: "domain and lead capture smokes remain gated" },
+    ],
+    handoffArtifacts: ["preview link", "tenant admin invite draft", "launch packet", "onboarding readiness tracker"],
+    blockedLiveActions: ["create tenant", "send tenant admin invite", "attach custom domain", "publish public site"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteLaunchSimulations",
+      "controlPlane.createTenant",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite 15-minute launch simulation",
+    targetMinutes: 15,
+    estimatedMinutes: 11,
+    previewPath: "/kinflo-sites/campaign-microsite",
+    previewLinkReady: true,
+    adminInviteReady: true,
+    adminInvitePosture: "site-editor-invite-prepared-not-sent",
+    launchOutcome: "Campaign microsite can reach a preview and editor handoff quickly, but consent, lead writes, and provider sends remain blocked.",
+    timeline: [
+      { stepKey: "select-campaign-template", label: "Select campaign microsite template", estimatedMinutes: 1, status: "ready", evidence: "campaign-microsite starter template is available" },
+      { stepKey: "assemble-campaign-pages", label: "Assemble campaign, signup, and impact pages", estimatedMinutes: 3, status: "ready", evidence: "starter content pack includes home, signup, and impact" },
+      { stepKey: "prepare-preview", label: "Prepare preview link", estimatedMinutes: 2, status: "ready", evidence: "public preview path is available" },
+      { stepKey: "prepare-editor-invite", label: "Prepare site editor invite", estimatedMinutes: 2, status: "review", evidence: "site.editor invite posture is selected but not sent" },
+      { stepKey: "review-consent", label: "Review consent and provider blockers", estimatedMinutes: 3, status: "blocked", evidence: "campaign consent and provider sends remain gated" },
+    ],
+    handoffArtifacts: ["preview link", "site editor invite draft", "campaign launch packet", "consent blocker register"],
+    blockedLiveActions: ["send campaign", "write public form lead", "publish AI copy", "send SMS/email"],
+    convexFunctions: [
+      "siteFactory.listClientWebsiteLaunchSimulations",
+      "siteFactory.listClientWebsiteStarterContentPacks",
+      "controlPlane.createInvitation",
+      "campaigns.requestCampaignApproval",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+];
+
+export const listClientWebsiteLaunchSimulations = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteLaunchSimulations.map((simulation) => ({
+      ...simulation,
+      withinTarget: simulation.estimatedMinutes <= simulation.targetMinutes,
+      timelineStepCount: simulation.timeline.length,
+      blockedStepCount: simulation.timeline.filter((step) => step.status === "blocked").length,
+      providerBoundary: "Read-only launch simulation query. It does not create tenants, create sites, send invites, write onboarding tasks, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
     })),
 });
 

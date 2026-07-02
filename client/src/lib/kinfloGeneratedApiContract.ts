@@ -98,6 +98,7 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("preferencesUpsertMyPreferences", "mutation", "experience preferences", "viewer can update own tenant/site scoped preferences after scope permission check"),
   binding("siteFactoryListStarterTemplates", "query", "site factory", "starter templates include quality contract metadata"),
   binding("siteFactoryListClientWebsiteLaunchBlueprints", "query", "site factory", "client website launch blueprints include template quality contracts and provider boundaries"),
+  binding("siteFactoryListClientWebsiteLaunchSimulations", "query", "site factory", "client launch simulations include target minutes, preview links, invite posture, blockers, and provider boundaries"),
   binding("siteFactoryListClientWebsiteOnboardingReadiness", "query", "site factory", "client onboarding readiness includes task groups, blockers, scores, and provider boundaries"),
   binding("siteFactoryListClientWebsiteAdminPermissionPresets", "query", "site factory", "client website admin permission presets include role, scope, gates, and provider boundaries"),
   binding("siteFactoryListClientWebsiteProvisioningOrders", "query", "site factory", "client website provisioning orders assemble site, blueprint, permission preset, gates, and blocked actions"),
