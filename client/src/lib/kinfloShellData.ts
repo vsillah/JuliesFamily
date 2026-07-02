@@ -484,6 +484,31 @@ export type ShellClientWebsiteVisualQaBudget = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteVisualQaEvidencePacket = {
+  siteKey: string;
+  label: string;
+  status: "provider-light-qa-evidence-packet";
+  evidencePosture: string;
+  evidenceItems: {
+    key: string;
+    label: string;
+    kind: "screenshot" | "accessibility" | "performance" | "regression";
+    status: "accepted" | "pending" | "blocked";
+    requiredArtifact: string;
+    currentEvidence: string;
+    owner: "platform" | "tenant" | "client" | "provider";
+  }[];
+  approvalChecklist: {
+    key: string;
+    label: string;
+    status: "ready" | "review" | "blocked";
+    decisionGate: string;
+  }[];
+  openRisks: string[];
+  blockedEvidenceActions: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
@@ -498,6 +523,7 @@ export type ShellClientWebsiteStudio = {
   launchSimulations: ShellClientWebsiteLaunchSimulation[];
   polishScorecards: ShellClientWebsitePolishScorecard[];
   visualQaBudgets: ShellClientWebsiteVisualQaBudget[];
+  visualQaEvidencePackets: ShellClientWebsiteVisualQaEvidencePacket[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -2427,6 +2453,183 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  visualQaEvidencePackets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family visual QA evidence packet",
+      status: "provider-light-qa-evidence-packet",
+      evidencePosture: "Local fixture evidence is organized, but hosted screenshots, accessibility crawl, and performance trace remain pending.",
+      evidenceItems: [
+        {
+          key: "desktop-screenshot",
+          label: "Desktop screenshot proof",
+          kind: "screenshot",
+          status: "accepted",
+          requiredArtifact: "Hosted desktop screenshot with hero, proof, CTA, and navigation visible.",
+          currentEvidence: "Local Site Studio and public preview smoke show the founding Julie Family path without overlap.",
+          owner: "platform",
+        },
+        {
+          key: "mobile-screenshot",
+          label: "390px screenshot proof",
+          kind: "screenshot",
+          status: "accepted",
+          requiredArtifact: "390px hosted screenshot with CTA and family learning promise readable.",
+          currentEvidence: "Local mobile smoke is clean; hosted screenshot capture is not approved.",
+          owner: "platform",
+        },
+        {
+          key: "accessibility-crawl",
+          label: "Accessibility crawl artifact",
+          kind: "accessibility",
+          status: "pending",
+          requiredArtifact: "Automated contrast, landmarks, and keyboard result packet.",
+          currentEvidence: "Manual fixture posture only; no crawler has run.",
+          owner: "provider",
+        },
+        {
+          key: "performance-trace",
+          label: "Performance trace artifact",
+          kind: "performance",
+          status: "pending",
+          requiredArtifact: "Hosted Lighthouse or equivalent trace with LCP and image budget evidence.",
+          currentEvidence: "No hosted performance trace has been approved.",
+          owner: "provider",
+        },
+      ],
+      approvalChecklist: [
+        { key: "founder-story", label: "Founder story and proof reviewed", status: "review", decisionGate: "Confirm final Julie Family story and proof copy before public publish." },
+        { key: "accessibility-review", label: "Accessibility evidence accepted", status: "blocked", decisionGate: "Run hosted accessibility crawl after generated API review." },
+        { key: "publish-approval", label: "Public publish approval", status: "blocked", decisionGate: "Approve hosted renderer, domain, storage, and rollback owner." },
+      ],
+      openRisks: ["hosted renderer not activated", "program imagery source review pending", "public publish rollback owner not assigned"],
+      blockedEvidenceActions: ["capture hosted screenshot", "run accessibility crawler", "run Lighthouse trace", "publish public site"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "siteFactory.listClientWebsitePolishScorecards",
+        "publicSite.resolvePublishedSite",
+        "launchReadiness.getSiteLaunchReadiness",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client visual QA evidence packet",
+      status: "provider-light-qa-evidence-packet",
+      evidencePosture: "Tenant handoff proof is organized around offer, proof, intake, and permission evidence before any client admin invite is sent.",
+      evidenceItems: [
+        {
+          key: "desktop-offer-proof",
+          label: "Desktop offer and proof screenshot",
+          kind: "screenshot",
+          status: "accepted",
+          requiredArtifact: "Hosted desktop screenshot proving offer, proof, and intake hierarchy.",
+          currentEvidence: "Local workbench shows proof-before-intake structure.",
+          owner: "platform",
+        },
+        {
+          key: "mobile-intake-proof",
+          label: "390px intake screenshot",
+          kind: "screenshot",
+          status: "pending",
+          requiredArtifact: "390px screenshot proving intake path and CTA remain visible.",
+          currentEvidence: "Mobile readiness is marked ready, but hosted lead smoke is gated.",
+          owner: "platform",
+        },
+        {
+          key: "intake-accessibility",
+          label: "Intake accessibility artifact",
+          kind: "accessibility",
+          status: "pending",
+          requiredArtifact: "Form labels, focus order, and error-state accessibility result.",
+          currentEvidence: "Fixture form path is not connected to hosted lead writes.",
+          owner: "provider",
+        },
+        {
+          key: "route-performance",
+          label: "Route performance trace",
+          kind: "performance",
+          status: "pending",
+          requiredArtifact: "Hosted route trace showing JS, LCP, and interaction budget.",
+          currentEvidence: "Vite bundle remains app-wide until public rendering strategy is approved.",
+          owner: "provider",
+        },
+      ],
+      approvalChecklist: [
+        { key: "tenant-owner", label: "Tenant owner confirmed", status: "review", decisionGate: "Confirm client owner and invite recipient before membership writes." },
+        { key: "intake-smoke", label: "Intake smoke accepted", status: "blocked", decisionGate: "Approve public lead route, smoke data cleanup, and rollback owner." },
+        { key: "handoff-approval", label: "Client handoff approval", status: "blocked", decisionGate: "Approve tenant creation, admin invite, domain, and preview evidence." },
+      ],
+      openRisks: ["tenant owner not approved", "lead route smoke not run", "route-level bundle budget not verified"],
+      blockedEvidenceActions: ["create tenant", "send tenant admin invite", "run hosted intake accessibility smoke", "attach custom domain"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite visual QA evidence packet",
+      status: "provider-light-qa-evidence-packet",
+      evidencePosture: "Campaign proof is blocked on consent, lead-write, and provider-send evidence before any traffic or campaign delivery is allowed.",
+      evidenceItems: [
+        {
+          key: "desktop-campaign-proof",
+          label: "Desktop campaign screenshot",
+          kind: "screenshot",
+          status: "accepted",
+          requiredArtifact: "Hosted desktop screenshot with single offer, proof, and signup path.",
+          currentEvidence: "Local starter pack keeps campaign path focused.",
+          owner: "platform",
+        },
+        {
+          key: "mobile-campaign-proof",
+          label: "390px campaign screenshot",
+          kind: "screenshot",
+          status: "pending",
+          requiredArtifact: "390px screenshot after first-viewport copy tightening.",
+          currentEvidence: "Mobile copy remains review-gated.",
+          owner: "platform",
+        },
+        {
+          key: "consent-accessibility",
+          label: "Consent accessibility artifact",
+          kind: "accessibility",
+          status: "blocked",
+          requiredArtifact: "Consent visibility, unsubscribe expectation, and signup label audit.",
+          currentEvidence: "Consent language is not approved.",
+          owner: "client",
+        },
+        {
+          key: "signup-performance",
+          label: "Signup performance trace",
+          kind: "performance",
+          status: "blocked",
+          requiredArtifact: "Hosted signup interaction trace before provider write.",
+          currentEvidence: "Public form lead write and provider sends remain gated.",
+          owner: "provider",
+        },
+      ],
+      approvalChecklist: [
+        { key: "campaign-objective", label: "Campaign objective accepted", status: "review", decisionGate: "Confirm one campaign objective and proof asset." },
+        { key: "consent-approval", label: "Consent language accepted", status: "blocked", decisionGate: "Approve consent copy, unsubscribe expectations, and source tracking." },
+        { key: "send-approval", label: "Provider send approval", status: "blocked", decisionGate: "Approve lead smoke, campaign approval state, provider-send trace, and rollback owner." },
+      ],
+      openRisks: ["consent language blocked", "public lead smoke blocked", "mobile copy still needs retest"],
+      blockedEvidenceActions: ["send campaign", "write public form lead", "run provider-send trace", "approve mobile screenshot"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+  ],
   researchSources: [
     { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
     { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },
@@ -2442,6 +2645,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
     "siteFactory.listClientWebsitePolishScorecards",
     "siteFactory.listClientWebsiteProvisioningOrders",
     "siteFactory.listClientWebsiteVisualQaBudgets",
+    "siteFactory.listClientWebsiteVisualQaEvidencePackets",
     "siteBuilder.getSiteDraft",
     "siteBuilder.updatePage",
     "publicSite.resolvePublishedSite",

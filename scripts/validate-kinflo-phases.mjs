@@ -133,6 +133,7 @@ for (const path of [
   "docs/phase65-client-launch-simulation.md",
   "docs/phase66-client-polish-scorecards.md",
   "docs/phase67-client-visual-qa-budgets.md",
+  "docs/phase68-client-visual-qa-evidence.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -144,6 +145,7 @@ for (const path of [
   "docs/convex-client-launch-simulation-manifest.json",
   "docs/convex-client-polish-scorecard-manifest.json",
   "docs/convex-client-visual-qa-budget-manifest.json",
+  "docs/convex-client-visual-qa-evidence-manifest.json",
   "docs/convex-import-contracts/import-manifest.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -211,6 +213,8 @@ for (const path of [
   "scripts/dry-run-kinflo-client-polish-scorecards.mjs",
   "scripts/validate-kinflo-client-visual-qa-budgets.mjs",
   "scripts/dry-run-kinflo-client-visual-qa-budgets.mjs",
+  "scripts/validate-kinflo-client-visual-qa-evidence.mjs",
+  "scripts/dry-run-kinflo-client-visual-qa-evidence.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1135,6 +1139,42 @@ requireIncludes("docs/convex-client-visual-qa-budget-manifest.json", [
   "\"regressionTargets\": 9",
 ]);
 
+requireIncludes("docs/phase68-client-visual-qa-evidence.md", [
+  "npm run kinflo:validate-client-visual-qa-evidence",
+  "npm run kinflo:dry-run-client-visual-qa-evidence",
+  "docs/convex-client-visual-qa-evidence-manifest.json",
+  "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+  "provider-light-qa-evidence-packet",
+  "Evidence packets: 3",
+  "Evidence items: 12",
+  "Accepted evidence items: 4",
+  "Blocked evidence items: 2",
+  "Approval checklist items: 9",
+  "Open risks: 9",
+  "No screenshot capture, accessibility crawl, Lighthouse run, provider call, evidence artifact write, content write, asset replacement, public publish, lead write, campaign send, generated API import, hosted deployment, or live Convex execution is performed",
+]);
+
+requireIncludes("docs/convex-client-visual-qa-evidence-manifest.json", [
+  "\"phase\": 68",
+  "\"status\": \"provider-light-qa-evidence-packet\"",
+  "\"convexFunction\": \"siteFactory.listClientWebsiteVisualQaEvidencePackets\"",
+  "\"externalWrites\": false",
+  "\"hostedDeploymentTouched\": false",
+  "\"generatedApiImported\": false",
+  "\"liveConvexExecution\": false",
+  "\"screenshotsCaptured\": false",
+  "\"accessibilityCrawlerRun\": false",
+  "\"lighthouseRun\": false",
+  "\"providersCalled\": false",
+  "\"evidenceArtifactsWritten\": false",
+  "\"evidenceItems\": 12",
+  "\"acceptedEvidenceItems\": 4",
+  "\"pendingEvidenceItems\": 6",
+  "\"blockedEvidenceItems\": 2",
+  "\"approvalChecklistItems\": 9",
+  "\"openRisks\": 9",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -1181,6 +1221,8 @@ requireIncludes("package.json", [
   "\"kinflo:dry-run-client-polish-scorecards\"",
   "\"kinflo:validate-client-visual-qa-budgets\"",
   "\"kinflo:dry-run-client-visual-qa-budgets\"",
+  "\"kinflo:validate-client-visual-qa-evidence\"",
+  "\"kinflo:dry-run-client-visual-qa-evidence\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1713,6 +1755,30 @@ requireIncludes("scripts/dry-run-kinflo-client-visual-qa-budgets.mjs", [
   "Screenshots captured: no",
 ]);
 
+requireIncludes("scripts/validate-kinflo-client-visual-qa-evidence.mjs", [
+  "docs/convex-client-visual-qa-evidence-manifest.json",
+  "provider-light-qa-evidence-packet",
+  "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+  "ShellClientWebsiteVisualQaEvidencePacket",
+  "section-kinflo-client-visual-qa-evidence-packet",
+  "button-client-visual-qa-evidence-gated",
+  "manifest totals twelve evidence items",
+  "manifest totals two blocked evidence items",
+  "\"evidenceArtifactsWritten\", false",
+]);
+
+requireIncludes("scripts/dry-run-kinflo-client-visual-qa-evidence.mjs", [
+  "scripts/validate-kinflo-client-visual-qa-evidence.mjs",
+  "KinFlo client visual QA evidence dry run",
+  "Visual QA evidence previews",
+  "Evidence items",
+  "External writes: 0",
+  "Hosted deployment touched: no",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+  "Evidence artifacts written: no",
+]);
+
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
   "process\\.env",
   "import\\.meta\\.env",
@@ -2007,6 +2073,10 @@ requireIncludes("convex/siteFactory.ts", [
   "clientWebsiteVisualQaBudgets",
   "export const listClientWebsiteVisualQaBudgets",
   "Read-only visual QA budget query",
+  "ClientWebsiteVisualQaEvidencePacket",
+  "clientWebsiteVisualQaEvidencePackets",
+  "export const listClientWebsiteVisualQaEvidencePackets",
+  "Read-only visual QA evidence packet query",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -2103,6 +2173,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellClientWebsiteLaunchSimulation",
   "ShellClientWebsitePolishScorecard",
   "ShellClientWebsiteVisualQaBudget",
+  "ShellClientWebsiteVisualQaEvidencePacket",
   "launchBlueprints",
   "adminPermissionPresets",
   "provisioningOrders",
@@ -2113,6 +2184,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "launchSimulations",
   "polishScorecards",
   "visualQaBudgets",
+  "visualQaEvidencePackets",
   "siteFactory.listClientWebsiteAdminPermissionPresets",
   "siteFactory.listClientWebsiteLaunchBlueprints",
   "siteFactory.listClientWebsiteProvisioningOrders",
@@ -2121,6 +2193,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "siteFactory.listClientWebsiteLaunchSimulations",
   "siteFactory.listClientWebsitePolishScorecards",
   "siteFactory.listClientWebsiteVisualQaBudgets",
+  "siteFactory.listClientWebsiteVisualQaEvidencePackets",
   "docs/convex-client-provisioning-execution-manifest.json",
   "provider-light-dry-run-contract",
   "referencedFunctions: 18",
@@ -2138,6 +2211,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Julie Family founding launch simulation",
   "Advisor client 15-minute launch simulation",
   "Campaign microsite 15-minute launch simulation",
+  "Julie Family visual QA evidence packet",
+  "Advisor client visual QA evidence packet",
+  "Campaign microsite visual QA evidence packet",
   "mission-clarity",
   "branded-portal-handoff",
   "Advisor client starter blueprint",
@@ -2455,6 +2531,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "selectedClientWebsiteLaunchSimulation",
   "selectedClientWebsitePolishScorecard",
   "selectedClientWebsiteVisualQaBudget",
+  "selectedClientWebsiteVisualQaEvidencePacket",
   "section-kinflo-client-provisioning-order",
   "text-kinflo-client-provisioning-order",
   "button-client-provisioning-order-gated",
@@ -2479,6 +2556,9 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-visual-qa-budget",
   "text-kinflo-client-visual-qa-budget",
   "button-client-visual-qa-gated",
+  "section-kinflo-client-visual-qa-evidence-packet",
+  "text-kinflo-client-visual-qa-evidence-packet",
+  "button-client-visual-qa-evidence-gated",
   "section-kinflo-client-studio-operating-frame",
   "section-kinflo-client-site-rail",
   "section-kinflo-client-preview-workbench",
