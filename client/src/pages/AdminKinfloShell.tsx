@@ -590,6 +590,11 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.visualQaEvidencePackets[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.visualQaEvidencePackets],
   );
+  const selectedClientWebsiteLaunchDecisionPacket = useMemo(
+    () => snapshot.clientWebsiteStudio.launchDecisionPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.launchDecisionPackets[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchDecisionPackets],
+  );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
   const clientWebsiteStudioReviewStats = [
     { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
@@ -3967,6 +3972,118 @@ export default function AdminKinfloShell() {
                       <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-visual-qa-evidence-gated">
                         <FileText className="mr-2 h-4 w-4" />
                         Visual QA evidence gated
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-launch-decision-packet">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4 text-slate-500" />
+                          <h3 className="text-base font-semibold">Launch Decision</h3>
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-launch-decision-packet">
+                          {selectedClientWebsiteLaunchDecisionPacket?.label}
+                        </p>
+                      </div>
+                      <Badge variant={selectedClientWebsiteLaunchDecisionPacket?.launchDecision === "no_go" ? "destructive" : "outline"}>
+                        {selectedClientWebsiteLaunchDecisionPacket?.launchDecision.replaceAll("_", " ")}
+                      </Badge>
+                    </div>
+
+                    <div className="mt-4 rounded-md border border-slate-200 p-3">
+                      <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Decision posture</div>
+                      <div className="mt-1 text-sm leading-6 text-slate-700">{selectedClientWebsiteLaunchDecisionPacket?.decisionPosture}</div>
+                      <div className="mt-2 text-xs text-slate-500">Owner: {selectedClientWebsiteLaunchDecisionPacket?.approvalOwner}</div>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-4">
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Criteria</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteLaunchDecisionPacket?.decisionCriteria.length}</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Ready</div>
+                        <div className="mt-1 text-sm font-medium">
+                          {selectedClientWebsiteLaunchDecisionPacket?.decisionCriteria.filter((item) => item.status === "ready").length}
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Blocked</div>
+                        <div className="mt-1 text-sm font-medium">
+                          {selectedClientWebsiteLaunchDecisionPacket?.decisionCriteria.filter((item) => item.status === "blocked").length}
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Signoffs</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteLaunchDecisionPacket?.requiredSignoffs.length}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Decision criteria</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsiteLaunchDecisionPacket?.decisionCriteria.map((criterion) => (
+                          <div key={criterion.key} className="rounded-md border border-slate-200 p-3">
+                            <div className="flex items-start gap-2">
+                              {criterion.status === "ready" ? (
+                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="text-sm font-medium">{criterion.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{criterion.evidence}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-600">{criterion.decisionGate}</div>
+                              </div>
+                              <Badge variant={criterion.status === "blocked" ? "destructive" : "outline"} className="ml-auto shrink-0">
+                                {criterion.status}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-md border border-slate-200 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-medium">Rollback plan</div>
+                          <div className="mt-1 text-xs text-slate-500">Owner: {selectedClientWebsiteLaunchDecisionPacket?.rollbackPlan.owner}</div>
+                        </div>
+                        <Badge variant={selectedClientWebsiteLaunchDecisionPacket?.rollbackPlan.status === "blocked" ? "destructive" : "outline"}>
+                          {selectedClientWebsiteLaunchDecisionPacket?.rollbackPlan.status}
+                        </Badge>
+                      </div>
+                      <div className="mt-3 space-y-2">
+                        {selectedClientWebsiteLaunchDecisionPacket?.rollbackPlan.steps.map((step) => (
+                          <div key={step} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                            <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                            <span>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Required signoffs</div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedClientWebsiteLaunchDecisionPacket?.requiredSignoffs.map((signoff) => (
+                          <Badge key={signoff} variant="secondary" className="whitespace-normal text-left">{signoff}</Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClientWebsiteLaunchDecisionPacket?.blockedLaunchActions.map((action) => (
+                          <Badge key={action} variant="outline" className="whitespace-normal text-left">{action}</Badge>
+                        ))}
+                      </div>
+                      <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-launch-decision-gated">
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        Launch decision gated
                       </Button>
                     </div>
                   </div>

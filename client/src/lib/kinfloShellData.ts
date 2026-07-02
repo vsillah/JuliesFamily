@@ -509,6 +509,30 @@ export type ShellClientWebsiteVisualQaEvidencePacket = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteLaunchDecisionPacket = {
+  siteKey: string;
+  label: string;
+  status: "provider-light-launch-decision";
+  launchDecision: "go" | "review" | "no_go";
+  decisionPosture: string;
+  approvalOwner: string;
+  decisionCriteria: {
+    key: string;
+    label: string;
+    status: "ready" | "review" | "blocked";
+    evidence: string;
+    decisionGate: string;
+  }[];
+  rollbackPlan: {
+    owner: string;
+    status: "ready" | "review" | "blocked";
+    steps: string[];
+  };
+  requiredSignoffs: string[];
+  blockedLaunchActions: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
@@ -524,6 +548,7 @@ export type ShellClientWebsiteStudio = {
   polishScorecards: ShellClientWebsitePolishScorecard[];
   visualQaBudgets: ShellClientWebsiteVisualQaBudget[];
   visualQaEvidencePackets: ShellClientWebsiteVisualQaEvidencePacket[];
+  launchDecisionPackets: ShellClientWebsiteLaunchDecisionPacket[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -2630,6 +2655,166 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  launchDecisionPackets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family launch decision packet",
+      status: "provider-light-launch-decision",
+      launchDecision: "review",
+      decisionPosture: "Local public preview and mobile evidence are organized, but hosted accessibility, performance, domain, and rollback gates must be accepted before publish.",
+      approvalOwner: "platform.super_admin",
+      decisionCriteria: [
+        {
+          key: "local-preview-proof",
+          label: "Local preview proof",
+          status: "ready",
+          evidence: "Site Studio and public preview smokes show the family learning promise, proof, and CTA without overlap.",
+          decisionGate: "Keep local proof as supporting evidence only until hosted renderer proof is captured.",
+        },
+        {
+          key: "visual-evidence-packet",
+          label: "Visual evidence packet reviewed",
+          status: "review",
+          evidence: "Evidence packet has two accepted local artifacts and two pending hosted artifacts.",
+          decisionGate: "Review final screenshot, accessibility, and performance artifacts before accepting the public launch.",
+        },
+        {
+          key: "hosted-accessibility",
+          label: "Hosted accessibility accepted",
+          status: "blocked",
+          evidence: "No hosted accessibility crawler or keyboard smoke has run.",
+          decisionGate: "Run hosted accessibility crawl after generated API review.",
+        },
+        {
+          key: "publish-rollback",
+          label: "Publish and rollback owner accepted",
+          status: "blocked",
+          evidence: "Public publish, domain, storage, and rollback owner remain gated.",
+          decisionGate: "Assign rollback owner and approve publish order before any public launch.",
+        },
+      ],
+      rollbackPlan: {
+        owner: "platform.super_admin",
+        status: "blocked",
+        steps: ["keep fixture renderer active", "restore previous published route", "pause public lead intake"],
+      },
+      requiredSignoffs: ["founder story and proof", "hosted visual QA evidence", "publish rollback owner"],
+      blockedLaunchActions: ["publish public site", "attach production domain", "enable public lead write", "accept hosted QA evidence"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "publicSite.resolvePublishedSite",
+        "siteBuilder.publishPage",
+        "launchReadiness.getSiteLaunchReadiness",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client launch decision packet",
+      status: "provider-light-launch-decision",
+      launchDecision: "review",
+      decisionPosture: "Advisor site can move toward client handoff only after tenant owner, intake smoke, client admin invite, and custom-domain evidence are approved.",
+      approvalOwner: "platform.super_admin",
+      decisionCriteria: [
+        {
+          key: "offer-proof",
+          label: "Offer and proof hierarchy",
+          status: "ready",
+          evidence: "Local workbench preserves proof-before-intake structure.",
+          decisionGate: "Keep local proof as supporting evidence until hosted preview proof is captured.",
+        },
+        {
+          key: "tenant-owner",
+          label: "Tenant owner confirmed",
+          status: "review",
+          evidence: "Client owner and invite recipient are still review-gated.",
+          decisionGate: "Confirm owner, invite recipient, and handoff scope before membership writes.",
+        },
+        {
+          key: "lead-smoke",
+          label: "Hosted lead smoke accepted",
+          status: "blocked",
+          evidence: "Public lead route and smoke cleanup are not approved.",
+          decisionGate: "Approve public lead route, smoke data cleanup, and rollback owner.",
+        },
+        {
+          key: "client-invite",
+          label: "Client admin invitation approved",
+          status: "blocked",
+          evidence: "Tenant creation and admin invite remain disabled.",
+          decisionGate: "Approve tenant creation, admin invite, and domain attachment order.",
+        },
+      ],
+      rollbackPlan: {
+        owner: "platform.super_admin",
+        status: "blocked",
+        steps: ["disable preview handoff", "revoke unsent invite posture", "return site to fixture-only state"],
+      },
+      requiredSignoffs: ["tenant owner", "hosted intake smoke", "client handoff approval"],
+      blockedLaunchActions: ["create tenant", "send tenant admin invite", "attach custom domain", "enable public intake writes"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite launch decision packet",
+      status: "provider-light-launch-decision",
+      launchDecision: "no_go",
+      decisionPosture: "Campaign launch is explicitly no-go until consent language, mobile screenshot, lead-write smoke, provider-send trace, and rollback owner are accepted.",
+      approvalOwner: "platform.super_admin",
+      decisionCriteria: [
+        {
+          key: "single-offer",
+          label: "Single offer focus",
+          status: "ready",
+          evidence: "Starter content pack keeps one campaign path.",
+          decisionGate: "Confirm final campaign objective before traffic is sent.",
+        },
+        {
+          key: "consent-language",
+          label: "Consent language accepted",
+          status: "blocked",
+          evidence: "Consent copy, unsubscribe expectations, and source tracking remain blocked.",
+          decisionGate: "Approve consent language before provider-send smoke.",
+        },
+        {
+          key: "lead-write",
+          label: "Lead-write smoke accepted",
+          status: "blocked",
+          evidence: "Public form lead write is still gated.",
+          decisionGate: "Approve public lead route, smoke cleanup, and rollback owner.",
+        },
+        {
+          key: "provider-send",
+          label: "Provider-send trace accepted",
+          status: "blocked",
+          evidence: "Campaign send and provider trace remain disabled.",
+          decisionGate: "Approve campaign provider trace before any traffic or sends.",
+        },
+      ],
+      rollbackPlan: {
+        owner: "platform.super_admin",
+        status: "blocked",
+        steps: ["pause campaign traffic", "disable signup route", "revert campaign approval state"],
+      },
+      requiredSignoffs: ["campaign objective", "consent language", "provider-send rollback owner"],
+      blockedLaunchActions: ["send campaign", "write public form lead", "run provider-send trace", "approve mobile screenshot"],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+  ],
   researchSources: [
     { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
     { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },
@@ -2639,6 +2824,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
   providerBoundary: "Client website studio changes are local review notes until hosted Convex, generated API bindings, visual QA, domain readiness, and publish approval are complete.",
   convexFunctions: [
     "siteFactory.listClientWebsiteAdminPermissionPresets",
+    "siteFactory.listClientWebsiteLaunchDecisionPackets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
     "siteFactory.listClientWebsiteLaunchSimulations",
     "siteFactory.listClientWebsiteOnboardingReadiness",
