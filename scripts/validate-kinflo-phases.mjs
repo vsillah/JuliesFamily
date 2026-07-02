@@ -161,6 +161,7 @@ for (const path of [
   "docs/phase99-site-studio-deep-links.md",
   "docs/phase105-site-studio-site-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
+  "docs/phase107-client-preview-review-packet.md",
   "docs/phase100-site-studio-launch-dossier-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
@@ -288,6 +289,7 @@ for (const path of [
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
+  "scripts/validate-kinflo-client-preview-review-packet.mjs",
   "scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
@@ -1676,6 +1678,20 @@ requireIncludes("docs/phase106-client-public-preview-context-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase107-client-preview-review-packet.md", [
+  "Phase 107: Client Preview Review Packet",
+  "npm run kinflo:validate-client-preview-review-packet",
+  "section-kinflo-client-preview-review-packet",
+  "section-kinflo-client-preview-review-context",
+  "section-kinflo-client-preview-review-evidence",
+  "section-kinflo-client-preview-review-gates",
+  "public publish",
+  "CRM lead write",
+  "client sharing",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase100-site-studio-launch-dossier-deep-links.md", [
   "Phase 100: Site Studio Launch Dossier Deep Links",
   "npm run kinflo:validate-site-studio-launch-dossier-deep-links",
@@ -1850,6 +1866,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase99-site-studio-deep-links.md\"",
   "\"docs/phase105-site-studio-site-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
+  "\"docs/phase107-client-preview-review-packet.md\"",
   "\"docs/phase100-site-studio-launch-dossier-deep-links.md\"",
   "\"docs/phase87-adapter-switch-runway.md\"",
   "\"docs/phase88-generated-api-review-board.md\"",
@@ -1880,6 +1897,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
+  "\"npm run kinflo:validate-client-preview-review-packet\"",
   "\"npm run kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"npm run kinflo:validate-adapter-switch-runway\"",
   "\"npm run kinflo:validate-generated-api-review-board\"",
@@ -1995,6 +2013,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
+  "\"kinflo:validate-client-preview-review-packet\"",
   "\"kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:validate-generated-api-review-board\"",
@@ -2935,6 +2954,17 @@ requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs
   "client public preview context links do not import generated API",
   "client public preview context links do not execute live Convex",
   "KinFlo client public preview context-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-preview-review-packet.mjs", [
+  "docs/phase107-client-preview-review-packet.md",
+  "section-kinflo-client-preview-review-packet",
+  "section-kinflo-client-preview-review-context",
+  "section-kinflo-client-preview-review-evidence",
+  "section-kinflo-client-preview-review-gates",
+  "client preview review packet does not import generated API",
+  "client preview review packet does not execute live Convex",
+  "KinFlo client preview review-packet validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs", [
@@ -4024,6 +4054,17 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-preview-workbench",
   "section-kinflo-client-preview-canvas",
   "section-kinflo-client-device-frame",
+  "clientWebsitePreviewReviewContext",
+  "clientWebsitePreviewReviewEvidence",
+  "clientWebsitePreviewReviewBlockedActions",
+  "section-kinflo-client-preview-review-packet",
+  "text-kinflo-client-preview-review-packet",
+  "section-kinflo-client-preview-review-context",
+  "section-kinflo-client-preview-review-evidence",
+  "section-kinflo-client-preview-review-gates",
+  "max-h-[360px]",
+  "grid-cols-[minmax(0,1fr)_minmax(130px,0.58fr)]",
+  "max-h-32",
   "section-kinflo-client-fold-line",
   "section-kinflo-client-launch-rail",
   "section-kinflo-client-launch-command-column",

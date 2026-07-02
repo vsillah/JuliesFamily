@@ -2012,6 +2012,41 @@ export default function AdminKinfloShell() {
   const clientWebsiteLaunchDecisionTone = selectedClientWebsiteLaunchDecisionPacket?.launchDecision === "no_go"
     ? "border-rose-200 bg-rose-50 text-rose-700"
     : "border-amber-200 bg-amber-50 text-amber-700";
+  const clientWebsitePreviewReviewContext = [
+    { label: "Site", value: selectedClientWebsiteStudioSite?.key ?? "pending" },
+    { label: "Route", value: clientWebsiteStudioPreviewRoute },
+    { label: "Persona", value: clientWebsiteStudioPreviewPersona ?? "pending" },
+    { label: "Journey", value: clientWebsiteStudioPreviewJourneyStage },
+    { label: "Device/source", value: "desktop / site-studio-preview" },
+    { label: "Decision", value: clientWebsiteLaunchDecisionLabel },
+  ];
+  const clientWebsitePreviewReviewEvidence = [
+    {
+      label: "Preview URL context",
+      value: "studioSite, route, persona, journeyStage, device, and source are present.",
+      done: true,
+    },
+    {
+      label: "Visual QA packet",
+      value: `${selectedClientWebsiteVisualQaEvidencePacket?.evidenceItems.length ?? 0} fixture evidence items remain local.`,
+      done: Boolean(selectedClientWebsiteVisualQaEvidencePacket?.evidenceItems.length),
+    },
+    {
+      label: "Launch decision criteria",
+      value: `${clientWebsiteLaunchDecisionReadyCount} ready / ${clientWebsiteLaunchDecisionBlockedCount} blocked.`,
+      done: clientWebsiteLaunchDecisionBlockedCount === 0,
+    },
+    {
+      label: "Hosted smoke evidence",
+      value: "Pending hosted Convex, generated API review, read-only smoke, and rollback approval.",
+      done: false,
+    },
+  ];
+  const clientWebsitePreviewReviewBlockedActions = [
+    "public publish write",
+    "CRM lead write",
+    "client sharing",
+  ];
   const clientWebsiteStudioReviewStats = [
     { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
     { label: "Readiness", value: `${clientWebsiteStudioReadyCount}/${clientWebsiteStudioReadiness.length}` },
@@ -6156,6 +6191,60 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardHeader>
                   <CardContent className="max-h-[calc(100vh-10rem)] space-y-5 overflow-y-auto pt-5">
+                    <div className="max-h-[360px] overflow-y-auto overflow-x-hidden rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-client-preview-review-packet">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 text-sm font-semibold text-amber-950">
+                            <FileText className="h-4 w-4" />
+                            Preview review packet
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-amber-900" data-testid="text-kinflo-client-preview-review-packet">
+                            Local review context for the selected client site. Publish, lead capture, and client sharing stay gated.
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="w-fit border-amber-300 bg-white text-amber-900">
+                          provider-light
+                        </Badge>
+                      </div>
+                      <div className="mt-3 grid grid-cols-3 gap-2" data-testid="section-kinflo-client-preview-review-context">
+                        {clientWebsitePreviewReviewContext.map((item) => (
+                          <div key={item.label} className="min-w-0 rounded-md border border-amber-200 bg-white px-2 py-1.5">
+                            <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">{item.label}</div>
+                            <div className="mt-0.5 truncate text-xs font-semibold text-slate-950" title={item.value}>
+                              {item.value}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(130px,0.58fr)] gap-2">
+                        <div className="grid max-h-32 gap-2 overflow-y-auto pr-1 lg:max-h-40" data-testid="section-kinflo-client-preview-review-evidence">
+                          {clientWebsitePreviewReviewEvidence.map((item) => (
+                            <div key={item.label} className="flex items-start gap-2 rounded-md border border-amber-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              {item.done ? (
+                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                              ) : (
+                                <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                              )}
+                              <div className="min-w-0">
+                                <div className="font-medium text-slate-950">{item.label}</div>
+                                <div className="mt-0.5 text-slate-600">{item.value}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <div className="rounded-md border border-amber-200 bg-white p-2" data-testid="section-kinflo-client-preview-review-gates">
+                          <div className="text-xs font-medium uppercase tracking-normal text-amber-700">Blocked live actions</div>
+                          <div className="mt-2 grid gap-2">
+                            {clientWebsitePreviewReviewBlockedActions.map((action) => (
+                              <div key={action} className="flex items-start gap-2 text-xs leading-5 text-slate-700">
+                                <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                <span>{action}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
                       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
                         <div className="flex items-center gap-2">
