@@ -95,7 +95,9 @@
         "docs/phase49-hosted-activation-packet.md",
         "docs/phase53-hosted-activation-ledger.md",
         "docs/phase71-hosted-activation-console.md",
+        "docs/phase73-hosted-activation-decision-register.md",
         "docs/convex-live-smoke-manifest.json",
+        "npm run kinflo:validate-hosted-activation-decisions",
         "npm run kinflo:activation-preflight",
         "npm run kinflo:live-handoff"
       ],
@@ -104,7 +106,7 @@
   ],
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity and adapter-switch evidence without importing convex/_generated/api.",
-    "Add human-gate decision capture for credential rotation, history purge, hosted ownership, and codegen approval.",
+    "Keep the human-gate decision register current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
     "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, and visual QA evidence."
   ],
   "blockedLiveActions": [
@@ -121,6 +123,7 @@
   ],
   "validationCommands": [
     "npm run kinflo:validate-saas-execution-ledger",
+    "npm run kinflo:validate-hosted-activation-decisions",
     "npm run kinflo:validate-phase0-readiness",
     "npm run kinflo:validate-phases",
     "npm run kinflo:validate-map",

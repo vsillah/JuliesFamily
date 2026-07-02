@@ -1722,6 +1722,61 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
+                <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-decision-register">
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Human Decision Register</CardTitle>
+                        <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                          {snapshot.hostedActivationRunbook.decisionRegister.length} decisions
+                        </Badge>
+                      </div>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                        Record the owner-owned approvals that must happen outside committed source before hosted activation, generated API review, live smokes, provider writes, or client sharing.
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-hosted-activation-decision-gated">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Decision capture gated
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {snapshot.hostedActivationRunbook.decisionRegister.map((decision) => (
+                        <div key={decision.id} className="rounded-lg border border-slate-200 bg-white p-4" data-testid={`card-hosted-activation-decision-${decision.id}`}>
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold">{decision.label}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">
+                                Owner: {decision.owner} · Required before {decision.requiredBefore}
+                              </div>
+                            </div>
+                            <Badge variant={decision.status === "pending_owner_decision" ? "secondary" : "outline"} className="self-start whitespace-nowrap">
+                              {decision.status.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+                          <div className="mt-3 space-y-3 text-sm leading-6">
+                            <p className="text-slate-700" data-testid={`text-hosted-activation-decision-${decision.id}`}>
+                              {decision.decisionNeeded}
+                            </p>
+                            <div className="rounded-md border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
+                              <div className="font-medium text-slate-800">Evidence target</div>
+                              <div className="mt-1">{decision.evidenceTarget}</div>
+                            </div>
+                            <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                              <div className="font-medium">Blocked until</div>
+                              <div className="mt-1">{decision.blockedUntil}</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-sm leading-6 text-muted-foreground" data-testid="text-hosted-activation-decision-boundary">
+                      The register captures decision posture only. It does not read secrets, rewrite history, create providers, run codegen, execute live Convex, send messages, publish sites, or approve client sharing.
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card>
                   <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
                     <div>

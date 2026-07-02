@@ -88,6 +88,24 @@ export type ShellHostedActivationStep = {
   liveConvexExecution: boolean;
 };
 
+export type ShellHostedActivationDecisionStatus =
+  | "pending_owner_decision"
+  | "ready_to_record"
+  | "blocked_until_prior_gate";
+
+export type ShellHostedActivationDecision = {
+  id: string;
+  label: string;
+  owner: string;
+  status: ShellHostedActivationDecisionStatus;
+  requiredBefore: string;
+  decisionNeeded: string;
+  evidenceTarget: string;
+  approvedState: string;
+  blockedUntil: string;
+  providerBoundary: string;
+};
+
 export type ShellHostedActivationConsole = {
   status: "provider_light_activation_console";
   decision: "blocked_until_approval";
@@ -103,6 +121,7 @@ export type ShellHostedActivationRunbook = {
   defaultStepId: string;
   providerBoundary: string;
   activationConsole: ShellHostedActivationConsole;
+  decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
   completionRules: string[];
@@ -3855,6 +3874,92 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     ],
     providerBoundary: "This console is a read-only activation gate. It summarizes approvals, commands, evidence, and blocked actions only; it does not create providers, run codegen, import generated API, execute live Convex, or print secrets.",
   },
+  decisionRegister: [
+    {
+      id: "credential-rotation-review",
+      label: "Credential rotation review",
+      owner: "Vambah",
+      status: "pending_owner_decision",
+      requiredBefore: "hosted env entry",
+      decisionNeeded: "Confirm every credential family that may have appeared in historical .env.local has been rotated or accepted as already safe outside committed source.",
+      evidenceTarget: "Provider-by-provider rotation note stored outside committed source; PR only records decision posture, never secret values.",
+      approvedState: "Credential families are rotated or owner-confirmed before hosted env values are entered.",
+      blockedUntil: "Historical .env.local exposure is reviewed in provider dashboards and 1Password.",
+      providerBoundary: "This decision does not read, print, move, rotate, or validate secret values.",
+    },
+    {
+      id: "history-purge-or-private-risk",
+      label: "History purge or private-risk decision",
+      owner: "Vambah",
+      status: "pending_owner_decision",
+      requiredBefore: "external/client sharing",
+      decisionNeeded: "Choose whether to purge historical .env.local blobs or keep the repo private with accepted residual risk.",
+      evidenceTarget: "Documented private-risk acceptance or integration-captain history purge plan.",
+      approvedState: "Repository sharing posture is approved before public/client access.",
+      blockedUntil: "Secret-history audit output is reviewed and sharing scope is decided.",
+      providerBoundary: "This decision does not rewrite git history or expose historical file contents.",
+    },
+    {
+      id: "hosted-convex-ownership",
+      label: "Hosted Convex ownership",
+      owner: "Vambah",
+      status: "blocked_until_prior_gate",
+      requiredBefore: "convex codegen",
+      decisionNeeded: "Approve hosted Convex project ownership, billing, backup expectations, auth provider, and environment policy.",
+      evidenceTarget: "Hosted project URL and owner/billing/backup notes captured outside committed source.",
+      approvedState: "A single hosted Convex project is approved as the activation target.",
+      blockedUntil: "Credential rotation and repository sharing posture decisions are recorded.",
+      providerBoundary: "This decision does not create or select a hosted Convex deployment from the shell.",
+    },
+    {
+      id: "env-and-codegen-window",
+      label: "Env and codegen window",
+      owner: "Vambah",
+      status: "blocked_until_prior_gate",
+      requiredBefore: "generated API import",
+      decisionNeeded: "Approve when real env values may be entered locally and when `npm run convex:codegen` may run.",
+      evidenceTarget: "Approved local-only codegen window plus `npm run kinflo:activation-preflight` output.",
+      approvedState: "Generated API bindings can be produced and reviewed without committing secrets.",
+      blockedUntil: "Hosted Convex ownership is approved.",
+      providerBoundary: "This decision does not run codegen, import generated API files, or print env values.",
+    },
+    {
+      id: "read-only-smoke-authorization",
+      label: "Read-only smoke authorization",
+      owner: "Vambah",
+      status: "blocked_until_prior_gate",
+      requiredBefore: "mutation smoke",
+      decisionNeeded: "Approve read-only hosted smoke execution for activation readiness, role catalog, permissions, public resolver, launch readiness, and shell adapter parity.",
+      evidenceTarget: "Read-only smoke transcript with no mutation writes beyond approved seed/readiness functions.",
+      approvedState: "Read-only hosted smoke passes before any mutation smoke or adapter switch.",
+      blockedUntil: "Generated API bindings are reviewed against KINFLO_GENERATED_API_BINDINGS.",
+      providerBoundary: "This decision does not execute hosted Convex from the fixture shell.",
+    },
+    {
+      id: "mutation-and-rollback-order",
+      label: "Mutation and rollback order",
+      owner: "Vambah",
+      status: "blocked_until_prior_gate",
+      requiredBefore: "adapter switch",
+      decisionNeeded: "Approve the mutation smoke sequence, rollback owner, rollback command path, and conditions for returning to fixtures.",
+      evidenceTarget: "Ordered smoke packet plus rollback note that keeps generatedApiAvailable false until switch review passes.",
+      approvedState: "Mutation smoke order and rollback path are approved before the shell can move off fixtures.",
+      blockedUntil: "Read-only hosted smokes pass.",
+      providerBoundary: "This decision does not switch adapters or execute mutation smokes.",
+    },
+    {
+      id: "provider-write-and-client-launch-signoff",
+      label: "Provider-write and client launch signoff",
+      owner: "Vambah",
+      status: "blocked_until_prior_gate",
+      requiredBefore: "public/client launch",
+      decisionNeeded: "Approve provider writes for invite delivery, email/SMS, billing, storage, domains, campaigns, AI, lead writes, and client sharing.",
+      evidenceTarget: "Provider readiness notes, launch decision packet, visual QA evidence, rollback plan, and client sharing approval.",
+      approvedState: "Client launch can proceed only after hosted smokes, provider readiness, and launch signoffs pass.",
+      blockedUntil: "Adapter switch review and launch decision packets are approved.",
+      providerBoundary: "This decision does not publish sites, write leads, send messages, attach domains, bill customers, or call providers.",
+    },
+  ],
   documents: [
     "docs/convex-hosted-activation-packet.json",
     "docs/convex-hosted-activation-ledger.json",

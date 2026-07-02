@@ -158,6 +158,7 @@ requireArrayIncludes("blocked live actions", ledger.blockedLiveActions ?? [], [
 
 requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-saas-execution-ledger",
+  "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
   "npm run kinflo:validate-map",
@@ -177,7 +178,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
   "No secret values are read or printed.",
-  "human-gate decisions without storing secrets",
+  "human-gate decision register current without storing secrets",
 ]);
 
 requireIncludes("package.json", [

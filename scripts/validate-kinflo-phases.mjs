@@ -138,6 +138,7 @@ for (const path of [
   "docs/phase70-control-room-polish.md",
   "docs/phase71-hosted-activation-console.md",
   "docs/phase72-saas-execution-ledger.md",
+  "docs/phase73-hosted-activation-decision-register.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -226,6 +227,7 @@ for (const path of [
   "scripts/validate-kinflo-control-room-polish.mjs",
   "scripts/validate-kinflo-hosted-activation-console.mjs",
   "scripts/validate-kinflo-saas-execution-ledger.mjs",
+  "scripts/validate-kinflo-hosted-activation-decisions.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1242,6 +1244,19 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
+  "npm run kinflo:validate-hosted-activation-decisions",
+  "hostedActivationRunbook.decisionRegister",
+  "ShellHostedActivationDecision",
+  "section-kinflo-hosted-activation-decision-register",
+  "button-hosted-activation-decision-gated",
+  "text-hosted-activation-decision-boundary",
+  "Decision register items: 7",
+  "credential-rotation-review",
+  "history-purge-or-private-risk",
+  "provider-write-and-client-launch-signoff",
+]);
+
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"phase\": 72",
   "\"status\": \"provider-light-saas-execution-ledger\"",
@@ -1251,6 +1266,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"site-factory-and-client-launch\"",
   "\"design-polish\"",
   "\"hosted-activation\"",
+  "\"docs/phase73-hosted-activation-decision-register.md\"",
+  "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1333,6 +1350,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-control-room-polish\"",
   "\"kinflo:validate-hosted-activation-console\"",
   "\"kinflo:validate-saas-execution-ledger\"",
+  "\"kinflo:validate-hosted-activation-decisions\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1951,6 +1969,19 @@ requireIncludes("scripts/validate-kinflo-saas-execution-ledger.mjs", [
   "generated Convex API files remain untracked",
   "secret env files remain untracked",
   "KinFlo SaaS execution ledger validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
+  "docs/phase73-hosted-activation-decision-register.md",
+  "section-kinflo-hosted-activation-decision-register",
+  "button-hosted-activation-decision-gated",
+  "text-hosted-activation-decision-boundary",
+  "ShellHostedActivationDecision",
+  "credential-rotation-review",
+  "history-purge-or-private-risk",
+  "provider-write-and-client-launch-signoff",
+  "activation decision register does not import generated API",
+  "activation decision register does not execute live Convex",
 ]);
 
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
@@ -2689,9 +2720,13 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "text-kinflo-hosted-activation-next-gate",
   "button-hosted-activation-console-gated",
   "section-kinflo-hosted-activation-blocked-actions",
+  "section-kinflo-hosted-activation-decision-register",
+  "button-hosted-activation-decision-gated",
+  "text-hosted-activation-decision-boundary",
   "snapshot.hostedActivationRunbook.activationConsole.preActivationCommands",
   "snapshot.hostedActivationRunbook.activationConsole.evidenceSummary",
   "snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions",
+  "snapshot.hostedActivationRunbook.decisionRegister",
   "select-kinflo-hosted-activation-step",
   "button-hosted-activation-gated",
   "snapshot.hostedActivationRunbook.documents",

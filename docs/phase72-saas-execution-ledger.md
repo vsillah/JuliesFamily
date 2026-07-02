@@ -48,7 +48,7 @@ No secret values are read or printed.
 The next repo-safe implementation work should stay in one of these lanes until Vambah approves hosted activation:
 
 - tighten fixture-to-live parity and adapter-switch evidence,
-- capture human-gate decisions without storing secrets,
+- keep the human-gate decision register current without storing secrets,
 - continue tenant/site permissions, client admin handoff, launch decisions, and visual QA evidence inside provider-light Kinflo OS surfaces.
 
 ## Human Gates Still Required
