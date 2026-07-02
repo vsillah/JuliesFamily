@@ -124,6 +124,7 @@ const shellTabValues = [
 ] as const;
 
 type ShellTabValue = (typeof shellTabValues)[number];
+type ClientWebsiteStudioLane = "queue" | "configuration" | "handoff" | "workbench";
 
 const shellTabLabels: Record<ShellTabValue, string> = {
   tenants: "Tenants",
@@ -1447,6 +1448,7 @@ export default function AdminKinfloShell() {
   const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
   const [clientWebsiteStudioSiteKey, setClientWebsiteStudioSiteKey] = useState(snapshot.clientWebsiteStudio.defaultSiteKey);
+  const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>("workbench");
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -5342,56 +5344,121 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <ClientWebsiteSpinUpQueue
-                queue={snapshot.clientWebsiteStudio.spinUpQueue}
-                testIds={clientWebsiteSpinUpQueueTestIds}
-              />
-
-              <ClientWebsiteConfigurationProfiles
-                profiles={snapshot.clientWebsiteStudio.configurationProfiles}
-                testIds={clientWebsiteConfigurationProfileTestIds}
-              />
-
-              <Tabs defaultValue="selected" className="min-w-0" data-testid={clientHandoffWorkspaceTestIds.root}>
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                  <TabsList className="grid h-auto w-full grid-cols-2 bg-slate-100 p-1 lg:max-w-xl">
-                    <TabsTrigger value="selected" data-testid="tab-kinflo-client-handoff-selected">Selected site</TabsTrigger>
-                    <TabsTrigger value="matrix" data-testid="tab-kinflo-client-handoff-matrix">All site permissions</TabsTrigger>
-                  </TabsList>
-                  <p className="text-xs leading-5 text-slate-500 lg:max-w-lg">
-                    Client handoff stays reviewable without forcing the full permission matrix into the default page flow.
-                  </p>
+              <div className="min-w-0" data-testid="tabs-kinflo-client-studio-lanes">
+                <div
+                  className="flex flex-col gap-3 border-y border-slate-200 bg-white/80 py-3 lg:flex-row lg:items-center lg:justify-between"
+                  data-testid="section-kinflo-client-studio-lane-switcher"
+                >
+                  <div className="grid h-auto w-full grid-cols-2 gap-1 rounded-md bg-slate-100 p-1 sm:grid-cols-4 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
+                    {[
+                      { value: "queue", label: "Spin up", testId: "tab-kinflo-client-studio-lane-queue" },
+                      { value: "configuration", label: "Configure", testId: "tab-kinflo-client-studio-lane-configuration" },
+                      { value: "handoff", label: "Handoff", testId: "tab-kinflo-client-studio-lane-handoff" },
+                      { value: "workbench", label: "Workbench", testId: "tab-kinflo-client-studio-lane-workbench" },
+                    ].map((lane) => {
+                      const isActiveLane = clientWebsiteStudioLane === lane.value;
+                      return (
+                        <button
+                          key={lane.value}
+                          type="button"
+                          role="tab"
+                          aria-selected={isActiveLane}
+                          onClick={() => setClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
+                          className={`rounded-sm px-3 py-1.5 text-sm font-medium transition ${
+                            isActiveLane
+                              ? "bg-white text-slate-950 shadow-sm"
+                              : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
+                          }`}
+                          data-testid={lane.testId}
+                        >
+                          {lane.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-xs lg:w-[360px]" data-testid="section-kinflo-client-studio-lane-summary">
+                    {[
+                      { label: "Requests", value: snapshot.clientWebsiteStudio.spinUpQueue.totalRequests },
+                      { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.totalProfiles },
+                      { label: "Sites", value: snapshot.clientWebsiteStudio.sites.length },
+                    ].map((item) => (
+                      <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
+                        <div className="truncate text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                        <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <TabsContent value="selected" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.selected}>
-                  <ClientHandoffPermissionStrip
-                    site={selectedClientWebsiteStudioSite}
-                    permissionPreset={selectedClientWebsiteAdminPermissionPreset}
-                    launchPacket={selectedClientWebsiteLaunchPacket}
-                    onboardingReadiness={selectedClientWebsiteOnboardingReadiness}
-                    launchSimulation={selectedClientWebsiteLaunchSimulation}
-                    testId={clientHandoffPermissionStripTestIds.root}
+                <div
+                  className={`${clientWebsiteStudioLane === "queue" ? "block" : "hidden"} mt-3 max-h-[calc(100vh-12rem)] overflow-y-auto overflow-x-hidden pr-1`}
+                  data-testid="section-kinflo-client-studio-lane-queue"
+                >
+                  <ClientWebsiteSpinUpQueue
+                    queue={snapshot.clientWebsiteStudio.spinUpQueue}
+                    testIds={clientWebsiteSpinUpQueueTestIds}
                   />
-                </TabsContent>
+                </div>
 
-                <TabsContent value="matrix" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.matrix}>
-                  <ClientAdminHandoffMatrix
-                    matrix={snapshot.clientWebsiteStudio.adminHandoffMatrix}
-                    testIds={clientAdminHandoffMatrixTestIds}
+                <div
+                  className={`${clientWebsiteStudioLane === "configuration" ? "block" : "hidden"} mt-3 max-h-[calc(100vh-12rem)] overflow-y-auto overflow-x-hidden pr-1`}
+                  data-testid="section-kinflo-client-studio-lane-configuration"
+                >
+                  <ClientWebsiteConfigurationProfiles
+                    profiles={snapshot.clientWebsiteStudio.configurationProfiles}
+                    testIds={clientWebsiteConfigurationProfileTestIds}
                   />
-                </TabsContent>
-              </Tabs>
+                </div>
 
-              <div
-                className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
-                data-testid="section-kinflo-client-workbench-grid"
-              >
-                <Tabs defaultValue="preview" className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
-                  <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
-                    <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
-                    <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
-                    <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
-                  </TabsList>
+                <div
+                  className={`${clientWebsiteStudioLane === "handoff" ? "block" : "hidden"} mt-3 max-h-[calc(100vh-12rem)] overflow-y-auto overflow-x-hidden pr-1`}
+                  data-testid="section-kinflo-client-studio-lane-handoff"
+                >
+                  <Tabs defaultValue="selected" className="min-w-0" data-testid={clientHandoffWorkspaceTestIds.root}>
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                      <TabsList className="grid h-auto w-full grid-cols-2 bg-slate-100 p-1 lg:max-w-xl">
+                        <TabsTrigger value="selected" data-testid="tab-kinflo-client-handoff-selected">Selected site</TabsTrigger>
+                        <TabsTrigger value="matrix" data-testid="tab-kinflo-client-handoff-matrix">All site permissions</TabsTrigger>
+                      </TabsList>
+                      <p className="text-xs leading-5 text-slate-500 lg:max-w-lg">
+                        Client handoff stays reviewable without forcing the full permission matrix into the default page flow.
+                      </p>
+                    </div>
+
+                    <TabsContent value="selected" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.selected}>
+                      <ClientHandoffPermissionStrip
+                        site={selectedClientWebsiteStudioSite}
+                        permissionPreset={selectedClientWebsiteAdminPermissionPreset}
+                        launchPacket={selectedClientWebsiteLaunchPacket}
+                        onboardingReadiness={selectedClientWebsiteOnboardingReadiness}
+                        launchSimulation={selectedClientWebsiteLaunchSimulation}
+                        testId={clientHandoffPermissionStripTestIds.root}
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="matrix" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.matrix}>
+                      <ClientAdminHandoffMatrix
+                        matrix={snapshot.clientWebsiteStudio.adminHandoffMatrix}
+                        testIds={clientAdminHandoffMatrixTestIds}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </div>
+
+                <div
+                  className={`${clientWebsiteStudioLane === "workbench" ? "block" : "hidden"} mt-3`}
+                  data-testid="section-kinflo-client-studio-lane-workbench"
+                >
+                  <div
+                    className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+                    data-testid="section-kinflo-client-workbench-grid"
+                  >
+                    <Tabs defaultValue="preview" className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
+                      <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                        <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
+                        <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
+                        <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
+                      </TabsList>
 
                   <TabsContent value="sites" className="mt-4" data-testid="section-kinflo-client-workbench-sites">
                     <div className="max-h-[calc(100vh-10rem)] overflow-y-auto rounded-2xl border border-slate-200 bg-white p-3" data-testid="section-kinflo-client-site-rail">
@@ -6967,6 +7034,8 @@ export default function AdminKinfloShell() {
                     </div>
                   </TabsContent>
                 </Tabs>
+              </div>
+                </div>
               </div>
             </section>
           </TabsContent>

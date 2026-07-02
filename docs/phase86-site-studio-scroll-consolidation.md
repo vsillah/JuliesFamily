@@ -11,6 +11,17 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 ## Added Surface
 
 - Admin route: `/admin/kinflo-os?tab=site-studio`
+- top-level lane switcher: `tabs-kinflo-client-studio-lanes`
+- lane toolbar: `section-kinflo-client-studio-lane-switcher`
+- lane summary: `section-kinflo-client-studio-lane-summary`
+- Spin up lane: `tab-kinflo-client-studio-lane-queue`
+- Configure lane: `tab-kinflo-client-studio-lane-configuration`
+- Handoff lane: `tab-kinflo-client-studio-lane-handoff`
+- Workbench lane: `tab-kinflo-client-studio-lane-workbench`
+- Bounded spin-up panel: `section-kinflo-client-studio-lane-queue`
+- Bounded configuration panel: `section-kinflo-client-studio-lane-configuration`
+- Bounded handoff panel: `section-kinflo-client-studio-lane-handoff`
+- Default workbench panel: `section-kinflo-client-studio-lane-workbench`
 - Workbench stage tabs: `tabs-kinflo-client-workbench-stage`
 - Sites stage: `tab-kinflo-client-workbench-sites`
 - Preview stage: `tab-kinflo-client-workbench-preview`
@@ -41,6 +52,8 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 ## What Changed
 
 The Site Studio workbench now uses page-level stage tabs for `Sites`, `Preview`, and `Launch`, so narrow review widths do not stack the site rail, preview workbench, and launch rail into one long vertical document. The launch rail remains available as a focused stage with its own bounded scroll.
+
+The page now has a top-level lane switcher above the major client website modules. Workbench is the default lane, while Spin up, Configure, and Handoff lanes stay available without adding to the default page height. This keeps super-admin setup, configuration profiles, permissions handoff, and the active client workbench in one operating surface instead of one stacked scroll.
 
 The client handoff area now uses a compact handoff workspace with `Selected site` and `All site permissions` tabs. The default view keeps the selected site's permissions, blocked invite, missing artifact, and gated action visible while moving the full cross-site admin matrix behind a tab. Super-admin comparison remains one click away, but it no longer expands the default Site Studio page into a long permission document.
 
