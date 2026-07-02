@@ -65,6 +65,7 @@ import {
   type ShellClientWebsiteOnboardingReadiness,
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
+  type ShellClientWebsiteConfigurationProfiles,
   type ShellClientWebsiteSpinUpQueue,
   type ShellClientWebsiteStudioSite,
   type ShellClientWebsiteVisualQaBudget,
@@ -251,6 +252,13 @@ const clientWebsiteSpinUpQueueTestIds = {
   summary: "section-kinflo-client-website-spin-up-summary",
   scroll: "section-kinflo-client-website-spin-up-scroll",
   gatedAction: "button-client-website-spin-up-gated",
+} as const;
+
+const clientWebsiteConfigurationProfileTestIds = {
+  root: "section-kinflo-client-website-configuration-profiles",
+  summary: "section-kinflo-client-website-configuration-summary",
+  scroll: "section-kinflo-client-website-configuration-scroll",
+  gatedAction: "button-client-website-configuration-gated",
 } as const;
 
 const hostedActivationOwnerChecklistTestIds = {
@@ -863,6 +871,137 @@ function ClientWebsiteSpinUpQueue({
 
       <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
         {queue.providerBoundary}
+      </p>
+    </section>
+  );
+}
+
+function ClientWebsiteConfigurationProfiles({
+  profiles,
+  testIds,
+}: {
+  profiles: ShellClientWebsiteConfigurationProfiles;
+  testIds: typeof clientWebsiteConfigurationProfileTestIds;
+}) {
+  const summaryItems = [
+    { label: "Profiles", value: profiles.totalProfiles },
+    { label: "Ready", value: profiles.readyProfiles },
+    { label: "Blocked", value: profiles.blockedProfiles },
+    { label: "Writes", value: "0" },
+  ];
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+              Configuration profiles
+            </Badge>
+            <Badge className="bg-slate-950 hover:bg-slate-950">{profiles.status.replaceAll("_", " ")}</Badge>
+          </div>
+          <h3 className="mt-3 text-base font-semibold text-slate-950">Client site configuration profiles</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            Compare each site's template, brand, navigation, starter content, admin preset, CRM pipeline, and locked surfaces before any live save or publish action is enabled.
+          </p>
+        </div>
+        <Button disabled variant="outline" data-testid={testIds.gatedAction}>
+          <SlidersHorizontal className="mr-2 h-4 w-4" />
+          Configuration save gated
+        </Button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
+        {summaryItems.map((item) => (
+          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 max-h-[440px] space-y-3 overflow-y-auto overflow-x-hidden pr-1" data-testid={testIds.scroll}>
+        {profiles.profiles.map((profile) => (
+          <article
+            key={profile.siteKey}
+            className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+            data-testid={`card-client-website-configuration-${profile.siteKey}`}
+          >
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">{profile.requestedPlan}</Badge>
+                  <Badge variant="outline" className="bg-white">{profile.configurationStatus.replaceAll("_", " ")}</Badge>
+                </div>
+                <div className="mt-2 text-sm font-semibold text-slate-950">{profile.label}</div>
+                <div className="mt-1 text-xs leading-5 text-slate-500">
+                  {profile.tenantSlug} · {profile.templateKey} · {profile.adminPresetLabel}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4 xl:w-[520px]">
+                {[
+                  { label: "Brand", value: profile.brandProfile },
+                  { label: "Navigation", value: profile.navigationProfile },
+                  { label: "Content", value: profile.contentPack },
+                  { label: "CRM", value: profile.crmPipeline },
+                ].map((item) => (
+                  <div key={`${profile.siteKey}-${item.label}`} className="min-w-0 rounded-lg border border-slate-200 bg-white p-2">
+                    <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+                    <div className="mt-1 truncate font-semibold text-slate-950" title={item.value}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="rounded-lg border border-slate-200 bg-white p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Editable review surfaces</div>
+                  <div className="mt-3 flex max-h-[96px] flex-wrap gap-1.5 overflow-y-auto pr-1">
+                    {profile.editableSurfaces.map((surface) => (
+                      <Badge key={surface} variant="outline" className="bg-slate-50 text-[10px]">{surface}</Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Locked live surfaces</div>
+                  <div className="mt-3 flex max-h-[96px] flex-wrap gap-1.5 overflow-y-auto pr-1">
+                    {profile.lockedSurfaces.map((surface) => (
+                      <Badge key={surface} variant="outline" className="border-amber-200 bg-white text-amber-900 text-[10px]">{surface}</Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="rounded-lg border border-amber-200 bg-white p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Next gate</div>
+                  <p className="mt-1 text-xs leading-5 text-amber-900">{profile.nextGate}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    ["Save", profile.canSaveConfig],
+                    ["Publish", profile.canPublish],
+                    ["Provider", profile.providerWrites],
+                    ["Convex", profile.liveConvexExecution],
+                  ].map(([label, value]) => (
+                    <div key={`${profile.siteKey}-${String(label)}`} className="rounded-lg border border-slate-200 bg-white p-2 text-xs">
+                      <div className="text-[10px] uppercase tracking-normal text-slate-500">{label}</div>
+                      <div className="mt-1 flex items-center gap-1.5 font-semibold text-slate-700">
+                        <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+                        {value ? "on" : "off"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+        {profiles.providerBoundary}
       </p>
     </section>
   );
@@ -5206,6 +5345,11 @@ export default function AdminKinfloShell() {
               <ClientWebsiteSpinUpQueue
                 queue={snapshot.clientWebsiteStudio.spinUpQueue}
                 testIds={clientWebsiteSpinUpQueueTestIds}
+              />
+
+              <ClientWebsiteConfigurationProfiles
+                profiles={snapshot.clientWebsiteStudio.configurationProfiles}
+                testIds={clientWebsiteConfigurationProfileTestIds}
               />
 
               <Tabs defaultValue="selected" className="min-w-0" data-testid={clientHandoffWorkspaceTestIds.root}>

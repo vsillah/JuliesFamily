@@ -88,7 +88,9 @@
         "docs/phase65-client-launch-simulation.md",
         "docs/phase69-client-launch-decisions.md",
         "docs/phase95-client-website-spin-up-queue.md",
+        "docs/phase97-client-website-configuration-profiles.md",
         "npm run kinflo:validate-client-website-spin-up-queue",
+        "npm run kinflo:validate-client-website-configuration-profiles",
         "npm run kinflo:validate-client-launch-decisions"
       ],
       "nextGate": "Approved hosted read-only smokes, mutation order, invite delivery gate, provider setup, and launch signoff."
@@ -164,7 +166,7 @@
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity, adapter-switch evidence, the Phase 87 switch runway, the Phase 88 generated API review board, the Phase 89 switch acceptance matrix, the Phase 90 hosted smoke gap backlog, the Phase 91 hosted smoke execution sequencer, the Phase 92 hosted smoke evidence ledger, and the Phase 93 adapter switch cutover checklist without importing convex/_generated/api.",
     "Keep the human-gate decision register, Phase 85 owner approval packet, and Phase 96 hosted activation owner checklist current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, adapter switch review, and provider-write signoff.",
-    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, the Phase 95 client website spin-up queue, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the Phase 94 client admin handoff matrix, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
+    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, the Phase 95 client website spin-up queue, the Phase 97 client website configuration profiles, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the Phase 94 client admin handoff matrix, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
   ],
   "blockedLiveActions": [
     "create hosted Convex deployment",
@@ -190,6 +192,7 @@
     "npm run kinflo:validate-client-handoff-permission-strip",
     "npm run kinflo:validate-client-admin-handoff-matrix",
     "npm run kinflo:validate-client-website-spin-up-queue",
+    "npm run kinflo:validate-client-website-configuration-profiles",
     "npm run kinflo:validate-claude-frame-ingestion",
     "npm run kinflo:validate-site-studio-scroll-consolidation",
     "npm run kinflo:validate-adapter-switch-runway",

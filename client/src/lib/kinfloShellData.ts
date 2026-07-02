@@ -659,6 +659,38 @@ export type ShellClientWebsiteSpinUpQueue = {
   }[];
 };
 
+export type ShellClientWebsiteConfigurationProfiles = {
+  status: "provider-light-configuration-profiles";
+  totalProfiles: number;
+  readyProfiles: number;
+  blockedProfiles: number;
+  providerBoundary: string;
+  profiles: {
+    siteKey: string;
+    label: string;
+    tenantSlug: string;
+    templateKey: string;
+    requestedPlan: string;
+    brandProfile: string;
+    navigationProfile: string;
+    contentPack: string;
+    adminPresetLabel: string;
+    launchBlueprintLabel: string;
+    crmPipeline: string;
+    configurationStatus: "ready_for_review" | "blocked_human_gate" | "draft";
+    ownerRole: string;
+    inviteRole: string;
+    editableSurfaces: string[];
+    lockedSurfaces: string[];
+    nextGate: string;
+    canSaveConfig: false;
+    canPublish: false;
+    providerWrites: false;
+    liveConvexExecution: false;
+    convexFunctions: string[];
+  }[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -850,6 +882,7 @@ export type ShellClientWebsiteStudio = {
   provisioningOrders: ShellClientWebsiteProvisioningOrder[];
   provisioningExecution: ShellClientWebsiteProvisioningExecution;
   spinUpQueue: ShellClientWebsiteSpinUpQueue;
+  configurationProfiles: ShellClientWebsiteConfigurationProfiles;
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
@@ -2304,6 +2337,102 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       },
     ],
   },
+  configurationProfiles: {
+    status: "provider-light-configuration-profiles",
+    totalProfiles: 3,
+    readyProfiles: 1,
+    blockedProfiles: 2,
+    providerBoundary: "Configuration profiles are local review records only. Saving brand, navigation, content, CRM, invite, publish, storage, billing, domain, provider, and live Convex changes remains blocked until hosted activation, generated API review, owner signoff, and smoke evidence pass.",
+    profiles: [
+      {
+        siteKey: "julies-family-public",
+        label: "Julie Family founding configuration",
+        tenantSlug: "julies-family",
+        templateKey: "nonprofit-learning-center",
+        requestedPlan: "Founding platform",
+        brandProfile: "Julie Family trust-and-learning system",
+        navigationProfile: "Family, programs, volunteer, donate, contact",
+        contentPack: "Family learning public content pack",
+        adminPresetLabel: "Founding platform steward",
+        launchBlueprintLabel: "Seeded tenant retrofit blueprint",
+        crmPipeline: "family intake and partner interest",
+        configurationStatus: "ready_for_review",
+        ownerRole: "platform.super_admin",
+        inviteRole: "platform.super_admin",
+        editableSurfaces: ["brand review", "navigation review", "content provenance", "public preview"],
+        lockedSurfaces: ["publish write", "lead write", "client invite", "domain attachment"],
+        nextGate: "Confirm founding tenant ownership and public renderer parity before accepting live configuration.",
+        canSaveConfig: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.listClientWebsiteConfigurationProfiles",
+          "siteFactory.listClientWebsiteProvisioningOrders",
+          "publicSite.resolvePublishedSite",
+          "siteBuilder.updateContentBlock",
+        ],
+      },
+      {
+        siteKey: "advisor-client-site",
+        label: "Advisor client launch configuration",
+        tenantSlug: "advisor-client-starter",
+        templateKey: "advisor-consultant",
+        requestedPlan: "Client Build",
+        brandProfile: "Quiet advisory credibility system",
+        navigationProfile: "Home, services, proof, intake, privacy",
+        contentPack: "Advisor proof-led starter pack",
+        adminPresetLabel: "Tenant admin launch owner",
+        launchBlueprintLabel: "Advisor client starter blueprint",
+        crmPipeline: "consultation intake and follow-up",
+        configurationStatus: "blocked_human_gate",
+        ownerRole: "tenant.admin",
+        inviteRole: "tenant.admin",
+        editableSurfaces: ["template selection", "starter copy review", "intake path", "permission scope"],
+        lockedSurfaces: ["tenant create", "site create", "admin invitation", "Stripe billing", "domain verification"],
+        nextGate: "Approve plan entitlement, tenant owner, domain posture, and hosted read smoke before configuration save.",
+        canSaveConfig: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.listClientWebsiteConfigurationProfiles",
+          "controlPlane.createTenant",
+          "siteFactory.createSiteFromTemplate",
+          "controlPlane.createInvitation",
+        ],
+      },
+      {
+        siteKey: "campaign-microsite",
+        label: "Campaign microsite configuration",
+        tenantSlug: "campaign-microsite-lab",
+        templateKey: "campaign-microsite",
+        requestedPlan: "Campaign Lab",
+        brandProfile: "Campaign offer proof system",
+        navigationProfile: "Offer, proof, signup, privacy",
+        contentPack: "Campaign conversion starter pack",
+        adminPresetLabel: "Site editor campaign operator",
+        launchBlueprintLabel: "Campaign microsite launch blueprint",
+        crmPipeline: "campaign lead routing",
+        configurationStatus: "draft",
+        ownerRole: "site.editor",
+        inviteRole: "site.editor",
+        editableSurfaces: ["offer copy", "proof block", "signup path", "campaign consent notes"],
+        lockedSurfaces: ["site create", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+        nextGate: "Approve campaign consent, site scope, lead routing, and provider-send boundary.",
+        canSaveConfig: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.listClientWebsiteConfigurationProfiles",
+          "siteFactory.createSiteFromTemplate",
+          "controlPlane.createInvitation",
+          "campaigns.requestCampaignApproval",
+        ],
+      },
+    ],
+  },
   launchPackets: [
     {
       siteKey: "julies-family-public",
@@ -3371,6 +3500,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
   providerBoundary: "Client website studio changes are local review notes until hosted Convex, generated API bindings, visual QA, domain readiness, and publish approval are complete.",
   convexFunctions: [
     "siteFactory.listClientWebsiteAdminPermissionPresets",
+    "siteFactory.listClientWebsiteConfigurationProfiles",
     "siteFactory.listClientWebsiteLaunchDecisionPackets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
     "siteFactory.listClientWebsiteLaunchSimulations",

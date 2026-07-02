@@ -83,6 +83,31 @@ type ClientWebsiteProvisioningOrder = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteConfigurationProfile = {
+  siteKey: string;
+  label: string;
+  tenantSlug: string;
+  templateKey: string;
+  requestedPlan: string;
+  brandProfile: string;
+  navigationProfile: string;
+  contentPack: string;
+  adminPresetLabel: string;
+  launchBlueprintLabel: string;
+  crmPipeline: string;
+  configurationStatus: "ready_for_review" | "blocked_human_gate" | "draft";
+  ownerRole: string;
+  inviteRole: string;
+  editableSurfaces: string[];
+  lockedSurfaces: string[];
+  nextGate: string;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 type ClientWebsiteStarterContentPack = {
   siteKey: string;
   packLabel: string;
@@ -1762,6 +1787,136 @@ export const listClientWebsiteAdminPermissionPresets = query({
         launchBlueprintLabel: blueprint?.label,
         launchPacketId: blueprint?.launchPacketId,
         providerBoundary: "Read-only admin permission preset query. It does not create tenants, grant memberships, invite users, send email, publish content, write leads, call providers, import generated API, or execute hosted activation.",
+      };
+    }),
+});
+
+const clientWebsiteConfigurationProfiles: ClientWebsiteConfigurationProfile[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family founding configuration",
+    tenantSlug: "julies-family",
+    templateKey: "nonprofit-learning-center",
+    requestedPlan: "Founding platform",
+    brandProfile: "Julie Family trust-and-learning system",
+    navigationProfile: "Family, programs, volunteer, donate, contact",
+    contentPack: "Family learning public content pack",
+    adminPresetLabel: "Founding platform steward",
+    launchBlueprintLabel: "Seeded tenant retrofit blueprint",
+    crmPipeline: "family intake and partner interest",
+    configurationStatus: "ready_for_review",
+    ownerRole: "platform.super_admin",
+    inviteRole: "platform.super_admin",
+    editableSurfaces: ["brand review", "navigation review", "content provenance", "public preview"],
+    lockedSurfaces: ["publish write", "lead write", "client invite", "domain attachment"],
+    nextGate: "Confirm founding tenant ownership and public renderer parity before accepting live configuration.",
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "siteFactory.listClientWebsiteProvisioningOrders",
+      "publicSite.resolvePublishedSite",
+      "siteBuilder.updateContentBlock",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client launch configuration",
+    tenantSlug: "advisor-client-starter",
+    templateKey: "advisor-consultant",
+    requestedPlan: "Client Build",
+    brandProfile: "Quiet advisory credibility system",
+    navigationProfile: "Home, services, proof, intake, privacy",
+    contentPack: "Advisor proof-led starter pack",
+    adminPresetLabel: "Tenant admin launch owner",
+    launchBlueprintLabel: "Advisor client starter blueprint",
+    crmPipeline: "consultation intake and follow-up",
+    configurationStatus: "blocked_human_gate",
+    ownerRole: "tenant.admin",
+    inviteRole: "tenant.admin",
+    editableSurfaces: ["template selection", "starter copy review", "intake path", "permission scope"],
+    lockedSurfaces: ["tenant create", "site create", "admin invitation", "Stripe billing", "domain verification"],
+    nextGate: "Approve plan entitlement, tenant owner, domain posture, and hosted read smoke before configuration save.",
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "controlPlane.createTenant",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite configuration",
+    tenantSlug: "campaign-microsite-lab",
+    templateKey: "campaign-microsite",
+    requestedPlan: "Campaign Lab",
+    brandProfile: "Campaign offer proof system",
+    navigationProfile: "Offer, proof, signup, privacy",
+    contentPack: "Campaign conversion starter pack",
+    adminPresetLabel: "Site editor campaign operator",
+    launchBlueprintLabel: "Campaign microsite launch blueprint",
+    crmPipeline: "campaign lead routing",
+    configurationStatus: "draft",
+    ownerRole: "site.editor",
+    inviteRole: "site.editor",
+    editableSurfaces: ["offer copy", "proof block", "signup path", "campaign consent notes"],
+    lockedSurfaces: ["site create", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+    nextGate: "Approve campaign consent, site scope, lead routing, and provider-send boundary.",
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "campaigns.requestCampaignApproval",
+    ],
+  },
+];
+
+export const listClientWebsiteConfigurationProfiles = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteConfigurationProfiles.map((profile) => {
+      const blueprint = clientWebsiteLaunchBlueprints.find((candidate) => candidate.siteKey === profile.siteKey);
+      const preset = clientWebsiteAdminPermissionPresets.find((candidate) => candidate.siteKey === profile.siteKey);
+      const starterContentPack = clientWebsiteStarterContentPacks.find((candidate) => candidate.siteKey === profile.siteKey);
+      return {
+        ...profile,
+        launchBlueprint: blueprint
+          ? {
+              label: blueprint.label,
+              defaultPages: blueprint.defaultPages,
+              blockedProviderActions: blueprint.blockedProviderActions,
+            }
+          : undefined,
+        adminPermissionPreset: preset
+          ? {
+              label: preset.label,
+              ownerRole: preset.ownerRole,
+              inviteRole: preset.inviteRole,
+              scope: preset.scope,
+              permissionSet: preset.permissionSet,
+            }
+          : undefined,
+        starterContentPack: starterContentPack
+          ? {
+              packLabel: starterContentPack.packLabel,
+              persona: starterContentPack.persona,
+              journeyStage: starterContentPack.journeyStage,
+              pageCount: starterContentPack.pages.length,
+            }
+          : undefined,
+        editableSurfaceCount: profile.editableSurfaces.length,
+        lockedSurfaceCount: profile.lockedSurfaces.length,
+        providerBoundary: "Read-only configuration profile query. It does not save brand, navigation, content, CRM, invite, publish, storage, billing, domain, provider, generated API, or hosted Convex changes.",
       };
     }),
 });
