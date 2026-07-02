@@ -154,6 +154,7 @@ for (const path of [
   "docs/phase97-client-website-configuration-profiles.md",
   "docs/phase98-configuration-profile-generated-api-coverage.md",
   "docs/phase96-hosted-activation-owner-checklist.md",
+  "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
@@ -275,6 +276,7 @@ for (const path of [
   "scripts/validate-kinflo-client-website-configuration-profiles.mjs",
   "scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
   "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
+  "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
@@ -1542,6 +1544,19 @@ requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase101-hosted-activation-step-deep-links.md", [
+  "Phase 101: Hosted Activation Step Deep Links",
+  "npm run kinflo:validate-hosted-activation-step-deep-links",
+  "activationStep",
+  "hosted-convex-project",
+  "env-and-codegen-approval",
+  "read-only-smoke-window",
+  "readInitialHostedActivationStepId",
+  "selectHostedActivationStep",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "Phase 86: Site Studio Scroll Consolidation",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
@@ -1747,6 +1762,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase95-client-website-spin-up-queue.md\"",
   "\"docs/phase97-client-website-configuration-profiles.md\"",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
+  "\"docs/phase101-hosted-activation-step-deep-links.md\"",
   "\"docs/phase84-claude-frame-ingestion-packet.md\"",
   "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
   "\"docs/phase85-hosted-activation-approval-packet.md\"",
@@ -1764,6 +1780,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
   "\"npm run kinflo:validate-hosted-activation-owner-checklist\"",
+  "\"npm run kinflo:validate-hosted-activation-step-deep-links\"",
   "\"npm run kinflo:validate-client-website-configuration-profiles\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
@@ -1869,6 +1886,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-decisions\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
   "\"kinflo:validate-hosted-activation-owner-checklist\"",
+  "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
@@ -2694,6 +2712,16 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
   "owner checklist does not import generated API",
   "owner checklist does not execute live Convex",
   "KinFlo hosted activation owner checklist validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-activation-step-deep-links.mjs", [
+  "docs/phase101-hosted-activation-step-deep-links.md",
+  "activationStep",
+  "readInitialHostedActivationStepId",
+  "selectHostedActivationStep",
+  "hosted activation step deep links do not import generated API",
+  "hosted activation step deep links do not execute live Convex",
+  "KinFlo hosted activation step deep-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-claude-frame-ingestion.mjs", [

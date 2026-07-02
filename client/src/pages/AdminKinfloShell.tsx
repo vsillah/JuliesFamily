@@ -313,6 +313,14 @@ function readInitialClientWebsiteLaunchDossier(): ClientWebsiteLaunchDossier {
     : "provisioning";
 }
 
+function readInitialHostedActivationStepId(defaultStepId: string, stepIds: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultStepId;
+  }
+  const stepId = new URLSearchParams(window.location.search).get("activationStep");
+  return stepId && stepIds.includes(stepId) ? stepId : defaultStepId;
+}
+
 function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
     return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
@@ -1439,7 +1447,14 @@ export default function AdminKinfloShell() {
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
   const [adapterSwitchBatchId, setAdapterSwitchBatchId] = useState(snapshot.adapterSwitchReadiness.defaultBatchId);
-  const [hostedActivationStepId, setHostedActivationStepId] = useState(snapshot.hostedActivationRunbook.defaultStepId);
+  const hostedActivationStepIds = useMemo(
+    () => snapshot.hostedActivationRunbook.steps.map((step) => step.id),
+    [snapshot.hostedActivationRunbook.steps],
+  );
+  const [hostedActivationStepId, setHostedActivationStepId] = useState(() => readInitialHostedActivationStepId(
+    snapshot.hostedActivationRunbook.defaultStepId,
+    hostedActivationStepIds,
+  ));
   const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
   const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
@@ -2254,11 +2269,16 @@ export default function AdminKinfloShell() {
     const nextLane = readInitialClientWebsiteStudioLane();
     const nextStage = readInitialClientWebsiteWorkbenchStage();
     const nextDossier = readInitialClientWebsiteLaunchDossier();
+    const nextHostedActivationStepId = readInitialHostedActivationStepId(
+      snapshot.hostedActivationRunbook.defaultStepId,
+      hostedActivationStepIds,
+    );
     setActiveTab((current) => (current === nextTab ? current : nextTab));
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
-  }, [location]);
+    setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
+  }, [hostedActivationStepIds, location, snapshot.hostedActivationRunbook.defaultStepId]);
 
   const updateKinfloShellRoute = (updates: Record<string, string | undefined>) => {
     if (typeof window === "undefined") {
@@ -2286,6 +2306,7 @@ export default function AdminKinfloShell() {
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
+      activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
     });
   };
 
@@ -2297,6 +2318,7 @@ export default function AdminKinfloShell() {
       studioLane: lane,
       studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      activationStep: undefined,
     });
   };
 
@@ -2309,6 +2331,7 @@ export default function AdminKinfloShell() {
       studioLane: "workbench",
       studioStage: stage,
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      activationStep: undefined,
     });
   };
 
@@ -2322,6 +2345,19 @@ export default function AdminKinfloShell() {
       studioLane: "workbench",
       studioStage: "launch",
       studioDossier: dossier,
+      activationStep: undefined,
+    });
+  };
+
+  const selectHostedActivationStep = (stepId: string) => {
+    setActiveTab("hosted-activation");
+    setHostedActivationStepId(stepId);
+    updateKinfloShellRoute({
+      tab: "hosted-activation",
+      studioLane: undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      activationStep: stepId,
     });
   };
 
@@ -4046,7 +4082,7 @@ export default function AdminKinfloShell() {
                     </div>
                     <div className="w-full lg:w-[320px]">
                       <Label>Activation step</Label>
-                      <Select value={hostedActivationStepId} onValueChange={setHostedActivationStepId}>
+                      <Select value={hostedActivationStepId} onValueChange={selectHostedActivationStep}>
                         <SelectTrigger className="mt-2" data-testid="select-kinflo-hosted-activation-step">
                           <SelectValue placeholder="Select activation step" />
                         </SelectTrigger>
