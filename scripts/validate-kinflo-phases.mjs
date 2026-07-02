@@ -149,11 +149,13 @@ for (const path of [
   "docs/phase81-workflow-navigation-rail.md",
   "docs/phase82-configuration-field-affordances.md",
   "docs/phase83-client-handoff-permission-strip.md",
+  "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
   "docs/convex-adapter-switch-evidence-matrix.json",
   "docs/kinflo-design-frame-adoption-backlog.json",
+  "docs/kinflo-claude-frame-ingestion-packet.json",
   "docs/convex-live-smoke-manifest.json",
   "docs/kinflo-saas-execution-ledger.json",
   "docs/convex-client-provisioning-execution-manifest.json",
@@ -250,6 +252,7 @@ for (const path of [
   "scripts/validate-kinflo-workflow-navigation-rail.mjs",
   "scripts/validate-kinflo-configuration-field-affordances.mjs",
   "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
+  "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1378,6 +1381,23 @@ requireIncludes("docs/phase83-client-handoff-permission-strip.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase84-claude-frame-ingestion-packet.md", [
+  "Phase 84: Claude Frame Ingestion Packet",
+  "npm run kinflo:validate-claude-frame-ingestion",
+  "docs/kinflo-claude-frame-ingestion-packet.json",
+  "pending_claude_code_auth",
+  "401 Invalid authentication credentials",
+  "https://developer.apple.com/design/awards/",
+  "https://developer.apple.com/design/human-interface-guidelines",
+  "https://winners.webbyawards.com/winners/websites-and-mobile-sites",
+  "https://ux-design-awards.com/winners",
+  "https://www.saasui.design/blog/7-saas-ui-design-trends-2026",
+  "https://webflow.com/blog/saas-website-design-examples",
+  "https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1409,6 +1429,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase81-workflow-navigation-rail.md\"",
   "\"docs/phase82-configuration-field-affordances.md\"",
   "\"docs/phase83-client-handoff-permission-strip.md\"",
+  "\"docs/phase84-claude-frame-ingestion-packet.md\"",
+  "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
@@ -1418,6 +1440,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-workflow-navigation-rail\"",
   "\"npm run kinflo:validate-configuration-field-affordances\"",
   "\"npm run kinflo:validate-client-handoff-permission-strip\"",
+  "\"npm run kinflo:validate-claude-frame-ingestion\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1510,6 +1533,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-workflow-navigation-rail\"",
   "\"kinflo:validate-configuration-field-affordances\"",
   "\"kinflo:validate-client-handoff-permission-strip\"",
+  "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2244,6 +2268,37 @@ requireIncludes("scripts/validate-kinflo-client-handoff-permission-strip.mjs", [
   "client handoff permission strip does not execute live Convex",
   "Expected permission, readiness, launch packet, and simulation references to stay connected by site key.",
   "KinFlo client handoff permission strip validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-claude-frame-ingestion.mjs", [
+  "docs/phase84-claude-frame-ingestion-packet.md",
+  "docs/kinflo-claude-frame-ingestion-packet.json",
+  "pending_claude_code_auth",
+  "blocked_invalid_credentials",
+  "super-admin-command-frame",
+  "client-site-studio-frame",
+  "https://developer.apple.com/design/awards/",
+  "https://webflow.com/blog/saas-website-design-examples",
+  "Claude Code auth is recorded as blocked",
+  "KinFlo Claude frame ingestion validation",
+]);
+
+requireIncludes("docs/kinflo-claude-frame-ingestion-packet.json", [
+  "\"phase\": 84",
+  "\"status\": \"pending_claude_code_auth\"",
+  "\"blocked_invalid_credentials\"",
+  "\"super-admin-command-frame\"",
+  "\"client-site-studio-frame\"",
+  "\"critique_only_then_provider_light_deltas\"",
+  "\"secretValuesRead\": false",
+  "\"secretValuesPrinted\": false",
+  "https://developer.apple.com/design/awards/",
+  "https://developer.apple.com/design/human-interface-guidelines",
+  "https://winners.webbyawards.com/winners/websites-and-mobile-sites",
+  "https://ux-design-awards.com/winners",
+  "https://www.saasui.design/blog/7-saas-ui-design-trends-2026",
+  "https://webflow.com/blog/saas-website-design-examples",
+  "https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [

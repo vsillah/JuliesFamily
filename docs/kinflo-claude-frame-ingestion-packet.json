@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "phase": 84,
+  "name": "KinFlo Claude Code design frame ingestion packet",
+  "status": "pending_claude_code_auth",
+  "updatedAt": "2026-07-02",
+  "objective": "Prepare a sanitized, source-backed Claude Code frame critique packet for KinFlo OS without sending secrets, private customer data, provider credentials, or live-provider actions.",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "convexCodegenRun": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "providerApisTouched": false,
+    "tenantSiteLaunchExecuted": false,
+    "clientSharingApproved": false,
+    "secretsReadOrPrinted": false,
+    "notes": "This packet is local-only design review preparation. Claude Code execution remains blocked until CLI credentials are repaired."
+  },
+  "cliAuth": {
+    "tool": "Claude Code",
+    "versionObserved": "2.1.139",
+    "status": "blocked_invalid_credentials",
+    "lastProbeDate": "2026-07-02",
+    "lastProbeSummary": "Non-interactive claude -p readiness probe returned 401 Invalid authentication credentials.",
+    "onePasswordStatus": "CLI account visible; item reads timed out at local authorization.",
+    "nextHumanStep": "Approve or repair the local 1Password and Claude Code credential path, then retry the sanitized prompt in this packet."
+  },
+  "credentialBoundary": {
+    "allowedToSendToClaude": [
+      "sanitized product brief",
+      "public design research URLs",
+      "local screenshot paths after user-visible QA",
+      "component and route names",
+      "provider-light blocked-action descriptions"
+    ],
+    "neverSendToClaude": [
+      "API keys",
+      "1Password item values",
+      ".env or .env.local contents",
+      "private customer records",
+      "provider credentials",
+      "raw local files outside the sanitized packet",
+      "production data exports"
+    ],
+    "secretValuesRead": false,
+    "secretValuesPrinted": false
+  },
+  "researchSources": [
+    {
+      "name": "Apple Design Awards 2026 winners and finalists",
+      "url": "https://developer.apple.com/design/awards/",
+      "designSignal": "Apple-level work pairs simplicity, technical care, inclusivity, interaction quality, social impact, and visual craft."
+    },
+    {
+      "name": "Apple Human Interface Guidelines",
+      "url": "https://developer.apple.com/design/human-interface-guidelines",
+      "designSignal": "Use platform-grade fundamentals for layout, typography, accessibility, controls, and interaction clarity."
+    },
+    {
+      "name": "Webby Awards 2026 Websites and Mobile Sites",
+      "url": "https://winners.webbyawards.com/winners/websites-and-mobile-sites",
+      "designSignal": "Award-caliber websites signal the object, proof, and action path quickly while preserving mobile quality."
+    },
+    {
+      "name": "UX Design Awards winners",
+      "url": "https://ux-design-awards.com/winners",
+      "designSignal": "Strong product UX is judged across industry, category, year, and application context, so KinFlo frames must show purpose and measurable task support."
+    },
+    {
+      "name": "SaaS UI 2026 trends",
+      "url": "https://www.saasui.design/blog/7-saas-ui-design-trends-2026",
+      "designSignal": "Modern SaaS products are moving toward calm dashboards, command surfaces, AI-native workflows, and strategic minimalism."
+    },
+    {
+      "name": "Webflow SaaS website design examples 2026",
+      "url": "https://webflow.com/blog/saas-website-design-examples",
+      "designSignal": "Product-led SaaS sites need clear value, strong product visuals, proof, and a direct conversion or activation path."
+    },
+    {
+      "name": "Muzli dashboard design examples 2026",
+      "url": "https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/",
+      "designSignal": "Effective dashboards surface the right data at the right hierarchy with minimal visual noise."
+    }
+  ],
+  "kinfloFrames": [
+    {
+      "id": "super-admin-command-frame",
+      "route": "/admin/kinflo-os",
+      "currentSurfaces": [
+        "workflow navigation rail",
+        "active object signal",
+        "decision gate rail",
+        "hosted activation gates",
+        "adapter switch evidence"
+      ],
+      "critiqueFocus": [
+        "first-viewport active tenant and site clarity",
+        "decision hierarchy",
+        "blocked live-action legibility",
+        "configuration density",
+        "hosted Convex activation boundary"
+      ],
+      "mustPreserve": [
+        "provider-light fixture mode",
+        "no generated Convex API import",
+        "disabled live actions with reasons",
+        "human-gate decision posture"
+      ]
+    },
+    {
+      "id": "client-site-studio-frame",
+      "route": "/admin/kinflo-os?tab=site-studio",
+      "currentSurfaces": [
+        "client workbench grid",
+        "device-framed preview canvas",
+        "mobile inspection mode",
+        "proof-before-publish cards",
+        "configuration field affordances",
+        "client handoff permission strip"
+      ],
+      "critiqueFocus": [
+        "site rail and preview hierarchy",
+        "mobile review confidence",
+        "permissions and handoff readiness",
+        "proof before publish",
+        "client-ready polish without enabling launch"
+      ],
+      "mustPreserve": [
+        "publish gated",
+        "handoff invite gated",
+        "lead writes blocked",
+        "domain attachment blocked",
+        "client sharing unapproved"
+      ]
+    }
+  ],
+  "claudePrompt": {
+    "title": "KinFlo OS two-frame design critique",
+    "mode": "critique_only_then_provider_light_deltas",
+    "prompt": "Review two KinFlo OS frames as a senior product designer: the super-admin command frame and the client-site studio frame. Use the attached sanitized packet and public design references only. Produce: 1. three non-negotiable design principles, 2. a frame-by-frame critique, 3. five provider-light UI deltas that can be implemented without live Convex, provider writes, secrets, or client sharing, 4. mobile risks at 390px, and 5. a do-not-change list for safety gates. Do not ask for secrets, credentials, production data, or raw private files.",
+    "expectedOutputShape": [
+      "principles",
+      "superAdminFrameCritique",
+      "clientSiteStudioFrameCritique",
+      "providerLightDeltas",
+      "mobileRisks",
+      "doNotChange"
+    ]
+  },
+  "ingestionRules": [
+    "Do not mark Claude Code review complete until the CLI returns a successful response.",
+    "Summarize Claude recommendations; do not commit raw private transcript text.",
+    "Classify every recommendation as accepted, rejected, or deferred.",
+    "Convert accepted recommendations into scoped provider-light backlog items before implementation.",
+    "Reject any recommendation that enables hosted Convex, generated API imports, provider writes, tenant launch, public publish, invite delivery, lead writes, domain verification, campaign sends, AI provider calls, production import, or client sharing before the human gate."
+  ],
+  "validationCommand": "npm run kinflo:validate-claude-frame-ingestion"
+}

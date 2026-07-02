@@ -85,7 +85,9 @@ for (const path of [
   "docs/phase81-workflow-navigation-rail.md",
   "docs/phase82-configuration-field-affordances.md",
   "docs/phase83-client-handoff-permission-strip.md",
+  "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
+  "docs/kinflo-claude-frame-ingestion-packet.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "client/src/pages/AdminKinfloShell.tsx",
@@ -102,6 +104,7 @@ for (const path of [
   "scripts/validate-kinflo-workflow-navigation-rail.mjs",
   "scripts/validate-kinflo-configuration-field-affordances.mjs",
   "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
+  "scripts/validate-kinflo-claude-frame-ingestion.mjs",
 ]) {
   requireFile(path);
 }
@@ -188,6 +191,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-workflow-navigation-rail",
   "npm run kinflo:validate-configuration-field-affordances",
   "npm run kinflo:validate-client-handoff-permission-strip",
+  "npm run kinflo:validate-claude-frame-ingestion",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -219,6 +223,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "workflow navigation rail",
   "configuration field affordances",
   "client handoff permission strip",
+  "Phase 84 Claude frame ingestion packet",
   "human-gate decision register current without storing secrets",
 ]);
 
@@ -232,6 +237,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-workflow-navigation-rail\"",
   "\"kinflo:validate-configuration-field-affordances\"",
   "\"kinflo:validate-client-handoff-permission-strip\"",
+  "\"kinflo:validate-claude-frame-ingestion\"",
 ]);
 
 const ledgerText = read("docs/kinflo-saas-execution-ledger.json");

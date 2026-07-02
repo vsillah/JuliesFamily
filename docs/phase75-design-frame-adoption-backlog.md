@@ -28,6 +28,7 @@ This phase creates a concrete queue for the next UI passes:
 - configuration field affordances,
 - client handoff permission strip,
 - Claude frame ingestion after the desktop task completes.
+- Phase 84 Claude Code packet for a repeatable two-frame critique after CLI auth is repaired.
 
 ## Claude Desktop Boundary
 
@@ -40,6 +41,14 @@ The response is captured in this phase as summarized design signals, not as a ra
 - prompt boundary: no secrets, private customer records, provider credentials, or raw local files were sent,
 - accepted recommendations: inline blocked reasons, unified launch panel, device-framed preview canvas, evidence cards, AI-content watermarking, blast-radius confirmations, and tab state dots,
 - next action: convert accepted recommendations into scoped provider-light UI phases.
+
+## Phase 84 Claude Code Packet
+
+The follow-up packet is stored at `docs/kinflo-claude-frame-ingestion-packet.json`.
+
+Status: `pending_claude_code_auth`.
+
+The packet adds refreshed public design research, a sanitized two-frame Claude prompt, redaction rules, and ingestion rules. It does not claim that Claude Code reviewed the frames while the CLI credential probe returns `401 Invalid authentication credentials`.
 
 ## Provider Boundary
 

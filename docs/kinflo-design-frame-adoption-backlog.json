@@ -53,6 +53,16 @@
       ],
       "rejectedRecommendations": [],
       "nextAction": "Convert the accepted recommendations into scoped provider-light UI phases, starting with first-viewport object signal and Client Site Studio workbench grid."
+    },
+    "claudeCodeFramePacket": {
+      "status": "pending_claude_code_auth",
+      "createdAt": "2026-07-02",
+      "packet": "docs/kinflo-claude-frame-ingestion-packet.json",
+      "phaseDoc": "docs/phase84-claude-frame-ingestion-packet.md",
+      "validationCommand": "npm run kinflo:validate-claude-frame-ingestion",
+      "frames": ["super-admin-command-frame", "client-site-studio-frame"],
+      "authBoundary": "Claude Code remains blocked by 401 Invalid authentication credentials. 1Password item values were not read or printed.",
+      "nextAction": "After CLI credentials are repaired, send only the sanitized packet prompt through Claude Code, classify recommendations, and convert accepted items into provider-light phases."
     }
   },
   "adoptionPrinciples": [
@@ -157,9 +167,9 @@
       "priority": "P2",
       "frame": "cross-frame",
       "surface": "Design review operations",
-      "targetFiles": ["docs/kinflo-design-frame-adoption-backlog.json", "docs/phase75-design-frame-adoption-backlog.md"],
-      "change": "Keep Claude Desktop recommendations summarized in this backlog, mark accepted/rejected recommendations, and convert accepted items into scoped provider-light UI phases.",
-      "validationGate": "Backlog records captured response date, accepted recommendations, rejected recommendations, and implementation phase targets without exposing secrets.",
+      "targetFiles": ["docs/kinflo-design-frame-adoption-backlog.json", "docs/phase75-design-frame-adoption-backlog.md", "docs/kinflo-claude-frame-ingestion-packet.json", "docs/phase84-claude-frame-ingestion-packet.md"],
+      "change": "Keep Claude Desktop recommendations summarized in this backlog and maintain a sanitized Claude Code packet with current design research, auth status, redaction rules, and provider-light implementation gates.",
+      "validationGate": "Backlog and packet record captured response date, accepted recommendations, rejected recommendations, CLI auth status, source URLs, and implementation phase targets without exposing secrets.",
       "blockedLiveActions": ["none"],
       "providerLight": true
     }

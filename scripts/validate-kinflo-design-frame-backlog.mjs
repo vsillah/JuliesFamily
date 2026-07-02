@@ -76,6 +76,8 @@ for (const path of [
   "docs/phase55-client-website-design-studio.md",
   "docs/phase68-client-visual-qa-evidence.md",
   "docs/phase69-client-launch-decisions.md",
+  "docs/phase84-claude-frame-ingestion-packet.md",
+  "docs/kinflo-claude-frame-ingestion-packet.json",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-kinflo-design-frame-backlog.mjs",
@@ -103,10 +105,14 @@ requireIncludes(backlogPath, [
   "\"client-studio-workbench-grid\"",
   "\"decision-gate-rail\"",
   "\"claude-frame-ingestion\"",
+  "\"claudeCodeFramePacket\"",
+  "\"pending_claude_code_auth\"",
+  "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
 ]);
 
 requireIncludes("package.json", [
   "\"kinflo:validate-design-frame-backlog\"",
+  "\"kinflo:validate-claude-frame-ingestion\"",
 ]);
 
 for (const path of [
@@ -194,6 +200,19 @@ if (backlog) {
     pass("Claude rejected recommendations are recorded");
   } else {
     fail("Claude rejected recommendations are recorded", "Expected rejectedRecommendations array.");
+  }
+
+  const claudeCodePacket = backlog.designInputs?.claudeCodeFramePacket;
+  if (claudeCodePacket?.status === "pending_claude_code_auth") {
+    pass("Claude Code frame packet is pending auth repair");
+  } else {
+    fail("Claude Code frame packet is pending auth repair", "Do not imply Claude Code review passed while CLI auth is broken.");
+  }
+
+  if (claudeCodePacket?.packet === "docs/kinflo-claude-frame-ingestion-packet.json" && claudeCodePacket?.phaseDoc === "docs/phase84-claude-frame-ingestion-packet.md") {
+    pass("Claude Code packet artifacts are linked");
+  } else {
+    fail("Claude Code packet artifacts are linked", "Backlog must link the packet JSON and Phase 84 doc.");
   }
 
   const principles = backlog.adoptionPrinciples ?? [];
