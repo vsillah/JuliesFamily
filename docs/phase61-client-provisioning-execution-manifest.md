@@ -31,7 +31,8 @@ The manifest defines the order in which client provisioning could run later:
 - Live Convex execution: no.
 - Provider APIs touched: no.
 - Secrets read or printed: no.
-- Claude Code frame pass completed: no, non-interactive credential check returned 401.
+- Claude Code credential check: passed with `ANTHROPIC_API_KEY` injected from 1Password item `ANTHROPIC_API_KEY` in vault `Portfolio / dev`.
+- Claude Code frame pass: completed as a short design probe; keep the panel preview-only, show per-step blocked reasons, and defer copy/export until executable dry-run approval.
 
 No tenant, site, membership, invitation, email, billing, domain, storage, publish, lead, campaign, AI, SMS, or provider write is executed by this phase.
 

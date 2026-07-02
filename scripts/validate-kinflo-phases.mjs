@@ -911,7 +911,8 @@ requireIncludes("docs/phase61-client-provisioning-execution-manifest.md", [
   "Client execution orders: 3",
   "Dry-run steps: 7",
   "Live provisioning execution: gated",
-  "Claude Code frame pass completed: no, non-interactive credential check returned 401",
+  "Claude Code credential check: passed with `ANTHROPIC_API_KEY` injected from 1Password item `ANTHROPIC_API_KEY` in vault `Portfolio / dev`",
+  "Claude Code frame pass: completed as a short design probe",
   "No tenant, site, membership, invitation, email, billing, domain, storage, publish, lead, campaign, AI, SMS, or provider write is executed",
 ]);
 
