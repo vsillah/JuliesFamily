@@ -70,6 +70,7 @@
     "kinflo:validate-proof-before-publish": "node scripts/validate-kinflo-proof-before-publish.mjs",
     "kinflo:validate-mobile-inspection-mode": "node scripts/validate-kinflo-mobile-inspection-mode.mjs",
     "kinflo:validate-workflow-navigation-rail": "node scripts/validate-kinflo-workflow-navigation-rail.mjs",
+    "kinflo:validate-configuration-field-affordances": "node scripts/validate-kinflo-configuration-field-affordances.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

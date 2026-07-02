@@ -147,6 +147,7 @@ for (const path of [
   "docs/phase79-proof-before-publish-cards.md",
   "docs/phase80-mobile-inspection-mode.md",
   "docs/phase81-workflow-navigation-rail.md",
+  "docs/phase82-configuration-field-affordances.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -246,6 +247,7 @@ for (const path of [
   "scripts/validate-kinflo-proof-before-publish.mjs",
   "scripts/validate-kinflo-mobile-inspection-mode.mjs",
   "scripts/validate-kinflo-workflow-navigation-rail.mjs",
+  "scripts/validate-kinflo-configuration-field-affordances.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1343,6 +1345,22 @@ requireIncludes("docs/phase81-workflow-navigation-rail.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase82-configuration-field-affordances.md", [
+  "Phase 82: Configuration Field Affordances",
+  "npm run kinflo:validate-configuration-field-affordances",
+  "ConfigurationAffordanceStrip",
+  "section-kinflo-configuration-affordance-brand",
+  "section-kinflo-configuration-affordance-navigation",
+  "section-kinflo-configuration-affordance-content",
+  "section-kinflo-configuration-affordance-assets",
+  "section-kinflo-configuration-affordance-domains",
+  "section-kinflo-configuration-affordance-integrations",
+  "section-kinflo-configuration-affordance-campaigns",
+  "section-kinflo-configuration-affordance-ai-review",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1372,6 +1390,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase79-proof-before-publish-cards.md\"",
   "\"docs/phase80-mobile-inspection-mode.md\"",
   "\"docs/phase81-workflow-navigation-rail.md\"",
+  "\"docs/phase82-configuration-field-affordances.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
@@ -1379,6 +1398,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-proof-before-publish\"",
   "\"npm run kinflo:validate-mobile-inspection-mode\"",
   "\"npm run kinflo:validate-workflow-navigation-rail\"",
+  "\"npm run kinflo:validate-configuration-field-affordances\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1469,6 +1489,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-proof-before-publish\"",
   "\"kinflo:validate-mobile-inspection-mode\"",
   "\"kinflo:validate-workflow-navigation-rail\"",
+  "\"kinflo:validate-configuration-field-affordances\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2171,6 +2192,22 @@ requireIncludes("scripts/validate-kinflo-workflow-navigation-rail.mjs", [
   "workflow navigation rail does not import generated API",
   "workflow navigation rail does not execute live Convex",
   "KinFlo workflow navigation rail validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-field-affordances.mjs", [
+  "docs/phase82-configuration-field-affordances.md",
+  "ConfigurationAffordanceStrip",
+  "section-kinflo-configuration-affordance-brand",
+  "section-kinflo-configuration-affordance-navigation",
+  "section-kinflo-configuration-affordance-content",
+  "section-kinflo-configuration-affordance-assets",
+  "section-kinflo-configuration-affordance-domains",
+  "section-kinflo-configuration-affordance-integrations",
+  "section-kinflo-configuration-affordance-campaigns",
+  "section-kinflo-configuration-affordance-ai-review",
+  "configuration affordances do not import generated API",
+  "configuration affordances do not execute live Convex",
+  "KinFlo configuration field affordances validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
@@ -3048,6 +3085,16 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "button-kinflo-workflow-lane-",
   "section-kinflo-workflow-lane-tabs-",
   "Control, Build, Launch, Growth, Evidence, and Hosted Activation",
+  "ConfigurationAffordanceStrip",
+  "section-kinflo-configuration-affordance-brand",
+  "section-kinflo-configuration-affordance-navigation",
+  "section-kinflo-configuration-affordance-content",
+  "section-kinflo-configuration-affordance-assets",
+  "section-kinflo-configuration-affordance-domains",
+  "section-kinflo-configuration-affordance-integrations",
+  "section-kinflo-configuration-affordance-campaigns",
+  "section-kinflo-configuration-affordance-ai-review",
+  "Live content save and publish are blocked",
   "clientWebsiteWorkbenchGridContract",
   "clientWebsiteStudioReviewStats",
   "clientWebsiteStudioCommandStats",
