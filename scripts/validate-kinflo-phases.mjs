@@ -125,6 +125,7 @@ for (const path of [
   "docs/phase57-convex-launch-blueprint-query.md",
   "docs/phase58-client-admin-permission-presets.md",
   "docs/phase59-client-studio-polish.md",
+  "docs/phase60-client-provisioning-orders.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -181,6 +182,7 @@ for (const path of [
   "scripts/validate-kinflo-convex-launch-blueprint-query.mjs",
   "scripts/validate-kinflo-client-admin-permission-presets.mjs",
   "scripts/validate-kinflo-client-studio-polish.mjs",
+  "scripts/validate-kinflo-client-provisioning-orders.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -886,6 +888,17 @@ requireIncludes("docs/phase59-client-studio-polish.md", [
   "No live Convex execution",
 ]);
 
+requireIncludes("docs/phase60-client-provisioning-orders.md", [
+  "npm run kinflo:validate-client-provisioning-orders",
+  "siteFactory.listClientWebsiteProvisioningOrders",
+  "clientWebsiteStudio.provisioningOrders",
+  "Provisioning orders: 3",
+  "Live provisioning action: gated",
+  "Read-only query: yes",
+  "Local state only: yes",
+  "No tenant, site, membership, invitation, email, billing, domain, publish, lead, campaign, AI, or storage write is executed",
+]);
+
 requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
@@ -917,6 +930,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-convex-launch-blueprint-query\"",
   "\"kinflo:validate-client-admin-permission-presets\"",
   "\"kinflo:validate-client-studio-polish\"",
+  "\"kinflo:validate-client-provisioning-orders\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1276,6 +1290,16 @@ requireIncludes("scripts/validate-kinflo-client-studio-polish.mjs", [
   "Live Convex execution: no",
 ]);
 
+requireIncludes("scripts/validate-kinflo-client-provisioning-orders.mjs", [
+  "siteFactory.listClientWebsiteProvisioningOrders",
+  "export const listClientWebsiteProvisioningOrders",
+  "siteFactoryListClientWebsiteProvisioningOrders",
+  "section-kinflo-client-provisioning-order",
+  "button-client-provisioning-order-gated",
+  "Live provisioning action: gated",
+  "Live Convex execution: no",
+]);
+
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
   "process\\.env",
   "import\\.meta\\.env",
@@ -1412,6 +1436,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "preferences.upsertMyPreferences",
   "siteFactory.listClientWebsiteAdminPermissionPresets",
   "siteFactory.listClientWebsiteLaunchBlueprints",
+  "siteFactory.listClientWebsiteProvisioningOrders",
   "siteBuilder.upsertDomain",
   "crm.submitLead",
   "crm.listJourneyProgressionRules",
@@ -1434,6 +1459,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "preferencesUpsertMyPreferences",
   "siteFactoryListClientWebsiteAdminPermissionPresets",
   "siteFactoryListClientWebsiteLaunchBlueprints",
+  "siteFactoryListClientWebsiteProvisioningOrders",
   "crmListJourneyProgressionRules",
   "crmUpsertJourneyProgressionRule",
   "crmTransitionLeadStage",
@@ -1648,10 +1674,13 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "clientWebsiteStudio: fixtureClientWebsiteStudio",
   "ShellClientWebsiteLaunchBlueprint",
   "ShellClientWebsiteAdminPermissionPreset",
+  "ShellClientWebsiteProvisioningOrder",
   "launchBlueprints",
   "adminPermissionPresets",
+  "provisioningOrders",
   "siteFactory.listClientWebsiteAdminPermissionPresets",
   "siteFactory.listClientWebsiteLaunchBlueprints",
+  "siteFactory.listClientWebsiteProvisioningOrders",
   "mission-clarity",
   "branded-portal-handoff",
   "Advisor client starter blueprint",
@@ -1961,6 +1990,10 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-admin-permission-preset",
   "text-kinflo-client-admin-permission-preset",
   "button-client-admin-permission-gated",
+  "selectedClientWebsiteProvisioningOrder",
+  "section-kinflo-client-provisioning-order",
+  "text-kinflo-client-provisioning-order",
+  "button-client-provisioning-order-gated",
   "section-kinflo-client-studio-operating-frame",
   "section-kinflo-client-site-rail",
   "section-kinflo-client-preview-workbench",

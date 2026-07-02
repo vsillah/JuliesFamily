@@ -318,12 +318,31 @@ export type ShellClientWebsiteAdminPermissionPreset = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteProvisioningOrder = {
+  siteKey: string;
+  label: string;
+  tenantSlug: string;
+  launchBlueprintLabel: string;
+  adminPresetLabel: string;
+  templateKey: string;
+  requestedPlan: string;
+  orderStatus: "review_ready" | "blocked_provider_gate" | "draft";
+  ownerRole: string;
+  inviteRole: string;
+  scope: "platform" | "tenant" | "site";
+  setupSteps: string[];
+  approvalEvidence: string[];
+  blockedActions: string[];
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteStudio = {
   defaultSiteKey: string;
   sites: ShellClientWebsiteStudioSite[];
   designPatterns: ShellClientWebsiteStudioPattern[];
   launchBlueprints: ShellClientWebsiteLaunchBlueprint[];
   adminPermissionPresets: ShellClientWebsiteAdminPermissionPreset[];
+  provisioningOrders: ShellClientWebsiteProvisioningOrder[];
   researchSources: { label: string; url: string }[];
   providerBoundary: string;
   convexFunctions: string[];
@@ -1343,6 +1362,122 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  provisioningOrders: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family seeded retrofit order",
+      tenantSlug: "julies-family",
+      launchBlueprintLabel: "Seeded tenant retrofit blueprint",
+      adminPresetLabel: "Founding platform steward",
+      templateKey: "nonprofit-learning-center",
+      requestedPlan: "Founding platform",
+      orderStatus: "review_ready",
+      ownerRole: "platform.super_admin",
+      inviteRole: "platform.super_admin",
+      scope: "platform",
+      setupSteps: [
+        "Confirm the seeded tenant remains the founding platform tenant",
+        "Map existing Julie Family pages into reusable content blocks",
+        "Run public preview, lead capture, and content provenance review before publish",
+      ],
+      approvalEvidence: [
+        "seeded tenant ownership note",
+        "content provenance review",
+        "public renderer fixture-to-live smoke",
+      ],
+      blockedActions: [
+        "client admin invitation",
+        "hosted Convex deployment",
+        "generated API import",
+        "public publish write",
+        "CRM lead write",
+      ],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteProvisioningOrders",
+        "siteFactory.listClientWebsiteLaunchBlueprints",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client tenant build order",
+      tenantSlug: "advisor-client-starter",
+      launchBlueprintLabel: "Advisor client starter blueprint",
+      adminPresetLabel: "Tenant admin launch owner",
+      templateKey: "advisor-consultant",
+      requestedPlan: "Client Build",
+      orderStatus: "blocked_provider_gate",
+      ownerRole: "tenant.admin",
+      inviteRole: "tenant.admin",
+      scope: "tenant",
+      setupSteps: [
+        "Create tenant after plan and entitlement review",
+        "Create site from Advisor Consultant template",
+        "Invite tenant admin after role and domain review",
+        "Run preview, lead, domain, and hosted Convex smokes before publish",
+      ],
+      approvalEvidence: [
+        "plan entitlement approval",
+        "tenant admin owner approval",
+        "domain readiness smoke",
+        "lead capture read-only smoke",
+      ],
+      blockedActions: [
+        "controlPlane.createTenant mutation",
+        "siteFactory.createSiteFromTemplate mutation",
+        "client admin invitation email",
+        "domain verification write",
+        "Stripe billing activation",
+      ],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteProvisioningOrders",
+        "controlPlane.createTenant",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "controlPlane.grantMembership",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite scoped editor order",
+      tenantSlug: "campaign-microsite-lab",
+      launchBlueprintLabel: "Campaign microsite launch blueprint",
+      adminPresetLabel: "Site editor campaign operator",
+      templateKey: "campaign-microsite",
+      requestedPlan: "Campaign Lab",
+      orderStatus: "draft",
+      ownerRole: "site.editor",
+      inviteRole: "site.editor",
+      scope: "site",
+      setupSteps: [
+        "Attach microsite to the selected tenant or campaign lab",
+        "Seed focused offer, proof, signup, and privacy blocks",
+        "Scope editor access to the campaign site only",
+        "Run consent, campaign approval, and provider-readiness review before send",
+      ],
+      approvalEvidence: [
+        "campaign consent review",
+        "site-scoped editor approval",
+        "lead routing approval",
+        "provider send smoke approval",
+      ],
+      blockedActions: [
+        "site create mutation",
+        "site editor invitation email",
+        "campaign send",
+        "AI copy publish",
+        "public form lead write",
+      ],
+      convexFunctions: [
+        "siteFactory.listClientWebsiteProvisioningOrders",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "crm.submitLead",
+        "campaigns.requestCampaignApproval",
+      ],
+    },
+  ],
   researchSources: [
     { label: "Kanopi nonprofit website examples", url: "https://kanopi.com/blog/best-nonprofit-websites/" },
     { label: "Azuro nonprofit design examples", url: "https://azurodigital.com/nonprofit-website-examples/" },
@@ -1353,6 +1488,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
   convexFunctions: [
     "siteFactory.listClientWebsiteAdminPermissionPresets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
+    "siteFactory.listClientWebsiteProvisioningOrders",
     "siteBuilder.getSiteDraft",
     "siteBuilder.updatePage",
     "publicSite.resolvePublishedSite",

@@ -544,12 +544,17 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.adminPermissionPresets[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.adminPermissionPresets],
   );
+  const selectedClientWebsiteProvisioningOrder = useMemo(
+    () => snapshot.clientWebsiteStudio.provisioningOrders.find((order) => order.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.provisioningOrders[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.provisioningOrders],
+  );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
   const clientWebsiteStudioReviewStats = [
     { label: "Tenant", value: selectedClientWebsiteStudioSite?.tenantSlug ?? "Pending" },
     { label: "Readiness", value: `${clientWebsiteStudioReadyCount}/${clientWebsiteStudioReadiness.length}` },
     { label: "Permission", value: selectedClientWebsiteAdminPermissionPreset?.scope ?? "Pending" },
-    { label: "Provider state", value: "Gated" },
+    { label: "Order", value: selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ") ?? "Pending" },
   ];
   const selectedAssetSite = useMemo(
     () => snapshot.assetLibrary.siteOptions.find((site) => site.key === assetSiteKey) ?? snapshot.assetLibrary.siteOptions[0],
@@ -3105,6 +3110,85 @@ export default function AdminKinfloShell() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-provisioning-order">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Workflow className="h-4 w-4 text-slate-500" />
+                          <h3 className="text-base font-semibold">Provisioning Order</h3>
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-provisioning-order">
+                          {selectedClientWebsiteProvisioningOrder?.label}
+                        </p>
+                      </div>
+                      <Badge variant="outline">{selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ")}</Badge>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Plan</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.requestedPlan}</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Template</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.templateKey}</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Owner</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.ownerRole}</div>
+                      </div>
+                      <div className="rounded-md border border-slate-200 p-3">
+                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Invite</div>
+                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.inviteRole}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Setup order</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step) => (
+                          <div key={step} className="flex items-start gap-2 text-sm text-slate-600">
+                            <CircleDashed className="mt-0.5 h-4 w-4 text-slate-400" />
+                            <span>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Approval evidence</div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
+                          <Badge key={item} variant="secondary">{item}</Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4">
+                      <div className="text-sm font-medium">Blocked live actions</div>
+                      <div className="mt-2 space-y-2">
+                        {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
+                          <div key={action} className="flex items-start gap-2 text-xs text-slate-600">
+                            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                            <span>{action}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 border-t border-slate-100 pt-4">
+                      <div className="flex flex-wrap gap-2">
+                        {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
+                          <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
+                        ))}
+                      </div>
+                      <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-provisioning-order-gated">
+                        <Workflow className="mr-2 h-4 w-4" />
+                        Provisioning gated
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-website-blueprint">
