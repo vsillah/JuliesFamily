@@ -102,6 +102,7 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("siteFactoryListClientWebsiteLaunchSimulations", "query", "site factory", "client launch simulations include target minutes, preview links, invite posture, blockers, and provider boundaries"),
   binding("siteFactoryListClientWebsiteOnboardingReadiness", "query", "site factory", "client onboarding readiness includes task groups, blockers, scores, and provider boundaries"),
   binding("siteFactoryListClientWebsitePolishScorecards", "query", "site factory", "client polish scorecards include design criteria, viewport checks, accessibility posture, and provider boundaries"),
+  binding("siteFactoryListClientWebsitePreviewReviewPackets", "query", "site factory", "client preview review packets include review URL context, evidence checklist, client-share gates, and provider boundaries"),
   binding("siteFactoryListClientWebsiteAdminPermissionPresets", "query", "site factory", "client website admin permission presets include role, scope, gates, and provider boundaries"),
   binding("siteFactoryListClientWebsiteConfigurationProfiles", "query", "site factory", "client website configuration profiles include template, brand, navigation, CRM, editable surfaces, locked surfaces, and provider boundaries"),
   binding("siteFactoryListClientWebsiteProvisioningOrders", "query", "site factory", "client website provisioning orders assemble site, blueprint, permission preset, gates, and blocked actions"),

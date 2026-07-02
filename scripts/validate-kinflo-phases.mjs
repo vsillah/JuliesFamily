@@ -162,6 +162,7 @@ for (const path of [
   "docs/phase105-site-studio-site-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
+  "docs/phase108-client-preview-review-contract.md",
   "docs/phase100-site-studio-launch-dossier-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
@@ -290,6 +291,7 @@ for (const path of [
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
+  "scripts/validate-kinflo-client-preview-review-contract.mjs",
   "scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
@@ -1692,6 +1694,18 @@ requireIncludes("docs/phase107-client-preview-review-packet.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase108-client-preview-review-contract.md", [
+  "Phase 108: Client Preview Review Contract",
+  "npm run kinflo:validate-client-preview-review-contract",
+  "siteFactory.listClientWebsitePreviewReviewPackets",
+  "siteFactoryListClientWebsitePreviewReviewPackets",
+  "provider-light-preview-review",
+  "requirements before client sharing",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No preview is shared with a client.",
+]);
+
 requireIncludes("docs/phase100-site-studio-launch-dossier-deep-links.md", [
   "Phase 100: Site Studio Launch Dossier Deep Links",
   "npm run kinflo:validate-site-studio-launch-dossier-deep-links",
@@ -1726,11 +1740,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 74",
-  "Query bindings: 36",
+  "Generated API bindings: 75",
+  "Query bindings: 37",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 29",
+  "Smoke-manifest review gaps: 30",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -1867,6 +1881,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase105-site-studio-site-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
+  "\"docs/phase108-client-preview-review-contract.md\"",
   "\"docs/phase100-site-studio-launch-dossier-deep-links.md\"",
   "\"docs/phase87-adapter-switch-runway.md\"",
   "\"docs/phase88-generated-api-review-board.md\"",
@@ -1898,6 +1913,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
+  "\"npm run kinflo:validate-client-preview-review-contract\"",
   "\"npm run kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"npm run kinflo:validate-adapter-switch-runway\"",
   "\"npm run kinflo:validate-generated-api-review-board\"",
@@ -2014,6 +2030,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-site-studio-site-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
+  "\"kinflo:validate-client-preview-review-contract\"",
   "\"kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:validate-generated-api-review-board\"",
@@ -2967,6 +2984,16 @@ requireIncludes("scripts/validate-kinflo-client-preview-review-packet.mjs", [
   "KinFlo client preview review-packet validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-client-preview-review-contract.mjs", [
+  "docs/phase108-client-preview-review-contract.md",
+  "siteFactory.listClientWebsitePreviewReviewPackets",
+  "siteFactoryListClientWebsitePreviewReviewPackets",
+  "client preview review contract does not import generated API",
+  "client preview review contract does not execute live Convex",
+  "preview review contract includes three site packets",
+  "KinFlo client preview review contract validation",
+]);
+
 requireIncludes("scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs", [
   "docs/phase100-site-studio-launch-dossier-deep-links.md",
   "studioDossier",
@@ -3510,6 +3537,10 @@ requireIncludes("convex/siteFactory.ts", [
   "clientWebsiteLaunchDecisionPackets",
   "export const listClientWebsiteLaunchDecisionPackets",
   "Read-only launch decision packet query",
+  "ClientWebsitePreviewReviewPacket",
+  "clientWebsitePreviewReviewPackets",
+  "export const listClientWebsitePreviewReviewPackets",
+  "Read-only preview review packet query",
 ]);
 
 requireIncludes("convex/activation.ts", [
@@ -3631,6 +3662,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "visualQaBudgets",
   "visualQaEvidencePackets",
   "launchDecisionPackets",
+  "siteFactory.listClientWebsitePreviewReviewPackets",
   "siteFactory.listClientWebsiteAdminPermissionPresets",
   "siteFactory.listClientWebsiteLaunchDecisionPackets",
   "siteFactory.listClientWebsiteLaunchBlueprints",

@@ -273,6 +273,29 @@ type ClientWebsiteLaunchDecisionPacket = {
   convexFunctions: string[];
 };
 
+type ClientWebsitePreviewReviewPacket = {
+  siteKey: string;
+  label: string;
+  previewPath: string;
+  route: string;
+  persona: string;
+  journeyStage: string;
+  device: "desktop" | "tablet" | "mobile";
+  reviewSource: "site-studio-preview";
+  reviewPosture: "provider-light-preview-review";
+  launchDecision: "go" | "review" | "no_go";
+  context: { label: string; value: string }[];
+  evidenceChecklist: {
+    key: string;
+    label: string;
+    status: "accepted" | "ready" | "pending" | "blocked";
+    evidence: string;
+  }[];
+  blockedLiveActions: string[];
+  requiredBeforeClientShare: string[];
+  convexFunctions: string[];
+};
+
 const now = () => Date.now();
 
 export const starterTemplates: StarterTemplate[] = [
@@ -1694,6 +1717,136 @@ export const listClientWebsiteLaunchDecisionPackets = query({
       blockedLaunchActionCount: packet.blockedLaunchActions.length,
       providerBoundary: "Read-only launch decision packet query. It records go/no-go posture only; it does not create tenants, create sites, send invites, write content, replace assets, publish content, write leads, send campaigns, call providers, import generated API, capture QA artifacts, or execute hosted activation.",
     })),
+});
+
+const clientWebsitePreviewReviewPackets: ClientWebsitePreviewReviewPacket[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family public preview review packet",
+    previewPath: "/kinflo-sites/julies-family",
+    route: "/",
+    persona: "parent, volunteer, donor, and community partner",
+    journeyStage: "awareness-to-decision",
+    device: "desktop",
+    reviewSource: "site-studio-preview",
+    reviewPosture: "provider-light-preview-review",
+    launchDecision: "review",
+    context: [
+      { label: "Site", value: "julies-family-public" },
+      { label: "Route", value: "/" },
+      { label: "Device/source", value: "desktop / site-studio-preview" },
+      { label: "Decision", value: "review" },
+    ],
+    evidenceChecklist: [
+      { key: "url-context", label: "Preview URL context", status: "accepted", evidence: "studioSite, route, persona, journeyStage, device, and source are represented." },
+      { key: "visual-qa", label: "Visual QA evidence packet", status: "ready", evidence: "Local screenshot and review slots are organized before hosted capture." },
+      { key: "launch-decision", label: "Launch decision criteria", status: "pending", evidence: "Hosted accessibility, performance, domain, and rollback evidence remain pending." },
+      { key: "hosted-smoke", label: "Hosted smoke evidence", status: "blocked", evidence: "Hosted Convex, generated API review, read-only smoke, and rollback approval are still gated." },
+    ],
+    blockedLiveActions: ["public publish write", "CRM lead write", "client sharing"],
+    requiredBeforeClientShare: ["hosted read-only smoke", "generated API review", "visual QA evidence accepted", "publish rollback owner assigned"],
+    convexFunctions: [
+      "siteFactory.listClientWebsitePreviewReviewPackets",
+      "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+      "siteFactory.listClientWebsiteLaunchDecisionPackets",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client preview review packet",
+    previewPath: "/kinflo-sites/advisor-client-site",
+    route: "/",
+    persona: "service client evaluating fit and proof",
+    journeyStage: "consideration-to-decision",
+    device: "desktop",
+    reviewSource: "site-studio-preview",
+    reviewPosture: "provider-light-preview-review",
+    launchDecision: "review",
+    context: [
+      { label: "Site", value: "advisor-client-site" },
+      { label: "Route", value: "/" },
+      { label: "Device/source", value: "desktop / site-studio-preview" },
+      { label: "Decision", value: "review" },
+    ],
+    evidenceChecklist: [
+      { key: "url-context", label: "Preview URL context", status: "accepted", evidence: "Preview link carries site, persona, journey, device, and source context." },
+      { key: "visual-qa", label: "Visual QA evidence packet", status: "ready", evidence: "Offer, proof, and intake hierarchy are staged for review." },
+      { key: "launch-decision", label: "Launch decision criteria", status: "pending", evidence: "Tenant owner, invite recipient, lead smoke, and domain evidence remain pending." },
+      { key: "hosted-smoke", label: "Hosted smoke evidence", status: "blocked", evidence: "Tenant creation, generated API review, lead smoke, and client invite delivery are still gated." },
+    ],
+    blockedLiveActions: ["tenant create mutation", "client admin invitation", "public publish write", "CRM lead write", "client sharing"],
+    requiredBeforeClientShare: ["tenant owner approval", "hosted preview smoke", "lead route smoke", "client invite approval"],
+    convexFunctions: [
+      "siteFactory.listClientWebsitePreviewReviewPackets",
+      "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+      "siteFactory.listClientWebsiteLaunchDecisionPackets",
+      "controlPlane.createTenant",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite preview review packet",
+    previewPath: "/kinflo-sites/campaign-microsite",
+    route: "/",
+    persona: "warm campaign lead from email, SMS, referral, or event traffic",
+    journeyStage: "decision",
+    device: "desktop",
+    reviewSource: "site-studio-preview",
+    reviewPosture: "provider-light-preview-review",
+    launchDecision: "no_go",
+    context: [
+      { label: "Site", value: "campaign-microsite" },
+      { label: "Route", value: "/" },
+      { label: "Device/source", value: "desktop / site-studio-preview" },
+      { label: "Decision", value: "no_go" },
+    ],
+    evidenceChecklist: [
+      { key: "url-context", label: "Preview URL context", status: "accepted", evidence: "Campaign preview route can carry traffic-source review context without provider sends." },
+      { key: "visual-qa", label: "Visual QA evidence packet", status: "pending", evidence: "Mobile first viewport and consent placement still need review." },
+      { key: "launch-decision", label: "Launch decision criteria", status: "blocked", evidence: "Consent, lead write, provider-send trace, and rollback owner are not accepted." },
+      { key: "hosted-smoke", label: "Hosted smoke evidence", status: "blocked", evidence: "Public form lead write and campaign send remain disabled." },
+    ],
+    blockedLiveActions: ["campaign send", "public form lead write", "AI copy publish", "client sharing"],
+    requiredBeforeClientShare: ["campaign consent approval", "mobile screenshot approval", "lead smoke approval", "provider-send rollback owner assigned"],
+    convexFunctions: [
+      "siteFactory.listClientWebsitePreviewReviewPackets",
+      "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+      "siteFactory.listClientWebsiteLaunchDecisionPackets",
+      "campaigns.requestCampaignApproval",
+      "crm.submitLead",
+    ],
+  },
+];
+
+export const listClientWebsitePreviewReviewPackets = query({
+  args: {},
+  handler: async () =>
+    clientWebsitePreviewReviewPackets.map((packet) => {
+      const evidencePacket = clientWebsiteVisualQaEvidencePackets.find((candidate) => candidate.siteKey === packet.siteKey);
+      const launchDecisionPacket = clientWebsiteLaunchDecisionPackets.find((candidate) => candidate.siteKey === packet.siteKey);
+      const starterContentPack = clientWebsiteStarterContentPacks.find((candidate) => candidate.siteKey === packet.siteKey);
+      return {
+        ...packet,
+        evidenceChecklistCount: packet.evidenceChecklist.length,
+        acceptedEvidenceCount: packet.evidenceChecklist.filter((item) => item.status === "accepted").length,
+        blockedEvidenceCount: packet.evidenceChecklist.filter((item) => item.status === "blocked").length,
+        blockedLiveActionCount: packet.blockedLiveActions.length,
+        requiredBeforeClientShareCount: packet.requiredBeforeClientShare.length,
+        visualQaEvidencePosture: evidencePacket?.evidencePosture,
+        launchDecisionPosture: launchDecisionPacket?.decisionPosture,
+        starterContentContext: starterContentPack
+          ? {
+              packLabel: starterContentPack.packLabel,
+              persona: starterContentPack.persona,
+              journeyStage: starterContentPack.journeyStage,
+              pageCount: starterContentPack.pages.length,
+            }
+          : undefined,
+        providerBoundary: "Read-only preview review packet query. It records review context and evidence requirements only; it does not share client previews, create tenants, create sites, send invites, write content, capture hosted QA, publish content, write leads, send campaigns, call providers, import generated API, or execute hosted activation.",
+      };
+    }),
 });
 
 const clientWebsiteAdminPermissionPresets: ClientWebsiteAdminPermissionPreset[] = [

@@ -124,9 +124,9 @@ requireIncludes(convexPath, [
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 74",
-  "Query bindings: 36",
-  "Smoke-manifest review gaps: 29",
+  "Generated API bindings: 75",
+  "Query bindings: 37",
+  "Smoke-manifest review gaps: 30",
 ]);
 
 requireIncludes(shellDataPath, [
