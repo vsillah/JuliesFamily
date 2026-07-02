@@ -81,6 +81,7 @@
     "kinflo:validate-hosted-smoke-gap-backlog": "node scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs",
     "kinflo:validate-hosted-smoke-execution-sequencer": "node scripts/validate-kinflo-hosted-smoke-execution-sequencer.mjs",
     "kinflo:validate-hosted-smoke-evidence-ledger": "node scripts/validate-kinflo-hosted-smoke-evidence-ledger.mjs",
+    "kinflo:validate-adapter-switch-cutover-checklist": "node scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

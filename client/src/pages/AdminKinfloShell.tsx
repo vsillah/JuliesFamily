@@ -2595,6 +2595,126 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
+                    <div className="rounded-lg border border-slate-200 bg-white p-4" data-testid="section-kinflo-adapter-switch-cutover-checklist">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Command className="h-4 w-4 text-slate-500" />
+                            <h3 className="text-sm font-semibold">Fixture-to-Live Cutover Checklist</h3>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-cutover-checklist">
+                            {snapshot.adapterSwitchReadiness.cutoverChecklist.approvalGate}
+                          </p>
+                        </div>
+                        <Button disabled variant="outline" data-testid="button-adapter-switch-cutover-gated">
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          Cutover gated
+                        </Button>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 md:grid-cols-5" data-testid="section-kinflo-adapter-switch-cutover-summary">
+                        {[
+                          { label: "Batches", value: snapshot.adapterSwitchReadiness.cutoverChecklist.totalBatches },
+                          { label: "Surfaces", value: snapshot.adapterSwitchReadiness.cutoverChecklist.totalSurfaces },
+                          { label: "Functions", value: snapshot.adapterSwitchReadiness.cutoverChecklist.totalFunctions },
+                          { label: "Ready", value: snapshot.adapterSwitchReadiness.cutoverChecklist.readyBatches },
+                          { label: "Blocked", value: snapshot.adapterSwitchReadiness.cutoverChecklist.blockedBatches },
+                        ].map((item) => (
+                          <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 grid max-h-[560px] gap-3 overflow-y-auto pr-1 xl:grid-cols-2" data-testid="section-kinflo-adapter-switch-cutover-scroll">
+                        {snapshot.adapterSwitchReadiness.cutoverChecklist.steps.map((step) => (
+                          <div key={step.batchId} className="rounded-md border border-slate-200 bg-white p-3" data-testid={`card-adapter-switch-cutover-${step.batchId}`}>
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Batch {step.order}</div>
+                                <div className="mt-1 text-sm font-semibold text-slate-950">{step.label}</div>
+                                <div className="mt-1 text-xs text-slate-600">{step.surfaceCount} surfaces · {step.functionCount} functions</div>
+                              </div>
+                              <Badge variant="outline" className="shrink-0 border-rose-200 bg-rose-50 text-rose-700">
+                                {step.canCutover ? "ready" : "blocked"}
+                              </Badge>
+                            </div>
+
+                            <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                              <div className="rounded-md border border-slate-100 px-2 py-1">
+                                <div className="text-slate-500">Import API</div>
+                                <div className="font-medium text-slate-950">{step.canImportGeneratedApi ? "yes" : "no"}</div>
+                              </div>
+                              <div className="rounded-md border border-slate-100 px-2 py-1">
+                                <div className="text-slate-500">API flag</div>
+                                <div className="font-medium text-slate-950">{step.generatedApiAvailable ? "true" : "false"}</div>
+                              </div>
+                              <div className="rounded-md border border-slate-100 px-2 py-1">
+                                <div className="text-slate-500">Live calls</div>
+                                <div className="font-medium text-slate-950">{step.liveConvexExecution ? "yes" : "no"}</div>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                              <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
+                                <div className="text-xs font-medium text-slate-900">Entry criteria</div>
+                                <div className="mt-2 space-y-1">
+                                  {step.entryCriteria.map((item) => (
+                                    <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                                      <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                      <span>{item}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="rounded-md border border-emerald-100 bg-emerald-50 p-3">
+                                <div className="text-xs font-medium text-emerald-900">Post-switch verification</div>
+                                <div className="mt-2 space-y-1">
+                                  {step.postSwitchVerification.map((item) => (
+                                    <div key={item} className="flex items-start gap-2 text-xs leading-5 text-emerald-800">
+                                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                      <span>{item}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mt-3 rounded-md border border-rose-100 bg-rose-50 p-3">
+                              <div className="text-xs font-medium text-rose-900">Rollback controls</div>
+                              <div className="mt-2 space-y-1">
+                                {step.rollbackControls.map((item) => (
+                                  <div key={item} className="flex items-start gap-2 text-xs leading-5 text-rose-700">
+                                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                    <span>{item}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div className="mt-3 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                              <span className="font-medium text-slate-900">Blocked until: </span>
+                              {step.blockedUntil}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                        {snapshot.adapterSwitchReadiness.cutoverChecklist.sourceDocuments.map((documentPath) => (
+                          <div key={documentPath} className="rounded-md border border-slate-200 px-3 py-2 text-xs">
+                            <span className="break-all">{documentPath}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <p className="mt-4 text-sm leading-6 text-muted-foreground">
+                        {snapshot.adapterSwitchReadiness.cutoverChecklist.providerBoundary}
+                      </p>
+                    </div>
+
                     <div className="grid gap-3">
                       {(selectedAdapterSwitchBatch?.surfaces ?? []).map((surface) => (
                         <div key={surface.id} className="rounded-md border p-4" data-testid={`card-adapter-switch-${surface.id}`}>
@@ -4953,11 +5073,11 @@ export default function AdminKinfloShell() {
 
                   <TabsContent value="launch" className="mt-4" data-testid="section-kinflo-client-workbench-launch">
                     <div
-                      className="grid max-h-[calc(100vh-10rem)] min-w-0 gap-3 overflow-y-auto overflow-x-hidden pr-1 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] lg:overflow-hidden lg:pr-0"
+                      className="grid max-h-[calc(100vh-10rem)] min-w-0 gap-3 overflow-y-auto overflow-x-hidden pr-1 min-[480px]:grid-cols-[minmax(154px,0.36fr)_minmax(0,0.64fr)] min-[480px]:overflow-hidden lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] lg:overflow-hidden lg:pr-0"
                       data-testid="section-kinflo-client-launch-rail"
                     >
-                      <div className="min-h-0 min-w-0 max-h-[calc(100vh-10rem)] space-y-3 overflow-y-auto pr-1" data-testid="section-kinflo-client-launch-command-column">
-                  <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white shadow-sm">
+                      <div className="min-h-0 min-w-0 max-h-[calc(100vh-10rem)] space-y-3 overflow-y-auto overflow-x-hidden pr-1" data-testid="section-kinflo-client-launch-command-column">
+                  <div className="rounded-2xl border border-slate-900 bg-slate-950 p-3 text-white shadow-sm lg:p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-medium text-slate-300">Launch command rail</div>
@@ -4967,7 +5087,7 @@ export default function AdminKinfloShell() {
                         {clientWebsiteLaunchDecisionLabel}
                       </Badge>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-300">
+                    <p className="mt-3 hidden text-sm leading-6 text-slate-300 lg:block">
                       Blueprint, permissions, evidence, and provider boundaries stay visible while the public site is reviewed.
                     </p>
                     <div className="mt-4 grid grid-cols-3 gap-2">
@@ -4986,11 +5106,11 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm" data-testid="section-kinflo-client-compact-launch-controls">
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 shadow-sm lg:p-4" data-testid="section-kinflo-client-compact-launch-controls">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="text-sm font-semibold text-amber-950">Compact launch controls</div>
-                        <p className="mt-1 text-xs leading-5 text-amber-900">
+                        <p className="mt-1 hidden text-xs leading-5 text-amber-900 lg:block">
                           Live operations stay disabled until hosted evidence and owner signoff are accepted.
                         </p>
                       </div>
@@ -5012,7 +5132,7 @@ export default function AdminKinfloShell() {
                         Domain gated
                       </Button>
                     </div>
-                    <div className="mt-3 space-y-2">
+                    <div className="mt-3 hidden space-y-2 lg:block">
                       {selectedClientWebsiteLaunchDecisionPacket?.blockedLaunchActions.slice(0, 3).map((action) => (
                         <div key={action} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
                           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -5022,7 +5142,7 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:block">
                     <Label>Client site</Label>
                     <Select value={clientWebsiteStudioSiteKey} onValueChange={setClientWebsiteStudioSiteKey}>
                       <SelectTrigger className="mt-2" data-testid="select-kinflo-client-website-site">
@@ -5038,7 +5158,7 @@ export default function AdminKinfloShell() {
                     </Select>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
+                  <div className="hidden rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm lg:block">
                     {snapshot.clientWebsiteStudio.providerBoundary}
                   </div>
                       </div>
@@ -5057,7 +5177,7 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
@@ -5096,7 +5216,7 @@ export default function AdminKinfloShell() {
 
                       <TabsContent value="order" className="mt-3" data-testid="section-kinflo-client-provisioning-order">
                         <div
-                          className="grid max-h-[360px] min-h-0 gap-3 overflow-hidden lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
+                          className="grid max-h-[280px] min-h-0 gap-3 overflow-y-auto overflow-x-hidden md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:max-h-[360px]"
                           data-testid="section-kinflo-client-provisioning-order-cockpit"
                         >
                           <div
@@ -5112,7 +5232,7 @@ export default function AdminKinfloShell() {
                               </div>
                               <Badge variant="outline" className="bg-white">Ordered</Badge>
                             </div>
-                            <div className="mt-3 max-h-[260px] space-y-2 overflow-y-auto pr-1">
+                            <div className="mt-3 max-h-[180px] space-y-2 overflow-y-auto pr-1 lg:max-h-[260px]">
                               {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step, index) => (
                                 <div key={step} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-600">
                                   <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-500">
@@ -5145,7 +5265,7 @@ export default function AdminKinfloShell() {
                                   </div>
                                   <Badge variant="secondary">Proof first</Badge>
                                 </div>
-                                <div className="mt-3 max-h-[210px] grid gap-2 overflow-y-auto pr-1">
+                                <div className="mt-3 grid max-h-[160px] gap-2 overflow-y-auto pr-1 lg:max-h-[210px]">
                                   {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
                                     <div key={item} className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-medium leading-5 text-emerald-800">
                                       {item}
@@ -5164,7 +5284,7 @@ export default function AdminKinfloShell() {
                                   </div>
                                   <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">Gated</Badge>
                                 </div>
-                                <div className="mt-3 max-h-[210px] grid gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                                <div className="mt-3 grid max-h-[160px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2 lg:max-h-[210px]">
                                   {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
                                     <div key={action} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
                                       <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -5184,7 +5304,7 @@ export default function AdminKinfloShell() {
                                   </div>
                                   <Badge variant="outline" className="bg-white">Mapped</Badge>
                                 </div>
-                                <div className="mt-3 max-h-[210px] flex flex-wrap gap-2 overflow-y-auto pr-1">
+                                <div className="mt-3 flex max-h-[160px] flex-wrap gap-2 overflow-y-auto pr-1 lg:max-h-[210px]">
                                   {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
                                     <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">{functionName}</Badge>
                                   ))}
@@ -5200,7 +5320,7 @@ export default function AdminKinfloShell() {
                       </TabsContent>
 
                       <TabsContent value="dry-run" className="mt-3" data-testid="section-kinflo-client-provisioning-execution">
-                        <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
+                        <div className="max-h-[280px] space-y-3 overflow-y-auto pr-1 lg:max-h-[360px]" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
                           <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">

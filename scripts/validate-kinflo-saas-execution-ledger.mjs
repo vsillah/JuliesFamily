@@ -94,6 +94,7 @@ for (const path of [
   "docs/phase90-hosted-smoke-gap-backlog.md",
   "docs/phase91-hosted-smoke-execution-sequencer.md",
   "docs/phase92-hosted-smoke-evidence-ledger.md",
+  "docs/phase93-adapter-switch-cutover-checklist.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "docs/kinflo-claude-frame-ingestion-packet.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -121,6 +122,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs",
   "scripts/validate-kinflo-hosted-smoke-execution-sequencer.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-ledger.mjs",
+  "scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs",
   "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
 ]) {
   requireFile(path);
@@ -216,6 +218,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-hosted-smoke-gap-backlog",
   "npm run kinflo:validate-hosted-smoke-execution-sequencer",
   "npm run kinflo:validate-hosted-smoke-evidence-ledger",
+  "npm run kinflo:validate-adapter-switch-cutover-checklist",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
   "npm run kinflo:validate-phase0-readiness",
@@ -257,6 +260,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 90 hosted smoke gap backlog",
   "Phase 91 hosted smoke execution sequencer",
   "Phase 92 hosted smoke evidence ledger",
+  "Phase 93 adapter switch cutover checklist",
   "human-gate decision register and Phase 85 owner approval packet current without storing secrets",
 ]);
 
@@ -278,6 +282,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-smoke-gap-backlog\"",
   "\"kinflo:validate-hosted-smoke-execution-sequencer\"",
   "\"kinflo:validate-hosted-smoke-evidence-ledger\"",
+  "\"kinflo:validate-adapter-switch-cutover-checklist\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 

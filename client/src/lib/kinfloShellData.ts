@@ -90,12 +90,45 @@ export type ShellAdapterSwitchAcceptanceBatch = {
   liveConvexExecution: boolean;
 };
 
+export type ShellAdapterSwitchCutoverStep = {
+  order: number;
+  batchId: string;
+  label: string;
+  surfaceCount: number;
+  functionCount: number;
+  entryCriteria: string[];
+  switchActions: string[];
+  postSwitchVerification: string[];
+  rollbackControls: string[];
+  adapterFlag: string;
+  blockedUntil: string;
+  canCutover: boolean;
+  canImportGeneratedApi: boolean;
+  generatedApiAvailable: boolean;
+  providerWrites: boolean;
+  liveConvexExecution: boolean;
+};
+
+export type ShellAdapterSwitchCutoverChecklist = {
+  status: "provider_light_adapter_cutover_checklist";
+  totalBatches: number;
+  totalSurfaces: number;
+  totalFunctions: number;
+  readyBatches: number;
+  blockedBatches: number;
+  approvalGate: string;
+  providerBoundary: string;
+  sourceDocuments: string[];
+  steps: ShellAdapterSwitchCutoverStep[];
+};
+
 export type ShellAdapterSwitchReadiness = {
   status: "provider_light_switch_plan";
   defaultBatchId: string;
   batches: ShellAdapterSwitchBatch[];
   runwaySteps: ShellAdapterSwitchRunwayStep[];
   acceptanceMatrix: ShellAdapterSwitchAcceptanceBatch[];
+  cutoverChecklist: ShellAdapterSwitchCutoverChecklist;
   providerBoundary: string;
   activationEvidence: string[];
   documents: string[];
@@ -4269,6 +4302,228 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
       ],
     },
   ],
+  cutoverChecklist: {
+    status: "provider_light_adapter_cutover_checklist",
+    totalBatches: 6,
+    totalSurfaces: 12,
+    totalFunctions: 32,
+    readyBatches: 0,
+    blockedBatches: 6,
+    approvalGate: "Cutover is prepared only. Hosted Convex ownership, generated API review, Phase 92 evidence acceptance, rollback owner, and owner signoff must pass before any fixture adapter can import generated bindings.",
+    providerBoundary: "This cutover checklist is local review metadata. It does not run codegen, import convex/_generated/api, set generatedApiAvailable true, execute live Convex, replace fixture reads, write providers, publish sites, or read secrets.",
+    sourceDocuments: [
+      "docs/phase87-adapter-switch-runway.md",
+      "docs/phase89-adapter-switch-acceptance-matrix.md",
+      "docs/phase92-hosted-smoke-evidence-ledger.md",
+      "client/src/lib/kinfloConvexRuntime.ts",
+    ],
+    steps: [
+      {
+        order: 10,
+        batchId: "read-only-core",
+        label: "Read-only core shell data",
+        surfaceCount: 4,
+        functionCount: 8,
+        entryCriteria: [
+          "generated API bindings are reviewed against KINFLO_GENERATED_API_BINDINGS",
+          "Phase 92 read-only evidence is accepted without scope leaks",
+          "fixture fallback remains selected until owner signoff",
+        ],
+        switchActions: [
+          "prepare read-only adapter import review",
+          "keep generatedApiAvailable false",
+          "keep tenant, plan, public renderer, and launch readiness fixtures active",
+        ],
+        postSwitchVerification: [
+          "tenant and site queries match fixture scope",
+          "public renderer keeps draft data hidden",
+          "launch readiness keeps provider actions disabled",
+        ],
+        rollbackControls: [
+          "return tenant, plan, public renderer, and launch readiness reads to fixtures",
+          "leave generatedApiAvailable false",
+          "record scope mismatch in the Phase 92 evidence ledger",
+        ],
+        adapterFlag: "generatedApiAvailable",
+        blockedUntil: "Read-only hosted evidence and generated binding review are accepted.",
+        canCutover: false,
+        canImportGeneratedApi: false,
+        generatedApiAvailable: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+      },
+      {
+        order: 20,
+        batchId: "user-scoped-preferences",
+        label: "User-scoped preference reads and writes",
+        surfaceCount: 1,
+        functionCount: 2,
+        entryCriteria: [
+          "read-only core cutover is accepted",
+          "preference isolation and cleanup evidence are accepted",
+          "preference rollback owner is named",
+        ],
+        switchActions: [
+          "prepare preference adapter import review",
+          "keep generatedApiAvailable false",
+          "keep local preference fallback selected",
+        ],
+        postSwitchVerification: [
+          "viewer reads only their own preference record",
+          "reversible upsert cleanup restores shell defaults",
+          "density, filters, site context, and landing page do not shift unexpectedly",
+        ],
+        rollbackControls: [
+          "delete or overwrite smoke preference record",
+          "restore fixture preference defaults",
+          "pause user-scoped preference adapter switch",
+        ],
+        adapterFlag: "generatedApiAvailable",
+        blockedUntil: "User preference smoke evidence and cleanup proof are accepted.",
+        canCutover: false,
+        canImportGeneratedApi: false,
+        generatedApiAvailable: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+      },
+      {
+        order: 30,
+        batchId: "site-creation-and-admin",
+        label: "Site creation, invitations, and activation readiness",
+        surfaceCount: 2,
+        functionCount: 6,
+        entryCriteria: [
+          "client site factory read evidence is accepted",
+          "smoke site cleanup policy is accepted",
+          "invite delivery remains blocked until handoff signoff",
+        ],
+        switchActions: [
+          "prepare activation and site factory adapter import review",
+          "keep generatedApiAvailable false",
+          "keep creation, invite, and publish actions disabled",
+        ],
+        postSwitchVerification: [
+          "launch blueprint maps to selected site and permission preset",
+          "activation readiness labels smoke data correctly",
+          "client admin invitation remains gated",
+        ],
+        rollbackControls: [
+          "archive smoke site records",
+          "revoke pending smoke invitations before delivery",
+          "return launch packets and permission presets to fixtures",
+        ],
+        adapterFlag: "generatedApiAvailable",
+        blockedUntil: "Site factory smoke evidence, cleanup policy, and invite rollback are accepted.",
+        canCutover: false,
+        canImportGeneratedApi: false,
+        generatedApiAvailable: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+      },
+      {
+        order: 40,
+        batchId: "public-crm-loop",
+        label: "Public lead capture and CRM workflow",
+        surfaceCount: 1,
+        functionCount: 6,
+        entryCriteria: [
+          "public resolver and lead smoke evidence are accepted",
+          "notification providers remain paused",
+          "smoke lead cleanup owner is named",
+        ],
+        switchActions: [
+          "prepare CRM adapter import review",
+          "keep generatedApiAvailable false",
+          "keep public lead writes and workflow mutations gated",
+        ],
+        postSwitchVerification: [
+          "journey rules remain site scoped",
+          "lead transition appends timeline and audit evidence",
+          "outbound notifications stay disabled",
+        ],
+        rollbackControls: [
+          "mark smoke leads and CRM workflow data as test-only",
+          "restore fixture CRM tables",
+          "keep outbound notification providers paused",
+        ],
+        adapterFlag: "generatedApiAvailable",
+        blockedUntil: "CRM smoke evidence, notification pause, and cleanup proof are accepted.",
+        canCutover: false,
+        canImportGeneratedApi: false,
+        generatedApiAvailable: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+      },
+      {
+        order: 50,
+        batchId: "provider-readiness-records",
+        label: "Provider readiness metadata without provider writes",
+        surfaceCount: 2,
+        functionCount: 4,
+        entryCriteria: [
+          "provider metadata evidence excludes secret values",
+          "DNS, SSL, email, SMS, storage, billing, and AI writes remain blocked",
+          "metadata deactivation rollback is accepted",
+        ],
+        switchActions: [
+          "prepare domain and integration adapter import review",
+          "keep generatedApiAvailable false",
+          "keep provider write paths disabled",
+        ],
+        postSwitchVerification: [
+          "domain entitlement limits remain enforced",
+          "integration settings never expose secret values",
+          "provider call paths remain unreachable",
+        ],
+        rollbackControls: [
+          "deactivate smoke metadata records",
+          "return domain and integration readiness rows to fixtures",
+          "keep provider env activation blocked",
+        ],
+        adapterFlag: "generatedApiAvailable",
+        blockedUntil: "Metadata-only evidence, secret exclusion, and provider-call block proof are accepted.",
+        canCutover: false,
+        canImportGeneratedApi: false,
+        generatedApiAvailable: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+      },
+      {
+        order: 60,
+        batchId: "campaign-and-ai-governance",
+        label: "Campaign and AI governance records",
+        surfaceCount: 2,
+        functionCount: 6,
+        entryCriteria: [
+          "campaign consent and provider-send pause are accepted",
+          "AI provenance evidence shows no generation provider call",
+          "publish rollback owner is named",
+        ],
+        switchActions: [
+          "prepare campaign and AI review adapter import review",
+          "keep generatedApiAvailable false",
+          "keep sends, generation calls, and publish targets disabled",
+        ],
+        postSwitchVerification: [
+          "campaign approval changes state without sending",
+          "AI review decisions do not publish generated output",
+          "email, SMS, automation, AI provider, and publish paths remain blocked",
+        ],
+        rollbackControls: [
+          "pause or delete smoke campaign records",
+          "revert AI review decisions",
+          "restore fixture governance rows and keep generated output unpublished",
+        ],
+        adapterFlag: "generatedApiAvailable",
+        blockedUntil: "Campaign and AI governance evidence, consent, and publish rollback are accepted.",
+        canCutover: false,
+        canImportGeneratedApi: false,
+        generatedApiAvailable: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+      },
+    ],
+  },
 };
 
 const fixtureHostedSmokeGapBacklog: ShellHostedSmokeGapBacklog = {

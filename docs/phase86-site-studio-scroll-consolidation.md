@@ -39,13 +39,17 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 
 The Site Studio workbench now uses page-level stage tabs for `Sites`, `Preview`, and `Launch`, so narrow review widths do not stack the site rail, preview workbench, and launch rail into one long vertical document. The launch rail remains available as a focused stage with its own bounded scroll.
 
+The launch stage now switches into a narrow two-pane rail at review widths above 480px, keeping the command controls beside the launch dossier instead of stacking the command rail above every provisioning detail. Secondary explanatory copy, the duplicate client-site picker, and the full provider boundary text stay available on wider desktop review, but they are hidden from the narrow command rail so the page remains scannable.
+
 The prior right-rail provisioning content stacked a large provisioning order card and a large execution dry-run card. The layout keeps the same evidence and gated actions but moves them into one compact card:
 
 - plan, template, owner, and invite become summary chips,
 - setup order stays visible in a compact order cockpit,
 - approval evidence, blocked actions, and function references move into internal `Evidence`, `Blocked`, and `Functions` tabs inside the `Order` tab,
 - manifest, dry-run counters, selected order steps, provider boundary, and blocked-until gates live under the `Dry run` tab,
-- long lists use bounded internal scroll areas instead of increasing the full page height.
+- long lists use bounded internal scroll areas instead of increasing the full page height,
+- narrow review widths cap the order cockpit and dry-run panels at 280px before desktop restores the larger review height,
+- the provisioning cockpit keeps one scrollable column until the dossier is wide enough for its own internal split.
 
 Launch packets, content packs, onboarding evidence, simulations, polish scorecards, visual QA, proof-before-publish, and launch decisions remain available in the rail, but they now sit inside a launch dossier with `Provision`, `Packets`, `QA`, and `Decision` tabs. The left command column keeps the active site, gated launch controls, and provider boundary visible while the right dossier scrolls internally.
 
