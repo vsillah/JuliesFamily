@@ -116,11 +116,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 75",
-  "Query bindings: 37",
+  "Generated API bindings: 76",
+  "Query bindings: 38",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 30",
+  "Smoke-manifest review gaps: 31",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -131,21 +131,24 @@ requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 75",
-  "queryBindings: 37",
+  "totalBindings: 76",
+  "queryBindings: 38",
   "mutationBindings: 38",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 30",
+  "smokeManifestGaps: 31",
+  "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
   "firstSwitchBatch: \"read-only-core\"",
   "npm run kinflo:validate-generated-api-review-board",
 ]);
 
 requireIncludes(generatedContractPath, [
+  "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
+  "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);
 
@@ -217,6 +220,7 @@ for (const [surface, counts] of bySurface) {
 
 if (
   reviewBoardBlock.includes("requiredFunctions: [") &&
+  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationReviewPackets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationProfiles\"")
 ) {
   pass("site factory configuration profile function is visible in review board");

@@ -39,7 +39,7 @@ function requireIncludes(path, patterns) {
 }
 
 function extractConfigurationProfilesBlock(contents) {
-  const match = contents.match(/configurationProfiles:\s*\{([\s\S]*?)\n\s*\},\n\s*launchPackets:/);
+  const match = contents.match(/configurationProfiles:\s*\{([\s\S]*?)\n\s*\},\n\s*configurationReviewPackets:/);
   if (!match) {
     fail("client website configuration profiles block exists", "Could not find clientWebsiteStudio.configurationProfiles.");
     return "";

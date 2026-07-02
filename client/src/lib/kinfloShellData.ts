@@ -692,6 +692,33 @@ export type ShellClientWebsiteConfigurationProfiles = {
   }[];
 };
 
+export type ShellClientWebsiteConfigurationReviewPacket = {
+  siteKey: string;
+  label: string;
+  reviewPosture: "provider-light-configuration-review";
+  selectedProfileStatus: "ready_for_review" | "blocked_human_gate" | "draft";
+  editableSurfaceCount: number;
+  lockedSurfaceCount: number;
+  saveBlockerCount: number;
+  requiredEvidenceCount: number;
+  surfaces: {
+    key: string;
+    label: string;
+    kind: "brand" | "navigation" | "content" | "crm" | "permissions";
+    status: "reviewable" | "locked";
+    evidence: string;
+  }[];
+  saveBlockers: string[];
+  requiredEvidence: string[];
+  blockedLiveActions: string[];
+  nextGate: string;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -907,6 +934,7 @@ export type ShellClientWebsiteStudio = {
   provisioningExecution: ShellClientWebsiteProvisioningExecution;
   spinUpQueue: ShellClientWebsiteSpinUpQueue;
   configurationProfiles: ShellClientWebsiteConfigurationProfiles;
+  configurationReviewPackets: ShellClientWebsiteConfigurationReviewPacket[];
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
@@ -2458,6 +2486,100 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       },
     ],
   },
+  configurationReviewPackets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family configuration review",
+      reviewPosture: "provider-light-configuration-review",
+      selectedProfileStatus: "ready_for_review",
+      editableSurfaceCount: 4,
+      lockedSurfaceCount: 4,
+      saveBlockerCount: 4,
+      requiredEvidenceCount: 4,
+      surfaces: [
+        { key: "brand", label: "Brand system", kind: "brand", status: "reviewable", evidence: "Julie Family trust-and-learning profile is mapped for review." },
+        { key: "navigation", label: "Navigation", kind: "navigation", status: "reviewable", evidence: "Family, programs, volunteer, donate, and contact paths remain editable in fixture review." },
+        { key: "content", label: "Content provenance", kind: "content", status: "reviewable", evidence: "Family learning public content pack keeps source provenance visible." },
+        { key: "crm", label: "CRM intake", kind: "crm", status: "locked", evidence: "Family intake and partner interest writes stay blocked until live lead smoke passes." },
+      ],
+      saveBlockers: ["founding tenant ownership note", "public renderer parity smoke", "lead route smoke", "publish rollback owner"],
+      requiredEvidence: ["seeded tenant ownership note", "content provenance review", "public renderer fixture-to-live smoke", "rollback owner acceptance"],
+      blockedLiveActions: ["configuration save mutation", "content write", "public publish write", "CRM lead write"],
+      nextGate: "Confirm founding tenant ownership and public renderer parity before accepting live configuration.",
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationReviewPackets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteBuilder.updateContentBlock",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client configuration review",
+      reviewPosture: "provider-light-configuration-review",
+      selectedProfileStatus: "blocked_human_gate",
+      editableSurfaceCount: 4,
+      lockedSurfaceCount: 5,
+      saveBlockerCount: 5,
+      requiredEvidenceCount: 5,
+      surfaces: [
+        { key: "brand", label: "Brand system", kind: "brand", status: "reviewable", evidence: "Quiet advisory credibility system is selected but remains local." },
+        { key: "navigation", label: "Navigation", kind: "navigation", status: "reviewable", evidence: "Home, services, proof, intake, and privacy paths are ready for review." },
+        { key: "content", label: "Starter copy", kind: "content", status: "reviewable", evidence: "Proof-led starter pack can be edited before client handoff." },
+        { key: "permissions", label: "Tenant admin scope", kind: "permissions", status: "locked", evidence: "Tenant admin invite stays blocked until owner and hosted read smoke are approved." },
+      ],
+      saveBlockers: ["plan entitlement approval", "tenant owner approval", "hosted read smoke", "domain posture review", "client admin invite approval"],
+      requiredEvidence: ["plan limit review", "tenant owner signoff", "preview URL review", "lead route smoke plan", "domain posture note"],
+      blockedLiveActions: ["tenant create mutation", "site create mutation", "configuration save mutation", "client admin invitation", "Stripe billing activation"],
+      nextGate: "Approve plan entitlement, tenant owner, domain posture, and hosted read smoke before configuration save.",
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationReviewPackets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "controlPlane.createTenant",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite configuration review",
+      reviewPosture: "provider-light-configuration-review",
+      selectedProfileStatus: "draft",
+      editableSurfaceCount: 4,
+      lockedSurfaceCount: 5,
+      saveBlockerCount: 5,
+      requiredEvidenceCount: 4,
+      surfaces: [
+        { key: "brand", label: "Offer system", kind: "brand", status: "reviewable", evidence: "Campaign offer proof system is draft-ready for local review." },
+        { key: "content", label: "Proof block", kind: "content", status: "reviewable", evidence: "Offer copy, proof block, and signup path can be reviewed without writes." },
+        { key: "crm", label: "Lead routing", kind: "crm", status: "locked", evidence: "Public form write stays blocked until lead route and consent review pass." },
+        { key: "permissions", label: "Editor scope", kind: "permissions", status: "locked", evidence: "Site editor invite is blocked until campaign consent and site scope are approved." },
+      ],
+      saveBlockers: ["campaign consent review", "site scope approval", "lead routing review", "provider-send boundary", "AI copy approval"],
+      requiredEvidence: ["campaign consent note", "site editor scope review", "lead route smoke plan", "provider-send boundary note"],
+      blockedLiveActions: ["site create mutation", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+      nextGate: "Approve campaign consent, site scope, lead routing, and provider-send boundary.",
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationReviewPackets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "campaigns.requestCampaignApproval",
+      ],
+    },
+  ],
   launchPackets: [
     {
       siteKey: "julies-family-public",
@@ -5675,11 +5797,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 75,
-    queryBindings: 37,
+    totalBindings: 76,
+    queryBindings: 38,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 30,
+    smokeManifestGaps: 31,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -5732,12 +5854,13 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 14,
-        queryBindings: 13,
+        totalBindings: 15,
+        queryBindings: 14,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
           "siteFactory.listClientWebsiteAdminPermissionPresets",
+          "siteFactory.listClientWebsiteConfigurationReviewPackets",
           "siteFactory.listClientWebsiteConfigurationProfiles",
           "siteFactory.listClientWebsiteLaunchBlueprints",
           "siteFactory.listClientWebsitePreviewReviewPackets",

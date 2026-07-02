@@ -103,6 +103,8 @@ for (const path of [
 requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", [
   "Phase 98: Configuration Profile Generated API Coverage",
   "npm run kinflo:validate-configuration-profile-generated-api-coverage",
+  "siteFactoryListClientWebsiteConfigurationReviewPackets",
+  "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "siteFactory.listClientWebsiteConfigurationProfiles",
   "configuration profile read",
@@ -111,26 +113,31 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
 ]);
 
 requireIncludes(runtimePath, [
+  "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);
 
 requireIncludes(generatedContractPath, [
+  "siteFactoryListClientWebsiteConfigurationReviewPackets",
+  "client website configuration review packets include selected-site surfaces, save blockers, required evidence, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "client website configuration profiles include template, brand, navigation, CRM, editable surfaces, locked surfaces, and provider boundaries",
 ]);
 
 requireIncludes(convexPath, [
+  "export const listClientWebsiteConfigurationReviewPackets",
   "export const listClientWebsiteConfigurationProfiles",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 75",
-  "Query bindings: 37",
-  "Smoke-manifest review gaps: 30",
+  "Generated API bindings: 76",
+  "Query bindings: 38",
+  "Smoke-manifest review gaps: 31",
 ]);
 
 requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
+  "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
 ]);
 
@@ -171,6 +178,20 @@ for (const [label, surface] of [
   } else {
     fail(`${label} includes configuration profile smoke evidence`, "Configuration profile read evidence must be required before adapter switch.");
   }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationReviewPackets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationReviewPackets")) {
+    pass(`${label} includes configuration review packet function`);
+  } else {
+    fail(`${label} includes configuration review packet function`, "Configuration review packet read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration review packet read")
+    || surface?.smokeEvidenceRequired?.includes("configuration review packet read")) {
+    pass(`${label} includes configuration review packet smoke evidence`);
+  } else {
+    fail(`${label} includes configuration review packet smoke evidence`, "Configuration review packet read evidence must be required before adapter switch.");
+  }
 }
 
 for (const path of [
@@ -207,7 +228,9 @@ for (const check of checks) {
 }
 
 console.log("\nKinFlo configuration profile generated API coverage validation");
+console.log("Runtime key: siteFactoryListClientWebsiteConfigurationReviewPackets");
 console.log("Runtime key: siteFactoryListClientWebsiteConfigurationProfiles");
+console.log("Convex function: siteFactory.listClientWebsiteConfigurationReviewPackets");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationProfiles");
 console.log("Adapter surface: site-factory");
 console.log("External writes: 0");

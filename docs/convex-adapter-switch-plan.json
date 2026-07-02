@@ -185,12 +185,14 @@
           "convexFunctions": [
             "siteFactory.listStarterTemplates",
             "siteFactory.listClientWebsiteAdminPermissionPresets",
+            "siteFactory.listClientWebsiteConfigurationReviewPackets",
             "siteFactory.listClientWebsiteConfigurationProfiles",
             "siteFactory.listClientWebsiteLaunchBlueprints",
             "siteFactory.createSiteFromTemplate"
           ],
           "requiredSmokeEvidence": [
             "template list",
+            "configuration review packet read",
             "configuration profile read",
             "draft site created from template",
             "owner invite scoped"
