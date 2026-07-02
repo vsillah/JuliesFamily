@@ -2988,6 +2988,108 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
+                <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-smoke-execution-sequencer">
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Hosted Smoke Execution Sequencer</CardTitle>
+                        <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700">
+                          {snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.blockedBatches} blocked
+                        </Badge>
+                      </div>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid="text-kinflo-hosted-smoke-execution-sequencer">
+                        {snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.approvalGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-hosted-smoke-execution-gated">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Batch execution gated
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-3 md:grid-cols-4" data-testid="section-kinflo-hosted-smoke-execution-summary">
+                      {[
+                        { label: "Batches", value: snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.totalBatches },
+                        { label: "Functions", value: snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.totalFunctions },
+                        { label: "Blocked", value: snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.blockedBatches },
+                        { label: "Read-only first", value: snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.readOnlyFirst ? "yes" : "no" },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid max-h-[520px] gap-3 overflow-y-auto pr-1 xl:grid-cols-2" data-testid="section-kinflo-hosted-smoke-execution-scroll">
+                      {snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.batches.map((batch) => (
+                        <div key={batch.id} className="rounded-lg border border-slate-200 bg-white p-4" data-testid={`card-hosted-smoke-execution-${batch.id}`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Batch {batch.order}</div>
+                              <div className="mt-1 text-sm font-semibold text-slate-950">{batch.label}</div>
+                            </div>
+                            <Badge
+                              variant={batch.smokeMode === "read_only" ? "secondary" : "outline"}
+                              className="shrink-0"
+                            >
+                              {batch.smokeMode.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <Badge variant="outline">{batch.functionCount} functions</Badge>
+                            <Badge variant="outline">Owner: {batch.owner}</Badge>
+                            <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700">
+                              can run: {batch.canRun ? "yes" : "no"}
+                            </Badge>
+                          </div>
+
+                          <div className="mt-3 grid gap-2 text-xs">
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <span className="font-medium text-slate-900">Required first: </span>
+                              <span className="text-slate-600">{batch.requiredBeforeRun}</span>
+                            </div>
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <span className="font-medium text-slate-900">Evidence: </span>
+                              <span className="text-slate-600">{batch.evidenceTarget}</span>
+                            </div>
+                            <div className="rounded-md border border-rose-100 bg-rose-50 p-2">
+                              <span className="font-medium text-rose-900">Abort if: </span>
+                              <span className="text-rose-700">{batch.abortCondition}</span>
+                            </div>
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <span className="font-medium text-slate-900">Rollback: </span>
+                              <span className="text-slate-600">{batch.rollbackPlan}</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {batch.functions.map((functionName) => (
+                              <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">
+                                {functionName}
+                              </Badge>
+                            ))}
+                          </div>
+                          <p className="mt-3 text-xs leading-5 text-slate-600">{batch.blockedUntil}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.sourceDocuments.map((documentPath) => (
+                        <div key={documentPath} className="rounded-md border border-slate-200 px-3 py-2 text-xs">
+                          <span className="break-all">{documentPath}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      {snapshot.hostedActivationRunbook.hostedSmokeExecutionSequencer.providerBoundary}
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-decision-register">
                   <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
                     <div>
@@ -4882,49 +4984,105 @@ export default function AdminKinfloShell() {
                       </TabsList>
 
                       <TabsContent value="order" className="mt-3" data-testid="section-kinflo-client-provisioning-order">
-                        <div className="max-h-[360px] space-y-4 overflow-y-auto pr-1" data-testid="section-kinflo-client-provisioning-order-scroll">
-                          <div>
-                            <div className="text-sm font-medium">Setup order</div>
-                            <div className="mt-2 space-y-2">
-                              {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step) => (
-                                <div key={step} className="flex items-start gap-2 text-sm leading-5 text-slate-600">
-                                  <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                                  <span>{step}</span>
+                        <div
+                          className="grid max-h-[360px] min-h-0 gap-3 overflow-hidden lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
+                          data-testid="section-kinflo-client-provisioning-order-cockpit"
+                        >
+                          <div
+                            className="min-h-0 rounded-md border border-slate-200 bg-slate-50 p-3"
+                            data-testid="section-kinflo-client-provisioning-order-scroll"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <div className="text-sm font-medium">Setup order</div>
+                                <div className="mt-0.5 text-xs text-slate-500">
+                                  {selectedClientWebsiteProvisioningOrder?.setupSteps.length ?? 0} provider-light steps
+                                </div>
+                              </div>
+                              <Badge variant="outline" className="bg-white">Ordered</Badge>
+                            </div>
+                            <div className="mt-3 max-h-[260px] space-y-2 overflow-y-auto pr-1">
+                              {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step, index) => (
+                                <div key={step} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs leading-5 text-slate-600">
+                                  <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-500">
+                                    {index + 1}
+                                  </div>
+                                  <span className="min-w-0">{step}</span>
                                 </div>
                               ))}
                             </div>
                           </div>
 
-                          <div>
-                            <div className="text-sm font-medium">Approval evidence</div>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
-                                <Badge key={item} variant="secondary" className="max-w-full whitespace-normal text-left">{item}</Badge>
-                              ))}
-                            </div>
-                          </div>
+                          <div
+                            className="min-h-0 rounded-md border border-slate-200 bg-white p-3"
+                            data-testid="section-kinflo-client-provisioning-order-detail-tabs"
+                          >
+                            <Tabs defaultValue="evidence" className="min-h-0" data-testid="tabs-kinflo-client-provisioning-order-detail">
+                              <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                                <TabsTrigger value="evidence" data-testid="tab-kinflo-client-provisioning-evidence">Evidence</TabsTrigger>
+                                <TabsTrigger value="blocked" data-testid="tab-kinflo-client-provisioning-blocked">Blocked</TabsTrigger>
+                                <TabsTrigger value="functions" data-testid="tab-kinflo-client-provisioning-functions">Functions</TabsTrigger>
+                              </TabsList>
 
-                          <div>
-                            <div className="text-sm font-medium">Blocked live actions</div>
-                            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                              {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
-                                <div key={action} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
-                                  <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
-                                  <span>{action}</span>
+                              <TabsContent value="evidence" className="mt-3" data-testid="section-kinflo-client-provisioning-evidence-panel">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div>
+                                    <div className="text-sm font-medium">Approval evidence</div>
+                                    <div className="mt-0.5 text-xs text-slate-500">
+                                      {selectedClientWebsiteProvisioningOrder?.approvalEvidence.length ?? 0} required proof items
+                                    </div>
+                                  </div>
+                                  <Badge variant="secondary">Proof first</Badge>
                                 </div>
-                              ))}
-                            </div>
-                          </div>
+                                <div className="mt-3 max-h-[210px] grid gap-2 overflow-y-auto pr-1">
+                                  {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
+                                    <div key={item} className="rounded-md border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs font-medium leading-5 text-emerald-800">
+                                      {item}
+                                    </div>
+                                  ))}
+                                </div>
+                              </TabsContent>
 
-                          <div className="border-t border-slate-100 pt-3">
-                            <div className="flex flex-wrap gap-2">
-                              {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
-                                <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">{functionName}</Badge>
-                              ))}
-                            </div>
+                              <TabsContent value="blocked" className="mt-3" data-testid="section-kinflo-client-provisioning-blocked-panel">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div>
+                                    <div className="text-sm font-medium">Blocked live actions</div>
+                                    <div className="mt-0.5 text-xs text-slate-500">
+                                      {selectedClientWebsiteProvisioningOrder?.blockedActions.length ?? 0} actions remain gated
+                                    </div>
+                                  </div>
+                                  <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">Gated</Badge>
+                                </div>
+                                <div className="mt-3 max-h-[210px] grid gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+                                  {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
+                                    <div key={action} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                                      <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                      <span>{action}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </TabsContent>
+
+                              <TabsContent value="functions" className="mt-3" data-testid="section-kinflo-client-provisioning-functions-panel">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div>
+                                    <div className="text-sm font-medium">Convex contract</div>
+                                    <div className="mt-0.5 text-xs text-slate-500">
+                                      {selectedClientWebsiteProvisioningOrder?.convexFunctions.length ?? 0} mapped functions
+                                    </div>
+                                  </div>
+                                  <Badge variant="outline" className="bg-white">Mapped</Badge>
+                                </div>
+                                <div className="mt-3 max-h-[210px] flex flex-wrap gap-2 overflow-y-auto pr-1">
+                                  {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
+                                    <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">{functionName}</Badge>
+                                  ))}
+                                </div>
+                              </TabsContent>
+                            </Tabs>
                           </div>
                         </div>
-                        <Button disabled variant="outline" className="mt-3 w-full" data-testid="button-client-provisioning-order-gated">
+                        <Button disabled variant="outline" className="mt-3 h-10 w-full" data-testid="button-client-provisioning-order-gated">
                           <Workflow className="mr-2 h-4 w-4" />
                           Provisioning gated
                         </Button>

@@ -135,10 +135,12 @@
         "docs/phase85-hosted-activation-approval-packet.md",
         "docs/phase88-generated-api-review-board.md",
         "docs/phase90-hosted-smoke-gap-backlog.md",
+        "docs/phase91-hosted-smoke-execution-sequencer.md",
         "docs/convex-live-smoke-manifest.json",
         "docs/convex-hosted-activation-approval-packet.json",
         "npm run kinflo:validate-generated-api-review-board",
         "npm run kinflo:validate-hosted-smoke-gap-backlog",
+        "npm run kinflo:validate-hosted-smoke-execution-sequencer",
         "npm run kinflo:validate-hosted-activation-decisions",
         "npm run kinflo:validate-hosted-activation-approval-packet",
         "npm run kinflo:activation-preflight",
@@ -148,7 +150,7 @@
     }
   ],
   "nextRepoSafeActions": [
-    "Keep tightening fixture-to-live parity, adapter-switch evidence, the Phase 87 switch runway, the Phase 88 generated API review board, the Phase 89 switch acceptance matrix, and the Phase 90 hosted smoke gap backlog without importing convex/_generated/api.",
+    "Keep tightening fixture-to-live parity, adapter-switch evidence, the Phase 87 switch runway, the Phase 88 generated API review board, the Phase 89 switch acceptance matrix, the Phase 90 hosted smoke gap backlog, and the Phase 91 hosted smoke execution sequencer without importing convex/_generated/api.",
     "Keep the human-gate decision register and Phase 85 owner approval packet current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
     "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
   ],
@@ -180,6 +182,7 @@
     "npm run kinflo:validate-generated-api-review-board",
     "npm run kinflo:validate-adapter-switch-acceptance-matrix",
     "npm run kinflo:validate-hosted-smoke-gap-backlog",
+    "npm run kinflo:validate-hosted-smoke-execution-sequencer",
     "npm run kinflo:validate-hosted-activation-decisions",
     "npm run kinflo:validate-hosted-activation-approval-packet",
     "npm run kinflo:validate-phase0-readiness",

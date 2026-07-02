@@ -79,6 +79,7 @@
     "kinflo:validate-generated-api-review-board": "node scripts/validate-kinflo-generated-api-review-board.mjs",
     "kinflo:validate-adapter-switch-acceptance-matrix": "node scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
     "kinflo:validate-hosted-smoke-gap-backlog": "node scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs",
+    "kinflo:validate-hosted-smoke-execution-sequencer": "node scripts/validate-kinflo-hosted-smoke-execution-sequencer.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

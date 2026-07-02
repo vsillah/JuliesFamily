@@ -208,6 +208,36 @@ export type ShellHostedSmokeGapBacklog = {
   gaps: ShellHostedSmokeGap[];
 };
 
+export type ShellHostedSmokeExecutionBatch = {
+  id: string;
+  order: number;
+  label: string;
+  smokeMode: ShellHostedSmokeGapMode | "mixed";
+  functionCount: number;
+  functions: string[];
+  requiredBeforeRun: string;
+  evidenceTarget: string;
+  abortCondition: string;
+  rollbackPlan: string;
+  owner: string;
+  blockedUntil: string;
+  canRun: boolean;
+  providerWrites: boolean;
+  liveConvexExecution: boolean;
+};
+
+export type ShellHostedSmokeExecutionSequencer = {
+  status: "provider_light_hosted_smoke_execution_sequencer";
+  totalBatches: number;
+  totalFunctions: number;
+  readOnlyFirst: boolean;
+  blockedBatches: number;
+  approvalGate: string;
+  providerBoundary: string;
+  sourceDocuments: string[];
+  batches: ShellHostedSmokeExecutionBatch[];
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -215,6 +245,7 @@ export type ShellHostedActivationRunbook = {
   activationConsole: ShellHostedActivationConsole;
   generatedApiReviewBoard: ShellGeneratedApiReviewBoard;
   hostedSmokeGapBacklog: ShellHostedSmokeGapBacklog;
+  hostedSmokeExecutionSequencer: ShellHostedSmokeExecutionSequencer;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -4465,6 +4496,148 @@ const fixtureHostedSmokeGapBacklog: ShellHostedSmokeGapBacklog = {
   ],
 };
 
+const fixtureHostedSmokeExecutionSequencer: ShellHostedSmokeExecutionSequencer = {
+  status: "provider_light_hosted_smoke_execution_sequencer",
+  totalBatches: 6,
+  totalFunctions: 16,
+  readOnlyFirst: true,
+  blockedBatches: 6,
+  approvalGate: "Execution order is prepared only. Vambah must approve hosted ownership, generated API review, smoke window, rollback owner, and batch order before any hosted smoke runs.",
+  providerBoundary: "This sequencer is local review metadata. It does not create a hosted Convex deployment, run codegen, import generated API files, execute live Convex functions, write provider metadata, send campaigns, call AI providers, publish sites, or read secrets.",
+  sourceDocuments: [
+    "docs/phase90-hosted-smoke-gap-backlog.md",
+    "docs/convex-adapter-switch-plan.json",
+    "docs/convex-live-smoke-manifest.json",
+    "docs/phase89-adapter-switch-acceptance-matrix.md",
+  ],
+  batches: [
+    {
+      id: "read-only-core",
+      order: 10,
+      label: "Read-only core launch readiness",
+      smokeMode: "read_only",
+      functionCount: 1,
+      functions: [
+        "launchReadiness.getSiteLaunchReadiness",
+      ],
+      requiredBeforeRun: "Hosted Convex ownership, auth posture, generated API review, and read-only smoke approval are accepted.",
+      evidenceTarget: "Capture launch readiness response, site:view scope, provider-action block state, and cross-tenant deny proof for the approved smoke site.",
+      abortCondition: "Stop if site scope leaks, launch evidence is missing, provider action blocking is false, or generated API binding names diverge.",
+      rollbackPlan: "Keep fixture launch readiness active and leave generatedApiAvailable false.",
+      owner: "platform.super_admin",
+      blockedUntil: "Hosted read-only smoke window is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "user-scoped-preferences",
+      order: 20,
+      label: "User-scoped preference read and reversible write",
+      smokeMode: "mixed",
+      functionCount: 2,
+      functions: [
+        "preferences.getMyPreferences",
+        "preferences.upsertMyPreferences",
+      ],
+      requiredBeforeRun: "Read-only user preference scope passes before one reversible preference upsert is authorized.",
+      evidenceTarget: "Capture signed-in user isolation, tenant/site defaults, reversible upsert payload, and cleanup confirmation.",
+      abortCondition: "Stop before mutation if another user can read the smoke preference, defaults cross tenant boundaries, or cleanup ownership is unclear.",
+      rollbackPlan: "Delete or overwrite the smoke preference record and restore fixture density, filters, site context, and landing-page defaults.",
+      owner: "platform.super_admin",
+      blockedUntil: "Preference mutation smoke order and rollback owner are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-creation-and-admin",
+      order: 30,
+      label: "Site factory blueprints and admin presets",
+      smokeMode: "read_only",
+      functionCount: 2,
+      functions: [
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "siteFactory.listClientWebsiteLaunchBlueprints",
+      ],
+      requiredBeforeRun: "Client site fixture, permission preset, and launch packet owner are confirmed before hosted reads.",
+      evidenceTarget: "Capture tenant-scoped preset and blueprint reads, owner/invite role mapping, default pages, permission gates, and publish disabled state.",
+      abortCondition: "Stop if presets leak across tenants, launch packet links do not match the selected site, or publish/invite actions become enabled.",
+      rollbackPlan: "Keep fixture permission presets and launch blueprints selected until hosted scope and launch packet mapping are accepted.",
+      owner: "platform.super_admin",
+      blockedUntil: "Client permission and launch blueprint read smokes are approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "public-crm-loop",
+      order: 40,
+      label: "CRM rules and lead-stage mutation path",
+      smokeMode: "mixed",
+      functionCount: 3,
+      functions: [
+        "crm.listJourneyProgressionRules",
+        "crm.upsertJourneyProgressionRule",
+        "crm.transitionLeadStage",
+      ],
+      requiredBeforeRun: "Public lead smoke, notification pause, cleanup policy, and CRM mutation rollback owner are accepted.",
+      evidenceTarget: "Capture tenant-scoped rule reads, one reversible rule upsert, one smoke lead transition, timeline/audit append proof, and notification pause proof.",
+      abortCondition: "Stop if outbound notifications are not paused, smoke lead data cannot be marked test-only, or audit events are missing.",
+      rollbackPlan: "Delete or mark smoke CRM records as test-only, restore fixture journey rules, and keep outbound notifications paused.",
+      owner: "platform.super_admin",
+      blockedUntil: "CRM mutation smoke order and cleanup policy are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "provider-readiness-records",
+      order: 50,
+      label: "Provider readiness metadata without provider writes",
+      smokeMode: "provider_gated_metadata",
+      functionCount: 2,
+      functions: [
+        "integrations.listIntegrationSettings",
+        "integrations.upsertIntegrationSetting",
+      ],
+      requiredBeforeRun: "Secret-value exclusion, metadata-only write boundary, and provider-call block proof are accepted.",
+      evidenceTarget: "Capture provider settings without secret values, one metadata-only upsert, and proof that DNS, email, payment, storage, and AI provider calls remain disabled.",
+      abortCondition: "Stop if any secret value appears, provider call path is reachable, or metadata rows cannot be deactivated.",
+      rollbackPlan: "Deactivate the smoke metadata record and return integration readiness rows to fixtures.",
+      owner: "platform.super_admin",
+      blockedUntil: "Metadata-only provider boundary and rollback owner are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "campaign-and-ai-governance",
+      order: 60,
+      label: "Campaign and AI governance records",
+      smokeMode: "governance",
+      functionCount: 6,
+      functions: [
+        "campaigns.listCampaignDrafts",
+        "campaigns.upsertCampaignDraft",
+        "campaigns.approveCampaignDraft",
+        "aiReview.listAiGenerationRecords",
+        "aiReview.upsertAiGenerationRecord",
+        "aiReview.reviewAiGenerationRecord",
+      ],
+      requiredBeforeRun: "Campaign consent, provider-send pause, AI provider-call block, reviewer authority, and publish rollback are accepted.",
+      evidenceTarget: "Capture campaign draft read, reversible draft upsert, approval-state change without send, AI provenance read/upsert/review, and publish/provider blocks.",
+      abortCondition: "Stop if email/SMS/automation send paths are reachable, AI generation calls can execute, or reviewer authority is ambiguous.",
+      rollbackPlan: "Pause or delete smoke campaign records, revert AI review decisions, keep generated output unpublished, and restore fixture governance state.",
+      owner: "platform.super_admin",
+      blockedUntil: "Campaign and AI governance smoke order is accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+  ],
+};
+
 const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger",
   defaultStepId: "repo-sharing-risk",
@@ -4662,6 +4835,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     ],
   },
   hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog,
+  hostedSmokeExecutionSequencer: fixtureHostedSmokeExecutionSequencer,
   decisionRegister: [
     {
       id: "credential-rotation-review",

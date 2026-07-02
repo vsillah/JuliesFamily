@@ -21,6 +21,11 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 - Tabs: `tabs-kinflo-client-provisioning-workbench`
 - Order tab: `tab-kinflo-client-provisioning-order`
 - Dry run tab: `tab-kinflo-client-provisioning-dry-run`
+- Compact order cockpit: `section-kinflo-client-provisioning-order-cockpit`
+- Order detail tabs: `tabs-kinflo-client-provisioning-order-detail`
+- Evidence panel: `section-kinflo-client-provisioning-evidence-panel`
+- Blocked action panel: `section-kinflo-client-provisioning-blocked-panel`
+- Function contract panel: `section-kinflo-client-provisioning-functions-panel`
 - Bounded order scroll: `section-kinflo-client-provisioning-order-scroll`
 - Bounded dry-run scroll: `section-kinflo-client-provisioning-dry-run-scroll`
 - Launch command column: `section-kinflo-client-launch-command-column`
@@ -37,7 +42,8 @@ The Site Studio workbench now uses page-level stage tabs for `Sites`, `Preview`,
 The prior right-rail provisioning content stacked a large provisioning order card and a large execution dry-run card. The layout keeps the same evidence and gated actions but moves them into one compact card:
 
 - plan, template, owner, and invite become summary chips,
-- setup order, approval evidence, blocked actions, and function references live under the `Order` tab,
+- setup order stays visible in a compact order cockpit,
+- approval evidence, blocked actions, and function references move into internal `Evidence`, `Blocked`, and `Functions` tabs inside the `Order` tab,
 - manifest, dry-run counters, selected order steps, provider boundary, and blocked-until gates live under the `Dry run` tab,
 - long lists use bounded internal scroll areas instead of increasing the full page height.
 
