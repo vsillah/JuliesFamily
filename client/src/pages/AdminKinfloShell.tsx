@@ -329,6 +329,14 @@ function readInitialAdapterSwitchBatchId(defaultBatchId: string, batchIds: strin
   return batchId && batchIds.includes(batchId) ? batchId : defaultBatchId;
 }
 
+function readInitialAdapterSwitchSurfaceId(defaultSurfaceId: string, surfaceIds: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultSurfaceId;
+  }
+  const surfaceId = new URLSearchParams(window.location.search).get("adapterSurface");
+  return surfaceId && surfaceIds.includes(surfaceId) ? surfaceId : defaultSurfaceId;
+}
+
 function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
     return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
@@ -1462,6 +1470,13 @@ export default function AdminKinfloShell() {
     snapshot.adapterSwitchReadiness.defaultBatchId,
     adapterSwitchBatchIds,
   ));
+  const defaultAdapterSwitchSurfaceIds = snapshot.adapterSwitchReadiness.batches
+    .find((batch) => batch.id === snapshot.adapterSwitchReadiness.defaultBatchId)
+    ?.surfaces.map((surface) => surface.id) ?? [];
+  const [adapterSwitchSurfaceId, setAdapterSwitchSurfaceId] = useState(() => readInitialAdapterSwitchSurfaceId(
+    defaultAdapterSwitchSurfaceIds[0] ?? "",
+    defaultAdapterSwitchSurfaceIds,
+  ));
   const hostedActivationStepIds = useMemo(
     () => snapshot.hostedActivationRunbook.steps.map((step) => step.id),
     [snapshot.hostedActivationRunbook.steps],
@@ -1588,6 +1603,11 @@ export default function AdminKinfloShell() {
     () => snapshot.adapterSwitchReadiness.batches.find((batch) => batch.id === adapterSwitchBatchId)
       ?? snapshot.adapterSwitchReadiness.batches[0],
     [adapterSwitchBatchId, snapshot.adapterSwitchReadiness.batches],
+  );
+  const selectedAdapterSwitchSurface = useMemo(
+    () => selectedAdapterSwitchBatch?.surfaces.find((surface) => surface.id === adapterSwitchSurfaceId)
+      ?? selectedAdapterSwitchBatch?.surfaces[0],
+    [adapterSwitchSurfaceId, selectedAdapterSwitchBatch],
   );
   const selectedAdapterSwitchAcceptance = useMemo(
     () => snapshot.adapterSwitchReadiness.acceptanceMatrix.find((batch) => batch.batchId === adapterSwitchBatchId)
@@ -2288,6 +2308,13 @@ export default function AdminKinfloShell() {
       snapshot.adapterSwitchReadiness.defaultBatchId,
       adapterSwitchBatchIds,
     );
+    const nextAdapterSwitchSurfaceIds = snapshot.adapterSwitchReadiness.batches
+      .find((batch) => batch.id === nextAdapterSwitchBatchId)
+      ?.surfaces.map((surface) => surface.id) ?? [];
+    const nextAdapterSwitchSurfaceId = readInitialAdapterSwitchSurfaceId(
+      nextAdapterSwitchSurfaceIds[0] ?? "",
+      nextAdapterSwitchSurfaceIds,
+    );
     const nextHostedActivationStepId = readInitialHostedActivationStepId(
       snapshot.hostedActivationRunbook.defaultStepId,
       hostedActivationStepIds,
@@ -2297,11 +2324,13 @@ export default function AdminKinfloShell() {
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
     setAdapterSwitchBatchId((current) => (current === nextAdapterSwitchBatchId ? current : nextAdapterSwitchBatchId));
+    setAdapterSwitchSurfaceId((current) => (current === nextAdapterSwitchSurfaceId ? current : nextAdapterSwitchSurfaceId));
     setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
   }, [
     adapterSwitchBatchIds,
     hostedActivationStepIds,
     location,
+    snapshot.adapterSwitchReadiness.batches,
     snapshot.adapterSwitchReadiness.defaultBatchId,
     snapshot.hostedActivationRunbook.defaultStepId,
   ]);
@@ -2333,6 +2362,7 @@ export default function AdminKinfloShell() {
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
       adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
+      adapterSurface: tab === "adapter-switch" ? adapterSwitchSurfaceId : undefined,
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
     });
   };
@@ -2346,6 +2376,7 @@ export default function AdminKinfloShell() {
       studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
       adapterBatch: undefined,
+      adapterSurface: undefined,
       activationStep: undefined,
     });
   };
@@ -2360,6 +2391,7 @@ export default function AdminKinfloShell() {
       studioStage: stage,
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
       adapterBatch: undefined,
+      adapterSurface: undefined,
       activationStep: undefined,
     });
   };
@@ -2375,19 +2407,38 @@ export default function AdminKinfloShell() {
       studioStage: "launch",
       studioDossier: dossier,
       adapterBatch: undefined,
+      adapterSurface: undefined,
       activationStep: undefined,
     });
   };
 
   const selectAdapterSwitchBatch = (batchId: string) => {
+    const batch = snapshot.adapterSwitchReadiness.batches.find((item) => item.id === batchId);
+    const surfaceId = batch?.surfaces[0]?.id ?? "";
     setActiveTab("adapter-switch");
     setAdapterSwitchBatchId(batchId);
+    setAdapterSwitchSurfaceId(surfaceId);
     updateKinfloShellRoute({
       tab: "adapter-switch",
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
       adapterBatch: batchId,
+      adapterSurface: surfaceId,
+      activationStep: undefined,
+    });
+  };
+
+  const selectAdapterSwitchSurface = (surfaceId: string) => {
+    setActiveTab("adapter-switch");
+    setAdapterSwitchSurfaceId(surfaceId);
+    updateKinfloShellRoute({
+      tab: "adapter-switch",
+      studioLane: undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      adapterBatch: adapterSwitchBatchId,
+      adapterSurface: surfaceId,
       activationStep: undefined,
     });
   };
@@ -2401,6 +2452,7 @@ export default function AdminKinfloShell() {
       studioStage: undefined,
       studioDossier: undefined,
       adapterBatch: undefined,
+      adapterSurface: undefined,
       activationStep: stepId,
     });
   };
@@ -2445,7 +2497,7 @@ export default function AdminKinfloShell() {
             </div>
           </div>
           <div
-            className="grid min-w-0 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]"
+            className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]`}
             data-testid="section-kinflo-active-object-signal"
           >
             <div className="min-w-0">
@@ -2491,20 +2543,27 @@ export default function AdminKinfloShell() {
       </div>
 
       <main className="mx-auto w-full max-w-7xl overflow-x-hidden px-4 py-7 sm:px-6 lg:px-8">
-        <section className="grid gap-5 rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] lg:p-6" data-testid="section-kinflo-command-brief">
+        <section
+          className={`grid rounded-lg border border-slate-200 bg-white shadow-sm ${
+            activeTab === "site-studio"
+              ? "hidden"
+              : "gap-5 p-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] lg:p-6"
+          }`}
+          data-testid="section-kinflo-command-brief"
+        >
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="secondary" className="bg-emerald-50 text-emerald-800 hover:bg-emerald-50">Command Brief</Badge>
               <Badge variant="outline" className="border-slate-300 bg-white">{snapshot.dataMode.runtimeLabel}</Badge>
               <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">{snapshot.activeObjectSignal.environment}</Badge>
             </div>
-            <h2 className="mt-4 max-w-3xl text-2xl font-semibold leading-tight tracking-normal md:text-3xl">
+            <h2 className={`${activeTab === "site-studio" ? "mt-2 text-lg" : "mt-4 text-2xl md:text-3xl"} max-w-3xl font-semibold leading-tight tracking-normal`}>
               {commandBrief.decision}
             </h2>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+            <p className={`${activeTab === "site-studio" ? "hidden" : "mt-3"} max-w-3xl text-sm leading-6 text-slate-600`}>
               {commandBrief.headline}: {commandBrief.blocker}
             </p>
-            <div className="mt-5 rounded-md border border-slate-200 bg-slate-50 p-4" data-testid="section-kinflo-active-object-detail">
+            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-5 rounded-md border border-slate-200 bg-slate-50 p-4"}`} data-testid="section-kinflo-active-object-detail">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0">
                   <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{snapshot.activeObjectSignal.objectType}</div>
@@ -2558,7 +2617,7 @@ export default function AdminKinfloShell() {
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className={`${activeTab === "site-studio" ? "mt-2" : "mt-4"} flex flex-wrap gap-2`}>
               {commandBrief.proof.map((item) => (
                 <Badge key={item} variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
                   {item}
@@ -2575,8 +2634,8 @@ export default function AdminKinfloShell() {
               </div>
               {commandBrief.nextGate ? hostedActivationStatusBadge(commandBrief.nextGate.status) : null}
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-300">{commandBrief.nextGate?.evidenceTarget}</p>
-            <div className="mt-4 rounded-md border border-white/10 bg-white/5 p-3" data-testid="section-kinflo-active-object-unblock-detail">
+            <p className={`${activeTab === "site-studio" ? "hidden" : "mt-3"} text-sm leading-6 text-slate-300`}>{commandBrief.nextGate?.evidenceTarget}</p>
+            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-4 rounded-md border border-white/10 bg-white/5 p-3"}`} data-testid="section-kinflo-active-object-unblock-detail">
               <div className="text-xs font-medium uppercase tracking-normal text-slate-400">Unblock condition</div>
               <p className="mt-1 text-sm leading-6 text-slate-300">{snapshot.activeObjectSignal.unblockCondition}</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -2587,7 +2646,7 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
             </div>
-            <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            <div className={`${activeTab === "site-studio" ? "mt-3 grid-cols-3" : "mt-4 sm:grid-cols-3"} grid gap-2`}>
               <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => selectShellTab("launch-readiness")}>
                 <Rocket className="mr-2 h-3 w-3" />
                 Launch
@@ -2604,7 +2663,7 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+        <div className={`${activeTab === "site-studio" ? "hidden" : "mt-5 grid"} gap-3 md:grid-cols-2 xl:grid-cols-5`}>
           {snapshot.metrics.map((metric) => {
             const Icon = metricIcons[metric.iconKey];
             return (
@@ -2622,7 +2681,7 @@ export default function AdminKinfloShell() {
           })}
         </div>
 
-        <Card className="mt-5 border-slate-200 bg-white shadow-none">
+        <Card className={`${activeTab === "site-studio" ? "hidden" : "mt-5"} border-slate-200 bg-white shadow-none`}>
           <CardHeader className="flex flex-col gap-3 space-y-0 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -2719,15 +2778,15 @@ export default function AdminKinfloShell() {
           </CardContent>
         </Card>
 
-        <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className="mt-7 min-w-0">
+        <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-3" : "mt-7"} min-w-0`}>
           <section
-            className="mb-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+            className={`${activeTab === "site-studio" ? "mb-2 rounded-lg p-2" : "mb-3 rounded-2xl p-3"} border border-slate-200 bg-white shadow-sm`}
             data-testid="section-kinflo-workflow-navigation-rail"
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-sm font-semibold text-slate-950">Workflow navigation</div>
-                <p className="mt-1 text-xs leading-5 text-slate-500">
+                <p className={`${activeTab === "site-studio" ? "hidden" : "mt-1"} text-xs leading-5 text-slate-500`}>
                   Control, Build, Launch, Growth, Evidence, and Hosted Activation group every existing tab by work mode.
                 </p>
               </div>
@@ -2735,7 +2794,7 @@ export default function AdminKinfloShell() {
                 {workflowNavigationTabCoverage.length}/{shellTabValues.length} tabs reachable
               </Badge>
             </div>
-            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3" data-testid="section-kinflo-workflow-navigation-lanes">
+            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-3 grid"} gap-2 md:grid-cols-2 xl:grid-cols-3`} data-testid="section-kinflo-workflow-navigation-lanes">
               {workflowNavigationLanes.map((lane) => {
                 const LaneIcon = lane.icon;
                 const isActiveLane = lane.tabs.includes(activeTab);
@@ -3100,20 +3159,37 @@ export default function AdminKinfloShell() {
                       </div>
                       <p className="mt-2 text-sm text-muted-foreground">{snapshot.adapterSwitchReadiness.providerBoundary}</p>
                     </div>
-                    <div className="w-full lg:w-[300px]">
-                      <Label>Switch batch</Label>
-                      <Select value={adapterSwitchBatchId} onValueChange={selectAdapterSwitchBatch}>
-                        <SelectTrigger className="mt-2" data-testid="select-kinflo-adapter-switch-batch">
-                          <SelectValue placeholder="Select switch batch" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {snapshot.adapterSwitchReadiness.batches.map((batch) => (
-                            <SelectItem key={batch.id} value={batch.id}>
-                              {batch.order}. {batch.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="grid w-full gap-3 lg:w-[360px]">
+                      <div>
+                        <Label>Switch batch</Label>
+                        <Select value={adapterSwitchBatchId} onValueChange={selectAdapterSwitchBatch}>
+                          <SelectTrigger className="mt-2" data-testid="select-kinflo-adapter-switch-batch">
+                            <SelectValue placeholder="Select switch batch" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.adapterSwitchReadiness.batches.map((batch) => (
+                              <SelectItem key={batch.id} value={batch.id}>
+                                {batch.order}. {batch.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label>Focus surface</Label>
+                        <Select value={selectedAdapterSwitchSurface?.id ?? ""} onValueChange={selectAdapterSwitchSurface}>
+                          <SelectTrigger className="mt-2" data-testid="select-kinflo-adapter-switch-surface">
+                            <SelectValue placeholder="Select switch surface" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {(selectedAdapterSwitchBatch?.surfaces ?? []).map((surface) => (
+                              <SelectItem key={surface.id} value={surface.id}>
+                                {surface.surface}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-5">
@@ -3149,6 +3225,68 @@ export default function AdminKinfloShell() {
                         <Badge variant="outline">
                           {selectedAdapterSwitchBatch?.surfaces.length ?? 0} surfaces
                         </Badge>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4" data-testid="section-kinflo-adapter-switch-surface-focus">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <MonitorSmartphone className="h-4 w-4 text-slate-500" />
+                            <h3 className="text-sm font-semibold text-slate-950">{selectedAdapterSwitchSurface?.surface}</h3>
+                            {selectedAdapterSwitchSurface ? liveAdapterStatusBadge(selectedAdapterSwitchSurface.status) : null}
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-surface-focus">
+                            {selectedAdapterSwitchSurface?.fixtureSource}
+                          </p>
+                        </div>
+                        <Button size="sm" disabled variant="outline" data-testid="button-adapter-switch-surface-focus-gated">
+                          <Workflow className="mr-2 h-3 w-3" />
+                          Surface switch gated
+                        </Button>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                        <div className="min-w-0 rounded-md border border-white bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Generated API contract</div>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {(selectedAdapterSwitchSurface?.convexFunctions ?? []).map((functionName) => (
+                              <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left text-[11px]">
+                                {functionName}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="min-w-0 rounded-md border border-white bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Smoke evidence required</div>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {(selectedAdapterSwitchSurface?.requiredSmokeEvidence ?? []).map((item) => (
+                              <Badge key={item} variant="outline" className="max-w-full whitespace-normal break-words text-left text-[11px]">
+                                {item}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-slate-500">Switch allowed</div>
+                          <div className="mt-1 font-semibold text-slate-950">{selectedAdapterSwitchSurface?.switchAllowed ? "yes" : "no"}</div>
+                        </div>
+                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-slate-500">Provider writes</div>
+                          <div className="mt-1 font-semibold text-slate-950">{selectedAdapterSwitchSurface?.providerWrites ? "yes" : "no"}</div>
+                        </div>
+                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-slate-500">Live Convex</div>
+                          <div className="mt-1 font-semibold text-slate-950">{selectedAdapterSwitchSurface?.liveConvexExecution ? "yes" : "no"}</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
+                        <span className="font-medium text-amber-950">Rollback: </span>
+                        {selectedAdapterSwitchSurface?.rollback}
                       </div>
                     </div>
 
@@ -3434,7 +3572,11 @@ export default function AdminKinfloShell() {
 
                     <div className="grid gap-3">
                       {(selectedAdapterSwitchBatch?.surfaces ?? []).map((surface) => (
-                        <div key={surface.id} className="rounded-md border p-4" data-testid={`card-adapter-switch-${surface.id}`}>
+                        <div
+                          key={surface.id}
+                          className={`rounded-md border p-4 ${surface.id === selectedAdapterSwitchSurface?.id ? "border-slate-900 bg-slate-50" : "bg-white"}`}
+                          data-testid={`card-adapter-switch-${surface.id}`}
+                        >
                           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                             <div className="min-w-0">
                               <div className="flex flex-wrap items-center gap-2">
@@ -5460,14 +5602,14 @@ export default function AdminKinfloShell() {
             </section>
           </TabsContent>
 
-          <TabsContent value="site-studio" className="mt-6">
-            <section className="min-w-0 space-y-5">
+          <TabsContent value="site-studio" className="mt-3">
+            <section className="min-w-0 space-y-3">
               <div
-                className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
                 data-testid="section-kinflo-client-control-room-frame"
               >
                 <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
-                  <div className="min-w-0 p-5 sm:p-6">
+                  <div className="min-w-0 p-3 sm:p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
                         <Command className="mr-1 h-3 w-3" />
@@ -5477,27 +5619,27 @@ export default function AdminKinfloShell() {
                         Local review only
                       </Badge>
                     </div>
-                    <h2 className="mt-4 max-w-3xl text-2xl font-semibold leading-tight text-slate-950 sm:text-3xl">
+                    <h2 className="mt-2 max-w-3xl text-xl font-semibold leading-tight text-slate-950 sm:text-2xl">
                       Client Website Design Studio
                     </h2>
-                    <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
+                    <p className="mt-2 max-w-3xl text-sm leading-5 text-slate-600">
                       Configure the selected client site, inspect the public experience, and keep every provider, publish, lead, invite, campaign, and launch action gated until the activation evidence is complete.
                     </p>
-                    <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4" data-testid="section-kinflo-client-command-stats">
+                    <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid="section-kinflo-client-command-stats">
                       {clientWebsiteStudioCommandStats.map((stat) => (
-                        <div key={stat.label} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+                        <div key={stat.label} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
                           <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">{stat.label}</div>
                           <div className="mt-1 truncate text-sm font-semibold text-slate-950">{stat.value}</div>
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div className="min-w-0 border-t border-slate-200 bg-slate-950 p-5 text-white lg:border-l lg:border-t-0 sm:p-6">
+                  <div className="min-w-0 border-t border-slate-200 bg-slate-950 p-3 text-white lg:border-l lg:border-t-0 sm:p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-xs font-medium uppercase tracking-normal text-slate-400">Selected site</div>
                         <div className="mt-1 text-lg font-semibold leading-snug">{selectedClientWebsiteStudioSite?.label}</div>
-                        <p className="mt-2 text-sm leading-6 text-slate-300">
+                        <p className="mt-1 hidden text-sm leading-5 text-slate-300 sm:block">
                           {selectedClientWebsiteLaunchDecisionPacket?.decisionPosture}
                         </p>
                       </div>
@@ -5505,16 +5647,16 @@ export default function AdminKinfloShell() {
                         {clientWebsiteLaunchDecisionLabel}
                       </Badge>
                     </div>
-                    <div className="mt-5 grid grid-cols-3 gap-2">
-                      <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      <div className="rounded-md border border-white/10 bg-white/5 px-3 py-2">
                         <div className="text-[11px] uppercase tracking-normal text-slate-400">Readiness</div>
                         <div className="mt-1 text-sm font-semibold">{clientWebsiteStudioReadinessPercent}%</div>
                       </div>
-                      <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <div className="rounded-md border border-white/10 bg-white/5 px-3 py-2">
                         <div className="text-[11px] uppercase tracking-normal text-slate-400">Blocked</div>
                         <div className="mt-1 text-sm font-semibold">{clientWebsiteLaunchDecisionBlockedCount}</div>
                       </div>
-                      <div className="min-w-0 rounded-xl border border-white/10 bg-white/5 px-3 py-3">
+                      <div className="min-w-0 rounded-md border border-white/10 bg-white/5 px-3 py-2">
                         <div className="text-[11px] uppercase tracking-normal text-slate-400">Owner</div>
                         <div className="mt-1 truncate text-sm font-semibold">{selectedClientWebsiteLaunchDecisionPacket?.approvalOwner}</div>
                       </div>
@@ -5524,26 +5666,26 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm md:grid-cols-4"
+                className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4"
                 data-testid="section-kinflo-client-studio-operating-frame"
               >
                 {clientWebsiteStudioReviewStats.map((stat) => (
-                  <div key={stat.label} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                    <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{stat.label}</div>
+                  <div key={stat.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                    <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{stat.label}</div>
                     <div className="mt-1 truncate text-sm font-semibold text-slate-950">{stat.value}</div>
                   </div>
                 ))}
               </div>
 
               <div
-                className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm md:grid-cols-4"
+                className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4"
                 data-testid="section-kinflo-client-workbench-grid-contract"
               >
                 {clientWebsiteWorkbenchGridContract.map((item) => (
-                  <div key={item.label} className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                  <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
                     <div className="flex items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                        <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
                         <div className="mt-1 truncate text-sm font-semibold text-slate-950">{item.value}</div>
                       </div>
                       <Badge variant="outline" className="shrink-0 bg-white">{item.status}</Badge>
