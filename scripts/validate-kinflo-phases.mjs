@@ -158,6 +158,7 @@ for (const path of [
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
+  "docs/phase100-site-studio-launch-dossier-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
   "docs/phase89-adapter-switch-acceptance-matrix.md",
@@ -277,6 +278,7 @@ for (const path of [
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
+  "scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
   "scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
@@ -1580,6 +1582,20 @@ requireIncludes("docs/phase99-site-studio-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase100-site-studio-launch-dossier-deep-links.md", [
+  "Phase 100: Site Studio Launch Dossier Deep Links",
+  "npm run kinflo:validate-site-studio-launch-dossier-deep-links",
+  "studioDossier",
+  "provisioning",
+  "packets",
+  "qa",
+  "decision",
+  "readInitialClientWebsiteLaunchDossier",
+  "selectClientWebsiteLaunchDossier",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase87-adapter-switch-runway.md", [
   "Phase 87: Adapter Switch Runway",
   "npm run kinflo:validate-adapter-switch-runway",
@@ -1737,6 +1753,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/convex-hosted-activation-approval-packet.json\"",
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
   "\"docs/phase99-site-studio-deep-links.md\"",
+  "\"docs/phase100-site-studio-launch-dossier-deep-links.md\"",
   "\"docs/phase87-adapter-switch-runway.md\"",
   "\"docs/phase88-generated-api-review-board.md\"",
   "\"docs/phase89-adapter-switch-acceptance-matrix.md\"",
@@ -1759,6 +1776,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-claude-frame-ingestion\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-site-studio-deep-links\"",
+  "\"npm run kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"npm run kinflo:validate-adapter-switch-runway\"",
   "\"npm run kinflo:validate-generated-api-review-board\"",
   "\"npm run kinflo:validate-adapter-switch-acceptance-matrix\"",
@@ -1867,6 +1885,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
+  "\"kinflo:validate-site-studio-launch-dossier-deep-links\"",
   "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:validate-generated-api-review-board\"",
   "\"kinflo:validate-adapter-switch-acceptance-matrix\"",
@@ -2740,6 +2759,16 @@ requireIncludes("scripts/validate-kinflo-site-studio-deep-links.mjs", [
   "Site Studio deep links do not import generated API",
   "Site Studio deep links do not execute live Convex",
   "KinFlo Site Studio deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs", [
+  "docs/phase100-site-studio-launch-dossier-deep-links.md",
+  "studioDossier",
+  "readInitialClientWebsiteLaunchDossier",
+  "selectClientWebsiteLaunchDossier",
+  "Site Studio launch dossier deep links do not import generated API",
+  "Site Studio launch dossier deep links do not execute live Convex",
+  "KinFlo Site Studio launch dossier deep-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-adapter-switch-runway.mjs", [

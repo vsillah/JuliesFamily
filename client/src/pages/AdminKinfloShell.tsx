@@ -128,6 +128,8 @@ const clientWebsiteStudioLaneValues = ["queue", "configuration", "handoff", "wor
 type ClientWebsiteStudioLane = (typeof clientWebsiteStudioLaneValues)[number];
 const clientWebsiteWorkbenchStageValues = ["sites", "preview", "launch"] as const;
 type ClientWebsiteWorkbenchStage = (typeof clientWebsiteWorkbenchStageValues)[number];
+const clientWebsiteLaunchDossierValues = ["provisioning", "packets", "qa", "decision"] as const;
+type ClientWebsiteLaunchDossier = (typeof clientWebsiteLaunchDossierValues)[number];
 
 const shellTabLabels: Record<ShellTabValue, string> = {
   tenants: "Tenants",
@@ -299,6 +301,16 @@ function readInitialClientWebsiteWorkbenchStage(): ClientWebsiteWorkbenchStage {
   return clientWebsiteWorkbenchStageValues.includes(stage as ClientWebsiteWorkbenchStage)
     ? (stage as ClientWebsiteWorkbenchStage)
     : "preview";
+}
+
+function readInitialClientWebsiteLaunchDossier(): ClientWebsiteLaunchDossier {
+  if (typeof window === "undefined") {
+    return "provisioning";
+  }
+  const dossier = new URLSearchParams(window.location.search).get("studioDossier");
+  return clientWebsiteLaunchDossierValues.includes(dossier as ClientWebsiteLaunchDossier)
+    ? (dossier as ClientWebsiteLaunchDossier)
+    : "provisioning";
 }
 
 function statusBadge(status: KinfloShellStatus) {
@@ -1473,6 +1485,7 @@ export default function AdminKinfloShell() {
   const [clientWebsiteStudioSiteKey, setClientWebsiteStudioSiteKey] = useState(snapshot.clientWebsiteStudio.defaultSiteKey);
   const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>(readInitialClientWebsiteStudioLane);
   const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
+  const [clientWebsiteLaunchDossier, setClientWebsiteLaunchDossier] = useState<ClientWebsiteLaunchDossier>(readInitialClientWebsiteLaunchDossier);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -2240,9 +2253,11 @@ export default function AdminKinfloShell() {
     const nextTab = readInitialShellTab();
     const nextLane = readInitialClientWebsiteStudioLane();
     const nextStage = readInitialClientWebsiteWorkbenchStage();
+    const nextDossier = readInitialClientWebsiteLaunchDossier();
     setActiveTab((current) => (current === nextTab ? current : nextTab));
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
+    setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
   }, [location]);
 
   const updateKinfloShellRoute = (updates: Record<string, string | undefined>) => {
@@ -2263,10 +2278,14 @@ export default function AdminKinfloShell() {
 
   const selectShellTab = (tab: ShellTabValue) => {
     setActiveTab(tab);
+    const shouldKeepDossier = tab === "site-studio"
+      && clientWebsiteStudioLane === "workbench"
+      && clientWebsiteWorkbenchStage === "launch";
     updateKinfloShellRoute({
       tab,
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+      studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
     });
   };
 
@@ -2277,6 +2296,7 @@ export default function AdminKinfloShell() {
       tab: "site-studio",
       studioLane: lane,
       studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+      studioDossier: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
     });
   };
 
@@ -2288,6 +2308,20 @@ export default function AdminKinfloShell() {
       tab: "site-studio",
       studioLane: "workbench",
       studioStage: stage,
+      studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
+    });
+  };
+
+  const selectClientWebsiteLaunchDossier = (dossier: ClientWebsiteLaunchDossier) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("workbench");
+    setClientWebsiteWorkbenchStage("launch");
+    setClientWebsiteLaunchDossier(dossier);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioLane: "workbench",
+      studioStage: "launch",
+      studioDossier: dossier,
     });
   };
 
@@ -5884,7 +5918,12 @@ export default function AdminKinfloShell() {
                   </div>
                       </div>
 
-                      <Tabs defaultValue="provisioning" className="min-h-0 min-w-0 max-h-[calc(100vh-10rem)] overflow-hidden" data-testid="tabs-kinflo-client-launch-dossier">
+                      <Tabs
+                        value={clientWebsiteLaunchDossier}
+                        onValueChange={(value) => selectClientWebsiteLaunchDossier(value as ClientWebsiteLaunchDossier)}
+                        className="min-h-0 min-w-0 max-h-[calc(100vh-10rem)] overflow-hidden"
+                        data-testid="tabs-kinflo-client-launch-dossier"
+                      >
                         <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
                           <TabsTrigger value="provisioning" data-testid="tab-kinflo-client-launch-dossier-provisioning">Provision</TabsTrigger>
                           <TabsTrigger value="packets" data-testid="tab-kinflo-client-launch-dossier-packets">Packets</TabsTrigger>

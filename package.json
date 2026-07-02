@@ -81,6 +81,7 @@
     "kinflo:validate-claude-frame-ingestion": "node scripts/validate-kinflo-claude-frame-ingestion.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-site-studio-deep-links": "node scripts/validate-kinflo-site-studio-deep-links.mjs",
+    "kinflo:validate-site-studio-launch-dossier-deep-links": "node scripts/validate-kinflo-site-studio-launch-dossier-deep-links.mjs",
     "kinflo:validate-adapter-switch-runway": "node scripts/validate-kinflo-adapter-switch-runway.mjs",
     "kinflo:validate-generated-api-review-board": "node scripts/validate-kinflo-generated-api-review-board.mjs",
     "kinflo:validate-adapter-switch-acceptance-matrix": "node scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
