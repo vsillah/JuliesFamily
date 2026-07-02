@@ -58,6 +58,10 @@ import {
   type KinfloShellStatus,
   type ShellAiReviewRecord,
   type ShellCampaignDraft,
+  type ShellClientWebsiteAdminPermissionPreset,
+  type ShellClientWebsiteLaunchPacket,
+  type ShellClientWebsiteLaunchSimulation,
+  type ShellClientWebsiteOnboardingReadiness,
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
   type ShellClientWebsiteStudioSite,
@@ -215,6 +219,16 @@ const workflowNavigationLanes: {
 
 const workflowNavigationTabCoverage = workflowNavigationLanes.flatMap((lane) => lane.tabs);
 
+const clientHandoffPermissionStripTestIds = {
+  root: "section-kinflo-client-handoff-permission-strip",
+  see: "section-kinflo-client-handoff-permission-strip-see",
+  edit: "section-kinflo-client-handoff-permission-strip-edit",
+  publish: "section-kinflo-client-handoff-permission-strip-publish",
+  blockedInvite: "section-kinflo-client-handoff-permission-strip-blocked-invite",
+  missingArtifact: "section-kinflo-client-handoff-permission-strip-missing-artifact",
+  gatedAction: "section-kinflo-client-handoff-permission-strip-gated-action",
+} as const;
+
 function readInitialShellTab(): ShellTabValue {
   if (typeof window === "undefined") {
     return "tenants";
@@ -339,6 +353,132 @@ function ConfigurationAffordanceStrip({
         <Button disabled variant="outline" size="sm" className="mt-3 w-full justify-start bg-white" data-testid={`${testId}-blocked-action`}>
           <ShieldCheck className="mr-2 h-4 w-4" />
           {disabledActionLabel}
+        </Button>
+      </div>
+    </section>
+  );
+}
+
+function ClientHandoffPermissionStrip({
+  site,
+  permissionPreset,
+  launchPacket,
+  onboardingReadiness,
+  launchSimulation,
+  testId,
+}: {
+  site?: ShellClientWebsiteStudioSite;
+  permissionPreset?: ShellClientWebsiteAdminPermissionPreset;
+  launchPacket?: ShellClientWebsiteLaunchPacket;
+  onboardingReadiness?: ShellClientWebsiteOnboardingReadiness;
+  launchSimulation?: ShellClientWebsiteLaunchSimulation;
+  testId: string;
+}) {
+  const permissionSet = permissionPreset?.permissionSet ?? [];
+  const canSee = permissionSet.filter((permission) => permission.endsWith(":view") || permission === "audit:view");
+  const canEdit = permissionSet.filter((permission) => permission.includes(":edit") || permission.includes(":manage") || permission.includes(":create"));
+  const canPublish = permissionSet.filter((permission) => permission.includes(":publish"));
+  const blockedInvite = permissionPreset?.blockedActions.find((action) => action.includes("invitation") || action.includes("membership"))
+    ?? "client admin invite";
+  const missingHandoffArtifact = onboardingReadiness && onboardingReadiness.openTasks > 0
+    ? `${onboardingReadiness.openTasks} onboarding task${onboardingReadiness.openTasks === 1 ? "" : "s"} still open`
+    : launchPacket?.handoffChecklist.find((item) => item.toLowerCase().includes("privacy") || item.toLowerCase().includes("approval"))
+      ?? "client handoff approval";
+
+  const permissionColumns = [
+    {
+      key: "see",
+      label: "Who can see",
+      value: canSee.length > 0 ? canSee.join(", ") : "site:view pending",
+      testId: `${testId}-see`,
+    },
+    {
+      key: "edit",
+      label: "Who can edit",
+      value: canEdit.length > 0 ? canEdit.join(", ") : "content:edit pending",
+      testId: `${testId}-edit`,
+    },
+    {
+      key: "publish",
+      label: "Who can publish",
+      value: canPublish.length > 0 ? canPublish.join(", ") : "content:publish gated",
+      testId: `${testId}-publish`,
+    },
+  ];
+
+  return (
+    <section
+      className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm lg:grid-cols-[minmax(0,1.1fr)_minmax(240px,0.8fr)]"
+      data-testid={testId}
+    >
+      <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="border-slate-300 bg-white">
+                Permission strip
+              </Badge>
+              <Badge className="bg-slate-950 hover:bg-slate-950">{permissionPreset?.scope ?? "site"} scope</Badge>
+            </div>
+            <h3 className="mt-3 text-base font-semibold text-slate-950">Client handoff permission strip</h3>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              {site?.label ?? "No site selected"} uses {permissionPreset?.label ?? "a pending permission preset"} before any invite or membership write is enabled.
+            </p>
+          </div>
+          <Badge variant="outline" className="self-start border-amber-300 bg-amber-50 text-amber-800">
+            Handoff gated
+          </Badge>
+        </div>
+
+        <div className="mt-4 grid gap-2 md:grid-cols-3">
+          {permissionColumns.map((column) => (
+            <div key={column.key} className="min-w-0 rounded-lg border border-white bg-white p-3" data-testid={column.testId}>
+              <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">{column.label}</div>
+              <div className="mt-1 break-words text-sm font-semibold text-slate-950">{column.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3" data-testid={`${testId}-blocked-invite`}>
+            <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Blocked invite</div>
+            <div className="mt-1 text-sm font-semibold text-amber-950">{blockedInvite}</div>
+            <p className="mt-2 text-xs leading-5 text-amber-900">
+              Invite delivery and membership grants stay disabled until hosted auth, role sync, and client handoff approval are accepted.
+            </p>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-white p-3" data-testid={`${testId}-missing-artifact`}>
+            <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Missing handoff artifact</div>
+            <div className="mt-1 text-sm font-semibold text-slate-950">{missingHandoffArtifact}</div>
+            <p className="mt-2 text-xs leading-5 text-slate-600">
+              Launch packet: {launchPacket?.label ?? "pending"} · Simulation: {launchSimulation?.label ?? "pending"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="min-w-0 rounded-xl border border-slate-900 bg-slate-950 p-4 text-white">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Onboarding readiness</div>
+            <div className="mt-1 text-2xl font-semibold">{onboardingReadiness?.readinessScore ?? 0}%</div>
+          </div>
+          <Badge className="border-white/10 bg-white/10 text-white hover:bg-white/10">
+            {onboardingReadiness?.completedTasks ?? 0}/{onboardingReadiness?.totalTasks ?? 0} complete
+          </Badge>
+        </div>
+        <Progress value={onboardingReadiness?.readinessScore ?? 0} className="mt-4 h-1.5 bg-white/10" />
+        <div className="mt-4 space-y-2">
+          {(onboardingReadiness?.criticalBlockers ?? permissionPreset?.approvalGates ?? []).slice(0, 3).map((item) => (
+            <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-300">
+              <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-300" />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+        <Button disabled variant="secondary" className="mt-4 w-full justify-start" data-testid={`${testId}-gated-action`}>
+          <UserRoundCog className="mr-2 h-4 w-4" />
+          Client handoff invite gated
         </Button>
       </div>
     </section>
@@ -3995,6 +4135,15 @@ export default function AdminKinfloShell() {
                   </div>
                 ))}
               </div>
+
+              <ClientHandoffPermissionStrip
+                site={selectedClientWebsiteStudioSite}
+                permissionPreset={selectedClientWebsiteAdminPermissionPreset}
+                launchPacket={selectedClientWebsiteLaunchPacket}
+                onboardingReadiness={selectedClientWebsiteOnboardingReadiness}
+                launchSimulation={selectedClientWebsiteLaunchSimulation}
+                testId={clientHandoffPermissionStripTestIds.root}
+              />
 
               <div
                 className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(236px,272px)_minmax(0,1fr)_minmax(320px,388px)]"

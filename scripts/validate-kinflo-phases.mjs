@@ -148,6 +148,7 @@ for (const path of [
   "docs/phase80-mobile-inspection-mode.md",
   "docs/phase81-workflow-navigation-rail.md",
   "docs/phase82-configuration-field-affordances.md",
+  "docs/phase83-client-handoff-permission-strip.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -248,6 +249,7 @@ for (const path of [
   "scripts/validate-kinflo-mobile-inspection-mode.mjs",
   "scripts/validate-kinflo-workflow-navigation-rail.mjs",
   "scripts/validate-kinflo-configuration-field-affordances.mjs",
+  "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1361,6 +1363,21 @@ requireIncludes("docs/phase82-configuration-field-affordances.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase83-client-handoff-permission-strip.md", [
+  "Phase 83: Client Handoff Permission Strip",
+  "npm run kinflo:validate-client-handoff-permission-strip",
+  "ClientHandoffPermissionStrip",
+  "section-kinflo-client-handoff-permission-strip",
+  "section-kinflo-client-handoff-permission-strip-see",
+  "section-kinflo-client-handoff-permission-strip-edit",
+  "section-kinflo-client-handoff-permission-strip-publish",
+  "section-kinflo-client-handoff-permission-strip-blocked-invite",
+  "section-kinflo-client-handoff-permission-strip-missing-artifact",
+  "section-kinflo-client-handoff-permission-strip-gated-action",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1391,6 +1408,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase80-mobile-inspection-mode.md\"",
   "\"docs/phase81-workflow-navigation-rail.md\"",
   "\"docs/phase82-configuration-field-affordances.md\"",
+  "\"docs/phase83-client-handoff-permission-strip.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
@@ -1399,6 +1417,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-mobile-inspection-mode\"",
   "\"npm run kinflo:validate-workflow-navigation-rail\"",
   "\"npm run kinflo:validate-configuration-field-affordances\"",
+  "\"npm run kinflo:validate-client-handoff-permission-strip\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1490,6 +1509,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-mobile-inspection-mode\"",
   "\"kinflo:validate-workflow-navigation-rail\"",
   "\"kinflo:validate-configuration-field-affordances\"",
+  "\"kinflo:validate-client-handoff-permission-strip\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2208,6 +2228,22 @@ requireIncludes("scripts/validate-kinflo-configuration-field-affordances.mjs", [
   "configuration affordances do not import generated API",
   "configuration affordances do not execute live Convex",
   "KinFlo configuration field affordances validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-handoff-permission-strip.mjs", [
+  "docs/phase83-client-handoff-permission-strip.md",
+  "ClientHandoffPermissionStrip",
+  "section-kinflo-client-handoff-permission-strip",
+  "section-kinflo-client-handoff-permission-strip-see",
+  "section-kinflo-client-handoff-permission-strip-edit",
+  "section-kinflo-client-handoff-permission-strip-publish",
+  "section-kinflo-client-handoff-permission-strip-blocked-invite",
+  "section-kinflo-client-handoff-permission-strip-missing-artifact",
+  "section-kinflo-client-handoff-permission-strip-gated-action",
+  "client handoff permission strip does not import generated API",
+  "client handoff permission strip does not execute live Convex",
+  "Expected permission, readiness, launch packet, and simulation references to stay connected by site key.",
+  "KinFlo client handoff permission strip validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
@@ -3095,6 +3131,15 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-configuration-affordance-campaigns",
   "section-kinflo-configuration-affordance-ai-review",
   "Live content save and publish are blocked",
+  "ClientHandoffPermissionStrip",
+  "section-kinflo-client-handoff-permission-strip",
+  "section-kinflo-client-handoff-permission-strip-see",
+  "section-kinflo-client-handoff-permission-strip-edit",
+  "section-kinflo-client-handoff-permission-strip-publish",
+  "section-kinflo-client-handoff-permission-strip-blocked-invite",
+  "section-kinflo-client-handoff-permission-strip-missing-artifact",
+  "section-kinflo-client-handoff-permission-strip-gated-action",
+  "Client handoff invite gated",
   "clientWebsiteWorkbenchGridContract",
   "clientWebsiteStudioReviewStats",
   "clientWebsiteStudioCommandStats",

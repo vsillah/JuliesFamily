@@ -84,6 +84,7 @@ for (const path of [
   "docs/phase80-mobile-inspection-mode.md",
   "docs/phase81-workflow-navigation-rail.md",
   "docs/phase82-configuration-field-affordances.md",
+  "docs/phase83-client-handoff-permission-strip.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -100,6 +101,7 @@ for (const path of [
   "scripts/validate-kinflo-mobile-inspection-mode.mjs",
   "scripts/validate-kinflo-workflow-navigation-rail.mjs",
   "scripts/validate-kinflo-configuration-field-affordances.mjs",
+  "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
 ]) {
   requireFile(path);
 }
@@ -185,6 +187,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-mobile-inspection-mode",
   "npm run kinflo:validate-workflow-navigation-rail",
   "npm run kinflo:validate-configuration-field-affordances",
+  "npm run kinflo:validate-client-handoff-permission-strip",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -215,6 +218,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "mobile inspection mode",
   "workflow navigation rail",
   "configuration field affordances",
+  "client handoff permission strip",
   "human-gate decision register current without storing secrets",
 ]);
 
@@ -227,6 +231,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-mobile-inspection-mode\"",
   "\"kinflo:validate-workflow-navigation-rail\"",
   "\"kinflo:validate-configuration-field-affordances\"",
+  "\"kinflo:validate-client-handoff-permission-strip\"",
 ]);
 
 const ledgerText = read("docs/kinflo-saas-execution-ledger.json");
