@@ -85,6 +85,7 @@
     "kinflo:validate-adapter-switch-runway": "node scripts/validate-kinflo-adapter-switch-runway.mjs",
     "kinflo:validate-generated-api-review-board": "node scripts/validate-kinflo-generated-api-review-board.mjs",
     "kinflo:validate-adapter-switch-acceptance-matrix": "node scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
+    "kinflo:validate-adapter-switch-batch-deep-links": "node scripts/validate-kinflo-adapter-switch-batch-deep-links.mjs",
     "kinflo:validate-hosted-smoke-gap-backlog": "node scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs",
     "kinflo:validate-hosted-smoke-execution-sequencer": "node scripts/validate-kinflo-hosted-smoke-execution-sequencer.mjs",
     "kinflo:validate-hosted-smoke-evidence-ledger": "node scripts/validate-kinflo-hosted-smoke-evidence-ledger.mjs",

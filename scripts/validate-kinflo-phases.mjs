@@ -167,6 +167,7 @@ for (const path of [
   "docs/phase91-hosted-smoke-execution-sequencer.md",
   "docs/phase92-hosted-smoke-evidence-ledger.md",
   "docs/phase93-adapter-switch-cutover-checklist.md",
+  "docs/phase102-adapter-switch-batch-deep-links.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -284,6 +285,7 @@ for (const path of [
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
   "scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
+  "scripts/validate-kinflo-adapter-switch-batch-deep-links.mjs",
   "scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs",
   "scripts/validate-kinflo-hosted-smoke-execution-sequencer.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-ledger.mjs",
@@ -1557,6 +1559,20 @@ requireIncludes("docs/phase101-hosted-activation-step-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase102-adapter-switch-batch-deep-links.md", [
+  "Phase 102: Adapter Switch Batch Deep Links",
+  "npm run kinflo:validate-adapter-switch-batch-deep-links",
+  "adapterBatch",
+  "read-only-core",
+  "site-creation-and-admin",
+  "campaign-and-ai-governance",
+  "readInitialAdapterSwitchBatchId",
+  "selectAdapterSwitchBatch",
+  "No generated Convex API files are committed or imported.",
+  "No generated API adapter switch is performed.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "Phase 86: Site Studio Scroll Consolidation",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
@@ -1777,6 +1793,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase91-hosted-smoke-execution-sequencer.md\"",
   "\"docs/phase92-hosted-smoke-evidence-ledger.md\"",
   "\"docs/phase93-adapter-switch-cutover-checklist.md\"",
+  "\"docs/phase102-adapter-switch-batch-deep-links.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
   "\"npm run kinflo:validate-hosted-activation-owner-checklist\"",
@@ -1801,6 +1818,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-hosted-smoke-execution-sequencer\"",
   "\"npm run kinflo:validate-hosted-smoke-evidence-ledger\"",
   "\"npm run kinflo:validate-adapter-switch-cutover-checklist\"",
+  "\"npm run kinflo:validate-adapter-switch-batch-deep-links\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1911,6 +1929,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-smoke-execution-sequencer\"",
   "\"kinflo:validate-hosted-smoke-evidence-ledger\"",
   "\"kinflo:validate-adapter-switch-cutover-checklist\"",
+  "\"kinflo:validate-adapter-switch-batch-deep-links\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2722,6 +2741,16 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "hosted activation step deep links do not import generated API",
   "hosted activation step deep links do not execute live Convex",
   "KinFlo hosted activation step deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-adapter-switch-batch-deep-links.mjs", [
+  "docs/phase102-adapter-switch-batch-deep-links.md",
+  "adapterBatch",
+  "readInitialAdapterSwitchBatchId",
+  "selectAdapterSwitchBatch",
+  "adapter switch batch deep links do not import generated API",
+  "adapter switch batch deep links do not execute live Convex",
+  "KinFlo adapter switch batch deep-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-claude-frame-ingestion.mjs", [

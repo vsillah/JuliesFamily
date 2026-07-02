@@ -321,6 +321,14 @@ function readInitialHostedActivationStepId(defaultStepId: string, stepIds: strin
   return stepId && stepIds.includes(stepId) ? stepId : defaultStepId;
 }
 
+function readInitialAdapterSwitchBatchId(defaultBatchId: string, batchIds: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultBatchId;
+  }
+  const batchId = new URLSearchParams(window.location.search).get("adapterBatch");
+  return batchId && batchIds.includes(batchId) ? batchId : defaultBatchId;
+}
+
 function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
     return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
@@ -1446,7 +1454,14 @@ export default function AdminKinfloShell() {
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
-  const [adapterSwitchBatchId, setAdapterSwitchBatchId] = useState(snapshot.adapterSwitchReadiness.defaultBatchId);
+  const adapterSwitchBatchIds = useMemo(
+    () => snapshot.adapterSwitchReadiness.batches.map((batch) => batch.id),
+    [snapshot.adapterSwitchReadiness.batches],
+  );
+  const [adapterSwitchBatchId, setAdapterSwitchBatchId] = useState(() => readInitialAdapterSwitchBatchId(
+    snapshot.adapterSwitchReadiness.defaultBatchId,
+    adapterSwitchBatchIds,
+  ));
   const hostedActivationStepIds = useMemo(
     () => snapshot.hostedActivationRunbook.steps.map((step) => step.id),
     [snapshot.hostedActivationRunbook.steps],
@@ -2269,6 +2284,10 @@ export default function AdminKinfloShell() {
     const nextLane = readInitialClientWebsiteStudioLane();
     const nextStage = readInitialClientWebsiteWorkbenchStage();
     const nextDossier = readInitialClientWebsiteLaunchDossier();
+    const nextAdapterSwitchBatchId = readInitialAdapterSwitchBatchId(
+      snapshot.adapterSwitchReadiness.defaultBatchId,
+      adapterSwitchBatchIds,
+    );
     const nextHostedActivationStepId = readInitialHostedActivationStepId(
       snapshot.hostedActivationRunbook.defaultStepId,
       hostedActivationStepIds,
@@ -2277,8 +2296,15 @@ export default function AdminKinfloShell() {
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
+    setAdapterSwitchBatchId((current) => (current === nextAdapterSwitchBatchId ? current : nextAdapterSwitchBatchId));
     setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
-  }, [hostedActivationStepIds, location, snapshot.hostedActivationRunbook.defaultStepId]);
+  }, [
+    adapterSwitchBatchIds,
+    hostedActivationStepIds,
+    location,
+    snapshot.adapterSwitchReadiness.defaultBatchId,
+    snapshot.hostedActivationRunbook.defaultStepId,
+  ]);
 
   const updateKinfloShellRoute = (updates: Record<string, string | undefined>) => {
     if (typeof window === "undefined") {
@@ -2306,6 +2332,7 @@ export default function AdminKinfloShell() {
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
+      adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
     });
   };
@@ -2318,6 +2345,7 @@ export default function AdminKinfloShell() {
       studioLane: lane,
       studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      adapterBatch: undefined,
       activationStep: undefined,
     });
   };
@@ -2331,6 +2359,7 @@ export default function AdminKinfloShell() {
       studioLane: "workbench",
       studioStage: stage,
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      adapterBatch: undefined,
       activationStep: undefined,
     });
   };
@@ -2345,6 +2374,20 @@ export default function AdminKinfloShell() {
       studioLane: "workbench",
       studioStage: "launch",
       studioDossier: dossier,
+      adapterBatch: undefined,
+      activationStep: undefined,
+    });
+  };
+
+  const selectAdapterSwitchBatch = (batchId: string) => {
+    setActiveTab("adapter-switch");
+    setAdapterSwitchBatchId(batchId);
+    updateKinfloShellRoute({
+      tab: "adapter-switch",
+      studioLane: undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      adapterBatch: batchId,
       activationStep: undefined,
     });
   };
@@ -2357,6 +2400,7 @@ export default function AdminKinfloShell() {
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
+      adapterBatch: undefined,
       activationStep: stepId,
     });
   };
@@ -3058,7 +3102,7 @@ export default function AdminKinfloShell() {
                     </div>
                     <div className="w-full lg:w-[300px]">
                       <Label>Switch batch</Label>
-                      <Select value={adapterSwitchBatchId} onValueChange={setAdapterSwitchBatchId}>
+                      <Select value={adapterSwitchBatchId} onValueChange={selectAdapterSwitchBatch}>
                         <SelectTrigger className="mt-2" data-testid="select-kinflo-adapter-switch-batch">
                           <SelectValue placeholder="Select switch batch" />
                         </SelectTrigger>
@@ -5973,8 +6017,8 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3 lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
-                    <div className="flex items-start justify-between gap-2">
+                  <div className="flex max-h-[min(560px,calc(100vh-9rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3 lg:max-h-none lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                    <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <Workflow className="h-4 w-4 text-slate-500" />
@@ -5988,7 +6032,7 @@ export default function AdminKinfloShell() {
                       <Badge variant="outline">{selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ")}</Badge>
                     </div>
 
-                    <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="section-kinflo-client-provisioning-summary-chips">
+                    <div className="mt-2 grid shrink-0 grid-cols-4 gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
                       {[
                         { label: "Plan", value: selectedClientWebsiteProvisioningOrder?.requestedPlan },
                         { label: "Template", value: selectedClientWebsiteProvisioningOrder?.templateKey },
@@ -6004,15 +6048,15 @@ export default function AdminKinfloShell() {
                       ))}
                     </div>
 
-                    <Tabs defaultValue="order" className="mt-3" data-testid="tabs-kinflo-client-provisioning-workbench">
-                      <TabsList className="grid h-auto w-full grid-cols-2 bg-slate-100 p-1">
+                    <Tabs defaultValue="order" className="mt-3 flex min-h-0 flex-1 flex-col" data-testid="tabs-kinflo-client-provisioning-workbench">
+                      <TabsList className="grid h-auto w-full shrink-0 grid-cols-2 bg-slate-100 p-1">
                         <TabsTrigger value="order" data-testid="tab-kinflo-client-provisioning-order">Order</TabsTrigger>
                         <TabsTrigger value="dry-run" data-testid="tab-kinflo-client-provisioning-dry-run">Dry run</TabsTrigger>
                       </TabsList>
 
-                      <TabsContent value="order" className="mt-3" data-testid="section-kinflo-client-provisioning-order">
+                      <TabsContent value="order" className="mt-3 min-h-0 flex-1" data-testid="section-kinflo-client-provisioning-order">
                         <div
-                          className="grid max-h-[360px] min-h-0 gap-3 overflow-y-auto overflow-x-hidden md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]"
+                          className="grid max-h-[300px] min-h-0 gap-3 overflow-y-auto overflow-x-hidden md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:max-h-[360px]"
                           data-testid="section-kinflo-client-provisioning-order-cockpit"
                         >
                           <div
@@ -6115,8 +6159,8 @@ export default function AdminKinfloShell() {
                         </Button>
                       </TabsContent>
 
-                      <TabsContent value="dry-run" className="mt-3" data-testid="section-kinflo-client-provisioning-execution">
-                        <div className="max-h-[280px] space-y-3 overflow-y-auto pr-1 lg:max-h-[360px]" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
+                      <TabsContent value="dry-run" className="mt-3 min-h-0 flex-1" data-testid="section-kinflo-client-provisioning-execution">
+                        <div className="max-h-[300px] space-y-3 overflow-y-auto pr-1 lg:max-h-[360px]" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
                           <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
