@@ -146,6 +146,7 @@ for (const path of [
   "docs/phase78-decision-gate-rail.md",
   "docs/phase79-proof-before-publish-cards.md",
   "docs/phase80-mobile-inspection-mode.md",
+  "docs/phase81-workflow-navigation-rail.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -244,6 +245,7 @@ for (const path of [
   "scripts/validate-kinflo-decision-gate-rail.mjs",
   "scripts/validate-kinflo-proof-before-publish.mjs",
   "scripts/validate-kinflo-mobile-inspection-mode.mjs",
+  "scripts/validate-kinflo-workflow-navigation-rail.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1326,6 +1328,21 @@ requireIncludes("docs/phase80-mobile-inspection-mode.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase81-workflow-navigation-rail.md", [
+  "Phase 81: Workflow Navigation Rail",
+  "npm run kinflo:validate-workflow-navigation-rail",
+  "section-kinflo-workflow-navigation-rail",
+  "section-kinflo-workflow-navigation-lanes",
+  "button-kinflo-workflow-lane-control",
+  "button-kinflo-workflow-lane-build",
+  "button-kinflo-workflow-lane-launch",
+  "button-kinflo-workflow-lane-growth",
+  "button-kinflo-workflow-lane-evidence",
+  "button-kinflo-workflow-lane-hosted-activation",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1354,12 +1371,14 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase78-decision-gate-rail.md\"",
   "\"docs/phase79-proof-before-publish-cards.md\"",
   "\"docs/phase80-mobile-inspection-mode.md\"",
+  "\"docs/phase81-workflow-navigation-rail.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
   "\"npm run kinflo:validate-decision-gate-rail\"",
   "\"npm run kinflo:validate-proof-before-publish\"",
   "\"npm run kinflo:validate-mobile-inspection-mode\"",
+  "\"npm run kinflo:validate-workflow-navigation-rail\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1449,6 +1468,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-decision-gate-rail\"",
   "\"kinflo:validate-proof-before-publish\"",
   "\"kinflo:validate-mobile-inspection-mode\"",
+  "\"kinflo:validate-workflow-navigation-rail\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2135,6 +2155,22 @@ requireIncludes("scripts/validate-kinflo-mobile-inspection-mode.mjs", [
   "mobile inspection mode does not import generated API",
   "mobile inspection mode does not execute live Convex",
   "KinFlo mobile inspection mode validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-workflow-navigation-rail.mjs", [
+  "docs/phase81-workflow-navigation-rail.md",
+  "workflowNavigationLanes",
+  "section-kinflo-workflow-navigation-rail",
+  "section-kinflo-workflow-navigation-lanes",
+  "button-kinflo-workflow-lane-control",
+  "button-kinflo-workflow-lane-build",
+  "button-kinflo-workflow-lane-launch",
+  "button-kinflo-workflow-lane-growth",
+  "button-kinflo-workflow-lane-evidence",
+  "button-kinflo-workflow-lane-hosted-activation",
+  "workflow navigation rail does not import generated API",
+  "workflow navigation rail does not execute live Convex",
+  "KinFlo workflow navigation rail validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
@@ -3005,6 +3041,13 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "card-client-mobile-launch-decision",
   "button-client-mobile-inspection-gated",
   "MobileInspectionMode",
+  "workflowNavigationLanes",
+  "workflowNavigationTabCoverage",
+  "section-kinflo-workflow-navigation-rail",
+  "section-kinflo-workflow-navigation-lanes",
+  "button-kinflo-workflow-lane-",
+  "section-kinflo-workflow-lane-tabs-",
+  "Control, Build, Launch, Growth, Evidence, and Hosted Activation",
   "clientWebsiteWorkbenchGridContract",
   "clientWebsiteStudioReviewStats",
   "clientWebsiteStudioCommandStats",

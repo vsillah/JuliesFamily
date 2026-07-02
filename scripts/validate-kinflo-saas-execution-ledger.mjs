@@ -82,6 +82,7 @@ for (const path of [
   "docs/phase78-decision-gate-rail.md",
   "docs/phase79-proof-before-publish-cards.md",
   "docs/phase80-mobile-inspection-mode.md",
+  "docs/phase81-workflow-navigation-rail.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -96,6 +97,7 @@ for (const path of [
   "scripts/validate-kinflo-decision-gate-rail.mjs",
   "scripts/validate-kinflo-proof-before-publish.mjs",
   "scripts/validate-kinflo-mobile-inspection-mode.mjs",
+  "scripts/validate-kinflo-workflow-navigation-rail.mjs",
 ]) {
   requireFile(path);
 }
@@ -179,6 +181,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-decision-gate-rail",
   "npm run kinflo:validate-proof-before-publish",
   "npm run kinflo:validate-mobile-inspection-mode",
+  "npm run kinflo:validate-workflow-navigation-rail",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -207,6 +210,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "decision gate rail",
   "proof-before-publish cards",
   "mobile inspection mode",
+  "workflow navigation rail",
   "human-gate decision register current without storing secrets",
 ]);
 
@@ -217,6 +221,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-decision-gate-rail\"",
   "\"kinflo:validate-proof-before-publish\"",
   "\"kinflo:validate-mobile-inspection-mode\"",
+  "\"kinflo:validate-workflow-navigation-rail\"",
 ]);
 
 const ledgerText = read("docs/kinflo-saas-execution-ledger.json");

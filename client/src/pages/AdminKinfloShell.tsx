@@ -117,6 +117,104 @@ const shellTabValues = [
 
 type ShellTabValue = (typeof shellTabValues)[number];
 
+const shellTabLabels: Record<ShellTabValue, string> = {
+  tenants: "Tenants",
+  sites: "Sites",
+  "launch-readiness": "Launch",
+  "adapter-switch": "Switch",
+  "hosted-activation": "Activation",
+  factory: "Factory",
+  plans: "Plans",
+  brand: "Brand",
+  navigation: "Nav",
+  preview: "Preview",
+  "site-studio": "Studio",
+  assets: "Assets",
+  domains: "Domains",
+  integrations: "Integrations",
+  campaigns: "Campaigns",
+  "ai-review": "AI Review",
+  content: "Content",
+  templates: "Templates",
+  crm: "CRM",
+  experience: "Experience",
+  access: "Access",
+};
+
+const workflowNavigationLanes: {
+  key: "control" | "build" | "launch" | "growth" | "evidence" | "hosted-activation";
+  label: string;
+  description: string;
+  icon: typeof Boxes;
+  tabs: ShellTabValue[];
+  primaryTab: ShellTabValue;
+  status: "ready" | "review" | "blocked";
+  blockedLiveAction: string;
+}[] = [
+  {
+    key: "control",
+    label: "Control",
+    description: "Tenants, plans, experience, and access",
+    icon: Command,
+    tabs: ["tenants", "sites", "plans", "experience", "access"],
+    primaryTab: "tenants",
+    status: "review",
+    blockedLiveAction: "client sharing gated",
+  },
+  {
+    key: "build",
+    label: "Build",
+    description: "Factory, studio, content, brand, navigation, assets, and templates",
+    icon: Factory,
+    tabs: ["factory", "site-studio", "content", "brand", "navigation", "assets", "templates"],
+    primaryTab: "site-studio",
+    status: "ready",
+    blockedLiveAction: "live content save gated",
+  },
+  {
+    key: "launch",
+    label: "Launch",
+    description: "Readiness, preview, domains, and handoff gates",
+    icon: Rocket,
+    tabs: ["launch-readiness", "preview", "domains"],
+    primaryTab: "launch-readiness",
+    status: "blocked",
+    blockedLiveAction: "public publish gated",
+  },
+  {
+    key: "growth",
+    label: "Growth",
+    description: "CRM, campaigns, integrations, and provider setup",
+    icon: Workflow,
+    tabs: ["crm", "campaigns", "integrations"],
+    primaryTab: "crm",
+    status: "blocked",
+    blockedLiveAction: "provider writes gated",
+  },
+  {
+    key: "evidence",
+    label: "Evidence",
+    description: "AI review, adapter switch, proof, and audit posture",
+    icon: FileText,
+    tabs: ["ai-review", "adapter-switch"],
+    primaryTab: "ai-review",
+    status: "review",
+    blockedLiveAction: "generated API import gated",
+  },
+  {
+    key: "hosted-activation",
+    label: "Hosted Activation",
+    description: "Convex ownership, codegen, smoke, and rollback gates",
+    icon: KeyRound,
+    tabs: ["hosted-activation"],
+    primaryTab: "hosted-activation",
+    status: "blocked",
+    blockedLiveAction: "hosted deployment gated",
+  },
+];
+
+const workflowNavigationTabCoverage = workflowNavigationLanes.flatMap((lane) => lane.tabs);
+
 function readInitialShellTab(): ShellTabValue {
   if (typeof window === "undefined") {
     return "tenants";
@@ -1684,29 +1782,103 @@ export default function AdminKinfloShell() {
         </Card>
 
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as ShellTabValue)} className="mt-7 min-w-0">
+          <section
+            className="mb-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+            data-testid="section-kinflo-workflow-navigation-rail"
+          >
+            <div className="flex flex-col gap-2">
+              <div>
+                <div className="text-sm font-semibold text-slate-950">Workflow navigation</div>
+                <p className="mt-1 text-xs leading-5 text-slate-500">
+                  Control, Build, Launch, Growth, Evidence, and Hosted Activation group every existing tab by work mode.
+                </p>
+              </div>
+              <Badge variant="outline" className="self-start border-amber-200 bg-amber-50 text-amber-700">
+                {workflowNavigationTabCoverage.length}/{shellTabValues.length} tabs reachable
+              </Badge>
+            </div>
+            <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-3" data-testid="section-kinflo-workflow-navigation-lanes">
+              {workflowNavigationLanes.map((lane) => {
+                const LaneIcon = lane.icon;
+                const isActiveLane = lane.tabs.includes(activeTab);
+                const laneTone = lane.status === "blocked"
+                  ? "border-amber-200 bg-amber-50 text-amber-900"
+                  : lane.status === "ready"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                    : "border-slate-200 bg-slate-50 text-slate-800";
+
+                return (
+                  <button
+                    key={lane.key}
+                    type="button"
+                    onClick={() => setActiveTab(lane.primaryTab)}
+                    aria-pressed={isActiveLane}
+                    className={`min-w-0 rounded-xl border p-3 text-left transition ${
+                      isActiveLane
+                        ? "border-slate-900 bg-slate-950 text-white shadow-sm"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                    }`}
+                    data-testid={`button-kinflo-workflow-lane-${lane.key}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-start gap-2">
+                        <div className={`mt-0.5 rounded-lg border p-1.5 ${isActiveLane ? "border-white/10 bg-white/10 text-white" : laneTone}`}>
+                          <LaneIcon className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="truncate text-sm font-semibold">{lane.label}</div>
+                          <div className={`mt-1 line-clamp-2 text-xs leading-5 ${isActiveLane ? "text-slate-300" : "text-slate-500"}`}>
+                            {lane.description}
+                          </div>
+                        </div>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={isActiveLane ? "shrink-0 border-white/10 bg-white/10 text-white" : "shrink-0 bg-white"}
+                      >
+                        {lane.tabs.length}
+                      </Badge>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-1.5" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
+                      {lane.tabs.map((tabValue) => (
+                        <span
+                          key={tabValue}
+                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-medium ${
+                            activeTab === tabValue
+                              ? isActiveLane
+                                ? "border-emerald-200/30 bg-emerald-300/20 text-emerald-100"
+                                : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : isActiveLane
+                                ? "border-white/10 bg-white/10 text-slate-200"
+                                : "border-slate-200 bg-slate-50 text-slate-600"
+                          }`}
+                          data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              activeTab === tabValue ? "bg-emerald-400" : lane.status === "blocked" ? "bg-amber-400" : "bg-slate-300"
+                            }`}
+                          />
+                          {shellTabLabels[tabValue]}
+                        </span>
+                      ))}
+                    </div>
+                    <div className={`mt-3 text-xs leading-5 ${isActiveLane ? "text-amber-100" : "text-amber-700"}`}>
+                      {lane.blockedLiveAction}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
           <div className="w-full min-w-0 overflow-x-auto rounded-md border border-slate-200 bg-white">
             <TabsList className="flex h-auto min-w-max justify-start gap-1 bg-white p-1">
-            <TabsTrigger className="shrink-0" value="tenants">Tenants</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="sites">Sites</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="launch-readiness">Launch</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="adapter-switch">Switch</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="hosted-activation">Activation</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="factory">Factory</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="plans">Plans</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="brand">Brand</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="navigation">Nav</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="preview">Preview</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="site-studio">Studio</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="assets">Assets</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="domains">Domains</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="integrations">Integrations</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="campaigns">Campaigns</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="ai-review">AI Review</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="content">Content</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="templates">Templates</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="crm">CRM</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="experience">Experience</TabsTrigger>
-            <TabsTrigger className="shrink-0" value="access">Access</TabsTrigger>
+            {shellTabValues.map((tabValue) => (
+              <TabsTrigger key={tabValue} className="shrink-0" value={tabValue}>
+                {shellTabLabels[tabValue]}
+              </TabsTrigger>
+            ))}
             </TabsList>
           </div>
 
