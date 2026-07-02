@@ -293,6 +293,14 @@ function readInitialClientWebsiteStudioLane(): ClientWebsiteStudioLane {
     : "workbench";
 }
 
+function readInitialClientWebsiteStudioSiteKey(defaultSiteKey: string, siteKeys: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultSiteKey;
+  }
+  const siteKey = new URLSearchParams(window.location.search).get("studioSite");
+  return siteKey && siteKeys.includes(siteKey) ? siteKey : defaultSiteKey;
+}
+
 function readInitialClientWebsiteWorkbenchStage(): ClientWebsiteWorkbenchStage {
   if (typeof window === "undefined") {
     return "preview";
@@ -1543,7 +1551,14 @@ export default function AdminKinfloShell() {
   const [previewPersona, setPreviewPersona] = useState(snapshot.previewStudio.defaultPersona);
   const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
-  const [clientWebsiteStudioSiteKey, setClientWebsiteStudioSiteKey] = useState(snapshot.clientWebsiteStudio.defaultSiteKey);
+  const clientWebsiteStudioSiteKeys = useMemo(
+    () => snapshot.clientWebsiteStudio.sites.map((site) => site.key),
+    [snapshot.clientWebsiteStudio.sites],
+  );
+  const [clientWebsiteStudioSiteKey, setClientWebsiteStudioSiteKey] = useState(() => readInitialClientWebsiteStudioSiteKey(
+    snapshot.clientWebsiteStudio.defaultSiteKey,
+    clientWebsiteStudioSiteKeys,
+  ));
   const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>(readInitialClientWebsiteStudioLane);
   const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
   const [clientWebsiteLaunchDossier, setClientWebsiteLaunchDossier] = useState<ClientWebsiteLaunchDossier>(readInitialClientWebsiteLaunchDossier);
@@ -2323,6 +2338,10 @@ export default function AdminKinfloShell() {
   useEffect(() => {
     const nextTab = readInitialShellTab();
     const nextLane = readInitialClientWebsiteStudioLane();
+    const nextSiteKey = readInitialClientWebsiteStudioSiteKey(
+      snapshot.clientWebsiteStudio.defaultSiteKey,
+      clientWebsiteStudioSiteKeys,
+    );
     const nextStage = readInitialClientWebsiteWorkbenchStage();
     const nextDossier = readInitialClientWebsiteLaunchDossier();
     const nextAdapterSwitchBatchId = readInitialAdapterSwitchBatchId(
@@ -2345,6 +2364,7 @@ export default function AdminKinfloShell() {
       hostedSmokeEvidenceBatchIds,
     );
     setActiveTab((current) => (current === nextTab ? current : nextTab));
+    setClientWebsiteStudioSiteKey((current) => (current === nextSiteKey ? current : nextSiteKey));
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
@@ -2354,11 +2374,13 @@ export default function AdminKinfloShell() {
     setHostedSmokeEvidenceBatchId((current) => (current === nextHostedSmokeEvidenceBatchId ? current : nextHostedSmokeEvidenceBatchId));
   }, [
     adapterSwitchBatchIds,
+    clientWebsiteStudioSiteKeys,
     hostedActivationStepIds,
     hostedSmokeEvidenceBatchIds,
     location,
     snapshot.adapterSwitchReadiness.batches,
     snapshot.adapterSwitchReadiness.defaultBatchId,
+    snapshot.clientWebsiteStudio.defaultSiteKey,
     snapshot.hostedActivationRunbook.defaultStepId,
   ]);
 
@@ -2400,6 +2422,7 @@ export default function AdminKinfloShell() {
       && clientWebsiteWorkbenchStage === "launch";
     updateKinfloShellRoute({
       tab,
+      studioSite: tab === "site-studio" ? clientWebsiteStudioSiteKey : undefined,
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
@@ -2410,11 +2433,28 @@ export default function AdminKinfloShell() {
     });
   };
 
+  const selectClientWebsiteStudioSite = (siteKey: string) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioSiteKey(siteKey);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: siteKey,
+      studioLane: clientWebsiteStudioLane,
+      studioStage: clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+      studioDossier: clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+    });
+  };
+
   const selectClientWebsiteStudioLane = (lane: ClientWebsiteStudioLane) => {
     setActiveTab("site-studio");
     setClientWebsiteStudioLane(lane);
     updateKinfloShellRoute({
       tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
       studioLane: lane,
       studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
@@ -2431,6 +2471,7 @@ export default function AdminKinfloShell() {
     setClientWebsiteWorkbenchStage(stage);
     updateKinfloShellRoute({
       tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
       studioLane: "workbench",
       studioStage: stage,
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
@@ -2448,6 +2489,7 @@ export default function AdminKinfloShell() {
     setClientWebsiteLaunchDossier(dossier);
     updateKinfloShellRoute({
       tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
       studioLane: "workbench",
       studioStage: "launch",
       studioDossier: dossier,
@@ -2466,6 +2508,7 @@ export default function AdminKinfloShell() {
     setAdapterSwitchSurfaceId(surfaceId);
     updateKinfloShellRoute({
       tab: "adapter-switch",
+      studioSite: undefined,
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
@@ -2481,6 +2524,7 @@ export default function AdminKinfloShell() {
     setAdapterSwitchSurfaceId(surfaceId);
     updateKinfloShellRoute({
       tab: "adapter-switch",
+      studioSite: undefined,
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
@@ -2496,6 +2540,7 @@ export default function AdminKinfloShell() {
     setHostedActivationStepId(stepId);
     updateKinfloShellRoute({
       tab: "hosted-activation",
+      studioSite: undefined,
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
@@ -2511,6 +2556,7 @@ export default function AdminKinfloShell() {
     setHostedSmokeEvidenceBatchId(batchId);
     updateKinfloShellRoute({
       tab: "hosted-activation",
+      studioSite: undefined,
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
@@ -5985,7 +6031,7 @@ export default function AdminKinfloShell() {
                         <button
                           key={site.key}
                           type="button"
-                          onClick={() => setClientWebsiteStudioSiteKey(site.key)}
+                          onClick={() => selectClientWebsiteStudioSite(site.key)}
                           aria-pressed={isSelected}
                           className={`w-full rounded-xl border px-3 py-3 text-left text-sm transition ${
                             isSelected
@@ -6280,7 +6326,7 @@ export default function AdminKinfloShell() {
 
                   <div className="hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:block">
                     <Label>Client site</Label>
-                    <Select value={clientWebsiteStudioSiteKey} onValueChange={setClientWebsiteStudioSiteKey}>
+                    <Select value={clientWebsiteStudioSiteKey} onValueChange={selectClientWebsiteStudioSite}>
                       <SelectTrigger className="mt-2" data-testid="select-kinflo-client-website-site">
                         <SelectValue placeholder="Select client site" />
                       </SelectTrigger>
