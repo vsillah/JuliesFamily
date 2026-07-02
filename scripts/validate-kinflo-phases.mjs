@@ -166,6 +166,7 @@ for (const path of [
   "docs/phase90-hosted-smoke-gap-backlog.md",
   "docs/phase91-hosted-smoke-execution-sequencer.md",
   "docs/phase92-hosted-smoke-evidence-ledger.md",
+  "docs/phase104-hosted-smoke-evidence-deep-links.md",
   "docs/phase93-adapter-switch-cutover-checklist.md",
   "docs/phase102-adapter-switch-batch-deep-links.md",
   "docs/phase103-adapter-switch-surface-deep-links.md",
@@ -279,6 +280,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
   "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
+  "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
@@ -1561,6 +1563,22 @@ requireIncludes("docs/phase101-hosted-activation-step-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase104-hosted-smoke-evidence-deep-links.md", [
+  "Phase 104: Hosted Smoke Evidence Deep Links",
+  "npm run kinflo:validate-hosted-smoke-evidence-deep-links",
+  "smokeEvidence",
+  "read-only-core",
+  "site-creation-and-admin",
+  "campaign-and-ai-governance",
+  "readInitialHostedSmokeEvidenceBatchId",
+  "selectHostedSmokeEvidenceBatch",
+  "section-kinflo-hosted-smoke-evidence-focus",
+  "scrollIntoView",
+  "No generated Convex API files are committed or imported.",
+  "No hosted smoke transcript is recorded.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase102-adapter-switch-batch-deep-links.md", [
   "Phase 102: Adapter Switch Batch Deep Links",
   "npm run kinflo:validate-adapter-switch-batch-deep-links",
@@ -1809,6 +1827,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase90-hosted-smoke-gap-backlog.md\"",
   "\"docs/phase91-hosted-smoke-execution-sequencer.md\"",
   "\"docs/phase92-hosted-smoke-evidence-ledger.md\"",
+  "\"docs/phase104-hosted-smoke-evidence-deep-links.md\"",
   "\"docs/phase93-adapter-switch-cutover-checklist.md\"",
   "\"docs/phase102-adapter-switch-batch-deep-links.md\"",
   "\"docs/phase103-adapter-switch-surface-deep-links.md\"",
@@ -1816,6 +1835,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
   "\"npm run kinflo:validate-hosted-activation-owner-checklist\"",
   "\"npm run kinflo:validate-hosted-activation-step-deep-links\"",
+  "\"npm run kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"npm run kinflo:validate-client-website-configuration-profiles\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
@@ -1924,6 +1944,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-approval-packet\"",
   "\"kinflo:validate-hosted-activation-owner-checklist\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
+  "\"kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
@@ -2761,6 +2782,18 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "hosted activation step deep links do not import generated API",
   "hosted activation step deep links do not execute live Convex",
   "KinFlo hosted activation step deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs", [
+  "docs/phase104-hosted-smoke-evidence-deep-links.md",
+  "smokeEvidence",
+  "readInitialHostedSmokeEvidenceBatchId",
+  "selectHostedSmokeEvidenceBatch",
+  "section-kinflo-hosted-smoke-evidence-focus",
+  "scrollIntoView",
+  "hosted smoke evidence deep links do not import generated API",
+  "hosted smoke evidence deep links do not execute live Convex",
+  "KinFlo hosted smoke evidence deep-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-adapter-switch-batch-deep-links.mjs", [

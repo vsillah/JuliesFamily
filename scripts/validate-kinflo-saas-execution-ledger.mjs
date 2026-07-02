@@ -96,6 +96,7 @@ for (const path of [
   "docs/phase98-configuration-profile-generated-api-coverage.md",
   "docs/phase96-hosted-activation-owner-checklist.md",
   "docs/phase101-hosted-activation-step-deep-links.md",
+  "docs/phase104-hosted-smoke-evidence-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
   "docs/phase89-adapter-switch-acceptance-matrix.md",
@@ -130,6 +131,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
   "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
+  "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
@@ -246,6 +248,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-hosted-smoke-gap-backlog",
   "npm run kinflo:validate-hosted-smoke-execution-sequencer",
   "npm run kinflo:validate-hosted-smoke-evidence-ledger",
+  "npm run kinflo:validate-hosted-smoke-evidence-deep-links",
   "npm run kinflo:validate-adapter-switch-cutover-checklist",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -289,6 +292,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 85 hosted activation approval packet",
   "Phase 96 hosted activation owner checklist",
   "Phase 101 hosted activation step deep links",
+  "Phase 104 hosted smoke evidence deep links",
   "Site Studio scroll consolidation",
   "Phase 99 Site Studio deep links",
   "Phase 100 Site Studio launch dossier deep links",
@@ -301,7 +305,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 93 adapter switch cutover checklist",
   "Phase 102 adapter switch batch deep links",
   "Phase 103 adapter switch surface deep links",
-  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, and Phase 101 hosted activation step deep links current without storing secrets",
+  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
 ]);
 
 requireIncludes("package.json", [
@@ -332,6 +336,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-smoke-gap-backlog\"",
   "\"kinflo:validate-hosted-smoke-execution-sequencer\"",
   "\"kinflo:validate-hosted-smoke-evidence-ledger\"",
+  "\"kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"kinflo:validate-adapter-switch-cutover-checklist\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);

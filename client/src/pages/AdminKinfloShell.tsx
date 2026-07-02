@@ -321,6 +321,14 @@ function readInitialHostedActivationStepId(defaultStepId: string, stepIds: strin
   return stepId && stepIds.includes(stepId) ? stepId : defaultStepId;
 }
 
+function readInitialHostedSmokeEvidenceBatchId(defaultBatchId: string, batchIds: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultBatchId;
+  }
+  const batchId = new URLSearchParams(window.location.search).get("smokeEvidence");
+  return batchId && batchIds.includes(batchId) ? batchId : defaultBatchId;
+}
+
 function readInitialAdapterSwitchBatchId(defaultBatchId: string, batchIds: string[]): string {
   if (typeof window === "undefined") {
     return defaultBatchId;
@@ -1485,6 +1493,14 @@ export default function AdminKinfloShell() {
     snapshot.hostedActivationRunbook.defaultStepId,
     hostedActivationStepIds,
   ));
+  const hostedSmokeEvidenceBatchIds = useMemo(
+    () => snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries.map((entry) => entry.batchId),
+    [snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries],
+  );
+  const [hostedSmokeEvidenceBatchId, setHostedSmokeEvidenceBatchId] = useState(() => readInitialHostedSmokeEvidenceBatchId(
+    hostedSmokeEvidenceBatchIds[0] ?? "",
+    hostedSmokeEvidenceBatchIds,
+  ));
   const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
   const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
@@ -1628,6 +1644,11 @@ export default function AdminKinfloShell() {
     () => snapshot.hostedActivationRunbook.steps.find((step) => step.id === hostedActivationStepId)
       ?? snapshot.hostedActivationRunbook.steps[0],
     [hostedActivationStepId, snapshot.hostedActivationRunbook.steps],
+  );
+  const selectedHostedSmokeEvidenceEntry = useMemo(
+    () => snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries.find((entry) => entry.batchId === hostedSmokeEvidenceBatchId)
+      ?? snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries[0],
+    [hostedSmokeEvidenceBatchId, snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries],
   );
   const hostedActivationTotals = useMemo(() => {
     const steps = snapshot.hostedActivationRunbook.steps;
@@ -2319,6 +2340,10 @@ export default function AdminKinfloShell() {
       snapshot.hostedActivationRunbook.defaultStepId,
       hostedActivationStepIds,
     );
+    const nextHostedSmokeEvidenceBatchId = readInitialHostedSmokeEvidenceBatchId(
+      hostedSmokeEvidenceBatchIds[0] ?? "",
+      hostedSmokeEvidenceBatchIds,
+    );
     setActiveTab((current) => (current === nextTab ? current : nextTab));
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
@@ -2326,14 +2351,31 @@ export default function AdminKinfloShell() {
     setAdapterSwitchBatchId((current) => (current === nextAdapterSwitchBatchId ? current : nextAdapterSwitchBatchId));
     setAdapterSwitchSurfaceId((current) => (current === nextAdapterSwitchSurfaceId ? current : nextAdapterSwitchSurfaceId));
     setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
+    setHostedSmokeEvidenceBatchId((current) => (current === nextHostedSmokeEvidenceBatchId ? current : nextHostedSmokeEvidenceBatchId));
   }, [
     adapterSwitchBatchIds,
     hostedActivationStepIds,
+    hostedSmokeEvidenceBatchIds,
     location,
     snapshot.adapterSwitchReadiness.batches,
     snapshot.adapterSwitchReadiness.defaultBatchId,
     snapshot.hostedActivationRunbook.defaultStepId,
   ]);
+
+  useEffect(() => {
+    if (activeTab !== "hosted-activation" || typeof window === "undefined") {
+      return;
+    }
+    const hasSmokeEvidenceParam = new URLSearchParams(window.location.search).has("smokeEvidence");
+    if (!hasSmokeEvidenceParam) {
+      return;
+    }
+    window.setTimeout(() => {
+      document
+        .querySelector('[data-testid="section-kinflo-hosted-smoke-evidence-focus"]')
+        ?.scrollIntoView({ block: "start" });
+    }, 250);
+  }, [activeTab, hostedSmokeEvidenceBatchId, location]);
 
   const updateKinfloShellRoute = (updates: Record<string, string | undefined>) => {
     if (typeof window === "undefined") {
@@ -2364,6 +2406,7 @@ export default function AdminKinfloShell() {
       adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
       adapterSurface: tab === "adapter-switch" ? adapterSwitchSurfaceId : undefined,
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
+      smokeEvidence: tab === "hosted-activation" ? hostedSmokeEvidenceBatchId : undefined,
     });
   };
 
@@ -2378,6 +2421,7 @@ export default function AdminKinfloShell() {
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
+      smokeEvidence: undefined,
     });
   };
 
@@ -2393,6 +2437,7 @@ export default function AdminKinfloShell() {
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
+      smokeEvidence: undefined,
     });
   };
 
@@ -2409,6 +2454,7 @@ export default function AdminKinfloShell() {
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
+      smokeEvidence: undefined,
     });
   };
 
@@ -2426,6 +2472,7 @@ export default function AdminKinfloShell() {
       adapterBatch: batchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
+      smokeEvidence: undefined,
     });
   };
 
@@ -2440,6 +2487,7 @@ export default function AdminKinfloShell() {
       adapterBatch: adapterSwitchBatchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
+      smokeEvidence: undefined,
     });
   };
 
@@ -2454,6 +2502,22 @@ export default function AdminKinfloShell() {
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: stepId,
+      smokeEvidence: hostedSmokeEvidenceBatchId,
+    });
+  };
+
+  const selectHostedSmokeEvidenceBatch = (batchId: string) => {
+    setActiveTab("hosted-activation");
+    setHostedSmokeEvidenceBatchId(batchId);
+    updateKinfloShellRoute({
+      tab: "hosted-activation",
+      studioLane: undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: hostedActivationStepId,
+      smokeEvidence: batchId,
     });
   };
 
@@ -4104,10 +4168,27 @@ export default function AdminKinfloShell() {
                         {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.approvalGate}
                       </p>
                     </div>
-                    <Button disabled variant="outline" data-testid="button-hosted-smoke-evidence-gated">
-                      <FileText className="mr-2 h-4 w-4" />
-                      Evidence capture gated
-                    </Button>
+                    <div className="grid w-full gap-3 lg:w-[320px]">
+                      <div>
+                        <Label>Focus evidence</Label>
+                        <Select value={selectedHostedSmokeEvidenceEntry?.batchId ?? ""} onValueChange={selectHostedSmokeEvidenceBatch}>
+                          <SelectTrigger className="mt-2" data-testid="select-kinflo-hosted-smoke-evidence">
+                            <SelectValue placeholder="Select smoke evidence batch" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries.map((entry) => (
+                              <SelectItem key={entry.batchId} value={entry.batchId}>
+                                {entry.order}. {entry.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button disabled variant="outline" data-testid="button-hosted-smoke-evidence-gated">
+                        <FileText className="mr-2 h-4 w-4" />
+                        Evidence capture gated
+                      </Button>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <div className="grid gap-3 md:grid-cols-4" data-testid="section-kinflo-hosted-smoke-evidence-summary">
@@ -4124,9 +4205,87 @@ export default function AdminKinfloShell() {
                       ))}
                     </div>
 
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4" data-testid="section-kinflo-hosted-smoke-evidence-focus">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <FileText className="h-4 w-4 text-slate-500" />
+                            <h3 className="text-sm font-semibold text-slate-950">{selectedHostedSmokeEvidenceEntry?.label}</h3>
+                            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+                              {selectedHostedSmokeEvidenceEntry?.status.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-hosted-smoke-evidence-focus">
+                            {selectedHostedSmokeEvidenceEntry?.expectedTranscript}
+                          </p>
+                        </div>
+                        <Button size="sm" disabled variant="outline" data-testid="button-hosted-smoke-evidence-focus-gated">
+                          <ShieldCheck className="mr-2 h-3 w-3" />
+                          Recording gated
+                        </Button>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                        <div className="rounded-md border border-white bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Evidence slots</div>
+                          <div className="mt-2 space-y-1">
+                            {(selectedHostedSmokeEvidenceEntry?.evidenceSlots ?? []).map((slot) => (
+                              <div key={slot} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                                <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                <span>{slot}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="rounded-md border border-white bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Acceptance criteria</div>
+                          <div className="mt-2 space-y-1">
+                            {(selectedHostedSmokeEvidenceEntry?.acceptanceCriteria ?? []).map((criterion) => (
+                              <div key={criterion} className="flex items-start gap-2 text-xs leading-5 text-emerald-800">
+                                <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                <span>{criterion}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-slate-500">Functions</div>
+                          <div className="mt-1 font-semibold text-slate-950">{selectedHostedSmokeEvidenceEntry?.functionCount}</div>
+                        </div>
+                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-slate-500">Owner</div>
+                          <div className="mt-1 truncate font-semibold text-slate-950" title={selectedHostedSmokeEvidenceEntry?.owner}>
+                            {selectedHostedSmokeEvidenceEntry?.owner}
+                          </div>
+                        </div>
+                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                          <div className="text-slate-500">Can record</div>
+                          <div className="mt-1 font-semibold text-slate-950">{selectedHostedSmokeEvidenceEntry?.canRecord ? "yes" : "no"}</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 text-xs lg:grid-cols-2">
+                        <div className="rounded-md border border-rose-100 bg-rose-50 p-2">
+                          <span className="font-medium text-rose-900">Abort if: </span>
+                          <span className="text-rose-700">{selectedHostedSmokeEvidenceEntry?.abortIf}</span>
+                        </div>
+                        <div className="rounded-md border border-slate-100 bg-white p-2">
+                          <span className="font-medium text-slate-900">Rollback: </span>
+                          <span className="text-slate-600">{selectedHostedSmokeEvidenceEntry?.rollbackReference}</span>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid max-h-[560px] gap-3 overflow-y-auto pr-1 xl:grid-cols-2" data-testid="section-kinflo-hosted-smoke-evidence-scroll">
                       {snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries.map((entry) => (
-                        <div key={entry.id} className="rounded-lg border border-slate-200 bg-white p-4" data-testid={`card-hosted-smoke-evidence-${entry.batchId}`}>
+                        <div
+                          key={entry.id}
+                          className={`rounded-lg border p-4 ${entry.batchId === selectedHostedSmokeEvidenceEntry?.batchId ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white"}`}
+                          data-testid={`card-hosted-smoke-evidence-${entry.batchId}`}
+                        >
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
                               <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Batch {entry.order}</div>
@@ -5603,7 +5762,7 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="site-studio" className="mt-3">
-            <section className="min-w-0 space-y-3">
+            <section className="min-w-0 space-y-2" data-testid="section-kinflo-client-studio-compact-shell">
               <div
                 className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
                 data-testid="section-kinflo-client-control-room-frame"
@@ -5622,10 +5781,10 @@ export default function AdminKinfloShell() {
                     <h2 className="mt-2 max-w-3xl text-xl font-semibold leading-tight text-slate-950 sm:text-2xl">
                       Client Website Design Studio
                     </h2>
-                    <p className="mt-2 max-w-3xl text-sm leading-5 text-slate-600">
+                    <p className="mt-2 hidden max-w-3xl text-sm leading-5 text-slate-600 sm:block">
                       Configure the selected client site, inspect the public experience, and keep every provider, publish, lead, invite, campaign, and launch action gated until the activation evidence is complete.
                     </p>
-                    <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid="section-kinflo-client-command-stats">
+                    <div className="mt-3 hidden grid-cols-2 gap-2 sm:grid lg:grid-cols-4" data-testid="section-kinflo-client-command-stats">
                       {clientWebsiteStudioCommandStats.map((stat) => (
                         <div key={stat.label} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
                           <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">{stat.label}</div>
@@ -5666,7 +5825,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4"
+                className="hidden grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid lg:grid-cols-4"
                 data-testid="section-kinflo-client-studio-operating-frame"
               >
                 {clientWebsiteStudioReviewStats.map((stat) => (
@@ -5678,7 +5837,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className="grid grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm md:grid-cols-4"
+                className="hidden grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid lg:grid-cols-4"
                 data-testid="section-kinflo-client-workbench-grid-contract"
               >
                 {clientWebsiteWorkbenchGridContract.map((item) => (
@@ -5696,7 +5855,7 @@ export default function AdminKinfloShell() {
 
               <div className="min-w-0" data-testid="tabs-kinflo-client-studio-lanes">
                 <div
-                  className="flex flex-col gap-3 border-y border-slate-200 bg-white/80 py-3 lg:flex-row lg:items-center lg:justify-between"
+                  className="sticky top-0 z-20 flex flex-col gap-2 border-y border-slate-200 bg-white/95 py-2 backdrop-blur lg:flex-row lg:items-center lg:justify-between"
                   data-testid="section-kinflo-client-studio-lane-switcher"
                 >
                   <div className="grid h-auto w-full grid-cols-2 gap-1 rounded-md bg-slate-100 p-1 sm:grid-cols-4 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
@@ -5726,7 +5885,7 @@ export default function AdminKinfloShell() {
                       );
                     })}
                   </div>
-                  <div className="grid grid-cols-3 gap-2 text-xs lg:w-[360px]" data-testid="section-kinflo-client-studio-lane-summary">
+                  <div className="hidden grid-cols-3 gap-2 text-xs sm:grid lg:w-[360px]" data-testid="section-kinflo-client-studio-lane-summary">
                     {[
                       { label: "Requests", value: snapshot.clientWebsiteStudio.spinUpQueue.totalRequests },
                       { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.totalProfiles },
@@ -5796,11 +5955,11 @@ export default function AdminKinfloShell() {
                 </div>
 
                 <div
-                  className={`${clientWebsiteStudioLane === "workbench" ? "block" : "hidden"} mt-3`}
+                  className={`${clientWebsiteStudioLane === "workbench" ? "block" : "hidden"} mt-2`}
                   data-testid="section-kinflo-client-studio-lane-workbench"
                 >
                   <div
-                    className="min-w-0 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+                    className="min-w-0 rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3"
                     data-testid="section-kinflo-client-workbench-grid"
                   >
                     <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
@@ -6155,7 +6314,7 @@ export default function AdminKinfloShell() {
 
                         <TabsContent
                           value="provisioning"
-                          className="mt-3 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1"
+                          className="mt-2 max-h-[calc(100vh-14rem)] overflow-hidden pr-0"
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 

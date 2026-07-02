@@ -11,6 +11,7 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 ## Added Surface
 
 - Admin route: `/admin/kinflo-os?tab=site-studio`
+- compact shell: `section-kinflo-client-studio-compact-shell`
 - top-level lane switcher: `tabs-kinflo-client-studio-lanes`
 - lane toolbar: `section-kinflo-client-studio-lane-switcher`
 - lane summary: `section-kinflo-client-studio-lane-summary`
@@ -52,6 +53,8 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 ## What Changed
 
 The Site Studio workbench now uses page-level stage tabs for `Sites`, `Preview`, and `Launch`, so narrow review widths do not stack the site rail, preview workbench, and launch rail into one long vertical document. The launch rail remains available as a focused stage with its own bounded scroll.
+
+The compact shell trims duplicate mobile summary chrome before the active workbench. The control-room explanatory copy and command stats collapse on the narrow viewport, the operating/grid contract rows wait for desktop width, and the lane toolbar stays sticky so the user can switch surfaces without scrolling back through the page header.
 
 The page now has a top-level lane switcher above the major client website modules. Workbench is the default lane, while Spin up, Configure, and Handoff lanes stay available without adding to the default page height. This keeps super-admin setup, configuration profiles, permissions handoff, and the active client workbench in one operating surface instead of one stacked scroll.
 
