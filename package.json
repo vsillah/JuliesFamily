@@ -60,6 +60,7 @@
     "kinflo:dry-run-client-launch-decisions": "node scripts/dry-run-kinflo-client-launch-decisions.mjs",
     "kinflo:validate-control-room-polish": "node scripts/validate-kinflo-control-room-polish.mjs",
     "kinflo:validate-hosted-activation-console": "node scripts/validate-kinflo-hosted-activation-console.mjs",
+    "kinflo:validate-saas-execution-ledger": "node scripts/validate-kinflo-saas-execution-ledger.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

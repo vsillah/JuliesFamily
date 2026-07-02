@@ -137,10 +137,12 @@ for (const path of [
   "docs/phase69-client-launch-decisions.md",
   "docs/phase70-control-room-polish.md",
   "docs/phase71-hosted-activation-console.md",
+  "docs/phase72-saas-execution-ledger.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
   "docs/convex-live-smoke-manifest.json",
+  "docs/kinflo-saas-execution-ledger.json",
   "docs/convex-client-provisioning-execution-manifest.json",
   "docs/convex-client-launch-packet-manifest.json",
   "docs/convex-client-starter-content-pack-manifest.json",
@@ -223,6 +225,7 @@ for (const path of [
   "scripts/dry-run-kinflo-client-launch-decisions.mjs",
   "scripts/validate-kinflo-control-room-polish.mjs",
   "scripts/validate-kinflo-hosted-activation-console.mjs",
+  "scripts/validate-kinflo-saas-execution-ledger.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1228,6 +1231,31 @@ requireIncludes("docs/phase71-hosted-activation-console.md", [
   "provider_light_activation_console",
 ]);
 
+requireIncludes("docs/phase72-saas-execution-ledger.md", [
+  "npm run kinflo:validate-saas-execution-ledger",
+  "provider-light-saas-execution-ledger",
+  "Execution lanes: 6",
+  "Blocked live actions: 10",
+  "No hosted Convex deployment is created.",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
+requireIncludes("docs/kinflo-saas-execution-ledger.json", [
+  "\"phase\": 72",
+  "\"status\": \"provider-light-saas-execution-ledger\"",
+  "\"phase0-readiness\"",
+  "\"convex-control-plane-spine\"",
+  "\"admin-shell-configuration\"",
+  "\"site-factory-and-client-launch\"",
+  "\"design-polish\"",
+  "\"hosted-activation\"",
+  "\"human_gate_blocked\"",
+  "\"run npm run convex:codegen\"",
+  "\"commit or import convex/_generated/api\"",
+]);
+
 requireIncludes("docs/convex-client-launch-decision-manifest.json", [
   "\"phase\": 69",
   "\"status\": \"provider-light-launch-decision\"",
@@ -1304,6 +1332,7 @@ requireIncludes("package.json", [
   "\"kinflo:dry-run-client-launch-decisions\"",
   "\"kinflo:validate-control-room-polish\"",
   "\"kinflo:validate-hosted-activation-console\"",
+  "\"kinflo:validate-saas-execution-ledger\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -1908,6 +1937,20 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-console.mjs", [
   "blocked_until_approval",
   "activation console does not import generated API",
   "activation console does not execute live Convex",
+]);
+
+requireIncludes("scripts/validate-kinflo-saas-execution-ledger.mjs", [
+  "docs/kinflo-saas-execution-ledger.json",
+  "docs/phase72-saas-execution-ledger.md",
+  "provider-light-saas-execution-ledger",
+  "phase0-readiness",
+  "convex-control-plane-spine",
+  "admin-shell-configuration",
+  "site-factory-and-client-launch",
+  "hosted-activation",
+  "generated Convex API files remain untracked",
+  "secret env files remain untracked",
+  "KinFlo SaaS execution ledger validation",
 ]);
 
 requireIncludes("scripts/inventory-kinflo-env.mjs", [
