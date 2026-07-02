@@ -13,7 +13,7 @@ Create a real KinFlo working tree from the Julie's Family GitHub source, harden 
 | Requirement | Status | Evidence | Notes |
 | --- | --- | --- | --- |
 | Create a real KinFlo working tree from the Julie's Family GitHub source. | Repo-complete | Workspace `/Users/vambahsillah/Documents/KinFlo CRM`; `origin` is `https://github.com/vsillah/JuliesFamily`; branch `codex/kinflo-phase-0-convex-plan`. | Existing local `excalidraw.log` remains untracked and out of PR scope. |
-| Confirm current branch, remotes, and dirty state. | Repo-complete | `git status --short --branch` shows branch synced to origin with only untracked `excalidraw.log`; PR #1 targets `main`. | Worktree cleanliness excludes the known unrelated local artifact. |
+| Confirm current branch, remotes, and dirty state. | Repo-complete | `git status --short --branch` shows branch synced to origin with known local-only untracked artifacts; PR #1 targets `main`. | Worktree cleanliness excludes `.cursor/`, `Terminal Commands.md`, `commands/`, `docs/terminal-command-cheatsheet.md`, and `excalidraw.log`, which remain outside PR scope. |
 | Run dependency install. | Repo-complete | [docs/phase0-baseline.md](phase0-baseline.md) records `npm install` completed and dependency audit findings. | Vulnerability remediation is intentionally not part of Phase 0. |
 | Run build baseline. | Repo-complete | `npm run build` passes; [docs/phase0-baseline.md](phase0-baseline.md) records current and historical build status. | Build still warns about stale Browserslist data and large bundles. |
 | Run typecheck baseline. | Repo-complete | `npm run kinflo:check-baseline` passes; repo-wide `npm run check` exits 0; TypeScript diagnostics: 0; protected KinFlo diagnostics: 0. | Earlier TypeScript drift is retained as historical intake context. |
@@ -51,6 +51,14 @@ The current PR checks passed:
 
 - Vercel: `SUCCESS`
 - Vercel Preview Comments: `SUCCESS`
+
+Current local-only artifacts intentionally excluded from the provider-light PR:
+
+- `.cursor/`
+- `Terminal Commands.md`
+- `commands/`
+- `docs/terminal-command-cheatsheet.md`
+- `excalidraw.log`
 
 ## Repo-Complete Definition
 

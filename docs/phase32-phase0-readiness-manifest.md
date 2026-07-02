@@ -16,6 +16,7 @@ The validator checks `docs/phase0-readiness-manifest.json` against current repo 
 - the working branch is `codex/kinflo-phase-0-convex-plan`.
 - `.env.local` is not tracked.
 - generated Convex API files under `convex/_generated/` are not tracked.
+- known local-only artifacts are documented and remain outside tracked source.
 - required Phase 0 docs and provider-light scripts exist.
 - all repo-complete Phase 0 requirements have structured evidence.
 - human-owned gates remain explicitly pending rather than silently marked complete.

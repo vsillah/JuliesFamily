@@ -312,6 +312,8 @@ requireIncludes("docs/phase0-completion-audit.md", [
   "npm run kinflo:validate-map",
   "npm run kinflo:check-baseline",
   "This branch satisfies those repo-complete conditions.",
+  ".cursor/",
+  "docs/terminal-command-cheatsheet.md",
   "Do not treat it as approval to create providers",
 ]);
 
@@ -328,6 +330,8 @@ requireIncludes("docs/phase0-readiness-manifest.json", [
   "\"phase\": 0",
   "\"sourceRepository\": \"https://github.com/vsillah/JuliesFamily\"",
   "\"providerBoundary\"",
+  "\"localOnlyUntrackedArtifacts\"",
+  "\"currentReviewEvidence\"",
   "\"hostedConvexDeploymentCreated\": false",
   "\"liveConvexExecution\": false",
   "\"repoCompleteRequirements\"",
@@ -631,6 +635,7 @@ requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "npm run kinflo:validate-phase0-readiness",
   "Repo-complete requirements: 13",
   "Human-owned gates: 4",
+  "known local-only artifacts are documented",
   "No hosted Convex deployment is created",
   "No credentials are read, printed, rotated, or copied",
 ]);
@@ -1826,6 +1831,8 @@ requireIncludes("scripts/validate-kinflo-phase0-readiness.mjs", [
   "phase0-readiness-manifest.json",
   "repoCompleteRequirements",
   "humanOwnedGates",
+  "localOnlyUntrackedArtifacts",
+  "currentReviewEvidence",
   "provider boundary",
   "Hosted deployment touched: no",
   "Live Convex execution: no",

@@ -2,7 +2,7 @@
 
 Initial intake date: June 30, 2026
 
-Current validation date: July 1, 2026
+Current validation date: July 2, 2026
 
 Workspace: `/Users/vambahsillah/Documents/KinFlo CRM`
 
@@ -169,8 +169,12 @@ Known local artifacts not intended for commit:
 - `node_modules/`
 - `dist/`
 
-Known unrelated or preexisting local artifact:
+Known unrelated or preexisting local artifacts:
 
+- `.cursor/`
+- `Terminal Commands.md`
+- `commands/`
+- `docs/terminal-command-cheatsheet.md`
 - `excalidraw.log`
 
 ## Phase 0 Gate Status

@@ -5,6 +5,27 @@
   "workspace": "/Users/vambahsillah/Documents/KinFlo CRM",
   "sourceRepository": "https://github.com/vsillah/JuliesFamily",
   "branch": "codex/kinflo-phase-0-convex-plan",
+  "localOnlyUntrackedArtifacts": [
+    ".cursor/",
+    "Terminal Commands.md",
+    "commands/",
+    "docs/terminal-command-cheatsheet.md",
+    "excalidraw.log"
+  ],
+  "currentReviewEvidence": {
+    "pullRequest": "https://github.com/vsillah/JuliesFamily/pull/1",
+    "liveVerificationCommand": "gh pr view 1 --repo vsillah/JuliesFamily --json headRefOid,statusCheckRollup,url",
+    "checks": [
+      {
+        "name": "Vercel",
+        "requiredStateBeforeMerge": "SUCCESS"
+      },
+      {
+        "name": "Vercel Preview Comments",
+        "requiredStateBeforeMerge": "SUCCESS"
+      }
+    ]
+  },
   "providerBoundary": {
     "hostedConvexDeploymentCreated": false,
     "convexCodegenRun": false,
@@ -28,7 +49,14 @@
       "id": "branch_and_dirty_state",
       "requirement": "Confirm current branch, remotes, and dirty state.",
       "status": "repo_complete",
-      "evidence": ["git status --short --branch", "known_untracked: excalidraw.log"]
+      "evidence": [
+        "git status --short --branch",
+        "known_untracked: .cursor/",
+        "known_untracked: Terminal Commands.md",
+        "known_untracked: commands/",
+        "known_untracked: docs/terminal-command-cheatsheet.md",
+        "known_untracked: excalidraw.log"
+      ]
     },
     {
       "id": "dependency_install",

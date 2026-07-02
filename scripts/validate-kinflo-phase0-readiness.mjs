@@ -93,6 +93,8 @@ for (const key of [
 const repoCompleteRequirements = manifest.repoCompleteRequirements ?? [];
 const humanOwnedGates = manifest.humanOwnedGates ?? [];
 const localValidationCommands = manifest.localValidationCommands ?? [];
+const localOnlyUntrackedArtifacts = manifest.localOnlyUntrackedArtifacts ?? [];
+const currentReviewEvidence = manifest.currentReviewEvidence ?? {};
 
 requireArrayIncludes(
   "repo-complete requirement ids",
@@ -113,6 +115,14 @@ requireArrayIncludes(
     "local_admin_browser_smoke",
   ],
 );
+
+requireArrayIncludes("local-only untracked artifacts", localOnlyUntrackedArtifacts, [
+  ".cursor/",
+  "Terminal Commands.md",
+  "commands/",
+  "docs/terminal-command-cheatsheet.md",
+  "excalidraw.log",
+]);
 
 for (const requirement of repoCompleteRequirements) {
   if (requirement.status === "repo_complete") {
@@ -177,6 +187,25 @@ if (trackedFiles.some((file) => file.startsWith("convex/_generated/"))) {
   pass("Convex generated files are not tracked");
 }
 
+for (const artifact of localOnlyUntrackedArtifacts) {
+  const normalizedArtifact = artifact.endsWith("/") ? artifact.slice(0, -1) : artifact;
+  const isTracked = trackedFiles.some((file) => file === normalizedArtifact || file.startsWith(`${normalizedArtifact}/`));
+  if (isTracked) {
+    fail(`${artifact} remains outside tracked source`, "Local-only artifact was found in git tracked files.");
+  } else {
+    pass(`${artifact} remains outside tracked source`);
+  }
+}
+
+if (currentReviewEvidence.pullRequest === "https://github.com/vsillah/JuliesFamily/pull/1") {
+  pass("current review evidence includes PR #1");
+} else {
+  fail("current review evidence includes PR #1", "Expected the Phase 0 readiness manifest to point at PR #1.");
+}
+
+const reviewCheckNames = (currentReviewEvidence.checks ?? []).map((check) => check.name);
+requireArrayIncludes("current review checks", reviewCheckNames, ["Vercel", "Vercel Preview Comments"]);
+
 for (const path of [
   "docs/phase0-baseline.md",
   "docs/phase0-completion-audit.md",
@@ -197,10 +226,13 @@ requireIncludes("docs/phase0-completion-audit.md", [
   "This branch satisfies those repo-complete conditions.",
   "Human-Owned Gates Still Pending",
   "Do not treat it as approval to create providers",
+  ".cursor/",
+  "docs/terminal-command-cheatsheet.md",
 ]);
 
 requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "npm run kinflo:validate-phase0-readiness",
+  "known local-only artifacts are documented",
   "No hosted Convex deployment is created.",
   "No live Convex query, mutation, or action is executed.",
   "No credentials are read, printed, rotated, or copied.",
