@@ -44,7 +44,7 @@ The Site Studio workbench now uses page-level stage tabs for `Sites`, `Preview`,
 
 The client handoff area now uses a compact handoff workspace with `Selected site` and `All site permissions` tabs. The default view keeps the selected site's permissions, blocked invite, missing artifact, and gated action visible while moving the full cross-site admin matrix behind a tab. Super-admin comparison remains one click away, but it no longer expands the default Site Studio page into a long permission document.
 
-The launch stage now switches into a narrow two-pane rail at review widths above 480px, keeping the command controls beside the launch dossier instead of stacking the command rail above every provisioning detail. Secondary explanatory copy, the duplicate client-site picker, and the full provider boundary text stay available on wider desktop review, but they are hidden from the narrow command rail so the page remains scannable.
+The launch stage now keeps a full-width dossier below desktop and only switches into a desktop-only command rail when there is enough horizontal room. Secondary explanatory copy, the duplicate client-site picker, and the full provider boundary text stay available on wider desktop review, but they are hidden from the compact review rail so the page remains scannable.
 
 The prior right-rail provisioning content stacked a large provisioning order card and a large execution dry-run card. The layout keeps the same evidence and gated actions but moves them into one compact card:
 
@@ -53,14 +53,14 @@ The prior right-rail provisioning content stacked a large provisioning order car
 - approval evidence, blocked actions, and function references move into internal `Evidence`, `Blocked`, and `Functions` tabs inside the `Order` tab,
 - manifest, dry-run counters, selected order steps, provider boundary, and blocked-until gates live under the `Dry run` tab,
 - long lists use bounded internal scroll areas instead of increasing the full page height,
-- narrow review widths cap the order cockpit and dry-run panels at 280px before desktop restores the larger review height,
-- the provisioning cockpit keeps one scrollable column until the dossier is wide enough for its own internal split.
+- local setup, evidence, blocked-action, and function lists use 230px local list caps,
+- the provisioning cockpit keeps one full-width dossier until the rail is wide enough for its own internal split.
 
 Launch packets, content packs, onboarding evidence, simulations, polish scorecards, visual QA, proof-before-publish, and launch decisions remain available in the rail, but they now sit inside a launch dossier with `Provision`, `Packets`, `QA`, and `Decision` tabs. The left command column keeps the active site, gated launch controls, and provider boundary visible while the right dossier scrolls internally.
 
 This keeps the Site Studio launch review as a compact dashboard instead of a long vertical proof document.
 
-At narrow review widths, the launch rail scrolls internally so the command column and dossier remain reachable without stretching the whole admin page. At wider widths, the rail locks into the two-pane command/dossier layout.
+At narrow review widths, the launch dossier scrolls internally without forcing a command-column split. At wider widths, the rail locks into the two-pane command/dossier layout.
 
 ## Provider Boundary
 
