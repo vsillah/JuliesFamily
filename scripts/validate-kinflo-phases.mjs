@@ -143,6 +143,7 @@ for (const path of [
   "docs/phase75-design-frame-adoption-backlog.md",
   "docs/phase76-active-object-signal.md",
   "docs/phase77-client-studio-workbench-grid.md",
+  "docs/phase78-decision-gate-rail.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-adapter-switch-plan.json",
@@ -238,6 +239,7 @@ for (const path of [
   "scripts/validate-kinflo-design-frame-backlog.mjs",
   "scripts/validate-kinflo-active-object-signal.mjs",
   "scripts/validate-kinflo-client-workbench-grid.mjs",
+  "scripts/validate-kinflo-decision-gate-rail.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1279,6 +1281,17 @@ requireIncludes("docs/phase77-client-studio-workbench-grid.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase78-decision-gate-rail.md", [
+  "Phase 78: Decision Gate Rail",
+  "npm run kinflo:validate-decision-gate-rail",
+  "DecisionGateRail",
+  "section-kinflo-launch-decision-gate-rail",
+  "section-kinflo-adapter-switch-decision-gate-rail",
+  "section-kinflo-hosted-activation-decision-gate-rail",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1304,9 +1317,11 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase73-hosted-activation-decision-register.md\"",
   "\"docs/phase76-active-object-signal.md\"",
   "\"docs/phase77-client-studio-workbench-grid.md\"",
+  "\"docs/phase78-decision-gate-rail.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
+  "\"npm run kinflo:validate-decision-gate-rail\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1393,6 +1408,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
+  "\"kinflo:validate-decision-gate-rail\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2038,6 +2054,17 @@ requireIncludes("scripts/validate-kinflo-client-workbench-grid.mjs", [
   "client workbench grid does not import generated API",
   "client workbench grid does not execute live Convex",
   "KinFlo client workbench grid validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-decision-gate-rail.mjs", [
+  "docs/phase78-decision-gate-rail.md",
+  "DecisionGateRail",
+  "section-kinflo-launch-decision-gate-rail",
+  "section-kinflo-adapter-switch-decision-gate-rail",
+  "section-kinflo-hosted-activation-decision-gate-rail",
+  "decision gate rail does not import generated API",
+  "decision gate rail does not execute live Convex",
+  "KinFlo decision gate rail validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
@@ -2893,6 +2920,10 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "button-client-compact-publish-gated",
   "button-client-compact-handoff-gated",
   "button-client-compact-domain-gated",
+  "section-kinflo-launch-decision-gate-rail",
+  "section-kinflo-adapter-switch-decision-gate-rail",
+  "section-kinflo-hosted-activation-decision-gate-rail",
+  "DecisionGateRail",
   "clientWebsiteWorkbenchGridContract",
   "clientWebsiteStudioReviewStats",
   "clientWebsiteStudioCommandStats",

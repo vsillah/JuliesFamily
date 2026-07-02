@@ -79,6 +79,7 @@ for (const path of [
   "docs/phase75-design-frame-adoption-backlog.md",
   "docs/phase76-active-object-signal.md",
   "docs/phase77-client-studio-workbench-grid.md",
+  "docs/phase78-decision-gate-rail.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
@@ -90,6 +91,7 @@ for (const path of [
   "scripts/validate-kinflo-design-frame-backlog.mjs",
   "scripts/validate-kinflo-active-object-signal.mjs",
   "scripts/validate-kinflo-client-workbench-grid.mjs",
+  "scripts/validate-kinflo-decision-gate-rail.mjs",
 ]) {
   requireFile(path);
 }
@@ -170,6 +172,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-saas-execution-ledger",
   "npm run kinflo:validate-active-object-signal",
   "npm run kinflo:validate-client-workbench-grid",
+  "npm run kinflo:validate-decision-gate-rail",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -195,6 +198,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "design-frame adoption backlog",
   "active-object signal",
   "client workbench grid",
+  "decision gate rail",
   "human-gate decision register current without storing secrets",
 ]);
 
@@ -202,6 +206,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-saas-execution-ledger\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
+  "\"kinflo:validate-decision-gate-rail\"",
 ]);
 
 const ledgerText = read("docs/kinflo-saas-execution-ledger.json");

@@ -166,6 +166,80 @@ function hostedActivationStatusBadge(status: ShellHostedActivationStepStatus) {
   return <Badge variant="outline">Pending approval</Badge>;
 }
 
+function DecisionGateRail({
+  title,
+  owner,
+  posture,
+  evidence,
+  rollback,
+  blockedActions,
+  disabledActionLabel,
+  testId,
+}: {
+  title: string;
+  owner: string;
+  posture: string;
+  evidence: string[];
+  rollback: string;
+  blockedActions: string[];
+  disabledActionLabel: string;
+  testId: string;
+}) {
+  return (
+    <Card className="border-slate-900 bg-slate-950 text-white shadow-sm" data-testid={testId}>
+      <CardHeader className="space-y-0 pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <Badge className="border-white/10 bg-white/10 text-white hover:bg-white/10">Decision rail</Badge>
+            <CardTitle className="mt-3 text-base leading-tight">{title}</CardTitle>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{posture}</p>
+          </div>
+          <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-amber-300" />
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3" data-testid={`${testId}-owner`}>
+          <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Owner</div>
+          <div className="mt-1 truncate text-sm font-semibold">{owner}</div>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3" data-testid={`${testId}-evidence`}>
+          <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Required evidence</div>
+          <div className="mt-3 space-y-2">
+            {evidence.slice(0, 4).map((item) => (
+              <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-300">
+                <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3" data-testid={`${testId}-rollback`}>
+          <div className="text-[11px] font-medium uppercase tracking-normal text-amber-100">Rollback</div>
+          <p className="mt-1 text-xs leading-5 text-amber-50">{rollback}</p>
+        </div>
+
+        <div className="rounded-xl border border-rose-300/30 bg-rose-400/10 p-3" data-testid={`${testId}-blocked-actions`}>
+          <div className="text-[11px] font-medium uppercase tracking-normal text-rose-100">Blocked live actions</div>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {blockedActions.slice(0, 4).map((action) => (
+              <Badge key={action} variant="outline" className="border-rose-200/30 bg-white/10 text-rose-50">
+                {action}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <Button disabled variant="secondary" className="w-full justify-start" data-testid={`${testId}-disabled-action`}>
+          <ShieldCheck className="mr-2 h-4 w-4" />
+          {disabledActionLabel}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function AdminKinfloShell() {
   const { isLoading } = useAuth();
   const { isAdmin } = useUserRole();
@@ -1528,6 +1602,19 @@ export default function AdminKinfloShell() {
               </div>
 
               <div className="space-y-4">
+                <DecisionGateRail
+                  title="Launch decision gate"
+                  owner={selectedLaunchReadinessSite?.stages.find((stage) => stage.status === "blocked")?.owner
+                    ?? selectedLaunchReadinessSite?.stages[0]?.owner
+                    ?? "Vambah"}
+                  posture={selectedLaunchReadinessSite?.blockerSummary ?? snapshot.launchReadiness.providerBoundary}
+                  evidence={snapshot.launchReadiness.activationEvidence}
+                  rollback="Keep the public site on provider-light preview, block live lead writes, and hold client handoff until launch evidence is accepted."
+                  blockedActions={["publish client site", "write live lead", "send campaign traffic", "attach production domain"]}
+                  disabledActionLabel="Live launch remains gated"
+                  testId="section-kinflo-launch-decision-gate-rail"
+                />
+
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Convex Launch Contract</CardTitle>
@@ -1704,6 +1791,18 @@ export default function AdminKinfloShell() {
               </div>
 
               <div className="space-y-4">
+                <DecisionGateRail
+                  title="Adapter switch decision gate"
+                  owner="Vambah / platform.super_admin"
+                  posture={`${selectedAdapterSwitchBatch?.label ?? "Switch batch"} stays fixture-backed until generated bindings, smoke evidence, and rollback order are accepted.`}
+                  evidence={(selectedAdapterSwitchBatch?.surfaces ?? []).flatMap((surface) => surface.requiredSmokeEvidence)}
+                  rollback={selectedAdapterSwitchBatch?.surfaces[0]?.rollback
+                    ?? "Return the affected surface to fixture data and keep every other surface blocked until reviewed."}
+                  blockedActions={["run codegen", "import generated API", "execute live Convex", "switch fixture adapter"]}
+                  disabledActionLabel="Live adapter switch remains gated"
+                  testId="section-kinflo-adapter-switch-decision-gate-rail"
+                />
+
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Switch Gate Evidence</CardTitle>
@@ -2008,6 +2107,21 @@ export default function AdminKinfloShell() {
               </div>
 
               <div className="space-y-4">
+                <DecisionGateRail
+                  title="Hosted activation decision gate"
+                  owner={selectedHostedActivationStep?.owner ?? "Vambah"}
+                  posture={snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
+                  evidence={[
+                    selectedHostedActivationStep?.evidenceTarget ?? "Hosted activation evidence target is pending.",
+                    ...snapshot.hostedActivationRunbook.activationConsole.evidenceSummary,
+                  ]}
+                  rollback={selectedHostedActivationStep?.rollback
+                    ?? "Keep all shell surfaces on fixtures and do not run hosted Convex commands."}
+                  blockedActions={snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions}
+                  disabledActionLabel="Hosted activation remains gated"
+                  testId="section-kinflo-hosted-activation-decision-gate-rail"
+                />
+
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Completion Rules</CardTitle>
