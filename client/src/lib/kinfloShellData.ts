@@ -628,6 +628,37 @@ export type ShellClientWebsiteProvisioningExecution = {
   }[];
 };
 
+export type ShellClientWebsiteSpinUpQueue = {
+  status: "provider-light-website-spin-up-queue";
+  totalRequests: number;
+  readyRequests: number;
+  blockedRequests: number;
+  totalSteps: number;
+  providerBoundary: string;
+  requests: {
+    siteKey: string;
+    label: string;
+    tenantSlug: string;
+    templateKey: string;
+    ownerRole: string;
+    inviteRole: string;
+    adminPresetLabel: string;
+    launchBlueprintLabel: string;
+    priority: "founding" | "client" | "campaign";
+    queueStatus: "ready_for_review" | "blocked_human_gate" | "draft";
+    stepCount: number;
+    nextGate: string;
+    canCreateTenant: false;
+    canCreateSite: false;
+    canInviteAdmin: false;
+    canPublish: false;
+    providerWrites: false;
+    liveConvexExecution: false;
+    steps: { order: number; label: string; mode: "read" | "write" | "review"; blockedLiveAction: string }[];
+    convexFunctions: string[];
+  }[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -818,6 +849,7 @@ export type ShellClientWebsiteStudio = {
   adminHandoffMatrix: ShellClientAdminHandoffMatrix;
   provisioningOrders: ShellClientWebsiteProvisioningOrder[];
   provisioningExecution: ShellClientWebsiteProvisioningExecution;
+  spinUpQueue: ShellClientWebsiteSpinUpQueue;
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
@@ -2159,6 +2191,115 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
             mode: "write",
             blockedLiveActions: ["campaign send", "AI copy publish", "SMS/email provider smoke"],
           },
+        ],
+      },
+    ],
+  },
+  spinUpQueue: {
+    status: "provider-light-website-spin-up-queue",
+    totalRequests: 3,
+    readyRequests: 1,
+    blockedRequests: 2,
+    totalSteps: 14,
+    providerBoundary: "Website spin-up remains a super-admin review queue only. Tenant creation, site creation, admin invite delivery, public publishing, provider writes, and live Convex execution stay blocked until hosted activation, generated API review, owner signoff, and smoke evidence pass.",
+    requests: [
+      {
+        siteKey: "julies-family-public",
+        label: "Julie Family founding retrofit",
+        tenantSlug: "julies-family",
+        templateKey: "nonprofit-learning-center",
+        ownerRole: "platform.super_admin",
+        inviteRole: "platform.super_admin",
+        adminPresetLabel: "Founding platform steward",
+        launchBlueprintLabel: "Seeded tenant retrofit blueprint",
+        priority: "founding",
+        queueStatus: "ready_for_review",
+        stepCount: 4,
+        nextGate: "Confirm founding tenant ownership and fixture-to-live renderer parity.",
+        canCreateTenant: false,
+        canCreateSite: false,
+        canInviteAdmin: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        steps: [
+          { order: 1, label: "Confirm seeded tenant remains the founding platform tenant", mode: "review", blockedLiveAction: "tenant ownership mutation" },
+          { order: 2, label: "Map existing Julie Family pages into reusable content blocks", mode: "read", blockedLiveAction: "siteBuilder.updateContentBlock mutation" },
+          { order: 3, label: "Prepare super-admin-only launch packet and rollback note", mode: "review", blockedLiveAction: "client admin invitation" },
+          { order: 4, label: "Hold public publish until hosted renderer and lead smoke pass", mode: "write", blockedLiveAction: "siteBuilder.publishPage mutation" },
+        ],
+        convexFunctions: [
+          "siteFactory.listClientWebsiteProvisioningOrders",
+          "publicSite.resolvePublishedSite",
+          "siteBuilder.updateContentBlock",
+          "siteBuilder.publishPage",
+        ],
+      },
+      {
+        siteKey: "advisor-client-site",
+        label: "Advisor client tenant launch",
+        tenantSlug: "advisor-client-starter",
+        templateKey: "advisor-consultant",
+        ownerRole: "tenant.admin",
+        inviteRole: "tenant.admin",
+        adminPresetLabel: "Tenant admin launch owner",
+        launchBlueprintLabel: "Advisor client starter blueprint",
+        priority: "client",
+        queueStatus: "blocked_human_gate",
+        stepCount: 5,
+        nextGate: "Approve plan entitlement, tenant owner, domain posture, and hosted read smoke.",
+        canCreateTenant: false,
+        canCreateSite: false,
+        canInviteAdmin: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        steps: [
+          { order: 1, label: "Review Client Build plan entitlement", mode: "review", blockedLiveAction: "Stripe billing activation" },
+          { order: 2, label: "Create tenant after owner approval", mode: "write", blockedLiveAction: "controlPlane.createTenant mutation" },
+          { order: 3, label: "Create site from Advisor Consultant template", mode: "write", blockedLiveAction: "siteFactory.createSiteFromTemplate mutation" },
+          { order: 4, label: "Prepare tenant admin invitation without sending email", mode: "write", blockedLiveAction: "controlPlane.createInvitation mutation" },
+          { order: 5, label: "Run preview, lead, domain, and publish smokes after hosted activation", mode: "write", blockedLiveAction: "siteBuilder.publishPage mutation" },
+        ],
+        convexFunctions: [
+          "controlPlane.createTenant",
+          "siteFactory.createSiteFromTemplate",
+          "controlPlane.createInvitation",
+          "siteBuilder.publishPage",
+          "crm.submitLead",
+        ],
+      },
+      {
+        siteKey: "campaign-microsite",
+        label: "Campaign microsite scoped editor",
+        tenantSlug: "campaign-microsite-lab",
+        templateKey: "campaign-microsite",
+        ownerRole: "site.editor",
+        inviteRole: "site.editor",
+        adminPresetLabel: "Site editor campaign operator",
+        launchBlueprintLabel: "Campaign microsite launch blueprint",
+        priority: "campaign",
+        queueStatus: "draft",
+        stepCount: 5,
+        nextGate: "Approve campaign consent, site scope, lead routing, and provider-send boundary.",
+        canCreateTenant: false,
+        canCreateSite: false,
+        canInviteAdmin: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        steps: [
+          { order: 1, label: "Attach microsite to selected tenant or campaign lab", mode: "review", blockedLiveAction: "tenant association write" },
+          { order: 2, label: "Create campaign microsite from template", mode: "write", blockedLiveAction: "siteFactory.createSiteFromTemplate mutation" },
+          { order: 3, label: "Scope editor access to the campaign site only", mode: "write", blockedLiveAction: "controlPlane.createInvitation mutation" },
+          { order: 4, label: "Prepare consent, lead routing, and campaign approval packet", mode: "review", blockedLiveAction: "campaigns.requestCampaignApproval mutation" },
+          { order: 5, label: "Keep send and public form writes disabled until provider checks pass", mode: "write", blockedLiveAction: "campaign send" },
+        ],
+        convexFunctions: [
+          "siteFactory.createSiteFromTemplate",
+          "controlPlane.createInvitation",
+          "campaigns.requestCampaignApproval",
+          "crm.submitLead",
         ],
       },
     ],

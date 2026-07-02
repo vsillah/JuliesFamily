@@ -65,6 +65,7 @@ import {
   type ShellClientWebsiteOnboardingReadiness,
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
+  type ShellClientWebsiteSpinUpQueue,
   type ShellClientWebsiteStudioSite,
   type ShellClientWebsiteVisualQaBudget,
   type ShellClientWebsiteVisualQaEvidencePacket,
@@ -242,6 +243,13 @@ const clientHandoffWorkspaceTestIds = {
   root: "tabs-kinflo-client-handoff-workspace",
   selected: "section-kinflo-client-handoff-workspace-selected",
   matrix: "section-kinflo-client-handoff-workspace-matrix",
+} as const;
+
+const clientWebsiteSpinUpQueueTestIds = {
+  root: "section-kinflo-client-website-spin-up-queue",
+  summary: "section-kinflo-client-website-spin-up-summary",
+  scroll: "section-kinflo-client-website-spin-up-scroll",
+  gatedAction: "button-client-website-spin-up-gated",
 } as const;
 
 function readInitialShellTab(): ShellTabValue {
@@ -609,6 +617,151 @@ function ClientAdminHandoffMatrix({
           {matrix.providerBoundary}
         </p>
       </div>
+    </section>
+  );
+}
+
+function ClientWebsiteSpinUpQueue({
+  queue,
+  testIds,
+}: {
+  queue: ShellClientWebsiteSpinUpQueue;
+  testIds: typeof clientWebsiteSpinUpQueueTestIds;
+}) {
+  const summaryItems = [
+    { label: "Requests", value: queue.totalRequests },
+    { label: "Ready", value: queue.readyRequests },
+    { label: "Blocked", value: queue.blockedRequests },
+    { label: "Steps", value: queue.totalSteps },
+  ];
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+              Super-admin queue
+            </Badge>
+            <Badge className="bg-slate-950 hover:bg-slate-950">{queue.status.replaceAll("_", " ")}</Badge>
+          </div>
+          <h3 className="mt-3 text-base font-semibold text-slate-950">Website spin-up queue</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            Ordered client website requests for tenant, template, admin preset, invite, and publish review before any live mutation or provider action can run.
+          </p>
+        </div>
+        <Button disabled variant="outline" data-testid={testIds.gatedAction}>
+          <Factory className="mr-2 h-4 w-4" />
+          Website spin-up gated
+        </Button>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
+        {summaryItems.map((item) => (
+          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 max-h-[440px] space-y-3 overflow-y-auto overflow-x-hidden pr-1" data-testid={testIds.scroll}>
+        {queue.requests.map((request) => (
+          <article
+            key={request.siteKey}
+            className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+            data-testid={`card-client-website-spin-up-${request.siteKey}`}
+          >
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge variant="secondary">{request.priority}</Badge>
+                  <Badge variant="outline" className="bg-white">{request.queueStatus.replaceAll("_", " ")}</Badge>
+                </div>
+                <div className="mt-2 text-sm font-semibold text-slate-950">{request.label}</div>
+                <div className="mt-1 text-xs leading-5 text-slate-500">
+                  {request.tenantSlug} · {request.templateKey} · {request.adminPresetLabel}
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-xs lg:w-[300px]">
+                {[
+                  { label: "Owner", value: request.ownerRole },
+                  { label: "Invite", value: request.inviteRole },
+                  { label: "Steps", value: request.stepCount },
+                ].map((item) => (
+                  <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-white p-2">
+                    <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+                    <div className="mt-1 truncate font-semibold text-slate-950" title={String(item.value)}>{item.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
+              <div className="rounded-lg border border-slate-200 bg-white p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-medium">Spin-up sequence</div>
+                  <Badge variant="outline" className="bg-white">Live writes off</Badge>
+                </div>
+                <div className="mt-3 max-h-[190px] space-y-2 overflow-y-auto pr-1">
+                  {request.steps.map((step) => (
+                    <div key={`${request.siteKey}-${step.order}`} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
+                      <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-[10px] font-semibold text-slate-500">
+                        {step.order}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-slate-800">{step.label}</div>
+                        <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <Badge variant="outline" className="bg-white text-[10px]">{step.mode}</Badge>
+                          <span className="text-slate-500">{step.blockedLiveAction}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+                  <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Next gate</div>
+                  <p className="mt-1 text-xs leading-5 text-amber-900">{request.nextGate}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    ["Tenant", request.canCreateTenant],
+                    ["Site", request.canCreateSite],
+                    ["Invite", request.canInviteAdmin],
+                    ["Publish", request.canPublish],
+                    ["Provider", request.providerWrites],
+                    ["Convex", request.liveConvexExecution],
+                  ].map(([label, value]) => (
+                    <div key={String(label)} className="rounded-lg border border-slate-200 bg-white p-2 text-xs">
+                      <div className="text-[10px] uppercase tracking-normal text-slate-500">{label}</div>
+                      <div className="mt-1 flex items-center gap-1.5 font-semibold text-slate-700">
+                        <ShieldCheck className="h-3.5 w-3.5 text-slate-400" />
+                        {value ? "on" : "off"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex max-h-[92px] flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-slate-200 bg-white p-2">
+                  {request.convexFunctions.map((functionName) => (
+                    <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[10px]">
+                      {functionName}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+        {queue.providerBoundary}
+      </p>
     </section>
   );
 }
@@ -4940,6 +5093,11 @@ export default function AdminKinfloShell() {
                   </div>
                 ))}
               </div>
+
+              <ClientWebsiteSpinUpQueue
+                queue={snapshot.clientWebsiteStudio.spinUpQueue}
+                testIds={clientWebsiteSpinUpQueueTestIds}
+              />
 
               <Tabs defaultValue="selected" className="min-w-0" data-testid={clientHandoffWorkspaceTestIds.root}>
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

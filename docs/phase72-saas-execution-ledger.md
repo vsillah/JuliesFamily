@@ -18,7 +18,7 @@ npm run kinflo:validate-saas-execution-ledger
 
 ## Why This Exists
 
-The branch now contains Phase 0 intake proof, provider-light Convex modules, the Kinflo OS shell, site factory contracts, launch decision packets, design polish, adapter-switch evidence, the Phase 87 adapter switch runway, the Phase 88 generated API review board, the Phase 89 adapter switch acceptance matrix, the Phase 90 hosted smoke gap backlog, the Phase 91 hosted smoke execution sequencer, the Phase 92 hosted smoke evidence ledger, the Phase 93 adapter switch cutover checklist, the design-frame adoption backlog, the Phase 76 active-object signal, the Phase 77 client workbench grid, the Phase 78 decision gate rail, the Phase 79 proof-before-publish cards, the Phase 80 mobile inspection mode, the Phase 81 workflow navigation rail, the Phase 82 configuration field affordances, the Phase 83 client handoff permission strip, the Phase 94 client admin handoff matrix, the Phase 84 Claude frame ingestion packet, the Phase 85 hosted activation approval packet, the Phase 86 Site Studio scroll consolidation, and hosted activation gates. The ledger makes the current operating state explicit so the next phase can move forward without treating local fixtures, docs, or dry runs as live readiness.
+The branch now contains Phase 0 intake proof, provider-light Convex modules, the Kinflo OS shell, site factory contracts, launch decision packets, design polish, adapter-switch evidence, the Phase 87 adapter switch runway, the Phase 88 generated API review board, the Phase 89 adapter switch acceptance matrix, the Phase 90 hosted smoke gap backlog, the Phase 91 hosted smoke execution sequencer, the Phase 92 hosted smoke evidence ledger, the Phase 93 adapter switch cutover checklist, the design-frame adoption backlog, the Phase 76 active-object signal, the Phase 77 client workbench grid, the Phase 78 decision gate rail, the Phase 79 proof-before-publish cards, the Phase 80 mobile inspection mode, the Phase 81 workflow navigation rail, the Phase 82 configuration field affordances, the Phase 83 client handoff permission strip, the Phase 94 client admin handoff matrix, the Phase 95 client website spin-up queue, the Phase 84 Claude frame ingestion packet, the Phase 85 hosted activation approval packet, the Phase 86 Site Studio scroll consolidation, and hosted activation gates. The ledger makes the current operating state explicit so the next phase can move forward without treating local fixtures, docs, or dry runs as live readiness.
 
 ## Current Lane Status
 
@@ -49,7 +49,7 @@ The next repo-safe implementation work should stay in one of these lanes until V
 
 - tighten fixture-to-live parity, adapter-switch evidence, the Phase 87 switch runway, the Phase 88 generated API review board, the Phase 89 adapter switch acceptance matrix, the Phase 90 hosted smoke gap backlog, the Phase 91 hosted smoke execution sequencer, the Phase 92 hosted smoke evidence ledger, and the Phase 93 adapter switch cutover checklist through `docs/convex-adapter-switch-evidence-matrix.json`,
 - keep the human-gate decision register and Phase 85 owner approval packet current without storing secrets,
-- continue tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the Phase 94 client admin handoff matrix, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet inside provider-light Kinflo OS surfaces.
+- continue tenant/site permissions, client admin handoff, the Phase 95 client website spin-up queue, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the Phase 94 client admin handoff matrix, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet inside provider-light Kinflo OS surfaces.
 
 ## Human Gates Still Required
 
@@ -74,6 +74,7 @@ npm run kinflo:validate-workflow-navigation-rail
 npm run kinflo:validate-configuration-field-affordances
 npm run kinflo:validate-client-handoff-permission-strip
 npm run kinflo:validate-client-admin-handoff-matrix
+npm run kinflo:validate-client-website-spin-up-queue
 npm run kinflo:validate-claude-frame-ingestion
 npm run kinflo:validate-site-studio-scroll-consolidation
 npm run kinflo:validate-adapter-switch-runway
