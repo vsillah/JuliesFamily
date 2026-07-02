@@ -122,17 +122,20 @@
         "docs/phase53-hosted-activation-ledger.md",
         "docs/phase71-hosted-activation-console.md",
         "docs/phase73-hosted-activation-decision-register.md",
+        "docs/phase85-hosted-activation-approval-packet.md",
         "docs/convex-live-smoke-manifest.json",
+        "docs/convex-hosted-activation-approval-packet.json",
         "npm run kinflo:validate-hosted-activation-decisions",
+        "npm run kinflo:validate-hosted-activation-approval-packet",
         "npm run kinflo:activation-preflight",
         "npm run kinflo:live-handoff"
       ],
-      "nextGate": "Vambah approves ownership, billing, backups, auth, env policy, codegen window, generated binding review, and smoke execution."
+      "nextGate": "Vambah approves the Phase 85 owner packet: ownership, billing, backups, auth, env policy, codegen window, generated binding review, smoke execution, adapter switch, provider writes, and client launch."
     }
   ],
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity and adapter-switch evidence with docs/convex-adapter-switch-evidence-matrix.json without importing convex/_generated/api.",
-    "Keep the human-gate decision register current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
+    "Keep the human-gate decision register and Phase 85 owner approval packet current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
     "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
   ],
   "blockedLiveActions": [
@@ -159,6 +162,7 @@
     "npm run kinflo:validate-client-handoff-permission-strip",
     "npm run kinflo:validate-claude-frame-ingestion",
     "npm run kinflo:validate-hosted-activation-decisions",
+    "npm run kinflo:validate-hosted-activation-approval-packet",
     "npm run kinflo:validate-phase0-readiness",
     "npm run kinflo:validate-phases",
     "npm run kinflo:validate-map",

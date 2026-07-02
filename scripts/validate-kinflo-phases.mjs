@@ -150,8 +150,10 @@ for (const path of [
   "docs/phase82-configuration-field-affordances.md",
   "docs/phase83-client-handoff-permission-strip.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
+  "docs/phase85-hosted-activation-approval-packet.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
+  "docs/convex-hosted-activation-approval-packet.json",
   "docs/convex-adapter-switch-plan.json",
   "docs/convex-adapter-switch-evidence-matrix.json",
   "docs/kinflo-design-frame-adoption-backlog.json",
@@ -242,6 +244,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-console.mjs",
   "scripts/validate-kinflo-saas-execution-ledger.mjs",
   "scripts/validate-kinflo-hosted-activation-decisions.mjs",
+  "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
   "scripts/validate-kinflo-adapter-switch-evidence.mjs",
   "scripts/validate-kinflo-design-frame-backlog.mjs",
   "scripts/validate-kinflo-active-object-signal.mjs",
@@ -1398,6 +1401,24 @@ requireIncludes("docs/phase84-claude-frame-ingestion-packet.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
+  "Phase 85: Hosted Activation Approval Packet",
+  "npm run kinflo:validate-hosted-activation-approval-packet",
+  "docs/convex-hosted-activation-approval-packet.json",
+  "prepare_only_owner_approval_packet",
+  "Owner checklist items: 8",
+  "credential-rotation-review",
+  "history-purge-or-private-risk",
+  "hosted-convex-ownership",
+  "env-and-codegen-window",
+  "read-only-smoke-authorization",
+  "mutation-and-rollback-order",
+  "adapter-switch-review",
+  "provider-write-and-client-launch-signoff",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1431,7 +1452,10 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase83-client-handoff-permission-strip.md\"",
   "\"docs/phase84-claude-frame-ingestion-packet.md\"",
   "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
+  "\"docs/phase85-hosted-activation-approval-packet.md\"",
+  "\"docs/convex-hosted-activation-approval-packet.json\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
+  "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
   "\"npm run kinflo:validate-active-object-signal\"",
   "\"npm run kinflo:validate-client-workbench-grid\"",
   "\"npm run kinflo:validate-decision-gate-rail\"",
@@ -1524,6 +1548,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-console\"",
   "\"kinflo:validate-saas-execution-ledger\"",
   "\"kinflo:validate-hosted-activation-decisions\"",
+  "\"kinflo:validate-hosted-activation-approval-packet\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
@@ -2312,6 +2337,33 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-decisions.mjs", [
   "provider-write-and-client-launch-signoff",
   "activation decision register does not import generated API",
   "activation decision register does not execute live Convex",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-activation-approval-packet.mjs", [
+  "docs/phase85-hosted-activation-approval-packet.md",
+  "docs/convex-hosted-activation-approval-packet.json",
+  "prepare_only_owner_approval_packet",
+  "owner approval checklist has eight items",
+  "approval mode records no committed approval",
+  "generated Convex API files remain untracked",
+  "secret env files remain untracked",
+  "KinFlo hosted activation approval packet validation",
+]);
+
+requireIncludes("docs/convex-hosted-activation-approval-packet.json", [
+  "\"phase\": 85",
+  "\"status\": \"prepare_only_owner_approval_packet\"",
+  "\"approvalRecorded\": false",
+  "\"secretValuesRequiredInRepo\": false",
+  "\"credential-rotation-review\"",
+  "\"history-purge-or-private-risk\"",
+  "\"hosted-convex-ownership\"",
+  "\"env-and-codegen-window\"",
+  "\"read-only-smoke-authorization\"",
+  "\"mutation-and-rollback-order\"",
+  "\"adapter-switch-review\"",
+  "\"provider-write-and-client-launch-signoff\"",
+  "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 
 requireIncludes("scripts/inventory-kinflo-env.mjs", [

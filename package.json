@@ -63,6 +63,7 @@
     "kinflo:validate-hosted-activation-console": "node scripts/validate-kinflo-hosted-activation-console.mjs",
     "kinflo:validate-saas-execution-ledger": "node scripts/validate-kinflo-saas-execution-ledger.mjs",
     "kinflo:validate-hosted-activation-decisions": "node scripts/validate-kinflo-hosted-activation-decisions.mjs",
+    "kinflo:validate-hosted-activation-approval-packet": "node scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
     "kinflo:validate-design-frame-backlog": "node scripts/validate-kinflo-design-frame-backlog.mjs",
     "kinflo:validate-active-object-signal": "node scripts/validate-kinflo-active-object-signal.mjs",
     "kinflo:validate-client-workbench-grid": "node scripts/validate-kinflo-client-workbench-grid.mjs",

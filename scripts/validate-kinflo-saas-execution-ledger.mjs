@@ -86,8 +86,10 @@ for (const path of [
   "docs/phase82-configuration-field-affordances.md",
   "docs/phase83-client-handoff-permission-strip.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
+  "docs/phase85-hosted-activation-approval-packet.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "docs/kinflo-claude-frame-ingestion-packet.json",
+  "docs/convex-hosted-activation-approval-packet.json",
   "convex/schema.ts",
   "convex/controlPlane.ts",
   "client/src/pages/AdminKinfloShell.tsx",
@@ -105,6 +107,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-field-affordances.mjs",
   "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
+  "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
 ]) {
   requireFile(path);
 }
@@ -193,6 +196,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-client-handoff-permission-strip",
   "npm run kinflo:validate-claude-frame-ingestion",
   "npm run kinflo:validate-hosted-activation-decisions",
+  "npm run kinflo:validate-hosted-activation-approval-packet",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
   "npm run kinflo:validate-map",
@@ -224,7 +228,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "configuration field affordances",
   "client handoff permission strip",
   "Phase 84 Claude frame ingestion packet",
-  "human-gate decision register current without storing secrets",
+  "Phase 85 hosted activation approval packet",
+  "human-gate decision register and Phase 85 owner approval packet current without storing secrets",
 ]);
 
 requireIncludes("package.json", [
@@ -238,6 +243,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-field-affordances\"",
   "\"kinflo:validate-client-handoff-permission-strip\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
+  "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 
 const ledgerText = read("docs/kinflo-saas-execution-ledger.json");
