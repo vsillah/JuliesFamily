@@ -152,6 +152,7 @@ for (const path of [
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
+  "docs/phase87-adapter-switch-runway.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -258,6 +259,7 @@ for (const path of [
   "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
+  "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1433,6 +1435,19 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase87-adapter-switch-runway.md", [
+  "Phase 87: Adapter Switch Runway",
+  "npm run kinflo:validate-adapter-switch-runway",
+  "ShellAdapterSwitchRunwayStep",
+  "adapterSwitchReadiness.runwaySteps",
+  "section-kinflo-adapter-switch-runway",
+  "section-kinflo-adapter-switch-runway-scroll",
+  "read-only-core",
+  "campaign-and-ai-governance",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -1469,6 +1484,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase85-hosted-activation-approval-packet.md\"",
   "\"docs/convex-hosted-activation-approval-packet.json\"",
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
+  "\"docs/phase87-adapter-switch-runway.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
   "\"npm run kinflo:validate-active-object-signal\"",
@@ -1481,6 +1497,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-handoff-permission-strip\"",
   "\"npm run kinflo:validate-claude-frame-ingestion\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
+  "\"npm run kinflo:validate-adapter-switch-runway\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1576,6 +1593,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-handoff-permission-strip\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
+  "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2334,6 +2352,38 @@ requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", 
   "Site Studio consolidation does not import generated API",
   "Site Studio consolidation does not execute live Convex",
   "KinFlo Site Studio scroll consolidation validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-adapter-switch-runway.mjs", [
+  "docs/phase87-adapter-switch-runway.md",
+  "docs/convex-adapter-switch-plan.json",
+  "ShellAdapterSwitchRunwayStep",
+  "section-kinflo-adapter-switch-runway",
+  "section-kinflo-adapter-switch-runway-scroll",
+  "runway keeps every step gated",
+  "runway blocks live Convex on every step",
+  "adapter switch runway does not import generated API",
+  "KinFlo adapter switch runway validation",
+]);
+
+requireIncludes("client/src/lib/kinfloShellData.ts", [
+  "ShellAdapterSwitchRunwayStep",
+  "runwaySteps: [",
+  "Read-only core first",
+  "User preference bridge",
+  "Site factory smoke",
+  "Public CRM loop",
+  "Provider metadata only",
+  "Campaign and AI governance",
+]);
+
+requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
+  "section-kinflo-adapter-switch-runway",
+  "section-kinflo-adapter-switch-runway-scroll",
+  "text-kinflo-adapter-switch-runway",
+  "card-adapter-switch-runway-",
+  "snapshot.adapterSwitchReadiness.runwaySteps",
+  "Every batch remains fixture-backed",
 ]);
 
 requireIncludes("docs/kinflo-claude-frame-ingestion-packet.json", [

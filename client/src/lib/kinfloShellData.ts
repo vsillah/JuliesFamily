@@ -60,10 +60,24 @@ export type ShellAdapterSwitchBatch = {
   surfaces: ShellAdapterSwitchSurface[];
 };
 
+export type ShellAdapterSwitchRunwayStep = {
+  order: number;
+  batchId: string;
+  label: string;
+  stage: string;
+  entryGate: string;
+  exitEvidence: string[];
+  rollbackOwner: string;
+  canAdvance: boolean;
+  liveConvexExecution: boolean;
+  providerWrites: boolean;
+};
+
 export type ShellAdapterSwitchReadiness = {
   status: "provider_light_switch_plan";
   defaultBatchId: string;
   batches: ShellAdapterSwitchBatch[];
+  runwaySteps: ShellAdapterSwitchRunwayStep[];
   providerBoundary: string;
   activationEvidence: string[];
   documents: string[];
@@ -3786,6 +3800,104 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
     "docs/convex-adapter-switch-plan.json",
     "docs/phase50-adapter-switch-plan.md",
     "docs/phase51-adapter-switch-parity.md",
+  ],
+  runwaySteps: [
+    {
+      order: 10,
+      batchId: "read-only-core",
+      label: "Read-only core first",
+      stage: "Hosted read-only smoke",
+      entryGate: "Generated API bindings reviewed and Vambah approves read-only hosted smoke.",
+      exitEvidence: [
+        "tenant/site/audit scope matches fixtures",
+        "public renderer hides draft data",
+        "launch readiness reads stay provider-gated",
+      ],
+      rollbackOwner: "platform.super_admin",
+      canAdvance: false,
+      liveConvexExecution: false,
+      providerWrites: false,
+    },
+    {
+      order: 20,
+      batchId: "user-scoped-preferences",
+      label: "User preference bridge",
+      stage: "Scoped mixed smoke",
+      entryGate: "Read-only core smoke passes and preference permission owner is named.",
+      exitEvidence: [
+        "viewer reads only their own preferences",
+        "tenant and site scoped preference checks hold",
+        "local preference fallback restores without layout shift",
+      ],
+      rollbackOwner: "platform.super_admin",
+      canAdvance: false,
+      liveConvexExecution: false,
+      providerWrites: false,
+    },
+    {
+      order: 30,
+      batchId: "site-creation-and-admin",
+      label: "Site factory smoke",
+      stage: "Mutation smoke",
+      entryGate: "Mutation smoke order, smoke-site cleanup, and invite rollback are approved.",
+      exitEvidence: [
+        "activation smoke audit event is labeled test-only",
+        "draft site creation maps template, owner, and permission preset",
+        "pending invite can be revoked before delivery",
+      ],
+      rollbackOwner: "platform.super_admin",
+      canAdvance: false,
+      liveConvexExecution: false,
+      providerWrites: false,
+    },
+    {
+      order: 40,
+      batchId: "public-crm-loop",
+      label: "Public CRM loop",
+      stage: "Lead-write smoke",
+      entryGate: "Public resolver smoke passes and lead cleanup owner is accepted.",
+      exitEvidence: [
+        "public form creates one smoke lead",
+        "tenant admin sees only scoped lead data",
+        "pipeline transition appends timeline and audit events",
+      ],
+      rollbackOwner: "platform.super_admin",
+      canAdvance: false,
+      liveConvexExecution: false,
+      providerWrites: false,
+    },
+    {
+      order: 50,
+      batchId: "provider-readiness-records",
+      label: "Provider metadata only",
+      stage: "Provider-gated metadata",
+      entryGate: "Domain and integration records are approved as metadata without DNS, SSL, email, SMS, storage, billing, or AI writes.",
+      exitEvidence: [
+        "custom domain entitlement limit is enforced",
+        "integration setting excludes secret values",
+        "provider write signoff remains separate",
+      ],
+      rollbackOwner: "platform.super_admin",
+      canAdvance: false,
+      liveConvexExecution: false,
+      providerWrites: false,
+    },
+    {
+      order: 60,
+      batchId: "campaign-and-ai-governance",
+      label: "Campaign and AI governance",
+      stage: "Provider-gated governance",
+      entryGate: "Campaign consent, AI provenance reviewer, and provider-send rollback owner are accepted.",
+      exitEvidence: [
+        "campaign draft remains blocked before send",
+        "AI generation record carries reviewer decision",
+        "email, SMS, automation, and AI provider calls remain disabled",
+      ],
+      rollbackOwner: "platform.super_admin",
+      canAdvance: false,
+      liveConvexExecution: false,
+      providerWrites: false,
+    },
   ],
   batches: [
     {

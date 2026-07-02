@@ -2430,6 +2430,67 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
+                    <div className="rounded-lg border border-slate-200 bg-white p-4" data-testid="section-kinflo-adapter-switch-runway">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <Workflow className="h-4 w-4 text-slate-500" />
+                            <h3 className="text-sm font-semibold">Fixture-to-live runway</h3>
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-runway">
+                            Every batch remains fixture-backed until its entry gate, smoke evidence, and rollback owner are accepted.
+                          </p>
+                        </div>
+                        <Badge variant="outline">{snapshot.adapterSwitchReadiness.runwaySteps.length} gated steps</Badge>
+                      </div>
+
+                      <div className="mt-4 grid max-h-[520px] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3" data-testid="section-kinflo-adapter-switch-runway-scroll">
+                        {snapshot.adapterSwitchReadiness.runwaySteps.map((step) => (
+                          <div
+                            key={step.batchId}
+                            className={`rounded-md border p-3 ${step.batchId === selectedAdapterSwitchBatch?.id ? "border-slate-900 bg-slate-50" : "border-slate-200"}`}
+                            data-testid={`card-adapter-switch-runway-${step.batchId}`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Step {step.order}</div>
+                                <div className="mt-1 text-sm font-semibold text-slate-950">{step.label}</div>
+                                <div className="mt-1 text-xs text-slate-600">{step.stage}</div>
+                              </div>
+                              <Badge variant={step.canAdvance ? "secondary" : "outline"} className="shrink-0">
+                                {step.canAdvance ? "ready" : "gated"}
+                              </Badge>
+                            </div>
+
+                            <div className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
+                              <span className="font-medium text-slate-900">Gate: </span>
+                              {step.entryGate}
+                            </div>
+
+                            <div className="mt-3 space-y-2">
+                              {step.exitEvidence.slice(0, 2).map((item) => (
+                                <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                                  <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                  <span>{item}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                              <div className="rounded-md border border-slate-100 px-2 py-1">
+                                <div className="text-slate-500">Live Convex</div>
+                                <div className="font-medium text-slate-900">{step.liveConvexExecution ? "yes" : "no"}</div>
+                              </div>
+                              <div className="rounded-md border border-slate-100 px-2 py-1">
+                                <div className="text-slate-500">Provider writes</div>
+                                <div className="font-medium text-slate-900">{step.providerWrites ? "yes" : "no"}</div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid gap-3">
                       {(selectedAdapterSwitchBatch?.surfaces ?? []).map((surface) => (
                         <div key={surface.id} className="rounded-md border p-4" data-testid={`card-adapter-switch-${surface.id}`}>
