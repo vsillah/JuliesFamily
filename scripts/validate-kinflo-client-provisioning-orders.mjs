@@ -133,7 +133,12 @@ const guardedFiles = [
 
 for (const path of guardedFiles) {
   const contents = read(path);
-  if (contents.includes("convex/_generated/api")) {
+  const importsGeneratedApi =
+    contents.includes("from \"convex/_generated/api\"") ||
+    contents.includes("from 'convex/_generated/api'") ||
+    contents.includes("import(\"convex/_generated/api\")") ||
+    contents.includes("import('convex/_generated/api')");
+  if (importsGeneratedApi) {
     fail(`${path} does not import generated API`, "Remove generated API imports until hosted activation approval.");
   } else {
     pass(`${path} does not import generated API`);

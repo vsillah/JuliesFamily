@@ -97,6 +97,7 @@
         "docs/phase82-configuration-field-affordances.md",
         "docs/phase83-client-handoff-permission-strip.md",
         "docs/phase84-claude-frame-ingestion-packet.md",
+        "docs/phase86-site-studio-scroll-consolidation.md",
         "docs/kinflo-design-frame-adoption-backlog.json",
         "docs/kinflo-claude-frame-ingestion-packet.json",
         "npm run kinflo:validate-design-frame-backlog",
@@ -109,6 +110,7 @@
         "npm run kinflo:validate-configuration-field-affordances",
         "npm run kinflo:validate-client-handoff-permission-strip",
         "npm run kinflo:validate-claude-frame-ingestion",
+        "npm run kinflo:validate-site-studio-scroll-consolidation",
         "npm run kinflo:validate-control-room-polish"
       ],
       "nextGate": "Continue implementing accepted provider-light design deltas from the Phase 75 backlog, then validate desktop and mobile browser frames before client handoff."
@@ -136,7 +138,7 @@
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity and adapter-switch evidence with docs/convex-adapter-switch-evidence-matrix.json without importing convex/_generated/api.",
     "Keep the human-gate decision register and Phase 85 owner approval packet current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
-    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
+    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
   ],
   "blockedLiveActions": [
     "create hosted Convex deployment",
@@ -161,6 +163,7 @@
     "npm run kinflo:validate-configuration-field-affordances",
     "npm run kinflo:validate-client-handoff-permission-strip",
     "npm run kinflo:validate-claude-frame-ingestion",
+    "npm run kinflo:validate-site-studio-scroll-consolidation",
     "npm run kinflo:validate-hosted-activation-decisions",
     "npm run kinflo:validate-hosted-activation-approval-packet",
     "npm run kinflo:validate-phase0-readiness",

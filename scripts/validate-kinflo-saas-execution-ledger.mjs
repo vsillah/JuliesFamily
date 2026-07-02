@@ -87,6 +87,7 @@ for (const path of [
   "docs/phase83-client-handoff-permission-strip.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
+  "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "docs/kinflo-claude-frame-ingestion-packet.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -107,6 +108,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-field-affordances.mjs",
   "scripts/validate-kinflo-client-handoff-permission-strip.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
+  "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
 ]) {
   requireFile(path);
@@ -195,6 +197,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-configuration-field-affordances",
   "npm run kinflo:validate-client-handoff-permission-strip",
   "npm run kinflo:validate-claude-frame-ingestion",
+  "npm run kinflo:validate-site-studio-scroll-consolidation",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
   "npm run kinflo:validate-phase0-readiness",
@@ -229,6 +232,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "client handoff permission strip",
   "Phase 84 Claude frame ingestion packet",
   "Phase 85 hosted activation approval packet",
+  "Site Studio scroll consolidation",
   "human-gate decision register and Phase 85 owner approval packet current without storing secrets",
 ]);
 
@@ -243,6 +247,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-field-affordances\"",
   "\"kinflo:validate-client-handoff-permission-strip\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
+  "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 

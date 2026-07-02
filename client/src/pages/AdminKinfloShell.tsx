@@ -4465,156 +4465,167 @@ export default function AdminKinfloShell() {
                     </Select>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-provisioning-order">
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
                           <Workflow className="h-4 w-4 text-slate-500" />
-                          <h3 className="text-base font-semibold">Provisioning Order</h3>
+                          <h3 className="text-base font-semibold">Provisioning workbench</h3>
+                          <Badge variant="secondary" className="text-[10px]">Provisioning Order</Badge>
                         </div>
-                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-provisioning-order">
+                        <p className="mt-1 text-sm leading-5 text-slate-600" data-testid="text-kinflo-client-provisioning-order">
                           {selectedClientWebsiteProvisioningOrder?.label}
                         </p>
                       </div>
                       <Badge variant="outline">{selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ")}</Badge>
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                      <div className="rounded-md border border-slate-200 p-3">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Plan</div>
-                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.requestedPlan}</div>
-                      </div>
-                      <div className="rounded-md border border-slate-200 p-3">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Template</div>
-                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.templateKey}</div>
-                      </div>
-                      <div className="rounded-md border border-slate-200 p-3">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Owner</div>
-                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.ownerRole}</div>
-                      </div>
-                      <div className="rounded-md border border-slate-200 p-3">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Invite</div>
-                        <div className="mt-1 text-sm font-medium">{selectedClientWebsiteProvisioningOrder?.inviteRole}</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <div className="text-sm font-medium">Setup order</div>
-                      <div className="mt-2 space-y-2">
-                        {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step) => (
-                          <div key={step} className="flex items-start gap-2 text-sm text-slate-600">
-                            <CircleDashed className="mt-0.5 h-4 w-4 text-slate-400" />
-                            <span>{step}</span>
+                    <div className="mt-3 grid grid-cols-2 gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
+                      {[
+                        { label: "Plan", value: selectedClientWebsiteProvisioningOrder?.requestedPlan },
+                        { label: "Template", value: selectedClientWebsiteProvisioningOrder?.templateKey },
+                        { label: "Owner", value: selectedClientWebsiteProvisioningOrder?.ownerRole },
+                        { label: "Invite", value: selectedClientWebsiteProvisioningOrder?.inviteRole },
+                      ].map((item) => (
+                        <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                          <div className="mt-1 truncate text-xs font-semibold text-slate-950" title={item.value}>
+                            {item.value}
                           </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <div className="text-sm font-medium">Approval evidence</div>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
-                          <Badge key={item} variant="secondary">{item}</Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <div className="text-sm font-medium">Blocked live actions</div>
-                      <div className="mt-2 space-y-2">
-                        {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
-                          <div key={action} className="flex items-start gap-2 text-xs text-slate-600">
-                            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
-                            <span>{action}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 border-t border-slate-100 pt-4">
-                      <div className="flex flex-wrap gap-2">
-                        {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
-                          <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
-                        ))}
-                      </div>
-                      <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-provisioning-order-gated">
-                        <Workflow className="mr-2 h-4 w-4" />
-                        Provisioning gated
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-provisioning-execution">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <ListChecks className="h-4 w-4 text-slate-500" />
-                          <h3 className="text-base font-semibold">Execution Dry Run</h3>
                         </div>
-                        <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-client-provisioning-execution">
-                          {snapshot.clientWebsiteStudio.provisioningExecution.manifestPath}
-                        </p>
-                      </div>
-                      <Badge variant="outline">{snapshot.clientWebsiteStudio.provisioningExecution.status.replaceAll("_", " ")}</Badge>
+                      ))}
                     </div>
 
-                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-md border border-slate-200 p-3">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Orders</div>
-                        <div className="mt-1 text-sm font-medium">{snapshot.clientWebsiteStudio.provisioningExecution.totalOrders}</div>
-                      </div>
-                      <div className="rounded-md border border-slate-200 p-3">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Steps</div>
-                        <div className="mt-1 text-sm font-medium">{snapshot.clientWebsiteStudio.provisioningExecution.dryRunSteps}</div>
-                      </div>
-                      <div className="rounded-md border border-slate-200 p-3">
-                        <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Functions</div>
-                        <div className="mt-1 text-sm font-medium">{snapshot.clientWebsiteStudio.provisioningExecution.referencedFunctions}</div>
-                      </div>
-                    </div>
+                    <Tabs defaultValue="order" className="mt-4" data-testid="tabs-kinflo-client-provisioning-workbench">
+                      <TabsList className="grid h-auto w-full grid-cols-2 bg-slate-100 p-1">
+                        <TabsTrigger value="order" data-testid="tab-kinflo-client-provisioning-order">Order</TabsTrigger>
+                        <TabsTrigger value="dry-run" data-testid="tab-kinflo-client-provisioning-dry-run">Dry run</TabsTrigger>
+                      </TabsList>
 
-                    <p className="mt-4 text-sm leading-6 text-slate-600">
-                      {snapshot.clientWebsiteStudio.provisioningExecution.providerBoundary}
-                    </p>
-
-                    <div className="mt-4">
-                      <div className="text-sm font-medium">Selected order steps</div>
-                      <div className="mt-2 space-y-2">
-                        {selectedClientWebsiteProvisioningExecution?.steps.map((step) => (
-                          <div key={step.id} className="rounded-md border border-slate-200 p-3">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0 text-sm font-medium">{step.id}</div>
-                              <Badge variant="secondary">{step.mode}</Badge>
+                      <TabsContent value="order" className="mt-3" data-testid="section-kinflo-client-provisioning-order">
+                        <div className="max-h-[360px] space-y-4 overflow-y-auto pr-1" data-testid="section-kinflo-client-provisioning-order-scroll">
+                          <div>
+                            <div className="text-sm font-medium">Setup order</div>
+                            <div className="mt-2 space-y-2">
+                              {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step) => (
+                                <div key={step} className="flex items-start gap-2 text-sm leading-5 text-slate-600">
+                                  <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                                  <span>{step}</span>
+                                </div>
+                              ))}
                             </div>
-                            <div className="mt-2 space-y-1">
-                              {step.blockedLiveActions.map((action) => (
-                                <div key={action} className="flex items-start gap-2 text-xs text-slate-600">
-                                  <ShieldCheck className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
+                          </div>
+
+                          <div>
+                            <div className="text-sm font-medium">Approval evidence</div>
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
+                                <Badge key={item} variant="secondary" className="max-w-full whitespace-normal text-left">{item}</Badge>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="text-sm font-medium">Blocked live actions</div>
+                            <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                              {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
+                                <div key={action} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                                  <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                                   <span>{action}</span>
                                 </div>
                               ))}
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
 
-                    <div className="mt-4">
-                      <div className="text-sm font-medium">Blocked until</div>
-                      <div className="mt-2 space-y-2">
-                        {snapshot.clientWebsiteStudio.provisioningExecution.blockedUntil.map((gate) => (
-                          <div key={gate} className="flex items-start gap-2 text-xs text-slate-600">
-                            <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
-                            <span>{gate}</span>
+                          <div className="border-t border-slate-100 pt-3">
+                            <div className="flex flex-wrap gap-2">
+                              {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
+                                <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">{functionName}</Badge>
+                              ))}
+                            </div>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                        <Button disabled variant="outline" className="mt-3 w-full" data-testid="button-client-provisioning-order-gated">
+                          <Workflow className="mr-2 h-4 w-4" />
+                          Provisioning gated
+                        </Button>
+                      </TabsContent>
 
-                    <Button disabled variant="outline" className="mt-4 w-full" data-testid="button-client-provisioning-dry-run-gated">
-                      <ListChecks className="mr-2 h-4 w-4" />
-                      Dry run gated
-                    </Button>
+                      <TabsContent value="dry-run" className="mt-3" data-testid="section-kinflo-client-provisioning-execution">
+                        <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
+                          <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <ListChecks className="h-4 w-4 text-slate-500" />
+                                  <div className="text-sm font-semibold">Execution Dry Run</div>
+                                </div>
+                                <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-client-provisioning-execution">
+                                  {snapshot.clientWebsiteStudio.provisioningExecution.manifestPath}
+                                </p>
+                              </div>
+                              <Badge variant="outline">{snapshot.clientWebsiteStudio.provisioningExecution.status.replaceAll("_", " ")}</Badge>
+                            </div>
+
+                            <div className="mt-3 grid grid-cols-3 gap-2">
+                              {[
+                                { label: "Orders", value: snapshot.clientWebsiteStudio.provisioningExecution.totalOrders },
+                                { label: "Steps", value: snapshot.clientWebsiteStudio.provisioningExecution.dryRunSteps },
+                                { label: "Functions", value: snapshot.clientWebsiteStudio.provisioningExecution.referencedFunctions },
+                              ].map((item) => (
+                                <div key={item.label} className="rounded-md border border-slate-200 bg-white p-2">
+                                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                                  <div className="mt-1 text-xs font-semibold">{item.value}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <p className="text-xs leading-5 text-slate-600">
+                            {snapshot.clientWebsiteStudio.provisioningExecution.providerBoundary}
+                          </p>
+
+                          <div>
+                            <div className="text-sm font-medium">Selected order steps</div>
+                            <div className="mt-2 space-y-2">
+                              {selectedClientWebsiteProvisioningExecution?.steps.map((step) => (
+                                <div key={step.id} className="rounded-md border border-slate-200 p-3">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0 text-sm font-medium">{step.id}</div>
+                                    <Badge variant="secondary">{step.mode}</Badge>
+                                  </div>
+                                  <div className="mt-2 space-y-1">
+                                    {step.blockedLiveActions.map((action) => (
+                                      <div key={action} className="flex items-start gap-2 text-xs text-slate-600">
+                                        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                        <span>{action}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <div className="text-sm font-medium">Blocked until</div>
+                            <div className="mt-2 grid gap-2">
+                              {snapshot.clientWebsiteStudio.provisioningExecution.blockedUntil.map((gate) => (
+                                <div key={gate} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                                  <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                  <span>{gate}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button disabled variant="outline" className="mt-3 w-full" data-testid="button-client-provisioning-dry-run-gated">
+                          <ListChecks className="mr-2 h-4 w-4" />
+                          Dry run gated
+                        </Button>
+                      </TabsContent>
+                    </Tabs>
                   </div>
 
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-launch-packet">
