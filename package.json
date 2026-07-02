@@ -67,6 +67,7 @@
     "kinflo:validate-active-object-signal": "node scripts/validate-kinflo-active-object-signal.mjs",
     "kinflo:validate-client-workbench-grid": "node scripts/validate-kinflo-client-workbench-grid.mjs",
     "kinflo:validate-decision-gate-rail": "node scripts/validate-kinflo-decision-gate-rail.mjs",
+    "kinflo:validate-proof-before-publish": "node scripts/validate-kinflo-proof-before-publish.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",
     "kinflo:validate-imports": "node scripts/validate-convex-import-contracts.mjs",

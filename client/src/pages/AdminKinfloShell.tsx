@@ -58,6 +58,8 @@ import {
   type KinfloShellStatus,
   type ShellAiReviewRecord,
   type ShellCampaignDraft,
+  type ShellClientWebsiteLaunchDecisionPacket,
+  type ShellClientWebsiteVisualQaEvidencePacket,
   type ShellDomainDraft,
   type ShellHostedActivationStepStatus,
   type ShellIntegrationDraft,
@@ -237,6 +239,150 @@ function DecisionGateRail({
         </Button>
       </CardContent>
     </Card>
+  );
+}
+
+function ProofBeforePublishCards({
+  evidencePacket,
+  decisionPacket,
+}: {
+  evidencePacket?: ShellClientWebsiteVisualQaEvidencePacket;
+  decisionPacket?: ShellClientWebsiteLaunchDecisionPacket;
+}) {
+  const acceptedEvidence = evidencePacket?.evidenceItems.filter((item) => item.status === "accepted").length ?? 0;
+  const totalEvidence = evidencePacket?.evidenceItems.length ?? 0;
+  const accessibilityEvidence = evidencePacket?.evidenceItems.find((item) => item.kind === "accessibility")
+    ?? evidencePacket?.evidenceItems[0];
+  const performanceEvidence = evidencePacket?.evidenceItems.find((item) => item.kind === "performance")
+    ?? evidencePacket?.evidenceItems[1]
+    ?? evidencePacket?.evidenceItems[0];
+  const approvalReady = evidencePacket?.approvalChecklist.filter((item) => item.status === "ready").length ?? 0;
+  const approvalTotal = evidencePacket?.approvalChecklist.length ?? 0;
+  const openRisks = evidencePacket?.openRisks ?? [];
+  const blockedActions = decisionPacket?.blockedLaunchActions ?? evidencePacket?.blockedEvidenceActions ?? [];
+
+  return (
+    <div
+      className="rounded-lg border border-slate-900 bg-slate-950 p-4 text-white shadow-sm"
+      data-testid="section-kinflo-client-proof-before-publish-cards"
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className="border-white/10 bg-white/10 text-white hover:bg-white/10">Proof before publish</Badge>
+            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+              Provider-light
+            </Badge>
+          </div>
+          <h3 className="mt-3 text-base font-semibold">Publish proof package</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-300">
+            QA evidence, approval checklist, rollback, and open risks stay visible beside the launch decision before any public action is enabled.
+          </p>
+        </div>
+        <Badge className="self-start border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-50">
+          {decisionPacket?.launchDecision.replaceAll("_", " ") ?? "review"}
+        </Badge>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3" data-testid="card-client-proof-qa-evidence">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">QA evidence</div>
+              <div className="mt-1 text-sm font-semibold">{acceptedEvidence}/{totalEvidence} accepted</div>
+            </div>
+            <MonitorSmartphone className="h-4 w-4 text-slate-400" />
+          </div>
+          <p className="mt-3 text-xs leading-5 text-slate-300">{evidencePacket?.evidencePosture}</p>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3" data-testid="card-client-proof-access-performance">
+          <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Accessibility and performance</div>
+          <div className="mt-3 grid gap-2">
+            {[accessibilityEvidence, performanceEvidence].filter(Boolean).map((item) => (
+              <div key={item?.key} className="rounded-lg border border-white/10 bg-slate-900/80 p-2">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-xs font-semibold text-slate-100">{item?.label}</div>
+                    <div className="mt-1 text-xs leading-5 text-slate-400">{item?.currentEvidence}</div>
+                  </div>
+                  <Badge variant={item?.status === "blocked" ? "destructive" : item?.status === "accepted" ? "secondary" : "outline"}>
+                    {item?.status}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3" data-testid="card-client-proof-approval-checklist">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-normal text-slate-400">Approval checklist</div>
+              <div className="mt-1 text-sm font-semibold">{approvalReady}/{approvalTotal} ready</div>
+            </div>
+            <ListChecks className="h-4 w-4 text-slate-400" />
+          </div>
+          <div className="mt-3 space-y-2">
+            {evidencePacket?.approvalChecklist.slice(0, 3).map((item) => (
+              <div key={item.key} className="flex items-start gap-2 text-xs leading-5 text-slate-300">
+                {item.status === "ready" ? (
+                  <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                ) : (
+                  <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-500" />
+                )}
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3" data-testid="card-client-proof-rollback">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-[11px] font-medium uppercase tracking-normal text-amber-100">Rollback</div>
+              <div className="mt-1 text-sm font-semibold text-amber-50">Owner: {decisionPacket?.rollbackPlan.owner}</div>
+            </div>
+            <Badge variant={decisionPacket?.rollbackPlan.status === "blocked" ? "destructive" : "outline"}>
+              {decisionPacket?.rollbackPlan.status}
+            </Badge>
+          </div>
+          <div className="mt-3 space-y-2">
+            {decisionPacket?.rollbackPlan.steps.map((step) => (
+              <div key={step} className="flex items-start gap-2 text-xs leading-5 text-amber-50">
+                <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                <span>{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-rose-300/30 bg-rose-400/10 p-3 lg:col-span-2" data-testid="card-client-proof-open-risks">
+          <div className="text-[11px] font-medium uppercase tracking-normal text-rose-100">Open risks and blocked launch actions</div>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div className="flex flex-wrap gap-2">
+              {openRisks.map((risk) => (
+                <Badge key={risk} variant="outline" className="border-rose-200/30 bg-white/10 text-rose-50">
+                  {risk}
+                </Badge>
+              ))}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {blockedActions.slice(0, 4).map((action) => (
+                <Badge key={action} variant="outline" className="border-amber-200/30 bg-white/10 text-amber-50">
+                  {action}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Button disabled variant="secondary" className="mt-4 w-full justify-start" data-testid="button-client-proof-before-publish-gated">
+        <ShieldCheck className="mr-2 h-4 w-4" />
+        Publish proof remains gated
+      </Button>
+    </div>
   );
 }
 
@@ -4524,6 +4670,11 @@ export default function AdminKinfloShell() {
                       </Button>
                     </div>
                   </div>
+
+                  <ProofBeforePublishCards
+                    evidencePacket={selectedClientWebsiteVisualQaEvidencePacket}
+                    decisionPacket={selectedClientWebsiteLaunchDecisionPacket}
+                  />
 
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-launch-decision-packet">
                     <div className="flex items-start justify-between gap-3">

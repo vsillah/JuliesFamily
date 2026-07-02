@@ -91,11 +91,13 @@
         "docs/phase76-active-object-signal.md",
         "docs/phase77-client-studio-workbench-grid.md",
         "docs/phase78-decision-gate-rail.md",
+        "docs/phase79-proof-before-publish-cards.md",
         "docs/kinflo-design-frame-adoption-backlog.json",
         "npm run kinflo:validate-design-frame-backlog",
         "npm run kinflo:validate-active-object-signal",
         "npm run kinflo:validate-client-workbench-grid",
         "npm run kinflo:validate-decision-gate-rail",
+        "npm run kinflo:validate-proof-before-publish",
         "npm run kinflo:validate-control-room-polish"
       ],
       "nextGate": "Continue implementing accepted provider-light design deltas from the Phase 75 backlog, then validate desktop and mobile browser frames before client handoff."
@@ -120,7 +122,7 @@
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity and adapter-switch evidence with docs/convex-adapter-switch-evidence-matrix.json without importing convex/_generated/api.",
     "Keep the human-gate decision register current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
-    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, the active-object signal, client workbench grid, decision gate rails, and the Phase 75 design-frame adoption backlog."
+    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, the active-object signal, client workbench grid, decision gate rails, and the Phase 75 design-frame adoption backlog."
   ],
   "blockedLiveActions": [
     "create hosted Convex deployment",
@@ -139,6 +141,7 @@
     "npm run kinflo:validate-active-object-signal",
     "npm run kinflo:validate-client-workbench-grid",
     "npm run kinflo:validate-decision-gate-rail",
+    "npm run kinflo:validate-proof-before-publish",
     "npm run kinflo:validate-hosted-activation-decisions",
     "npm run kinflo:validate-phase0-readiness",
     "npm run kinflo:validate-phases",
