@@ -11,6 +11,7 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 ## Added Surface
 
 - Admin route: `/admin/kinflo-os?tab=site-studio`
+- viewport-bounded launch rail: `section-kinflo-client-launch-rail`
 - Compact workbench: `section-kinflo-client-provisioning-workbench`
 - Summary chips: `section-kinflo-client-provisioning-summary-chips`
 - Tabs: `tabs-kinflo-client-provisioning-workbench`
@@ -27,6 +28,8 @@ The prior right-rail provisioning content stacked a large provisioning order car
 - setup order, approval evidence, blocked actions, and function references live under the `Order` tab,
 - manifest, dry-run counters, selected order steps, provider boundary, and blocked-until gates live under the `Dry run` tab,
 - long lists use bounded internal scroll areas instead of increasing the full page height.
+
+The launch rail itself is also viewport-bounded across narrow and desktop review widths, with sticky positioning added at the desktop breakpoint. Launch packets, content packs, onboarding evidence, simulations, polish scorecards, visual QA, proof-before-publish, and launch decisions remain available in the rail, but they scroll inside the rail instead of stretching Site Studio into one long vertical page.
 
 ## Provider Boundary
 

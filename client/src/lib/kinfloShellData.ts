@@ -130,11 +130,37 @@ export type ShellHostedActivationConsole = {
   providerBoundary: string;
 };
 
+export type ShellGeneratedApiReviewSurface = {
+  surface: string;
+  totalBindings: number;
+  queryBindings: number;
+  mutationBindings: number;
+  reviewPosture: "ready_for_codegen_review" | "smoke_manifest_gap";
+  smokeCoverage: string;
+  owner: string;
+  blockedUntil: string;
+};
+
+export type ShellGeneratedApiReviewBoard = {
+  status: "provider_light_generated_api_review";
+  totalBindings: number;
+  queryBindings: number;
+  mutationBindings: number;
+  smokeManifestFunctions: number;
+  smokeManifestGaps: number;
+  firstSwitchBatch: string;
+  approvalGate: string;
+  providerBoundary: string;
+  documents: string[];
+  surfaces: ShellGeneratedApiReviewSurface[];
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
   providerBoundary: string;
   activationConsole: ShellHostedActivationConsole;
+  generatedApiReviewBoard: ShellGeneratedApiReviewBoard;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -4024,6 +4050,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "npm run kinflo:inventory-env",
       "npm run kinflo:activation-preflight",
       "npm run kinflo:validate-generated-api",
+      "npm run kinflo:validate-generated-api-review-board",
       "npm run kinflo:validate-live-smoke",
       "npm run kinflo:dry-run-live-smoke",
       "npm run kinflo:live-handoff",
@@ -4032,7 +4059,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     blockedLiveActions: [
       "create hosted Convex deployment",
       "run npm run convex:codegen",
-      "import convex/_generated/api",
+      "import generated Convex API module",
       "execute live Convex query, mutation, or action",
       "switch fixture adapter to generated API",
       "publish site, write lead, send invite, attach domain, send campaign, or call provider",
@@ -4046,6 +4073,165 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "Rollback path keeps generatedApiAvailable false until a reviewed switch lands.",
     ],
     providerBoundary: "This console is a read-only activation gate. It summarizes approvals, commands, evidence, and blocked actions only; it does not create providers, run codegen, import generated API, execute live Convex, or print secrets.",
+  },
+  generatedApiReviewBoard: {
+    status: "provider_light_generated_api_review",
+    totalBindings: 73,
+    queryBindings: 35,
+    mutationBindings: 38,
+    smokeManifestFunctions: 45,
+    smokeManifestGaps: 28,
+    firstSwitchBatch: "read-only-core",
+    approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
+    providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
+    documents: [
+      "client/src/lib/kinfloGeneratedApiContract.ts",
+      "docs/phase26-generated-api-contract.md",
+      "docs/convex-live-smoke-manifest.json",
+      "docs/convex-adapter-switch-plan.json",
+    ],
+    surfaces: [
+      {
+        surface: "identity",
+        totalBindings: 3,
+        queryBindings: 1,
+        mutationBindings: 2,
+        reviewPosture: "ready_for_codegen_review",
+        smokeCoverage: "covered by identity-bootstrap smoke",
+        owner: "platform.super_admin",
+        blockedUntil: "hosted auth and bootstrap approval",
+      },
+      {
+        surface: "access",
+        totalBindings: 5,
+        queryBindings: 4,
+        mutationBindings: 1,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "role catalog read coverage remains outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "role catalog read review and deny-check evidence",
+      },
+      {
+        surface: "tenant control plane",
+        totalBindings: 12,
+        queryBindings: 4,
+        mutationBindings: 8,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "invitation list read remains outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "tenant/site scope proof and invitation rollback review",
+      },
+      {
+        surface: "plans and entitlements",
+        totalBindings: 6,
+        queryBindings: 4,
+        mutationBindings: 2,
+        reviewPosture: "ready_for_codegen_review",
+        smokeCoverage: "covered by plan-entitlement-readonly and billing-entitlement-mutations smoke",
+        owner: "platform.super_admin",
+        blockedUntil: "billing provider boundary and override rollback accepted",
+      },
+      {
+        surface: "site factory",
+        totalBindings: 12,
+        queryBindings: 11,
+        mutationBindings: 1,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "client website studio read models remain outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "client website review packets and template smoke are accepted",
+      },
+      {
+        surface: "site builder",
+        totalBindings: 10,
+        queryBindings: 1,
+        mutationBindings: 9,
+        reviewPosture: "ready_for_codegen_review",
+        smokeCoverage: "covered by site-builder-publish smoke",
+        owner: "platform.super_admin",
+        blockedUntil: "publish rollback and public resolver review",
+      },
+      {
+        surface: "CRM",
+        totalBindings: 10,
+        queryBindings: 3,
+        mutationBindings: 7,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "journey progression and transition smoke are not yet in the live manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "lead-write cleanup and journey transition rollback owner",
+      },
+      {
+        surface: "activation",
+        totalBindings: 2,
+        queryBindings: 1,
+        mutationBindings: 1,
+        reviewPosture: "ready_for_codegen_review",
+        smokeCoverage: "covered by activation-seed smoke",
+        owner: "platform.super_admin",
+        blockedUntil: "smoke data cleanup policy accepted",
+      },
+      {
+        surface: "public renderer",
+        totalBindings: 1,
+        queryBindings: 1,
+        mutationBindings: 0,
+        reviewPosture: "ready_for_codegen_review",
+        smokeCoverage: "covered by public-renderer-readonly smoke",
+        owner: "platform.super_admin",
+        blockedUntil: "public-safe resolver proof and visual QA accepted",
+      },
+      {
+        surface: "launch readiness",
+        totalBindings: 1,
+        queryBindings: 1,
+        mutationBindings: 0,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "launchReadiness.getSiteLaunchReadiness remains outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "launch packet read-only hosted smoke added",
+      },
+      {
+        surface: "experience preferences",
+        totalBindings: 2,
+        queryBindings: 1,
+        mutationBindings: 1,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "preference read/write smoke remains outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "user-scoped preference permission proof",
+      },
+      {
+        surface: "integration readiness",
+        totalBindings: 2,
+        queryBindings: 1,
+        mutationBindings: 1,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "integration metadata smoke remains outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "secret-value exclusion and provider-write signoff",
+      },
+      {
+        surface: "campaign automation",
+        totalBindings: 4,
+        queryBindings: 1,
+        mutationBindings: 3,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "campaign governance smoke remains outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "campaign consent and provider-send rollback owner",
+      },
+      {
+        surface: "AI review",
+        totalBindings: 3,
+        queryBindings: 1,
+        mutationBindings: 2,
+        reviewPosture: "smoke_manifest_gap",
+        smokeCoverage: "AI provenance smoke remains outside the live smoke manifest",
+        owner: "platform.super_admin",
+        blockedUntil: "AI reviewer, source-safety, and provider-call signoff",
+      },
+    ],
   },
   decisionRegister: [
     {

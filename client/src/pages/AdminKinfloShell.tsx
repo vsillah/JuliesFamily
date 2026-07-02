@@ -2705,6 +2705,95 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
+                <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-generated-api-review-board">
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Generated API Review Board</CardTitle>
+                        <Badge variant="secondary">{snapshot.hostedActivationRunbook.generatedApiReviewBoard.status.replaceAll("_", " ")}</Badge>
+                      </div>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid="text-kinflo-generated-api-review-board">
+                        {snapshot.hostedActivationRunbook.generatedApiReviewBoard.approvalGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-generated-api-review-gated">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Codegen review gated
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-3 md:grid-cols-5">
+                      {[
+                        { label: "Bindings", value: snapshot.hostedActivationRunbook.generatedApiReviewBoard.totalBindings },
+                        { label: "Queries", value: snapshot.hostedActivationRunbook.generatedApiReviewBoard.queryBindings },
+                        { label: "Mutations", value: snapshot.hostedActivationRunbook.generatedApiReviewBoard.mutationBindings },
+                        { label: "Smoke funcs", value: snapshot.hostedActivationRunbook.generatedApiReviewBoard.smokeManifestFunctions },
+                        { label: "Gaps", value: snapshot.hostedActivationRunbook.generatedApiReviewBoard.smokeManifestGaps },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm leading-6 text-amber-900">
+                      First switch batch: <span className="font-semibold">{snapshot.hostedActivationRunbook.generatedApiReviewBoard.firstSwitchBatch}</span>. Generated bindings still need owner review before any fixture adapter imports the generated Convex API module.
+                    </div>
+
+                    <div className="grid max-h-[460px] gap-3 overflow-y-auto pr-1 md:grid-cols-2" data-testid="section-kinflo-generated-api-review-scroll">
+                      {snapshot.hostedActivationRunbook.generatedApiReviewBoard.surfaces.map((surface) => (
+                        <div key={surface.surface} className="rounded-lg border border-slate-200 bg-white p-4" data-testid={`card-generated-api-review-${surface.surface.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="text-sm font-semibold">{surface.surface}</div>
+                              <div className="mt-1 text-xs text-slate-600">
+                                {surface.queryBindings} query · {surface.mutationBindings} mutation
+                              </div>
+                            </div>
+                            <Badge variant={surface.reviewPosture === "ready_for_codegen_review" ? "secondary" : "outline"} className="shrink-0">
+                              {surface.reviewPosture.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+
+                          <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                            <div className="rounded-md border border-slate-100 px-2 py-1">
+                              <div className="text-slate-500">Total</div>
+                              <div className="font-medium text-slate-950">{surface.totalBindings}</div>
+                            </div>
+                            <div className="rounded-md border border-slate-100 px-2 py-1">
+                              <div className="text-slate-500">Owner</div>
+                              <div className="truncate font-medium text-slate-950" title={surface.owner}>{surface.owner}</div>
+                            </div>
+                            <div className="rounded-md border border-slate-100 px-2 py-1">
+                              <div className="text-slate-500">Import</div>
+                              <div className="font-medium text-slate-950">blocked</div>
+                            </div>
+                          </div>
+
+                          <p className="mt-3 text-xs leading-5 text-slate-600">{surface.smokeCoverage}</p>
+                          <div className="mt-3 rounded-md bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                            <span className="font-medium text-slate-900">Blocked until: </span>
+                            {surface.blockedUntil}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {snapshot.hostedActivationRunbook.generatedApiReviewBoard.documents.map((documentPath) => (
+                        <div key={documentPath} className="rounded-md border border-slate-200 px-3 py-2 text-xs">
+                          <span className="break-all">{documentPath}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      {snapshot.hostedActivationRunbook.generatedApiReviewBoard.providerBoundary}
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-decision-register">
                   <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
                     <div>
@@ -4444,7 +4533,7 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
-                <div className="space-y-4 xl:sticky xl:top-6 xl:self-start" data-testid="section-kinflo-client-launch-rail">
+                <div className="max-h-[calc(100vh-2rem)] space-y-4 overflow-y-auto pr-1 xl:sticky xl:top-6 xl:max-h-[calc(100vh-3rem)] xl:self-start" data-testid="section-kinflo-client-launch-rail">
                   <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white shadow-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div>

@@ -89,6 +89,7 @@ for (const path of [
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase87-adapter-switch-runway.md",
+  "docs/phase88-generated-api-review-board.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "docs/kinflo-claude-frame-ingestion-packet.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -111,6 +112,7 @@ for (const path of [
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
+  "scripts/validate-kinflo-generated-api-review-board.mjs",
   "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
 ]) {
   requireFile(path);
@@ -201,6 +203,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-claude-frame-ingestion",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
   "npm run kinflo:validate-adapter-switch-runway",
+  "npm run kinflo:validate-generated-api-review-board",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
   "npm run kinflo:validate-phase0-readiness",
@@ -237,6 +240,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 85 hosted activation approval packet",
   "Site Studio scroll consolidation",
   "Phase 87 adapter switch runway",
+  "Phase 88 generated API review board",
   "human-gate decision register and Phase 85 owner approval packet current without storing secrets",
 ]);
 
@@ -253,6 +257,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-adapter-switch-runway\"",
+  "\"kinflo:validate-generated-api-review-board\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 

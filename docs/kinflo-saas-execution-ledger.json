@@ -58,9 +58,11 @@
         "docs/phase48-launch-readiness-shell.md",
         "docs/phase74-adapter-switch-evidence-matrix.md",
         "docs/phase87-adapter-switch-runway.md",
+        "docs/phase88-generated-api-review-board.md",
         "docs/convex-adapter-switch-evidence-matrix.json",
         "npm run kinflo:validate-adapter-switch-evidence",
         "npm run kinflo:validate-adapter-switch-runway",
+        "npm run kinflo:validate-generated-api-review-board",
         "npm run kinflo:validate-shell-routes"
       ],
       "nextGate": "Replace fixture adapter with generated Convex API only after hosted activation smoke passes."
@@ -127,8 +129,10 @@
         "docs/phase71-hosted-activation-console.md",
         "docs/phase73-hosted-activation-decision-register.md",
         "docs/phase85-hosted-activation-approval-packet.md",
+        "docs/phase88-generated-api-review-board.md",
         "docs/convex-live-smoke-manifest.json",
         "docs/convex-hosted-activation-approval-packet.json",
+        "npm run kinflo:validate-generated-api-review-board",
         "npm run kinflo:validate-hosted-activation-decisions",
         "npm run kinflo:validate-hosted-activation-approval-packet",
         "npm run kinflo:activation-preflight",
@@ -138,7 +142,7 @@
     }
   ],
   "nextRepoSafeActions": [
-    "Keep tightening fixture-to-live parity, adapter-switch evidence, and the Phase 87 switch runway without importing convex/_generated/api.",
+    "Keep tightening fixture-to-live parity, adapter-switch evidence, the Phase 87 switch runway, and the Phase 88 generated API review board without importing convex/_generated/api.",
     "Keep the human-gate decision register and Phase 85 owner approval packet current for credential rotation, history purge, hosted ownership, codegen approval, smoke authorization, rollback order, and provider-write signoff.",
     "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, Site Studio scroll consolidation, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
   ],
@@ -167,6 +171,7 @@
     "npm run kinflo:validate-claude-frame-ingestion",
     "npm run kinflo:validate-site-studio-scroll-consolidation",
     "npm run kinflo:validate-adapter-switch-runway",
+    "npm run kinflo:validate-generated-api-review-board",
     "npm run kinflo:validate-hosted-activation-decisions",
     "npm run kinflo:validate-hosted-activation-approval-packet",
     "npm run kinflo:validate-phase0-readiness",

@@ -66,6 +66,11 @@ for (const path of [
 }
 
 const compactMarkers = [
+  "section-kinflo-client-launch-rail",
+  "max-h-[calc(100vh-2rem)]",
+  "overflow-y-auto",
+  "pr-1",
+  "xl:max-h-[calc(100vh-3rem)]",
   "section-kinflo-client-provisioning-workbench",
   "section-kinflo-client-provisioning-summary-chips",
   "tabs-kinflo-client-provisioning-workbench",
@@ -81,6 +86,8 @@ const compactMarkers = [
 requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "Phase 86: Site Studio Scroll Consolidation",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
+  "section-kinflo-client-launch-rail",
+  "viewport-bounded launch rail",
   "section-kinflo-client-provisioning-workbench",
   "tabs-kinflo-client-provisioning-workbench",
   "bounded internal scroll areas",
@@ -103,7 +110,12 @@ requireIncludes("package.json", [
 ]);
 
 const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
-if (shellContents.includes("convex/_generated/api")) {
+const importsGeneratedApi =
+  shellContents.includes("from \"convex/_generated/api\"") ||
+  shellContents.includes("from 'convex/_generated/api'") ||
+  shellContents.includes("import(\"convex/_generated/api\")") ||
+  shellContents.includes("import('convex/_generated/api')");
+if (importsGeneratedApi) {
   fail("Site Studio consolidation does not import generated API", "Generated API imports remain gated until hosted activation approval.");
 } else {
   pass("Site Studio consolidation does not import generated API");
@@ -128,8 +140,9 @@ for (const check of checks) {
 
 console.log("\nKinFlo Site Studio scroll consolidation validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio");
+console.log("Viewport-bounded launch rail: yes");
 console.log("Compact provisioning workbench: yes");
-console.log("Local scroll regions: 2");
+console.log("Local scroll regions: 3");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");

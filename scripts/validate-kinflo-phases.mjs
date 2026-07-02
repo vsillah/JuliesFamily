@@ -153,6 +153,7 @@ for (const path of [
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase87-adapter-switch-runway.md",
+  "docs/phase88-generated-api-review-board.md",
   "docs/convex-hosted-activation-packet.json",
   "docs/convex-hosted-activation-ledger.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -260,6 +261,7 @@ for (const path of [
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
+  "scripts/validate-kinflo-generated-api-review-board.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
   "scripts/validate-convex-import-contracts.mjs",
@@ -1426,6 +1428,8 @@ requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
 requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "Phase 86: Site Studio Scroll Consolidation",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
+  "section-kinflo-client-launch-rail",
+  "viewport-bounded launch rail",
   "section-kinflo-client-provisioning-workbench",
   "section-kinflo-client-provisioning-summary-chips",
   "tabs-kinflo-client-provisioning-workbench",
@@ -1444,6 +1448,23 @@ requireIncludes("docs/phase87-adapter-switch-runway.md", [
   "section-kinflo-adapter-switch-runway-scroll",
   "read-only-core",
   "campaign-and-ai-governance",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
+requireIncludes("docs/phase88-generated-api-review-board.md", [
+  "Phase 88: Generated API Review Board",
+  "npm run kinflo:validate-generated-api-review-board",
+  "ShellGeneratedApiReviewBoard",
+  "hostedActivationRunbook.generatedApiReviewBoard",
+  "section-kinflo-generated-api-review-board",
+  "section-kinflo-generated-api-review-scroll",
+  "Generated API bindings: 73",
+  "Query bindings: 35",
+  "Mutation bindings: 38",
+  "Live smoke manifest functions: 45",
+  "Smoke-manifest review gaps: 28",
+  "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -1485,6 +1506,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/convex-hosted-activation-approval-packet.json\"",
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
   "\"docs/phase87-adapter-switch-runway.md\"",
+  "\"docs/phase88-generated-api-review-board.md\"",
   "\"npm run kinflo:validate-hosted-activation-decisions\"",
   "\"npm run kinflo:validate-hosted-activation-approval-packet\"",
   "\"npm run kinflo:validate-active-object-signal\"",
@@ -1498,6 +1520,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-claude-frame-ingestion\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-adapter-switch-runway\"",
+  "\"npm run kinflo:validate-generated-api-review-board\"",
   "\"human_gate_blocked\"",
   "\"run npm run convex:codegen\"",
   "\"commit or import convex/_generated/api\"",
@@ -1594,6 +1617,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-adapter-switch-runway\"",
+  "\"kinflo:validate-generated-api-review-board\"",
   "\"kinflo:inventory-env\"",
   "\"kinflo:audit-secret-history\"",
   "\"kinflo:validate-imports\"",
@@ -2345,6 +2369,10 @@ requireIncludes("scripts/validate-kinflo-claude-frame-ingestion.mjs", [
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [
   "docs/phase86-site-studio-scroll-consolidation.md",
+  "section-kinflo-client-launch-rail",
+  "max-h-[calc(100vh-2rem)]",
+  "overflow-y-auto",
+  "xl:max-h-[calc(100vh-3rem)]",
   "section-kinflo-client-provisioning-workbench",
   "tabs-kinflo-client-provisioning-workbench",
   "section-kinflo-client-provisioning-order-scroll",
@@ -2366,6 +2394,16 @@ requireIncludes("scripts/validate-kinflo-adapter-switch-runway.mjs", [
   "KinFlo adapter switch runway validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-generated-api-review-board.mjs", [
+  "docs/phase88-generated-api-review-board.md",
+  "ShellGeneratedApiReviewBoard",
+  "section-kinflo-generated-api-review-board",
+  "section-kinflo-generated-api-review-scroll",
+  "review board distinguishes covered and gap surfaces",
+  "generated API review board does not execute live Convex",
+  "KinFlo generated API review board validation",
+]);
+
 requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellAdapterSwitchRunwayStep",
   "runwaySteps: [",
@@ -2375,6 +2413,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "Public CRM loop",
   "Provider metadata only",
   "Campaign and AI governance",
+  "ShellGeneratedApiReviewBoard",
+  "generatedApiReviewBoard: {",
+  "provider_light_generated_api_review",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
@@ -2384,6 +2425,9 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "card-adapter-switch-runway-",
   "snapshot.adapterSwitchReadiness.runwaySteps",
   "Every batch remains fixture-backed",
+  "section-kinflo-generated-api-review-board",
+  "section-kinflo-generated-api-review-scroll",
+  "Codegen review gated",
 ]);
 
 requireIncludes("docs/kinflo-claude-frame-ingestion-packet.json", [
@@ -2920,7 +2964,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "blocked_until_approval",
   "Approve hosted Convex ownership, billing, backup, auth, env policy, and codegen window",
   "run npm run convex:codegen",
-  "import convex/_generated/api",
+  "import generated Convex API module",
   "prepare_only_evidence_ledger",
   "repo-sharing-risk",
   "provider-write-approvals",
