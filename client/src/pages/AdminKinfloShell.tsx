@@ -2898,6 +2898,96 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
+                <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-smoke-gap-backlog">
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Hosted Smoke Gap Backlog</CardTitle>
+                        <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                          {snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.totalGaps} gaps
+                        </Badge>
+                      </div>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid="text-kinflo-hosted-smoke-gap-backlog">
+                        {snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.approvalGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-hosted-smoke-gap-gated">
+                      <ListChecks className="mr-2 h-4 w-4" />
+                      Smoke execution gated
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-3 md:grid-cols-5" data-testid="section-kinflo-hosted-smoke-gap-summary">
+                      {[
+                        { label: "Total", value: snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.totalGaps },
+                        { label: "Read-only", value: snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.readOnlyGaps },
+                        { label: "Mutations", value: snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.mutationGaps },
+                        { label: "Provider", value: snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.providerGatedGaps },
+                        { label: "Governance", value: snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.governanceGaps },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid max-h-[460px] gap-3 overflow-y-auto pr-1 md:grid-cols-2" data-testid="section-kinflo-hosted-smoke-gap-scroll">
+                      {snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.gaps.map((gap) => (
+                        <div key={gap.id} className="rounded-lg border border-slate-200 bg-white p-4" data-testid={`card-hosted-smoke-gap-${gap.id}`}>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="break-all text-sm font-semibold">{gap.functionName}</div>
+                              <div className="mt-1 text-xs text-slate-600">{gap.surface} · {gap.batchId}</div>
+                            </div>
+                            <Badge
+                              variant={gap.smokeMode === "read_only" ? "secondary" : "outline"}
+                              className="shrink-0"
+                            >
+                              {gap.smokeMode.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+
+                          <div className="mt-3 grid gap-2 text-xs">
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <span className="font-medium text-slate-900">Local proof: </span>
+                              <span className="text-slate-600">{gap.localProof}</span>
+                            </div>
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <span className="font-medium text-slate-900">Hosted proof: </span>
+                              <span className="text-slate-600">{gap.hostedProofRequired}</span>
+                            </div>
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <span className="font-medium text-slate-900">Rollback: </span>
+                              <span className="text-slate-600">{gap.rollbackArtifact}</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 flex flex-wrap items-center gap-2">
+                            <Badge variant="outline">Owner: {gap.owner}</Badge>
+                            <Badge variant="outline" className="border-rose-200 bg-rose-50 text-rose-700">
+                              can run: {gap.canRun ? "yes" : "no"}
+                            </Badge>
+                          </div>
+                          <p className="mt-3 text-xs leading-5 text-slate-600">{gap.blockedUntil}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.sourceDocuments.map((documentPath) => (
+                        <div key={documentPath} className="rounded-md border border-slate-200 px-3 py-2 text-xs">
+                          <span className="break-all">{documentPath}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      {snapshot.hostedActivationRunbook.hostedSmokeGapBacklog.providerBoundary}
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-decision-register">
                   <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
                     <div>
@@ -4649,7 +4739,11 @@ export default function AdminKinfloShell() {
                   </TabsContent>
 
                   <TabsContent value="launch" className="mt-4" data-testid="section-kinflo-client-workbench-launch">
-                    <div className="max-h-[calc(100vh-10rem)] space-y-4 overflow-y-auto pr-1" data-testid="section-kinflo-client-launch-rail">
+                    <div
+                      className="grid max-h-[calc(100vh-10rem)] min-w-0 gap-3 overflow-y-auto overflow-x-hidden pr-1 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] lg:overflow-hidden lg:pr-0"
+                      data-testid="section-kinflo-client-launch-rail"
+                    >
+                      <div className="min-h-0 min-w-0 max-h-[calc(100vh-10rem)] space-y-3 overflow-y-auto pr-1" data-testid="section-kinflo-client-launch-command-column">
                   <div className="rounded-2xl border border-slate-900 bg-slate-950 p-4 text-white shadow-sm">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -4730,6 +4824,25 @@ export default function AdminKinfloShell() {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
+                    {snapshot.clientWebsiteStudio.providerBoundary}
+                  </div>
+                      </div>
+
+                      <Tabs defaultValue="provisioning" className="min-h-0 min-w-0 max-h-[calc(100vh-10rem)] overflow-hidden" data-testid="tabs-kinflo-client-launch-dossier">
+                        <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
+                          <TabsTrigger value="provisioning" data-testid="tab-kinflo-client-launch-dossier-provisioning">Provision</TabsTrigger>
+                          <TabsTrigger value="packets" data-testid="tab-kinflo-client-launch-dossier-packets">Packets</TabsTrigger>
+                          <TabsTrigger value="qa" data-testid="tab-kinflo-client-launch-dossier-qa">QA</TabsTrigger>
+                          <TabsTrigger value="decision" data-testid="tab-kinflo-client-launch-dossier-decision">Decision</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent
+                          value="provisioning"
+                          className="mt-3 max-h-[calc(100vh-14rem)] overflow-y-auto pr-1"
+                          data-testid="section-kinflo-client-launch-dossier-provisioning"
+                        >
 
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex items-start justify-between gap-3">
@@ -4893,6 +5006,14 @@ export default function AdminKinfloShell() {
                       </TabsContent>
                     </Tabs>
                   </div>
+
+                        </TabsContent>
+
+                        <TabsContent
+                          value="packets"
+                          className="mt-3 grid max-h-[calc(100vh-14rem)] gap-3 overflow-y-auto pr-1 xl:grid-cols-2"
+                          data-testid="section-kinflo-client-launch-dossier-packets"
+                        >
 
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-launch-packet">
                     <div className="flex items-start justify-between gap-3">
@@ -5234,6 +5355,14 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
+                        </TabsContent>
+
+                        <TabsContent
+                          value="qa"
+                          className="mt-3 grid max-h-[calc(100vh-14rem)] gap-3 overflow-y-auto pr-1 xl:grid-cols-2"
+                          data-testid="section-kinflo-client-launch-dossier-qa"
+                        >
+
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-polish-scorecard">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -5565,6 +5694,14 @@ export default function AdminKinfloShell() {
                     decisionPacket={selectedClientWebsiteLaunchDecisionPacket}
                   />
 
+                        </TabsContent>
+
+                        <TabsContent
+                          value="decision"
+                          className="mt-3 grid max-h-[calc(100vh-14rem)] gap-3 overflow-y-auto pr-1 xl:grid-cols-2"
+                          data-testid="section-kinflo-client-launch-dossier-decision"
+                        >
+
                   <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-launch-decision-packet">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -5876,9 +6013,8 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 shadow-sm">
-                    {snapshot.clientWebsiteStudio.providerBoundary}
-                  </div>
+                        </TabsContent>
+                      </Tabs>
                     </div>
                   </TabsContent>
                 </Tabs>

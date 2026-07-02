@@ -23,6 +23,12 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 - Dry run tab: `tab-kinflo-client-provisioning-dry-run`
 - Bounded order scroll: `section-kinflo-client-provisioning-order-scroll`
 - Bounded dry-run scroll: `section-kinflo-client-provisioning-dry-run-scroll`
+- Launch command column: `section-kinflo-client-launch-command-column`
+- Launch dossier tabs: `tabs-kinflo-client-launch-dossier`
+- Provisioning dossier: `section-kinflo-client-launch-dossier-provisioning`
+- Packet dossier: `section-kinflo-client-launch-dossier-packets`
+- QA dossier: `section-kinflo-client-launch-dossier-qa`
+- Decision dossier: `section-kinflo-client-launch-dossier-decision`
 
 ## What Changed
 
@@ -35,7 +41,11 @@ The prior right-rail provisioning content stacked a large provisioning order car
 - manifest, dry-run counters, selected order steps, provider boundary, and blocked-until gates live under the `Dry run` tab,
 - long lists use bounded internal scroll areas instead of increasing the full page height.
 
-Launch packets, content packs, onboarding evidence, simulations, polish scorecards, visual QA, proof-before-publish, and launch decisions remain available in the rail, but they sit behind the `Launch` stage and scroll inside the rail instead of stretching Site Studio into one long vertical page.
+Launch packets, content packs, onboarding evidence, simulations, polish scorecards, visual QA, proof-before-publish, and launch decisions remain available in the rail, but they now sit inside a launch dossier with `Provision`, `Packets`, `QA`, and `Decision` tabs. The left command column keeps the active site, gated launch controls, and provider boundary visible while the right dossier scrolls internally.
+
+This keeps the Site Studio launch review as a compact dashboard instead of a long vertical proof document.
+
+At narrow review widths, the launch rail scrolls internally so the command column and dossier remain reachable without stretching the whole admin page. At wider widths, the rail locks into the two-pane command/dossier layout.
 
 ## Provider Boundary
 

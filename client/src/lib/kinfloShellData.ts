@@ -173,12 +173,48 @@ export type ShellGeneratedApiReviewBoard = {
   surfaces: ShellGeneratedApiReviewSurface[];
 };
 
+export type ShellHostedSmokeGapMode =
+  | "read_only"
+  | "mutation_smoke_required"
+  | "provider_gated_metadata"
+  | "governance";
+
+export type ShellHostedSmokeGap = {
+  id: string;
+  batchId: string;
+  surface: string;
+  functionName: string;
+  smokeMode: ShellHostedSmokeGapMode;
+  localProof: string;
+  hostedProofRequired: string;
+  rollbackArtifact: string;
+  owner: string;
+  blockedUntil: string;
+  canRun: boolean;
+  providerWrites: boolean;
+  liveConvexExecution: boolean;
+};
+
+export type ShellHostedSmokeGapBacklog = {
+  status: "provider_light_hosted_smoke_gap_backlog";
+  totalGaps: number;
+  readOnlyGaps: number;
+  mutationGaps: number;
+  providerGatedGaps: number;
+  governanceGaps: number;
+  approvalGate: string;
+  providerBoundary: string;
+  sourceDocuments: string[];
+  gaps: ShellHostedSmokeGap[];
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
   providerBoundary: string;
   activationConsole: ShellHostedActivationConsole;
   generatedApiReviewBoard: ShellGeneratedApiReviewBoard;
+  hostedSmokeGapBacklog: ShellHostedSmokeGapBacklog;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -4170,6 +4206,265 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
   ],
 };
 
+const fixtureHostedSmokeGapBacklog: ShellHostedSmokeGapBacklog = {
+  status: "provider_light_hosted_smoke_gap_backlog",
+  totalGaps: 16,
+  readOnlyGaps: 8,
+  mutationGaps: 3,
+  providerGatedGaps: 1,
+  governanceGaps: 4,
+  approvalGate: "Hosted smoke gap backlog cannot run until hosted Convex ownership, generated API review, live-smoke dry run, rollback owner, and Vambah's smoke execution approval are accepted.",
+  providerBoundary: "This backlog is review-only. It does not create a hosted Convex deployment, run codegen, import generated API files, execute live Convex functions, write provider metadata, send campaigns, call AI providers, or publish client sites.",
+  sourceDocuments: [
+    "docs/convex-adapter-switch-plan.json",
+    "docs/convex-live-smoke-manifest.json",
+    "docs/phase89-adapter-switch-acceptance-matrix.md",
+    "client/src/lib/kinfloGeneratedApiContract.ts",
+  ],
+  gaps: [
+    {
+      id: "launch-readiness-get-site-launch-readiness",
+      batchId: "read-only-core",
+      surface: "Launch readiness",
+      functionName: "launchReadiness.getSiteLaunchReadiness",
+      smokeMode: "read_only",
+      localProof: "Phase 48 and the adapter switch acceptance matrix map launch readiness fixtures and keep provider actions gated.",
+      hostedProofRequired: "Run a read-only hosted smoke that proves site:view scope, launch packet evidence, and provider action blocking for one approved smoke site.",
+      rollbackArtifact: "Fixture launch readiness packet and adapter fallback remain authoritative if hosted gate state is overstated.",
+      owner: "platform.super_admin",
+      blockedUntil: "Read-only hosted smoke is approved after generated API review.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "preferences-get-my-preferences",
+      batchId: "user-scoped-preferences",
+      surface: "Admin experience preferences",
+      functionName: "preferences.getMyPreferences",
+      smokeMode: "read_only",
+      localProof: "Phase 37 proves data mode, filters, density, and landing-page defaults through fixture-backed shell state.",
+      hostedProofRequired: "Run a viewer-scoped hosted read confirming the signed-in user sees only their own preference record.",
+      rollbackArtifact: "Local preference fallback restores density, filters, site context, and landing-page defaults.",
+      owner: "platform.super_admin",
+      blockedUntil: "User-scoped preference permission smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "preferences-upsert-my-preferences",
+      batchId: "user-scoped-preferences",
+      surface: "Admin experience preferences",
+      functionName: "preferences.upsertMyPreferences",
+      smokeMode: "mutation_smoke_required",
+      localProof: "Phase 37 local edits remain fixture-backed and never persist through generated API imports.",
+      hostedProofRequired: "Run one reversible preference upsert for the smoke user and confirm tenant/site scope checks hold.",
+      rollbackArtifact: "Restore fixture preferences and delete or overwrite the smoke preference record.",
+      owner: "platform.super_admin",
+      blockedUntil: "Mutation smoke order and rollback owner are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-admin-permission-presets",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteAdminPermissionPresets",
+      smokeMode: "read_only",
+      localProof: "Phase 58 maps client admin permission presets and keeps client handoff gated.",
+      hostedProofRequired: "Run a read-only hosted preset query and confirm owner/invite roles remain tenant and site scoped.",
+      rollbackArtifact: "Fixture permission presets remain active if hosted role scope diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Client permission preset smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-launch-blueprints",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteLaunchBlueprints",
+      smokeMode: "read_only",
+      localProof: "Phase 56 maps launch blueprints, default pages, permission gates, and launch sequence fixtures.",
+      hostedProofRequired: "Run a read-only hosted blueprint query and confirm it maps to the approved launch packet without enabling publish.",
+      rollbackArtifact: "Fixture launch blueprint remains active if hosted blueprint content or permission gates diverge.",
+      owner: "platform.super_admin",
+      blockedUntil: "Launch blueprint read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "crm-list-journey-progression-rules",
+      batchId: "public-crm-loop",
+      surface: "CRM lead workspace",
+      functionName: "crm.listJourneyProgressionRules",
+      smokeMode: "read_only",
+      localProof: "Phase 34 maps journey progression rules and Phase 89 identifies the rule list as a CRM switch gap.",
+      hostedProofRequired: "Run a tenant-scoped hosted read confirming progression rules do not leak across sites.",
+      rollbackArtifact: "Fixture journey progression rules remain selected if hosted scope is wrong.",
+      owner: "platform.super_admin",
+      blockedUntil: "CRM journey read smoke is approved after public resolver and lead list smoke.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "crm-upsert-journey-progression-rule",
+      batchId: "public-crm-loop",
+      surface: "CRM lead workspace",
+      functionName: "crm.upsertJourneyProgressionRule",
+      smokeMode: "mutation_smoke_required",
+      localProof: "Phase 34 validates the rule contract without running hosted mutations.",
+      hostedProofRequired: "Run one reversible hosted rule upsert and confirm lead:manage authorization plus audit evidence.",
+      rollbackArtifact: "Delete or mark the smoke rule as test-only and restore fixture CRM rule display.",
+      owner: "platform.super_admin",
+      blockedUntil: "CRM mutation smoke order, cleanup policy, and notification pause are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "crm-transition-lead-stage",
+      batchId: "public-crm-loop",
+      surface: "CRM lead workspace",
+      functionName: "crm.transitionLeadStage",
+      smokeMode: "mutation_smoke_required",
+      localProof: "Phase 89 lists lead-stage transition as missing from hosted smoke while CRM fixture transitions remain local.",
+      hostedProofRequired: "Run one smoke lead stage transition and verify pipeline, journey, timeline, and audit events are appended.",
+      rollbackArtifact: "Mark smoke lead workflow data as test-only and keep outbound notifications paused.",
+      owner: "platform.super_admin",
+      blockedUntil: "Public lead smoke, transition cleanup, and rollback owner are approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "integrations-list-integration-settings",
+      batchId: "provider-readiness-records",
+      surface: "Integration readiness",
+      functionName: "integrations.listIntegrationSettings",
+      smokeMode: "read_only",
+      localProof: "Phase 45 maps provider settings, env key references, and activation evidence without secrets.",
+      hostedProofRequired: "Run a read-only hosted integration-settings query and confirm secret values are excluded.",
+      rollbackArtifact: "Fixture integration readiness rows remain active if hosted rows expose values or scope incorrectly.",
+      owner: "platform.super_admin",
+      blockedUntil: "Integration metadata smoke and secret-value exclusion review are approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "integrations-upsert-integration-setting",
+      batchId: "provider-readiness-records",
+      surface: "Integration readiness",
+      functionName: "integrations.upsertIntegrationSetting",
+      smokeMode: "provider_gated_metadata",
+      localProof: "Phase 45 keeps provider readiness writes disabled while metadata fields are reviewable.",
+      hostedProofRequired: "Run one metadata-only hosted upsert with secret values excluded and all provider calls disabled.",
+      rollbackArtifact: "Return integration readiness rows to fixtures and deactivate the smoke metadata record.",
+      owner: "platform.super_admin",
+      blockedUntil: "Metadata-only provider boundary and rollback owner are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "campaigns-list-campaign-drafts",
+      batchId: "campaign-and-ai-governance",
+      surface: "Campaign automation",
+      functionName: "campaigns.listCampaignDrafts",
+      smokeMode: "read_only",
+      localProof: "Phase 46 maps campaign drafts, safety gates, and approval state in fixtures.",
+      hostedProofRequired: "Run a read-only hosted campaign draft list and confirm campaign:manage scope and send gates.",
+      rollbackArtifact: "Fixture campaign review state remains active if hosted draft scope diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Campaign governance and consent smoke are approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "campaigns-upsert-campaign-draft",
+      batchId: "campaign-and-ai-governance",
+      surface: "Campaign automation",
+      functionName: "campaigns.upsertCampaignDraft",
+      smokeMode: "governance",
+      localProof: "Phase 46 validates campaign draft editing without email, SMS, or automation sends.",
+      hostedProofRequired: "Run one reversible campaign draft upsert and confirm provider send remains disabled.",
+      rollbackArtifact: "Pause or delete the smoke campaign record and restore fixture campaign review state.",
+      owner: "platform.super_admin",
+      blockedUntil: "Campaign consent, provider-send rollback, and mutation order are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "campaigns-approve-campaign-draft",
+      batchId: "campaign-and-ai-governance",
+      surface: "Campaign automation",
+      functionName: "campaigns.approveCampaignDraft",
+      smokeMode: "governance",
+      localProof: "Phase 46 keeps live approval and live send buttons gated in the shell.",
+      hostedProofRequired: "Run one approval-state hosted smoke that records approval without sending provider messages.",
+      rollbackArtifact: "Revert the smoke draft approval state and keep email, SMS, and automation sends blocked.",
+      owner: "platform.super_admin",
+      blockedUntil: "Approval authority and provider-send signoff are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "ai-review-list-generation-records",
+      batchId: "campaign-and-ai-governance",
+      surface: "AI review provenance",
+      functionName: "aiReview.listAiGenerationRecords",
+      smokeMode: "read_only",
+      localProof: "Phase 47 maps AI prompt, source, output, reviewer, and publish target provenance.",
+      hostedProofRequired: "Run a read-only hosted AI generation list and confirm ai:draft scope and provider calls remain absent.",
+      rollbackArtifact: "Fixture AI review queue remains active if hosted provenance scope diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "AI provenance reviewer and provider-call boundary are approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "ai-review-upsert-generation-record",
+      batchId: "campaign-and-ai-governance",
+      surface: "AI review provenance",
+      functionName: "aiReview.upsertAiGenerationRecord",
+      smokeMode: "governance",
+      localProof: "Phase 47 keeps AI output records local and blocks AI provider calls.",
+      hostedProofRequired: "Run one hosted AI provenance record upsert using supplied metadata only, with no provider generation call.",
+      rollbackArtifact: "Delete or mark the smoke AI generation record as test-only and keep generated output unpublished.",
+      owner: "platform.super_admin",
+      blockedUntil: "AI metadata-only smoke, reviewer owner, and rollback policy are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "ai-review-review-generation-record",
+      batchId: "campaign-and-ai-governance",
+      surface: "AI review provenance",
+      functionName: "aiReview.reviewAiGenerationRecord",
+      smokeMode: "governance",
+      localProof: "Phase 47 blocks live AI review and publish while provenance state remains inspectable.",
+      hostedProofRequired: "Run one reviewer-decision hosted smoke and confirm publish target stays blocked.",
+      rollbackArtifact: "Revert reviewer decision on the smoke AI record and keep publish/provider actions disabled.",
+      owner: "platform.super_admin",
+      blockedUntil: "AI reviewer authority and publish rollback are accepted.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+  ],
+};
+
 const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger",
   defaultStepId: "repo-sharing-risk",
@@ -4366,6 +4661,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
     ],
   },
+  hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog,
   decisionRegister: [
     {
       id: "credential-rotation-review",

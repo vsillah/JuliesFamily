@@ -91,6 +91,7 @@ for (const path of [
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
   "docs/phase89-adapter-switch-acceptance-matrix.md",
+  "docs/phase90-hosted-smoke-gap-backlog.md",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "docs/kinflo-claude-frame-ingestion-packet.json",
   "docs/convex-hosted-activation-approval-packet.json",
@@ -115,6 +116,7 @@ for (const path of [
   "scripts/validate-kinflo-adapter-switch-runway.mjs",
   "scripts/validate-kinflo-generated-api-review-board.mjs",
   "scripts/validate-kinflo-adapter-switch-acceptance-matrix.mjs",
+  "scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs",
   "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
 ]) {
   requireFile(path);
@@ -207,6 +209,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-adapter-switch-runway",
   "npm run kinflo:validate-generated-api-review-board",
   "npm run kinflo:validate-adapter-switch-acceptance-matrix",
+  "npm run kinflo:validate-hosted-smoke-gap-backlog",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
   "npm run kinflo:validate-phase0-readiness",
@@ -245,6 +248,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 87 adapter switch runway",
   "Phase 88 generated API review board",
   "Phase 89 adapter switch acceptance matrix",
+  "Phase 90 hosted smoke gap backlog",
   "human-gate decision register and Phase 85 owner approval packet current without storing secrets",
 ]);
 
@@ -263,6 +267,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-adapter-switch-runway\"",
   "\"kinflo:validate-generated-api-review-board\"",
   "\"kinflo:validate-adapter-switch-acceptance-matrix\"",
+  "\"kinflo:validate-hosted-smoke-gap-backlog\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 
