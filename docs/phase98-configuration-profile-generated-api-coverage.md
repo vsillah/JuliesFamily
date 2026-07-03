@@ -15,12 +15,14 @@ npm run kinflo:validate-configuration-profile-generated-api-coverage
 - Runtime function key: `siteFactoryListClientWebsiteConfigurationAuditTimelines`
 - Runtime function key: `siteFactoryListClientWebsiteConfigurationChangeSets`
 - Runtime function key: `siteFactoryListClientWebsiteConfigurationProfiles`
+- Runtime function key: `siteFactoryListClientWebsiteConfigurationRollbackCheckpoints`
 - Runtime function key: `siteFactoryListClientWebsiteConfigurationSaveRequests`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationReviewPackets`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationApprovalMatrices`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationAuditTimelines`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationChangeSets`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationProfiles`
+- Convex function path: `siteFactory.listClientWebsiteConfigurationRollbackCheckpoints`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationSaveRequests`
 - Generated API binding surface: `site factory`
 - Adapter-switch surface: `site-factory`
@@ -29,9 +31,10 @@ npm run kinflo:validate-configuration-profile-generated-api-coverage
 - Required switch evidence: `configuration audit timeline read`
 - Required switch evidence: `configuration change set read`
 - Required switch evidence: `configuration profile read`
+- Required switch evidence: `configuration rollback checkpoint read`
 - Required switch evidence: `configuration save request read`
 
-The Site Factory adapter-switch surface now requires configuration review packet, configuration approval matrix, configuration audit timeline, configuration change set, configuration profile, and configuration save request read evidence before the fixture adapter can move toward generated Convex bindings.
+The Site Factory adapter-switch surface now requires configuration review packet, configuration approval matrix, configuration audit timeline, configuration change set, configuration profile, configuration rollback checkpoint, and configuration save request read evidence before the fixture adapter can move toward generated Convex bindings.
 
 ## Provider Boundary
 
@@ -49,4 +52,4 @@ No secret values are read or printed.
 
 ## Why This Matters
 
-Client websites are becoming configurable products, not one-off pages. The generated API review path must include each site's template, brand, navigation, CRM pipeline, editable surfaces, locked surfaces, approval matrix, audit timeline, draft change set, save request packet, and provider boundary before hosted activation can safely replace local fixtures.
+Client websites are becoming configurable products, not one-off pages. The generated API review path must include each site's template, brand, navigation, CRM pipeline, editable surfaces, locked surfaces, approval matrix, audit timeline, draft change set, rollback checkpoint, save request packet, and provider boundary before hosted activation can safely replace local fixtures.

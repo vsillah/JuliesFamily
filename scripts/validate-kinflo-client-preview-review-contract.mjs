@@ -118,8 +118,8 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [
   "siteFactory.listClientWebsitePreviewReviewPackets",
-  "totalBindings: 19",
-  "queryBindings: 18",
+  "totalBindings: 20",
+  "queryBindings: 19",
   "client website review packets and template smoke are accepted",
 ]);
 

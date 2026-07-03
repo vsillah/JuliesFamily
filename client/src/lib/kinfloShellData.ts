@@ -826,6 +826,35 @@ export type ShellClientWebsiteConfigurationAuditTimeline = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteConfigurationRollbackCheckpoint = {
+  siteKey: string;
+  label: string;
+  rollbackPosture: "provider-light-rollback-checkpoint";
+  checkpointStatus: "ready_for_rehearsal" | "blocked_human_gate" | "draft";
+  baselineLabel: string;
+  rollbackOwner: string;
+  checkpointCount: number;
+  readyCheckpointCount: number;
+  blockedCheckpointCount: number;
+  checkpoints: {
+    key: string;
+    label: string;
+    status: "ready" | "blocked" | "pending";
+    evidence: string;
+    rollbackAction: string;
+  }[];
+  rehearsalSteps: string[];
+  blockedLiveActions: string[];
+  nextGate: string;
+  canRehearseRollback: false;
+  canRecordAudit: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -1046,6 +1075,7 @@ export type ShellClientWebsiteStudio = {
   configurationApprovalMatrices: ShellClientWebsiteConfigurationApprovalMatrix[];
   configurationSaveRequests: ShellClientWebsiteConfigurationSaveRequest[];
   configurationAuditTimelines: ShellClientWebsiteConfigurationAuditTimeline[];
+  configurationRollbackCheckpoints: ShellClientWebsiteConfigurationRollbackCheckpoint[];
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
@@ -3082,6 +3112,108 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  configurationRollbackCheckpoints: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family configuration rollback checkpoint",
+      rollbackPosture: "provider-light-rollback-checkpoint",
+      checkpointStatus: "ready_for_rehearsal",
+      baselineLabel: "Founding fixture configuration baseline",
+      rollbackOwner: "Platform super admin",
+      checkpointCount: 4,
+      readyCheckpointCount: 2,
+      blockedCheckpointCount: 2,
+      checkpoints: [
+        { key: "fixture-baseline", label: "Fixture baseline captured", status: "ready", evidence: "seeded tenant ownership note", rollbackAction: "Restore fixture configuration profile." },
+        { key: "source-content", label: "Source content fallback", status: "ready", evidence: "source page mapping", rollbackAction: "Restore source-mapped Julie Family content blocks." },
+        { key: "renderer-parity", label: "Renderer parity fallback", status: "blocked", evidence: "fixture-to-live smoke pending", rollbackAction: "Keep public renderer on local fixture route." },
+        { key: "lead-route", label: "Lead route fallback", status: "blocked", evidence: "lead route smoke pending", rollbackAction: "Keep CRM lead writes disabled." },
+      ],
+      rehearsalSteps: ["Snapshot local fixture profile", "Compare public preview parity", "Confirm source content fallback", "Keep save request capture disabled"],
+      blockedLiveActions: ["configuration save mutation", "content block write", "public publish write", "CRM lead write"],
+      nextGate: "Accept renderer parity and lead route smoke before rollback rehearsal can be recorded.",
+      canRehearseRollback: false,
+      canRecordAudit: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+        "siteFactory.listClientWebsiteConfigurationSaveRequests",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client rollback checkpoint",
+      rollbackPosture: "provider-light-rollback-checkpoint",
+      checkpointStatus: "blocked_human_gate",
+      baselineLabel: "Advisor local fixture baseline",
+      rollbackOwner: "Platform super admin",
+      checkpointCount: 5,
+      readyCheckpointCount: 1,
+      blockedCheckpointCount: 4,
+      checkpoints: [
+        { key: "fixture-baseline", label: "Local fixture baseline", status: "ready", evidence: "advisor fixture profile", rollbackAction: "Discard pending advisor save request." },
+        { key: "owner-signoff", label: "Owner signoff fallback", status: "blocked", evidence: "tenant owner signoff pending", rollbackAction: "Keep tenant creation disabled." },
+        { key: "hosted-read", label: "Hosted read fallback", status: "blocked", evidence: "hosted read smoke transcript pending", rollbackAction: "Keep adapter on fixture reads." },
+        { key: "domain-posture", label: "Domain fallback", status: "pending", evidence: "domain posture note pending", rollbackAction: "Leave custom domain unattached." },
+        { key: "admin-invite", label: "Admin invite fallback", status: "blocked", evidence: "admin permission scope review pending", rollbackAction: "Keep client invitation disabled." },
+      ],
+      rehearsalSteps: ["Confirm advisor fixture baseline", "Review owner and plan gates", "Verify hosted-read smoke remains blocked", "Keep invitation and billing disabled"],
+      blockedLiveActions: ["tenant create mutation", "site create mutation", "configuration save mutation", "client admin invitation", "Stripe billing activation"],
+      nextGate: "Capture owner, hosted read, domain, and access evidence before rollback rehearsal can be recorded.",
+      canRehearseRollback: false,
+      canRecordAudit: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+        "siteFactory.listClientWebsiteConfigurationSaveRequests",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite rollback checkpoint",
+      rollbackPosture: "provider-light-rollback-checkpoint",
+      checkpointStatus: "blocked_human_gate",
+      baselineLabel: "Campaign fixture content baseline",
+      rollbackOwner: "Platform super admin",
+      checkpointCount: 5,
+      readyCheckpointCount: 1,
+      blockedCheckpointCount: 4,
+      checkpoints: [
+        { key: "fixture-content", label: "Fixture content baseline", status: "ready", evidence: "campaign fixture profile", rollbackAction: "Restore campaign fixture content pack." },
+        { key: "consent", label: "Consent fallback", status: "blocked", evidence: "campaign consent note pending", rollbackAction: "Keep signup route disabled." },
+        { key: "lead-routing", label: "Lead route fallback", status: "blocked", evidence: "lead route smoke plan pending", rollbackAction: "Keep public form writes disabled." },
+        { key: "provider-send", label: "Provider-send fallback", status: "blocked", evidence: "provider-send boundary note pending", rollbackAction: "Keep campaign sends disabled." },
+        { key: "ai-copy", label: "AI copy fallback", status: "blocked", evidence: "AI copy approval pending", rollbackAction: "Keep AI copy unpublished." },
+      ],
+      rehearsalSteps: ["Confirm campaign fixture content", "Review consent and lead routing gates", "Keep provider-send disabled", "Keep AI copy publish disabled"],
+      blockedLiveActions: ["site create mutation", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+      nextGate: "Capture consent, lead routing, provider-send, and AI copy evidence before rollback rehearsal can be recorded.",
+      canRehearseRollback: false,
+      canRecordAudit: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+        "siteFactory.listClientWebsiteConfigurationSaveRequests",
+        "siteFactory.createSiteFromTemplate",
+        "campaigns.requestCampaignApproval",
+      ],
+    },
+  ],
   launchPackets: [
     {
       siteKey: "julies-family-public",
@@ -4258,6 +4390,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
     "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
     "siteFactory.listClientWebsiteConfigurationAuditTimelines",
     "siteFactory.listClientWebsiteConfigurationProfiles",
+    "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
     "siteFactory.listClientWebsiteConfigurationSaveRequests",
     "siteFactory.listClientWebsiteLaunchDecisionPackets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
@@ -6302,11 +6435,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 80,
-    queryBindings: 42,
+    totalBindings: 81,
+    queryBindings: 43,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 35,
+    smokeManifestGaps: 36,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -6359,8 +6492,8 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 19,
-        queryBindings: 18,
+        totalBindings: 20,
+        queryBindings: 19,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
@@ -6370,6 +6503,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
           "siteFactory.listClientWebsiteConfigurationChangeSets",
           "siteFactory.listClientWebsiteConfigurationReviewPackets",
           "siteFactory.listClientWebsiteConfigurationProfiles",
+          "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
           "siteFactory.listClientWebsiteConfigurationSaveRequests",
           "siteFactory.listClientWebsiteLaunchBlueprints",
           "siteFactory.listClientWebsitePreviewReviewPackets",

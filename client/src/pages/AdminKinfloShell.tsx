@@ -69,6 +69,7 @@ import {
   type ShellClientWebsiteConfigurationAuditTimeline,
   type ShellClientWebsiteConfigurationChangeSet,
   type ShellClientWebsiteConfigurationProfiles,
+  type ShellClientWebsiteConfigurationRollbackCheckpoint,
   type ShellClientWebsiteConfigurationReviewPacket,
   type ShellClientWebsiteConfigurationSaveRequest,
   type ShellClientWebsiteSpinUpQueue,
@@ -995,6 +996,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedApprovalMatrix,
   selectedSaveRequest,
   selectedAuditTimeline,
+  selectedRollbackCheckpoint,
   testIds,
 }: {
   profiles: ShellClientWebsiteConfigurationProfiles;
@@ -1003,6 +1005,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedApprovalMatrix?: ShellClientWebsiteConfigurationApprovalMatrix;
   selectedSaveRequest?: ShellClientWebsiteConfigurationSaveRequest;
   selectedAuditTimeline?: ShellClientWebsiteConfigurationAuditTimeline;
+  selectedRollbackCheckpoint?: ShellClientWebsiteConfigurationRollbackCheckpoint;
   testIds: typeof clientWebsiteConfigurationProfileTestIds;
 }) {
   const summaryItems = [
@@ -1399,10 +1402,11 @@ function ClientWebsiteConfigurationProfiles({
             </div>
 
             <Tabs defaultValue="blockers" className="min-w-0" data-testid="tabs-kinflo-client-configuration-save-request-detail">
-              <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
+              <TabsList className="grid h-auto w-full grid-cols-5 bg-slate-100 p-1">
                 <TabsTrigger value="blockers" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-blockers">Blockers</TabsTrigger>
                 <TabsTrigger value="evidence" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-evidence">Evidence</TabsTrigger>
                 <TabsTrigger value="audit" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-audit-timeline">Audit</TabsTrigger>
+                <TabsTrigger value="rollback" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-rollback-checkpoint">Rollback</TabsTrigger>
                 <TabsTrigger value="functions" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-functions">Functions</TabsTrigger>
               </TabsList>
 
@@ -1442,6 +1446,35 @@ function ClientWebsiteConfigurationProfiles({
                         </Badge>
                       </div>
                       <p className="mt-1 text-slate-600">{event.evidence}</p>
+                    </div>
+                  )) ?? null}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="rollback" className="mt-2" data-testid="section-kinflo-client-configuration-rollback-checkpoint">
+                <div className="max-h-[145px] space-y-2 overflow-y-auto pr-1">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-medium text-slate-950">{selectedRollbackCheckpoint?.baselineLabel}</div>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-normal text-slate-500">{selectedRollbackCheckpoint?.rollbackOwner}</div>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 text-[10px]">
+                        {selectedRollbackCheckpoint?.checkpointStatus.replaceAll("_", " ")}
+                      </Badge>
+                    </div>
+                  </div>
+                  {selectedRollbackCheckpoint?.checkpoints.map((checkpoint) => (
+                    <div key={checkpoint.key} className="rounded-lg border border-slate-200 bg-white p-2 text-xs leading-5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-medium text-slate-950">{checkpoint.label}</div>
+                          <p className="mt-1 text-slate-600">{checkpoint.rollbackAction}</p>
+                        </div>
+                        <Badge variant={checkpoint.status === "ready" ? "secondary" : "outline"} className="shrink-0 text-[10px]">
+                          {checkpoint.status}
+                        </Badge>
+                      </div>
                     </div>
                   )) ?? null}
                 </div>
@@ -2415,6 +2448,11 @@ export default function AdminKinfloShell() {
     () => snapshot.clientWebsiteStudio.configurationAuditTimelines.find((timeline) => timeline.siteKey === selectedClientWebsiteStudioSite?.key)
       ?? snapshot.clientWebsiteStudio.configurationAuditTimelines[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationAuditTimelines],
+  );
+  const selectedClientWebsiteConfigurationRollbackCheckpoint = useMemo(
+    () => snapshot.clientWebsiteStudio.configurationRollbackCheckpoints.find((checkpoint) => checkpoint.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.configurationRollbackCheckpoints[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationRollbackCheckpoints],
   );
   const selectedClientWebsiteLaunchPacket = useMemo(
     () => snapshot.clientWebsiteStudio.launchPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
@@ -6498,6 +6536,7 @@ export default function AdminKinfloShell() {
                     selectedApprovalMatrix={selectedClientWebsiteConfigurationApprovalMatrix}
                     selectedSaveRequest={selectedClientWebsiteConfigurationSaveRequest}
                     selectedAuditTimeline={selectedClientWebsiteConfigurationAuditTimeline}
+                    selectedRollbackCheckpoint={selectedClientWebsiteConfigurationRollbackCheckpoint}
                     testIds={clientWebsiteConfigurationProfileTestIds}
                   />
                 </div>
@@ -6956,7 +6995,7 @@ export default function AdminKinfloShell() {
                       <Tabs
                         value={clientWebsiteLaunchDossier}
                         onValueChange={(value) => selectClientWebsiteLaunchDossier(value as ClientWebsiteLaunchDossier)}
-                        className="min-h-0 min-w-0 max-h-[calc(100vh-18rem)] overflow-hidden"
+                        className="min-h-0 min-w-0 max-h-[calc(100vh-18rem)] overflow-visible"
                         data-testid="tabs-kinflo-client-launch-dossier"
                       >
                         <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
@@ -6968,11 +7007,11 @@ export default function AdminKinfloShell() {
 
                         <TabsContent
                           value="provisioning"
-                          className="mt-2 max-h-[calc(100vh-21rem)] overflow-hidden pr-0"
+                          className="mt-2 max-h-[calc(100vh-21rem)] overflow-visible pr-0"
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="flex max-h-[320px] flex-col overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:max-h-[min(340px,calc(100vh-21rem))] sm:p-3 lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="flex h-[480px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(360px,calc(100vh-21rem))] sm:p-3 lg:h-[min(380px,calc(100vh-21rem))] lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -7011,44 +7050,42 @@ export default function AdminKinfloShell() {
 
                       <TabsContent value="order" className="mt-3 min-h-0 flex-1" data-testid="section-kinflo-client-provisioning-order">
                         <div
-                          className="grid max-h-[190px] min-h-0 grid-cols-[minmax(118px,0.82fr)_minmax(140px,1.18fr)] gap-2 overflow-y-auto overflow-x-hidden sm:max-h-[240px] lg:max-h-[360px]"
+                          className="min-h-0 rounded-md border border-slate-200 bg-white p-2 sm:p-3"
                           data-testid="section-kinflo-client-provisioning-order-cockpit"
                         >
-                          <div
-                            className="min-h-0 rounded-md border border-slate-200 bg-slate-50 p-2 sm:p-3"
-                            data-testid="section-kinflo-client-provisioning-order-scroll"
+                          <Tabs
+                            defaultValue="setup"
+                            className="min-h-0"
+                            data-testid="tabs-kinflo-client-provisioning-order-detail"
                           >
-                            <div className="flex items-center justify-between gap-3">
-                              <div>
-                                <div className="text-sm font-medium">Setup order</div>
-                                <div className="mt-0.5 text-xs text-slate-500">
-                                  {selectedClientWebsiteProvisioningOrder?.setupSteps.length ?? 0} provider-light steps
-                                </div>
-                              </div>
-                              <Badge variant="outline" className="bg-white">Ordered</Badge>
-                            </div>
-                            <div className="mt-2 max-h-[108px] space-y-2 overflow-y-auto pr-1 sm:max-h-[145px] lg:max-h-[230px]">
-                              {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step, index) => (
-                                <div key={step} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-1.5 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-[11px] leading-4 text-slate-600 sm:grid-cols-[1.5rem_minmax(0,1fr)] sm:gap-2 sm:px-3 sm:py-2 sm:text-xs sm:leading-5">
-                                  <div className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-[10px] font-semibold text-slate-500 sm:h-6 sm:w-6">
-                                    {index + 1}
-                                  </div>
-                                  <span className="min-w-0">{step}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div
-                            className="min-h-0 rounded-md border border-slate-200 bg-white p-2 sm:p-3"
-                            data-testid="section-kinflo-client-provisioning-order-detail-tabs"
-                          >
-                            <Tabs defaultValue="evidence" className="min-h-0" data-testid="tabs-kinflo-client-provisioning-order-detail">
-                              <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                            <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
+                              <TabsTrigger value="setup" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-setup">Setup</TabsTrigger>
                                 <TabsTrigger value="evidence" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-evidence">Evidence</TabsTrigger>
                                 <TabsTrigger value="blocked" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-blocked">Blocked</TabsTrigger>
                                 <TabsTrigger value="functions" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-functions">Functions</TabsTrigger>
                               </TabsList>
+
+                              <TabsContent value="setup" className="mt-2 sm:mt-3" data-testid="section-kinflo-client-provisioning-order-scroll">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div>
+                                    <div className="text-sm font-medium">Setup order</div>
+                                    <div className="mt-0.5 text-xs text-slate-500">
+                                      {selectedClientWebsiteProvisioningOrder?.setupSteps.length ?? 0} provider-light steps
+                                    </div>
+                                  </div>
+                                  <Badge variant="outline" className="bg-white">Ordered</Badge>
+                                </div>
+                                <div className="mt-2 grid max-h-[128px] gap-2 overflow-y-auto pr-1 sm:max-h-[160px] lg:max-h-[250px]">
+                                  {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step, index) => (
+                                    <div key={step} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] leading-4 text-slate-600 sm:grid-cols-[1.5rem_minmax(0,1fr)] sm:gap-2 sm:px-3 sm:py-2 sm:text-xs sm:leading-5">
+                                      <div className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white text-[10px] font-semibold text-slate-500 sm:h-6 sm:w-6">
+                                        {index + 1}
+                                      </div>
+                                      <span className="min-w-0">{step}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </TabsContent>
 
                               <TabsContent value="evidence" className="mt-2 sm:mt-3" data-testid="section-kinflo-client-provisioning-evidence-panel">
                                 <div className="flex items-center justify-between gap-3">
@@ -7106,7 +7143,6 @@ export default function AdminKinfloShell() {
                                 </div>
                               </TabsContent>
                             </Tabs>
-                          </div>
                         </div>
                         <Button disabled variant="outline" className="mt-2 hidden h-9 w-full lg:flex" data-testid="button-client-provisioning-order-gated">
                           <Workflow className="mr-2 h-4 w-4" />

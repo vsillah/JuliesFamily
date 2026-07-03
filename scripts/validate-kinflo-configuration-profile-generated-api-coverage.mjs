@@ -113,10 +113,13 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "siteFactory.listClientWebsiteConfigurationProfiles",
+  "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
+  "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactoryListClientWebsiteConfigurationSaveRequests",
   "siteFactory.listClientWebsiteConfigurationSaveRequests",
   "configuration profile read",
   "configuration audit timeline read",
+  "configuration rollback checkpoint read",
   "configuration save request read",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -128,6 +131,7 @@ requireIncludes(runtimePath, [
   "siteFactoryListClientWebsiteConfigurationAuditTimelines: \"siteFactory.listClientWebsiteConfigurationAuditTimelines\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
+  "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints: \"siteFactory.listClientWebsiteConfigurationRollbackCheckpoints\"",
   "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
 ]);
 
@@ -142,6 +146,8 @@ requireIncludes(generatedContractPath, [
   "client website configuration review packets include selected-site surfaces, save blockers, required evidence, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "client website configuration profiles include template, brand, navigation, CRM, editable surfaces, locked surfaces, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
+  "client website configuration rollback checkpoints include fixture baselines, rollback owners, rehearsal steps, blocked actions, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationSaveRequests",
   "client website configuration save requests include selected payloads, approval evidence, blockers, rollback posture, and provider boundaries",
 ]);
@@ -152,13 +158,14 @@ requireIncludes(convexPath, [
   "export const listClientWebsiteConfigurationChangeSets",
   "export const listClientWebsiteConfigurationReviewPackets",
   "export const listClientWebsiteConfigurationProfiles",
+  "export const listClientWebsiteConfigurationRollbackCheckpoints",
   "export const listClientWebsiteConfigurationSaveRequests",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 80",
-  "Query bindings: 42",
-  "Smoke-manifest review gaps: 35",
+  "Generated API bindings: 81",
+  "Query bindings: 43",
+  "Smoke-manifest review gaps: 36",
 ]);
 
 requireIncludes(shellDataPath, [
@@ -168,6 +175,7 @@ requireIncludes(shellDataPath, [
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactory.listClientWebsiteConfigurationSaveRequests",
 ]);
 
@@ -236,6 +244,20 @@ for (const [label, surface] of [
   } else {
     fail(`${label} includes configuration change set smoke evidence`, "Configuration change set read evidence must be required before adapter switch.");
   }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationRollbackCheckpoints")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationRollbackCheckpoints")) {
+    pass(`${label} includes configuration rollback checkpoint function`);
+  } else {
+    fail(`${label} includes configuration rollback checkpoint function`, "Configuration rollback checkpoint read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration rollback checkpoint read")
+    || surface?.smokeEvidenceRequired?.includes("configuration rollback checkpoint read")) {
+    pass(`${label} includes configuration rollback checkpoint smoke evidence`);
+  } else {
+    fail(`${label} includes configuration rollback checkpoint smoke evidence`, "Configuration rollback checkpoint read evidence must be required before adapter switch.");
+  }
 }
 
 for (const path of [
@@ -275,9 +297,11 @@ console.log("\nKinFlo configuration profile generated API coverage validation");
 console.log("Runtime key: siteFactoryListClientWebsiteConfigurationChangeSets");
 console.log("Runtime key: siteFactoryListClientWebsiteConfigurationReviewPackets");
 console.log("Runtime key: siteFactoryListClientWebsiteConfigurationProfiles");
+console.log("Runtime key: siteFactoryListClientWebsiteConfigurationRollbackCheckpoints");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationChangeSets");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationReviewPackets");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationProfiles");
+console.log("Convex function: siteFactory.listClientWebsiteConfigurationRollbackCheckpoints");
 console.log("Adapter surface: site-factory");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
