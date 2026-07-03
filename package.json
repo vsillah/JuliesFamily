@@ -67,6 +67,7 @@
     "kinflo:validate-hosted-activation-owner-checklist": "node scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
     "kinflo:validate-hosted-activation-decision-checkpoint": "node scripts/validate-kinflo-hosted-activation-decision-checkpoint.mjs",
     "kinflo:validate-hosted-activation-credential-rotation-review": "node scripts/validate-kinflo-hosted-activation-credential-rotation-review.mjs",
+    "kinflo:validate-hosted-activation-repo-sharing-risk-review": "node scripts/validate-kinflo-hosted-activation-repo-sharing-risk-review.mjs",
     "kinflo:validate-design-frame-backlog": "node scripts/validate-kinflo-design-frame-backlog.mjs",
     "kinflo:validate-active-object-signal": "node scripts/validate-kinflo-active-object-signal.mjs",
     "kinflo:validate-client-workbench-grid": "node scripts/validate-kinflo-client-workbench-grid.mjs",

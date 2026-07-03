@@ -357,6 +357,39 @@ export type ShellHostedActivationCredentialRotationReview = {
   liveConvexExecution: false;
 };
 
+export type ShellRepoSharingRiskOption = {
+  id: string;
+  label: string;
+  decisionPosture: string;
+  evidenceTarget: string;
+  blockedUntil: string;
+  riskNote: string;
+};
+
+export type ShellHostedActivationRepoSharingRiskReview = {
+  status: "prepare_only_repo_sharing_risk_review";
+  decisionId: "history-purge-or-private-risk";
+  owner: "Vambah";
+  totalOptions: number;
+  pendingOptions: number;
+  acceptedOptions: number;
+  nextGate: string;
+  reviewPacketPath: string;
+  sourceDocuments: string[];
+  reviewOptions: ShellRepoSharingRiskOption[];
+  blockedActions: string[];
+  canRecordDecision: false;
+  canRewriteHistory: false;
+  canExposeHistory: false;
+  canShareRepo: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  canCreateHostedDeployment: false;
+  canRunCodegen: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -368,6 +401,7 @@ export type ShellHostedActivationRunbook = {
   hostedSmokeEvidenceLedger: ShellHostedSmokeEvidenceLedger;
   decisionCheckpoint: ShellHostedActivationDecisionCheckpoint;
   credentialRotationReview: ShellHostedActivationCredentialRotationReview;
+  repoSharingRiskReview: ShellHostedActivationRepoSharingRiskReview;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -7386,6 +7420,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "docs/phase85-hosted-activation-approval-packet.md",
       "docs/phase96-hosted-activation-owner-checklist.md",
       "docs/phase121-hosted-activation-credential-rotation-review.md",
+      "docs/phase122-hosted-activation-repo-sharing-risk-review.md",
       "docs/phase104-hosted-smoke-evidence-deep-links.md",
     ],
     blockedActions: [
@@ -7492,6 +7527,70 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canPrintSecrets: false,
     canRotateSecrets: false,
     canValidateProviderCredentials: false,
+    canCreateHostedDeployment: false,
+    canRunCodegen: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  repoSharingRiskReview: {
+    status: "prepare_only_repo_sharing_risk_review",
+    decisionId: "history-purge-or-private-risk",
+    owner: "Vambah",
+    totalOptions: 3,
+    pendingOptions: 3,
+    acceptedOptions: 0,
+    nextGate: "Owner chooses history purge, private-repo residual-risk acceptance, or paused external sharing before hosted activation can move toward client or public review.",
+    reviewPacketPath: "docs/phase122-hosted-activation-repo-sharing-risk-review.md",
+    sourceDocuments: [
+      "docs/phase0-completion-audit.md",
+      "docs/phase73-hosted-activation-decision-register.md",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase96-hosted-activation-owner-checklist.md",
+      "docs/phase120-hosted-activation-decision-checkpoint.md",
+      "docs/phase121-hosted-activation-credential-rotation-review.md",
+    ],
+    reviewOptions: [
+      {
+        id: "history-purge-plan",
+        label: "History purge plan",
+        decisionPosture: "requires integration captain",
+        evidenceTarget: "Owner-approved purge plan and coordination note before any rewritten history is attempted.",
+        blockedUntil: "No history rewrite runs from this provider-light phase.",
+        riskNote: "Best for future public or client sharing, highest coordination cost.",
+      },
+      {
+        id: "private-risk-acceptance",
+        label: "Private repo residual-risk acceptance",
+        decisionPosture: "owner acceptance required",
+        evidenceTarget: "Owner note accepts private-repo residual risk after credential rotation review.",
+        blockedUntil: "Repo remains private and client or public sharing remains blocked until owner records acceptance.",
+        riskNote: "Fastest path for private internal activation, not enough for public or client repo sharing.",
+      },
+      {
+        id: "pause-external-sharing",
+        label: "Pause external/client sharing",
+        decisionPosture: "default safe posture",
+        evidenceTarget: "Decision note keeps external and client sharing paused until history posture is resolved.",
+        blockedUntil: "All external and client repo access remains blocked.",
+        riskNote: "Safest default when credential or history review is incomplete.",
+      },
+    ],
+    blockedActions: [
+      "rewrite git history",
+      "force-push rewritten history",
+      "share repository externally or with clients",
+      "expose historical secret-bearing file contents",
+      "record private-risk acceptance in committed source",
+      "create hosted Convex deployment",
+      "run npm run convex:codegen",
+      "execute hosted smoke or provider writes",
+    ],
+    canRecordDecision: false,
+    canRewriteHistory: false,
+    canExposeHistory: false,
+    canShareRepo: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
     canCreateHostedDeployment: false,
     canRunCodegen: false,
     providerWrites: false,

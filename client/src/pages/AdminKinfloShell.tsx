@@ -4716,6 +4716,87 @@ export default function AdminKinfloShell() {
                   </div>
                 </section>
 
+                <section
+                  className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+                  data-testid="section-kinflo-hosted-activation-repo-sharing-risk-review"
+                >
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="border-slate-300 bg-slate-50 text-slate-800">
+                          Repo sharing risk
+                        </Badge>
+                        <Badge className="bg-slate-950 hover:bg-slate-950">
+                          {snapshot.hostedActivationRunbook.repoSharingRiskReview.status.replaceAll("_", " ")}
+                        </Badge>
+                      </div>
+                      <h3 className="mt-3 text-base font-semibold text-slate-950">Repository sharing risk review</h3>
+                      <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600" data-testid="text-hosted-activation-repo-sharing-risk-next-gate">
+                        {snapshot.hostedActivationRunbook.repoSharingRiskReview.nextGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-hosted-activation-repo-sharing-risk-gated">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Repo sharing gated
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2" data-testid="section-kinflo-hosted-activation-repo-sharing-risk-summary">
+                    {[
+                      { label: "Options", value: snapshot.hostedActivationRunbook.repoSharingRiskReview.totalOptions },
+                      { label: "Pending", value: snapshot.hostedActivationRunbook.repoSharingRiskReview.pendingOptions },
+                      { label: "Accepted", value: snapshot.hostedActivationRunbook.repoSharingRiskReview.acceptedOptions },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                        <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                        <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
+                    <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Decision options</div>
+                        <Badge variant="outline" className="bg-white">{snapshot.hostedActivationRunbook.repoSharingRiskReview.decisionId}</Badge>
+                      </div>
+                      <div className="mt-3 grid max-h-[260px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-activation-repo-sharing-options-scroll">
+                        {snapshot.hostedActivationRunbook.repoSharingRiskReview.reviewOptions.map((option) => (
+                          <div key={option.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{option.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{option.decisionPosture}</div>
+                              </div>
+                              <Badge variant="secondary" className="w-fit shrink-0">{option.id}</Badge>
+                            </div>
+                            <p className="mt-2 text-xs leading-5 text-slate-600">{option.evidenceTarget}</p>
+                            <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs leading-5 text-amber-900">{option.riskNote}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 space-y-3">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                        <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Review packet</div>
+                        <div className="mt-2 break-all text-xs leading-5 text-amber-950">
+                          {snapshot.hostedActivationRunbook.repoSharingRiskReview.reviewPacketPath}
+                        </div>
+                      </div>
+
+                      <div className="max-h-[180px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-activation-repo-sharing-blocked-actions">
+                        {snapshot.hostedActivationRunbook.repoSharingRiskReview.blockedActions.map((action) => (
+                          <div key={action} className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <span>{action}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
                 <Card className="overflow-hidden border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-console">
                   <CardHeader className="border-b border-slate-100 bg-slate-950 text-white">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
