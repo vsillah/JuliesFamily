@@ -168,6 +168,8 @@ const compactShellScrollEffectIndex = shellContents.indexOf(
   'querySelector(\'[data-testid="section-kinflo-client-studio-compact-shell"]\')'
 );
 const laneStageLocationDepsIndex = shellContents.indexOf("[activeTab, clientWebsiteStudioLane, clientWebsiteWorkbenchStage, location]");
+const nearestLaneRailScrollIndex = shellContents.indexOf('scrollIntoView({ block: "nearest" })');
+const documentTopResetIndex = shellContents.indexOf('window.scrollTo({ top: 0, behavior: "auto" })');
 
 if (
   siteStudioIndex !== -1 &&
@@ -208,13 +210,15 @@ if (
 if (
   compactShellScrollEffectIndex !== -1 &&
   laneStageLocationDepsIndex !== -1 &&
+  nearestLaneRailScrollIndex !== -1 &&
+  documentTopResetIndex !== -1 &&
   compactShellScrollEffectIndex < controlRoomIndex
 ) {
-  pass("client Studio lane changes reset to the compact shell top");
+  pass("client Studio lane changes preserve the section-top rail anchor");
 } else {
   fail(
-    "client Studio lane changes reset to the compact shell top",
-    "Changing Site Studio lanes or Workbench stage must scroll the compact shell into view so the lane rail does not appear mid-page after preserved SPA scroll."
+    "client Studio lane changes preserve the section-top rail anchor",
+    "Changing Site Studio lanes or Workbench stage must keep the lane rail at the Site Studio section top instead of snapping longer lanes to a different viewport position."
   );
 }
 

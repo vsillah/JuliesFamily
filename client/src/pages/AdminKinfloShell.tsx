@@ -4856,9 +4856,9 @@ export default function AdminKinfloShell() {
       return;
     }
     window.setTimeout(() => {
-      document
-        .querySelector('[data-testid="section-kinflo-client-studio-compact-shell"]')
-        ?.scrollIntoView({ block: "start" });
+      const compactShell = document.querySelector('[data-testid="section-kinflo-client-studio-compact-shell"]');
+      compactShell?.scrollIntoView({ block: "nearest" });
+      window.scrollTo({ top: 0, behavior: "auto" });
     }, 80);
   }, [activeTab, clientWebsiteStudioLane, clientWebsiteWorkbenchStage, location]);
 
@@ -4884,9 +4884,9 @@ export default function AdminKinfloShell() {
     }
 
     window.setTimeout(() => {
-      document
-        .querySelector('[data-testid="tabs-kinflo-client-studio-lanes"]')
-        ?.scrollIntoView({ block: "start" });
+      const laneRail = document.querySelector('[data-testid="tabs-kinflo-client-studio-lanes"]');
+      laneRail?.scrollIntoView({ block: "nearest" });
+      window.scrollTo({ top: 0, behavior: "auto" });
 
       const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane];
       const laneSection = document.querySelector(`[data-testid="${laneSectionTestId}"]`);
@@ -8459,6 +8459,73 @@ export default function AdminKinfloShell() {
                           <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
                         </div>
                       ))}
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm" data-testid="section-kinflo-generated-api-cutover-readiness-scoreboard">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <ShieldCheck className="h-4 w-4 text-slate-600" />
+                            <h4 className="text-sm font-semibold text-slate-950">Cutover readiness scoreboard</h4>
+                            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                              {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.status.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+                          <p className="mt-2 text-xs leading-5 text-slate-600" data-testid="text-kinflo-generated-api-cutover-readiness-scoreboard">
+                            {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.nextOwnerGate}
+                          </p>
+                        </div>
+                        <Button size="sm" disabled variant="outline" data-testid="button-generated-api-cutover-readiness-gated">
+                          <ListChecks className="mr-2 h-3 w-3" />
+                          Readiness gated
+                        </Button>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                        {[
+                          { label: "Gates", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.totalGates },
+                          { label: "Blocked", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.blockedGates },
+                          { label: "Ready", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.readyGates },
+                          { label: "Ready batches", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.readyBatches },
+                          { label: "Blocked batches", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.blockedBatches },
+                          { label: "Smoke gaps", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.totalSmokeGaps },
+                        ].map((item) => (
+                          <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 px-2 py-2">
+                            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                            <div className="mt-1 text-sm font-semibold text-slate-950">{item.value}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-3 grid max-h-[260px] gap-2 overflow-y-auto pr-1 lg:grid-cols-2" data-testid="section-kinflo-generated-api-cutover-readiness-gates">
+                        {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readinessScoreboard.gates.map((gate) => (
+                          <div key={gate.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{gate.label}</div>
+                                <p className="mt-1 text-xs leading-5 text-slate-600">{gate.evidence}</p>
+                              </div>
+                              <Badge variant="outline" className="shrink-0 border-amber-200 bg-white text-amber-700">
+                                {gate.status.replaceAll("_", " ")}
+                              </Badge>
+                            </div>
+                            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                              <div className="rounded-md border border-white bg-white px-2 py-1">
+                                <div className="text-slate-500">Review items</div>
+                                <div className="font-medium text-slate-950">{gate.blockedReviewItemCount}</div>
+                              </div>
+                              <div className="rounded-md border border-white bg-white px-2 py-1">
+                                <div className="text-slate-500">Blocked batches</div>
+                                <div className="font-medium text-slate-950">{gate.blockedBatchCount}</div>
+                              </div>
+                            </div>
+                            <div className="mt-3 rounded-md border border-slate-200 bg-white p-2 text-xs leading-5 text-slate-600">
+                              <span className="font-medium text-slate-900">Next owner action: </span>
+                              {gate.nextOwnerAction}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="grid gap-3 lg:grid-cols-2">

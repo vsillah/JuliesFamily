@@ -22,7 +22,7 @@ npm run kinflo:validate-client-studio-lane-anchor
 
 ## What Changed
 
-The shared Site Studio lane rail renders as the first control inside the compact Site Studio working shell. The active lane workspace renders directly below it, and the control room, selected-site summaries, and Workbench context stack are ordered after the active workspace. Phase 152 adds explicit lane-switch behavior so each lane change scrolls the compact shell and rail back into view and resets the selected lane container to its top position.
+The shared Site Studio lane rail renders as the first control inside the compact Site Studio working shell. The active lane workspace renders directly below it, and the control room, selected-site summaries, and Workbench context stack are ordered after the active workspace. Phase 152 adds explicit lane-switch behavior so each lane change keeps the compact shell and rail aligned with the Site Studio section top using `scrollIntoView({ block: "nearest" })`, resets the page with `window.scrollTo({ top: 0, behavior: "auto" })`, then resets the selected lane container to its top position.
 
 This keeps the same controls at the top of every Site Studio lane instead of allowing prior lane scroll state or lane-specific card height to make the next lane feel like it starts in the middle of the page.
 

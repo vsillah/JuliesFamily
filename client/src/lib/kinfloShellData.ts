@@ -868,6 +868,37 @@ export type ShellGeneratedApiCutoverOwnerReviewBatch = {
   canCutover: false;
 };
 
+export type ShellGeneratedApiCutoverReadinessGate = {
+  id: string;
+  label: string;
+  status: "blocked_until_owner_gate";
+  evidence: string;
+  nextOwnerAction: string;
+  blockedReviewItemCount: number;
+  blockedBatchCount: number;
+};
+
+export type ShellGeneratedApiCutoverReadinessScoreboard = {
+  phase: 172;
+  status: "provider_light_generated_api_cutover_readiness_scoreboard";
+  totalGates: number;
+  blockedGates: number;
+  readyGates: number;
+  readyBatches: number;
+  blockedBatches: number;
+  totalSmokeGaps: number;
+  ownerReviewItems: number;
+  nextOwnerGate: string;
+  gates: ShellGeneratedApiCutoverReadinessGate[];
+  canOpenCodegenWindow: false;
+  canImportGeneratedApi: false;
+  canSwitchFixtureAdapter: false;
+  canExecuteHostedSmoke: false;
+  canApproveCutover: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellGeneratedApiCutoverOwnerReview = {
   phase: 169;
   status: "provider_light_generated_api_cutover_owner_review_shell";
@@ -884,6 +915,7 @@ export type ShellGeneratedApiCutoverOwnerReview = {
   sourceDocuments: string[];
   reviewItemsList: ShellGeneratedApiCutoverOwnerReviewItem[];
   batchSummaries: ShellGeneratedApiCutoverOwnerReviewBatch[];
+  readinessScoreboard: ShellGeneratedApiCutoverReadinessScoreboard;
   blockedActions: string[];
   providerBoundary: string;
   canOpenCodegenWindow: false;
@@ -8387,6 +8419,72 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
         canCutover: false,
       },
     ],
+    readinessScoreboard: {
+      phase: 172,
+      status: "provider_light_generated_api_cutover_readiness_scoreboard",
+      totalGates: 5,
+      blockedGates: 5,
+      readyGates: 0,
+      readyBatches: 0,
+      blockedBatches: 6,
+      totalSmokeGaps: 28,
+      ownerReviewItems: 5,
+      nextOwnerGate: "Hosted ownership, env policy, generated binding review, hosted-smoke evidence, rollback owner, and Phase 85 approval remain unresolved.",
+      gates: [
+        {
+          id: "generated-binding-contract",
+          label: "Generated binding contract",
+          status: "blocked_until_owner_gate",
+          evidence: "86 generated bindings are mapped across 14 surfaces, but the generated binding review window has not been approved.",
+          nextOwnerAction: "Approve the generated binding review window after hosted ownership and env policy are accepted.",
+          blockedReviewItemCount: 1,
+          blockedBatchCount: 6,
+        },
+        {
+          id: "cutover-batch-parity",
+          label: "Cutover batch parity",
+          status: "blocked_until_owner_gate",
+          evidence: "All six cutover batch ids match the hosted-smoke evidence ledger, but rollback owners are still unresolved.",
+          nextOwnerAction: "Name rollback owners and accept Phase 92 hosted evidence before any batch can move.",
+          blockedReviewItemCount: 1,
+          blockedBatchCount: 6,
+        },
+        {
+          id: "hosted-smoke-evidence",
+          label: "Hosted-smoke evidence",
+          status: "blocked_until_owner_gate",
+          evidence: "28 hosted-smoke evidence gaps remain and no accepted hosted run is recorded.",
+          nextOwnerAction: "Authorize read-only hosted smoke and capture sanitized evidence before changing adapters.",
+          blockedReviewItemCount: 1,
+          blockedBatchCount: 6,
+        },
+        {
+          id: "rollback-and-fixture-fallback",
+          label: "Rollback and fixture fallback",
+          status: "blocked_until_owner_gate",
+          evidence: "Fixture fallback remains selected and every batch has generatedApiAvailable false.",
+          nextOwnerAction: "Accept rollback artifacts and fixture restore checks before generated API import.",
+          blockedReviewItemCount: 1,
+          blockedBatchCount: 6,
+        },
+        {
+          id: "phase85-owner-approval",
+          label: "Phase 85 owner approval",
+          status: "blocked_until_owner_gate",
+          evidence: "The hosted activation approval packet remains unsigned in committed source.",
+          nextOwnerAction: "Complete credential rotation, repo-sharing risk, smoke, mutation, adapter-switch, provider-write, and launch signoffs.",
+          blockedReviewItemCount: 1,
+          blockedBatchCount: 6,
+        },
+      ],
+      canOpenCodegenWindow: false,
+      canImportGeneratedApi: false,
+      canSwitchFixtureAdapter: false,
+      canExecuteHostedSmoke: false,
+      canApproveCutover: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
     blockedActions: [
       "create hosted Convex deployment",
       "run npm run convex:codegen",
