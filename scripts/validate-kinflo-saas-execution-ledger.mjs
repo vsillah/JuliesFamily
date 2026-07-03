@@ -94,6 +94,7 @@ for (const path of [
   "docs/phase154-side-by-side-mobile-preview.md",
   "docs/phase155-handoff-readiness-checklist.md",
   "docs/phase156-pr-preview-deployment-checkpoint.md",
+  "docs/phase157-client-configuration-command-surface.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -203,6 +204,7 @@ for (const path of [
   "scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
   "scripts/validate-kinflo-handoff-readiness-checklist.mjs",
   "scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
+  "scripts/validate-kinflo-client-configuration-command-surface.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
@@ -279,6 +281,7 @@ requireArrayIncludes(
     "admin-shell-configuration",
     "site-factory-and-client-launch",
     "design-polish",
+    "preview-deployment",
     "hosted-activation",
   ],
 );
@@ -331,6 +334,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-side-by-side-mobile-preview",
   "npm run kinflo:validate-handoff-readiness-checklist",
   "npm run kinflo:validate-pr-preview-deployment-checkpoint",
+  "npm run kinflo:validate-client-configuration-command-surface",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
   "npm run kinflo:validate-site-studio-deep-links",
   "npm run kinflo:validate-site-studio-site-deep-links",
@@ -396,7 +400,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "npm run kinflo:validate-saas-execution-ledger",
   "provider-light-saas-execution-ledger",
-  "Execution lanes: 6",
+  "Execution lanes: 7",
   "Blocked live actions: 10",
   "No hosted Convex deployment is created.",
   "No generated Convex API files are committed or imported.",
@@ -467,7 +471,9 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 102 adapter switch batch deep links",
   "Phase 103 adapter switch surface deep links",
   "Phase 156 PR preview deployment checkpoint",
-  "current PR head's Vercel preview is ready for integration review",
+  "Phase 157 client configuration command surface",
+  "Vercel build-rate limit",
+  "do not treat the preview as integration-ready",
 ]);
 
 requireIncludes("package.json", [
@@ -517,6 +523,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-side-by-side-mobile-preview\"",
   "\"kinflo:validate-handoff-readiness-checklist\"",
   "\"kinflo:validate-pr-preview-deployment-checkpoint\"",
+  "\"kinflo:validate-client-configuration-command-surface\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -550,6 +557,20 @@ requireIncludes("package.json", [
 ]);
 
 const ledgerText = read("docs/kinflo-saas-execution-ledger.json");
+for (const marker of [
+  "\"preview-deployment\"",
+  "\"external_rate_limit_blocked\"",
+  "\"docs/phase157-client-configuration-command-surface.md\"",
+  "\"npm run kinflo:validate-client-configuration-command-surface\"",
+  "Vercel build-rate limiting",
+]) {
+  if (ledgerText.includes(marker)) {
+    pass(`ledger includes ${marker}`);
+  } else {
+    fail(`ledger includes ${marker}`, "Expected Phase 157 or preview deployment rate-limit evidence is missing.");
+  }
+}
+
 if (ledgerText.includes("convex/_generated/api") && ledgerText.includes("\"commit or import convex/_generated/api\"")) {
   pass("ledger references generated API only as a blocked action");
 } else {
