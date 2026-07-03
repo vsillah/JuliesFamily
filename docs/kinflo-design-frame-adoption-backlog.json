@@ -93,10 +93,16 @@
           "phaseDoc": "docs/phase152-client-studio-lane-anchor.md",
           "validationCommand": "npm run kinflo:validate-client-studio-lane-anchor",
           "status": "implemented_provider_light"
+        },
+        {
+          "id": "primary-metric-per-panel",
+          "phaseDoc": "docs/phase153-primary-configure-metric.md",
+          "validationCommand": "npm run kinflo:validate-primary-configure-metric",
+          "status": "implemented_provider_light"
         }
       ],
       "rejectedRecommendations": [],
-      "nextAction": "Continue the accepted provider-light deltas in order, with primary metric per Configure panel next after the Phase 152 lane anchor."
+      "nextAction": "Continue the accepted provider-light deltas in order, with side-by-side mobile preview next after the Phase 153 primary Configure metric."
     }
   },
   "adoptionPrinciples": [

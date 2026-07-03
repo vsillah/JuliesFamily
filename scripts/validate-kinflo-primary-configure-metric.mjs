@@ -20,7 +20,7 @@ function requireFile(path) {
     pass(`${path} exists`);
     return true;
   }
-  fail(`${path} exists`, "Expected client Studio lane anchor artifact was not found.");
+  fail(`${path} exists`, "Expected primary Configure metric artifact was not found.");
   return false;
 }
 
@@ -34,7 +34,7 @@ function requireIncludes(path, patterns) {
     if (contents.includes(pattern)) {
       pass(`${path} includes ${pattern}`);
     } else {
-      fail(`${path} includes ${pattern}`, "Expected client Studio lane anchor text was not found.");
+      fail(`${path} includes ${pattern}`, "Expected primary Configure metric text was not found.");
     }
   }
 }
@@ -58,86 +58,99 @@ if (trackedSecretFiles.length > 0) {
 }
 
 for (const path of [
-  "docs/phase152-client-studio-lane-anchor.md",
+  "docs/phase153-primary-configure-metric.md",
+  "docs/kinflo-claude-code-frame-response.json",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "docs/kinflo-saas-execution-ledger.json",
   "docs/phase72-saas-execution-ledger.md",
   "docs/phase75-design-frame-adoption-backlog.md",
   "client/src/pages/AdminKinfloShell.tsx",
   "package.json",
-  "scripts/validate-kinflo-client-studio-lane-anchor.mjs",
+  "scripts/validate-kinflo-primary-configure-metric.mjs",
 ]) {
   requireFile(path);
 }
 
-requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
-  "Phase 152: Client Studio Lane Anchor",
-  "npm run kinflo:validate-client-studio-lane-anchor",
-  "clientWebsiteStudioLaneSectionTestIds",
-  "scrollClientWebsiteStudioLaneToTop",
-  "tabs-kinflo-client-studio-lanes",
-  "section-kinflo-client-studio-lane-queue",
-  "section-kinflo-client-studio-lane-configuration",
-  "section-kinflo-client-studio-lane-handoff",
-  "section-kinflo-client-studio-lane-workbench",
+requireIncludes("docs/phase153-primary-configure-metric.md", [
+  "Phase 153: Primary Configure Metric",
+  "npm run kinflo:validate-primary-configure-metric",
+  "primary-metric-per-panel",
+  "ConfigurationPrimaryMetricPanel",
+  "section-kinflo-client-configuration-primary-metric-review",
+  "section-kinflo-client-configuration-primary-metric-change",
+  "section-kinflo-client-configuration-primary-metric-approval",
+  "section-kinflo-client-configuration-primary-metric-save",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/kinflo-claude-code-frame-response.json", [
+  "\"id\": \"primary-metric-per-panel\"",
+  "\"summary\": \"Give each Configure panel one primary status and metric before expandable evidence detail.\"",
+  "\"Panel density needs a primary metric so scanning does not require reading every label.\"",
+]);
+
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
-  "const clientWebsiteStudioLaneSectionTestIds: Record<ClientWebsiteStudioLane, string>",
-  "queue: \"section-kinflo-client-studio-lane-queue\"",
-  "configuration: \"section-kinflo-client-studio-lane-configuration\"",
-  "handoff: \"section-kinflo-client-studio-lane-handoff\"",
-  "workbench: \"section-kinflo-client-studio-lane-workbench\"",
-  "const scrollClientWebsiteStudioLaneToTop = (lane: ClientWebsiteStudioLane)",
-  "querySelector('[data-testid=\"tabs-kinflo-client-studio-lanes\"]')",
-  "scrollIntoView({ block: \"start\" })",
-  "const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane]",
-  "laneSection.scrollTo({ top: 0 })",
-  "scrollClientWebsiteStudioLaneToTop(lane)",
+  "function ConfigurationPrimaryMetricPanel({",
+  "label: string;",
+  "value: string | number;",
+  "status: string;",
+  "detail: string;",
+  "items: { label: string; value: string | number }[];",
+  "data-testid={`${testId}-value`}",
+  "data-testid={`${testId}-status`}",
+  "data-testid={`${testId}-detail`}",
+  "section-kinflo-client-configuration-primary-metric-review",
+  "section-kinflo-client-configuration-primary-metric-change",
+  "section-kinflo-client-configuration-primary-metric-approval",
+  "section-kinflo-client-configuration-primary-metric-save",
+  "Save blockers",
+  "Draft changes",
+  "Required approvals",
+  "Payload items",
+  "{ label: \"Writes\", value: \"0\" }",
 ]);
 
 requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
-  "\"client-studio-lane-anchor\"",
-  "\"phaseDoc\": \"docs/phase152-client-studio-lane-anchor.md\"",
-  "\"validationCommand\": \"npm run kinflo:validate-client-studio-lane-anchor\"",
+  "\"primary-metric-per-panel\"",
+  "\"phaseDoc\": \"docs/phase153-primary-configure-metric.md\"",
+  "\"validationCommand\": \"npm run kinflo:validate-primary-configure-metric\"",
   "\"status\": \"implemented_provider_light\"",
   "\"nextAction\": \"Continue the accepted provider-light deltas in order, with side-by-side mobile preview next after the Phase 153 primary Configure metric.\"",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
-  "\"docs/phase152-client-studio-lane-anchor.md\"",
-  "\"npm run kinflo:validate-client-studio-lane-anchor\"",
-  "Phase 152 Client Studio lane anchor",
+  "\"docs/phase153-primary-configure-metric.md\"",
+  "\"npm run kinflo:validate-primary-configure-metric\"",
+  "Phase 153 primary Configure metric",
 ]);
 
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
-  "Phase 152 Client Studio lane anchor",
-  "npm run kinflo:validate-client-studio-lane-anchor",
+  "Phase 153 primary Configure metric",
+  "npm run kinflo:validate-primary-configure-metric",
 ]);
 
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
-  "Phase 152 adds the Client Studio lane anchor",
-  "npm run kinflo:validate-client-studio-lane-anchor",
+  "Phase 153 implements the primary Configure metric",
+  "npm run kinflo:validate-primary-configure-metric",
   "side-by-side mobile preview remains the next provider-light design delta",
 ]);
 
 requireIncludes("package.json", [
-  "\"kinflo:validate-client-studio-lane-anchor\"",
+  "\"kinflo:validate-primary-configure-metric\"",
 ]);
 
 const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
 if (shellContents.includes("convex/_generated/api")) {
-  fail("client Studio lane anchor does not import generated API", "Generated API imports remain gated until hosted activation approval.");
+  fail("primary Configure metric does not import generated API", "Generated API imports remain gated until hosted activation approval.");
 } else {
-  pass("client Studio lane anchor does not import generated API");
+  pass("primary Configure metric does not import generated API");
 }
 
 if (shellContents.includes("useMutation(") || shellContents.includes("useAction(")) {
-  fail("client Studio lane anchor does not execute live Convex", "Live Convex execution must remain blocked.");
+  fail("primary Configure metric does not execute live Convex", "Live Convex execution must remain blocked.");
 } else {
-  pass("client Studio lane anchor does not execute live Convex");
+  pass("primary Configure metric does not execute live Convex");
 }
 
 const failed = checks.filter((check) => !check.ok);
@@ -151,9 +164,9 @@ for (const check of checks) {
   }
 }
 
-console.log("\nKinFlo client Studio lane anchor validation");
-console.log("Route: /admin/kinflo-os?tab=site-studio");
-console.log("Top rail: tabs-kinflo-client-studio-lanes");
+console.log("\nKinFlo primary Configure metric validation");
+console.log("Route: /admin/kinflo-os?tab=site-studio&studioLane=configuration");
+console.log("Claude Code delta: primary-metric-per-panel");
 console.log("Local state only: yes");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
@@ -163,8 +176,8 @@ console.log("Provider APIs touched: no");
 console.log("Secrets read or printed: no");
 
 if (failed.length > 0) {
-  console.error(`\nKinFlo client Studio lane anchor validation failed: ${failed.length} check(s) failed.`);
+  console.error(`\nKinFlo primary Configure metric validation failed: ${failed.length} check(s) failed.`);
   process.exit(1);
 }
 
-console.log(`\nKinFlo client Studio lane anchor validation passed: ${checks.length} checks.`);
+console.log(`\nKinFlo primary Configure metric validation passed: ${checks.length} checks.`);

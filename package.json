@@ -112,6 +112,7 @@
     "kinflo:validate-persistent-identity-strip": "node scripts/validate-kinflo-persistent-identity-strip.mjs",
     "kinflo:validate-gate-card-pattern": "node scripts/validate-kinflo-gate-card-pattern.mjs",
     "kinflo:validate-client-studio-lane-anchor": "node scripts/validate-kinflo-client-studio-lane-anchor.mjs",
+    "kinflo:validate-primary-configure-metric": "node scripts/validate-kinflo-primary-configure-metric.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-site-studio-deep-links": "node scripts/validate-kinflo-site-studio-deep-links.mjs",
     "kinflo:validate-site-studio-site-deep-links": "node scripts/validate-kinflo-site-studio-site-deep-links.mjs",

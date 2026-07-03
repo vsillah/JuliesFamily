@@ -99,7 +99,7 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"implementedDeltas\"",
   "\"phaseDoc\": \"docs/phase150-persistent-identity-strip.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-persistent-identity-strip\"",
-  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with primary metric per Configure panel next after the Phase 152 lane anchor.\"",
+  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with side-by-side mobile preview next after the Phase 153 primary Configure metric.\"",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [

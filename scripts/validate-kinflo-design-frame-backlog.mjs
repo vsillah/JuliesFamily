@@ -120,6 +120,8 @@ requireIncludes(backlogPath, [
   "\"client-studio-lane-anchor\"",
   "\"docs/phase152-client-studio-lane-anchor.md\"",
   "\"npm run kinflo:validate-client-studio-lane-anchor\"",
+  "\"docs/phase153-primary-configure-metric.md\"",
+  "\"npm run kinflo:validate-primary-configure-metric\"",
 ]);
 
 requireIncludes("package.json", [

@@ -816,6 +816,49 @@ function GateCard({
   );
 }
 
+function ConfigurationPrimaryMetricPanel({
+  label,
+  value,
+  status,
+  detail,
+  items,
+  testId,
+}: {
+  label: string;
+  value: string | number;
+  status: string;
+  detail: string;
+  items: { label: string; value: string | number }[];
+  testId: string;
+}) {
+  return (
+    <div className="w-full min-w-0 rounded-md border border-slate-200 bg-white p-3 lg:w-[360px]" data-testid={testId}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{label}</div>
+          <div className="mt-1 text-2xl font-semibold leading-none text-slate-950" data-testid={`${testId}-value`}>
+            {value}
+          </div>
+        </div>
+        <Badge variant="outline" className="shrink-0 bg-slate-50" data-testid={`${testId}-status`}>
+          {status}
+        </Badge>
+      </div>
+      <p className="mt-2 text-xs leading-5 text-slate-600" data-testid={`${testId}-detail`}>
+        {detail}
+      </p>
+      <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+        {items.map((item) => (
+          <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-2">
+            <div className="truncate text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+            <div className="mt-1 truncate text-sm font-semibold text-slate-950">{item.value}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ClientHandoffPermissionStrip({
   site,
   permissionPreset,
@@ -1744,19 +1787,18 @@ function ClientWebsiteConfigurationProfiles({
                 Selected-site configuration review keeps editable surfaces, locked surfaces, save blockers, and required evidence visible without enabling live saves.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs lg:w-[320px]">
-              {[
+            <ConfigurationPrimaryMetricPanel
+              label="Primary metric"
+              value={selectedReviewPacket.saveBlockerCount}
+              status="Save blockers"
+              detail={`${selectedReviewPacket.requiredEvidenceCount} evidence items required before local review can advance.`}
+              items={[
                 { label: "Editable", value: selectedReviewPacket.editableSurfaceCount },
                 { label: "Locked", value: selectedReviewPacket.lockedSurfaceCount },
-                { label: "Blockers", value: selectedReviewPacket.saveBlockerCount },
                 { label: "Evidence", value: selectedReviewPacket.requiredEvidenceCount },
-              ].map((item) => (
-                <div key={item.label} className="rounded-lg border border-slate-200 bg-white p-2">
-                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-950">{item.value}</div>
-                </div>
-              ))}
-            </div>
+              ]}
+              testId="section-kinflo-client-configuration-primary-metric-review"
+            />
           </div>
 
           <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
@@ -1854,18 +1896,18 @@ function ClientWebsiteConfigurationProfiles({
                 Proposed configuration changes are reviewable here, but the actual save remains blocked until ownership, hosted smoke, and provider boundaries are approved.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-xs lg:w-[360px]">
-              {[
-                { label: "Draft", value: selectedChangeSet.draftChangeCount },
+            <ConfigurationPrimaryMetricPanel
+              label="Primary metric"
+              value={selectedChangeSet.draftChangeCount}
+              status="Draft changes"
+              detail={`${selectedChangeSet.lockedChangeCount} locked changes remain gated behind approval evidence.`}
+              items={[
                 { label: "Locked", value: selectedChangeSet.lockedChangeCount },
                 { label: "Evidence", value: selectedChangeSet.approvalEvidenceCount },
-              ].map((item) => (
-                <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
-                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-950">{item.value}</div>
-                </div>
-              ))}
-            </div>
+                { label: "Writes", value: "0" },
+              ]}
+              testId="section-kinflo-client-configuration-primary-metric-change"
+            />
           </div>
 
           <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
@@ -1961,18 +2003,18 @@ function ClientWebsiteConfigurationProfiles({
                 Configuration approvals are mapped by role and evidence requirement, but approval capture, saves, invitations, provider writes, and hosted Convex execution remain blocked.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-xs lg:w-[360px]">
-              {[
-                { label: "Required", value: selectedApprovalMatrix.requiredApprovalCount },
+            <ConfigurationPrimaryMetricPanel
+              label="Primary metric"
+              value={selectedApprovalMatrix.requiredApprovalCount}
+              status="Required approvals"
+              detail={`${selectedApprovalMatrix.blockedApprovalCount} approvals are still blocked before capture can open.`}
+              items={[
                 { label: "Accepted", value: selectedApprovalMatrix.acceptedApprovalCount },
                 { label: "Blocked", value: selectedApprovalMatrix.blockedApprovalCount },
-              ].map((item) => (
-                <div key={item.label} className="rounded-lg border border-slate-200 bg-white p-2">
-                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-950">{item.value}</div>
-                </div>
-              ))}
-            </div>
+                { label: "Writes", value: "0" },
+              ]}
+              testId="section-kinflo-client-configuration-primary-metric-approval"
+            />
           </div>
 
           <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
@@ -2067,18 +2109,18 @@ function ClientWebsiteConfigurationProfiles({
                 The proposed save request bundles the selected payload, approval evidence, blockers, and rollback posture while the real configuration save remains disabled.
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-xs lg:w-[360px]">
-              {[
-                { label: "Payload", value: selectedSaveRequest.payloadCount },
+            <ConfigurationPrimaryMetricPanel
+              label="Primary metric"
+              value={selectedSaveRequest.payloadCount}
+              status="Payload items"
+              detail={`${selectedSaveRequest.blockerCount} blockers keep the save request provider-light.`}
+              items={[
                 { label: "Evidence", value: selectedSaveRequest.evidenceCount },
                 { label: "Blockers", value: selectedSaveRequest.blockerCount },
-              ].map((item) => (
-                <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
-                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
-                  <div className="mt-1 text-sm font-semibold text-slate-950">{item.value}</div>
-                </div>
-              ))}
-            </div>
+                { label: "Writes", value: "0" },
+              ]}
+              testId="section-kinflo-client-configuration-primary-metric-save"
+            />
           </div>
 
           <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
