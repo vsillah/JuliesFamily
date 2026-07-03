@@ -792,6 +792,46 @@ export type ShellHostedActivationSanitizedPreflightRepositoryRecord = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationSanitizedPreflightRepositoryRecordApprovalItem = {
+  id: string;
+  label: string;
+  requiredApproval: string;
+  repoSafeAcceptance: string;
+  blockedCondition: string;
+  approvalState: "blocked_until_repository_record_reviewed";
+};
+
+export type ShellHostedActivationSanitizedPreflightRepositoryRecordApproval = {
+  phase: 137;
+  status: "prepare_only_sanitized_preflight_repository_record_approval";
+  decisionId: "sanitized-preflight-repository-record-approval";
+  owner: "Vambah";
+  proposedRecordPath: "docs/convex-activation-preflight-sanitized-result.json";
+  totalApprovalItems: number;
+  pendingApprovalItems: number;
+  acceptedApprovalItems: number;
+  nextGate: string;
+  reviewPacketPath: "docs/phase137-hosted-activation-sanitized-preflight-repository-record-approval.md";
+  sourceDocuments: string[];
+  approvalItems: ShellHostedActivationSanitizedPreflightRepositoryRecordApprovalItem[];
+  approvalRules: string[];
+  blockedActions: string[];
+  canApproveRepositoryRecord: false;
+  canCreateRepositoryRecord: false;
+  canCommitRepositoryRecord: false;
+  canCommitRawOutput: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -815,6 +855,7 @@ export type ShellHostedActivationRunbook = {
   sanitizedPreflightResultCapture: ShellHostedActivationSanitizedPreflightResultCapture;
   sanitizedPreflightResultCommitReview: ShellHostedActivationSanitizedPreflightResultCommitReview;
   sanitizedPreflightRepositoryRecord: ShellHostedActivationSanitizedPreflightRepositoryRecord;
+  sanitizedPreflightRepositoryRecordApproval: ShellHostedActivationSanitizedPreflightRepositoryRecordApproval;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -9004,6 +9045,101 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "execute hosted read or mutation smoke",
       "perform provider writes or client launch",
     ],
+    canCreateRepositoryRecord: false,
+    canCommitRepositoryRecord: false,
+    canCommitRawOutput: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  sanitizedPreflightRepositoryRecordApproval: {
+    phase: 137,
+    status: "prepare_only_sanitized_preflight_repository_record_approval",
+    decisionId: "sanitized-preflight-repository-record-approval",
+    owner: "Vambah",
+    proposedRecordPath: "docs/convex-activation-preflight-sanitized-result.json",
+    totalApprovalItems: 5,
+    pendingApprovalItems: 5,
+    acceptedApprovalItems: 0,
+    nextGate: "After the Phase 136 repository record packet is reviewed, Vambah must approve the prior gates, six-field shape, private evidence boundary, repo-safe stop conditions, and post-record next gate before the sanitized repository record can be created.",
+    reviewPacketPath: "docs/phase137-hosted-activation-sanitized-preflight-repository-record-approval.md",
+    sourceDocuments: [
+      "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
+      "docs/phase133-hosted-activation-raw-preflight-output-redaction-checklist.md",
+      "docs/phase134-hosted-activation-sanitized-preflight-result-capture.md",
+      "docs/phase135-hosted-activation-sanitized-preflight-result-commit-review.md",
+      "docs/phase136-hosted-activation-sanitized-preflight-repository-record.md",
+    ],
+    approvalItems: [
+      {
+        id: "prior-phase-acceptance",
+        label: "Prior phase acceptance",
+        requiredApproval: "Phase 132 storage, Phase 133 redaction, Phase 134 sanitized capture, Phase 135 commit review, and Phase 136 repository record packet are all owner-accepted.",
+        repoSafeAcceptance: "Commit only accepted | blocked posture for each prior gate; do not include private approval notes, screenshots, secure-note ids, or raw output references.",
+        blockedCondition: "Any prior gate still pending or carrying private raw-output details keeps the repository record blocked.",
+        approvalState: "blocked_until_repository_record_reviewed",
+      },
+      {
+        id: "six-field-record-shape",
+        label: "Six-field record shape",
+        requiredApproval: "The proposed record contains exactly local-env-present, generated-directory-present, hosted-env-visible, external-writes, hosted-deployment-touched, and preflight-result-status.",
+        repoSafeAcceptance: "Commit exactly those field ids with boolean, number, or enum values plus the decision id, owner posture, and one short note.",
+        blockedCondition: "Any extra field, raw text field, path, URL, dashboard id, provider id, command output, or generated API content blocks creation.",
+        approvalState: "blocked_until_repository_record_reviewed",
+      },
+      {
+        id: "private-evidence-boundary",
+        label: "Private evidence boundary",
+        requiredApproval: "Private raw-output evidence remains outside committed source and is referenced only by a generic owner-approved storage label.",
+        repoSafeAcceptance: "Use a non-identifying label such as owner-approved private raw-output store; no local path, note id, dashboard URL, deployment name, or provider request id.",
+        blockedCondition: "Any private location, provider identifier, hosted deployment identifier, URL, local path, env name/value, masked secret, or stack trace blocks creation.",
+        approvalState: "blocked_until_repository_record_reviewed",
+      },
+      {
+        id: "repo-safe-stop-conditions",
+        label: "Repo-safe stop conditions",
+        requiredApproval: "external-writes equals 0, hosted-deployment-touched is false, and preflight-result-status is passed, blocked, or aborted with no raw detail.",
+        repoSafeAcceptance: "Commit only external-writes: 0 and hosted-deployment-touched: false for the repo-safe path.",
+        blockedCondition: "Any external write, mutation/provider response, hosted deployment touch, created resource id, or unclear status keeps evidence private and blocks creation.",
+        approvalState: "blocked_until_repository_record_reviewed",
+      },
+      {
+        id: "post-record-next-gate",
+        label: "Post-record next gate",
+        requiredApproval: "Creating the sanitized repository record does not approve codegen, generated API import, live smoke, adapter switch, provider writes, or client launch.",
+        repoSafeAcceptance: "Commit the record as evidence only; keep every downstream live-action gate false until separately approved.",
+        blockedCondition: "Any attempt to treat the record as approval for hosted execution, generated bindings, provider writes, publish, lead writes, invites, or domains blocks creation.",
+        approvalState: "blocked_until_repository_record_reviewed",
+      },
+    ],
+    approvalRules: [
+      "Do not approve, create, or commit docs/convex-activation-preflight-sanitized-result.json until every approval item is owner-accepted.",
+      "Approval may record only accepted | blocked posture, the decision id, and one short non-secret note.",
+      "Never commit private approval text, raw preflight output, command logs, stack traces, local paths, secure-note ids, dashboard URLs, provider ids, hosted deployment identifiers, secrets, masked secret fragments, or generated API contents.",
+      "If external-writes is not 0 or hosted-deployment-touched is not false, keep the result out of committed source.",
+      "This approval packet is not approval for hosted preflight, codegen, generated API import, live smoke, adapter switch, provider writes, publish, lead writes, invites, domains, or client sharing.",
+    ],
+    blockedActions: [
+      "approve the sanitized preflight repository record before owner review",
+      "create docs/convex-activation-preflight-sanitized-result.json before all approval items are accepted",
+      "commit raw activation preflight output or logs",
+      "commit private evidence locations, provider identifiers, hosted deployment identifiers, local paths, URLs, secrets, stack traces, or masked secret fragments",
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "execute hosted read or mutation smoke",
+      "perform provider writes or client launch",
+    ],
+    canApproveRepositoryRecord: false,
     canCreateRepositoryRecord: false,
     canCommitRepositoryRecord: false,
     canCommitRawOutput: false,

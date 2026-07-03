@@ -264,6 +264,28 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
   pass("Site Studio consolidation does not execute live Convex");
 }
 
+const laneSwitcherIndex = shellContents.indexOf("section-kinflo-client-studio-lane-switcher");
+const controlRoomIndex = shellContents.indexOf("section-kinflo-client-control-room-frame");
+const operatingFrameIndex = shellContents.indexOf("section-kinflo-client-studio-operating-frame");
+const workbenchContractIndex = shellContents.indexOf("section-kinflo-client-workbench-grid-contract");
+
+if (
+  laneSwitcherIndex !== -1 &&
+  controlRoomIndex !== -1 &&
+  operatingFrameIndex !== -1 &&
+  workbenchContractIndex !== -1 &&
+  laneSwitcherIndex < controlRoomIndex &&
+  laneSwitcherIndex < operatingFrameIndex &&
+  laneSwitcherIndex < workbenchContractIndex
+) {
+  pass("Site Studio lane switcher renders before variable studio summary frames");
+} else {
+  fail(
+    "Site Studio lane switcher renders before variable studio summary frames",
+    "The lane switcher must stay at the top of the Site Studio section so it does not jump lower on lanes that render summary cards."
+  );
+}
+
 const failed = checks.filter((check) => !check.ok);
 
 for (const check of checks) {

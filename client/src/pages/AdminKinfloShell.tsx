@@ -5893,6 +5893,83 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
+                  <div className="mt-4 rounded-xl border border-violet-200 bg-violet-50 p-3" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record-approval">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-violet-300 bg-white text-violet-900">
+                            Phase {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.phase}
+                          </Badge>
+                          <Badge className="bg-violet-800 hover:bg-violet-800">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.status.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <h4 className="mt-3 text-sm font-semibold text-violet-950">Sanitized repository record approval</h4>
+                        <p className="mt-1 max-w-3xl text-xs leading-5 text-violet-900" data-testid="text-kinflo-hosted-sanitized-preflight-repository-record-approval">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.nextGate}
+                        </p>
+                      </div>
+                      <Button size="sm" disabled variant="outline" className="self-start border-violet-300 bg-white text-violet-900 hover:bg-white hover:text-violet-900" data-testid="button-hosted-sanitized-preflight-repository-record-approval-gated">
+                        <ShieldCheck className="mr-2 h-3 w-3" />
+                        Approval gated
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record-approval-summary">
+                      {[
+                        { label: "Items", value: snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.totalApprovalItems },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.pendingApprovalItems },
+                        { label: "Accepted", value: snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.acceptedApprovalItems },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-lg border border-violet-200 bg-white px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-violet-700">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+                      <div className="grid max-h-[280px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record-approval-items">
+                        {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.approvalItems.map((item) => (
+                          <div key={item.id} className="rounded-lg border border-violet-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{item.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{item.requiredApproval}</div>
+                              </div>
+                              <Badge variant="outline" className="w-fit shrink-0 border-violet-200 bg-violet-50 text-violet-800">{item.approvalState.replaceAll("_", " ")}</Badge>
+                            </div>
+                            <p className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-900">{item.repoSafeAcceptance}</p>
+                            <p className="mt-2 rounded-md border border-rose-100 bg-rose-50 p-2 text-xs leading-5 text-rose-800">{item.blockedCondition}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="min-w-0 space-y-2">
+                        <div className="rounded-lg border border-violet-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-violet-700">Proposed record</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.proposedRecordPath}
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-violet-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-violet-700">Review packet</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.reviewPacketPath}
+                          </div>
+                        </div>
+                        <div className="max-h-[170px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record-approval-rules">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecordApproval.approvalRules.map((rule) => (
+                            <div key={rule} className="flex items-start gap-2 rounded-lg border border-violet-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-violet-700" />
+                              <span>{rule}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
                     <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -7920,6 +7997,53 @@ export default function AdminKinfloShell() {
 
           <TabsContent value="site-studio" className="mt-2">
             <section className="flex min-w-0 flex-col gap-2 overflow-hidden" data-testid="section-kinflo-client-studio-compact-shell">
+              <div className="contents" data-testid="tabs-kinflo-client-studio-lanes">
+                <div
+                  className="sticky top-0 z-20 flex flex-col gap-1 border-y border-slate-200 bg-white/95 py-1.5 backdrop-blur sm:gap-2 sm:py-2 lg:flex-row lg:items-center lg:justify-between"
+                  data-testid="section-kinflo-client-studio-lane-switcher"
+                >
+                  <div className="grid h-auto w-full grid-cols-4 gap-1 rounded-md bg-slate-100 p-1 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
+                    {[
+                      { value: "queue", label: "Spin up", testId: "tab-kinflo-client-studio-lane-queue" },
+                      { value: "configuration", label: "Configure", testId: "tab-kinflo-client-studio-lane-configuration" },
+                      { value: "handoff", label: "Handoff", testId: "tab-kinflo-client-studio-lane-handoff" },
+                      { value: "workbench", label: "Workbench", testId: "tab-kinflo-client-studio-lane-workbench" },
+                    ].map((lane) => {
+                      const isActiveLane = clientWebsiteStudioLane === lane.value;
+                      return (
+                        <button
+                          key={lane.value}
+                          type="button"
+                          role="tab"
+                          aria-selected={isActiveLane}
+                          onClick={() => selectClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
+                          className={`rounded-sm px-2 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
+                            isActiveLane
+                              ? "bg-white text-slate-950 shadow-sm"
+                              : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
+                          }`}
+                          data-testid={lane.testId}
+                        >
+                          {lane.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div className="hidden grid-cols-3 gap-2 text-xs sm:grid lg:w-[360px]" data-testid="section-kinflo-client-studio-lane-summary">
+                    {[
+                      { label: "Requests", value: snapshot.clientWebsiteStudio.spinUpQueue.totalRequests },
+                      { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.totalProfiles },
+                      { label: "Sites", value: snapshot.clientWebsiteStudio.sites.length },
+                    ].map((item) => (
+                      <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
+                        <div className="truncate text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                        <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div
                 className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "overflow-hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
@@ -8010,52 +8134,7 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className="contents" data-testid="tabs-kinflo-client-studio-lanes">
-                <div
-                  className="order-first sticky top-0 z-20 flex flex-col gap-1 border-y border-slate-200 bg-white/95 py-1.5 backdrop-blur sm:gap-2 sm:py-2 lg:flex-row lg:items-center lg:justify-between"
-                  data-testid="section-kinflo-client-studio-lane-switcher"
-                >
-                  <div className="grid h-auto w-full grid-cols-4 gap-1 rounded-md bg-slate-100 p-1 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
-                    {[
-                      { value: "queue", label: "Spin up", testId: "tab-kinflo-client-studio-lane-queue" },
-                      { value: "configuration", label: "Configure", testId: "tab-kinflo-client-studio-lane-configuration" },
-                      { value: "handoff", label: "Handoff", testId: "tab-kinflo-client-studio-lane-handoff" },
-                      { value: "workbench", label: "Workbench", testId: "tab-kinflo-client-studio-lane-workbench" },
-                    ].map((lane) => {
-                      const isActiveLane = clientWebsiteStudioLane === lane.value;
-                      return (
-                        <button
-                          key={lane.value}
-                          type="button"
-                          role="tab"
-                          aria-selected={isActiveLane}
-                          onClick={() => selectClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
-                          className={`rounded-sm px-2 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
-                            isActiveLane
-                              ? "bg-white text-slate-950 shadow-sm"
-                              : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
-                          }`}
-                          data-testid={lane.testId}
-                        >
-                          {lane.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="hidden grid-cols-3 gap-2 text-xs sm:grid lg:w-[360px]" data-testid="section-kinflo-client-studio-lane-summary">
-                    {[
-                      { label: "Requests", value: snapshot.clientWebsiteStudio.spinUpQueue.totalRequests },
-                      { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.totalProfiles },
-                      { label: "Sites", value: snapshot.clientWebsiteStudio.sites.length },
-                    ].map((item) => (
-                      <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
-                        <div className="truncate text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-                        <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
+              <div className="contents">
                 <div
                   className={`${clientWebsiteStudioLane === "queue" ? "block" : "hidden"} mt-2 max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1`}
                   data-testid="section-kinflo-client-studio-lane-queue"

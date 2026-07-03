@@ -61,6 +61,8 @@ The Site Studio route now also compacts the surrounding KinFlo OS chrome: the gl
 
 The page now has a top-level lane switcher above the major client website modules. Workbench is the default lane, while Spin up, Configure, and Handoff lanes stay available without adding to the default page height. This keeps super-admin setup, configuration profiles, permissions handoff, and the active client workbench in one operating surface instead of one stacked scroll.
 
+The lane switcher now renders as the first row inside the Site Studio compact shell, before the control-room, operating-frame, and workbench-contract summary cards. That keeps `Spin up`, `Configure`, `Handoff`, and `Workbench` anchored in the same top position instead of shifting lower on lanes that show more summary context.
+
 On narrow screens, the lane switcher now stays in one four-column row with `text-xs` controls. That prevents the lane toolbar itself from becoming a two-row vertical stack before the user reaches `Sites`, `Preview`, or `Launch`.
 
 The client handoff area now uses a compact handoff workspace with `Selected site` and `All site permissions` tabs. The default view keeps the selected site's permissions, blocked invite, missing artifact, and gated action visible while moving the full cross-site admin matrix behind a tab. Super-admin comparison remains one click away, but it no longer expands the default Site Studio page into a long permission document.
