@@ -99,6 +99,7 @@ for (const path of [
   "docs/phase159-client-website-portfolio-registry.md",
   "docs/phase160-client-website-launch-composer.md",
   "docs/phase161-client-website-launch-composer-query.md",
+  "docs/phase162-client-website-launch-composer-switch-evidence.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -347,6 +348,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-client-website-portfolio-registry",
   "npm run kinflo:validate-client-website-launch-composer",
   "npm run kinflo:validate-client-website-launch-composer-query",
+  "npm run kinflo:validate-client-website-launch-composer-switch-evidence",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
   "npm run kinflo:validate-site-studio-deep-links",
   "npm run kinflo:validate-site-studio-site-deep-links",
@@ -439,6 +441,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "npm run kinflo:validate-client-website-launch-composer",
   "Phase 161 client website launch composer query",
   "npm run kinflo:validate-client-website-launch-composer-query",
+  "Phase 162 client website launch composer switch evidence",
+  "npm run kinflo:validate-client-website-launch-composer-switch-evidence",
   "Phase 84 Claude frame ingestion packet",
   "Phase 149 Claude Code frame response",
   "Phase 156 PR preview deployment checkpoint",
@@ -591,6 +595,8 @@ for (const marker of [
   "\"npm run kinflo:validate-client-website-launch-composer\"",
   "\"docs/phase161-client-website-launch-composer-query.md\"",
   "\"npm run kinflo:validate-client-website-launch-composer-query\"",
+  "\"docs/phase162-client-website-launch-composer-switch-evidence.md\"",
+  "\"npm run kinflo:validate-client-website-launch-composer-switch-evidence\"",
   "Vercel build-rate limiting",
 ]) {
   if (ledgerText.includes(marker)) {

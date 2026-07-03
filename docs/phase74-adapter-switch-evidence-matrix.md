@@ -51,6 +51,7 @@ The matrix proves that every adapter switch surface remains blocked while still 
 - each surface has smoke evidence and rollback text,
 - every surface keeps `switchAllowed`, `providerWrites`, and `liveConvexExecution` false,
 - every design gate is explicit before the surface can become client-facing.
+- the site-factory surface now requires `siteFactory.listClientWebsiteLaunchComposer` plus `client website launch composer read` smoke evidence before any generated API switch.
 
 ## Next Safe Work
 

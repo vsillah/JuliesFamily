@@ -61,6 +61,7 @@ Latest result:
 - Packet status: `provider_light_switch_plan`.
 - Switch batches: 6.
 - Switch surfaces: 12.
+- Site factory launch composer read evidence: `client website launch composer read`.
 - External writes: 0.
 - Hosted deployment touched: no.
 - Generated API imported: no.

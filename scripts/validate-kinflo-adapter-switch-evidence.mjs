@@ -321,6 +321,25 @@ if (matrix) {
   } else {
     fail("matrix surface ids are unique", "Duplicate surface ids found.");
   }
+
+  const siteFactorySurface = surfaces.find((surface) => surface?.id === "site-factory");
+  if (siteFactorySurface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteLaunchComposer")) {
+    pass("site factory evidence includes launch composer function");
+  } else {
+    fail("site factory evidence includes launch composer function", "The site factory evidence matrix must cover siteFactory.listClientWebsiteLaunchComposer.");
+  }
+
+  if (siteFactorySurface?.smokeEvidenceRequired?.includes("client website launch composer read")) {
+    pass("site factory evidence includes launch composer smoke evidence");
+  } else {
+    fail("site factory evidence includes launch composer smoke evidence", "The site factory evidence matrix must require client website launch composer read evidence.");
+  }
+
+  if (siteFactorySurface?.designGate?.includes("launch composer")) {
+    pass("site factory evidence design gate names launch composer");
+  } else {
+    fail("site factory evidence design gate names launch composer", "The site factory design gate must require launch composer review.");
+  }
 }
 
 const failed = checks.filter((check) => !check.ok);

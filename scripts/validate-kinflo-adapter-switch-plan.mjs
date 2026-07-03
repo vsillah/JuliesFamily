@@ -325,6 +325,22 @@ if (plan) {
     }
   }
 
+  const siteFactorySurface = batches
+    .flatMap((batch) => batch.surfaces ?? [])
+    .find((surface) => surface?.id === "site-factory");
+
+  if (siteFactorySurface?.convexFunctions?.includes("siteFactory.listClientWebsiteLaunchComposer")) {
+    pass("site factory surface includes launch composer function");
+  } else {
+    fail("site factory surface includes launch composer function", "The site factory switch plan must cover siteFactory.listClientWebsiteLaunchComposer.");
+  }
+
+  if (siteFactorySurface?.requiredSmokeEvidence?.includes("client website launch composer read")) {
+    pass("site factory surface includes launch composer smoke evidence");
+  } else {
+    fail("site factory surface includes launch composer smoke evidence", "The site factory switch plan must require client website launch composer read evidence.");
+  }
+
   const rollbackRequirements = Array.isArray(plan.rollbackRequirements) ? plan.rollbackRequirements : [];
   if (rollbackRequirements.length >= 5) {
     pass("plan includes at least five rollback requirements");

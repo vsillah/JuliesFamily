@@ -353,6 +353,20 @@ for (const [label, surface] of [
   } else {
     fail(`${label} includes configuration rollback checkpoint smoke evidence`, "Configuration rollback checkpoint read evidence must be required before adapter switch.");
   }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteLaunchComposer")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteLaunchComposer")) {
+    pass(`${label} includes client website launch composer function`);
+  } else {
+    fail(`${label} includes client website launch composer function`, "Client website launch composer read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("client website launch composer read")
+    || surface?.smokeEvidenceRequired?.includes("client website launch composer read")) {
+    pass(`${label} includes client website launch composer smoke evidence`);
+  } else {
+    fail(`${label} includes client website launch composer smoke evidence`, "Client website launch composer read evidence must be required before adapter switch.");
+  }
 }
 
 for (const path of [

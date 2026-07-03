@@ -246,6 +246,7 @@
         "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
         "siteFactory.listClientWebsiteExperienceConfigurationPresets",
         "siteFactory.listClientWebsiteLaunchBlueprints",
+        "siteFactory.listClientWebsiteLaunchComposer",
         "siteFactory.createSiteFromTemplate"
       ],
       "smokeEvidenceRequired": [
@@ -261,10 +262,11 @@
         "client website domain readiness read",
         "client website admin invitation readiness read",
         "experience configuration preset read",
+        "client website launch composer read",
         "draft site created from template",
         "owner invite scoped"
       ],
-      "designGate": "Client site creation must show template fit, configuration profile, permissions, launch packet, invite posture, and rollback before execution.",
+      "designGate": "Client site creation must show template fit, configuration profile, permissions, launch packet, launch composer, invite posture, and rollback before execution.",
       "blockedBy": [
         "hosted Convex approval",
         "template smoke",

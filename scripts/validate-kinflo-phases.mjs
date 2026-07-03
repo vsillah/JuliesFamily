@@ -199,6 +199,7 @@ for (const path of [
   "docs/phase159-client-website-portfolio-registry.md",
   "docs/phase160-client-website-launch-composer.md",
   "docs/phase161-client-website-launch-composer-query.md",
+  "docs/phase162-client-website-launch-composer-switch-evidence.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -2518,6 +2519,18 @@ requireIncludes("docs/phase161-client-website-launch-composer-query.md", [
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase162-client-website-launch-composer-switch-evidence.md", [
+  "Phase 162: Client Website Launch Composer Switch Evidence",
+  "npm run kinflo:validate-client-website-launch-composer-switch-evidence",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "client website launch composer read",
+  "docs/convex-adapter-switch-plan.json",
+  "docs/convex-adapter-switch-evidence-matrix.json",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -3073,6 +3086,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-website-launch-composer\"",
   "\"docs/phase161-client-website-launch-composer-query.md\"",
   "\"npm run kinflo:validate-client-website-launch-composer-query\"",
+  "\"docs/phase162-client-website-launch-composer-switch-evidence.md\"",
+  "\"npm run kinflo:validate-client-website-launch-composer-switch-evidence\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3345,6 +3360,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-website-portfolio-registry\"",
   "\"kinflo:validate-client-website-launch-composer\"",
   "\"kinflo:validate-client-website-launch-composer-query\"",
+  "\"kinflo:validate-client-website-launch-composer-switch-evidence\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4838,6 +4854,13 @@ requireIncludes("scripts/validate-kinflo-client-website-launch-composer-query.mj
   "clientWebsiteLaunchComposer",
   "launch composer query block is read-only",
   "KinFlo client website launch composer query validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-website-launch-composer-switch-evidence.mjs", [
+  "docs/phase162-client-website-launch-composer-switch-evidence.md",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "client website launch composer read",
+  "KinFlo client website launch composer switch evidence validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [

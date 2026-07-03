@@ -197,6 +197,7 @@
             "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
             "siteFactory.listClientWebsiteExperienceConfigurationPresets",
             "siteFactory.listClientWebsiteLaunchBlueprints",
+            "siteFactory.listClientWebsiteLaunchComposer",
             "siteFactory.createSiteFromTemplate"
           ],
           "requiredSmokeEvidence": [
@@ -212,6 +213,7 @@
             "client website domain readiness read",
             "client website admin invitation readiness read",
             "experience configuration preset read",
+            "client website launch composer read",
             "draft site created from template",
             "owner invite scoped"
           ],
