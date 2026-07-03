@@ -196,6 +196,7 @@ for (const path of [
   "docs/phase144-configuration-workspace-panels.md",
   "docs/phase145-configuration-profile-switcher.md",
   "docs/phase146-configuration-admin-permission-preset.md",
+  "docs/phase148-configuration-domain-readiness.md",
   "docs/phase147-configuration-admin-invitation-readiness.md",
   "docs/phase141-configuration-save-request-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
@@ -366,6 +367,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-workspace-panels.mjs",
   "scripts/validate-kinflo-configuration-profile-switcher.mjs",
   "scripts/validate-kinflo-configuration-admin-permission-preset.mjs",
+  "scripts/validate-kinflo-configuration-domain-readiness.mjs",
   "scripts/validate-kinflo-configuration-admin-invitation-readiness.mjs",
   "scripts/validate-kinflo-configuration-save-request-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
@@ -2502,6 +2504,24 @@ requireIncludes("docs/phase146-configuration-admin-permission-preset.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase148-configuration-domain-readiness.md", [
+  "Phase 148: Configuration Domain Readiness",
+  "npm run kinflo:validate-configuration-domain-readiness",
+  "studioSite=julies-family-public|advisor-client-site|campaign-microsite",
+  "studioConfigure=review|change|approval|save",
+  "section-kinflo-client-configuration-domain-readiness",
+  "text-kinflo-client-configuration-domain-readiness",
+  "section-kinflo-client-configuration-domain-status",
+  "section-kinflo-client-configuration-domain-hostname",
+  "section-kinflo-client-configuration-domain-checklist",
+  "section-kinflo-client-configuration-domain-blocked",
+  "section-kinflo-client-configuration-domain-functions",
+  "button-client-configuration-domain-gated",
+  "selectedClientWebsiteDomainReadinessPacket",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase147-configuration-admin-invitation-readiness.md", [
   "Phase 147: Configuration Admin Invitation Readiness",
   "npm run kinflo:validate-configuration-admin-invitation-readiness",
@@ -2801,6 +2821,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase144-configuration-workspace-panels.md\"",
   "\"docs/phase145-configuration-profile-switcher.md\"",
   "\"docs/phase146-configuration-admin-permission-preset.md\"",
+  "\"docs/phase148-configuration-domain-readiness.md\"",
   "\"docs/phase147-configuration-admin-invitation-readiness.md\"",
   "\"docs/phase141-configuration-save-request-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
@@ -2867,6 +2888,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-configuration-workspace-panels\"",
   "\"npm run kinflo:validate-configuration-profile-switcher\"",
   "\"npm run kinflo:validate-configuration-admin-permission-preset\"",
+  "\"npm run kinflo:validate-configuration-domain-readiness\"",
   "\"npm run kinflo:validate-configuration-admin-invitation-readiness\"",
   "\"npm run kinflo:validate-configuration-save-request-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
@@ -3020,6 +3042,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-workspace-panels\"",
   "\"kinflo:validate-configuration-profile-switcher\"",
   "\"kinflo:validate-configuration-admin-permission-preset\"",
+  "\"kinflo:validate-configuration-domain-readiness\"",
   "\"kinflo:validate-configuration-admin-invitation-readiness\"",
   "\"kinflo:validate-configuration-save-request-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
@@ -4516,6 +4539,17 @@ requireIncludes("scripts/validate-kinflo-configuration-admin-permission-preset.m
   "configuration admin permission preset does not import generated API",
   "configuration admin permission preset does not execute live Convex",
   "KinFlo configuration admin permission preset validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-domain-readiness.mjs", [
+  "docs/phase148-configuration-domain-readiness.md",
+  "studioSite",
+  "selectedDomainReadiness",
+  "section-kinflo-client-configuration-domain-readiness",
+  "button-client-configuration-domain-gated",
+  "configuration domain readiness does not import generated API",
+  "configuration domain readiness does not execute live Convex",
+  "KinFlo configuration domain readiness validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-configuration-admin-invitation-readiness.mjs", [

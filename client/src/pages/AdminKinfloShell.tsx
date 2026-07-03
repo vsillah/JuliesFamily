@@ -1435,6 +1435,103 @@ function ClientWebsiteConfigurationProfiles({
         </div>
       ) : null}
 
+      {selectedDomainReadiness ? (
+        <div
+          className="mt-3 max-h-[340px] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-white p-3 pr-2"
+          data-testid="section-kinflo-client-configuration-domain-readiness"
+        >
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="bg-slate-50">
+                  Domain readiness
+                </Badge>
+                <Badge variant="secondary" data-testid="section-kinflo-client-configuration-domain-status">
+                  {selectedDomainReadiness.domainStatus.replaceAll("_", " ")}
+                </Badge>
+                <Badge variant="outline" className="bg-slate-50">
+                  {selectedDomainReadiness.verificationMode.replaceAll("_", " ")}
+                </Badge>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-slate-950" data-testid="text-kinflo-client-configuration-domain-readiness">
+                {selectedDomainReadiness.label}
+              </div>
+              <p className="mt-1 break-all text-xs leading-5 text-slate-600" data-testid="section-kinflo-client-configuration-domain-hostname">
+                {selectedDomainReadiness.hostname}
+              </p>
+            </div>
+            <Button disabled variant="outline" className="shrink-0 justify-start" data-testid="button-client-configuration-domain-gated">
+              <Globe2 className="mr-2 h-4 w-4" />
+              Domain attach gated
+            </Button>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {[
+                { label: "SSL", value: selectedDomainReadiness.sslStatus.replaceAll("_", " ") },
+                { label: "Provider", value: selectedDomainReadiness.providerStatus.replaceAll("_", " ") },
+              ].map((item) => (
+                <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+                  <div className="mt-1 truncate font-semibold text-slate-950" title={item.value}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-700">
+              <div className="font-semibold text-slate-950">Next gate</div>
+              <p className="mt-1">{selectedDomainReadiness.nextGate}</p>
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-2" data-testid="section-kinflo-client-configuration-domain-checklist">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">DNS checklist</div>
+              <div className="mt-2 max-h-[112px] space-y-1.5 overflow-y-auto pr-1">
+                {selectedDomainReadiness.dnsChecklist.map((item) => (
+                  <div key={item.key} className="rounded-md border border-slate-200 bg-white p-2 text-xs leading-5">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-medium text-slate-950">{item.label}</span>
+                      <Badge variant={item.status === "ready" ? "secondary" : "outline"} className="shrink-0 bg-slate-50 text-[10px]">
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-slate-600">{item.evidence}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-2" data-testid="section-kinflo-client-configuration-domain-blocked">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Blocked domain actions</div>
+              <div className="mt-2 max-h-[112px] space-y-1.5 overflow-y-auto pr-1">
+                {selectedDomainReadiness.blockedLiveActions.map((action) => (
+                  <div key={action} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
+                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                    <span>{action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-700">
+              <div className="font-semibold text-slate-950">Rollback</div>
+              <p className="mt-1">{selectedDomainReadiness.rollbackPlan}</p>
+            </div>
+            <div className="flex max-h-[72px] flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-2" data-testid="section-kinflo-client-configuration-domain-functions">
+              {selectedDomainReadiness.convexFunctions.map((functionName) => (
+                <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all bg-white text-left text-[10px]">
+                  {functionName}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {selectedInvitationReadiness ? (
         <div
           className="mt-3 max-h-[360px] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-slate-50 p-3 pr-2"

@@ -119,6 +119,7 @@
     "kinflo:validate-configuration-workspace-panels": "node scripts/validate-kinflo-configuration-workspace-panels.mjs",
     "kinflo:validate-configuration-profile-switcher": "node scripts/validate-kinflo-configuration-profile-switcher.mjs",
     "kinflo:validate-configuration-admin-permission-preset": "node scripts/validate-kinflo-configuration-admin-permission-preset.mjs",
+    "kinflo:validate-configuration-domain-readiness": "node scripts/validate-kinflo-configuration-domain-readiness.mjs",
     "kinflo:validate-configuration-admin-invitation-readiness": "node scripts/validate-kinflo-configuration-admin-invitation-readiness.mjs",
     "kinflo:validate-configuration-save-request-deep-links": "node scripts/validate-kinflo-configuration-save-request-deep-links.mjs",
     "kinflo:validate-client-public-preview-context-links": "node scripts/validate-kinflo-client-public-preview-context-links.mjs",
