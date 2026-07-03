@@ -15,12 +15,12 @@
   "currentReviewEvidence": {
     "pullRequest": "https://github.com/vsillah/JuliesFamily/pull/1",
     "liveVerificationCommand": "gh pr view 1 --repo vsillah/JuliesFamily --json headRefOid,statusCheckRollup,url",
-    "latestObservedState": {
+    "lastLocalObservation": {
       "observedDate": "2026-07-03",
-      "headSource": "current PR #1 head at the time the command is run",
-      "vercel": "PENDING",
+      "scope": "read-only local check before this artifact update; rerun liveVerificationCommand or npm run kinflo:validate-pr-review-state after each push",
+      "vercel": "SUCCESS",
       "vercelPreviewComments": "SUCCESS",
-      "mergeReadiness": "blocked_until_vercel_success"
+      "mergeReadiness": "ready_for_integration_review"
     },
     "checks": [
       {
@@ -156,6 +156,7 @@
   ],
   "localValidationCommands": [
     "npm run kinflo:validate-phase0-readiness",
+    "npm run kinflo:validate-pr-review-state",
     "npm run kinflo:audit-secret-history",
     "npm run kinflo:inventory-env",
     "npm run kinflo:validate-phases",

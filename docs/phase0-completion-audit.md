@@ -38,6 +38,7 @@ The latest local validation set passed:
 - `npm run kinflo:audit-secret-history`
 - `npm run kinflo:inventory-env`
 - `npm run kinflo:validate-phase0-readiness`
+- `npm run kinflo:validate-pr-review-state`
 - `npm run kinflo:validate-phases`
 - `npm run kinflo:validate-map`
 - `npm run kinflo:check-baseline`
@@ -52,8 +53,10 @@ Current PR review state:
 - PR: `https://github.com/vsillah/JuliesFamily/pull/1`
 - Head source: current `codex/kinflo-phase-0-convex-plan` head.
 - Required before merge: Vercel `SUCCESS` and Vercel Preview Comments `SUCCESS`.
-- Latest observed state on July 3, 2026 after the most recent push: Vercel `PENDING`, Vercel Preview Comments `SUCCESS`.
-- Merge readiness: blocked until the Vercel status check reports `SUCCESS` on the current PR head.
+- Last local observation on July 3, 2026 before this artifact update: Vercel `SUCCESS`, Vercel Preview Comments `SUCCESS`.
+- Merge readiness from that observation: `ready_for_integration_review`.
+- Live refresh command: `npm run kinflo:validate-pr-review-state`.
+- After any new push, the live refresh command is authoritative because GitHub creates a new Vercel status target for the new head.
 
 Current local-only artifacts intentionally excluded from the provider-light PR:
 

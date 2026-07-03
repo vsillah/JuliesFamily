@@ -95,7 +95,7 @@ const humanOwnedGates = manifest.humanOwnedGates ?? [];
 const localValidationCommands = manifest.localValidationCommands ?? [];
 const localOnlyUntrackedArtifacts = manifest.localOnlyUntrackedArtifacts ?? [];
 const currentReviewEvidence = manifest.currentReviewEvidence ?? {};
-const latestObservedReviewState = currentReviewEvidence.latestObservedState ?? {};
+const lastLocalReviewObservation = currentReviewEvidence.lastLocalObservation ?? {};
 
 requireArrayIncludes(
   "repo-complete requirement ids",
@@ -160,6 +160,7 @@ for (const gate of humanOwnedGates) {
 
 requireArrayIncludes("local validation commands", localValidationCommands, [
   "npm run kinflo:validate-phase0-readiness",
+  "npm run kinflo:validate-pr-review-state",
   "npm run kinflo:audit-secret-history",
   "npm run kinflo:inventory-env",
   "npm run kinflo:validate-phases",
@@ -207,39 +208,41 @@ if (currentReviewEvidence.pullRequest === "https://github.com/vsillah/JuliesFami
 const reviewCheckNames = (currentReviewEvidence.checks ?? []).map((check) => check.name);
 requireArrayIncludes("current review checks", reviewCheckNames, ["Vercel", "Vercel Preview Comments"]);
 
-if (latestObservedReviewState.vercel === "PENDING") {
-  pass("latest observed Vercel state is pending");
+if (["PENDING", "SUCCESS"].includes(lastLocalReviewObservation.vercel)) {
+  pass(`last local Vercel observation is non-failing: ${lastLocalReviewObservation.vercel}`);
 } else {
-  fail("latest observed Vercel state is pending", `Received ${latestObservedReviewState.vercel ?? "(missing)"}.`);
+  fail("last local Vercel observation is non-failing", `Received ${lastLocalReviewObservation.vercel ?? "(missing)"}.`);
 }
 
-if (latestObservedReviewState.vercelPreviewComments === "SUCCESS") {
-  pass("latest observed Vercel Preview Comments state is success");
+if (lastLocalReviewObservation.vercelPreviewComments === "SUCCESS") {
+  pass("last local Vercel Preview Comments observation is success");
 } else {
   fail(
-    "latest observed Vercel Preview Comments state is success",
-    `Received ${latestObservedReviewState.vercelPreviewComments ?? "(missing)"}.`,
+    "last local Vercel Preview Comments observation is success",
+    `Received ${lastLocalReviewObservation.vercelPreviewComments ?? "(missing)"}.`,
   );
 }
 
-if (latestObservedReviewState.mergeReadiness === "blocked_until_vercel_success") {
-  pass("latest observed merge readiness remains blocked on Vercel success");
+if (["blocked_until_vercel_success", "ready_for_integration_review"].includes(lastLocalReviewObservation.mergeReadiness)) {
+  pass(`last local merge readiness is recognized: ${lastLocalReviewObservation.mergeReadiness}`);
 } else {
   fail(
-    "latest observed merge readiness remains blocked on Vercel success",
-    `Received ${latestObservedReviewState.mergeReadiness ?? "(missing)"}.`,
+    "last local merge readiness is recognized",
+    `Received ${lastLocalReviewObservation.mergeReadiness ?? "(missing)"}.`,
   );
 }
 
 for (const path of [
   "docs/phase0-baseline.md",
   "docs/phase0-completion-audit.md",
+  "docs/phase0-pr-review-state.md",
   "docs/phase0-env-inventory.md",
   "docs/phase0-secret-remediation.md",
   "docs/drizzle-to-convex-migration-map.md",
   "docs/kinflo-saas-adoption-plan.md",
   "docs/phase32-phase0-readiness-manifest.md",
   "scripts/validate-kinflo-phase0-readiness.mjs",
+  "scripts/validate-kinflo-pr-review-state.mjs",
   "scripts/validate-kinflo-phases.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
@@ -250,8 +253,10 @@ for (const path of [
 requireIncludes("docs/phase0-completion-audit.md", [
   "This branch satisfies those repo-complete conditions.",
   "Current PR review state",
-  "Latest observed state on July 3, 2026 after the most recent push: Vercel `PENDING`, Vercel Preview Comments `SUCCESS`.",
-  "Merge readiness: blocked until the Vercel status check reports `SUCCESS` on the current PR head.",
+  "Last local observation on July 3, 2026 before this artifact update: Vercel `SUCCESS`, Vercel Preview Comments `SUCCESS`.",
+  "Merge readiness from that observation: `ready_for_integration_review`.",
+  "Live refresh command: `npm run kinflo:validate-pr-review-state`.",
+  "After any new push, the live refresh command is authoritative",
   "Human-Owned Gates Still Pending",
   "Do not treat it as approval to create providers",
   ".cursor/",
@@ -265,6 +270,12 @@ if (phase0AuditContents.includes("The current PR checks passed:")) {
   pass("Phase 0 audit does not claim current PR checks passed while Vercel is pending");
 }
 
+if (phase0AuditContents.includes("Latest observed state on July 3, 2026 after the most recent push")) {
+  fail("Phase 0 audit does not claim static observation is current after future pushes", "Use last-local-observation language plus the live refresh command.");
+} else {
+  pass("Phase 0 audit does not claim static observation is current after future pushes");
+}
+
 requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "npm run kinflo:validate-phase0-readiness",
   "known local-only artifacts are documented",
@@ -275,6 +286,29 @@ requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
 
 requireIncludes("package.json", [
   "\"kinflo:validate-phase0-readiness\"",
+  "\"kinflo:validate-pr-review-state\"",
+]);
+
+requireIncludes("docs/phase0-pr-review-state.md", [
+  "Phase 0 PR Review State Gate",
+  "npm run kinflo:validate-pr-review-state",
+  "blocked_until_vercel_success",
+  "ready_for_integration_review",
+  "No hosted Convex deployment is created.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
+requireIncludes("scripts/validate-kinflo-pr-review-state.mjs", [
+  "gh",
+  "pr",
+  "view",
+  "vsillah/JuliesFamily",
+  "Vercel status context is present",
+  "Vercel Preview Comments succeeded",
+  "blocked_until_vercel_success",
+  "ready_for_integration_review",
+  "Provider APIs touched: no",
 ]);
 
 console.log("KinFlo Phase 0 readiness validation");
