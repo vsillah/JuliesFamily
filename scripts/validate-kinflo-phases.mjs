@@ -192,6 +192,7 @@ for (const path of [
   "docs/phase139-admin-handoff-matrix-filters.md",
   "docs/phase140-configuration-review-deep-links.md",
   "docs/phase142-configuration-change-set-deep-links.md",
+  "docs/phase143-configuration-approval-matrix-deep-links.md",
   "docs/phase141-configuration-save-request-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
@@ -356,6 +357,8 @@ for (const path of [
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
   "scripts/validate-kinflo-admin-handoff-matrix-filters.mjs",
   "scripts/validate-kinflo-configuration-review-deep-links.mjs",
+  "scripts/validate-kinflo-configuration-change-set-deep-links.mjs",
+  "scripts/validate-kinflo-configuration-approval-matrix-deep-links.mjs",
   "scripts/validate-kinflo-configuration-save-request-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
@@ -2416,6 +2419,23 @@ requireIncludes("docs/phase142-configuration-change-set-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase143-configuration-approval-matrix-deep-links.md", [
+  "Phase 143: Configuration Approval Matrix Deep Links",
+  "npm run kinflo:validate-configuration-approval-matrix-deep-links",
+  "studioApproval=blockers|evidence|functions",
+  "studioConfig=blockers|evidence|functions",
+  "studioChange=blockers|evidence|functions",
+  "studioSave=blockers|evidence|audit|rollback|publish|domain|invite|experience|functions",
+  "readInitialClientConfigurationApprovalDetail",
+  "selectClientConfigurationApprovalDetail",
+  "tabs-kinflo-client-configuration-approval-detail",
+  "section-kinflo-client-configuration-approval-blockers",
+  "section-kinflo-client-configuration-approval-evidence",
+  "section-kinflo-client-configuration-approval-functions",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase141-configuration-save-request-deep-links.md", [
   "Phase 141: Configuration Save Request Deep Links",
   "npm run kinflo:validate-configuration-save-request-deep-links",
@@ -2693,6 +2713,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase139-admin-handoff-matrix-filters.md\"",
   "\"docs/phase140-configuration-review-deep-links.md\"",
   "\"docs/phase142-configuration-change-set-deep-links.md\"",
+  "\"docs/phase143-configuration-approval-matrix-deep-links.md\"",
   "\"docs/phase141-configuration-save-request-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
@@ -2754,6 +2775,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-admin-handoff-matrix-filters\"",
   "\"npm run kinflo:validate-configuration-review-deep-links\"",
   "\"npm run kinflo:validate-configuration-change-set-deep-links\"",
+  "\"npm run kinflo:validate-configuration-approval-matrix-deep-links\"",
   "\"npm run kinflo:validate-configuration-save-request-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
@@ -2902,6 +2924,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-admin-handoff-matrix-filters\"",
   "\"kinflo:validate-configuration-review-deep-links\"",
   "\"kinflo:validate-configuration-change-set-deep-links\"",
+  "\"kinflo:validate-configuration-approval-matrix-deep-links\"",
   "\"kinflo:validate-configuration-save-request-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
@@ -4348,6 +4371,19 @@ requireIncludes("scripts/validate-kinflo-configuration-change-set-deep-links.mjs
   "configuration change-set deep links do not import generated API",
   "configuration change-set deep links do not execute live Convex",
   "KinFlo configuration change-set deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-approval-matrix-deep-links.mjs", [
+  "docs/phase143-configuration-approval-matrix-deep-links.md",
+  "studioApproval",
+  "studioConfig",
+  "studioChange",
+  "studioSave",
+  "readInitialClientConfigurationApprovalDetail",
+  "selectClientConfigurationApprovalDetail",
+  "configuration approval-matrix deep links do not import generated API",
+  "configuration approval-matrix deep links do not execute live Convex",
+  "KinFlo configuration approval-matrix deep-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [

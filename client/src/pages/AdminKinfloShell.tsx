@@ -150,6 +150,8 @@ const clientConfigurationReviewDetailValues = ["blockers", "evidence", "function
 type ClientConfigurationReviewDetail = (typeof clientConfigurationReviewDetailValues)[number];
 const clientConfigurationChangeDetailValues = ["blockers", "evidence", "functions"] as const;
 type ClientConfigurationChangeDetail = (typeof clientConfigurationChangeDetailValues)[number];
+const clientConfigurationApprovalDetailValues = ["blockers", "evidence", "functions"] as const;
+type ClientConfigurationApprovalDetail = (typeof clientConfigurationApprovalDetailValues)[number];
 const clientConfigurationSaveDetailValues = ["blockers", "evidence", "audit", "rollback", "publish", "domain", "invite", "experience", "functions"] as const;
 type ClientConfigurationSaveDetail = (typeof clientConfigurationSaveDetailValues)[number];
 
@@ -409,6 +411,16 @@ function readInitialClientConfigurationChangeDetail(): ClientConfigurationChange
   const detail = new URLSearchParams(window.location.search).get("studioChange");
   return clientConfigurationChangeDetailValues.includes(detail as ClientConfigurationChangeDetail)
     ? (detail as ClientConfigurationChangeDetail)
+    : "blockers";
+}
+
+function readInitialClientConfigurationApprovalDetail(): ClientConfigurationApprovalDetail {
+  if (typeof window === "undefined") {
+    return "blockers";
+  }
+  const detail = new URLSearchParams(window.location.search).get("studioApproval");
+  return clientConfigurationApprovalDetailValues.includes(detail as ClientConfigurationApprovalDetail)
+    ? (detail as ClientConfigurationApprovalDetail)
     : "blockers";
 }
 
@@ -1175,6 +1187,8 @@ function ClientWebsiteConfigurationProfiles({
   onReviewDetailChange,
   changeDetail,
   onChangeDetailChange,
+  approvalDetail,
+  onApprovalDetailChange,
   saveDetail,
   onSaveDetailChange,
   testIds,
@@ -1194,6 +1208,8 @@ function ClientWebsiteConfigurationProfiles({
   onReviewDetailChange: (detail: ClientConfigurationReviewDetail) => void;
   changeDetail: ClientConfigurationChangeDetail;
   onChangeDetailChange: (detail: ClientConfigurationChangeDetail) => void;
+  approvalDetail: ClientConfigurationApprovalDetail;
+  onApprovalDetailChange: (detail: ClientConfigurationApprovalDetail) => void;
   saveDetail: ClientConfigurationSaveDetail;
   onSaveDetailChange: (detail: ClientConfigurationSaveDetail) => void;
   testIds: typeof clientWebsiteConfigurationProfileTestIds;
@@ -1500,7 +1516,12 @@ function ClientWebsiteConfigurationProfiles({
               ))}
             </div>
 
-            <Tabs defaultValue="blockers" className="min-w-0" data-testid="tabs-kinflo-client-configuration-approval-detail">
+            <Tabs
+              value={approvalDetail}
+              onValueChange={(value) => onApprovalDetailChange(value as ClientConfigurationApprovalDetail)}
+              className="min-w-0"
+              data-testid="tabs-kinflo-client-configuration-approval-detail"
+            >
               <TabsList className="grid h-auto w-full grid-cols-3 bg-white p-1">
                 <TabsTrigger value="blockers" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-approval-blockers">Blockers</TabsTrigger>
                 <TabsTrigger value="evidence" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-approval-evidence">Evidence</TabsTrigger>
@@ -2428,6 +2449,7 @@ export default function AdminKinfloShell() {
   const [clientAdminHandoffMatrixFilter, setClientAdminHandoffMatrixFilter] = useState<ClientAdminHandoffMatrixFilter>(readInitialClientAdminHandoffMatrixFilter);
   const [clientConfigurationReviewDetail, setClientConfigurationReviewDetail] = useState<ClientConfigurationReviewDetail>(readInitialClientConfigurationReviewDetail);
   const [clientConfigurationChangeDetail, setClientConfigurationChangeDetail] = useState<ClientConfigurationChangeDetail>(readInitialClientConfigurationChangeDetail);
+  const [clientConfigurationApprovalDetail, setClientConfigurationApprovalDetail] = useState<ClientConfigurationApprovalDetail>(readInitialClientConfigurationApprovalDetail);
   const [clientConfigurationSaveDetail, setClientConfigurationSaveDetail] = useState<ClientConfigurationSaveDetail>(readInitialClientConfigurationSaveDetail);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
@@ -3308,6 +3330,7 @@ export default function AdminKinfloShell() {
     const nextHandoffMatrixFilter = readInitialClientAdminHandoffMatrixFilter();
     const nextConfigurationReviewDetail = readInitialClientConfigurationReviewDetail();
     const nextConfigurationChangeDetail = readInitialClientConfigurationChangeDetail();
+    const nextConfigurationApprovalDetail = readInitialClientConfigurationApprovalDetail();
     const nextConfigurationSaveDetail = readInitialClientConfigurationSaveDetail();
     const nextAdapterSwitchBatchId = readInitialAdapterSwitchBatchId(
       snapshot.adapterSwitchReadiness.defaultBatchId,
@@ -3345,6 +3368,7 @@ export default function AdminKinfloShell() {
     setClientAdminHandoffMatrixFilter((current) => (current === nextHandoffMatrixFilter ? current : nextHandoffMatrixFilter));
     setClientConfigurationReviewDetail((current) => (current === nextConfigurationReviewDetail ? current : nextConfigurationReviewDetail));
     setClientConfigurationChangeDetail((current) => (current === nextConfigurationChangeDetail ? current : nextConfigurationChangeDetail));
+    setClientConfigurationApprovalDetail((current) => (current === nextConfigurationApprovalDetail ? current : nextConfigurationApprovalDetail));
     setClientConfigurationSaveDetail((current) => (current === nextConfigurationSaveDetail ? current : nextConfigurationSaveDetail));
     setAdapterSwitchBatchId((current) => (current === nextAdapterSwitchBatchId ? current : nextAdapterSwitchBatchId));
     setAdapterSwitchSurfaceId((current) => (current === nextAdapterSwitchSurfaceId ? current : nextAdapterSwitchSurfaceId));
@@ -3437,6 +3461,7 @@ export default function AdminKinfloShell() {
     const shouldKeepHandoffMatrixFilter = shouldKeepHandoffWorkspace && clientWebsiteHandoffWorkspace === "matrix";
     const shouldKeepConfigurationReviewDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     const shouldKeepConfigurationChangeDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
+    const shouldKeepConfigurationApprovalDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     const shouldKeepConfigurationSaveDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     updateKinfloShellRoute({
       tab,
@@ -3449,6 +3474,7 @@ export default function AdminKinfloShell() {
       studioMatrix: shouldKeepHandoffMatrixFilter ? clientAdminHandoffMatrixFilter : undefined,
       studioConfig: shouldKeepConfigurationReviewDetail ? clientConfigurationReviewDetail : undefined,
       studioChange: shouldKeepConfigurationChangeDetail ? clientConfigurationChangeDetail : undefined,
+      studioApproval: shouldKeepConfigurationApprovalDetail ? clientConfigurationApprovalDetail : undefined,
       studioSave: shouldKeepConfigurationSaveDetail ? clientConfigurationSaveDetail : undefined,
       adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
       adapterSurface: tab === "adapter-switch" ? adapterSwitchSurfaceId : undefined,
@@ -3477,6 +3503,7 @@ export default function AdminKinfloShell() {
         : undefined,
       studioConfig: clientWebsiteStudioLane === "configuration" ? clientConfigurationReviewDetail : undefined,
       studioChange: clientWebsiteStudioLane === "configuration" ? clientConfigurationChangeDetail : undefined,
+      studioApproval: clientWebsiteStudioLane === "configuration" ? clientConfigurationApprovalDetail : undefined,
       studioSave: clientWebsiteStudioLane === "configuration" ? clientConfigurationSaveDetail : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3505,6 +3532,7 @@ export default function AdminKinfloShell() {
         : undefined,
       studioConfig: lane === "configuration" ? clientConfigurationReviewDetail : undefined,
       studioChange: lane === "configuration" ? clientConfigurationChangeDetail : undefined,
+      studioApproval: lane === "configuration" ? clientConfigurationApprovalDetail : undefined,
       studioSave: lane === "configuration" ? clientConfigurationSaveDetail : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3530,6 +3558,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: detail,
       studioChange: clientConfigurationChangeDetail,
+      studioApproval: clientConfigurationApprovalDetail,
       studioSave: clientConfigurationSaveDetail,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3555,6 +3584,33 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: clientConfigurationReviewDetail,
       studioChange: detail,
+      studioApproval: clientConfigurationApprovalDetail,
+      studioSave: clientConfigurationSaveDetail,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+    });
+  };
+
+  const selectClientConfigurationApprovalDetail = (detail: ClientConfigurationApprovalDetail) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("configuration");
+    setClientConfigurationApprovalDetail(detail);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "configuration",
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      studioConfig: clientConfigurationReviewDetail,
+      studioChange: clientConfigurationChangeDetail,
+      studioApproval: detail,
       studioSave: clientConfigurationSaveDetail,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3580,6 +3636,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: clientConfigurationReviewDetail,
       studioChange: clientConfigurationChangeDetail,
+      studioApproval: clientConfigurationApprovalDetail,
       studioSave: detail,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3605,6 +3662,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3631,6 +3689,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3658,6 +3717,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3683,6 +3743,7 @@ export default function AdminKinfloShell() {
       studioMatrix: workspace === "matrix" ? clientAdminHandoffMatrixFilter : undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3709,6 +3770,7 @@ export default function AdminKinfloShell() {
       studioMatrix: filter,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3736,6 +3798,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: batchId,
       adapterSurface: surfaceId,
@@ -3760,6 +3823,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: adapterSwitchBatchId,
       adapterSurface: surfaceId,
@@ -3784,6 +3848,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3808,6 +3873,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3832,6 +3898,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -3856,6 +3923,7 @@ export default function AdminKinfloShell() {
       studioMatrix: undefined,
       studioConfig: undefined,
       studioChange: undefined,
+      studioApproval: undefined,
       studioSave: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
@@ -8546,6 +8614,8 @@ export default function AdminKinfloShell() {
                     onReviewDetailChange={selectClientConfigurationReviewDetail}
                     changeDetail={clientConfigurationChangeDetail}
                     onChangeDetailChange={selectClientConfigurationChangeDetail}
+                    approvalDetail={clientConfigurationApprovalDetail}
+                    onApprovalDetailChange={selectClientConfigurationApprovalDetail}
                     saveDetail={clientConfigurationSaveDetail}
                     onSaveDetailChange={selectClientConfigurationSaveDetail}
                     testIds={clientWebsiteConfigurationProfileTestIds}
