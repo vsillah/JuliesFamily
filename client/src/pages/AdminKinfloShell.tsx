@@ -5816,6 +5816,83 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
+                  <div className="mt-4 rounded-xl border border-cyan-200 bg-cyan-50 p-3" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-cyan-300 bg-white text-cyan-900">
+                            Phase {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.phase}
+                          </Badge>
+                          <Badge className="bg-cyan-800 hover:bg-cyan-800">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.status.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <h4 className="mt-3 text-sm font-semibold text-cyan-950">Sanitized preflight repository record</h4>
+                        <p className="mt-1 max-w-3xl text-xs leading-5 text-cyan-900" data-testid="text-kinflo-hosted-sanitized-preflight-repository-record">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.nextGate}
+                        </p>
+                      </div>
+                      <Button size="sm" disabled variant="outline" className="self-start border-cyan-300 bg-white text-cyan-900 hover:bg-white hover:text-cyan-900" data-testid="button-hosted-sanitized-preflight-repository-record-gated">
+                        <ShieldCheck className="mr-2 h-3 w-3" />
+                        Record creation gated
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record-summary">
+                      {[
+                        { label: "Fields", value: snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.totalRecordFields },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.pendingRecordFields },
+                        { label: "Accepted", value: snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.acceptedRecordFields },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-lg border border-cyan-200 bg-white px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-cyan-700">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+                      <div className="grid max-h-[280px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record-fields">
+                        {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.recordFields.map((field) => (
+                          <div key={field.id} className="rounded-lg border border-cyan-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{field.label}</div>
+                                <div className="mt-1 break-all text-xs leading-5 text-slate-500">{field.sourceField}</div>
+                              </div>
+                              <Badge variant="outline" className="w-fit shrink-0 border-cyan-200 bg-cyan-50 text-cyan-800">{field.recordState.replaceAll("_", " ")}</Badge>
+                            </div>
+                            <p className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-900">{field.allowedCommittedValue}</p>
+                            <p className="mt-2 rounded-md border border-rose-100 bg-rose-50 p-2 text-xs leading-5 text-rose-800">{field.redactionRule}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="min-w-0 space-y-2">
+                        <div className="rounded-lg border border-cyan-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-cyan-700">Proposed record</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.proposedRecordPath}
+                          </div>
+                        </div>
+                        <div className="rounded-lg border border-cyan-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-cyan-700">Review packet</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.reviewPacketPath}
+                          </div>
+                        </div>
+                        <div className="max-h-[170px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-repository-record-rules">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightRepositoryRecord.recordRules.map((rule) => (
+                            <div key={rule} className="flex items-start gap-2 rounded-lg border border-cyan-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-700" />
+                              <span>{rule}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
                     <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -7842,7 +7919,7 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="site-studio" className="mt-2">
-            <section className="min-w-0 space-y-2 overflow-hidden" data-testid="section-kinflo-client-studio-compact-shell">
+            <section className="flex min-w-0 flex-col gap-2 overflow-hidden" data-testid="section-kinflo-client-studio-compact-shell">
               <div
                 className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "overflow-hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
@@ -7933,9 +8010,9 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className="min-w-0 overflow-hidden" data-testid="tabs-kinflo-client-studio-lanes">
+              <div className="contents" data-testid="tabs-kinflo-client-studio-lanes">
                 <div
-                  className="sticky top-0 z-20 flex flex-col gap-1 border-y border-slate-200 bg-white/95 py-1.5 backdrop-blur sm:gap-2 sm:py-2 lg:flex-row lg:items-center lg:justify-between"
+                  className="order-first sticky top-0 z-20 flex flex-col gap-1 border-y border-slate-200 bg-white/95 py-1.5 backdrop-blur sm:gap-2 sm:py-2 lg:flex-row lg:items-center lg:justify-between"
                   data-testid="section-kinflo-client-studio-lane-switcher"
                 >
                   <div className="grid h-auto w-full grid-cols-4 gap-1 rounded-md bg-slate-100 p-1 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">

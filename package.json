@@ -82,6 +82,7 @@
     "kinflo:validate-hosted-activation-raw-preflight-output-redaction-checklist": "node scripts/validate-kinflo-hosted-activation-raw-preflight-output-redaction-checklist.mjs",
     "kinflo:validate-hosted-activation-sanitized-preflight-result-capture": "node scripts/validate-kinflo-hosted-activation-sanitized-preflight-result-capture.mjs",
     "kinflo:validate-hosted-activation-sanitized-preflight-result-commit-review": "node scripts/validate-kinflo-hosted-activation-sanitized-preflight-result-commit-review.mjs",
+    "kinflo:validate-hosted-activation-sanitized-preflight-repository-record": "node scripts/validate-kinflo-hosted-activation-sanitized-preflight-repository-record.mjs",
     "kinflo:validate-design-frame-backlog": "node scripts/validate-kinflo-design-frame-backlog.mjs",
     "kinflo:validate-active-object-signal": "node scripts/validate-kinflo-active-object-signal.mjs",
     "kinflo:validate-client-workbench-grid": "node scripts/validate-kinflo-client-workbench-grid.mjs",

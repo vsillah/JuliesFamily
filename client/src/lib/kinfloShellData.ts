@@ -753,6 +753,45 @@ export type ShellHostedActivationSanitizedPreflightResultCommitReview = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationSanitizedPreflightRepositoryRecordField = {
+  id: string;
+  label: string;
+  sourceField: string;
+  allowedCommittedValue: string;
+  redactionRule: string;
+  recordState: "blocked_until_commit_review_accepted";
+};
+
+export type ShellHostedActivationSanitizedPreflightRepositoryRecord = {
+  phase: 136;
+  status: "prepare_only_sanitized_preflight_repository_record";
+  decisionId: "sanitized-preflight-repository-record";
+  owner: "Vambah";
+  proposedRecordPath: "docs/convex-activation-preflight-sanitized-result.json";
+  totalRecordFields: number;
+  pendingRecordFields: number;
+  acceptedRecordFields: number;
+  nextGate: string;
+  reviewPacketPath: "docs/phase136-hosted-activation-sanitized-preflight-repository-record.md";
+  sourceDocuments: string[];
+  recordFields: ShellHostedActivationSanitizedPreflightRepositoryRecordField[];
+  recordRules: string[];
+  blockedActions: string[];
+  canCreateRepositoryRecord: false;
+  canCommitRepositoryRecord: false;
+  canCommitRawOutput: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -775,6 +814,7 @@ export type ShellHostedActivationRunbook = {
   rawPreflightOutputRedactionChecklist: ShellHostedActivationRawPreflightOutputRedactionChecklist;
   sanitizedPreflightResultCapture: ShellHostedActivationSanitizedPreflightResultCapture;
   sanitizedPreflightResultCommitReview: ShellHostedActivationSanitizedPreflightResultCommitReview;
+  sanitizedPreflightRepositoryRecord: ShellHostedActivationSanitizedPreflightRepositoryRecord;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -8864,6 +8904,108 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canReviewSanitizedResult: false,
     canCommitSanitizedResult: false,
     canRecordApprovedResult: false,
+    canCommitRawOutput: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  sanitizedPreflightRepositoryRecord: {
+    phase: 136,
+    status: "prepare_only_sanitized_preflight_repository_record",
+    decisionId: "sanitized-preflight-repository-record",
+    owner: "Vambah",
+    proposedRecordPath: "docs/convex-activation-preflight-sanitized-result.json",
+    totalRecordFields: 6,
+    pendingRecordFields: 6,
+    acceptedRecordFields: 0,
+    nextGate: "After Phase 132 storage, Phase 133 redaction, Phase 134 capture, and Phase 135 commit review are accepted, create the repository record with only the six sanitized fields and one short non-secret note.",
+    reviewPacketPath: "docs/phase136-hosted-activation-sanitized-preflight-repository-record.md",
+    sourceDocuments: [
+      "docs/phase128-hosted-activation-preflight-result-contract.md",
+      "docs/phase130-hosted-activation-preflight-result-template.md",
+      "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
+      "docs/phase133-hosted-activation-raw-preflight-output-redaction-checklist.md",
+      "docs/phase134-hosted-activation-sanitized-preflight-result-capture.md",
+      "docs/phase135-hosted-activation-sanitized-preflight-result-commit-review.md",
+    ],
+    recordFields: [
+      {
+        id: "local-env-present",
+        label: "Local env present",
+        sourceField: "sanitizedPreflightResultCapture.fields.local-env-present",
+        allowedCommittedValue: "boolean only",
+        redactionRule: "No env names, values, shell exports, local paths, 1Password item names, or masked secret fragments.",
+        recordState: "blocked_until_commit_review_accepted",
+      },
+      {
+        id: "generated-directory-present",
+        label: "Generated directory present",
+        sourceField: "sanitizedPreflightResultCapture.fields.generated-directory-present",
+        allowedCommittedValue: "boolean only",
+        redactionRule: "No generated file contents, generated API import snippets, file tree dumps, or codegen output.",
+        recordState: "blocked_until_commit_review_accepted",
+      },
+      {
+        id: "hosted-env-visible",
+        label: "Hosted env visible",
+        sourceField: "sanitizedPreflightResultCapture.fields.hosted-env-visible",
+        allowedCommittedValue: "boolean only",
+        redactionRule: "No dashboard URLs, deployment names, issuer URLs, client ids, provider ids, or environment variable names/values.",
+        recordState: "blocked_until_commit_review_accepted",
+      },
+      {
+        id: "external-writes",
+        label: "External writes",
+        sourceField: "sanitizedPreflightResultCapture.fields.external-writes",
+        allowedCommittedValue: "number; repo-safe record requires 0",
+        redactionRule: "Any nonzero write count, mutation response, provider response, or created resource id remains private and blocks the record.",
+        recordState: "blocked_until_commit_review_accepted",
+      },
+      {
+        id: "hosted-deployment-touched",
+        label: "Hosted deployment touched",
+        sourceField: "sanitizedPreflightResultCapture.fields.hosted-deployment-touched",
+        allowedCommittedValue: "boolean; repo-safe record requires false",
+        redactionRule: "If true, do not commit the record; keep the private evidence in the owner-approved raw-output store.",
+        recordState: "blocked_until_commit_review_accepted",
+      },
+      {
+        id: "preflight-result-status",
+        label: "Preflight result status",
+        sourceField: "sanitizedPreflightResultCapture.fields.preflight-result-status",
+        allowedCommittedValue: "passed | blocked | aborted",
+        redactionRule: "One short non-secret note only; no raw stack trace, command output, provider text, identifiers, URLs, paths, or secret-shaped fragments.",
+        recordState: "blocked_until_commit_review_accepted",
+      },
+    ],
+    recordRules: [
+      "Do not create docs/convex-activation-preflight-sanitized-result.json until the Phase 135 owner commit review is accepted.",
+      "The eventual repository record may include only the six sanitized fields, the decision id, the approved owner posture, and one short non-secret note.",
+      "Never commit raw command output, preflight logs, stack traces, local paths, provider ids, hosted deployment identifiers, dashboard URLs, secrets, masked secret fragments, or generated API contents.",
+      "A repo-safe record requires external-writes to equal 0 and hosted-deployment-touched to equal false.",
+      "This packet is not approval to run hosted preflight, codegen, generated API import, live smoke, adapter switch, provider writes, or client launch.",
+    ],
+    blockedActions: [
+      "create the sanitized preflight repository record before owner commit review",
+      "commit raw activation preflight output or logs",
+      "commit private evidence locations, provider identifiers, hosted deployment identifiers, local paths, URLs, secrets, stack traces, or masked secret fragments",
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "execute hosted read or mutation smoke",
+      "perform provider writes or client launch",
+    ],
+    canCreateRepositoryRecord: false,
+    canCommitRepositoryRecord: false,
     canCommitRawOutput: false,
     canEnterEnvValues: false,
     canRunAgainstRealEnv: false,
