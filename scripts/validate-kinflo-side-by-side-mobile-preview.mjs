@@ -113,12 +113,16 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"phaseDoc\": \"docs/phase154-side-by-side-mobile-preview.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-side-by-side-mobile-preview\"",
   "\"status\": \"implemented_provider_light\"",
-  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with handoff readiness checklist next after the Phase 154 side-by-side mobile preview.\"",
+  "\"phaseDoc\": \"docs/phase155-handoff-readiness-checklist.md\"",
+  "\"validationCommand\": \"npm run kinflo:validate-handoff-readiness-checklist\"",
+  "\"nextAction\": \"All accepted Claude Code provider-light deltas are implemented; continue hosted activation owner gates or choose the next design-frame backlog item.\"",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase154-side-by-side-mobile-preview.md\"",
   "\"npm run kinflo:validate-side-by-side-mobile-preview\"",
+  "\"docs/phase155-handoff-readiness-checklist.md\"",
+  "\"npm run kinflo:validate-handoff-readiness-checklist\"",
   "Phase 154 side-by-side mobile preview",
 ]);
 
@@ -130,7 +134,9 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
   "Phase 154 implements the side-by-side mobile preview",
   "npm run kinflo:validate-side-by-side-mobile-preview",
-  "handoff readiness checklist remains the next provider-light design delta",
+  "Phase 155 implements the handoff readiness checklist",
+  "npm run kinflo:validate-handoff-readiness-checklist",
+  "All accepted Claude Code provider-light deltas are now implemented",
 ]);
 
 requireIncludes("package.json", [

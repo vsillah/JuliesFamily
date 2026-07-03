@@ -99,7 +99,7 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"implementedDeltas\"",
   "\"phaseDoc\": \"docs/phase150-persistent-identity-strip.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-persistent-identity-strip\"",
-  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with handoff readiness checklist next after the Phase 154 side-by-side mobile preview.\"",
+  "\"nextAction\": \"All accepted Claude Code provider-light deltas are implemented; continue hosted activation owner gates or choose the next design-frame backlog item.\"",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [

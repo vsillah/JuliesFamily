@@ -124,6 +124,8 @@ requireIncludes(backlogPath, [
   "\"npm run kinflo:validate-primary-configure-metric\"",
   "\"docs/phase154-side-by-side-mobile-preview.md\"",
   "\"npm run kinflo:validate-side-by-side-mobile-preview\"",
+  "\"docs/phase155-handoff-readiness-checklist.md\"",
+  "\"npm run kinflo:validate-handoff-readiness-checklist\"",
 ]);
 
 requireIncludes("package.json", [

@@ -107,7 +107,7 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"phaseDoc\": \"docs/phase151-gate-card-pattern.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-gate-card-pattern\"",
   "\"status\": \"implemented_provider_light\"",
-  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with handoff readiness checklist next after the Phase 154 side-by-side mobile preview.\"",
+  "\"nextAction\": \"All accepted Claude Code provider-light deltas are implemented; continue hosted activation owner gates or choose the next design-frame backlog item.\"",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
@@ -122,7 +122,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
 
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
   "Phase 151 implements the second delta as `docs/phase151-gate-card-pattern.md` with `npm run kinflo:validate-gate-card-pattern`.",
-  "handoff readiness checklist remains the next provider-light design delta",
+  "All accepted Claude Code provider-light deltas are now implemented",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [

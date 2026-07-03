@@ -272,6 +272,17 @@ const clientHandoffPermissionStripTestIds = {
   gatedAction: "section-kinflo-client-handoff-permission-strip-gated-action",
 } as const;
 
+const clientHandoffReadinessChecklistTestIds = {
+  root: "section-kinflo-client-handoff-readiness-checklist",
+  summary: "section-kinflo-client-handoff-readiness-summary",
+  profile: "section-kinflo-client-handoff-readiness-profile",
+  permissions: "section-kinflo-client-handoff-readiness-permissions",
+  domain: "section-kinflo-client-handoff-readiness-domain",
+  invite: "section-kinflo-client-handoff-readiness-invite",
+  publish: "section-kinflo-client-handoff-readiness-publish",
+  gatedAction: "button-client-handoff-readiness-gated",
+} as const;
+
 const clientAdminHandoffMatrixTestIds = {
   root: "section-kinflo-client-admin-handoff-matrix",
   summary: "section-kinflo-client-admin-handoff-matrix-summary",
@@ -1048,6 +1059,179 @@ function ClientWebsiteSideBySideMobilePreview({
         </div>
       </div>
     </div>
+  );
+}
+
+function ClientHandoffReadinessChecklist({
+  site,
+  profile,
+  permissionPreset,
+  domainReadiness,
+  invitationReadiness,
+  publishReadiness,
+  testIds,
+}: {
+  site?: ShellClientWebsiteStudioSite;
+  profile?: ShellClientWebsiteConfigurationProfiles["profiles"][number];
+  permissionPreset?: ShellClientWebsiteAdminPermissionPreset;
+  domainReadiness?: ShellClientWebsiteDomainReadinessPacket;
+  invitationReadiness?: ShellClientWebsiteAdminInvitationReadinessPacket;
+  publishReadiness?: ShellClientWebsiteConfigurationPublishReadiness;
+  testIds: typeof clientHandoffReadinessChecklistTestIds;
+}) {
+  type HandoffStatus = "ready" | "pending" | "blocked";
+
+  const mapConfigStatus = (status?: ShellClientWebsiteConfigurationProfiles["profiles"][number]["configurationStatus"]): HandoffStatus => {
+    if (status === "ready_for_review") return "ready";
+    if (status === "draft") return "pending";
+    return "blocked";
+  };
+  const mapChecklistStatus = (statuses: ("ready" | "pending" | "blocked")[]): HandoffStatus => {
+    if (statuses.includes("blocked")) return "blocked";
+    if (statuses.includes("pending") || statuses.length === 0) return "pending";
+    return "ready";
+  };
+  const statusTone: Record<HandoffStatus, string> = {
+    ready: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    pending: "border-amber-200 bg-amber-50 text-amber-800",
+    blocked: "border-rose-200 bg-rose-50 text-rose-800",
+  };
+  const statusIcon: Record<HandoffStatus, typeof CheckCircle2> = {
+    ready: CheckCircle2,
+    pending: CircleDashed,
+    blocked: ShieldCheck,
+  };
+
+  const profileStatus = mapConfigStatus(profile?.configurationStatus);
+  const permissionsStatus: HandoffStatus = (permissionPreset?.blockedActions.length ?? 0) > 0 ? "blocked" : "ready";
+  const domainStatus: HandoffStatus = domainReadiness?.domainStatus === "verified_fixture"
+    ? "ready"
+    : domainReadiness?.domainStatus === "pending_dns"
+      ? "pending"
+      : "blocked";
+  const inviteStatus = mapChecklistStatus((invitationReadiness?.evidenceChecklist ?? []).map((item) => item.status));
+  const publishStatus: HandoffStatus = publishReadiness?.readinessStatus === "ready_for_review"
+    ? "ready"
+    : publishReadiness?.readinessStatus === "draft"
+      ? "pending"
+      : "blocked";
+
+  const checklistItems = [
+    {
+      key: "profile",
+      label: "Profile",
+      status: profileStatus,
+      evidence: profile
+        ? `${profile.brandProfile} · ${profile.navigationProfile} · ${profile.contentPack}`
+        : "Configuration profile pending",
+      gate: profile?.nextGate ?? "Select a configuration profile before handoff.",
+      testId: testIds.profile,
+    },
+    {
+      key: "permissions",
+      label: "Permissions",
+      status: permissionsStatus,
+      evidence: permissionPreset
+        ? `${permissionPreset.ownerRole} owns ${permissionPreset.scope} scope with ${permissionPreset.permissionSet.length} mapped permissions`
+        : "Permission preset pending",
+      gate: permissionPreset?.approvalGates[0] ?? permissionPreset?.blockedActions[0] ?? "Approve permission scope before invite.",
+      testId: testIds.permissions,
+    },
+    {
+      key: "domain",
+      label: "Domain",
+      status: domainStatus,
+      evidence: domainReadiness
+        ? `${domainReadiness.hostname} · ${domainReadiness.verificationMode.replaceAll("_", " ")}`
+        : "Domain readiness pending",
+      gate: domainReadiness?.nextGate ?? "Review domain, DNS, SSL, and rollback evidence.",
+      testId: testIds.domain,
+    },
+    {
+      key: "invite",
+      label: "Invite",
+      status: inviteStatus,
+      evidence: invitationReadiness
+        ? `${invitationReadiness.inviteRole} · ${invitationReadiness.deliveryMode.replaceAll("_", " ")}`
+        : "Invitation readiness pending",
+      gate: invitationReadiness?.nextGate ?? "Approve hosted auth, role scope, and rollback evidence.",
+      testId: testIds.invite,
+    },
+    {
+      key: "publish",
+      label: "Publish",
+      status: publishStatus,
+      evidence: publishReadiness
+        ? `${publishReadiness.readyCriteriaCount}/${publishReadiness.criteria.length} criteria ready`
+        : "Publish readiness pending",
+      gate: publishReadiness?.nextGate ?? "Complete publish, rollback, visual QA, and hosted smoke evidence.",
+      testId: testIds.publish,
+    },
+  ];
+  const readyCount = checklistItems.filter((item) => item.status === "ready").length;
+  const blockedCount = checklistItems.filter((item) => item.status === "blocked").length;
+  const readinessPercent = Math.round((readyCount / checklistItems.length) * 100);
+
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-slate-50">Handoff readiness</Badge>
+            <Badge className="bg-slate-950 hover:bg-slate-950">{readyCount}/{checklistItems.length} ready</Badge>
+          </div>
+          <h3 className="mt-3 text-base font-semibold text-slate-950">Handoff readiness checklist</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            {site?.label ?? "Selected site"} must satisfy profile, permission, domain, invite, and publish evidence before a client-facing handoff can move out of local review.
+          </p>
+        </div>
+        <Button disabled variant="outline" data-testid={testIds.gatedAction}>
+          <ShieldCheck className="mr-2 h-4 w-4" />
+          Handoff remains gated
+        </Button>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-[220px_minmax(0,1fr)]">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid={testIds.summary}>
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-slate-950">Readiness</span>
+            <span className="text-slate-500">{readinessPercent}%</span>
+          </div>
+          <Progress value={readinessPercent} className="mt-2" />
+          <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+            <div className="rounded-lg border border-slate-200 bg-white p-2">
+              <div className="text-[10px] uppercase tracking-normal text-slate-500">Ready</div>
+              <div className="mt-1 text-lg font-semibold text-slate-950">{readyCount}</div>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-white p-2">
+              <div className="text-[10px] uppercase tracking-normal text-slate-500">Blocked</div>
+              <div className="mt-1 text-lg font-semibold text-slate-950">{blockedCount}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-5">
+          {checklistItems.map((item) => {
+            const StatusIcon = statusIcon[item.status];
+            return (
+              <div key={item.key} className="min-w-0 rounded-xl border border-slate-200 bg-white p-3" data-testid={item.testId}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                    <Badge variant="outline" className={`mt-2 ${statusTone[item.status]}`}>
+                      <StatusIcon className="mr-1 h-3 w-3" />
+                      {item.status}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="mt-3 text-xs leading-5 text-slate-700">{item.evidence}</p>
+                <div className="mt-3 border-t border-slate-100 pt-2 text-xs leading-5 text-slate-500">{item.gate}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -3516,6 +3700,11 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.adminPermissionPresets[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.adminPermissionPresets],
   );
+  const selectedClientWebsiteConfigurationProfile = useMemo(
+    () => snapshot.clientWebsiteStudio.configurationProfiles.profiles.find((profile) => profile.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.configurationProfiles.profiles[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationProfiles.profiles],
+  );
   const selectedClientWebsiteProvisioningOrder = useMemo(
     () => snapshot.clientWebsiteStudio.provisioningOrders.find((order) => order.siteKey === selectedClientWebsiteStudioSite?.key)
       ?? snapshot.clientWebsiteStudio.provisioningOrders[0],
@@ -4831,7 +5020,6 @@ export default function AdminKinfloShell() {
               </Button>
             </div>
           </div>
-          {activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null}
           <div
             className="grid min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]"
             data-testid="section-kinflo-persistent-identity-strip"
@@ -9355,6 +9543,8 @@ export default function AdminKinfloShell() {
 
           <TabsContent value="site-studio" className="mt-2">
             <section className="flex min-w-0 flex-col gap-2 overflow-x-hidden" data-testid="section-kinflo-client-studio-compact-shell">
+              {clientWebsiteStudioLaneRail}
+
               <div
                 className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "overflow-hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
@@ -9509,7 +9699,16 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
 
-                    <TabsContent value="selected" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.selected}>
+                    <TabsContent value="selected" className="mt-3 space-y-3" data-testid={clientHandoffWorkspaceTestIds.selected}>
+                      <ClientHandoffReadinessChecklist
+                        site={selectedClientWebsiteStudioSite}
+                        profile={selectedClientWebsiteConfigurationProfile}
+                        permissionPreset={selectedClientWebsiteAdminPermissionPreset}
+                        domainReadiness={selectedClientWebsiteDomainReadinessPacket}
+                        invitationReadiness={selectedClientWebsiteAdminInvitationReadinessPacket}
+                        publishReadiness={selectedClientWebsiteConfigurationPublishReadiness}
+                        testIds={clientHandoffReadinessChecklistTestIds}
+                      />
                       <ClientHandoffPermissionStrip
                         site={selectedClientWebsiteStudioSite}
                         permissionPreset={selectedClientWebsiteAdminPermissionPreset}

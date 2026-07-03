@@ -105,10 +105,16 @@
           "phaseDoc": "docs/phase154-side-by-side-mobile-preview.md",
           "validationCommand": "npm run kinflo:validate-side-by-side-mobile-preview",
           "status": "implemented_provider_light"
+        },
+        {
+          "id": "handoff-readiness-checklist",
+          "phaseDoc": "docs/phase155-handoff-readiness-checklist.md",
+          "validationCommand": "npm run kinflo:validate-handoff-readiness-checklist",
+          "status": "implemented_provider_light"
         }
       ],
       "rejectedRecommendations": [],
-      "nextAction": "Continue the accepted provider-light deltas in order, with handoff readiness checklist next after the Phase 154 side-by-side mobile preview."
+      "nextAction": "All accepted Claude Code provider-light deltas are implemented; continue hosted activation owner gates or choose the next design-frame backlog item."
     }
   },
   "adoptionPrinciples": [

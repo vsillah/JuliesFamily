@@ -13,6 +13,7 @@ npm run kinflo:validate-client-studio-lane-anchor
 - lane section ID map: `clientWebsiteStudioLaneSectionTestIds`
 - lane top reset helper: `scrollClientWebsiteStudioLaneToTop`
 - top rail anchor: `tabs-kinflo-client-studio-lanes`
+- compact shell first control: `{clientWebsiteStudioLaneRail}`
 - lane sections:
   - `section-kinflo-client-studio-lane-queue`
   - `section-kinflo-client-studio-lane-configuration`
@@ -21,7 +22,7 @@ npm run kinflo:validate-client-studio-lane-anchor
 
 ## What Changed
 
-The shared Site Studio lane rail was already the header-first lane control. Phase 152 adds explicit lane-switch behavior so each lane change scrolls the rail back into view and resets the selected lane container to its top position.
+The shared Site Studio lane rail is the compact shell first control above the control room, selected-site summaries, and lane content. Phase 152 adds explicit lane-switch behavior so each lane change scrolls the rail back into view and resets the selected lane container to its top position.
 
 This keeps the same controls at the top of every Site Studio lane instead of allowing prior lane scroll state to make the next lane feel like it starts in the middle of the page.
 

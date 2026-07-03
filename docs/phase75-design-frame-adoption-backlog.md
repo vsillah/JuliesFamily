@@ -69,6 +69,8 @@ Phase 153 implements the primary Configure metric as `docs/phase153-primary-conf
 
 Phase 154 implements the side-by-side mobile preview as `docs/phase154-side-by-side-mobile-preview.md` with `npm run kinflo:validate-side-by-side-mobile-preview`. The handoff readiness checklist remains the next provider-light design delta.
 
+Phase 155 implements the handoff readiness checklist as `docs/phase155-handoff-readiness-checklist.md` with `npm run kinflo:validate-handoff-readiness-checklist`. All accepted Claude Code provider-light deltas are now implemented.
+
 The packet and response preserve redaction rules, prompt boundaries, and provider gates. They do not claim hosted Convex readiness or enable live writes.
 
 ## Provider Boundary

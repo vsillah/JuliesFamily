@@ -76,6 +76,7 @@ requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
   "clientWebsiteStudioLaneSectionTestIds",
   "scrollClientWebsiteStudioLaneToTop",
   "tabs-kinflo-client-studio-lanes",
+  "compact shell first control",
   "section-kinflo-client-studio-lane-queue",
   "section-kinflo-client-studio-lane-configuration",
   "section-kinflo-client-studio-lane-handoff",
@@ -93,6 +94,8 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "const scrollClientWebsiteStudioLaneToTop = (lane: ClientWebsiteStudioLane)",
   "querySelector('[data-testid=\"tabs-kinflo-client-studio-lanes\"]')",
   "scrollIntoView({ block: \"start\" })",
+  "section-kinflo-client-studio-compact-shell",
+  "{clientWebsiteStudioLaneRail}",
   "const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane]",
   "laneSection.scrollTo({ top: 0 })",
   "scrollClientWebsiteStudioLaneToTop(lane)",
@@ -103,7 +106,7 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"phaseDoc\": \"docs/phase152-client-studio-lane-anchor.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-client-studio-lane-anchor\"",
   "\"status\": \"implemented_provider_light\"",
-  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with handoff readiness checklist next after the Phase 154 side-by-side mobile preview.\"",
+  "\"nextAction\": \"All accepted Claude Code provider-light deltas are implemented; continue hosted activation owner gates or choose the next design-frame backlog item.\"",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
@@ -120,7 +123,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
   "Phase 152 adds the Client Studio lane anchor",
   "npm run kinflo:validate-client-studio-lane-anchor",
-  "handoff readiness checklist remains the next provider-light design delta",
+  "All accepted Claude Code provider-light deltas are now implemented",
 ]);
 
 requireIncludes("package.json", [
@@ -132,6 +135,29 @@ if (shellContents.includes("convex/_generated/api")) {
   fail("client Studio lane anchor does not import generated API", "Generated API imports remain gated until hosted activation approval.");
 } else {
   pass("client Studio lane anchor does not import generated API");
+}
+
+const siteStudioIndex = shellContents.indexOf('value="site-studio"');
+const railRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", siteStudioIndex);
+const controlRoomIndex = shellContents.indexOf('data-testid="section-kinflo-client-control-room-frame"', siteStudioIndex);
+const headerRailRenderIndex = shellContents.indexOf('activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null');
+
+if (siteStudioIndex !== -1 && railRenderIndex !== -1 && controlRoomIndex !== -1 && railRenderIndex < controlRoomIndex) {
+  pass("client Studio lane rail renders first inside the compact shell");
+} else {
+  fail(
+    "client Studio lane rail renders first inside the compact shell",
+    "The lane rail must render above the control-room frame so each lane starts from the same top control position."
+  );
+}
+
+if (headerRailRenderIndex === -1) {
+  pass("client Studio lane rail is not rendered in the global page header");
+} else {
+  fail(
+    "client Studio lane rail is not rendered in the global page header",
+    "Render the lane rail inside the Site Studio compact shell so it anchors the working section instead of global page chrome."
+  );
 }
 
 if (shellContents.includes("useMutation(") || shellContents.includes("useAction(")) {
