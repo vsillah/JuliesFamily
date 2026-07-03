@@ -14,6 +14,7 @@ The validator checks `docs/phase0-readiness-manifest.json` against current repo 
 
 - `origin` remains `https://github.com/vsillah/JuliesFamily`.
 - the working branch is `codex/kinflo-phase-0-convex-plan`.
+- live PR review state can be refreshed through `npm run kinflo:validate-pr-review-state`.
 - `.env.local` is not tracked.
 - generated Convex API files under `convex/_generated/` are not tracked.
 - known local-only artifacts are documented and remain outside tracked source.
@@ -43,7 +44,7 @@ Latest result:
 
 - Repo-complete requirements: 13.
 - Human-owned gates: 4.
-- Local validation commands: 11.
+- Local validation commands: 12.
 - External writes: 0.
 - Hosted deployment touched: no.
 - Live Convex execution: no.

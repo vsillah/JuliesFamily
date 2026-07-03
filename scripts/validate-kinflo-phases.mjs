@@ -98,6 +98,7 @@ for (const path of [
   "docs/phase30-shell-route-smoke.md",
   "docs/phase31-local-admin-smoke-fixture.md",
   "docs/phase32-phase0-readiness-manifest.md",
+  "docs/phase0-pr-review-state.md",
   "docs/phase33-convex-schema-coverage.md",
   "docs/phase34-crm-progression-contracts.md",
   "docs/phase35-public-visibility-contract.md",
@@ -267,6 +268,7 @@ for (const path of [
   "client/src/lib/kinfloPublicSitePreview.ts",
   "scripts/validate-drizzle-convex-map.mjs",
   "scripts/validate-kinflo-phase0-readiness.mjs",
+  "scripts/validate-kinflo-pr-review-state.mjs",
   "scripts/validate-kinflo-schema-coverage.mjs",
   "scripts/validate-kinflo-crm-progression.mjs",
   "scripts/validate-kinflo-public-visibility.mjs",
@@ -757,11 +759,23 @@ requireIncludes("docs/phase31-local-admin-smoke-fixture.md", [
 
 requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "npm run kinflo:validate-phase0-readiness",
+  "npm run kinflo:validate-pr-review-state",
   "Repo-complete requirements: 13",
   "Human-owned gates: 4",
+  "Local validation commands: 12",
   "known local-only artifacts are documented",
   "No hosted Convex deployment is created",
   "No credentials are read, printed, rotated, or copied",
+]);
+
+requireIncludes("docs/phase0-pr-review-state.md", [
+  "Phase 0 PR Review State Gate",
+  "npm run kinflo:validate-pr-review-state",
+  "blocked_until_vercel_success",
+  "ready_for_integration_review",
+  "No hosted Convex deployment is created.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
 ]);
 
 requireIncludes("docs/phase33-convex-schema-coverage.md", [
@@ -3093,6 +3107,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-map\"",
   "\"kinflo:validate-phases\"",
   "\"kinflo:validate-phase0-readiness\"",
+  "\"kinflo:validate-pr-review-state\"",
   "\"kinflo:validate-schema-coverage\"",
   "\"kinflo:validate-crm-progression\"",
   "\"kinflo:validate-public-visibility\"",
@@ -3261,9 +3276,24 @@ requireIncludes("scripts/validate-kinflo-phase0-readiness.mjs", [
   "humanOwnedGates",
   "localOnlyUntrackedArtifacts",
   "currentReviewEvidence",
+  "docs/phase0-pr-review-state.md",
+  "scripts/validate-kinflo-pr-review-state.mjs",
+  "npm run kinflo:validate-pr-review-state",
   "provider boundary",
   "Hosted deployment touched: no",
   "Live Convex execution: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-pr-review-state.mjs", [
+  "gh",
+  "pr",
+  "view",
+  "vsillah/JuliesFamily",
+  "Vercel status context is present",
+  "Vercel Preview Comments succeeded",
+  "blocked_until_vercel_success",
+  "ready_for_integration_review",
+  "Provider APIs touched: no",
 ]);
 
 requireIncludes("scripts/validate-kinflo-schema-coverage.mjs", [
