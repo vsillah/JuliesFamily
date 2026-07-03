@@ -20,11 +20,11 @@ The hosted activation shell now shows the generated API review state before code
 
 ## Current Contract Counts
 
-- Generated API bindings: 77
-- Query bindings: 39
+- Generated API bindings: 78
+- Query bindings: 40
 - Mutation bindings: 38
 - Live smoke manifest functions: 45
-- Smoke-manifest review gaps: 32
+- Smoke-manifest review gaps: 33
 - Surface groups: 14
 - First fixture-to-live batch: `read-only-core`
 

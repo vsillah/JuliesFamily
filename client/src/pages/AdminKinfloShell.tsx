@@ -65,6 +65,7 @@ import {
   type ShellClientWebsiteOnboardingReadiness,
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
+  type ShellClientWebsiteConfigurationApprovalMatrix,
   type ShellClientWebsiteConfigurationChangeSet,
   type ShellClientWebsiteConfigurationProfiles,
   type ShellClientWebsiteConfigurationReviewPacket,
@@ -989,11 +990,13 @@ function ClientWebsiteConfigurationProfiles({
   profiles,
   selectedReviewPacket,
   selectedChangeSet,
+  selectedApprovalMatrix,
   testIds,
 }: {
   profiles: ShellClientWebsiteConfigurationProfiles;
   selectedReviewPacket?: ShellClientWebsiteConfigurationReviewPacket;
   selectedChangeSet?: ShellClientWebsiteConfigurationChangeSet;
+  selectedApprovalMatrix?: ShellClientWebsiteConfigurationApprovalMatrix;
   testIds: typeof clientWebsiteConfigurationProfileTestIds;
 }) {
   const summaryItems = [
@@ -1235,6 +1238,107 @@ function ClientWebsiteConfigurationProfiles({
             <Button disabled variant="outline" className="justify-start" data-testid="button-client-configuration-change-set-gated">
               <Save className="mr-2 h-4 w-4" />
               Draft save gated
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {selectedApprovalMatrix ? (
+        <div
+          className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3"
+          data-testid="section-kinflo-client-configuration-approval-matrix"
+        >
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">{selectedApprovalMatrix.approvalPosture.replaceAll("_", " ")}</Badge>
+                <Badge variant="outline" className="bg-white">capture gated</Badge>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-slate-950">{selectedApprovalMatrix.label}</div>
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                Configuration approvals are mapped by role and evidence requirement, but approval capture, saves, invitations, provider writes, and hosted Convex execution remain blocked.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-2 text-xs lg:w-[360px]">
+              {[
+                { label: "Required", value: selectedApprovalMatrix.requiredApprovalCount },
+                { label: "Accepted", value: selectedApprovalMatrix.acceptedApprovalCount },
+                { label: "Blocked", value: selectedApprovalMatrix.blockedApprovalCount },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-slate-200 bg-white p-2">
+                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+                  <div className="mt-1 text-sm font-semibold text-slate-950">{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+            <div className="grid max-h-[210px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2" data-testid="section-kinflo-client-configuration-approval-rows">
+              {selectedApprovalMatrix.approvalRows.map((row) => (
+                <div key={row.key} className="rounded-lg border border-slate-200 bg-white p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-slate-950">{row.role}</div>
+                      <div className="mt-1 text-[11px] uppercase tracking-normal text-slate-500">{row.requiredEvidence}</div>
+                    </div>
+                    <Badge variant={row.status === "ready_for_review" ? "secondary" : "outline"} className="shrink-0">
+                      {row.status.replaceAll("_", " ")}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-600">{row.responsibility}</p>
+                </div>
+              ))}
+            </div>
+
+            <Tabs defaultValue="blockers" className="min-w-0" data-testid="tabs-kinflo-client-configuration-approval-detail">
+              <TabsList className="grid h-auto w-full grid-cols-3 bg-white p-1">
+                <TabsTrigger value="blockers" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-approval-blockers">Blockers</TabsTrigger>
+                <TabsTrigger value="evidence" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-approval-evidence">Evidence</TabsTrigger>
+                <TabsTrigger value="functions" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-approval-functions">Functions</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="blockers" className="mt-2" data-testid="section-kinflo-client-configuration-approval-blockers">
+                <div className="max-h-[150px] space-y-2 overflow-y-auto pr-1">
+                  {selectedApprovalMatrix.saveBlockers.map((blocker) => (
+                    <div key={blocker} className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-2 text-xs leading-5 text-amber-900">
+                      <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      <span>{blocker}</span>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="evidence" className="mt-2" data-testid="section-kinflo-client-configuration-approval-evidence">
+                <div className="max-h-[150px] space-y-2 overflow-y-auto pr-1">
+                  {selectedApprovalMatrix.approvalEvidence.map((item) => (
+                    <div key={item} className="flex items-start gap-2 rounded-lg border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-800">
+                      <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="functions" className="mt-2" data-testid="section-kinflo-client-configuration-approval-functions">
+                <div className="flex max-h-[150px] flex-wrap gap-1.5 overflow-y-auto pr-1">
+                  {selectedApprovalMatrix.convexFunctions.map((functionName) => (
+                    <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[10px]">
+                      {functionName}
+                    </Badge>
+                  ))}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,1fr)_220px]">
+            <p className="rounded-lg border border-amber-200 bg-white p-3 text-xs leading-5 text-amber-900">
+              {selectedApprovalMatrix.nextGate}
+            </p>
+            <Button disabled variant="outline" className="justify-start bg-white" data-testid="button-client-configuration-approval-gated">
+              <ShieldCheck className="mr-2 h-4 w-4" />
+              Approval capture gated
             </Button>
           </div>
         </div>
@@ -2168,6 +2272,11 @@ export default function AdminKinfloShell() {
     () => snapshot.clientWebsiteStudio.configurationChangeSets.find((changeSet) => changeSet.siteKey === selectedClientWebsiteStudioSite?.key)
       ?? snapshot.clientWebsiteStudio.configurationChangeSets[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationChangeSets],
+  );
+  const selectedClientWebsiteConfigurationApprovalMatrix = useMemo(
+    () => snapshot.clientWebsiteStudio.configurationApprovalMatrices.find((matrix) => matrix.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.configurationApprovalMatrices[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationApprovalMatrices],
   );
   const selectedClientWebsiteLaunchPacket = useMemo(
     () => snapshot.clientWebsiteStudio.launchPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
@@ -6248,6 +6357,7 @@ export default function AdminKinfloShell() {
                     profiles={snapshot.clientWebsiteStudio.configurationProfiles}
                     selectedReviewPacket={selectedClientWebsiteConfigurationReviewPacket}
                     selectedChangeSet={selectedClientWebsiteConfigurationChangeSet}
+                    selectedApprovalMatrix={selectedClientWebsiteConfigurationApprovalMatrix}
                     testIds={clientWebsiteConfigurationProfileTestIds}
                   />
                 </div>

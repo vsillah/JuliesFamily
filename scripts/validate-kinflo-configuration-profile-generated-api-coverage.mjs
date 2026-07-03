@@ -103,6 +103,8 @@ for (const path of [
 requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", [
   "Phase 98: Configuration Profile Generated API Coverage",
   "npm run kinflo:validate-configuration-profile-generated-api-coverage",
+  "siteFactoryListClientWebsiteConfigurationApprovalMatrices",
+  "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
   "siteFactoryListClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
@@ -116,11 +118,14 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
 
 requireIncludes(runtimePath, [
   "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
+  "siteFactoryListClientWebsiteConfigurationApprovalMatrices: \"siteFactory.listClientWebsiteConfigurationApprovalMatrices\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
 ]);
 
 requireIncludes(generatedContractPath, [
+  "siteFactoryListClientWebsiteConfigurationApprovalMatrices",
+  "client website configuration approval matrices include approver roles, evidence, save blockers, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationChangeSets",
   "client website configuration change sets include draft changes, save blockers, approval evidence, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
@@ -130,19 +135,21 @@ requireIncludes(generatedContractPath, [
 ]);
 
 requireIncludes(convexPath, [
+  "export const listClientWebsiteConfigurationApprovalMatrices",
   "export const listClientWebsiteConfigurationChangeSets",
   "export const listClientWebsiteConfigurationReviewPackets",
   "export const listClientWebsiteConfigurationProfiles",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 77",
-  "Query bindings: 39",
-  "Smoke-manifest review gaps: 32",
+  "Generated API bindings: 78",
+  "Query bindings: 40",
+  "Smoke-manifest review gaps: 33",
 ]);
 
 requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
+  "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",

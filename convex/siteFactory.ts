@@ -161,6 +161,32 @@ type ClientWebsiteConfigurationChangeSet = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteConfigurationApprovalMatrix = {
+  siteKey: string;
+  label: string;
+  approvalPosture: "provider-light-approval-matrix";
+  requiredApprovalCount: number;
+  acceptedApprovalCount: number;
+  blockedApprovalCount: number;
+  approvalRows: {
+    key: string;
+    role: string;
+    responsibility: string;
+    status: "ready_for_review" | "blocked_human_gate" | "pending_evidence";
+    requiredEvidence: string;
+  }[];
+  saveBlockers: string[];
+  approvalEvidence: string[];
+  blockedLiveActions: string[];
+  nextGate: string;
+  canCaptureApproval: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 type ClientWebsiteStarterContentPack = {
   siteKey: string;
   packLabel: string;
@@ -2326,6 +2352,112 @@ export const listClientWebsiteConfigurationChangeSets = query({
     clientWebsiteConfigurationChangeSets.map((changeSet) => ({
       ...changeSet,
       providerBoundary: "Read-only configuration change set query. It records proposed local configuration changes, blockers, evidence, and gates only; it does not save brand, navigation, content, CRM, invite, publish, storage, billing, domain, provider, generated API, or hosted Convex changes.",
+    })),
+});
+
+const clientWebsiteConfigurationApprovalMatrices: ClientWebsiteConfigurationApprovalMatrix[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family founding approval matrix",
+    approvalPosture: "provider-light-approval-matrix",
+    requiredApprovalCount: 4,
+    acceptedApprovalCount: 1,
+    blockedApprovalCount: 3,
+    approvalRows: [
+      { key: "founding-owner", role: "Platform super admin", responsibility: "Confirm Julie Family remains the seeded founding tenant.", status: "ready_for_review", requiredEvidence: "seeded tenant ownership note" },
+      { key: "content-provenance", role: "Content reviewer", responsibility: "Approve source mapping from existing Julie Family pages into reusable blocks.", status: "pending_evidence", requiredEvidence: "content provenance review" },
+      { key: "public-preview", role: "Launch reviewer", responsibility: "Accept public preview parity before publish can be considered.", status: "blocked_human_gate", requiredEvidence: "public renderer fixture-to-live smoke" },
+      { key: "lead-route", role: "CRM reviewer", responsibility: "Approve family intake lead route before CRM writes are enabled.", status: "blocked_human_gate", requiredEvidence: "lead route smoke plan" },
+    ],
+    saveBlockers: ["content provenance review", "public renderer parity smoke", "lead route smoke", "publish rollback owner"],
+    approvalEvidence: ["seeded tenant ownership note", "source page mapping", "fixture preview screenshot", "rollback owner acceptance"],
+    blockedLiveActions: ["configuration save mutation", "content block write", "public publish write", "CRM lead write"],
+    nextGate: "Capture content provenance, public renderer parity, lead route smoke, and rollback owner acceptance before configuration save.",
+    canCaptureApproval: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "siteFactory.listClientWebsiteConfigurationChangeSets",
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "siteBuilder.updateContentBlock",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client approval matrix",
+    approvalPosture: "provider-light-approval-matrix",
+    requiredApprovalCount: 5,
+    acceptedApprovalCount: 0,
+    blockedApprovalCount: 5,
+    approvalRows: [
+      { key: "plan-owner", role: "Platform super admin", responsibility: "Approve pilot plan limits before tenant creation is enabled.", status: "pending_evidence", requiredEvidence: "plan entitlement approval" },
+      { key: "tenant-owner", role: "Client owner", responsibility: "Confirm owner scope and admin authority before invitation.", status: "blocked_human_gate", requiredEvidence: "tenant owner signoff" },
+      { key: "hosted-smoke", role: "Technical reviewer", responsibility: "Review hosted read smoke before moving the site off fixtures.", status: "blocked_human_gate", requiredEvidence: "hosted read smoke transcript" },
+      { key: "domain-posture", role: "Launch reviewer", responsibility: "Accept pending domain posture before public readiness.", status: "pending_evidence", requiredEvidence: "domain posture note" },
+      { key: "admin-scope", role: "Access reviewer", responsibility: "Approve client admin permission preset before invite send.", status: "blocked_human_gate", requiredEvidence: "admin permission scope review" },
+    ],
+    saveBlockers: ["plan entitlement approval", "tenant owner approval", "hosted read smoke", "domain posture review", "client admin invite approval"],
+    approvalEvidence: ["plan limit review", "tenant owner signoff", "preview URL review", "domain posture note", "admin permission scope review"],
+    blockedLiveActions: ["tenant create mutation", "site create mutation", "configuration save mutation", "client admin invitation", "Stripe billing activation"],
+    nextGate: "Capture plan, owner, hosted smoke, domain, and access approvals before any advisor client configuration save.",
+    canCaptureApproval: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "siteFactory.listClientWebsiteConfigurationChangeSets",
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "controlPlane.createTenant",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite approval matrix",
+    approvalPosture: "provider-light-approval-matrix",
+    requiredApprovalCount: 5,
+    acceptedApprovalCount: 0,
+    blockedApprovalCount: 5,
+    approvalRows: [
+      { key: "campaign-consent", role: "Campaign reviewer", responsibility: "Approve consent posture before public form capture.", status: "blocked_human_gate", requiredEvidence: "campaign consent note" },
+      { key: "site-scope", role: "Platform super admin", responsibility: "Confirm microsite scope and campaign owner before site creation.", status: "pending_evidence", requiredEvidence: "site scope approval" },
+      { key: "lead-routing", role: "CRM reviewer", responsibility: "Accept lead route and consent handling before writes.", status: "blocked_human_gate", requiredEvidence: "lead route smoke plan" },
+      { key: "provider-send", role: "Operations reviewer", responsibility: "Keep campaign sends blocked until provider-send boundary is approved.", status: "blocked_human_gate", requiredEvidence: "provider-send boundary note" },
+      { key: "ai-copy", role: "Content reviewer", responsibility: "Approve AI-assisted copy before publish or send.", status: "blocked_human_gate", requiredEvidence: "AI copy approval" },
+    ],
+    saveBlockers: ["campaign consent review", "site scope approval", "lead routing review", "provider-send boundary", "AI copy approval"],
+    approvalEvidence: ["campaign consent note", "site editor scope review", "lead route smoke plan", "provider-send boundary note", "AI copy approval"],
+    blockedLiveActions: ["site create mutation", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+    nextGate: "Capture consent, site scope, lead routing, provider-send, and AI copy approvals before microsite save.",
+    canCaptureApproval: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "siteFactory.listClientWebsiteConfigurationChangeSets",
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "campaigns.requestCampaignApproval",
+    ],
+  },
+];
+
+export const listClientWebsiteConfigurationApprovalMatrices = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteConfigurationApprovalMatrices.map((matrix) => ({
+      ...matrix,
+      providerBoundary: "Read-only configuration approval matrix query. It records approver roles, required evidence, save blockers, and gates only; it does not capture approvals, save configuration, publish, invite, bill, attach domains, call providers, run codegen, import generated API, or execute hosted Convex.",
     })),
 });
 

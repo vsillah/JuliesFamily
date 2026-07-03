@@ -142,6 +142,7 @@
         "docs/phase83-client-handoff-permission-strip.md",
         "docs/phase84-claude-frame-ingestion-packet.md",
         "docs/phase86-site-studio-scroll-consolidation.md",
+        "docs/phase112-client-configuration-approval-matrix.md",
         "docs/kinflo-design-frame-adoption-backlog.json",
         "docs/kinflo-claude-frame-ingestion-packet.json",
         "npm run kinflo:validate-design-frame-backlog",
@@ -155,6 +156,7 @@
         "npm run kinflo:validate-client-handoff-permission-strip",
         "npm run kinflo:validate-claude-frame-ingestion",
         "npm run kinflo:validate-site-studio-scroll-consolidation",
+        "npm run kinflo:validate-client-configuration-approval-matrix",
         "npm run kinflo:validate-control-room-polish"
       ],
       "nextGate": "Continue implementing accepted provider-light design deltas from the Phase 75 backlog, then validate desktop and mobile browser frames before client handoff."
