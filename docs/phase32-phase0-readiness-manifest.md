@@ -44,9 +44,9 @@ Latest result:
 
 - Repo-complete requirements: 13.
 - Human-owned gates: 4.
-- Local validation commands: 12.
+- Local validation commands: 13.
 - External writes: 0.
 - Hosted deployment touched: no.
 - Live Convex execution: no.
 
-This is the machine-checkable handoff artifact for treating PR #1 as ready for staged review without treating it as approval to activate hosted providers.
+This is the machine-checkable handoff artifact for treating PR #1 as ready for staged review without treating it as approval to activate hosted providers. Integration Captain can run `npm run kinflo:validate-integration-review-handoff` for the final read-only merge-scheduling check.

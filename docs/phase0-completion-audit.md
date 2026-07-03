@@ -39,6 +39,7 @@ The latest local validation set passed:
 - `npm run kinflo:inventory-env`
 - `npm run kinflo:validate-phase0-readiness`
 - `npm run kinflo:validate-pr-review-state`
+- `npm run kinflo:validate-integration-review-handoff`
 - `npm run kinflo:validate-phases`
 - `npm run kinflo:validate-map`
 - `npm run kinflo:check-baseline`

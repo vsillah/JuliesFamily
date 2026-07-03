@@ -157,6 +157,7 @@
   "localValidationCommands": [
     "npm run kinflo:validate-phase0-readiness",
     "npm run kinflo:validate-pr-review-state",
+    "npm run kinflo:validate-integration-review-handoff",
     "npm run kinflo:audit-secret-history",
     "npm run kinflo:inventory-env",
     "npm run kinflo:validate-phases",
@@ -169,5 +170,5 @@
     "git diff --check"
   ],
   "reviewStatus": "ready_for_staged_review",
-  "nextActivationGate": "Human approval for credential rotation/history decision and hosted Convex ownership/auth/backup setup."
+  "nextActivationGate": "Human approval for credential rotation/history decision, Integration Captain merge timing, and hosted Convex ownership/auth/backup setup."
 }

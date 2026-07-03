@@ -13,6 +13,7 @@
     "kinflo:validate-phases": "node scripts/validate-kinflo-phases.mjs",
     "kinflo:validate-phase0-readiness": "node scripts/validate-kinflo-phase0-readiness.mjs",
     "kinflo:validate-pr-review-state": "node scripts/validate-kinflo-pr-review-state.mjs",
+    "kinflo:validate-integration-review-handoff": "node scripts/validate-kinflo-integration-review-handoff.mjs",
     "kinflo:validate-schema-coverage": "node scripts/validate-kinflo-schema-coverage.mjs",
     "kinflo:validate-crm-progression": "node scripts/validate-kinflo-crm-progression.mjs",
     "kinflo:validate-public-visibility": "node scripts/validate-kinflo-public-visibility.mjs",

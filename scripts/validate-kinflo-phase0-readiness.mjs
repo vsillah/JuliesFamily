@@ -161,6 +161,7 @@ for (const gate of humanOwnedGates) {
 requireArrayIncludes("local validation commands", localValidationCommands, [
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-pr-review-state",
+  "npm run kinflo:validate-integration-review-handoff",
   "npm run kinflo:audit-secret-history",
   "npm run kinflo:inventory-env",
   "npm run kinflo:validate-phases",
@@ -236,6 +237,7 @@ for (const path of [
   "docs/phase0-baseline.md",
   "docs/phase0-completion-audit.md",
   "docs/phase0-pr-review-state.md",
+  "docs/phase0-integration-review-handoff.md",
   "docs/phase0-env-inventory.md",
   "docs/phase0-secret-remediation.md",
   "docs/drizzle-to-convex-migration-map.md",
@@ -243,6 +245,7 @@ for (const path of [
   "docs/phase32-phase0-readiness-manifest.md",
   "scripts/validate-kinflo-phase0-readiness.mjs",
   "scripts/validate-kinflo-pr-review-state.mjs",
+  "scripts/validate-kinflo-integration-review-handoff.mjs",
   "scripts/validate-kinflo-phases.mjs",
   "scripts/inventory-kinflo-env.mjs",
   "scripts/audit-kinflo-secret-history.mjs",
@@ -278,6 +281,7 @@ if (phase0AuditContents.includes("Latest observed state on July 3, 2026 after th
 
 requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "npm run kinflo:validate-phase0-readiness",
+  "npm run kinflo:validate-integration-review-handoff",
   "known local-only artifacts are documented",
   "No hosted Convex deployment is created.",
   "No live Convex query, mutation, or action is executed.",
@@ -287,6 +291,7 @@ requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
 requireIncludes("package.json", [
   "\"kinflo:validate-phase0-readiness\"",
   "\"kinflo:validate-pr-review-state\"",
+  "\"kinflo:validate-integration-review-handoff\"",
 ]);
 
 requireIncludes("docs/phase0-pr-review-state.md", [
@@ -308,6 +313,25 @@ requireIncludes("scripts/validate-kinflo-pr-review-state.mjs", [
   "Vercel Preview Comments succeeded",
   "blocked_until_vercel_success",
   "ready_for_integration_review",
+  "Provider APIs touched: no",
+]);
+
+requireIncludes("docs/phase0-integration-review-handoff.md", [
+  "Phase 0 Integration Review Handoff",
+  "npm run kinflo:validate-integration-review-handoff",
+  "Merge readiness: ready_for_integration_review",
+  "No hosted Convex deployment is created.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
+requireIncludes("scripts/validate-kinflo-integration-review-handoff.mjs", [
+  "gh",
+  "vsillah/JuliesFamily",
+  "PR #1 remains open",
+  "PR merge state is clean",
+  "Vercel succeeded for current PR head",
+  "merge readiness is ready_for_integration_review",
   "Provider APIs touched: no",
 ]);
 
