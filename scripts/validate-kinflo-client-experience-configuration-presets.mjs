@@ -20,7 +20,7 @@ function requireFile(path) {
     pass(`${path} exists`);
     return true;
   }
-  fail(`${path} exists`, "Expected client configuration publish readiness artifact was not found.");
+  fail(`${path} exists`, "Expected client experience configuration preset artifact was not found.");
   return false;
 }
 
@@ -33,7 +33,7 @@ function requireIncludes(path, patterns) {
     if (contents.includes(pattern)) {
       pass(`${path} includes ${pattern}`);
     } else {
-      fail(`${path} includes ${pattern}`, "Expected client configuration publish readiness marker was not found.");
+      fail(`${path} includes ${pattern}`, "Expected client experience configuration preset marker was not found.");
     }
   }
 }
@@ -57,7 +57,7 @@ if (trackedSecretFiles.length > 0) {
 }
 
 for (const path of [
-  "docs/phase116-client-configuration-publish-readiness.md",
+  "docs/phase117-client-experience-configuration-presets.md",
   "docs/phase72-saas-execution-ledger.md",
   "docs/kinflo-saas-execution-ledger.json",
   "docs/phase88-generated-api-review-board.md",
@@ -70,63 +70,63 @@ for (const path of [
   "client/src/lib/kinfloShellData.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "package.json",
-  "scripts/validate-kinflo-client-configuration-publish-readiness.mjs",
+  "scripts/validate-kinflo-client-experience-configuration-presets.mjs",
 ]) {
   requireFile(path);
 }
 
-requireIncludes("docs/phase116-client-configuration-publish-readiness.md", [
-  "Phase 116: Client Configuration Publish Readiness",
-  "npm run kinflo:validate-client-configuration-publish-readiness",
-  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
-  "ShellClientWebsiteConfigurationPublishReadiness",
-  "snapshot.clientWebsiteStudio.configurationPublishReadiness",
-  "selectedClientWebsiteConfigurationPublishReadiness",
-  "tab-kinflo-client-configuration-publish-readiness",
-  "section-kinflo-client-configuration-publish-readiness",
+requireIncludes("docs/phase117-client-experience-configuration-presets.md", [
+  "Phase 117: Client Experience Configuration Presets",
+  "npm run kinflo:validate-client-experience-configuration-presets",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "ShellClientWebsiteExperienceConfigurationPreset",
+  "snapshot.clientWebsiteStudio.experienceConfigurationPresets",
+  "tab-kinflo-client-experience-configuration-preset",
+  "section-kinflo-client-experience-configuration-preset",
   "No hosted Convex deployment is created.",
   "No Convex codegen is run.",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
-  "No publish request, configuration save, audit event write, approval capture, public publish, lead write, invite send, campaign send, provider call, domain verification, production import, or client sharing is performed.",
+  "No experience preset apply, configuration save, public publish, lead write, invite send, campaign send, provider call, domain verification, production import, or client sharing is performed.",
   "No secret values are read or printed.",
 ]);
 
 requireIncludes("convex/siteFactory.ts", [
-  "type ClientWebsiteConfigurationPublishReadiness",
-  "clientWebsiteConfigurationPublishReadiness",
-  "export const listClientWebsiteConfigurationPublishReadiness",
-  "provider-light-publish-readiness",
-  "Read-only configuration publish readiness query",
-  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
-  "canRequestPublish: false",
-  "canPublish: false",
+  "type ClientWebsiteExperienceConfigurationPreset",
+  "clientWebsiteExperienceConfigurationPresets",
+  "export const listClientWebsiteExperienceConfigurationPresets",
+  "provider-light-experience-preset",
+  "Read-only client experience preset query",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "canApplyPreset: false",
   "canSaveConfig: false",
-  "canRecordAudit: false",
+  "canPublish: false",
   "providerWrites: false",
   "liveConvexExecution: false",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
-  "siteFactoryListClientWebsiteConfigurationPublishReadiness: \"siteFactory.listClientWebsiteConfigurationPublishReadiness\"",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets: \"siteFactory.listClientWebsiteExperienceConfigurationPresets\"",
 ]);
 
 requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
-  "siteFactoryListClientWebsiteConfigurationPublishReadiness",
-  "client website configuration publish readiness includes publish criteria, blockers, rollback requirements, blocked actions, and provider boundaries",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets",
+  "client website experience configuration presets include audience, journey, layout density, tone, navigation mode, admin preset, personalization rules, and provider boundaries",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [
-  "ShellClientWebsiteConfigurationPublishReadiness",
-  "configurationPublishReadiness: ShellClientWebsiteConfigurationPublishReadiness[]",
-  "configurationPublishReadiness: [",
+  "ShellClientWebsiteExperienceConfigurationPreset",
+  "experienceConfigurationPresets: ShellClientWebsiteExperienceConfigurationPreset[]",
+  "experienceConfigurationPresets: [",
   "julies-family-public",
   "advisor-client-site",
   "campaign-microsite",
-  "publishPosture: \"provider-light-publish-readiness\"",
-  "publishBlockers",
-  "rollbackRequirements",
-  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+  "presetPosture: \"provider-light-experience-preset\"",
+  "layoutDensity: \"guided\"",
+  "layoutDensity: \"compact\"",
+  "layoutDensity: \"campaign\"",
+  "personalizationRules",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
   "totalBindings: 83",
   "queryBindings: 45",
   "smokeManifestGaps: 38",
@@ -135,64 +135,64 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
-  "selectedClientWebsiteConfigurationPublishReadiness",
-  "snapshot.clientWebsiteStudio.configurationPublishReadiness.find",
-  "selectedPublishReadiness={selectedClientWebsiteConfigurationPublishReadiness}",
-  "tab-kinflo-client-configuration-publish-readiness",
-  "section-kinflo-client-configuration-publish-readiness",
-  "selectedPublishReadiness?.criteria.map",
-  "grid-cols-6",
+  "selectedClientWebsiteExperienceConfigurationPreset",
+  "snapshot.clientWebsiteStudio.experienceConfigurationPresets.find",
+  "selectedExperiencePreset={selectedClientWebsiteExperienceConfigurationPreset}",
+  "tab-kinflo-client-experience-configuration-preset",
+  "section-kinflo-client-experience-configuration-preset",
+  "selectedExperiencePreset?.personalizationRules.map",
+  "grid-cols-7",
   "max-h-[145px]",
 ]);
 
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
-  "Phase 116 client configuration publish readiness",
-  "npm run kinflo:validate-client-configuration-publish-readiness",
+  "Phase 117 client experience configuration presets",
+  "npm run kinflo:validate-client-experience-configuration-presets",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
-  "\"docs/phase116-client-configuration-publish-readiness.md\"",
-  "\"npm run kinflo:validate-client-configuration-publish-readiness\"",
+  "\"docs/phase117-client-experience-configuration-presets.md\"",
+  "\"npm run kinflo:validate-client-experience-configuration-presets\"",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
   "Generated API bindings: 83",
   "Query bindings: 45",
   "Smoke-manifest review gaps: 38",
-  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
 ]);
 
 requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", [
-  "siteFactoryListClientWebsiteConfigurationPublishReadiness",
-  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
-  "configuration publish readiness read",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "experience configuration preset read",
 ]);
 
 requireIncludes("docs/convex-adapter-switch-plan.json", [
-  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
-  "configuration publish readiness read",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "experience configuration preset read",
 ]);
 
 requireIncludes("docs/convex-adapter-switch-evidence-matrix.json", [
-  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
-  "configuration publish readiness read",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "experience configuration preset read",
 ]);
 
 requireIncludes("package.json", [
-  "\"kinflo:validate-client-configuration-publish-readiness\"",
+  "\"kinflo:validate-client-experience-configuration-presets\"",
 ]);
 
 const shellDataContents = read("client/src/lib/kinfloShellData.ts");
-const publishReadinessCount = (shellDataContents.match(/publishPosture: "provider-light-publish-readiness",/g) ?? []).length;
-if (publishReadinessCount === 3) {
-  pass("shell data includes three configuration publish readiness packets");
+const presetCount = (shellDataContents.match(/presetPosture: "provider-light-experience-preset",/g) ?? []).length;
+if (presetCount === 3) {
+  pass("shell data includes three experience configuration preset packets");
 } else {
-  fail("shell data includes three configuration publish readiness packets", `Received ${publishReadinessCount}.`);
+  fail("shell data includes three experience configuration preset packets", `Received ${presetCount}.`);
 }
 
 let generatedApiImportFound = false;
 for (const path of [
-  "docs/phase116-client-configuration-publish-readiness.md",
+  "docs/phase117-client-experience-configuration-presets.md",
   "convex/siteFactory.ts",
   "client/src/lib/kinfloShellData.ts",
   "client/src/pages/AdminKinfloShell.tsx",
@@ -212,21 +212,21 @@ for (const path of [
 }
 
 if (generatedApiImportFound) {
-  fail("client configuration publish readiness does not import generated API", "Generated API imports remain gated until hosted activation approval.");
+  fail("client experience configuration presets do not import generated API", "Generated API imports remain gated until hosted activation approval.");
 } else {
-  pass("client configuration publish readiness does not import generated API");
+  pass("client experience configuration presets do not import generated API");
 }
 
 const pageContents = read("client/src/pages/AdminKinfloShell.tsx");
-const convexPublishSection = read("convex/siteFactory.ts").match(/const clientWebsiteConfigurationPublishReadiness:[\s\S]*?const clientWebsiteProvisioningOrders:/)?.[0] ?? "";
+const convexPresetSection = read("convex/siteFactory.ts").match(/const clientWebsiteExperienceConfigurationPresets:[\s\S]*?const clientWebsiteProvisioningOrders:/)?.[0] ?? "";
 if (
   pageContents.includes("useMutation(") ||
   pageContents.includes("useAction(") ||
-  convexPublishSection.includes("mutation({")
+  convexPresetSection.includes("mutation({")
 ) {
-  fail("client configuration publish readiness does not execute live Convex", "Live Convex execution must remain blocked.");
+  fail("client experience configuration presets do not execute live Convex", "Live Convex execution must remain blocked.");
 } else {
-  pass("client configuration publish readiness does not execute live Convex");
+  pass("client experience configuration presets do not execute live Convex");
 }
 
 const failed = checks.filter((check) => !check.ok);
@@ -240,9 +240,9 @@ for (const check of checks) {
   }
 }
 
-console.log("\nKinFlo client configuration publish readiness validation");
-console.log("Convex function: siteFactory.listClientWebsiteConfigurationPublishReadiness");
-console.log("Publish readiness packets: 3");
+console.log("\nKinFlo client experience configuration preset validation");
+console.log("Convex function: siteFactory.listClientWebsiteExperienceConfigurationPresets");
+console.log("Experience preset packets: 3");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Convex codegen run: no");
@@ -252,8 +252,8 @@ console.log("Provider APIs touched: no");
 console.log("Secrets read or printed: no");
 
 if (failed.length > 0) {
-  console.error(`\nKinFlo client configuration publish readiness validation failed: ${failed.length} check(s) failed.`);
+  console.error(`\nKinFlo client experience configuration preset validation failed: ${failed.length} check(s) failed.`);
   process.exit(1);
 }
 
-console.log(`\nKinFlo client configuration publish readiness validation passed: ${checks.length} checks.`);
+console.log(`\nKinFlo client experience configuration preset validation passed: ${checks.length} checks.`);

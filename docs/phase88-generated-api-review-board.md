@@ -17,15 +17,16 @@ The hosted activation shell now shows the generated API review state before code
 - `section-kinflo-generated-api-review-board` summarizes the current contract totals,
 - `section-kinflo-generated-api-review-scroll` keeps the surface review cards bounded,
 - `siteFactory.listClientWebsiteConfigurationPublishReadiness` is visible as a site-factory smoke-manifest review gap,
+- `siteFactory.listClientWebsiteExperienceConfigurationPresets` is visible as a site-factory smoke-manifest review gap,
 - every generated API import and codegen step stays blocked until hosted ownership, env policy, generated binding review, and smoke evidence are approved.
 
 ## Current Contract Counts
 
-- Generated API bindings: 82
-- Query bindings: 44
+- Generated API bindings: 83
+- Query bindings: 45
 - Mutation bindings: 38
 - Live smoke manifest functions: 45
-- Smoke-manifest review gaps: 37
+- Smoke-manifest review gaps: 38
 - Surface groups: 14
 - First fixture-to-live batch: `read-only-core`
 

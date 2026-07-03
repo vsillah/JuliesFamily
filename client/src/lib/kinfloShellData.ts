@@ -883,6 +883,35 @@ export type ShellClientWebsiteConfigurationPublishReadiness = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteExperienceConfigurationPreset = {
+  siteKey: string;
+  label: string;
+  presetPosture: "provider-light-experience-preset";
+  presetStatus: "ready_for_review" | "blocked_human_gate" | "draft";
+  audience: string;
+  journeyStage: string;
+  layoutDensity: "guided" | "compact" | "campaign";
+  contentTone: string;
+  navigationMode: string;
+  adminPermissionPreset: string;
+  personalizationRules: {
+    key: string;
+    label: string;
+    surface: "content" | "navigation" | "crm" | "permissions" | "layout";
+    status: "ready" | "blocked" | "pending";
+    evidence: string;
+  }[];
+  lockedControls: string[];
+  blockedLiveActions: string[];
+  nextGate: string;
+  canApplyPreset: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -1105,6 +1134,7 @@ export type ShellClientWebsiteStudio = {
   configurationAuditTimelines: ShellClientWebsiteConfigurationAuditTimeline[];
   configurationRollbackCheckpoints: ShellClientWebsiteConfigurationRollbackCheckpoint[];
   configurationPublishReadiness: ShellClientWebsiteConfigurationPublishReadiness[];
+  experienceConfigurationPresets: ShellClientWebsiteExperienceConfigurationPreset[];
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
@@ -3344,6 +3374,107 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  experienceConfigurationPresets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family guided learner preset",
+      presetPosture: "provider-light-experience-preset",
+      presetStatus: "ready_for_review",
+      audience: "adult learners, families, donors, and volunteers",
+      journeyStage: "trust-building intake",
+      layoutDensity: "guided",
+      contentTone: "warm, direct, practical, and proof-led",
+      navigationMode: "program-first public path with donor and volunteer branches",
+      adminPermissionPreset: "Founding platform steward",
+      personalizationRules: [
+        { key: "adult-learner-path", label: "Adult learner path", surface: "content", status: "ready", evidence: "GED and support program pages mapped from source content" },
+        { key: "family-navigation", label: "Family navigation", surface: "navigation", status: "ready", evidence: "preschool, childcare, and family support routes remain visible" },
+        { key: "lead-routing", label: "Lead routing context", surface: "crm", status: "blocked", evidence: "CRM lead write smoke pending" },
+        { key: "public-layout", label: "Guided public layout", surface: "layout", status: "ready", evidence: "mobile and desktop preview layout accepted locally" },
+      ],
+      lockedControls: ["CRM lead write", "public publish write", "client sharing"],
+      blockedLiveActions: ["configuration save mutation", "public publish write", "CRM lead write", "client sharing"],
+      nextGate: "Pass hosted read smoke and lead route smoke before applying the experience preset to live configuration.",
+      canApplyPreset: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteFactory.listClientWebsiteConfigurationSaveRequests",
+        "preferences.upsertMyPreferences",
+        "crm.submitLead",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor trust-building client preset",
+      presetPosture: "provider-light-experience-preset",
+      presetStatus: "blocked_human_gate",
+      audience: "prospective advisory clients and referral partners",
+      journeyStage: "credibility review",
+      layoutDensity: "compact",
+      contentTone: "restrained, professional, evidence-forward",
+      navigationMode: "services, proof, intake, and privacy",
+      adminPermissionPreset: "Client content reviewer",
+      personalizationRules: [
+        { key: "proof-led-service-path", label: "Proof-led service path", surface: "content", status: "ready", evidence: "advisor fixture content profile exists" },
+        { key: "client-review-permission", label: "Client review permission", surface: "permissions", status: "blocked", evidence: "admin permission scope review pending" },
+        { key: "domain-context", label: "Domain context", surface: "navigation", status: "pending", evidence: "domain posture note pending" },
+        { key: "intake-route", label: "Intake route", surface: "crm", status: "blocked", evidence: "hosted read and lead route smoke pending" },
+      ],
+      lockedControls: ["client admin invitation", "domain attach", "tenant create mutation"],
+      blockedLiveActions: ["tenant create mutation", "site create mutation", "client admin invitation", "domain attach", "public publish write"],
+      nextGate: "Approve tenant owner, admin scope, domain posture, and hosted read evidence before applying this preset.",
+      canApplyPreset: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign conversion microsite preset",
+      presetPosture: "provider-light-experience-preset",
+      presetStatus: "blocked_human_gate",
+      audience: "campaign visitors and warm referral traffic",
+      journeyStage: "offer and signup",
+      layoutDensity: "campaign",
+      contentTone: "clear, urgent, consent-aware, and proof-backed",
+      navigationMode: "single-offer path with privacy and proof fallback",
+      adminPermissionPreset: "Campaign editor",
+      personalizationRules: [
+        { key: "offer-path", label: "Offer path", surface: "content", status: "ready", evidence: "campaign fixture content pack exists" },
+        { key: "consent-copy", label: "Consent copy", surface: "content", status: "blocked", evidence: "campaign consent note pending" },
+        { key: "form-routing", label: "Form routing", surface: "crm", status: "blocked", evidence: "public form write remains disabled" },
+        { key: "editor-scope", label: "Editor scope", surface: "permissions", status: "pending", evidence: "site editor scope review pending" },
+      ],
+      lockedControls: ["campaign send", "public form write", "AI copy publish"],
+      blockedLiveActions: ["campaign send", "public form write", "AI copy publish", "editor invitation", "public publish write"],
+      nextGate: "Accept consent, lead routing, provider-send, and AI provenance evidence before applying this preset.",
+      canApplyPreset: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "controlPlane.createInvitation",
+      ],
+    },
+  ],
   launchPackets: [
     {
       siteKey: "julies-family-public",
@@ -4523,6 +4654,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
     "siteFactory.listClientWebsiteConfigurationPublishReadiness",
     "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
     "siteFactory.listClientWebsiteConfigurationSaveRequests",
+    "siteFactory.listClientWebsiteExperienceConfigurationPresets",
     "siteFactory.listClientWebsiteLaunchDecisionPackets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
     "siteFactory.listClientWebsiteLaunchSimulations",
@@ -6566,11 +6698,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 82,
-    queryBindings: 44,
+    totalBindings: 83,
+    queryBindings: 45,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 37,
+    smokeManifestGaps: 38,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -6623,8 +6755,8 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 21,
-        queryBindings: 20,
+        totalBindings: 22,
+        queryBindings: 21,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
@@ -6637,6 +6769,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
           "siteFactory.listClientWebsiteConfigurationPublishReadiness",
           "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
           "siteFactory.listClientWebsiteConfigurationSaveRequests",
+          "siteFactory.listClientWebsiteExperienceConfigurationPresets",
           "siteFactory.listClientWebsiteLaunchBlueprints",
           "siteFactory.listClientWebsitePreviewReviewPackets",
           "siteFactory.createSiteFromTemplate",

@@ -119,11 +119,14 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactoryListClientWebsiteConfigurationSaveRequests",
   "siteFactory.listClientWebsiteConfigurationSaveRequests",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
   "configuration profile read",
   "configuration audit timeline read",
   "configuration publish readiness read",
   "configuration rollback checkpoint read",
   "configuration save request read",
+  "experience configuration preset read",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -137,6 +140,7 @@ requireIncludes(runtimePath, [
   "siteFactoryListClientWebsiteConfigurationPublishReadiness: \"siteFactory.listClientWebsiteConfigurationPublishReadiness\"",
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints: \"siteFactory.listClientWebsiteConfigurationRollbackCheckpoints\"",
   "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets: \"siteFactory.listClientWebsiteExperienceConfigurationPresets\"",
 ]);
 
 requireIncludes(generatedContractPath, [
@@ -152,6 +156,8 @@ requireIncludes(generatedContractPath, [
   "client website configuration profiles include template, brand, navigation, CRM, editable surfaces, locked surfaces, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationPublishReadiness",
   "client website configuration publish readiness includes publish criteria, blockers, rollback requirements, blocked actions, and provider boundaries",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets",
+  "client website experience configuration presets include audience, journey, layout density, tone, navigation mode, admin preset, personalization rules, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
   "client website configuration rollback checkpoints include fixture baselines, rollback owners, rehearsal steps, blocked actions, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationSaveRequests",
@@ -167,12 +173,13 @@ requireIncludes(convexPath, [
   "export const listClientWebsiteConfigurationPublishReadiness",
   "export const listClientWebsiteConfigurationRollbackCheckpoints",
   "export const listClientWebsiteConfigurationSaveRequests",
+  "export const listClientWebsiteExperienceConfigurationPresets",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 82",
-  "Query bindings: 44",
-  "Smoke-manifest review gaps: 37",
+  "Generated API bindings: 83",
+  "Query bindings: 45",
+  "Smoke-manifest review gaps: 38",
 ]);
 
 requireIncludes(shellDataPath, [
@@ -185,6 +192,7 @@ requireIncludes(shellDataPath, [
   "siteFactory.listClientWebsiteConfigurationPublishReadiness",
   "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactory.listClientWebsiteConfigurationSaveRequests",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
 ]);
 
 requireIncludes(shellPath, [
@@ -265,6 +273,20 @@ for (const [label, surface] of [
     pass(`${label} includes configuration publish readiness smoke evidence`);
   } else {
     fail(`${label} includes configuration publish readiness smoke evidence`, "Configuration publish readiness read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteExperienceConfigurationPresets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteExperienceConfigurationPresets")) {
+    pass(`${label} includes experience configuration preset function`);
+  } else {
+    fail(`${label} includes experience configuration preset function`, "Experience configuration preset read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("experience configuration preset read")
+    || surface?.smokeEvidenceRequired?.includes("experience configuration preset read")) {
+    pass(`${label} includes experience configuration preset smoke evidence`);
+  } else {
+    fail(`${label} includes experience configuration preset smoke evidence`, "Experience configuration preset read evidence must be required before adapter switch.");
   }
 
   if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationRollbackCheckpoints")
