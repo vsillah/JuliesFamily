@@ -66,6 +66,7 @@ import {
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
   type ShellClientWebsiteConfigurationApprovalMatrix,
+  type ShellClientWebsiteConfigurationAuditTimeline,
   type ShellClientWebsiteConfigurationChangeSet,
   type ShellClientWebsiteConfigurationProfiles,
   type ShellClientWebsiteConfigurationReviewPacket,
@@ -993,6 +994,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedChangeSet,
   selectedApprovalMatrix,
   selectedSaveRequest,
+  selectedAuditTimeline,
   testIds,
 }: {
   profiles: ShellClientWebsiteConfigurationProfiles;
@@ -1000,6 +1002,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedChangeSet?: ShellClientWebsiteConfigurationChangeSet;
   selectedApprovalMatrix?: ShellClientWebsiteConfigurationApprovalMatrix;
   selectedSaveRequest?: ShellClientWebsiteConfigurationSaveRequest;
+  selectedAuditTimeline?: ShellClientWebsiteConfigurationAuditTimeline;
   testIds: typeof clientWebsiteConfigurationProfileTestIds;
 }) {
   const summaryItems = [
@@ -1396,9 +1399,10 @@ function ClientWebsiteConfigurationProfiles({
             </div>
 
             <Tabs defaultValue="blockers" className="min-w-0" data-testid="tabs-kinflo-client-configuration-save-request-detail">
-              <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+              <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
                 <TabsTrigger value="blockers" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-blockers">Blockers</TabsTrigger>
                 <TabsTrigger value="evidence" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-evidence">Evidence</TabsTrigger>
+                <TabsTrigger value="audit" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-audit-timeline">Audit</TabsTrigger>
                 <TabsTrigger value="functions" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-functions">Functions</TabsTrigger>
               </TabsList>
 
@@ -1421,6 +1425,25 @@ function ClientWebsiteConfigurationProfiles({
                       <span>{item}</span>
                     </div>
                   ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="audit" className="mt-2" data-testid="section-kinflo-client-configuration-audit-timeline">
+                <div className="max-h-[145px] space-y-2 overflow-y-auto pr-1">
+                  {selectedAuditTimeline?.timelineEvents.map((event) => (
+                    <div key={event.key} className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-medium text-slate-950">{event.label}</div>
+                          <div className="mt-0.5 text-[10px] uppercase tracking-normal text-slate-500">{event.actor}</div>
+                        </div>
+                        <Badge variant={event.status === "accepted" ? "secondary" : "outline"} className="shrink-0 text-[10px]">
+                          {event.status}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-slate-600">{event.evidence}</p>
+                    </div>
+                  )) ?? null}
                 </div>
               </TabsContent>
 
@@ -2387,6 +2410,11 @@ export default function AdminKinfloShell() {
     () => snapshot.clientWebsiteStudio.configurationSaveRequests.find((request) => request.siteKey === selectedClientWebsiteStudioSite?.key)
       ?? snapshot.clientWebsiteStudio.configurationSaveRequests[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationSaveRequests],
+  );
+  const selectedClientWebsiteConfigurationAuditTimeline = useMemo(
+    () => snapshot.clientWebsiteStudio.configurationAuditTimelines.find((timeline) => timeline.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.configurationAuditTimelines[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationAuditTimelines],
   );
   const selectedClientWebsiteLaunchPacket = useMemo(
     () => snapshot.clientWebsiteStudio.launchPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
@@ -3394,7 +3422,7 @@ export default function AdminKinfloShell() {
 
         <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
           <section
-            className={`${activeTab === "site-studio" ? "mb-1 rounded-md px-2 py-1.5" : "mb-3 rounded-2xl p-3"} border border-slate-200 bg-white shadow-sm`}
+            className={`${activeTab === "site-studio" ? "mb-1 hidden rounded-md px-2 py-1.5 lg:block" : "mb-3 rounded-2xl p-3"} border border-slate-200 bg-white shadow-sm`}
             data-testid="section-kinflo-workflow-navigation-rail"
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -6469,6 +6497,7 @@ export default function AdminKinfloShell() {
                     selectedChangeSet={selectedClientWebsiteConfigurationChangeSet}
                     selectedApprovalMatrix={selectedClientWebsiteConfigurationApprovalMatrix}
                     selectedSaveRequest={selectedClientWebsiteConfigurationSaveRequest}
+                    selectedAuditTimeline={selectedClientWebsiteConfigurationAuditTimeline}
                     testIds={clientWebsiteConfigurationProfileTestIds}
                   />
                 </div>
@@ -6943,7 +6972,7 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="flex max-h-[min(340px,calc(100vh-21rem))] flex-col overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3 lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="flex max-h-[320px] flex-col overflow-y-auto overflow-x-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:max-h-[min(340px,calc(100vh-21rem))] sm:p-3 lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -7088,17 +7117,17 @@ export default function AdminKinfloShell() {
                       <TabsContent value="dry-run" className="mt-3 min-h-0 flex-1" data-testid="section-kinflo-client-provisioning-execution">
                         <div className="max-h-[190px] space-y-2 overflow-y-auto pr-1 sm:max-h-[240px] lg:max-h-[360px]" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
                           <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
-                            <div className="flex items-start justify-between gap-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2">
                                   <ListChecks className="h-4 w-4 text-slate-500" />
                                   <div className="text-sm font-semibold">Execution Dry Run</div>
                                 </div>
-                                <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-client-provisioning-execution">
+                                <p className="mt-1 break-all text-xs leading-5 text-slate-600 sm:break-normal" data-testid="text-kinflo-client-provisioning-execution">
                                   {snapshot.clientWebsiteStudio.provisioningExecution.manifestPath}
                                 </p>
                               </div>
-                              <Badge variant="outline">{snapshot.clientWebsiteStudio.provisioningExecution.status.replaceAll("_", " ")}</Badge>
+                              <Badge variant="outline" className="w-fit">{snapshot.clientWebsiteStudio.provisioningExecution.status.replaceAll("_", " ")}</Badge>
                             </div>
 
                             <div className="mt-3 grid grid-cols-3 gap-2">

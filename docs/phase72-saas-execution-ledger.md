@@ -80,6 +80,7 @@ npm run kinflo:validate-client-configuration-review-packet
 npm run kinflo:validate-client-configuration-change-set
 npm run kinflo:validate-client-configuration-approval-matrix
 npm run kinflo:validate-client-configuration-save-request
+npm run kinflo:validate-client-configuration-audit-timeline
 npm run kinflo:validate-configuration-profile-generated-api-coverage
 npm run kinflo:validate-claude-frame-ingestion
 npm run kinflo:validate-site-studio-scroll-consolidation

@@ -217,6 +217,31 @@ type ClientWebsiteConfigurationSaveRequest = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteConfigurationAuditTimeline = {
+  siteKey: string;
+  label: string;
+  auditPosture: "provider-light-audit-timeline";
+  eventCount: number;
+  acceptedEventCount: number;
+  blockedEventCount: number;
+  timelineEvents: {
+    key: string;
+    label: string;
+    actor: string;
+    status: "accepted" | "pending" | "blocked";
+    evidence: string;
+  }[];
+  rollbackNotes: string[];
+  blockedLiveActions: string[];
+  nextGate: string;
+  canRecordAudit: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 type ClientWebsiteStarterContentPack = {
   siteKey: string;
   packLabel: string;
@@ -2612,6 +2637,109 @@ export const listClientWebsiteConfigurationSaveRequests = query({
     clientWebsiteConfigurationSaveRequests.map((request) => ({
       ...request,
       providerBoundary: "Read-only configuration save request query. It records selected payloads, approval evidence, blockers, rollback posture, and gates only; it does not capture approval, save configuration, publish, invite, bill, attach domains, call providers, run codegen, import generated API, or execute hosted Convex.",
+    })),
+});
+
+const clientWebsiteConfigurationAuditTimelines: ClientWebsiteConfigurationAuditTimeline[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family configuration audit timeline",
+    auditPosture: "provider-light-audit-timeline",
+    eventCount: 5,
+    acceptedEventCount: 2,
+    blockedEventCount: 3,
+    timelineEvents: [
+      { key: "tenant-seed", label: "Founding tenant seed confirmed", actor: "Platform super admin", status: "accepted", evidence: "seeded tenant ownership note" },
+      { key: "source-map", label: "Source pages mapped", actor: "Content reviewer", status: "accepted", evidence: "source page mapping" },
+      { key: "renderer-parity", label: "Public renderer parity", actor: "Launch reviewer", status: "pending", evidence: "fixture-to-live smoke pending" },
+      { key: "lead-route", label: "Family intake route", actor: "CRM reviewer", status: "blocked", evidence: "lead route smoke pending" },
+      { key: "rollback-owner", label: "Rollback owner acceptance", actor: "Platform super admin", status: "blocked", evidence: "rollback owner acceptance pending" },
+    ],
+    rollbackNotes: ["Keep founding site on fixture configuration.", "Restore source-mapped public blocks if renderer parity fails.", "Keep public lead writes disabled until CRM route smoke passes."],
+    blockedLiveActions: ["configuration save mutation", "content block write", "public publish write", "CRM lead write"],
+    nextGate: "Accept renderer parity, lead route smoke, and rollback owner evidence before audit recording.",
+    canRecordAudit: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+      "siteFactory.listClientWebsiteConfigurationSaveRequests",
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client configuration audit timeline",
+    auditPosture: "provider-light-audit-timeline",
+    eventCount: 5,
+    acceptedEventCount: 0,
+    blockedEventCount: 5,
+    timelineEvents: [
+      { key: "plan-review", label: "Pilot plan limit review", actor: "Platform super admin", status: "pending", evidence: "plan limit review pending" },
+      { key: "owner-signoff", label: "Tenant owner signoff", actor: "Client owner", status: "blocked", evidence: "tenant owner signoff pending" },
+      { key: "hosted-read", label: "Hosted read smoke", actor: "Technical reviewer", status: "blocked", evidence: "hosted read smoke transcript pending" },
+      { key: "domain-posture", label: "Domain posture note", actor: "Launch reviewer", status: "pending", evidence: "domain posture note pending" },
+      { key: "admin-scope", label: "Admin permission scope", actor: "Access reviewer", status: "blocked", evidence: "admin permission scope review pending" },
+    ],
+    rollbackNotes: ["Leave advisor site as a local fixture.", "Discard the pending save request if any owner, domain, or hosted smoke evidence fails.", "Keep invitation and billing activation disabled."],
+    blockedLiveActions: ["tenant create mutation", "site create mutation", "configuration save mutation", "client admin invitation", "Stripe billing activation"],
+    nextGate: "Capture plan, owner, hosted smoke, domain, and access evidence before audit recording.",
+    canRecordAudit: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+      "siteFactory.listClientWebsiteConfigurationSaveRequests",
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "controlPlane.createTenant",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite configuration audit timeline",
+    auditPosture: "provider-light-audit-timeline",
+    eventCount: 5,
+    acceptedEventCount: 0,
+    blockedEventCount: 5,
+    timelineEvents: [
+      { key: "consent", label: "Campaign consent", actor: "Campaign reviewer", status: "blocked", evidence: "campaign consent note pending" },
+      { key: "site-scope", label: "Microsite scope", actor: "Platform super admin", status: "pending", evidence: "site scope approval pending" },
+      { key: "lead-routing", label: "Lead route smoke", actor: "CRM reviewer", status: "blocked", evidence: "lead route smoke plan pending" },
+      { key: "provider-send", label: "Provider-send boundary", actor: "Operations reviewer", status: "blocked", evidence: "provider-send boundary note pending" },
+      { key: "ai-copy", label: "AI copy approval", actor: "Content reviewer", status: "blocked", evidence: "AI copy approval pending" },
+    ],
+    rollbackNotes: ["Keep campaign microsite on fixture content.", "Discard pending request if consent, scope, lead, provider-send, or AI copy evidence fails.", "Keep campaign sends and public form writes disabled."],
+    blockedLiveActions: ["site create mutation", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+    nextGate: "Capture consent, scope, lead routing, provider-send, and AI copy evidence before audit recording.",
+    canRecordAudit: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+      "siteFactory.listClientWebsiteConfigurationSaveRequests",
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "campaigns.requestCampaignApproval",
+    ],
+  },
+];
+
+export const listClientWebsiteConfigurationAuditTimelines = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteConfigurationAuditTimelines.map((timeline) => ({
+      ...timeline,
+      providerBoundary: "Read-only configuration audit timeline query. It records evidence events, actor labels, rollback notes, blocked actions, and gates only; it does not record audit events, save configuration, publish, invite, bill, attach domains, call providers, run codegen, import generated API, or execute hosted Convex.",
     })),
 });
 

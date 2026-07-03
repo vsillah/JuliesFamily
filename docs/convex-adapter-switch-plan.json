@@ -186,6 +186,7 @@
             "siteFactory.listStarterTemplates",
             "siteFactory.listClientWebsiteAdminPermissionPresets",
             "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+            "siteFactory.listClientWebsiteConfigurationAuditTimelines",
             "siteFactory.listClientWebsiteConfigurationChangeSets",
             "siteFactory.listClientWebsiteConfigurationReviewPackets",
             "siteFactory.listClientWebsiteConfigurationProfiles",
@@ -196,6 +197,7 @@
           "requiredSmokeEvidence": [
             "template list",
             "configuration approval matrix read",
+            "configuration audit timeline read",
             "configuration change set read",
             "configuration review packet read",
             "configuration profile read",

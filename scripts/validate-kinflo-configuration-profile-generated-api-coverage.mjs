@@ -105,6 +105,8 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "npm run kinflo:validate-configuration-profile-generated-api-coverage",
   "siteFactoryListClientWebsiteConfigurationApprovalMatrices",
   "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+  "siteFactoryListClientWebsiteConfigurationAuditTimelines",
+  "siteFactory.listClientWebsiteConfigurationAuditTimelines",
   "siteFactoryListClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
@@ -114,6 +116,7 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "siteFactoryListClientWebsiteConfigurationSaveRequests",
   "siteFactory.listClientWebsiteConfigurationSaveRequests",
   "configuration profile read",
+  "configuration audit timeline read",
   "configuration save request read",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -122,6 +125,7 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
 requireIncludes(runtimePath, [
   "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
   "siteFactoryListClientWebsiteConfigurationApprovalMatrices: \"siteFactory.listClientWebsiteConfigurationApprovalMatrices\"",
+  "siteFactoryListClientWebsiteConfigurationAuditTimelines: \"siteFactory.listClientWebsiteConfigurationAuditTimelines\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
   "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
@@ -130,6 +134,8 @@ requireIncludes(runtimePath, [
 requireIncludes(generatedContractPath, [
   "siteFactoryListClientWebsiteConfigurationApprovalMatrices",
   "client website configuration approval matrices include approver roles, evidence, save blockers, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationAuditTimelines",
+  "client website configuration audit timelines include evidence events, actor labels, rollback notes, blocked actions, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationChangeSets",
   "client website configuration change sets include draft changes, save blockers, approval evidence, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
@@ -142,6 +148,7 @@ requireIncludes(generatedContractPath, [
 
 requireIncludes(convexPath, [
   "export const listClientWebsiteConfigurationApprovalMatrices",
+  "export const listClientWebsiteConfigurationAuditTimelines",
   "export const listClientWebsiteConfigurationChangeSets",
   "export const listClientWebsiteConfigurationReviewPackets",
   "export const listClientWebsiteConfigurationProfiles",
@@ -149,14 +156,15 @@ requireIncludes(convexPath, [
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 79",
-  "Query bindings: 41",
-  "Smoke-manifest review gaps: 34",
+  "Generated API bindings: 80",
+  "Query bindings: 42",
+  "Smoke-manifest review gaps: 35",
 ]);
 
 requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+  "siteFactory.listClientWebsiteConfigurationAuditTimelines",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
