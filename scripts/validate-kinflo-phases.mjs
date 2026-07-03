@@ -203,6 +203,7 @@ for (const path of [
   "docs/phase163-client-website-launch-composer-hosted-smoke-gap.md",
   "docs/phase164-hosted-smoke-sequencer-parity.md",
   "docs/phase165-hosted-smoke-evidence-ledger-parity.md",
+  "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -395,6 +396,7 @@ for (const path of [
   "scripts/validate-kinflo-client-website-launch-composer-hosted-smoke-gap.mjs",
   "scripts/validate-kinflo-hosted-smoke-sequencer-parity.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-ledger-parity.mjs",
+  "scripts/validate-kinflo-hosted-smoke-evidence-deep-link-parity.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2574,6 +2576,19 @@ requireIncludes("docs/phase165-hosted-smoke-evidence-ledger-parity.md", [
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase166-hosted-smoke-evidence-deep-link-parity.md", [
+  "Phase 166: Hosted Smoke Evidence Deep Link Parity",
+  "npm run kinflo:validate-hosted-smoke-evidence-deep-link-parity",
+  "Evidence entries: 6",
+  "Hosted smoke gaps covered by those entries: 28",
+  "snapshot.hostedActivationRunbook.hostedSmokeEvidenceLedger.entries",
+  "provider-readiness-records",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No hosted smoke transcript is recorded.",
+  "No secret values are read or printed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -3143,6 +3158,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-hosted-smoke-sequencer-parity\"",
   "\"docs/phase165-hosted-smoke-evidence-ledger-parity.md\"",
   "\"npm run kinflo:validate-hosted-smoke-evidence-ledger-parity\"",
+  "\"docs/phase166-hosted-smoke-evidence-deep-link-parity.md\"",
+  "\"npm run kinflo:validate-hosted-smoke-evidence-deep-link-parity\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3383,6 +3400,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-sanitized-preflight-repository-record-approval\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-hosted-smoke-evidence-deep-links\"",
+  "\"kinflo:validate-hosted-smoke-evidence-deep-link-parity\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
@@ -5297,6 +5315,17 @@ requireIncludes("scripts/validate-kinflo-hosted-smoke-evidence-ledger-parity.mjs
   "hosted smoke evidence ledger parity does not import generated API",
   "hosted smoke evidence ledger parity does not execute live Convex",
   "KinFlo hosted smoke evidence ledger parity validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-smoke-evidence-deep-link-parity.mjs", [
+  "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
+  "docs/phase104-hosted-smoke-evidence-deep-links.md",
+  "hosted smoke evidence deep links cover six ledger batches",
+  "hosted smoke evidence deep links cover twenty-eight hosted smoke gaps",
+  "Phase 104 documents deep link for",
+  "hosted smoke evidence deep-link parity does not import generated API",
+  "hosted smoke evidence deep-link parity does not execute live Convex",
+  "KinFlo hosted smoke evidence deep-link parity validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs", [

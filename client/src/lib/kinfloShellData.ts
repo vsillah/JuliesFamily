@@ -7797,6 +7797,8 @@ const fixtureHostedSmokeEvidenceLedger: ShellHostedSmokeEvidenceLedger = {
     "docs/phase90-hosted-smoke-gap-backlog.md",
     "docs/convex-adapter-switch-plan.json",
     "docs/convex-live-smoke-manifest.json",
+    "docs/phase104-hosted-smoke-evidence-deep-links.md",
+    "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
   ],
   entries: [
     {
@@ -8242,6 +8244,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "docs/phase123-hosted-activation-ownership-review.md",
       "docs/phase124-hosted-activation-env-codegen-review.md",
       "docs/phase104-hosted-smoke-evidence-deep-links.md",
+      "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
     ],
     blockedActions: [
       "create hosted Convex deployment",
