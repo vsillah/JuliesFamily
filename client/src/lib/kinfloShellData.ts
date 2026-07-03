@@ -493,6 +493,41 @@ export type ShellHostedActivationPreflightReview = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationPreflightEvidenceEntry = {
+  id: string;
+  label: string;
+  allowedValue: string;
+  evidenceTarget: string;
+  prohibitedContent: string;
+  storagePolicy: string;
+};
+
+export type ShellHostedActivationPreflightEvidenceLedger = {
+  status: "prepare_only_preflight_evidence_ledger";
+  decisionId: "activation-preflight-window";
+  owner: "Vambah";
+  totalEntries: number;
+  pendingEntries: number;
+  acceptedEntries: number;
+  nextGate: string;
+  reviewPacketPath: string;
+  sourceDocuments: string[];
+  entries: ShellHostedActivationPreflightEvidenceEntry[];
+  blockedActions: string[];
+  canRecordEvidence: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canCommitRawLogs: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -508,6 +543,7 @@ export type ShellHostedActivationRunbook = {
   hostedOwnershipReview: ShellHostedActivationOwnershipReview;
   envCodegenReview: ShellHostedActivationEnvCodegenReview;
   activationPreflightReview: ShellHostedActivationPreflightReview;
+  activationPreflightEvidenceLedger: ShellHostedActivationPreflightEvidenceLedger;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -7965,6 +8001,91 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canRecordDecision: false,
     canEnterEnvValues: false,
     canRunAgainstRealEnv: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  activationPreflightEvidenceLedger: {
+    status: "prepare_only_preflight_evidence_ledger",
+    decisionId: "activation-preflight-window",
+    owner: "Vambah",
+    totalEntries: 5,
+    pendingEntries: 5,
+    acceptedEntries: 0,
+    nextGate: "Capture only redacted yes/no preflight evidence after the activation preflight window is approved; keep raw command output outside committed source.",
+    reviewPacketPath: "docs/phase126-hosted-activation-preflight-evidence-ledger.md",
+    sourceDocuments: [
+      "docs/phase17-convex-activation-preflight.md",
+      "docs/phase24-live-convex-handoff.md",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase120-hosted-activation-decision-checkpoint.md",
+      "docs/phase124-hosted-activation-env-codegen-review.md",
+      "docs/phase125-hosted-activation-preflight-review.md",
+    ],
+    entries: [
+      {
+        id: "local-env-presence-summary",
+        label: "Local env presence summary",
+        allowedValue: "Local .env.local present: yes or no",
+        evidenceTarget: "Record only whether the local file exists for readiness review.",
+        prohibitedContent: "No env key names beyond documented placeholders, no values, no file contents, and no shell export output.",
+        storagePolicy: "Commit the yes/no summary only; keep any raw terminal output outside the repo if it contains local context.",
+      },
+      {
+        id: "generated-directory-presence-summary",
+        label: "Generated directory presence summary",
+        allowedValue: "Generated Convex directory present: yes or no",
+        evidenceTarget: "Record whether `convex/_generated` exists before the approved codegen window.",
+        prohibitedContent: "No generated API file contents, no generated import snippets, and no `generatedApiAvailable` true state.",
+        storagePolicy: "Commit the yes/no summary only; generated files remain untracked and uncommitted.",
+      },
+      {
+        id: "hosted-env-visibility-summary",
+        label: "Hosted env visibility summary",
+        allowedValue: "Hosted Convex env visible to this process: yes or no",
+        evidenceTarget: "Record process visibility without exposing the deployment URL, auth issuer, client id, tokens, or provider identifiers.",
+        prohibitedContent: "No raw env values, no copied provider dashboard values, and no 1Password item contents.",
+        storagePolicy: "Commit the yes/no summary only; private hosted env evidence stays in 1Password or owner-held notes.",
+      },
+      {
+        id: "external-write-zero-proof",
+        label: "External write zero proof",
+        allowedValue: "External writes: 0; Hosted deployment touched: no",
+        evidenceTarget: "Confirm the preflight remains a local readiness check with no hosted Convex, auth, domain, CRM, or provider write.",
+        prohibitedContent: "No resource ids from created deployments, no mutation output, no provider request/response logs, and no live smoke output.",
+        storagePolicy: "Commit the zero-write summary only; do not store provider logs in source.",
+      },
+      {
+        id: "abort-and-cleanup-note",
+        label: "Abort and cleanup note",
+        allowedValue: "Abort path documented; sanitized summary committed only",
+        evidenceTarget: "Record that raw logs stay private and any blocked result keeps codegen, generated API imports, and live smokes disabled.",
+        prohibitedContent: "No raw failed command output if it includes local paths, secret names with values, tokens, URLs, or provider dashboard details.",
+        storagePolicy: "Commit a sanitized note only; store raw abort notes outside the repo if owner review needs them.",
+      },
+    ],
+    blockedActions: [
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "commit raw activation preflight logs",
+      "print or commit secret-bearing preflight output",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "set generatedApiAvailable true",
+      "execute hosted read or mutation smoke",
+      "switch fixture adapter to generated API",
+      "perform provider writes or client launch",
+    ],
+    canRecordEvidence: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canCommitRawLogs: false,
     canRunCodegen: false,
     canCommitGeneratedApi: false,
     canImportGeneratedApi: false,
