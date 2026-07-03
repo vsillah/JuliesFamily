@@ -82,6 +82,7 @@ requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
   "section-kinflo-client-studio-lane-configuration",
   "section-kinflo-client-studio-lane-handoff",
   "section-kinflo-client-studio-lane-workbench",
+  "Spin up, Configure, and Handoff now bypass the Workbench context stack",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -99,6 +100,10 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "min-h-screen overflow-x-clip bg-slate-50",
   "max-w-7xl overflow-x-clip px-4",
   "flex min-w-0 flex-col gap-2 overflow-x-clip",
+  "const shouldShowClientWebsiteStudioContext =",
+  "clientWebsiteStudioLane === \"workbench\" && !isClientWebsiteLaunchWorkbench",
+  "shouldShowClientWebsiteStudioContext ? \"overflow-hidden\" : \"hidden\"",
+  "shouldShowClientWebsiteStudioContext ? \"grid\" : \"hidden\"",
   "{clientWebsiteStudioLaneRail}",
   "const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane]",
   "laneSection.scrollTo({ top: 0 })",
@@ -147,6 +152,12 @@ const railRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", c
 const headerRailRenderIndex = shellContents.indexOf('activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null');
 const persistentIdentityIndex = shellContents.indexOf('data-testid="section-kinflo-persistent-identity-strip"');
 const controlRoomIndex = shellContents.indexOf('data-testid="section-kinflo-client-control-room-frame"', siteStudioIndex);
+const studioContextGuardIndex = shellContents.indexOf("const shouldShowClientWebsiteStudioContext =");
+const commandSurfaceGuardIndex = shellContents.indexOf(
+  '${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]',
+  siteStudioIndex
+);
+const queueLaneIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-lane-queue"', siteStudioIndex);
 
 if (
   siteStudioIndex !== -1 &&
@@ -164,6 +175,22 @@ if (
   fail(
     "client Studio lane rail renders first in the compact Site Studio section",
     "The lane rail must render inside the compact Site Studio shell before the control-room frame so each lane starts from the same top control position."
+  );
+}
+
+if (
+  studioContextGuardIndex !== -1 &&
+  controlRoomIndex !== -1 &&
+  commandSurfaceGuardIndex !== -1 &&
+  queueLaneIndex !== -1 &&
+  railRenderIndex < controlRoomIndex &&
+  controlRoomIndex < queueLaneIndex
+) {
+  pass("client Studio non-Workbench lanes open below the lane rail");
+} else {
+  fail(
+    "client Studio non-Workbench lanes open below the lane rail",
+    "Spin up, Configure, and Handoff must bypass the Workbench context stack so the active lane does not start halfway down a shared scroll."
   );
 }
 

@@ -63,6 +63,8 @@ The page now has a top-level lane switcher above the major client website module
 
 The lane switcher now renders at the top of the compact Site Studio shell before the control-room, operating-frame, and workbench-contract summary cards. The compact shell still preserves viewport stickiness by avoiding a hidden vertical overflow ancestor, and the `tabs-kinflo-client-studio-lanes` rail uses sticky top-0 placement. That keeps `Spin up`, `Configure`, `Handoff`, and `Workbench` anchored in the same section position instead of shifting lower when identity context or lane summary cards change.
 
+Spin up, Configure, and Handoff now bypass the Workbench context stack after the lane rail. The control-room frame, portfolio registry, configuration command surface, launch composer, operating frame, and workbench-contract summary remain available in Workbench, but they no longer sit between the lane switcher and the active operational lane. That makes each lane feel like its own compact section instead of a tab that opens halfway down a shared vertical page.
+
 On narrow screens, the lane switcher now stays in one four-column row with `text-xs` controls. That prevents the lane toolbar itself from becoming a two-row vertical stack before the user reaches `Sites`, `Preview`, or `Launch`.
 
 The client handoff area now uses a compact handoff workspace with `Selected site` and `All site permissions` tabs. The default view keeps the selected site's permissions, blocked invite, missing artifact, and gated action visible while moving the full cross-site admin matrix behind a tab. Super-admin comparison remains one click away, but it no longer expands the default Site Studio page into a long permission document.

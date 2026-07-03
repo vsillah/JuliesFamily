@@ -26,6 +26,8 @@ The shared Site Studio lane rail renders as the first control inside the compact
 
 This keeps the same controls at the top of every Site Studio lane instead of allowing prior lane scroll state or lane-specific card height to make the next lane feel like it starts in the middle of the page.
 
+Spin up, Configure, and Handoff now bypass the Workbench context stack after the rail. The Workbench lane keeps the control room, portfolio registry, configuration command surface, launch composer, operating frame, and workbench contract, while the operational lanes open directly below the lane switcher.
+
 The page, main content, and compact Site Studio shell use `overflow-x-clip` instead of hidden horizontal overflow. That keeps wide child panels clipped without turning the shell wrappers into overflow containers that can break the `sticky top-0` lane rail.
 
 ## Provider Boundary

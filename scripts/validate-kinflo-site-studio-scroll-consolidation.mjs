@@ -81,11 +81,14 @@ const compactMarkers = [
   "activeTab === \"site-studio\" ? \"hidden sm:block\" : \"block\"",
   "activeTab === \"site-studio\" ? \"mb-1 hidden rounded-md px-2 py-1.5 lg:block\"",
   "const clientWebsiteStudioLaneRail = (",
+  "const shouldShowClientWebsiteStudioContext =",
+  "clientWebsiteStudioLane === \"workbench\" && !isClientWebsiteLaunchWorkbench",
   "section-kinflo-client-studio-compact-shell",
   "{clientWebsiteStudioLaneRail}",
   "hidden max-w-3xl text-sm leading-5 text-slate-600 sm:block",
   "hidden grid-cols-2 gap-2 sm:grid lg:grid-cols-4",
-  "${isClientWebsiteLaunchWorkbench ? \"hidden\" : \"hidden lg:grid\"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4",
+  "${shouldShowClientWebsiteStudioContext ? \"hidden lg:grid\" : \"hidden\"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4",
+  "${shouldShowClientWebsiteStudioContext ? \"grid\" : \"hidden\"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]",
   "tabs-kinflo-client-studio-lanes",
   "section-kinflo-client-studio-lane-switcher",
   "overflow-x-hidden",
@@ -194,6 +197,7 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "compact shell trims duplicate mobile summary chrome",
   "lane toolbar stays as a sticky compact-section rail",
   "before the control-room frame",
+  "Spin up, Configure, and Handoff now bypass the Workbench context stack",
   "sticky top-0 placement",
   "tabs-kinflo-client-workbench-stage",
   "section-kinflo-client-launch-rail",
@@ -324,6 +328,38 @@ if (
   fail(
     "Site Studio lane switcher uses a sticky compact-section top rail",
     "The lane switcher must stay in the compact Site Studio shell with sticky top-0 placement before lane content."
+  );
+}
+
+const studioContextGuardIndex = shellContents.indexOf("const shouldShowClientWebsiteStudioContext =");
+const controlRoomClassIndex = shellContents.indexOf(
+  'className={`${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`',
+  siteStudioIndex
+);
+const registryGuardIndex = shellContents.indexOf(
+  'className={shouldShowClientWebsiteStudioContext ? "block" : "hidden"}',
+  siteStudioIndex
+);
+const commandSurfaceGuardIndex = shellContents.indexOf(
+  '${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]',
+  siteStudioIndex
+);
+const queueLaneIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-lane-queue"', siteStudioIndex);
+
+if (
+  studioContextGuardIndex !== -1 &&
+  controlRoomClassIndex !== -1 &&
+  registryGuardIndex !== -1 &&
+  commandSurfaceGuardIndex !== -1 &&
+  queueLaneIndex !== -1 &&
+  laneRailRenderIndex < controlRoomClassIndex &&
+  controlRoomClassIndex < queueLaneIndex
+) {
+  pass("Site Studio non-Workbench lanes bypass the Workbench context stack");
+} else {
+  fail(
+    "Site Studio non-Workbench lanes bypass the Workbench context stack",
+    "Spin up, Configure, and Handoff must open directly below the lane rail instead of inheriting the Workbench control-room, registry, composer, and contract stack."
   );
 }
 

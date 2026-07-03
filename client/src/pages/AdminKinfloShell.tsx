@@ -4265,6 +4265,8 @@ export default function AdminKinfloShell() {
   };
   const isClientWebsiteLaunchWorkbench =
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch";
+  const shouldShowClientWebsiteStudioContext =
+    clientWebsiteStudioLane === "workbench" && !isClientWebsiteLaunchWorkbench;
   const clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context ?? [];
   const clientWebsitePreviewReviewEvidence = selectedClientWebsitePreviewReviewPacket?.evidenceChecklist.map((item) => ({
     label: item.label,
@@ -10030,7 +10032,7 @@ export default function AdminKinfloShell() {
               {clientWebsiteStudioLaneRail}
 
               <div
-                className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "overflow-hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
+                className={`${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
               >
                 <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -10090,7 +10092,7 @@ export default function AdminKinfloShell() {
                 </div>
               </div>
 
-              <div className={isClientWebsiteLaunchWorkbench ? "hidden" : "block"}>
+              <div className={shouldShowClientWebsiteStudioContext ? "block" : "hidden"}>
                 <ClientWebsitePortfolioRegistry
                   registry={snapshot.clientWebsiteStudio.portfolioRegistry}
                   selectedSiteKey={clientWebsiteStudioSiteKey}
@@ -10100,7 +10102,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "hidden lg:grid"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-studio-operating-frame"
               >
                 {clientWebsiteStudioReviewStats.map((stat) => (
@@ -10111,7 +10113,7 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "grid"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
+              <div className={`${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
                 <ClientWebsiteConfigurationCommandSurface
                   site={selectedClientWebsiteStudioSite}
                   profile={selectedClientWebsiteConfigurationProfile}
@@ -10126,7 +10128,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "hidden lg:grid"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-workbench-grid-contract"
               >
                 {clientWebsiteWorkbenchGridContract.map((item) => (
