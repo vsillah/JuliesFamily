@@ -112,6 +112,7 @@ for (const path of [
   "docs/phase130-hosted-activation-preflight-result-template.md",
   "docs/phase131-hosted-activation-preflight-result-template-packet.md",
   "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
+  "docs/phase133-hosted-activation-raw-preflight-output-redaction-checklist.md",
   "docs/convex-activation-preflight-result-template.json",
   "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase104-hosted-smoke-evidence-deep-links.md",
@@ -162,6 +163,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-preflight-result-template.mjs",
   "scripts/validate-kinflo-hosted-activation-preflight-result-template-packet.mjs",
   "scripts/validate-kinflo-hosted-activation-raw-preflight-output-storage.mjs",
+  "scripts/validate-kinflo-hosted-activation-raw-preflight-output-redaction-checklist.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
@@ -309,6 +311,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-hosted-activation-preflight-result-template",
   "npm run kinflo:validate-hosted-activation-preflight-result-template-packet",
   "npm run kinflo:validate-hosted-activation-raw-preflight-output-storage",
+  "npm run kinflo:validate-hosted-activation-raw-preflight-output-redaction-checklist",
   "npm run kinflo:validate-hosted-activation-step-deep-links",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -360,6 +363,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 130 hosted activation preflight result template",
   "Phase 131 hosted activation preflight result template packet",
   "Phase 132 hosted activation raw preflight output storage review",
+  "Phase 133 hosted activation raw preflight output redaction checklist",
   "Phase 101 hosted activation step deep links",
   "Phase 104 hosted smoke evidence deep links",
   "Site Studio scroll consolidation",
@@ -378,7 +382,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 93 adapter switch cutover checklist",
   "Phase 102 adapter switch batch deep links",
   "Phase 103 adapter switch surface deep links",
-  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 121 hosted activation credential rotation review, Phase 122 hosted activation repo sharing risk review, Phase 123 hosted activation ownership review, Phase 124 hosted activation env/codegen review, Phase 125 hosted activation preflight review, Phase 126 hosted activation preflight evidence ledger, Phase 127 hosted activation preflight evidence deep links, Phase 128 hosted activation preflight result contract, Phase 129 hosted activation preflight result deep links, Phase 130 hosted activation preflight result template, Phase 131 hosted activation preflight result template packet, Phase 132 hosted activation raw preflight output storage review, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
+  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 121 hosted activation credential rotation review, Phase 122 hosted activation repo sharing risk review, Phase 123 hosted activation ownership review, Phase 124 hosted activation env/codegen review, Phase 125 hosted activation preflight review, Phase 126 hosted activation preflight evidence ledger, Phase 127 hosted activation preflight evidence deep links, Phase 128 hosted activation preflight result contract, Phase 129 hosted activation preflight result deep links, Phase 130 hosted activation preflight result template, Phase 131 hosted activation preflight result template packet, Phase 132 hosted activation raw preflight output storage review, Phase 133 hosted activation raw preflight output redaction checklist, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
 ]);
 
 requireIncludes("package.json", [
@@ -412,6 +416,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-preflight-result-template\"",
   "\"kinflo:validate-hosted-activation-preflight-result-template-packet\"",
   "\"kinflo:validate-hosted-activation-raw-preflight-output-storage\"",
+  "\"kinflo:validate-hosted-activation-raw-preflight-output-redaction-checklist\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",

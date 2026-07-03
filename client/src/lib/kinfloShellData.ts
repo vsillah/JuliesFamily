@@ -636,6 +636,45 @@ export type ShellHostedActivationRawPreflightOutputStorageReview = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationRawPreflightOutputRedactionItem = {
+  id: string;
+  label: string;
+  rawOutputRisk: string;
+  sanitizedCommitShape: string;
+  reviewerAction: string;
+  reviewState: "pending_storage_approval";
+};
+
+export type ShellHostedActivationRawPreflightOutputRedactionChecklist = {
+  phase: 133;
+  status: "prepare_only_raw_preflight_output_redaction_checklist";
+  decisionId: "raw-preflight-output-redaction";
+  owner: "Vambah";
+  totalRules: number;
+  pendingRules: number;
+  acceptedRules: number;
+  nextGate: string;
+  reviewPacketPath: "docs/phase133-hosted-activation-raw-preflight-output-redaction-checklist.md";
+  sourceDocuments: string[];
+  redactionItems: ShellHostedActivationRawPreflightOutputRedactionItem[];
+  commitRules: string[];
+  blockedActions: string[];
+  canReviewRawOutput: false;
+  canRedactRawOutput: false;
+  canRecordSanitizedResult: false;
+  canCommitRawOutput: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -655,6 +694,7 @@ export type ShellHostedActivationRunbook = {
   activationPreflightResultContract: ShellHostedActivationPreflightResultContract;
   activationPreflightResultTemplatePacket: ShellHostedActivationPreflightResultTemplatePacket;
   rawPreflightOutputStorageReview: ShellHostedActivationRawPreflightOutputStorageReview;
+  rawPreflightOutputRedactionChecklist: ShellHostedActivationRawPreflightOutputRedactionChecklist;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -8453,6 +8493,100 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canSelectStorageLocation: false,
     canRecordRawOutput: false,
     canCommitRawLogs: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  rawPreflightOutputRedactionChecklist: {
+    phase: 133,
+    status: "prepare_only_raw_preflight_output_redaction_checklist",
+    decisionId: "raw-preflight-output-redaction",
+    owner: "Vambah",
+    totalRules: 5,
+    pendingRules: 5,
+    acceptedRules: 0,
+    nextGate: "After private raw-output storage is approved, review the redaction checklist before any sanitized hosted preflight result is committed.",
+    reviewPacketPath: "docs/phase133-hosted-activation-raw-preflight-output-redaction-checklist.md",
+    sourceDocuments: [
+      "docs/phase126-hosted-activation-preflight-evidence-ledger.md",
+      "docs/phase128-hosted-activation-preflight-result-contract.md",
+      "docs/phase130-hosted-activation-preflight-result-template.md",
+      "docs/phase131-hosted-activation-preflight-result-template-packet.md",
+      "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
+    ],
+    redactionItems: [
+      {
+        id: "secret-like-values",
+        label: "Secret-like values",
+        rawOutputRisk: "Tokens, API keys, auth issuer secrets, client secrets, copied 1Password fields, or shell-exported values may appear in raw output.",
+        sanitizedCommitShape: "Commit only yes/no or enum status fields; never commit the value, prefix, suffix, hash, or masked token.",
+        reviewerAction: "Confirm raw output stayed in the approved private surface and that committed notes contain no secret-like fragments.",
+        reviewState: "pending_storage_approval",
+      },
+      {
+        id: "local-private-paths",
+        label: "Local private paths",
+        rawOutputRisk: "Stack traces, command output, or local config checks may reveal machine paths, usernames, project folders, or private artifact locations.",
+        sanitizedCommitShape: "Commit only the high-level result and a generic note such as local env present or local artifact reviewed.",
+        reviewerAction: "Remove or generalize local path details before any source-controlled summary is written.",
+        reviewState: "pending_storage_approval",
+      },
+      {
+        id: "hosted-provider-identifiers",
+        label: "Hosted provider identifiers",
+        rawOutputRisk: "Hosted Convex deployment names, dashboard URLs, auth issuer URLs, client ids, provider request ids, or resource ids may appear.",
+        sanitizedCommitShape: "Commit only boolean visibility/touched fields and the approved enum result status.",
+        reviewerAction: "Verify provider identifiers remain in the private raw-output store and do not enter docs, chat, generated artifacts, or deploy logs.",
+        reviewState: "pending_storage_approval",
+      },
+      {
+        id: "stack-trace-private-context",
+        label: "Stack trace private context",
+        rawOutputRisk: "Failure traces can combine private paths, dependency versions, env names, and command arguments in one block.",
+        sanitizedCommitShape: "Commit only blocked or aborted plus a short sanitized reason that does not include raw stack frames.",
+        reviewerAction: "Summarize failure class and next gate without copying raw trace lines.",
+        reviewState: "pending_storage_approval",
+      },
+      {
+        id: "mutation-or-provider-output",
+        label: "Mutation or provider output",
+        rawOutputRisk: "Any nonzero external write count, mutation response, provider response, or created resource id proves the run crossed the provider boundary.",
+        sanitizedCommitShape: "Commit externalWrites as 0 only for prepare-only proof; otherwise stop and keep the raw output private for owner review.",
+        reviewerAction: "Block codegen, live smoke, adapter switch, provider writes, and client launch until the owner reviews the private output.",
+        reviewState: "pending_storage_approval",
+      },
+    ],
+    commitRules: [
+      "Commit only sanitized yes/no, number, or enum fields from the approved result contract.",
+      "Never commit raw command output, stack traces, provider ids, local paths, secrets, masked secret fragments, or copied dashboard values.",
+      "Keep raw output in the owner-approved private storage surface selected after Phase 132.",
+      "Treat any nonzero external write, hosted deployment touch, or provider response as a stop condition for owner review.",
+      "Do not use this checklist as approval to run hosted preflight, codegen, generated API import, live smoke, adapter switch, or provider writes.",
+    ],
+    blockedActions: [
+      "review raw output before owner approves private storage",
+      "redact raw output into a committed result before owner approval",
+      "commit raw activation preflight logs",
+      "paste secret-bearing output into repo docs, chat, generated artifacts, or deploy logs",
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "execute hosted read or mutation smoke",
+      "perform provider writes or client launch",
+    ],
+    canReviewRawOutput: false,
+    canRedactRawOutput: false,
+    canRecordSanitizedResult: false,
+    canCommitRawOutput: false,
     canEnterEnvValues: false,
     canRunAgainstRealEnv: false,
     canRunCodegen: false,

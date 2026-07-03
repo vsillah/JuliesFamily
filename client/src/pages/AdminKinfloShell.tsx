@@ -5561,6 +5561,77 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
+                  <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3" data-testid="section-kinflo-hosted-raw-preflight-output-redaction-checklist">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-rose-300 bg-white text-rose-900">
+                            Phase {snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.phase}
+                          </Badge>
+                          <Badge className="bg-rose-800 hover:bg-rose-800">
+                            {snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.status.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <h4 className="mt-3 text-sm font-semibold text-rose-950">Raw output redaction checklist</h4>
+                        <p className="mt-1 max-w-3xl text-xs leading-5 text-rose-900" data-testid="text-kinflo-hosted-raw-preflight-output-redaction-checklist">
+                          {snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.nextGate}
+                        </p>
+                      </div>
+                      <Button size="sm" disabled variant="outline" className="self-start border-rose-300 bg-white text-rose-900 hover:bg-white hover:text-rose-900" data-testid="button-hosted-raw-preflight-output-redaction-gated">
+                        <ShieldCheck className="mr-2 h-3 w-3" />
+                        Redaction review gated
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs" data-testid="section-kinflo-hosted-raw-preflight-output-redaction-summary">
+                      {[
+                        { label: "Rules", value: snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.totalRules },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.pendingRules },
+                        { label: "Accepted", value: snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.acceptedRules },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-lg border border-rose-200 bg-white px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-rose-700">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+                      <div className="grid max-h-[250px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-raw-preflight-output-redaction-items">
+                        {snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.redactionItems.map((item) => (
+                          <div key={item.id} className="rounded-lg border border-rose-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{item.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{item.rawOutputRisk}</div>
+                              </div>
+                              <Badge variant="outline" className="w-fit shrink-0 border-rose-200 bg-rose-50 text-rose-800">{item.reviewState.replaceAll("_", " ")}</Badge>
+                            </div>
+                            <p className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-900">{item.sanitizedCommitShape}</p>
+                            <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">{item.reviewerAction}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="min-w-0 space-y-2">
+                        <div className="rounded-lg border border-rose-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-rose-700">Review packet</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.reviewPacketPath}
+                          </div>
+                        </div>
+                        <div className="max-h-[160px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-raw-preflight-output-redaction-rules">
+                          {snapshot.hostedActivationRunbook.rawPreflightOutputRedactionChecklist.commitRules.map((rule) => (
+                            <div key={rule} className="flex items-start gap-2 rounded-lg border border-rose-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-rose-700" />
+                              <span>{rule}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
                     <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
