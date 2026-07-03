@@ -68,6 +68,7 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   siteFactoryListClientWebsiteConfigurationChangeSets: "siteFactory.listClientWebsiteConfigurationChangeSets",
   siteFactoryListClientWebsiteConfigurationProfiles: "siteFactory.listClientWebsiteConfigurationProfiles",
   siteFactoryListClientWebsiteConfigurationReviewPackets: "siteFactory.listClientWebsiteConfigurationReviewPackets",
+  siteFactoryListClientWebsiteConfigurationSaveRequests: "siteFactory.listClientWebsiteConfigurationSaveRequests",
   siteFactoryListClientWebsiteLaunchDecisionPackets: "siteFactory.listClientWebsiteLaunchDecisionPackets",
   siteFactoryListClientWebsiteLaunchBlueprints: "siteFactory.listClientWebsiteLaunchBlueprints",
   siteFactoryListClientWebsiteLaunchSimulations: "siteFactory.listClientWebsiteLaunchSimulations",

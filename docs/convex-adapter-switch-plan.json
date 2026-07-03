@@ -189,6 +189,7 @@
             "siteFactory.listClientWebsiteConfigurationChangeSets",
             "siteFactory.listClientWebsiteConfigurationReviewPackets",
             "siteFactory.listClientWebsiteConfigurationProfiles",
+            "siteFactory.listClientWebsiteConfigurationSaveRequests",
             "siteFactory.listClientWebsiteLaunchBlueprints",
             "siteFactory.createSiteFromTemplate"
           ],
@@ -198,6 +199,7 @@
             "configuration change set read",
             "configuration review packet read",
             "configuration profile read",
+            "configuration save request read",
             "draft site created from template",
             "owner invite scoped"
           ],

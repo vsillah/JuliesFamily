@@ -116,11 +116,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 78",
-  "Query bindings: 40",
+  "Generated API bindings: 79",
+  "Query bindings: 41",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 33",
+  "Smoke-manifest review gaps: 34",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -131,15 +131,16 @@ requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 78",
-  "queryBindings: 40",
+  "totalBindings: 79",
+  "queryBindings: 41",
   "mutationBindings: 38",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 33",
+  "smokeManifestGaps: 34",
   "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationSaveRequests",
   "firstSwitchBatch: \"read-only-core\"",
   "npm run kinflo:validate-generated-api-review-board",
 ]);
@@ -149,6 +150,7 @@ requireIncludes(generatedContractPath, [
   "siteFactoryListClientWebsiteConfigurationChangeSets",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
@@ -156,6 +158,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
 ]);
 
 requireIncludes(shellPath, [

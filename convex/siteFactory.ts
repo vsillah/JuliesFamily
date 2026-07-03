@@ -187,6 +187,36 @@ type ClientWebsiteConfigurationApprovalMatrix = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteConfigurationSaveRequest = {
+  siteKey: string;
+  label: string;
+  requestPosture: "provider-light-save-request";
+  requestStatus: "ready_for_internal_review" | "blocked_pending_approval" | "draft";
+  requestedBy: string;
+  changeSetLabel: string;
+  approvalMatrixLabel: string;
+  payloadCount: number;
+  evidenceCount: number;
+  blockerCount: number;
+  requestPayload: {
+    key: string;
+    label: string;
+    value: string;
+    status: "ready" | "blocked";
+  }[];
+  approvalEvidence: string[];
+  saveBlockers: string[];
+  blockedLiveActions: string[];
+  rollbackPlan: string;
+  nextGate: string;
+  canRequestSave: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 type ClientWebsiteStarterContentPack = {
   siteKey: string;
   packLabel: string;
@@ -2458,6 +2488,130 @@ export const listClientWebsiteConfigurationApprovalMatrices = query({
     clientWebsiteConfigurationApprovalMatrices.map((matrix) => ({
       ...matrix,
       providerBoundary: "Read-only configuration approval matrix query. It records approver roles, required evidence, save blockers, and gates only; it does not capture approvals, save configuration, publish, invite, bill, attach domains, call providers, run codegen, import generated API, or execute hosted Convex.",
+    })),
+});
+
+const clientWebsiteConfigurationSaveRequests: ClientWebsiteConfigurationSaveRequest[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family founding save request",
+    requestPosture: "provider-light-save-request",
+    requestStatus: "ready_for_internal_review",
+    requestedBy: "Platform super admin",
+    changeSetLabel: "Julie Family founding change set",
+    approvalMatrixLabel: "Julie Family founding approval matrix",
+    payloadCount: 4,
+    evidenceCount: 4,
+    blockerCount: 4,
+    requestPayload: [
+      { key: "brand", label: "Brand trust tone", value: "family-learning trust tokens; founding logo unchanged", status: "ready" },
+      { key: "navigation", label: "Program navigation", value: "family programs, volunteer, donate, contact", status: "ready" },
+      { key: "content", label: "Origin story content blocks", value: "source-mapped Julie Family pages", status: "ready" },
+      { key: "crm", label: "Family intake route", value: "prepared, public writes blocked", status: "blocked" },
+    ],
+    approvalEvidence: ["seeded tenant ownership note", "content provenance review", "fixture preview screenshot", "rollback owner acceptance"],
+    saveBlockers: ["public renderer parity smoke", "lead route smoke", "publish rollback owner", "hosted generated API review"],
+    blockedLiveActions: ["configuration save mutation", "content block write", "public publish write", "CRM lead write"],
+    rollbackPlan: "Keep founding site on fixture configuration and restore source-mapped public blocks if renderer parity or lead route evidence fails.",
+    nextGate: "Approve renderer parity, lead route smoke, rollback owner, and generated API review before save request capture.",
+    canRequestSave: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationSaveRequests",
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "siteFactory.listClientWebsiteConfigurationChangeSets",
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "siteBuilder.updateContentBlock",
+      "publicSite.resolvePublishedSite",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client save request",
+    requestPosture: "provider-light-save-request",
+    requestStatus: "blocked_pending_approval",
+    requestedBy: "Platform super admin",
+    changeSetLabel: "Advisor client draft change set",
+    approvalMatrixLabel: "Advisor client approval matrix",
+    payloadCount: 5,
+    evidenceCount: 5,
+    blockerCount: 5,
+    requestPayload: [
+      { key: "brand", label: "Credibility brand system", value: "restrained advisory tokens and proof-led rhythm", status: "ready" },
+      { key: "navigation", label: "Service navigation", value: "home, services, proof, intake, privacy", status: "ready" },
+      { key: "content", label: "Proof-led starter copy", value: "outcomes, trust, intake, advisory proof", status: "ready" },
+      { key: "permissions", label: "Client admin scope", value: "review-only until owner and hosted read smoke", status: "blocked" },
+      { key: "billing", label: "Pilot plan entitlement", value: "manual approval required before tenant write", status: "blocked" },
+    ],
+    approvalEvidence: ["plan limit review", "tenant owner signoff", "hosted read smoke transcript", "domain posture note", "admin permission scope review"],
+    saveBlockers: ["plan entitlement approval", "tenant owner approval", "hosted read smoke", "domain posture review", "client admin invite approval"],
+    blockedLiveActions: ["tenant create mutation", "site create mutation", "configuration save mutation", "client admin invitation", "Stripe billing activation"],
+    rollbackPlan: "Leave advisor site as a local fixture and discard the pending save request if plan, owner, hosted smoke, domain, or access evidence fails.",
+    nextGate: "Capture plan, owner, hosted smoke, domain, and access approval evidence before save request capture.",
+    canRequestSave: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationSaveRequests",
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "siteFactory.listClientWebsiteConfigurationChangeSets",
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "controlPlane.createTenant",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign microsite save request",
+    requestPosture: "provider-light-save-request",
+    requestStatus: "blocked_pending_approval",
+    requestedBy: "Platform super admin",
+    changeSetLabel: "Campaign microsite draft change set",
+    approvalMatrixLabel: "Campaign microsite approval matrix",
+    payloadCount: 5,
+    evidenceCount: 5,
+    blockerCount: 5,
+    requestPayload: [
+      { key: "brand", label: "Offer visual system", value: "focused campaign offer identity", status: "ready" },
+      { key: "content", label: "Proof and signup copy", value: "offer, proof block, signup path", status: "ready" },
+      { key: "crm", label: "Lead consent route", value: "modeled route with public writes blocked", status: "blocked" },
+      { key: "permissions", label: "Campaign editor scope", value: "held until scope and provider boundary approval", status: "blocked" },
+      { key: "campaign", label: "Provider-send boundary", value: "send and AI publish blocked", status: "blocked" },
+    ],
+    approvalEvidence: ["campaign consent note", "site editor scope review", "lead route smoke plan", "provider-send boundary note", "AI copy approval"],
+    saveBlockers: ["campaign consent review", "site scope approval", "lead routing review", "provider-send boundary", "AI copy approval"],
+    blockedLiveActions: ["site create mutation", "editor invitation", "public form write", "campaign send", "AI copy publish"],
+    rollbackPlan: "Keep campaign microsite on fixture content and discard pending request if consent, scope, lead, provider-send, or AI copy approvals fail.",
+    nextGate: "Capture consent, scope, lead routing, provider-send, and AI copy evidence before save request capture.",
+    canRequestSave: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteConfigurationSaveRequests",
+      "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      "siteFactory.listClientWebsiteConfigurationChangeSets",
+      "siteFactory.listClientWebsiteConfigurationProfiles",
+      "siteFactory.createSiteFromTemplate",
+      "controlPlane.createInvitation",
+      "campaigns.requestCampaignApproval",
+    ],
+  },
+];
+
+export const listClientWebsiteConfigurationSaveRequests = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteConfigurationSaveRequests.map((request) => ({
+      ...request,
+      providerBoundary: "Read-only configuration save request query. It records selected payloads, approval evidence, blockers, rollback posture, and gates only; it does not capture approval, save configuration, publish, invite, bill, attach domains, call providers, run codegen, import generated API, or execute hosted Convex.",
     })),
 });
 

@@ -111,7 +111,10 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "siteFactory.listClientWebsiteConfigurationProfiles",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests",
+  "siteFactory.listClientWebsiteConfigurationSaveRequests",
   "configuration profile read",
+  "configuration save request read",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -121,6 +124,7 @@ requireIncludes(runtimePath, [
   "siteFactoryListClientWebsiteConfigurationApprovalMatrices: \"siteFactory.listClientWebsiteConfigurationApprovalMatrices\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
 ]);
 
 requireIncludes(generatedContractPath, [
@@ -132,6 +136,8 @@ requireIncludes(generatedContractPath, [
   "client website configuration review packets include selected-site surfaces, save blockers, required evidence, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "client website configuration profiles include template, brand, navigation, CRM, editable surfaces, locked surfaces, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests",
+  "client website configuration save requests include selected payloads, approval evidence, blockers, rollback posture, and provider boundaries",
 ]);
 
 requireIncludes(convexPath, [
@@ -139,12 +145,13 @@ requireIncludes(convexPath, [
   "export const listClientWebsiteConfigurationChangeSets",
   "export const listClientWebsiteConfigurationReviewPackets",
   "export const listClientWebsiteConfigurationProfiles",
+  "export const listClientWebsiteConfigurationSaveRequests",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 78",
-  "Query bindings: 40",
-  "Smoke-manifest review gaps: 33",
+  "Generated API bindings: 79",
+  "Query bindings: 41",
+  "Smoke-manifest review gaps: 34",
 ]);
 
 requireIncludes(shellDataPath, [
@@ -153,6 +160,7 @@ requireIncludes(shellDataPath, [
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationSaveRequests",
 ]);
 
 requireIncludes(shellPath, [
