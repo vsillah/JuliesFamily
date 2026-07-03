@@ -86,8 +86,8 @@ const compactMarkers = [
   "${isClientWebsiteLaunchWorkbench ? \"hidden\" : \"hidden lg:grid\"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4",
   "tabs-kinflo-client-studio-lanes",
   "section-kinflo-client-studio-lane-switcher",
-  "sticky top-0 z-20",
-  "bg-white/95 py-1.5 backdrop-blur",
+  "relative z-10",
+  "bg-white py-1.5",
   "grid h-auto w-full grid-cols-4 gap-1",
   "text-xs font-medium transition sm:px-3 sm:text-sm",
   "section-kinflo-client-studio-lane-summary",
@@ -187,7 +187,7 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "npm run kinflo:validate-site-studio-scroll-consolidation",
   "section-kinflo-client-studio-compact-shell",
   "compact shell trims duplicate mobile summary chrome",
-  "lane toolbar stays sticky",
+  "lane toolbar stays as a static top rail",
   "tabs-kinflo-client-workbench-stage",
   "section-kinflo-client-launch-rail",
   "viewport-bounded launch rail",
@@ -283,6 +283,18 @@ if (
   fail(
     "Site Studio lane switcher renders before variable studio summary frames",
     "The lane switcher must stay at the top of the Site Studio section so it does not jump lower on lanes that render summary cards."
+  );
+}
+
+const laneSwitcherClassWindow = laneSwitcherIndex === -1
+  ? ""
+  : shellContents.slice(Math.max(0, laneSwitcherIndex - 360), laneSwitcherIndex + 120);
+if (laneSwitcherClassWindow.includes("relative z-10") && !laneSwitcherClassWindow.includes("sticky top-0")) {
+  pass("Site Studio lane switcher uses a static top rail instead of sticky positioning");
+} else {
+  fail(
+    "Site Studio lane switcher uses a static top rail instead of sticky positioning",
+    "The lane switcher must not use sticky top-0 because it can appear lower in the page as lane content changes."
   );
 }
 

@@ -146,6 +146,8 @@ const clientWebsiteHandoffWorkspaceValues = ["selected", "matrix"] as const;
 type ClientWebsiteHandoffWorkspace = (typeof clientWebsiteHandoffWorkspaceValues)[number];
 const clientAdminHandoffMatrixFilterValues = ["all", "blocked", "ready", "platform", "tenant", "site"] as const;
 type ClientAdminHandoffMatrixFilter = (typeof clientAdminHandoffMatrixFilterValues)[number];
+const clientConfigurationReviewDetailValues = ["blockers", "evidence", "functions"] as const;
+type ClientConfigurationReviewDetail = (typeof clientConfigurationReviewDetailValues)[number];
 
 const shellTabLabels: Record<ShellTabValue, string> = {
   tenants: "Tenants",
@@ -374,6 +376,16 @@ function readInitialClientAdminHandoffMatrixFilter(): ClientAdminHandoffMatrixFi
   return clientAdminHandoffMatrixFilterValues.includes(filter as ClientAdminHandoffMatrixFilter)
     ? (filter as ClientAdminHandoffMatrixFilter)
     : "all";
+}
+
+function readInitialClientConfigurationReviewDetail(): ClientConfigurationReviewDetail {
+  if (typeof window === "undefined") {
+    return "blockers";
+  }
+  const detail = new URLSearchParams(window.location.search).get("studioConfig");
+  return clientConfigurationReviewDetailValues.includes(detail as ClientConfigurationReviewDetail)
+    ? (detail as ClientConfigurationReviewDetail)
+    : "blockers";
 }
 
 function buildClientWebsiteStudioPreviewHref({
@@ -1135,6 +1147,8 @@ function ClientWebsiteConfigurationProfiles({
   selectedInvitationReadiness,
   selectedExperiencePreset,
   selectedRollbackCheckpoint,
+  reviewDetail,
+  onReviewDetailChange,
   testIds,
 }: {
   profiles: ShellClientWebsiteConfigurationProfiles;
@@ -1148,6 +1162,8 @@ function ClientWebsiteConfigurationProfiles({
   selectedInvitationReadiness?: ShellClientWebsiteAdminInvitationReadinessPacket;
   selectedExperiencePreset?: ShellClientWebsiteExperienceConfigurationPreset;
   selectedRollbackCheckpoint?: ShellClientWebsiteConfigurationRollbackCheckpoint;
+  reviewDetail: ClientConfigurationReviewDetail;
+  onReviewDetailChange: (detail: ClientConfigurationReviewDetail) => void;
   testIds: typeof clientWebsiteConfigurationProfileTestIds;
 }) {
   const summaryItems = [
@@ -1239,7 +1255,12 @@ function ClientWebsiteConfigurationProfiles({
               ))}
             </div>
 
-            <Tabs defaultValue="blockers" className="min-w-0" data-testid="tabs-kinflo-client-configuration-review-detail">
+            <Tabs
+              value={reviewDetail}
+              onValueChange={(value) => onReviewDetailChange(value as ClientConfigurationReviewDetail)}
+              className="min-w-0"
+              data-testid="tabs-kinflo-client-configuration-review-detail"
+            >
               <TabsList className="grid h-auto w-full grid-cols-3 bg-white p-1">
                 <TabsTrigger value="blockers" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-blockers">Blockers</TabsTrigger>
                 <TabsTrigger value="evidence" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-evidence">Evidence</TabsTrigger>
@@ -2363,6 +2384,7 @@ export default function AdminKinfloShell() {
   const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
   const [clientWebsiteHandoffWorkspace, setClientWebsiteHandoffWorkspace] = useState<ClientWebsiteHandoffWorkspace>(readInitialClientWebsiteHandoffWorkspace);
   const [clientAdminHandoffMatrixFilter, setClientAdminHandoffMatrixFilter] = useState<ClientAdminHandoffMatrixFilter>(readInitialClientAdminHandoffMatrixFilter);
+  const [clientConfigurationReviewDetail, setClientConfigurationReviewDetail] = useState<ClientConfigurationReviewDetail>(readInitialClientConfigurationReviewDetail);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -3240,6 +3262,7 @@ export default function AdminKinfloShell() {
     const nextDossier = readInitialClientWebsiteLaunchDossier();
     const nextHandoffWorkspace = readInitialClientWebsiteHandoffWorkspace();
     const nextHandoffMatrixFilter = readInitialClientAdminHandoffMatrixFilter();
+    const nextConfigurationReviewDetail = readInitialClientConfigurationReviewDetail();
     const nextAdapterSwitchBatchId = readInitialAdapterSwitchBatchId(
       snapshot.adapterSwitchReadiness.defaultBatchId,
       adapterSwitchBatchIds,
@@ -3274,6 +3297,7 @@ export default function AdminKinfloShell() {
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
     setClientWebsiteHandoffWorkspace((current) => (current === nextHandoffWorkspace ? current : nextHandoffWorkspace));
     setClientAdminHandoffMatrixFilter((current) => (current === nextHandoffMatrixFilter ? current : nextHandoffMatrixFilter));
+    setClientConfigurationReviewDetail((current) => (current === nextConfigurationReviewDetail ? current : nextConfigurationReviewDetail));
     setAdapterSwitchBatchId((current) => (current === nextAdapterSwitchBatchId ? current : nextAdapterSwitchBatchId));
     setAdapterSwitchSurfaceId((current) => (current === nextAdapterSwitchSurfaceId ? current : nextAdapterSwitchSurfaceId));
     setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
@@ -3363,6 +3387,7 @@ export default function AdminKinfloShell() {
     const shouldKeepProvisioningView = shouldKeepDossier && clientWebsiteLaunchDossier === "provisioning";
     const shouldKeepHandoffWorkspace = tab === "site-studio" && clientWebsiteStudioLane === "handoff";
     const shouldKeepHandoffMatrixFilter = shouldKeepHandoffWorkspace && clientWebsiteHandoffWorkspace === "matrix";
+    const shouldKeepConfigurationReviewDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     updateKinfloShellRoute({
       tab,
       studioSite: tab === "site-studio" ? clientWebsiteStudioSiteKey : undefined,
@@ -3372,6 +3397,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: shouldKeepProvisioningView ? clientWebsiteProvisioningView : undefined,
       studioHandoff: shouldKeepHandoffWorkspace ? clientWebsiteHandoffWorkspace : undefined,
       studioMatrix: shouldKeepHandoffMatrixFilter ? clientAdminHandoffMatrixFilter : undefined,
+      studioConfig: shouldKeepConfigurationReviewDetail ? clientConfigurationReviewDetail : undefined,
       adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
       adapterSurface: tab === "adapter-switch" ? adapterSwitchSurfaceId : undefined,
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
@@ -3397,6 +3423,7 @@ export default function AdminKinfloShell() {
       studioMatrix: clientWebsiteStudioLane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
         ? clientAdminHandoffMatrixFilter
         : undefined,
+      studioConfig: clientWebsiteStudioLane === "configuration" ? clientConfigurationReviewDetail : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3422,6 +3449,30 @@ export default function AdminKinfloShell() {
       studioMatrix: lane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
         ? clientAdminHandoffMatrixFilter
         : undefined,
+      studioConfig: lane === "configuration" ? clientConfigurationReviewDetail : undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+    });
+  };
+
+  const selectClientConfigurationReviewDetail = (detail: ClientConfigurationReviewDetail) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("configuration");
+    setClientConfigurationReviewDetail(detail);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "configuration",
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      studioConfig: detail,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3444,6 +3495,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: stage === "launch" && clientWebsiteLaunchDossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3467,6 +3519,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: dossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3491,6 +3544,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: view,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3513,6 +3567,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: workspace,
       studioMatrix: workspace === "matrix" ? clientAdminHandoffMatrixFilter : undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3536,6 +3591,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: "matrix",
       studioMatrix: filter,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3560,6 +3616,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: batchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
@@ -3581,6 +3638,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: adapterSwitchBatchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
@@ -3602,6 +3660,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: stepId,
@@ -3623,6 +3682,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -3644,6 +3704,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -3665,6 +3726,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfig: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -8188,7 +8250,7 @@ export default function AdminKinfloShell() {
             <section className="flex min-w-0 flex-col gap-2 overflow-hidden" data-testid="section-kinflo-client-studio-compact-shell">
               <div className="contents" data-testid="tabs-kinflo-client-studio-lanes">
                 <div
-                  className="sticky top-0 z-20 flex flex-col gap-1 border-y border-slate-200 bg-white/95 py-1.5 backdrop-blur sm:gap-2 sm:py-2 lg:flex-row lg:items-center lg:justify-between"
+                  className="relative z-10 flex flex-col gap-1 border-y border-slate-200 bg-white py-1.5 sm:gap-2 sm:py-2 lg:flex-row lg:items-center lg:justify-between"
                   data-testid="section-kinflo-client-studio-lane-switcher"
                 >
                   <div className="grid h-auto w-full grid-cols-4 gap-1 rounded-md bg-slate-100 p-1 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
@@ -8350,6 +8412,8 @@ export default function AdminKinfloShell() {
                     selectedInvitationReadiness={selectedClientWebsiteAdminInvitationReadinessPacket}
                     selectedExperiencePreset={selectedClientWebsiteExperienceConfigurationPreset}
                     selectedRollbackCheckpoint={selectedClientWebsiteConfigurationRollbackCheckpoint}
+                    reviewDetail={clientConfigurationReviewDetail}
+                    onReviewDetailChange={selectClientConfigurationReviewDetail}
                     testIds={clientWebsiteConfigurationProfileTestIds}
                   />
                 </div>
