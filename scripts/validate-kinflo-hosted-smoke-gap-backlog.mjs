@@ -110,8 +110,9 @@ requireIncludes("docs/phase90-hosted-smoke-gap-backlog.md", [
   "hostedActivationRunbook.hostedSmokeGapBacklog",
   "section-kinflo-hosted-smoke-gap-backlog",
   "section-kinflo-hosted-smoke-gap-scroll",
-  "Total gaps: 27",
-  "Read-only gaps: 21",
+  "Total gaps: 28",
+  "Read-only gaps: 22",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "Mutation gaps: 3",
   "Provider-gated metadata gaps: 2",
   "Governance gaps: 5",
@@ -124,8 +125,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureHostedSmokeGapBacklog",
   "hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog",
   "provider_light_hosted_smoke_gap_backlog",
-  "totalGaps: 27",
-  "readOnlyGaps: 21",
+  "totalGaps: 28",
+  "readOnlyGaps: 22",
   "mutationGaps: 3",
   "providerGatedGaps: 2",
   "governanceGaps: 5",
@@ -133,6 +134,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "providerWrites: false",
   "liveConvexExecution: false",
   "launchReadiness.getSiteLaunchReadiness",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "preferences.upsertMyPreferences",
   "integrations.upsertIntegrationSetting",
   "aiReview.reviewAiGenerationRecord",
@@ -169,10 +171,10 @@ const expectedGaps = [...new Set((plan?.switchBatches ?? []).flatMap((batch) =>
 
 const contractMissing = expectedGaps.filter((functionName) => !contractFunctions.has(functionName));
 
-if (expectedGaps.length === 27) {
-  pass("adapter switch plan has twenty-seven hosted smoke gaps");
+if (expectedGaps.length === 28) {
+  pass("adapter switch plan has twenty-eight hosted smoke gaps");
 } else {
-  fail("adapter switch plan has twenty-seven hosted smoke gaps", `Received ${expectedGaps.length}: ${expectedGaps.join(", ")}`);
+  fail("adapter switch plan has twenty-eight hosted smoke gaps", `Received ${expectedGaps.length}: ${expectedGaps.join(", ")}`);
 }
 
 if (contractMissing.length === 0) {
@@ -197,7 +199,7 @@ const modeCounts = {
 };
 
 const expectedModeCounts = {
-  read_only: 21,
+  read_only: 22,
   mutation_smoke_required: 3,
   provider_gated_metadata: 2,
   governance: 5,

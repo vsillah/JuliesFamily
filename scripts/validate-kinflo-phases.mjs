@@ -200,6 +200,7 @@ for (const path of [
   "docs/phase160-client-website-launch-composer.md",
   "docs/phase161-client-website-launch-composer-query.md",
   "docs/phase162-client-website-launch-composer-switch-evidence.md",
+  "docs/phase163-client-website-launch-composer-hosted-smoke-gap.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -388,6 +389,8 @@ for (const path of [
   "scripts/validate-kinflo-client-website-portfolio-registry.mjs",
   "scripts/validate-kinflo-client-website-launch-composer.mjs",
   "scripts/validate-kinflo-client-website-launch-composer-query.mjs",
+  "scripts/validate-kinflo-client-website-launch-composer-switch-evidence.mjs",
+  "scripts/validate-kinflo-client-website-launch-composer-hosted-smoke-gap.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2532,6 +2535,18 @@ requireIncludes("docs/phase162-client-website-launch-composer-switch-evidence.md
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase163-client-website-launch-composer-hosted-smoke-gap.md", [
+  "Phase 163: Client Website Launch Composer Hosted Smoke Gap",
+  "npm run kinflo:validate-client-website-launch-composer-hosted-smoke-gap",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "totalGaps: 28",
+  "readOnlyGaps: 22",
+  "live smoke manifest unchanged",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -2972,8 +2987,9 @@ requireIncludes("docs/phase90-hosted-smoke-gap-backlog.md", [
   "hostedActivationRunbook.hostedSmokeGapBacklog",
   "section-kinflo-hosted-smoke-gap-backlog",
   "section-kinflo-hosted-smoke-gap-scroll",
-  "Total gaps: 27",
-  "Read-only gaps: 21",
+  "Total gaps: 28",
+  "Read-only gaps: 22",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "Mutation gaps: 3",
   "Provider-gated metadata gaps: 2",
   "Governance gaps: 5",
@@ -3090,6 +3106,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-website-launch-composer-query\"",
   "\"docs/phase162-client-website-launch-composer-switch-evidence.md\"",
   "\"npm run kinflo:validate-client-website-launch-composer-switch-evidence\"",
+  "\"docs/phase163-client-website-launch-composer-hosted-smoke-gap.md\"",
+  "\"npm run kinflo:validate-client-website-launch-composer-hosted-smoke-gap\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3363,6 +3381,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-website-launch-composer\"",
   "\"kinflo:validate-client-website-launch-composer-query\"",
   "\"kinflo:validate-client-website-launch-composer-switch-evidence\"",
+  "\"kinflo:validate-client-website-launch-composer-hosted-smoke-gap\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4866,6 +4885,15 @@ requireIncludes("scripts/validate-kinflo-client-website-launch-composer-switch-e
   "KinFlo client website launch composer switch evidence validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-client-website-launch-composer-hosted-smoke-gap.mjs", [
+  "docs/phase163-client-website-launch-composer-hosted-smoke-gap.md",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "totalGaps: 28",
+  "readOnlyGaps: 22",
+  "launch composer is absent from live smoke manifest",
+  "KinFlo client website launch composer hosted smoke gap validation",
+]);
+
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "tabs-kinflo-client-workbench-stage",
@@ -5170,9 +5198,10 @@ requireIncludes("scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs", [
   "ShellHostedSmokeGapBacklog",
   "section-kinflo-hosted-smoke-gap-backlog",
   "section-kinflo-hosted-smoke-gap-scroll",
-  "adapter switch plan has twenty-seven hosted smoke gaps",
+  "adapter switch plan has twenty-eight hosted smoke gaps",
   "hosted smoke gaps have generated contract coverage",
-  "read_only: 21",
+  "read_only: 22",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "mutation_smoke_required: 3",
   "provider_gated_metadata: 2",
   "governance: 5",
@@ -5280,7 +5309,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "canImportGeneratedApi: false",
   "generatedApiAvailable: false",
   "totalEvidenceEntries: 6",
-  "totalGaps: 27",
+  "totalGaps: 28",
   "Read-only core first",
   "User preference bridge",
   "Site factory smoke",

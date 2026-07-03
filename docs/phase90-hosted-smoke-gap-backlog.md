@@ -21,15 +21,17 @@ npm run kinflo:validate-hosted-smoke-gap-backlog
 
 ## Current Backlog Counts
 
-- Total gaps: 27
-- Read-only gaps: 21
+- Total gaps: 28
+- Read-only gaps: 22
 - Mutation gaps: 3
 - Provider-gated metadata gaps: 2
 - Governance gaps: 5
 
 ## Why This Exists
 
-The adapter switch plan maps 43 functions across six fixture-to-live batches. The live-smoke manifest covers 16 of those functions. The remaining 27 cannot be ignored before a generated Convex adapter switch.
+The adapter switch plan maps 42 functions across six fixture-to-live batches. The live-smoke manifest covers 14 of those adapter-switch functions. The remaining 28 cannot be ignored before a generated Convex adapter switch.
+
+The launch composer is now part of this backlog as `siteFactory.listClientWebsiteLaunchComposer`. It has local fixture, query, and adapter-switch evidence, but the live-smoke manifest still does not cover the hosted read, so it remains gated until a read-only hosted smoke is approved and captured.
 
 This phase gives every missing function an owner-facing backlog row with:
 
