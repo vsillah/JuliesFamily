@@ -77,6 +77,7 @@ requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
   "scrollClientWebsiteStudioLaneToTop",
   "tabs-kinflo-client-studio-lanes",
   "Site Studio compact shell rail",
+  "overflow-x-clip",
   "section-kinflo-client-studio-lane-queue",
   "section-kinflo-client-studio-lane-configuration",
   "section-kinflo-client-studio-lane-handoff",
@@ -95,6 +96,9 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "querySelector('[data-testid=\"tabs-kinflo-client-studio-lanes\"]')",
   "scrollIntoView({ block: \"start\" })",
   "section-kinflo-client-studio-compact-shell",
+  "min-h-screen overflow-x-clip bg-slate-50",
+  "max-w-7xl overflow-x-clip px-4",
+  "flex min-w-0 flex-col gap-2 overflow-x-clip",
   "{clientWebsiteStudioLaneRail}",
   "const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane]",
   "laneSection.scrollTo({ top: 0 })",
@@ -169,6 +173,19 @@ if (headerRailRenderIndex === -1) {
   fail(
     "client Studio lane rail is not rendered inside the global page header",
     "Render the lane rail in the compact Site Studio shell so it does not scroll away with the global page header."
+  );
+}
+
+if (
+  shellContents.includes("min-h-screen overflow-x-clip bg-slate-50") &&
+  shellContents.includes("max-w-7xl overflow-x-clip px-4") &&
+  shellContents.includes("flex min-w-0 flex-col gap-2 overflow-x-clip")
+) {
+  pass("client Studio lane rail sticky wrappers use clipped horizontal overflow");
+} else {
+  fail(
+    "client Studio lane rail sticky wrappers use clipped horizontal overflow",
+    "The page, main, and compact Site Studio shell wrappers must use overflow-x-clip so they do not create hidden overflow ancestors that break sticky lane rail placement."
   );
 }
 

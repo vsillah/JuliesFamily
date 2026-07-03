@@ -5402,7 +5402,7 @@ export default function AdminKinfloShell() {
   );
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
+    <div className="min-h-screen overflow-x-clip bg-slate-50 text-slate-950">
       <div className="border-b border-slate-200 bg-white/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
           <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]} />
@@ -5524,7 +5524,7 @@ export default function AdminKinfloShell() {
         </div>
       </div>
 
-      <main className={`mx-auto w-full max-w-7xl overflow-x-hidden px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "py-3" : "py-7"}`}>
+      <main className={`mx-auto w-full max-w-7xl overflow-x-clip px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "py-3" : "py-7"}`}>
         <section
           className={`grid rounded-lg border border-slate-200 bg-white shadow-sm ${
             activeTab === "site-studio"
@@ -10026,7 +10026,7 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="site-studio" className="mt-2">
-            <section className="flex min-w-0 flex-col gap-2 overflow-x-hidden" data-testid="section-kinflo-client-studio-compact-shell">
+            <section className="flex min-w-0 flex-col gap-2 overflow-x-clip" data-testid="section-kinflo-client-studio-compact-shell">
               {clientWebsiteStudioLaneRail}
 
               <div

@@ -26,6 +26,8 @@ The shared Site Studio lane rail renders as the first control inside the compact
 
 This keeps the same controls at the top of every Site Studio lane instead of allowing prior lane scroll state or lane-specific card height to make the next lane feel like it starts in the middle of the page.
 
+The page, main content, and compact Site Studio shell use `overflow-x-clip` instead of hidden horizontal overflow. That keeps wide child panels clipped without turning the shell wrappers into overflow containers that can break the `sticky top-0` lane rail.
+
 ## Provider Boundary
 
 No hosted Convex deployment is created.
