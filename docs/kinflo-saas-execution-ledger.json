@@ -237,7 +237,7 @@
         "Vercel status context FAILURE",
         "Vercel target https://vercel.com/vsillahs-projects?upgradeToPro=build-rate-limit",
         "Deployment rate limited - retry in 24 hours",
-        "npm run kinflo:validate-pr-review-state fails until Vercel recovers",
+        "npm run kinflo:validate-pr-review-state reports external_rate_limit_blocked until Vercel recovers",
         "docs/phase156-pr-preview-deployment-checkpoint.md"
       ],
       "nextGate": "Wait for Vercel build-rate limit recovery or resolve Vercel quota, then rerun PR checks and npm run kinflo:validate-integration-review-handoff before merge scheduling."

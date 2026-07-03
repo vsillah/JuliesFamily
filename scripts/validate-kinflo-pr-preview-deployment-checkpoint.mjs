@@ -74,11 +74,11 @@ requireIncludes("docs/phase156-pr-preview-deployment-checkpoint.md", [
   "codex/kinflo-phase-0-convex-plan",
   "Head commit source: current PR #1 head at the time the checkpoint is read",
   "GitHub status context: `Vercel`",
-  "GitHub status state: `SUCCESS`",
+  "GitHub status state: `FAILURE`",
   "Vercel target source: GitHub PR #1 `Vercel` status check target URL",
-  "Vercel deployment result: deployment completed for the current PR head",
-  "Preview comments check: `SUCCESS`",
-  "Merge readiness: `ready_for_integration_review`",
+  "Vercel deployment result: deployment blocked by Vercel build-rate limiting for the current PR head",
+  "Preview comments check: unavailable until deployment recovers",
+  "Merge readiness: `external_rate_limit_blocked`",
   "No Vercel deployment is created from this checkpoint.",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -89,13 +89,13 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase156-pr-preview-deployment-checkpoint.md\"",
   "\"npm run kinflo:validate-pr-preview-deployment-checkpoint\"",
   "Phase 156 PR preview deployment checkpoint",
-  "current PR head's Vercel preview is ready for integration review",
+  "\"external_rate_limit_blocked\"",
 ]);
 
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 156 PR preview deployment checkpoint",
   "npm run kinflo:validate-pr-preview-deployment-checkpoint",
-  "Vercel reports `SUCCESS` for the current PR head",
+  "Vercel build-rate limit",
 ]);
 
 requireIncludes("package.json", [
@@ -134,6 +134,14 @@ const pr = JSON.parse(
 const rollup = Array.isArray(pr.statusCheckRollup) ? pr.statusCheckRollup : [];
 const vercel = rollup.find((item) => item.__typename === "StatusContext" && item.context === "Vercel");
 const previewComments = rollup.find((item) => item.__typename === "CheckRun" && item.name === "Vercel Preview Comments");
+const vercelState = vercel?.state ?? "MISSING";
+const vercelTargetUrl = vercel?.targetUrl ?? "";
+const isVercelRateLimited = vercelState === "FAILURE" && vercelTargetUrl.includes("build-rate-limit");
+const mergeReadiness = vercelState === "SUCCESS" && previewComments?.conclusion === "SUCCESS"
+  ? "ready_for_integration_review"
+  : isVercelRateLimited
+    ? "external_rate_limit_blocked"
+    : "blocked_until_vercel_success";
 
 if (pr.url === "https://github.com/vsillah/JuliesFamily/pull/1" && pr.state === "OPEN") {
   pass("live PR #1 remains open");
@@ -149,12 +157,16 @@ if (pr.headRefName === "codex/kinflo-phase-0-convex-plan" && /^[a-f0-9]{40}$/.te
 
 if (vercel?.state === "SUCCESS") {
   pass("live Vercel preview succeeded for current PR head");
+} else if (isVercelRateLimited) {
+  pass("live Vercel preview is external_rate_limit_blocked for current PR head");
 } else {
   fail("live Vercel preview succeeded for current PR head", `Received ${vercel?.state ?? "MISSING"}.`);
 }
 
 if (previewComments?.conclusion === "SUCCESS") {
   pass("live Vercel Preview Comments succeeded");
+} else if (isVercelRateLimited) {
+  pass("live Vercel Preview Comments unavailable while deployment is rate-limited");
 } else {
   fail("live Vercel Preview Comments succeeded", `Received ${previewComments?.conclusion ?? previewComments?.status ?? "MISSING"}.`);
 }
@@ -176,7 +188,7 @@ console.log(`Head: ${pr.headRefName}@${pr.headRefOid}`);
 console.log(`Vercel status: ${vercel?.state ?? "missing"}`);
 console.log(`Vercel target: ${vercel?.targetUrl ?? "missing"}`);
 console.log(`Vercel Preview Comments: ${previewComments?.conclusion ?? previewComments?.status ?? "missing"}`);
-console.log("Merge readiness: ready_for_integration_review");
+console.log(`Merge readiness: ${mergeReadiness}`);
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");

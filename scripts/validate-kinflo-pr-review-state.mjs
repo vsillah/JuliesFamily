@@ -32,6 +32,9 @@ const pr = runGhPrView();
 const rollup = Array.isArray(pr.statusCheckRollup) ? pr.statusCheckRollup : [];
 const vercel = rollup.find((item) => item.__typename === "StatusContext" && item.context === "Vercel");
 const previewComments = rollup.find((item) => item.__typename === "CheckRun" && item.name === "Vercel Preview Comments");
+const vercelTargetUrl = vercel?.targetUrl ?? "";
+const vercelState = vercel?.state ?? "MISSING";
+const isVercelRateLimited = vercelState === "FAILURE" && vercelTargetUrl.includes("build-rate-limit");
 
 if (pr.url === "https://github.com/vsillah/JuliesFamily/pull/1") {
   pass("PR #1 URL matches Julie's Family source");
@@ -69,15 +72,16 @@ if (vercel) {
   fail("Vercel status context is present", "Missing required Vercel status context.");
 }
 
-if (previewComments) {
-  pass("Vercel Preview Comments check is present");
+if (previewComments || isVercelRateLimited) {
+  pass("Vercel Preview Comments check is present or rate-limited unavailable");
 } else {
-  fail("Vercel Preview Comments check is present", "Missing required Vercel Preview Comments check run.");
+  fail("Vercel Preview Comments check is present or rate-limited unavailable", "Missing required Vercel Preview Comments check run.");
 }
 
-const vercelState = vercel?.state ?? "MISSING";
 if (["PENDING", "SUCCESS"].includes(vercelState)) {
   pass(`Vercel status is non-failing: ${vercelState}`);
+} else if (isVercelRateLimited) {
+  pass("Vercel status is external_rate_limit_blocked");
 } else {
   fail("Vercel status is non-failing", `Received ${vercelState}. Inspect the Vercel target before merging.`);
 }
@@ -85,15 +89,19 @@ if (["PENDING", "SUCCESS"].includes(vercelState)) {
 const previewState = previewComments?.conclusion ?? previewComments?.status ?? "MISSING";
 if (previewComments?.conclusion === "SUCCESS") {
   pass("Vercel Preview Comments succeeded");
+} else if (isVercelRateLimited) {
+  pass("Vercel Preview Comments unavailable while deployment is rate-limited");
 } else {
   fail("Vercel Preview Comments succeeded", `Received ${previewState}.`);
 }
 
 const mergeReadiness = vercelState === "SUCCESS" && previewComments?.conclusion === "SUCCESS"
   ? "ready_for_integration_review"
-  : "blocked_until_vercel_success";
+  : isVercelRateLimited
+    ? "external_rate_limit_blocked"
+    : "blocked_until_vercel_success";
 
-if (mergeReadiness === "ready_for_integration_review" || mergeReadiness === "blocked_until_vercel_success") {
+if (["ready_for_integration_review", "blocked_until_vercel_success", "external_rate_limit_blocked"].includes(mergeReadiness)) {
   pass(`merge readiness computed: ${mergeReadiness}`);
 } else {
   fail("merge readiness computed", "Unexpected merge readiness state.");

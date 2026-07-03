@@ -14,23 +14,24 @@ npm run kinflo:validate-pr-preview-deployment-checkpoint
 - Branch: `codex/kinflo-phase-0-convex-plan`
 - Head commit source: current PR #1 head at the time the checkpoint is read
 - GitHub status context: `Vercel`
-- GitHub status state: `SUCCESS`
+- GitHub status state: `FAILURE`
 - Vercel target source: GitHub PR #1 `Vercel` status check target URL, which changes with each pushed head
-- Vercel deployment result: deployment completed for the current PR head
-- Preview comments check: `SUCCESS`
-- Merge readiness: `ready_for_integration_review`
+- Vercel deployment result: deployment blocked by Vercel build-rate limiting for the current PR head
+- Preview comments check: unavailable until deployment recovers
+- Merge readiness: `external_rate_limit_blocked`
 
 ## Review Gate
 
-The current PR head is deployment-verified for staged review. If another commit is pushed, GitHub will create a new Vercel status target and this checkpoint must be refreshed before merge.
+The current PR head is not deployment-verified for staged review. Vercel is returning the build-rate-limit target, so this checkpoint must stay blocked until Vercel recovers and the current PR head can build.
 
 Steps:
 
 1. Run `npm run kinflo:validate-pr-review-state`.
 2. Confirm the current head SHA matches the PR branch head.
-3. Confirm Vercel reports `SUCCESS`.
-4. Confirm Vercel Preview Comments reports `SUCCESS`.
-5. Keep the PR draft until Integration Captain decides when to merge and verify deployments.
+3. If Vercel reports the build-rate-limit target, keep merge readiness at `external_rate_limit_blocked`.
+4. After Vercel recovers, confirm Vercel reports `SUCCESS`.
+5. Confirm Vercel Preview Comments reports `SUCCESS`.
+6. Keep the PR draft until Integration Captain decides when to merge and verify deployments.
 
 ## Provider Boundary
 
@@ -54,4 +55,4 @@ No secret values are read or printed.
 
 ## Why This Matters
 
-The local provider-light shell and validators are green, and the current PR head has deployment truth. This checkpoint keeps the distinction explicit: local proof is complete for this phase, PR preview verification is complete for the current head, and hosted Convex activation remains a separate owner approval gate.
+The local provider-light shell and validators are green, but the current PR head does not have deployment approval while Vercel is rate-limited. This checkpoint keeps the distinction explicit: local proof can remain complete for this phase while PR preview verification and hosted Convex activation remain separate gates.

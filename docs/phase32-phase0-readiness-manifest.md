@@ -23,6 +23,7 @@ The validator checks `docs/phase0-readiness-manifest.json` against current repo 
 - human-owned gates remain explicitly pending rather than silently marked complete.
 - local validation commands include the full Phase 0 proof suite.
 - provider boundary flags remain false.
+- the current review status can record `repo_complete_external_rate_limit_blocked` without marking the PR integration-ready.
 
 ## Provider Boundary
 
@@ -49,4 +50,5 @@ Latest result:
 - Hosted deployment touched: no.
 - Live Convex execution: no.
 
-This is the machine-checkable handoff artifact for treating PR #1 as ready for staged review without treating it as approval to activate hosted providers. Integration Captain can run `npm run kinflo:validate-integration-review-handoff` for the final read-only merge-scheduling check.
+This is the machine-checkable handoff artifact for treating local Phase 0 proof as repo-complete without treating PR #1 as ready for merge scheduling or approval to activate hosted providers. Integration Captain can run `npm run kinflo:validate-integration-review-handoff` for the final read-only merge-scheduling check after Vercel recovers and the current head is pushed.
+Current review status is `repo_complete_external_rate_limit_blocked`: local Phase 0 proof is intact, but PR integration readiness must wait for Vercel quota recovery, a pushed current head, and a passing integration handoff.

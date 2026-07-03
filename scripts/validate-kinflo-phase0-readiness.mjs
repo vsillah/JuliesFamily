@@ -68,7 +68,7 @@ const manifest = JSON.parse(read(manifestPath));
 requireEqual("manifest phase is 0", String(manifest.phase), "0");
 requireEqual("manifest source repository", manifest.sourceRepository, "https://github.com/vsillah/JuliesFamily");
 requireEqual("manifest branch", manifest.branch, "codex/kinflo-phase-0-convex-plan");
-requireEqual("manifest review status", manifest.reviewStatus, "ready_for_staged_review");
+requireEqual("manifest review status", manifest.reviewStatus, "repo_complete_external_rate_limit_blocked");
 
 const providerBoundary = manifest.providerBoundary ?? {};
 for (const key of [
@@ -209,22 +209,32 @@ if (currentReviewEvidence.pullRequest === "https://github.com/vsillah/JuliesFami
 const reviewCheckNames = (currentReviewEvidence.checks ?? []).map((check) => check.name);
 requireArrayIncludes("current review checks", reviewCheckNames, ["Vercel", "Vercel Preview Comments"]);
 
+const lastObservationMergeReadiness = lastLocalReviewObservation.mergeReadiness;
+const lastObservationIsRateLimited = lastLocalReviewObservation.vercel === "FAILURE"
+  && typeof lastLocalReviewObservation.vercelTarget === "string"
+  && lastLocalReviewObservation.vercelTarget.includes("build-rate-limit")
+  && lastObservationMergeReadiness === "external_rate_limit_blocked";
+
 if (["PENDING", "SUCCESS"].includes(lastLocalReviewObservation.vercel)) {
   pass(`last local Vercel observation is non-failing: ${lastLocalReviewObservation.vercel}`);
+} else if (lastObservationIsRateLimited) {
+  pass("last local Vercel observation is classified external_rate_limit_blocked");
 } else {
-  fail("last local Vercel observation is non-failing", `Received ${lastLocalReviewObservation.vercel ?? "(missing)"}.`);
+  fail("last local Vercel observation is non-failing or classified external_rate_limit_blocked", `Received ${lastLocalReviewObservation.vercel ?? "(missing)"}.`);
 }
 
 if (lastLocalReviewObservation.vercelPreviewComments === "SUCCESS") {
   pass("last local Vercel Preview Comments observation is success");
+} else if (lastObservationIsRateLimited && lastLocalReviewObservation.vercelPreviewComments === "MISSING_UNTIL_DEPLOYMENT_RECOVERS") {
+  pass("last local Vercel Preview Comments observation is unavailable during rate limit");
 } else {
   fail(
-    "last local Vercel Preview Comments observation is success",
+    "last local Vercel Preview Comments observation is success or unavailable during rate limit",
     `Received ${lastLocalReviewObservation.vercelPreviewComments ?? "(missing)"}.`,
   );
 }
 
-if (["blocked_until_vercel_success", "ready_for_integration_review"].includes(lastLocalReviewObservation.mergeReadiness)) {
+if (["blocked_until_vercel_success", "ready_for_integration_review", "external_rate_limit_blocked"].includes(lastLocalReviewObservation.mergeReadiness)) {
   pass(`last local merge readiness is recognized: ${lastLocalReviewObservation.mergeReadiness}`);
 } else {
   fail(
@@ -256,9 +266,10 @@ for (const path of [
 requireIncludes("docs/phase0-completion-audit.md", [
   "This branch satisfies those repo-complete conditions.",
   "Current PR review state",
-  "Last local observation on July 3, 2026 before this artifact update: Vercel `SUCCESS`, Vercel Preview Comments `SUCCESS`.",
-  "Merge readiness from that observation: `ready_for_integration_review`.",
+  "Last local observation on July 3, 2026 after this artifact update: Vercel `FAILURE`",
+  "Merge readiness from that observation: `external_rate_limit_blocked`.",
   "Live refresh command: `npm run kinflo:validate-pr-review-state`.",
+  "Integration handoff command: `npm run kinflo:validate-integration-review-handoff` remains expected to fail",
   "After any new push, the live refresh command is authoritative",
   "Human-Owned Gates Still Pending",
   "Do not treat it as approval to create providers",
@@ -283,6 +294,7 @@ requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-integration-review-handoff",
   "known local-only artifacts are documented",
+  "repo_complete_external_rate_limit_blocked",
   "No hosted Convex deployment is created.",
   "No live Convex query, mutation, or action is executed.",
   "No credentials are read, printed, rotated, or copied.",
@@ -298,6 +310,7 @@ requireIncludes("docs/phase0-pr-review-state.md", [
   "Phase 0 PR Review State Gate",
   "npm run kinflo:validate-pr-review-state",
   "blocked_until_vercel_success",
+  "external_rate_limit_blocked",
   "ready_for_integration_review",
   "No hosted Convex deployment is created.",
   "No live Convex query, mutation, or action is executed.",
@@ -310,7 +323,8 @@ requireIncludes("scripts/validate-kinflo-pr-review-state.mjs", [
   "view",
   "vsillah/JuliesFamily",
   "Vercel status context is present",
-  "Vercel Preview Comments succeeded",
+  "Vercel Preview Comments check is present or rate-limited unavailable",
+  "external_rate_limit_blocked",
   "blocked_until_vercel_success",
   "ready_for_integration_review",
   "Provider APIs touched: no",
@@ -319,7 +333,8 @@ requireIncludes("scripts/validate-kinflo-pr-review-state.mjs", [
 requireIncludes("docs/phase0-integration-review-handoff.md", [
   "Phase 0 Integration Review Handoff",
   "npm run kinflo:validate-integration-review-handoff",
-  "Merge readiness: ready_for_integration_review",
+  "Current gate: `external_rate_limit_blocked`",
+  "Target merge readiness: `ready_for_integration_review`",
   "No hosted Convex deployment is created.",
   "No live Convex query, mutation, or action is executed.",
   "No secret values are read or printed.",

@@ -15,10 +15,11 @@ npm run kinflo:validate-pr-review-state
 - The head branch is `codex/kinflo-phase-0-convex-plan`.
 - The current PR head SHA is present.
 - The GitHub `Vercel` status context is present.
-- The `Vercel Preview Comments` check run is present and successful.
-- Vercel is either `PENDING` or `SUCCESS`.
+- The `Vercel Preview Comments` check run is present and successful when a preview deployment exists.
+- Vercel is `PENDING`, `SUCCESS`, or a classified build-rate-limit `FAILURE`.
 - Merge readiness is computed from live PR state:
   - `blocked_until_vercel_success` while Vercel is pending,
+  - `external_rate_limit_blocked` while Vercel returns the build-rate-limit target,
   - `ready_for_integration_review` once Vercel and Preview Comments both report success.
 
 ## Provider Boundary

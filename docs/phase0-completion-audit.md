@@ -13,7 +13,7 @@ Create a real KinFlo working tree from the Julie's Family GitHub source, harden 
 | Requirement | Status | Evidence | Notes |
 | --- | --- | --- | --- |
 | Create a real KinFlo working tree from the Julie's Family GitHub source. | Repo-complete | Workspace `/Users/vambahsillah/Documents/KinFlo CRM`; `origin` is `https://github.com/vsillah/JuliesFamily`; branch `codex/kinflo-phase-0-convex-plan`. | Existing local `excalidraw.log` remains untracked and out of PR scope. |
-| Confirm current branch, remotes, and dirty state. | Repo-complete | `git status --short --branch` shows branch synced to origin with known local-only untracked artifacts; PR #1 targets `main`. | Worktree cleanliness excludes `.cursor/`, `Terminal Commands.md`, `commands/`, `docs/terminal-command-cheatsheet.md`, and `excalidraw.log`, which remain outside PR scope. |
+| Confirm current branch, remotes, and dirty state. | Repo-complete; integration handoff blocked | `git status --short --branch` shows `codex/kinflo-phase-0-convex-plan` ahead of `origin/codex/kinflo-phase-0-convex-plan` by 2 local commits, with known local-only untracked artifacts; PR #1 targets `main`. | Worktree cleanliness excludes `.cursor/`, `Terminal Commands.md`, `commands/`, `docs/terminal-command-cheatsheet.md`, and `excalidraw.log`, which remain outside PR scope. The local commits should not be treated as preview-verified until pushed and checked. |
 | Run dependency install. | Repo-complete | [docs/phase0-baseline.md](phase0-baseline.md) records `npm install` completed and dependency audit findings. | Vulnerability remediation is intentionally not part of Phase 0. |
 | Run build baseline. | Repo-complete | `npm run build` passes; [docs/phase0-baseline.md](phase0-baseline.md) records current and historical build status. | Build still warns about stale Browserslist data and large bundles. |
 | Run typecheck baseline. | Repo-complete | `npm run kinflo:check-baseline` passes; repo-wide `npm run check` exits 0; TypeScript diagnostics: 0; protected KinFlo diagnostics: 0. | Earlier TypeScript drift is retained as historical intake context. |
@@ -38,8 +38,7 @@ The latest local validation set passed:
 - `npm run kinflo:audit-secret-history`
 - `npm run kinflo:inventory-env`
 - `npm run kinflo:validate-phase0-readiness`
-- `npm run kinflo:validate-pr-review-state`
-- `npm run kinflo:validate-integration-review-handoff`
+- `npm run kinflo:validate-pr-review-state` reports `external_rate_limit_blocked`
 - `npm run kinflo:validate-phases`
 - `npm run kinflo:validate-map`
 - `npm run kinflo:check-baseline`
@@ -52,11 +51,14 @@ The latest local validation set passed:
 Current PR review state:
 
 - PR: `https://github.com/vsillah/JuliesFamily/pull/1`
-- Head source: current `codex/kinflo-phase-0-convex-plan` head.
+- Local head: `6a56a08d9c6e25c628e4465cb2fae7085cd6741f`.
+- Remote PR head: `164629f60e67edd4edeec71c9dcbf34a5c50ffbd`.
+- Local branch state: ahead of `origin/codex/kinflo-phase-0-convex-plan` by 2 commits.
 - Required before merge: Vercel `SUCCESS` and Vercel Preview Comments `SUCCESS`.
-- Last local observation on July 3, 2026 before this artifact update: Vercel `SUCCESS`, Vercel Preview Comments `SUCCESS`.
-- Merge readiness from that observation: `ready_for_integration_review`.
+- Last local observation on July 3, 2026 after this artifact update: Vercel `FAILURE` with target `https://vercel.com/vsillahs-projects?upgradeToPro=build-rate-limit`; Vercel Preview Comments unavailable until deployment recovers.
+- Merge readiness from that observation: `external_rate_limit_blocked`.
 - Live refresh command: `npm run kinflo:validate-pr-review-state`.
+- Integration handoff command: `npm run kinflo:validate-integration-review-handoff` remains expected to fail until the local commits are pushed, Vercel recovers, and the current PR head reports `SUCCESS`.
 - After any new push, the live refresh command is authoritative because GitHub creates a new Vercel status target for the new head.
 
 Current local-only artifacts intentionally excluded from the provider-light PR:
@@ -98,4 +100,4 @@ These are intentionally outside the provider-light branch:
 
 ## Recommendation
 
-Treat PR #1 as ready for staged review as the provider-light Phase 0 plus scaffold packet. Do not treat it as approval to create providers, rotate credentials, rewrite history, import production data, or execute live Convex functions.
+Treat the local branch as repo-complete for Phase 0 provider-light proof. Do not treat PR #1 as integration-ready while the preview-deployment lane is `external_rate_limit_blocked`. Do not treat it as approval to create providers, rotate credentials, rewrite history, import production data, or execute live Convex functions.

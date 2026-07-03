@@ -60,7 +60,9 @@ requireIncludes("docs/phase0-integration-review-handoff.md", [
   "npm run kinflo:validate-integration-review-handoff",
   "https://github.com/vsillah/JuliesFamily/pull/1",
   "codex/kinflo-phase-0-convex-plan",
-  "Merge readiness: ready_for_integration_review",
+  "Current gate: `external_rate_limit_blocked`",
+  "Target merge readiness: `ready_for_integration_review`",
+  "This command is expected to fail until the local commits are pushed",
   "No hosted Convex deployment is created.",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -80,8 +82,8 @@ requireIncludes("docs/phase0-pr-review-state.md", [
 ]);
 
 requireIncludes("docs/phase156-pr-preview-deployment-checkpoint.md", [
-  "GitHub status state: `SUCCESS`",
-  "Merge readiness: `ready_for_integration_review`",
+  "GitHub status state: `FAILURE`",
+  "Merge readiness: `external_rate_limit_blocked`",
 ]);
 
 requireIncludes("package.json", [

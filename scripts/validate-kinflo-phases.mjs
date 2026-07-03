@@ -467,7 +467,7 @@ requireIncludes("docs/phase0-readiness-manifest.json", [
   "\"repoCompleteRequirements\"",
   "\"humanOwnedGates\"",
   "\"localValidationCommands\"",
-  "\"reviewStatus\": \"ready_for_staged_review\"",
+  "\"reviewStatus\": \"repo_complete_external_rate_limit_blocked\"",
 ]);
 
 requireIncludes("docs/phase0-secret-remediation.md", [
@@ -776,6 +776,7 @@ requireIncludes("docs/phase0-pr-review-state.md", [
   "Phase 0 PR Review State Gate",
   "npm run kinflo:validate-pr-review-state",
   "blocked_until_vercel_success",
+  "external_rate_limit_blocked",
   "ready_for_integration_review",
   "No hosted Convex deployment is created.",
   "No live Convex query, mutation, or action is executed.",
@@ -2397,10 +2398,10 @@ requireIncludes("docs/phase156-pr-preview-deployment-checkpoint.md", [
   "https://github.com/vsillah/JuliesFamily/pull/1",
   "codex/kinflo-phase-0-convex-plan",
   "GitHub status context: `Vercel`",
-  "GitHub status state: `SUCCESS`",
-  "Vercel deployment result: deployment completed for the current PR head",
-  "Preview comments check: `SUCCESS`",
-  "Merge readiness: `ready_for_integration_review`",
+  "GitHub status state: `FAILURE`",
+  "Vercel deployment result: deployment blocked by Vercel build-rate limiting for the current PR head",
+  "Preview comments check: unavailable until deployment recovers",
+  "Merge readiness: `external_rate_limit_blocked`",
   "No Vercel deployment is created from this checkpoint.",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -3319,8 +3320,9 @@ requireIncludes("scripts/validate-kinflo-pr-review-state.mjs", [
   "view",
   "vsillah/JuliesFamily",
   "Vercel status context is present",
-  "Vercel Preview Comments succeeded",
+  "Vercel Preview Comments check is present or rate-limited unavailable",
   "blocked_until_vercel_success",
+  "external_rate_limit_blocked",
   "ready_for_integration_review",
   "Provider APIs touched: no",
 ]);
@@ -4672,8 +4674,8 @@ requireIncludes("scripts/validate-kinflo-side-by-side-mobile-preview.mjs", [
 
 requireIncludes("scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs", [
   "docs/phase156-pr-preview-deployment-checkpoint.md",
-  "GitHub status state: `SUCCESS`",
-  "live Vercel preview succeeded for current PR head",
+  "GitHub status state: `FAILURE`",
+  "live Vercel preview is external_rate_limit_blocked for current PR head",
   "PR preview checkpoint contains no secret assignments",
   "KinFlo PR preview deployment checkpoint validation",
 ]);

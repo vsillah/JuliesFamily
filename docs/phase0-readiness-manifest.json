@@ -17,10 +17,14 @@
     "liveVerificationCommand": "gh pr view 1 --repo vsillah/JuliesFamily --json headRefOid,statusCheckRollup,url",
     "lastLocalObservation": {
       "observedDate": "2026-07-03",
-      "scope": "read-only local check before this artifact update; rerun liveVerificationCommand or npm run kinflo:validate-pr-review-state after each push",
-      "vercel": "SUCCESS",
-      "vercelPreviewComments": "SUCCESS",
-      "mergeReadiness": "ready_for_integration_review"
+      "scope": "read-only local check after local commits; remote PR head remains behind the local branch and Vercel is build-rate-limited",
+      "localHead": "6a56a08d9c6e25c628e4465cb2fae7085cd6741f",
+      "remotePrHead": "164629f60e67edd4edeec71c9dcbf34a5c50ffbd",
+      "localCommitsAheadOfOrigin": 2,
+      "vercel": "FAILURE",
+      "vercelTarget": "https://vercel.com/vsillahs-projects?upgradeToPro=build-rate-limit",
+      "vercelPreviewComments": "MISSING_UNTIL_DEPLOYMENT_RECOVERS",
+      "mergeReadiness": "external_rate_limit_blocked"
     },
     "checks": [
       {
@@ -169,6 +173,6 @@
     "npm run build",
     "git diff --check"
   ],
-  "reviewStatus": "ready_for_staged_review",
-  "nextActivationGate": "Human approval for credential rotation/history decision, Integration Captain merge timing, and hosted Convex ownership/auth/backup setup."
+  "reviewStatus": "repo_complete_external_rate_limit_blocked",
+  "nextActivationGate": "Wait for Vercel build-rate limit recovery, push the local commits when preview capacity is available, then rerun PR checks and the integration review handoff before merge scheduling."
 }

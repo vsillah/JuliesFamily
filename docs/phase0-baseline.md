@@ -140,7 +140,7 @@ Current command run:
 gh pr view 1 --json url,state,isDraft,headRefName,headRefOid,mergeStateStatus,statusCheckRollup
 ```
 
-Current result: PR #1 is open and draft on `codex/kinflo-phase-0-convex-plan`. Vercel Preview Comments reports `SUCCESS`; the Vercel deployment check reports `SUCCESS` for the current head, so PR preview readiness is `ready_for_integration_review`.
+Current result: PR #1 is open and draft on `codex/kinflo-phase-0-convex-plan`. The remote PR head is behind the local branch, and the Vercel deployment check currently reports `FAILURE` with the build-rate-limit target, so PR preview readiness is `external_rate_limit_blocked` until Vercel recovers and the current local head is pushed and verified.
 
 Current TypeScript status:
 
@@ -213,4 +213,4 @@ Not completed:
 
 Recommendation:
 
-Proceed with review of the provider-light PR, then move to hosted Convex activation only after Vambah approves the ownership, auth, backup, and credential-rotation gates. The current branch is ready for staged review as a local Convex SaaS/control-plane packet, not as approval to provision providers or import production data.
+Proceed with local review of the provider-light packet, but do not schedule merge or hosted activation until Vercel preview capacity recovers, the current local head is pushed, and the integration handoff reports `ready_for_integration_review`. The current branch remains a local Convex SaaS/control-plane packet, not approval to provision providers or import production data.
