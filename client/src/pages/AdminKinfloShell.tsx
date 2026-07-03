@@ -8086,7 +8086,7 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="flex h-[min(318px,calc(100vh-14rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(336px,calc(100vh-18rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="flex h-[min(338px,calc(100vh-14rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(356px,calc(100vh-18rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -8155,13 +8155,13 @@ export default function AdminKinfloShell() {
                                 </div>
                                 <Badge variant="outline" className="bg-white text-[10px]">Ordered</Badge>
                               </div>
-                              <div className="mt-1.5 grid max-h-[72px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
+                              <div className="mt-1.5 grid max-h-[92px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step, index) => (
                                   <div key={step} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] leading-4 text-slate-600 sm:grid-cols-[1.375rem_minmax(0,1fr)] sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-xs sm:leading-5">
                                     <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full border border-slate-200 bg-white text-[9px] font-semibold text-slate-500 sm:h-5 sm:w-5">
                                       {index + 1}
                                     </div>
-                                    <span className="min-w-0">{step}</span>
+                                    <span className="min-w-0 truncate" title={step}>{step}</span>
                                   </div>
                                 ))}
                               </div>
@@ -8177,7 +8177,7 @@ export default function AdminKinfloShell() {
                                 </div>
                                 <Badge variant="secondary" className="text-[10px]">Proof first</Badge>
                               </div>
-                              <div className="mt-1.5 grid max-h-[72px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
+                              <div className="mt-1.5 grid max-h-[92px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
                                   <div key={item} className="rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1 text-[10px] font-medium leading-4 text-emerald-800 sm:px-2.5 sm:py-1.5 sm:text-xs sm:leading-5">
                                     {item}
@@ -8196,7 +8196,7 @@ export default function AdminKinfloShell() {
                                 </div>
                                 <Badge variant="outline" className="border-amber-200 bg-amber-50 text-[10px] text-amber-800">Gated</Badge>
                               </div>
-                              <div className="mt-1.5 grid max-h-[72px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
+                              <div className="mt-1.5 grid max-h-[92px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
                                   <div key={action} className="flex items-start gap-1.5 rounded-md border border-slate-100 bg-slate-50 p-1.5 text-[10px] leading-4 text-slate-600 sm:gap-2 sm:text-xs sm:leading-5">
                                     <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
@@ -8216,7 +8216,7 @@ export default function AdminKinfloShell() {
                                 </div>
                                 <Badge variant="outline" className="bg-white text-[10px]">Mapped</Badge>
                               </div>
-                              <div className="mt-1.5 flex max-h-[72px] flex-wrap gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
+                              <div className="mt-1.5 flex max-h-[92px] flex-wrap gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
                                   <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">{functionName}</Badge>
                                 ))}

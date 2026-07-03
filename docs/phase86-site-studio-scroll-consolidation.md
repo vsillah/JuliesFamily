@@ -73,13 +73,14 @@ The prior right-rail provisioning content stacked a large provisioning order car
 - approval evidence, blocked actions, and function references move into internal `Evidence`, `Blocked`, and `Functions` tabs inside the `Order` tab,
 - manifest, dry-run counters, selected order steps, provider boundary, and blocked-until gates live under the `Dry run` tab,
 - long lists use bounded internal scroll areas instead of increasing the full page height,
-- local setup, evidence, blocked-action, and function lists use 72px caps at narrow review widths, 104px caps at small widths, and expand to 190px on desktop,
+- local setup, evidence, blocked-action, and function lists use 92px caps at narrow review widths, 104px caps at small widths, and expand to 190px on desktop,
 - the provisioning summary stays in a compact four-chip row by default so plan, template, owner, and invite do not stack into the tall card column shown in earlier review captures.
-- the provisioning workbench itself is capped at 318px on narrow review widths and 336px at the small breakpoint, with order and dry-run interiors using local scroll so the page does not fall back into a tall proof stack.
+- the provisioning workbench itself is capped at 338px on narrow review widths and 356px at the small breakpoint, with order and dry-run interiors using local scroll so the page does not fall back into a tall proof stack.
 - duplicate disabled gate buttons are screen-reader-only because the compact workbench already shows the gated state in the header badge.
 - the workbench card uses local vertical scrolling rather than clipping content when a nested panel has more detail than the compact viewport can show.
 - the provisioning view is controlled by an explicit `Order` / `Dry run` sub-tab state, keeping the default surface summary-first and preventing the execution dry run from reappearing as a second stacked card.
-- setup, evidence, blocked-action, and function panels now share the tighter 72px narrow cap and 104px small-screen cap, with the scroll behavior owned by the active panel rather than the whole order cockpit.
+- setup, evidence, blocked-action, and function panels now share a 92px narrow cap and 104px small-screen cap, with the scroll behavior owned by the active panel rather than the whole order cockpit.
+- the narrow setup panel can show the full three-step order without reintroducing the stacked dry-run card below it.
 
 Launch packets, content packs, onboarding evidence, simulations, polish scorecards, visual QA, proof-before-publish, and launch decisions remain available in the rail, but they now sit inside a launch dossier with `Provision`, `Packets`, `QA`, and `Decision` tabs. The left command column keeps the active site, gated launch controls, and provider boundary visible while the right dossier scrolls internally.
 
