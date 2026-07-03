@@ -23,9 +23,9 @@ The Adapter Switch tab now shows batch-level acceptance before surface-level det
 - Switch batches: 6
 - Switch surfaces: 12
 - Generated contract coverage: complete
-- Total mapped functions: 43
+- Total mapped functions: 44
 - Smoke-covered functions: 16
-- Smoke-gap functions: 27
+- Smoke-gap functions: 28
 - Switch-ready batches: 0
 
 ## Provider Boundary

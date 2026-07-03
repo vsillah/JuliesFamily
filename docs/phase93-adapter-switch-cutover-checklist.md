@@ -22,7 +22,7 @@ npm run kinflo:validate-adapter-switch-cutover-checklist
 
 - Total batches: 6
 - Total surfaces: 12
-- Total functions: 43
+- Total functions: 44
 - Ready batches: 0
 - Blocked batches: 6
 
@@ -36,6 +36,8 @@ npm run kinflo:validate-adapter-switch-cutover-checklist
 6. `campaign-and-ai-governance`
 
 Each step records entry criteria, proposed switch actions, post-switch verification, rollback controls, adapter flag posture, blocked-until state, and explicit `canCutover: false`, `canImportGeneratedApi: false`, and `generatedApiAvailable: false` posture.
+
+Phase 167 refreshes this cutover checklist against the Phase 92 evidence ledger, the Phase 165 evidence-ledger parity check, and the Phase 166 evidence deep-link parity check. The cutover checklist still maps all 44 per-batch generated adapter functions, while the hosted-smoke evidence ledger covers the 28 remaining smoke gaps; both surfaces must share the same six batch ids before owner review can consider any generated adapter switch.
 
 ## Provider Boundary
 

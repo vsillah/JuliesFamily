@@ -111,9 +111,9 @@ requireIncludes("docs/phase89-adapter-switch-acceptance-matrix.md", [
   "section-kinflo-adapter-switch-acceptance-scroll",
   "Switch batches: 6",
   "Switch surfaces: 12",
-  "Total mapped functions: 43",
+  "Total mapped functions: 44",
   "Smoke-covered functions: 16",
-  "Smoke-gap functions: 27",
+  "Smoke-gap functions: 28",
   "Switch-ready batches: 0",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -188,7 +188,7 @@ if (totals.surfaces === 12) {
   fail("switch plan has twelve surfaces", `Received ${totals.surfaces}.`);
 }
 
-if (totals.functions === 43 && totals.covered === 16 && totals.missing === 27) {
+if (totals.functions === 44 && totals.covered === 16 && totals.missing === 28) {
   pass("switch acceptance totals match source contracts");
 } else {
   fail("switch acceptance totals match source contracts", `Received functions=${totals.functions}, covered=${totals.covered}, missing=${totals.missing}.`);

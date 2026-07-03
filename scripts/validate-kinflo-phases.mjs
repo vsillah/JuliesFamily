@@ -204,6 +204,7 @@ for (const path of [
   "docs/phase164-hosted-smoke-sequencer-parity.md",
   "docs/phase165-hosted-smoke-evidence-ledger-parity.md",
   "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
+  "docs/phase167-adapter-switch-cutover-evidence-parity.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -397,6 +398,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-smoke-sequencer-parity.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-ledger-parity.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-link-parity.mjs",
+  "scripts/validate-kinflo-adapter-switch-cutover-evidence-parity.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -3014,9 +3016,9 @@ requireIncludes("docs/phase89-adapter-switch-acceptance-matrix.md", [
   "section-kinflo-adapter-switch-acceptance-scroll",
   "Switch batches: 6",
   "Switch surfaces: 12",
-  "Total mapped functions: 43",
+  "Total mapped functions: 44",
   "Smoke-covered functions: 16",
-  "Smoke-gap functions: 27",
+  "Smoke-gap functions: 28",
   "Switch-ready batches: 0",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -3087,12 +3089,28 @@ requireIncludes("docs/phase93-adapter-switch-cutover-checklist.md", [
   "button-adapter-switch-cutover-gated",
   "Total batches: 6",
   "Total surfaces: 12",
-  "Total functions: 43",
+  "Total functions: 44",
   "Ready batches: 0",
   "Blocked batches: 6",
+  "Phase 167 refreshes this cutover checklist against the Phase 92 evidence ledger",
+  "Phase 166 evidence deep-link parity check",
   "No generated Convex API files are committed or imported.",
   "No fixture adapter switch is performed.",
   "No live Convex query, mutation, or action is executed.",
+]);
+
+requireIncludes("docs/phase167-adapter-switch-cutover-evidence-parity.md", [
+  "Phase 167: Adapter Switch Cutover Evidence Parity",
+  "npm run kinflo:validate-adapter-switch-cutover-evidence-parity",
+  "Cutover batches: 6",
+  "Evidence batches: 6",
+  "Shared batch ids: 6",
+  "Cutover mapped functions: 44",
+  "Hosted smoke evidence gaps: 28",
+  "No generated Convex API files are committed or imported.",
+  "No fixture adapter switch is performed.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
 ]);
 
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
@@ -3160,6 +3178,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-hosted-smoke-evidence-ledger-parity\"",
   "\"docs/phase166-hosted-smoke-evidence-deep-link-parity.md\"",
   "\"npm run kinflo:validate-hosted-smoke-evidence-deep-link-parity\"",
+  "\"docs/phase167-adapter-switch-cutover-evidence-parity.md\"",
+  "\"npm run kinflo:validate-adapter-switch-cutover-evidence-parity\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3401,6 +3421,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"kinflo:validate-hosted-smoke-evidence-deep-link-parity\"",
+  "\"kinflo:validate-adapter-switch-cutover-evidence-parity\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
@@ -5340,6 +5361,18 @@ requireIncludes("scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs", 
   "liveConvexExecution false entry count is 6",
   "adapter switch cutover checklist does not import generated API",
   "KinFlo adapter switch cutover checklist validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-adapter-switch-cutover-evidence-parity.mjs", [
+  "docs/phase167-adapter-switch-cutover-evidence-parity.md",
+  "cutover parity covers six cutover batches",
+  "cutover parity covers six evidence batches",
+  "cutover parity shares six batch ids with evidence ledger",
+  "cutover parity preserves forty-four mapped adapter functions",
+  "cutover parity preserves twenty-eight hosted smoke evidence gaps",
+  "adapter switch cutover evidence parity does not import generated API",
+  "adapter switch cutover evidence parity does not execute live Convex",
+  "KinFlo adapter switch cutover evidence parity validation",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [

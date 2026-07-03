@@ -82,6 +82,9 @@ for (const path of [
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase89-adapter-switch-acceptance-matrix.md",
   "docs/phase92-hosted-smoke-evidence-ledger.md",
+  "docs/phase165-hosted-smoke-evidence-ledger-parity.md",
+  "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
+  "docs/phase167-adapter-switch-cutover-evidence-parity.md",
   "docs/convex-adapter-switch-plan.json",
   "client/src/lib/kinfloShellData.ts",
   "client/src/pages/AdminKinfloShell.tsx",
@@ -102,9 +105,11 @@ requireIncludes("docs/phase93-adapter-switch-cutover-checklist.md", [
   "button-adapter-switch-cutover-gated",
   "Total batches: 6",
   "Total surfaces: 12",
-  "Total functions: 43",
+  "Total functions: 44",
   "Ready batches: 0",
   "Blocked batches: 6",
+  "Phase 167 refreshes this cutover checklist against the Phase 92 evidence ledger",
+  "Phase 166 evidence deep-link parity check",
   "No generated Convex API files are committed or imported.",
   "No fixture adapter switch is performed.",
   "No live Convex query, mutation, or action is executed.",
@@ -117,7 +122,10 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "provider_light_adapter_cutover_checklist",
   "totalBatches: 6",
   "totalSurfaces: 12",
-  "totalFunctions: 43",
+  "totalFunctions: 44",
+  "docs/phase165-hosted-smoke-evidence-ledger-parity.md",
+  "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
+  "docs/phase167-adapter-switch-cutover-evidence-parity.md",
   "readyBatches: 0",
   "blockedBatches: 6",
   "canCutover: false",
@@ -175,10 +183,10 @@ if (totals.surfaces === 12) {
   fail("cutover plan has twelve surfaces", `Received ${totals.surfaces}.`);
 }
 
-if (totals.functions === 43) {
-  pass("cutover plan has forty-three mapped functions");
+if (totals.functions === 44) {
+  pass("cutover plan has forty-four mapped functions");
 } else {
-  fail("cutover plan has forty-three mapped functions", `Received ${totals.functions}.`);
+  fail("cutover plan has forty-four mapped functions", `Received ${totals.functions}.`);
 }
 
 for (const item of uniqueFunctionsByBatch) {
