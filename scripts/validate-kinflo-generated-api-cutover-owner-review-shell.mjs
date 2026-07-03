@@ -143,9 +143,10 @@ requireIncludes("package.json", [
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const shellPage = read("client/src/pages/AdminKinfloShell.tsx");
 const block = extractOwnerReviewBlock(shellData);
-const batchCount = (block.match(/batchId: "/g) ?? []).length;
+const batchSummaryBlock = block.match(/batchSummaries:\s*\[([\s\S]*?)\n\s*\],\n\s*readinessScoreboard:/)?.[1] ?? "";
+const batchCount = (batchSummaryBlock.match(/batchId: "/g) ?? []).length;
 const reviewItemCount = (block.match(/status: "pending_owner_review"/g) ?? []).length;
-const canCutoverFalseCount = (block.match(/canCutover: false/g) ?? []).length;
+const canCutoverFalseCount = (batchSummaryBlock.match(/canCutover: false/g) ?? []).length;
 const canApproveFalseCount = (block.match(/canApprove: false/g) ?? []).length;
 
 if (batchCount === 6) {

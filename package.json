@@ -163,6 +163,7 @@
     "kinflo:validate-generated-api-cutover-owner-review-shell-parity": "node scripts/validate-kinflo-generated-api-cutover-owner-review-shell-parity.mjs",
     "kinflo:validate-generated-api-cutover-owner-review-deep-links": "node scripts/validate-kinflo-generated-api-cutover-owner-review-deep-links.mjs",
     "kinflo:validate-generated-api-cutover-readiness-scoreboard": "node scripts/validate-kinflo-generated-api-cutover-readiness-scoreboard.mjs",
+    "kinflo:validate-generated-api-cutover-rollback-drill-matrix": "node scripts/validate-kinflo-generated-api-cutover-rollback-drill-matrix.mjs",
     "kinflo:validate-hosted-activation-step-deep-links": "node scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",

@@ -22,6 +22,7 @@ import {
   MonitorSmartphone,
   Palette,
   Plus,
+  RotateCcw,
   Rocket,
   Save,
   Settings2,
@@ -8522,6 +8523,68 @@ export default function AdminKinfloShell() {
                             <div className="mt-3 rounded-md border border-slate-200 bg-white p-2 text-xs leading-5 text-slate-600">
                               <span className="font-medium text-slate-900">Next owner action: </span>
                               {gate.nextOwnerAction}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm" data-testid="section-kinflo-generated-api-cutover-rollback-drill-matrix">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <RotateCcw className="h-4 w-4 text-slate-600" />
+                            <h4 className="text-sm font-semibold text-slate-950">Rollback drill matrix</h4>
+                            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                              {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.rollbackDrillMatrix.status.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+                          <p className="mt-2 text-xs leading-5 text-slate-600" data-testid="text-kinflo-generated-api-cutover-rollback-drill-matrix">
+                            {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.rollbackDrillMatrix.nextGate}
+                          </p>
+                        </div>
+                        <Button size="sm" disabled variant="outline" data-testid="button-generated-api-cutover-rollback-drill-gated">
+                          <ShieldCheck className="mr-2 h-3 w-3" />
+                          Drill gated
+                        </Button>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 sm:grid-cols-4">
+                        {[
+                          { label: "Drills", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.rollbackDrillMatrix.totalDrills },
+                          { label: "Blocked", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.rollbackDrillMatrix.blockedDrills },
+                          { label: "Ready", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.rollbackDrillMatrix.readyDrills },
+                          { label: "Owner", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.rollbackDrillMatrix.owner },
+                        ].map((item) => (
+                          <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-2 py-2">
+                            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                            <div className="mt-1 truncate text-sm font-semibold text-slate-950">{item.value}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-3 grid max-h-[300px] gap-2 overflow-y-auto pr-1 lg:grid-cols-2" data-testid="section-kinflo-generated-api-cutover-rollback-drills">
+                        {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.rollbackDrillMatrix.drills.map((drill) => (
+                          <div key={drill.batchId} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{drill.label}</div>
+                                <div className="mt-1 text-xs text-slate-500">{drill.batchId} · {drill.rollbackOwner}</div>
+                              </div>
+                              <Badge variant="outline" className="shrink-0 border-amber-200 bg-white text-amber-700">
+                                {drill.drillStatus.replaceAll("_", " ")}
+                              </Badge>
+                            </div>
+                            <div className="mt-3 rounded-md border border-slate-200 bg-white p-2 text-xs leading-5 text-slate-600">
+                              <span className="font-medium text-slate-900">Fixture restore: </span>
+                              {drill.fixtureRestoreAction}
+                            </div>
+                            <div className="mt-3 flex max-h-[76px] flex-wrap gap-1.5 overflow-y-auto rounded-md border border-slate-200 bg-white p-2" data-testid="section-kinflo-generated-api-cutover-rollback-evidence">
+                              {drill.requiredEvidence.map((item) => (
+                                <Badge key={item} variant="outline" className="max-w-full whitespace-normal break-all bg-slate-50 text-left text-[10px]">
+                                  {item}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
                         ))}

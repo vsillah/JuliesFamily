@@ -899,6 +899,36 @@ export type ShellGeneratedApiCutoverReadinessScoreboard = {
   liveConvexExecution: false;
 };
 
+export type ShellGeneratedApiCutoverRollbackDrill = {
+  batchId: string;
+  label: string;
+  rollbackOwner: string;
+  fixtureRestoreAction: string;
+  requiredEvidence: string[];
+  drillStatus: "blocked_until_owner_gate";
+  canRunDrill: false;
+  canSwitchAdapter: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
+export type ShellGeneratedApiCutoverRollbackDrillMatrix = {
+  phase: 173;
+  status: "provider_light_generated_api_cutover_rollback_drill_matrix";
+  totalDrills: number;
+  blockedDrills: number;
+  readyDrills: number;
+  owner: "platform.super_admin";
+  nextGate: string;
+  drills: ShellGeneratedApiCutoverRollbackDrill[];
+  canRunRollbackDrill: false;
+  canSwitchFixtureAdapter: false;
+  canImportGeneratedApi: false;
+  canExecuteHostedSmoke: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellGeneratedApiCutoverOwnerReview = {
   phase: 169;
   status: "provider_light_generated_api_cutover_owner_review_shell";
@@ -916,6 +946,7 @@ export type ShellGeneratedApiCutoverOwnerReview = {
   reviewItemsList: ShellGeneratedApiCutoverOwnerReviewItem[];
   batchSummaries: ShellGeneratedApiCutoverOwnerReviewBatch[];
   readinessScoreboard: ShellGeneratedApiCutoverReadinessScoreboard;
+  rollbackDrillMatrix: ShellGeneratedApiCutoverRollbackDrillMatrix;
   blockedActions: string[];
   providerBoundary: string;
   canOpenCodegenWindow: false;
@@ -8482,6 +8513,95 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       canSwitchFixtureAdapter: false,
       canExecuteHostedSmoke: false,
       canApproveCutover: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    rollbackDrillMatrix: {
+      phase: 173,
+      status: "provider_light_generated_api_cutover_rollback_drill_matrix",
+      totalDrills: 6,
+      blockedDrills: 6,
+      readyDrills: 0,
+      owner: "platform.super_admin",
+      nextGate: "Each cutover batch needs a named rollback owner, accepted fixture restore proof, hosted-smoke evidence, and Phase 85 approval before any generated adapter drill can run.",
+      drills: [
+        {
+          batchId: "read-only-core",
+          label: "Read-only core shell data",
+          rollbackOwner: "platform.super_admin",
+          fixtureRestoreAction: "Restore Kinflo OS shell reads to typed local fixtures and keep generated API imports absent.",
+          requiredEvidence: ["hosted read smoke transcript", "fixture parity snapshot", "generated binding review acceptance"],
+          drillStatus: "blocked_until_owner_gate",
+          canRunDrill: false,
+          canSwitchAdapter: false,
+          providerWrites: false,
+          liveConvexExecution: false,
+        },
+        {
+          batchId: "user-scoped-preferences",
+          label: "User-scoped preference reads and writes",
+          rollbackOwner: "platform.super_admin",
+          fixtureRestoreAction: "Keep preference writes disabled and restore fixture preference defaults.",
+          requiredEvidence: ["preference read smoke", "write rollback transcript", "owner approval note"],
+          drillStatus: "blocked_until_owner_gate",
+          canRunDrill: false,
+          canSwitchAdapter: false,
+          providerWrites: false,
+          liveConvexExecution: false,
+        },
+        {
+          batchId: "site-creation-and-admin",
+          label: "Site creation, invitations, and activation readiness",
+          rollbackOwner: "platform.super_admin",
+          fixtureRestoreAction: "Keep site factory, admin invitation, and activation readiness mutations gated behind fixture review.",
+          requiredEvidence: ["site factory dry-run parity", "invite no-send proof", "activation owner approval"],
+          drillStatus: "blocked_until_owner_gate",
+          canRunDrill: false,
+          canSwitchAdapter: false,
+          providerWrites: false,
+          liveConvexExecution: false,
+        },
+        {
+          batchId: "public-crm-loop",
+          label: "Public lead capture and CRM workflow",
+          rollbackOwner: "platform.super_admin",
+          fixtureRestoreAction: "Keep public lead writes disabled and route CRM surfaces back to fixture leads.",
+          requiredEvidence: ["public lead no-write smoke", "CRM fixture restore proof", "lead rollback owner signoff"],
+          drillStatus: "blocked_until_owner_gate",
+          canRunDrill: false,
+          canSwitchAdapter: false,
+          providerWrites: false,
+          liveConvexExecution: false,
+        },
+        {
+          batchId: "provider-readiness-records",
+          label: "Provider readiness metadata without provider writes",
+          rollbackOwner: "platform.super_admin",
+          fixtureRestoreAction: "Keep domain, integration, asset, and provider readiness records fixture-backed with provider writes disabled.",
+          requiredEvidence: ["provider no-write proof", "domain rollback note", "asset fixture restore snapshot"],
+          drillStatus: "blocked_until_owner_gate",
+          canRunDrill: false,
+          canSwitchAdapter: false,
+          providerWrites: false,
+          liveConvexExecution: false,
+        },
+        {
+          batchId: "campaign-and-ai-governance",
+          label: "Campaign and AI governance records",
+          rollbackOwner: "platform.super_admin",
+          fixtureRestoreAction: "Keep campaign sends, AI review publish actions, and governance writes blocked behind fixture records.",
+          requiredEvidence: ["campaign no-send proof", "AI review rollback note", "governance fixture restore proof"],
+          drillStatus: "blocked_until_owner_gate",
+          canRunDrill: false,
+          canSwitchAdapter: false,
+          providerWrites: false,
+          liveConvexExecution: false,
+        },
+      ],
+      canRunRollbackDrill: false,
+      canSwitchFixtureAdapter: false,
+      canImportGeneratedApi: false,
+      canExecuteHostedSmoke: false,
       providerWrites: false,
       liveConvexExecution: false,
     },

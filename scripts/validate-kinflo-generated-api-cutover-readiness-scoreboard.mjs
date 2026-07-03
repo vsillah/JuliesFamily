@@ -148,6 +148,7 @@ const shellData = read("client/src/lib/kinfloShellData.ts");
 const shellPage = read("client/src/pages/AdminKinfloShell.tsx");
 const doc = read("docs/phase172-generated-api-cutover-readiness-scoreboard.md");
 const block = extractOwnerReviewBlock(shellData);
+const batchSummaryBlock = block.match(/batchSummaries:\s*\[([\s\S]*?)\n\s*\],\n\s*readinessScoreboard:/)?.[1] ?? "";
 const gateIds = [
   "generated-binding-contract",
   "cutover-batch-parity",
@@ -155,7 +156,7 @@ const gateIds = [
   "rollback-and-fixture-fallback",
   "phase85-owner-approval",
 ];
-const batchIds = [...block.matchAll(/batchId: "([^"]+)"/g)].map((match) => match[1]);
+const batchIds = [...batchSummaryBlock.matchAll(/batchId: "([^"]+)"/g)].map((match) => match[1]);
 
 for (const gateId of gateIds) {
   if (block.includes(`id: "${gateId}"`) && doc.includes(`\`${gateId}\``)) {

@@ -128,8 +128,9 @@ const shellData = read("client/src/lib/kinfloShellData.ts");
 const shellPage = read("client/src/pages/AdminKinfloShell.tsx");
 const doc = read("docs/phase171-generated-api-cutover-owner-review-deep-links.md");
 const block = extractOwnerReviewBlock(shellData);
+const batchSummaryBlock = block.match(/batchSummaries:\s*\[([\s\S]*?)\n\s*\],\n\s*readinessScoreboard:/)?.[1] ?? "";
 const reviewItemIds = [...block.matchAll(/id: "([^"]+)"[\s\S]*?status: "pending_owner_review"/g)].map((match) => match[1]);
-const batchIds = [...block.matchAll(/batchId: "([^"]+)"/g)].map((match) => match[1]);
+const batchIds = [...batchSummaryBlock.matchAll(/batchId: "([^"]+)"/g)].map((match) => match[1]);
 
 if (reviewItemIds.length === 5) {
   pass("generated API cutover owner-review deep links cover five review items");
