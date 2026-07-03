@@ -390,6 +390,39 @@ export type ShellHostedActivationRepoSharingRiskReview = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedOwnershipCriterion = {
+  id: string;
+  label: string;
+  decisionScope: string;
+  evidenceTarget: string;
+  blockedUntil: string;
+};
+
+export type ShellHostedActivationOwnershipReview = {
+  status: "prepare_only_hosted_ownership_review";
+  decisionId: "hosted-convex-ownership";
+  owner: "Vambah";
+  totalCriteria: number;
+  blockedUntilPriorGate: number;
+  acceptedCriteria: number;
+  nextGate: string;
+  reviewPacketPath: string;
+  sourceDocuments: string[];
+  criteria: ShellHostedOwnershipCriterion[];
+  blockedActions: string[];
+  canRecordDecision: false;
+  canCreateHostedDeployment: false;
+  canSelectHostedProject: false;
+  canEnterEnvValues: false;
+  canRunCodegen: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -402,6 +435,7 @@ export type ShellHostedActivationRunbook = {
   decisionCheckpoint: ShellHostedActivationDecisionCheckpoint;
   credentialRotationReview: ShellHostedActivationCredentialRotationReview;
   repoSharingRiskReview: ShellHostedActivationRepoSharingRiskReview;
+  hostedOwnershipReview: ShellHostedActivationOwnershipReview;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -7421,6 +7455,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "docs/phase96-hosted-activation-owner-checklist.md",
       "docs/phase121-hosted-activation-credential-rotation-review.md",
       "docs/phase122-hosted-activation-repo-sharing-risk-review.md",
+      "docs/phase123-hosted-activation-ownership-review.md",
       "docs/phase104-hosted-smoke-evidence-deep-links.md",
     ],
     blockedActions: [
@@ -7593,6 +7628,83 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canPrintSecrets: false,
     canCreateHostedDeployment: false,
     canRunCodegen: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  hostedOwnershipReview: {
+    status: "prepare_only_hosted_ownership_review",
+    decisionId: "hosted-convex-ownership",
+    owner: "Vambah",
+    totalCriteria: 5,
+    blockedUntilPriorGate: 5,
+    acceptedCriteria: 0,
+    nextGate: "Credential rotation and repo-sharing posture must be resolved before owner records hosted Convex ownership, billing, backup, auth, and env policy acceptance.",
+    reviewPacketPath: "docs/phase123-hosted-activation-ownership-review.md",
+    sourceDocuments: [
+      "docs/phase49-hosted-activation-packet.md",
+      "docs/phase73-hosted-activation-decision-register.md",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase96-hosted-activation-owner-checklist.md",
+      "docs/phase120-hosted-activation-decision-checkpoint.md",
+      "docs/phase121-hosted-activation-credential-rotation-review.md",
+      "docs/phase122-hosted-activation-repo-sharing-risk-review.md",
+    ],
+    criteria: [
+      {
+        id: "project-owner",
+        label: "Hosted Convex project owner",
+        decisionScope: "who owns the hosted project, dashboard access, and recovery path",
+        evidenceTarget: "Owner note identifies the approved Convex team/account and dashboard owner outside committed source.",
+        blockedUntil: "Credential rotation and repository sharing posture are accepted.",
+      },
+      {
+        id: "billing-plan",
+        label: "Billing and spend posture",
+        decisionScope: "starter budget, billing account, spend alerts, and upgrade threshold",
+        evidenceTarget: "Owner note records billing account, expected starter spend posture, and escalation threshold.",
+        blockedUntil: "No hosted project billing is selected from this repo.",
+      },
+      {
+        id: "backup-retention",
+        label: "Backup and retention expectations",
+        decisionScope: "backup cadence, retention expectations, restore owner, and export boundaries",
+        evidenceTarget: "Owner note captures backup/restore expectation before production import or live tenant data.",
+        blockedUntil: "Production import and hosted smoke remain blocked.",
+      },
+      {
+        id: "auth-provider",
+        label: "Auth provider and session boundary",
+        decisionScope: "admin auth, client admin auth, tenant scope, invite recovery, and session ownership",
+        evidenceTarget: "Owner note confirms auth provider posture and client admin session boundary before codegen.",
+        blockedUntil: "Hosted auth setup and invitation smoke remain blocked.",
+      },
+      {
+        id: "env-policy",
+        label: "Hosted env policy",
+        decisionScope: "where secrets live, who can enter env values, and how generated bindings are reviewed",
+        evidenceTarget: "Owner note confirms env values stay in approved local/provider surfaces and are never committed.",
+        blockedUntil: "No env values are entered and no codegen window is opened.",
+      },
+    ],
+    blockedActions: [
+      "create or select hosted Convex deployment",
+      "enter hosted Convex env values",
+      "record hosted project URL or billing details in committed source",
+      "run npm run convex:codegen",
+      "commit or import generated Convex API files",
+      "execute hosted read or mutation smoke",
+      "import production data",
+      "perform provider writes or client launch",
+    ],
+    canRecordDecision: false,
+    canCreateHostedDeployment: false,
+    canSelectHostedProject: false,
+    canEnterEnvValues: false,
+    canRunCodegen: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
     providerWrites: false,
     liveConvexExecution: false,
   },

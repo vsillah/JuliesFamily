@@ -4797,6 +4797,87 @@ export default function AdminKinfloShell() {
                   </div>
                 </section>
 
+                <section
+                  className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+                  data-testid="section-kinflo-hosted-activation-ownership-review"
+                >
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="border-slate-300 bg-slate-50 text-slate-800">
+                          Hosted ownership
+                        </Badge>
+                        <Badge className="bg-slate-950 hover:bg-slate-950">
+                          {snapshot.hostedActivationRunbook.hostedOwnershipReview.status.replaceAll("_", " ")}
+                        </Badge>
+                      </div>
+                      <h3 className="mt-3 text-base font-semibold text-slate-950">Hosted Convex ownership review</h3>
+                      <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600" data-testid="text-hosted-activation-ownership-next-gate">
+                        {snapshot.hostedActivationRunbook.hostedOwnershipReview.nextGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-hosted-activation-ownership-gated">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Ownership gated
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2" data-testid="section-kinflo-hosted-activation-ownership-summary">
+                    {[
+                      { label: "Criteria", value: snapshot.hostedActivationRunbook.hostedOwnershipReview.totalCriteria },
+                      { label: "Blocked", value: snapshot.hostedActivationRunbook.hostedOwnershipReview.blockedUntilPriorGate },
+                      { label: "Accepted", value: snapshot.hostedActivationRunbook.hostedOwnershipReview.acceptedCriteria },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                        <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                        <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
+                    <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Ownership criteria</div>
+                        <Badge variant="outline" className="bg-white">{snapshot.hostedActivationRunbook.hostedOwnershipReview.decisionId}</Badge>
+                      </div>
+                      <div className="mt-3 grid max-h-[280px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-activation-ownership-criteria-scroll">
+                        {snapshot.hostedActivationRunbook.hostedOwnershipReview.criteria.map((criterion) => (
+                          <div key={criterion.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{criterion.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{criterion.decisionScope}</div>
+                              </div>
+                              <Badge variant="secondary" className="w-fit shrink-0">{criterion.id}</Badge>
+                            </div>
+                            <p className="mt-2 text-xs leading-5 text-slate-600">{criterion.evidenceTarget}</p>
+                            <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">{criterion.blockedUntil}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 space-y-3">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                        <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Review packet</div>
+                        <div className="mt-2 break-all text-xs leading-5 text-amber-950">
+                          {snapshot.hostedActivationRunbook.hostedOwnershipReview.reviewPacketPath}
+                        </div>
+                      </div>
+
+                      <div className="max-h-[190px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-activation-ownership-blocked-actions">
+                        {snapshot.hostedActivationRunbook.hostedOwnershipReview.blockedActions.map((action) => (
+                          <div key={action} className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <span>{action}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
                 <Card className="overflow-hidden border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-console">
                   <CardHeader className="border-b border-slate-100 bg-slate-950 text-white">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
