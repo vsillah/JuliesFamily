@@ -43,7 +43,7 @@ Existing detail tabs stay preserved by workspace:
   - `button-kinflo-client-configuration-profile-campaign-microsite`
 - Switching a profile reuses the existing `selectClientWebsiteStudioSite` route path, preserving the current Configure workspace and detail params while changing `studioSite`.
 - The switcher shows owner role, invite role, template, tenant slug, permission preset, and configuration status without enabling any save, invite, publish, provider, or live Convex write.
-- The shared Site Studio lane rail remains the first control in the compact shell, labeled `Studio lanes`, before the control-room frame and before lane-specific panels.
+- The shared Site Studio lane rail remains the first Site Studio control in the header, labeled `Studio lanes`, before the persistent identity strip, control-room frame, and lane-specific panels.
 
 ## Provider Boundary
 

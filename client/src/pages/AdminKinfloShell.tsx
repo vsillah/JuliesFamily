@@ -4419,6 +4419,62 @@ export default function AdminKinfloShell() {
     return null;
   }
 
+  const clientWebsiteStudioLaneRail = (
+    <div
+      className="sticky top-0 z-30 -mx-1 bg-slate-50/95 px-1 pb-2 pt-0 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80"
+      data-testid="tabs-kinflo-client-studio-lanes"
+    >
+      <div
+        className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm sm:gap-2 sm:p-2 lg:flex-row lg:items-center lg:justify-between"
+        data-testid="section-kinflo-client-studio-lane-switcher"
+      >
+        <div className="flex items-center justify-between gap-2 lg:hidden">
+          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Studio lanes</div>
+          <div className="text-[10px] font-medium text-slate-500">{clientWebsiteStudioStatusLabel}</div>
+        </div>
+        <div className="grid h-auto w-full grid-cols-4 gap-1 rounded-md bg-slate-100 p-1 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
+          {[
+            { value: "queue", label: "Spin up", testId: "tab-kinflo-client-studio-lane-queue" },
+            { value: "configuration", label: "Configure", testId: "tab-kinflo-client-studio-lane-configuration" },
+            { value: "handoff", label: "Handoff", testId: "tab-kinflo-client-studio-lane-handoff" },
+            { value: "workbench", label: "Workbench", testId: "tab-kinflo-client-studio-lane-workbench" },
+          ].map((lane) => {
+            const isActiveLane = clientWebsiteStudioLane === lane.value;
+            return (
+              <button
+                key={lane.value}
+                type="button"
+                role="tab"
+                aria-selected={isActiveLane}
+                onClick={() => selectClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
+                className={`rounded-sm px-2 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
+                  isActiveLane
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
+                }`}
+                data-testid={lane.testId}
+              >
+                {lane.label}
+              </button>
+            );
+          })}
+        </div>
+        <div className="hidden grid-cols-3 gap-2 text-xs sm:grid lg:w-[360px]" data-testid="section-kinflo-client-studio-lane-summary">
+          {[
+            { label: "Requests", value: snapshot.clientWebsiteStudio.spinUpQueue.totalRequests },
+            { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.totalProfiles },
+            { label: "Sites", value: snapshot.clientWebsiteStudio.sites.length },
+          ].map((item) => (
+            <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
+              <div className="truncate text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+              <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-slate-50 text-slate-950">
       <div className="border-b border-slate-200 bg-white/95">
@@ -4446,6 +4502,7 @@ export default function AdminKinfloShell() {
               </Button>
             </div>
           </div>
+          {activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null}
           <div
             className="grid min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]"
             data-testid="section-kinflo-persistent-identity-strip"
@@ -8979,60 +9036,6 @@ export default function AdminKinfloShell() {
 
           <TabsContent value="site-studio" className="mt-2">
             <section className="flex min-w-0 flex-col gap-2 overflow-x-hidden" data-testid="section-kinflo-client-studio-compact-shell">
-              <div
-                className="sticky top-0 z-30 order-first -mx-1 bg-slate-50/95 px-1 pb-2 pt-0 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80"
-                data-testid="tabs-kinflo-client-studio-lanes"
-              >
-                <div
-                  className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm sm:gap-2 sm:p-2 lg:flex-row lg:items-center lg:justify-between"
-                  data-testid="section-kinflo-client-studio-lane-switcher"
-                >
-                  <div className="flex items-center justify-between gap-2 lg:hidden">
-                    <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Studio lanes</div>
-                    <div className="text-[10px] font-medium text-slate-500">{clientWebsiteStudioStatusLabel}</div>
-                  </div>
-                  <div className="grid h-auto w-full grid-cols-4 gap-1 rounded-md bg-slate-100 p-1 lg:max-w-3xl" role="tablist" aria-label="Client studio lanes">
-                    {[
-                      { value: "queue", label: "Spin up", testId: "tab-kinflo-client-studio-lane-queue" },
-                      { value: "configuration", label: "Configure", testId: "tab-kinflo-client-studio-lane-configuration" },
-                      { value: "handoff", label: "Handoff", testId: "tab-kinflo-client-studio-lane-handoff" },
-                      { value: "workbench", label: "Workbench", testId: "tab-kinflo-client-studio-lane-workbench" },
-                    ].map((lane) => {
-                      const isActiveLane = clientWebsiteStudioLane === lane.value;
-                      return (
-                        <button
-                          key={lane.value}
-                          type="button"
-                          role="tab"
-                          aria-selected={isActiveLane}
-                          onClick={() => selectClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}
-                          className={`rounded-sm px-2 py-1.5 text-xs font-medium transition sm:px-3 sm:text-sm ${
-                            isActiveLane
-                              ? "bg-white text-slate-950 shadow-sm"
-                              : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
-                          }`}
-                          data-testid={lane.testId}
-                        >
-                          {lane.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div className="hidden grid-cols-3 gap-2 text-xs sm:grid lg:w-[360px]" data-testid="section-kinflo-client-studio-lane-summary">
-                    {[
-                      { label: "Requests", value: snapshot.clientWebsiteStudio.spinUpQueue.totalRequests },
-                      { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.totalProfiles },
-                      { label: "Sites", value: snapshot.clientWebsiteStudio.sites.length },
-                    ].map((item) => (
-                      <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-2 py-2">
-                        <div className="truncate text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-                        <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
               <div
                 className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "overflow-hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"

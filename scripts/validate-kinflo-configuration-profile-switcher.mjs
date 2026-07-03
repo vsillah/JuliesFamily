@@ -159,20 +159,23 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
 }
 
 const laneSwitcherIndex = shellContents.indexOf("section-kinflo-client-studio-lane-switcher");
+const persistentIdentityIndex = shellContents.indexOf("section-kinflo-persistent-identity-strip");
 const controlRoomIndex = shellContents.indexOf("section-kinflo-client-control-room-frame");
 const configurationLaneIndex = shellContents.indexOf("section-kinflo-client-studio-lane-configuration");
 if (
   laneSwitcherIndex !== -1 &&
+  persistentIdentityIndex !== -1 &&
   controlRoomIndex !== -1 &&
   configurationLaneIndex !== -1 &&
+  laneSwitcherIndex < persistentIdentityIndex &&
   laneSwitcherIndex < controlRoomIndex &&
   laneSwitcherIndex < configurationLaneIndex
 ) {
-  pass("studio lanes stay at the top before lane-specific sections");
+  pass("studio lanes stay at the top before identity and lane-specific sections");
 } else {
   fail(
-    "studio lanes stay at the top before lane-specific sections",
-    "The shared Site Studio lane rail must render before the control room and lane-specific panels."
+    "studio lanes stay at the top before identity and lane-specific sections",
+    "The shared Site Studio lane rail must render before the persistent identity strip, control room, and lane-specific panels."
   );
 }
 
