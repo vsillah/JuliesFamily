@@ -4801,6 +4801,14 @@ export default function AdminKinfloShell() {
     }, 0);
   };
 
+  useEffect(() => {
+    if (activeTab !== "site-studio") {
+      return;
+    }
+
+    scrollClientWebsiteStudioLaneToTop(clientWebsiteStudioLane);
+  }, [activeTab, clientWebsiteStudioLane]);
+
   const selectShellTab = (tab: ShellTabValue) => {
     setActiveTab(tab);
     const shouldKeepDossier = tab === "site-studio"
@@ -5431,7 +5439,7 @@ export default function AdminKinfloShell() {
             </div>
           </div>
           <div
-            className="grid min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]"
+            className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]`}
             data-testid="section-kinflo-persistent-identity-strip"
           >
             <div className="min-w-0">
