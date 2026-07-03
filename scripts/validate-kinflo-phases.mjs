@@ -194,6 +194,7 @@ for (const path of [
   "docs/phase154-side-by-side-mobile-preview.md",
   "docs/phase155-handoff-readiness-checklist.md",
   "docs/phase156-pr-preview-deployment-checkpoint.md",
+  "docs/phase157-client-configuration-command-surface.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -377,6 +378,7 @@ for (const path of [
   "scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
   "scripts/validate-kinflo-handoff-readiness-checklist.mjs",
   "scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
+  "scripts/validate-kinflo-client-configuration-command-surface.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2402,6 +2404,22 @@ requireIncludes("docs/phase156-pr-preview-deployment-checkpoint.md", [
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase157-client-configuration-command-surface.md", [
+  "Phase 157: Client Configuration Command Surface",
+  "npm run kinflo:validate-client-configuration-command-surface",
+  "ClientWebsiteConfigurationCommandSurface",
+  "section-kinflo-client-configuration-command-surface",
+  "text-kinflo-client-configuration-command-site",
+  "text-kinflo-client-configuration-command-gate",
+  "section-kinflo-client-configuration-command-stats",
+  "section-kinflo-client-configuration-editable-surfaces",
+  "section-kinflo-client-configuration-locked-surfaces",
+  "section-kinflo-client-configuration-command-permissions",
+  "button-client-configuration-command-save-gated",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -3211,6 +3229,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-side-by-side-mobile-preview\"",
   "\"kinflo:validate-handoff-readiness-checklist\"",
   "\"kinflo:validate-pr-preview-deployment-checkpoint\"",
+  "\"kinflo:validate-client-configuration-command-surface\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4649,6 +4668,17 @@ requireIncludes("scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs", 
   "live Vercel preview succeeded for current PR head",
   "PR preview checkpoint contains no secret assignments",
   "KinFlo PR preview deployment checkpoint validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-configuration-command-surface.mjs", [
+  "docs/phase157-client-configuration-command-surface.md",
+  "ClientWebsiteConfigurationCommandSurface",
+  "section-kinflo-client-configuration-command-surface",
+  "button-client-configuration-command-save-gated",
+  "selectedClientWebsiteConfigurationProfile",
+  "client configuration command surface does not import generated API",
+  "client configuration command surface does not execute live Convex",
+  "KinFlo client configuration command surface validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [

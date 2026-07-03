@@ -61,6 +61,7 @@ import {
   type ShellCampaignDraft,
   type ShellClientAdminHandoffMatrix,
   type ShellClientWebsiteAdminPermissionPreset,
+  type ShellClientWebsiteLaunchBlueprint,
   type ShellClientWebsiteLaunchPacket,
   type ShellClientWebsiteLaunchSimulation,
   type ShellClientWebsiteOnboardingReadiness,
@@ -1684,6 +1685,119 @@ function ClientWebsiteSpinUpQueue({
       <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
         {queue.providerBoundary}
       </p>
+    </section>
+  );
+}
+
+function ClientWebsiteConfigurationCommandSurface({
+  site,
+  profile,
+  launchBlueprint,
+  permissionPreset,
+}: {
+  site?: ShellClientWebsiteStudioSite;
+  profile?: ShellClientWebsiteConfigurationProfiles["profiles"][number];
+  launchBlueprint?: ShellClientWebsiteLaunchBlueprint;
+  permissionPreset?: ShellClientWebsiteAdminPermissionPreset;
+}) {
+  const commandStats = [
+    { label: "Template", value: profile?.templateKey ?? launchBlueprint?.templateKey ?? "Pending" },
+    { label: "Brand", value: profile?.brandProfile ?? "Pending" },
+    { label: "Navigation", value: profile?.navigationProfile ?? "Pending" },
+    { label: "CRM", value: profile?.crmPipeline ?? "Pending" },
+  ];
+  const lockStats = [
+    { label: "Editable", value: profile?.editableSurfaces.length ?? 0 },
+    { label: "Locked", value: profile?.lockedSurfaces.length ?? 0 },
+    { label: "Permission", value: permissionPreset?.scope ?? "Pending" },
+  ];
+
+  return (
+    <section
+      className="grid min-w-0 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.42fr)]"
+      data-testid="section-kinflo-client-configuration-command-surface"
+    >
+      <div className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-3">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="border-slate-300 bg-white">
+                <SlidersHorizontal className="mr-1 h-3 w-3" />
+                Configuration command
+              </Badge>
+              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                Site-scoped
+              </Badge>
+            </div>
+            <div className="mt-2 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-client-configuration-command-site">
+              {site?.label ?? "Selected client site"}
+            </div>
+            <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-600" data-testid="text-kinflo-client-configuration-command-gate">
+              {profile?.nextGate ?? "Configuration remains gated until hosted Convex, generated API review, and owner approval are complete."}
+            </p>
+          </div>
+          <Button disabled size="sm" variant="outline" className="shrink-0 bg-white" data-testid="button-client-configuration-command-save-gated">
+            <Save className="mr-2 h-3.5 w-3.5" />
+            Save gated
+          </Button>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid="section-kinflo-client-configuration-command-stats">
+          {commandStats.map((item) => (
+            <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-white px-3 py-2">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+              <div className="mt-1 truncate text-xs font-semibold text-slate-950" title={String(item.value)}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 grid gap-2 lg:grid-cols-2">
+          <div className="min-w-0 rounded-md border border-slate-200 bg-white p-2" data-testid="section-kinflo-client-configuration-editable-surfaces">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Editable surfaces</div>
+            <div className="mt-2 flex max-h-16 flex-wrap gap-1.5 overflow-y-auto">
+              {(profile?.editableSurfaces ?? []).map((surface) => (
+                <Badge key={surface} variant="secondary" className="text-[10px]">
+                  {surface}
+                </Badge>
+              ))}
+            </div>
+          </div>
+          <div className="min-w-0 rounded-md border border-slate-200 bg-white p-2" data-testid="section-kinflo-client-configuration-locked-surfaces">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Locked until approval</div>
+            <div className="mt-2 flex max-h-16 flex-wrap gap-1.5 overflow-y-auto">
+              {(profile?.lockedSurfaces ?? []).map((surface) => (
+                <Badge key={surface} variant="outline" className="bg-white text-[10px]">
+                  {surface}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid min-w-0 gap-2 rounded-md border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-client-configuration-command-permissions">
+        <div className="grid grid-cols-3 gap-2">
+          {lockStats.map((item) => (
+            <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-white px-2 py-2">
+              <div className="truncate text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+              <div className="mt-1 truncate text-xs font-semibold text-slate-950" title={String(item.value)}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="rounded-md border border-amber-200 bg-amber-50 p-2">
+          <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Provider boundary</div>
+          <p className="mt-1 text-xs leading-5 text-amber-900">
+            Saves, invites, publishes, domains, and lead writes stay off until hosted activation and generated API review pass.
+          </p>
+        </div>
+        <div className="flex max-h-16 flex-wrap gap-1.5 overflow-y-auto rounded-md border border-slate-200 bg-white p-2">
+          {(permissionPreset?.permissionSet ?? []).slice(0, 6).map((permission) => (
+            <Badge key={permission} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[10px]">
+              {permission}
+            </Badge>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -9615,6 +9729,15 @@ export default function AdminKinfloShell() {
                     <div className="mt-1 truncate text-sm font-semibold text-slate-950">{stat.value}</div>
                   </div>
                 ))}
+              </div>
+
+              <div className={isClientWebsiteLaunchWorkbench ? "hidden" : "block"}>
+                <ClientWebsiteConfigurationCommandSurface
+                  site={selectedClientWebsiteStudioSite}
+                  profile={selectedClientWebsiteConfigurationProfile}
+                  launchBlueprint={selectedClientWebsiteLaunchBlueprint}
+                  permissionPreset={selectedClientWebsiteAdminPermissionPreset}
+                />
               </div>
 
               <div
