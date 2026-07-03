@@ -115,6 +115,7 @@
     "kinflo:validate-primary-configure-metric": "node scripts/validate-kinflo-primary-configure-metric.mjs",
     "kinflo:validate-side-by-side-mobile-preview": "node scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
     "kinflo:validate-handoff-readiness-checklist": "node scripts/validate-kinflo-handoff-readiness-checklist.mjs",
+    "kinflo:validate-pr-preview-deployment-checkpoint": "node scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-site-studio-deep-links": "node scripts/validate-kinflo-site-studio-deep-links.mjs",
     "kinflo:validate-site-studio-site-deep-links": "node scripts/validate-kinflo-site-studio-site-deep-links.mjs",

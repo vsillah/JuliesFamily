@@ -76,7 +76,7 @@ requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
   "clientWebsiteStudioLaneSectionTestIds",
   "scrollClientWebsiteStudioLaneToTop",
   "tabs-kinflo-client-studio-lanes",
-  "compact shell first control",
+  "Site Studio header rail",
   "section-kinflo-client-studio-lane-queue",
   "section-kinflo-client-studio-lane-configuration",
   "section-kinflo-client-studio-lane-handoff",
@@ -94,8 +94,8 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "const scrollClientWebsiteStudioLaneToTop = (lane: ClientWebsiteStudioLane)",
   "querySelector('[data-testid=\"tabs-kinflo-client-studio-lanes\"]')",
   "scrollIntoView({ block: \"start\" })",
+  "activeTab === \"site-studio\" ? clientWebsiteStudioLaneRail : null",
   "section-kinflo-client-studio-compact-shell",
-  "{clientWebsiteStudioLaneRail}",
   "const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane]",
   "laneSection.scrollTo({ top: 0 })",
   "scrollClientWebsiteStudioLaneToTop(lane)",
@@ -139,24 +139,33 @@ if (shellContents.includes("convex/_generated/api")) {
 
 const siteStudioIndex = shellContents.indexOf('value="site-studio"');
 const railRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", siteStudioIndex);
-const controlRoomIndex = shellContents.indexOf('data-testid="section-kinflo-client-control-room-frame"', siteStudioIndex);
 const headerRailRenderIndex = shellContents.indexOf('activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null');
+const persistentIdentityIndex = shellContents.indexOf('data-testid="section-kinflo-persistent-identity-strip"');
+const controlRoomIndex = shellContents.indexOf('data-testid="section-kinflo-client-control-room-frame"', siteStudioIndex);
 
-if (siteStudioIndex !== -1 && railRenderIndex !== -1 && controlRoomIndex !== -1 && railRenderIndex < controlRoomIndex) {
-  pass("client Studio lane rail renders first inside the compact shell");
+if (
+  siteStudioIndex !== -1 &&
+  railRenderIndex === -1 &&
+  headerRailRenderIndex !== -1 &&
+  persistentIdentityIndex !== -1 &&
+  controlRoomIndex !== -1 &&
+  persistentIdentityIndex < headerRailRenderIndex &&
+  headerRailRenderIndex < controlRoomIndex
+) {
+  pass("client Studio lane rail renders in the Site Studio header above lane sections");
 } else {
   fail(
-    "client Studio lane rail renders first inside the compact shell",
-    "The lane rail must render above the control-room frame so each lane starts from the same top control position."
+    "client Studio lane rail renders in the Site Studio header above lane sections",
+    "The lane rail must render under the persistent identity strip and above the control-room frame so each lane starts from the same top control position."
   );
 }
 
-if (headerRailRenderIndex === -1) {
-  pass("client Studio lane rail is not rendered in the global page header");
+if (railRenderIndex === -1) {
+  pass("client Studio lane rail is not rendered inside the compact lane body");
 } else {
   fail(
-    "client Studio lane rail is not rendered in the global page header",
-    "Render the lane rail inside the Site Studio compact shell so it anchors the working section instead of global page chrome."
+    "client Studio lane rail is not rendered inside the compact lane body",
+    "Render the lane rail in the Site Studio header so it does not jump below lane-specific cards."
   );
 }
 

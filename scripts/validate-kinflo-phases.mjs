@@ -191,6 +191,7 @@ for (const path of [
   "docs/phase153-primary-configure-metric.md",
   "docs/phase154-side-by-side-mobile-preview.md",
   "docs/phase155-handoff-readiness-checklist.md",
+  "docs/phase156-pr-preview-deployment-checkpoint.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -371,6 +372,7 @@ for (const path of [
   "scripts/validate-kinflo-primary-configure-metric.mjs",
   "scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
   "scripts/validate-kinflo-handoff-readiness-checklist.mjs",
+  "scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2314,7 +2316,7 @@ requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
   "clientWebsiteStudioLaneSectionTestIds",
   "scrollClientWebsiteStudioLaneToTop",
   "tabs-kinflo-client-studio-lanes",
-  "compact shell first control",
+  "Site Studio header rail",
   "section-kinflo-client-studio-lane-queue",
   "section-kinflo-client-studio-lane-configuration",
   "section-kinflo-client-studio-lane-handoff",
@@ -2366,6 +2368,22 @@ requireIncludes("docs/phase155-handoff-readiness-checklist.md", [
   "button-client-handoff-readiness-gated",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
+]);
+
+requireIncludes("docs/phase156-pr-preview-deployment-checkpoint.md", [
+  "Phase 156: PR Preview Deployment Checkpoint",
+  "npm run kinflo:validate-pr-preview-deployment-checkpoint",
+  "https://github.com/vsillah/JuliesFamily/pull/1",
+  "codex/kinflo-phase-0-convex-plan",
+  "GitHub status context: `Vercel`",
+  "GitHub status state: `PENDING`",
+  "Vercel connector result: scope authorization blocked for `vsillahs-projects`",
+  "Preview comments check: `SUCCESS`",
+  "Vambah needs to refresh Vercel access for the `vsillahs-projects` scope",
+  "No Vercel deployment is created from this checkpoint.",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
 ]);
 
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
@@ -3013,6 +3031,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-primary-configure-metric\"",
   "\"npm run kinflo:validate-side-by-side-mobile-preview\"",
   "\"npm run kinflo:validate-handoff-readiness-checklist\"",
+  "\"npm run kinflo:validate-pr-preview-deployment-checkpoint\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
@@ -3174,6 +3193,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-primary-configure-metric\"",
   "\"kinflo:validate-side-by-side-mobile-preview\"",
   "\"kinflo:validate-handoff-readiness-checklist\"",
+  "\"kinflo:validate-pr-preview-deployment-checkpoint\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4560,8 +4580,8 @@ requireIncludes("scripts/validate-kinflo-client-studio-lane-anchor.mjs", [
   "clientWebsiteStudioLaneSectionTestIds",
   "scrollClientWebsiteStudioLaneToTop",
   "tabs-kinflo-client-studio-lanes",
-  "client Studio lane rail renders first inside the compact shell",
-  "client Studio lane rail is not rendered in the global page header",
+  "client Studio lane rail renders in the Site Studio header above lane sections",
+  "client Studio lane rail is not rendered inside the compact lane body",
   "section-kinflo-client-studio-lane-configuration",
   "client Studio lane anchor does not import generated API",
   "client Studio lane anchor does not execute live Convex",
@@ -4591,6 +4611,14 @@ requireIncludes("scripts/validate-kinflo-side-by-side-mobile-preview.mjs", [
   "KinFlo side-by-side mobile preview validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs", [
+  "docs/phase156-pr-preview-deployment-checkpoint.md",
+  "GitHub status state: `PENDING`",
+  "Vercel connector result: scope authorization blocked for `vsillahs-projects`",
+  "PR preview checkpoint contains no secret assignments",
+  "KinFlo PR preview deployment checkpoint validation",
+]);
+
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "tabs-kinflo-client-workbench-stage",
@@ -4616,7 +4644,7 @@ requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", 
   "lg:overflow-hidden",
   "overflow-hidden",
   "lg:pr-0",
-  "lane switcher uses a sticky compact-shell top rail",
+  "lane switcher uses a sticky header top rail",
   "section-kinflo-client-provisioning-workbench",
   "tabs-kinflo-client-provisioning-workbench",
   "readInitialClientWebsiteProvisioningView",

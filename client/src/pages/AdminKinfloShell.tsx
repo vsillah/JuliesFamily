@@ -5072,6 +5072,7 @@ export default function AdminKinfloShell() {
               actionTestId="button-kinflo-persistent-identity-gated"
             />
           </div>
+          {activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null}
           <div
             className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]`}
             data-testid="section-kinflo-active-object-signal"
@@ -9543,8 +9544,6 @@ export default function AdminKinfloShell() {
 
           <TabsContent value="site-studio" className="mt-2">
             <section className="flex min-w-0 flex-col gap-2 overflow-x-hidden" data-testid="section-kinflo-client-studio-compact-shell">
-              {clientWebsiteStudioLaneRail}
-
               <div
                 className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "overflow-hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
