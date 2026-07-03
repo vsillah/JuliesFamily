@@ -186,6 +186,8 @@ for (const path of [
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase149-claude-code-frame-response.md",
   "docs/phase150-persistent-identity-strip.md",
+  "docs/phase151-gate-card-pattern.md",
+  "docs/phase152-client-studio-lane-anchor.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -361,6 +363,8 @@ for (const path of [
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-persistent-identity-strip.mjs",
+  "scripts/validate-kinflo-gate-card-pattern.mjs",
+  "scripts/validate-kinflo-client-studio-lane-anchor.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2283,6 +2287,35 @@ requireIncludes("docs/phase150-persistent-identity-strip.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase151-gate-card-pattern.md", [
+  "Phase 151: GateCard Pattern",
+  "npm run kinflo:validate-gate-card-pattern",
+  "gate-card-pattern",
+  "GateCard",
+  "reason blocked",
+  "unblock path",
+  "owner",
+  "section-kinflo-persistent-identity-gate",
+  "text-kinflo-persistent-identity-gate-reason",
+  "text-kinflo-active-object-unblock-path",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
+requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
+  "Phase 152: Client Studio Lane Anchor",
+  "npm run kinflo:validate-client-studio-lane-anchor",
+  "clientWebsiteStudioLaneSectionTestIds",
+  "scrollClientWebsiteStudioLaneToTop",
+  "tabs-kinflo-client-studio-lanes",
+  "section-kinflo-client-studio-lane-queue",
+  "section-kinflo-client-studio-lane-configuration",
+  "section-kinflo-client-studio-lane-handoff",
+  "section-kinflo-client-studio-lane-workbench",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -2923,6 +2956,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-claude-frame-ingestion\"",
   "\"npm run kinflo:validate-claude-code-frame-response\"",
   "\"npm run kinflo:validate-persistent-identity-strip\"",
+  "\"npm run kinflo:validate-gate-card-pattern\"",
+  "\"npm run kinflo:validate-client-studio-lane-anchor\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
@@ -3079,6 +3114,8 @@ requireIncludes("package.json", [
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-claude-code-frame-response\"",
   "\"kinflo:validate-persistent-identity-strip\"",
+  "\"kinflo:validate-gate-card-pattern\"",
+  "\"kinflo:validate-client-studio-lane-anchor\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4446,6 +4483,29 @@ requireIncludes("scripts/validate-kinflo-persistent-identity-strip.mjs", [
   "persistent identity strip does not import generated API",
   "persistent identity strip does not execute live Convex",
   "KinFlo persistent identity strip validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-gate-card-pattern.mjs", [
+  "docs/phase151-gate-card-pattern.md",
+  "gate-card-pattern",
+  "function GateCard",
+  "text-kinflo-persistent-identity-gate-reason",
+  "text-kinflo-persistent-identity-gate-unblock",
+  "text-kinflo-active-object-unblock-path",
+  "GateCard pattern does not import generated API",
+  "GateCard pattern does not execute live Convex",
+  "KinFlo GateCard pattern validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-studio-lane-anchor.mjs", [
+  "docs/phase152-client-studio-lane-anchor.md",
+  "clientWebsiteStudioLaneSectionTestIds",
+  "scrollClientWebsiteStudioLaneToTop",
+  "tabs-kinflo-client-studio-lanes",
+  "section-kinflo-client-studio-lane-configuration",
+  "client Studio lane anchor does not import generated API",
+  "client Studio lane anchor does not execute live Convex",
+  "KinFlo client Studio lane anchor validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [

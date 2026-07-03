@@ -99,7 +99,7 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"implementedDeltas\"",
   "\"phaseDoc\": \"docs/phase150-persistent-identity-strip.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-persistent-identity-strip\"",
-  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with GateCard pattern next after the Phase 150 persistent identity strip.\"",
+  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with primary metric per Configure panel next after the Phase 152 lane anchor.\"",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [
@@ -123,6 +123,9 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "text-kinflo-persistent-identity-last-verified",
   "section-kinflo-persistent-identity-gate",
   "text-kinflo-persistent-identity-gate",
+  "text-kinflo-persistent-identity-gate-reason",
+  "text-kinflo-persistent-identity-gate-unblock",
+  "text-kinflo-persistent-identity-gate-owner",
   "button-kinflo-persistent-identity-gated",
   "persistentIdentity.gateReason",
 ]);

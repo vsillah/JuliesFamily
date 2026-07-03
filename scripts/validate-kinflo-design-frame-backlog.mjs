@@ -115,6 +115,11 @@ requireIncludes(backlogPath, [
   "\"docs/kinflo-claude-code-frame-response.json\"",
   "\"claude-code-frame-response-capture\"",
   "\"docs/phase150-persistent-identity-strip.md\"",
+  "\"docs/phase151-gate-card-pattern.md\"",
+  "\"npm run kinflo:validate-gate-card-pattern\"",
+  "\"client-studio-lane-anchor\"",
+  "\"docs/phase152-client-studio-lane-anchor.md\"",
+  "\"npm run kinflo:validate-client-studio-lane-anchor\"",
 ]);
 
 requireIncludes("package.json", [

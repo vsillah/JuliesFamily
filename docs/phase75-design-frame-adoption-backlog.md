@@ -59,7 +59,11 @@ The captured Claude Code response accepted five provider-light deltas:
 - side-by-side mobile preview,
 - handoff readiness checklist.
 
-Phase 150 implements the first delta as `docs/phase150-persistent-identity-strip.md` with `npm run kinflo:validate-persistent-identity-strip`. GateCard pattern remains the next provider-light design delta.
+Phase 150 implements the first delta as `docs/phase150-persistent-identity-strip.md` with `npm run kinflo:validate-persistent-identity-strip`.
+
+Phase 151 implements the second delta as `docs/phase151-gate-card-pattern.md` with `npm run kinflo:validate-gate-card-pattern`.
+
+Phase 152 adds the Client Studio lane anchor as `docs/phase152-client-studio-lane-anchor.md` with `npm run kinflo:validate-client-studio-lane-anchor`. The primary metric per Configure panel remains the next provider-light design delta.
 
 The packet and response preserve redaction rules, prompt boundaries, and provider gates. They do not claim hosted Convex readiness or enable live writes.
 

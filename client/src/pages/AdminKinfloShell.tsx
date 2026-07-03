@@ -137,6 +137,12 @@ const shellTabValues = [
 type ShellTabValue = (typeof shellTabValues)[number];
 const clientWebsiteStudioLaneValues = ["queue", "configuration", "handoff", "workbench"] as const;
 type ClientWebsiteStudioLane = (typeof clientWebsiteStudioLaneValues)[number];
+const clientWebsiteStudioLaneSectionTestIds: Record<ClientWebsiteStudioLane, string> = {
+  queue: "section-kinflo-client-studio-lane-queue",
+  configuration: "section-kinflo-client-studio-lane-configuration",
+  handoff: "section-kinflo-client-studio-lane-handoff",
+  workbench: "section-kinflo-client-studio-lane-workbench",
+};
 const clientWebsiteWorkbenchStageValues = ["sites", "preview", "launch"] as const;
 type ClientWebsiteWorkbenchStage = (typeof clientWebsiteWorkbenchStageValues)[number];
 const clientWebsiteLaunchDossierValues = ["provisioning", "packets", "qa", "decision"] as const;
@@ -739,6 +745,74 @@ function ConfigurationAffordanceStrip({
         </Button>
       </div>
     </section>
+  );
+}
+
+function GateCard({
+  title,
+  state,
+  reason,
+  unblockPath,
+  owner,
+  actionLabel,
+  testId,
+  stateTestId,
+  reasonTestId,
+  unblockTestId,
+  ownerTestId,
+  actionTestId,
+}: {
+  title: string;
+  state: string;
+  reason: string;
+  unblockPath: string;
+  owner: string;
+  actionLabel: string;
+  testId: string;
+  stateTestId: string;
+  reasonTestId: string;
+  unblockTestId: string;
+  ownerTestId: string;
+  actionTestId: string;
+}) {
+  return (
+    <div className="w-full min-w-0 rounded-md border border-amber-200 bg-white p-3 lg:max-w-[360px]" data-testid={testId}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">{title}</div>
+          <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid={stateTestId}>
+            {state}
+          </div>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="shrink-0 border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-50 hover:text-amber-900"
+          disabled
+          data-testid={actionTestId}
+          title={reason}
+        >
+          <ShieldCheck className="mr-2 h-3 w-3" />
+          {actionLabel}
+        </Button>
+      </div>
+
+      <div className="mt-3 grid gap-2 text-xs leading-5 text-slate-700 sm:grid-cols-2">
+        <div className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-2">
+          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Reason blocked</div>
+          <p className="mt-1 text-amber-900" data-testid={reasonTestId}>{reason}</p>
+        </div>
+        <div className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-2">
+          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Unblock path</div>
+          <p className="mt-1" data-testid={unblockTestId}>{unblockPath}</p>
+        </div>
+        <div className="min-w-0 rounded-md border border-slate-200 bg-slate-50 p-2 sm:col-span-2">
+          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Owner</div>
+          <p className="mt-1 truncate font-medium text-slate-950" data-testid={ownerTestId}>{owner}</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -3355,6 +3429,8 @@ export default function AdminKinfloShell() {
     launchPosture: activeTab === "site-studio" ? clientWebsiteLaunchDecisionLabel : snapshot.activeObjectSignal.launchPosture,
     gateLabel: snapshot.activeObjectSignal.disabledActionLabel,
     gateReason: snapshot.activeObjectSignal.disabledActionReason,
+    unblockPath: snapshot.activeObjectSignal.unblockCondition,
+    owner: snapshot.activeObjectSignal.owner,
   };
   const isClientWebsiteLaunchWorkbench =
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch";
@@ -3874,6 +3950,24 @@ export default function AdminKinfloShell() {
     navigate(query ? `/admin/kinflo-os?${query}` : "/admin/kinflo-os");
   };
 
+  const scrollClientWebsiteStudioLaneToTop = (lane: ClientWebsiteStudioLane) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.setTimeout(() => {
+      document
+        .querySelector('[data-testid="tabs-kinflo-client-studio-lanes"]')
+        ?.scrollIntoView({ block: "start" });
+
+      const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane];
+      const laneSection = document.querySelector(`[data-testid="${laneSectionTestId}"]`);
+      if (laneSection instanceof HTMLElement) {
+        laneSection.scrollTo({ top: 0 });
+      }
+    }, 0);
+  };
+
   const selectShellTab = (tab: ShellTabValue) => {
     setActiveTab(tab);
     const shouldKeepDossier = tab === "site-studio"
@@ -3943,6 +4037,7 @@ export default function AdminKinfloShell() {
   const selectClientWebsiteStudioLane = (lane: ClientWebsiteStudioLane) => {
     setActiveTab("site-studio");
     setClientWebsiteStudioLane(lane);
+    scrollClientWebsiteStudioLaneToTop(lane);
     updateKinfloShellRoute({
       tab: "site-studio",
       studioSite: clientWebsiteStudioSiteKey,
@@ -4540,28 +4635,20 @@ export default function AdminKinfloShell() {
                 </div>
               </div>
             </div>
-            <div className="min-w-0 rounded-md border border-amber-200 bg-white p-2 lg:w-[320px]" data-testid="section-kinflo-persistent-identity-gate">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Gate</div>
-                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-gate">
-                    {persistentIdentity.launchPosture}
-                  </div>
-                </div>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0 border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-50 hover:text-amber-900"
-                  disabled
-                  data-testid="button-kinflo-persistent-identity-gated"
-                  title={persistentIdentity.gateReason}
-                >
-                  <ShieldCheck className="mr-2 h-3 w-3" />
-                  {persistentIdentity.gateLabel}
-                </Button>
-              </div>
-            </div>
+            <GateCard
+              title="Gate"
+              state={persistentIdentity.launchPosture}
+              reason={persistentIdentity.gateReason}
+              unblockPath={persistentIdentity.unblockPath}
+              owner={persistentIdentity.owner}
+              actionLabel={persistentIdentity.gateLabel}
+              testId="section-kinflo-persistent-identity-gate"
+              stateTestId="text-kinflo-persistent-identity-gate"
+              reasonTestId="text-kinflo-persistent-identity-gate-reason"
+              unblockTestId="text-kinflo-persistent-identity-gate-unblock"
+              ownerTestId="text-kinflo-persistent-identity-gate-owner"
+              actionTestId="button-kinflo-persistent-identity-gated"
+            />
           </div>
           <div
             className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]`}
@@ -4589,22 +4676,20 @@ export default function AdminKinfloShell() {
                 {snapshot.activeObjectSignal.nextDecision}
               </p>
             </div>
-            <div className="min-w-0 rounded-md border border-amber-200 bg-white p-3" data-testid="section-kinflo-active-object-unblock-condition">
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                className="w-full border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-50 hover:text-amber-900"
-                disabled
-                data-testid="button-active-object-live-gated"
-              >
-                <ShieldCheck className="mr-2 h-3 w-3" />
-                {snapshot.activeObjectSignal.disabledActionLabel}
-              </Button>
-              <p className="mt-2 text-xs leading-5 text-amber-900" data-testid="text-kinflo-active-object-disabled-reason">
-                {snapshot.activeObjectSignal.disabledActionReason}
-              </p>
-            </div>
+            <GateCard
+              title="Active object gate"
+              state={snapshot.activeObjectSignal.launchPosture}
+              reason={snapshot.activeObjectSignal.disabledActionReason}
+              unblockPath={snapshot.activeObjectSignal.unblockCondition}
+              owner={snapshot.activeObjectSignal.owner}
+              actionLabel={snapshot.activeObjectSignal.disabledActionLabel}
+              testId="section-kinflo-active-object-unblock-condition"
+              stateTestId="text-kinflo-active-object-gate-state"
+              reasonTestId="text-kinflo-active-object-disabled-reason"
+              unblockTestId="text-kinflo-active-object-unblock-path"
+              ownerTestId="text-kinflo-active-object-gate-owner"
+              actionTestId="button-active-object-live-gated"
+            />
           </div>
         </div>
       </div>
