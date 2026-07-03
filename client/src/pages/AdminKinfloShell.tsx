@@ -7490,31 +7490,31 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="flex h-[min(360px,calc(100vh-16rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(360px,calc(100vh-19rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="flex h-[min(318px,calc(100vh-14rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(336px,calc(100vh-18rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <Workflow className="h-4 w-4 text-slate-500" />
-                          <h3 className="text-base font-semibold">Provisioning workbench</h3>
+                          <h3 className="text-sm font-semibold sm:text-base">Provisioning workbench</h3>
                           <Badge variant="secondary" className="text-[10px]">Provisioning Order</Badge>
                         </div>
-                        <p className="mt-0.5 truncate text-sm leading-5 text-slate-600" data-testid="text-kinflo-client-provisioning-order" title={selectedClientWebsiteProvisioningOrder?.label}>
+                        <p className="mt-0.5 truncate text-xs leading-4 text-slate-600 sm:text-sm sm:leading-5" data-testid="text-kinflo-client-provisioning-order" title={selectedClientWebsiteProvisioningOrder?.label}>
                           {selectedClientWebsiteProvisioningOrder?.label}
                         </p>
                       </div>
-                      <Badge variant="outline" className="shrink-0">{selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ")}</Badge>
+                      <Badge variant="outline" className="shrink-0 text-[10px]">{selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ")}</Badge>
                     </div>
 
-                    <div className="mt-2 grid shrink-0 grid-cols-4 gap-1 sm:gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
+                    <div className="mt-1.5 grid shrink-0 grid-cols-4 gap-1 sm:gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
                       {[
                         { label: "Plan", value: selectedClientWebsiteProvisioningOrder?.requestedPlan },
                         { label: "Template", value: selectedClientWebsiteProvisioningOrder?.templateKey },
                         { label: "Owner", value: selectedClientWebsiteProvisioningOrder?.ownerRole },
                         { label: "Invite", value: selectedClientWebsiteProvisioningOrder?.inviteRole },
                       ].map((item) => (
-                        <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-1 py-1 sm:px-2 sm:py-2">
-                          <div className="truncate text-[9px] font-medium uppercase tracking-normal text-slate-500 sm:text-[10px]">{item.label}</div>
-                          <div className="mt-0.5 truncate text-[10px] font-semibold text-slate-950 sm:text-xs" title={item.value}>
+                        <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-1 py-0.5 sm:px-2 sm:py-1.5">
+                          <div className="truncate text-[8px] font-medium uppercase tracking-normal text-slate-500 sm:text-[10px]">{item.label}</div>
+                          <div className="truncate text-[9px] font-semibold text-slate-950 sm:mt-0.5 sm:text-xs" title={item.value}>
                             {item.value}
                           </div>
                         </div>
@@ -7524,45 +7524,45 @@ export default function AdminKinfloShell() {
                     <Tabs
                       value={clientWebsiteProvisioningView}
                       onValueChange={(value) => setClientWebsiteProvisioningView(value as ClientWebsiteProvisioningView)}
-                      className="mt-3 flex min-h-0 flex-1 flex-col overflow-hidden"
+                      className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden"
                       data-testid="tabs-kinflo-client-provisioning-workbench"
                     >
-                      <TabsList className="grid h-auto w-full shrink-0 grid-cols-2 bg-slate-100 p-1">
-                        <TabsTrigger value="order" data-testid="tab-kinflo-client-provisioning-order">Order</TabsTrigger>
-                        <TabsTrigger value="dry-run" data-testid="tab-kinflo-client-provisioning-dry-run">Dry run</TabsTrigger>
+                      <TabsList className="grid h-8 w-full shrink-0 grid-cols-2 bg-slate-100 p-1">
+                        <TabsTrigger value="order" className="h-6 text-xs" data-testid="tab-kinflo-client-provisioning-order">Order</TabsTrigger>
+                        <TabsTrigger value="dry-run" className="h-6 text-xs" data-testid="tab-kinflo-client-provisioning-dry-run">Dry run</TabsTrigger>
                       </TabsList>
 
-                      <TabsContent value="order" className="mt-2 min-h-0 flex-1 overflow-hidden" data-testid="section-kinflo-client-provisioning-order">
+                      <TabsContent value="order" className="mt-1.5 min-h-0 flex-1 overflow-hidden" data-testid="section-kinflo-client-provisioning-order">
                         <div
-                          className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 sm:p-3"
+                          className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-1.5 sm:p-2"
                           data-testid="section-kinflo-client-provisioning-order-cockpit"
                         >
                           <Tabs
                             defaultValue="setup"
-                            className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden sm:grid-cols-[minmax(118px,0.82fr)_minmax(140px,1.18fr)]"
+                            className="grid min-h-0 flex-1 grid-cols-1 gap-1.5 overflow-hidden sm:grid-cols-[minmax(112px,0.78fr)_minmax(150px,1.22fr)]"
                             data-testid="tabs-kinflo-client-provisioning-order-detail"
                           >
-                            <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1 sm:grid-cols-1 sm:content-start" data-testid="section-kinflo-client-provisioning-order-detail-tabs">
-                              <TabsTrigger value="setup" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-setup">Setup</TabsTrigger>
-                              <TabsTrigger value="evidence" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-evidence">Evidence</TabsTrigger>
-                              <TabsTrigger value="blocked" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-blocked">Blocked</TabsTrigger>
-                              <TabsTrigger value="functions" className="px-1 text-[11px] sm:text-xs" data-testid="tab-kinflo-client-provisioning-functions">Functions</TabsTrigger>
+                            <TabsList className="grid h-7 w-full grid-cols-4 bg-slate-100 p-0.5 sm:h-auto sm:grid-cols-1 sm:content-start" data-testid="section-kinflo-client-provisioning-order-detail-tabs">
+                              <TabsTrigger value="setup" className="h-6 px-1 text-[10px] sm:h-7 sm:text-xs" data-testid="tab-kinflo-client-provisioning-setup">Setup</TabsTrigger>
+                              <TabsTrigger value="evidence" className="h-6 px-1 text-[10px] sm:h-7 sm:text-xs" data-testid="tab-kinflo-client-provisioning-evidence">Evidence</TabsTrigger>
+                              <TabsTrigger value="blocked" className="h-6 px-1 text-[10px] sm:h-7 sm:text-xs" data-testid="tab-kinflo-client-provisioning-blocked">Blocked</TabsTrigger>
+                              <TabsTrigger value="functions" className="h-6 px-1 text-[10px] sm:h-7 sm:text-xs" data-testid="tab-kinflo-client-provisioning-functions">Functions</TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="setup" className="mt-2 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-order-scroll">
+                            <TabsContent value="setup" className="mt-1.5 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-order-scroll">
                               <div className="flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="text-sm font-medium">Setup order</div>
+                                  <div className="text-xs font-medium sm:text-sm">Setup order</div>
                                   <div className="mt-0.5 text-xs text-slate-500">
                                     {selectedClientWebsiteProvisioningOrder?.setupSteps.length ?? 0} provider-light steps
                                   </div>
                                 </div>
-                                <Badge variant="outline" className="bg-white">Ordered</Badge>
+                                <Badge variant="outline" className="bg-white text-[10px]">Ordered</Badge>
                               </div>
-                              <div className="mt-2 grid max-h-[108px] gap-2 overflow-y-auto pr-1 sm:max-h-[145px] lg:max-h-[230px]">
+                              <div className="mt-1.5 grid max-h-[72px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.setupSteps.map((step, index) => (
-                                  <div key={step} className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5 text-[11px] leading-4 text-slate-600 sm:grid-cols-[1.5rem_minmax(0,1fr)] sm:gap-2 sm:px-3 sm:py-2 sm:text-xs sm:leading-5">
-                                    <div className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white text-[10px] font-semibold text-slate-500 sm:h-6 sm:w-6">
+                                  <div key={step} className="grid grid-cols-[1.125rem_minmax(0,1fr)] gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] leading-4 text-slate-600 sm:grid-cols-[1.375rem_minmax(0,1fr)] sm:gap-2 sm:px-2.5 sm:py-1.5 sm:text-xs sm:leading-5">
+                                    <div className="flex h-[18px] w-[18px] items-center justify-center rounded-full border border-slate-200 bg-white text-[9px] font-semibold text-slate-500 sm:h-5 sm:w-5">
                                       {index + 1}
                                     </div>
                                     <span className="min-w-0">{step}</span>
@@ -7571,38 +7571,38 @@ export default function AdminKinfloShell() {
                               </div>
                             </TabsContent>
 
-                            <TabsContent value="evidence" className="mt-2 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-evidence-panel">
+                            <TabsContent value="evidence" className="mt-1.5 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-evidence-panel">
                               <div className="flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="text-sm font-medium">Approval evidence</div>
+                                  <div className="text-xs font-medium sm:text-sm">Approval evidence</div>
                                   <div className="mt-0.5 text-xs text-slate-500">
                                     {selectedClientWebsiteProvisioningOrder?.approvalEvidence.length ?? 0} required proof items
                                   </div>
                                 </div>
-                                <Badge variant="secondary">Proof first</Badge>
+                                <Badge variant="secondary" className="text-[10px]">Proof first</Badge>
                               </div>
-                              <div className="mt-2 grid max-h-[108px] gap-2 overflow-y-auto pr-1 sm:max-h-[145px] lg:max-h-[230px]">
+                              <div className="mt-1.5 grid max-h-[72px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.approvalEvidence.map((item) => (
-                                  <div key={item} className="rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1.5 text-[11px] font-medium leading-4 text-emerald-800 sm:px-3 sm:py-2 sm:text-xs sm:leading-5">
+                                  <div key={item} className="rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1 text-[10px] font-medium leading-4 text-emerald-800 sm:px-2.5 sm:py-1.5 sm:text-xs sm:leading-5">
                                     {item}
                                   </div>
                                 ))}
                               </div>
                             </TabsContent>
 
-                            <TabsContent value="blocked" className="mt-2 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-blocked-panel">
+                            <TabsContent value="blocked" className="mt-1.5 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-blocked-panel">
                               <div className="flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="text-sm font-medium">Blocked live actions</div>
+                                  <div className="text-xs font-medium sm:text-sm">Blocked live actions</div>
                                   <div className="mt-0.5 text-xs text-slate-500">
                                     {selectedClientWebsiteProvisioningOrder?.blockedActions.length ?? 0} actions remain gated
                                   </div>
                                 </div>
-                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">Gated</Badge>
+                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-[10px] text-amber-800">Gated</Badge>
                               </div>
-                              <div className="mt-2 grid max-h-[108px] gap-2 overflow-y-auto pr-1 sm:max-h-[145px] lg:max-h-[230px]">
+                              <div className="mt-1.5 grid max-h-[72px] gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.blockedActions.map((action) => (
-                                  <div key={action} className="flex items-start gap-1.5 rounded-md border border-slate-100 bg-slate-50 p-2 text-[11px] leading-4 text-slate-600 sm:gap-2 sm:text-xs sm:leading-5">
+                                  <div key={action} className="flex items-start gap-1.5 rounded-md border border-slate-100 bg-slate-50 p-1.5 text-[10px] leading-4 text-slate-600 sm:gap-2 sm:text-xs sm:leading-5">
                                     <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                                     <span>{action}</span>
                                   </div>
@@ -7610,17 +7610,17 @@ export default function AdminKinfloShell() {
                               </div>
                             </TabsContent>
 
-                            <TabsContent value="functions" className="mt-2 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-functions-panel">
+                            <TabsContent value="functions" className="mt-1.5 min-h-0 overflow-hidden sm:mt-0" data-testid="section-kinflo-client-provisioning-functions-panel">
                               <div className="flex items-center justify-between gap-3">
                                 <div>
-                                  <div className="text-sm font-medium">Convex contract</div>
+                                  <div className="text-xs font-medium sm:text-sm">Convex contract</div>
                                   <div className="mt-0.5 text-xs text-slate-500">
                                     {selectedClientWebsiteProvisioningOrder?.convexFunctions.length ?? 0} mapped functions
                                   </div>
                                 </div>
-                                <Badge variant="outline" className="bg-white">Mapped</Badge>
+                                <Badge variant="outline" className="bg-white text-[10px]">Mapped</Badge>
                               </div>
-                              <div className="mt-2 flex max-h-[108px] flex-wrap gap-1.5 overflow-y-auto pr-1 sm:max-h-[145px] lg:max-h-[230px]">
+                              <div className="mt-1.5 flex max-h-[72px] flex-wrap gap-1.5 overflow-y-auto pr-1 sm:max-h-[104px] lg:max-h-[190px]">
                                 {selectedClientWebsiteProvisioningOrder?.convexFunctions.map((functionName) => (
                                   <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all text-left text-[11px]">{functionName}</Badge>
                                 ))}
@@ -7628,61 +7628,61 @@ export default function AdminKinfloShell() {
                             </TabsContent>
                           </Tabs>
                         </div>
-                        <Button disabled variant="outline" className="mt-2 hidden h-9 w-full lg:flex" data-testid="button-client-provisioning-order-gated">
+                        <Button disabled variant="outline" className="sr-only" data-testid="button-client-provisioning-order-gated">
                           <Workflow className="mr-2 h-4 w-4" />
                           Provisioning gated
                         </Button>
                       </TabsContent>
 
-                      <TabsContent value="dry-run" className="mt-2 min-h-0 flex-1 overflow-hidden" data-testid="section-kinflo-client-provisioning-execution">
+                      <TabsContent value="dry-run" className="mt-1.5 min-h-0 flex-1 overflow-hidden" data-testid="section-kinflo-client-provisioning-execution">
                         <div className="grid h-full min-h-0 gap-2 overflow-hidden lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]" data-testid="section-kinflo-client-provisioning-dry-run-grid">
-                          <div className="min-h-0 space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
-                            <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
-                              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                          <div className="min-h-0 space-y-1.5 overflow-y-auto pr-1" data-testid="section-kinflo-client-provisioning-dry-run-scroll">
+                            <div className="rounded-md border border-slate-100 bg-slate-50 p-2">
+                              <div className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                                 <div className="min-w-0">
                                   <div className="flex items-center gap-2">
                                     <ListChecks className="h-4 w-4 text-slate-500" />
-                                    <div className="text-sm font-semibold">Execution Dry Run</div>
+                                    <div className="text-xs font-semibold sm:text-sm">Execution Dry Run</div>
                                   </div>
-                                  <p className="mt-1 break-all text-xs leading-5 text-slate-600 sm:break-normal" data-testid="text-kinflo-client-provisioning-execution">
+                                  <p className="mt-0.5 break-all text-[11px] leading-4 text-slate-600 sm:break-normal sm:text-xs sm:leading-5" data-testid="text-kinflo-client-provisioning-execution">
                                     {snapshot.clientWebsiteStudio.provisioningExecution.manifestPath}
                                   </p>
                                 </div>
-                                <Badge variant="outline" className="w-fit">{snapshot.clientWebsiteStudio.provisioningExecution.status.replaceAll("_", " ")}</Badge>
+                                <Badge variant="outline" className="w-fit text-[10px]">{snapshot.clientWebsiteStudio.provisioningExecution.status.replaceAll("_", " ")}</Badge>
                               </div>
 
-                              <div className="mt-3 grid grid-cols-3 gap-2">
+                              <div className="mt-2 grid grid-cols-3 gap-1.5">
                                 {[
                                   { label: "Orders", value: snapshot.clientWebsiteStudio.provisioningExecution.totalOrders },
                                   { label: "Steps", value: snapshot.clientWebsiteStudio.provisioningExecution.dryRunSteps },
                                   { label: "Functions", value: snapshot.clientWebsiteStudio.provisioningExecution.referencedFunctions },
                                 ].map((item) => (
-                                  <div key={item.label} className="rounded-md border border-slate-200 bg-white p-2">
-                                    <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-                                    <div className="mt-1 text-xs font-semibold">{item.value}</div>
+                                  <div key={item.label} className="rounded-md border border-slate-200 bg-white px-2 py-1">
+                                    <div className="text-[9px] font-medium uppercase tracking-normal text-slate-500 sm:text-[10px]">{item.label}</div>
+                                    <div className="text-xs font-semibold">{item.value}</div>
                                   </div>
                                 ))}
                               </div>
                             </div>
 
-                            <p className="text-xs leading-5 text-slate-600">
+                            <p className="line-clamp-3 text-[11px] leading-4 text-slate-600 sm:text-xs sm:leading-5">
                               {snapshot.clientWebsiteStudio.provisioningExecution.providerBoundary}
                             </p>
                           </div>
 
-                          <div className="min-h-0 space-y-3 overflow-y-auto pr-1">
+                          <div className="min-h-0 space-y-2 overflow-y-auto pr-1">
                             <div>
-                              <div className="text-sm font-medium">Selected order steps</div>
-                              <div className="mt-2 space-y-2">
+                              <div className="text-xs font-medium sm:text-sm">Selected order steps</div>
+                              <div className="mt-1.5 space-y-1.5">
                                 {selectedClientWebsiteProvisioningExecution?.steps.map((step) => (
-                                  <div key={step.id} className="rounded-md border border-slate-200 p-3">
+                                  <div key={step.id} className="rounded-md border border-slate-200 p-2">
                                     <div className="flex items-start justify-between gap-3">
-                                      <div className="min-w-0 text-sm font-medium">{step.id}</div>
-                                      <Badge variant="secondary">{step.mode}</Badge>
+                                      <div className="min-w-0 text-xs font-medium sm:text-sm">{step.id}</div>
+                                      <Badge variant="secondary" className="text-[10px]">{step.mode}</Badge>
                                     </div>
-                                    <div className="mt-2 space-y-1">
+                                    <div className="mt-1.5 space-y-1">
                                       {step.blockedLiveActions.map((action) => (
-                                        <div key={action} className="flex items-start gap-2 text-xs text-slate-600">
+                                        <div key={action} className="flex items-start gap-2 text-[11px] leading-4 text-slate-600 sm:text-xs">
                                           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                                           <span>{action}</span>
                                         </div>
@@ -7694,10 +7694,10 @@ export default function AdminKinfloShell() {
                             </div>
 
                             <div>
-                              <div className="text-sm font-medium">Blocked until</div>
-                              <div className="mt-2 grid gap-2">
+                              <div className="text-xs font-medium sm:text-sm">Blocked until</div>
+                              <div className="mt-1.5 grid gap-1.5">
                                 {snapshot.clientWebsiteStudio.provisioningExecution.blockedUntil.map((gate) => (
-                                  <div key={gate} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                                  <div key={gate} className="flex items-start gap-2 rounded-md border border-slate-100 bg-slate-50 p-1.5 text-[11px] leading-4 text-slate-600 sm:text-xs sm:leading-5">
                                     <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
                                     <span>{gate}</span>
                                   </div>
@@ -7707,7 +7707,7 @@ export default function AdminKinfloShell() {
                           </div>
                         </div>
 
-                        <Button disabled variant="outline" className="mt-3 hidden w-full lg:flex" data-testid="button-client-provisioning-dry-run-gated">
+                        <Button disabled variant="outline" className="sr-only" data-testid="button-client-provisioning-dry-run-gated">
                           <ListChecks className="mr-2 h-4 w-4" />
                           Dry run gated
                         </Button>
