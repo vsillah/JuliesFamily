@@ -107,7 +107,7 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"phaseDoc\": \"docs/phase151-gate-card-pattern.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-gate-card-pattern\"",
   "\"status\": \"implemented_provider_light\"",
-  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with side-by-side mobile preview next after the Phase 153 primary Configure metric.\"",
+  "\"nextAction\": \"Continue the accepted provider-light deltas in order, with handoff readiness checklist next after the Phase 154 side-by-side mobile preview.\"",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
@@ -122,7 +122,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
 
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
   "Phase 151 implements the second delta as `docs/phase151-gate-card-pattern.md` with `npm run kinflo:validate-gate-card-pattern`.",
-  "side-by-side mobile preview remains the next provider-light design delta",
+  "handoff readiness checklist remains the next provider-light design delta",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [

@@ -189,6 +189,7 @@ for (const path of [
   "docs/phase151-gate-card-pattern.md",
   "docs/phase152-client-studio-lane-anchor.md",
   "docs/phase153-primary-configure-metric.md",
+  "docs/phase154-side-by-side-mobile-preview.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -367,6 +368,7 @@ for (const path of [
   "scripts/validate-kinflo-gate-card-pattern.mjs",
   "scripts/validate-kinflo-client-studio-lane-anchor.mjs",
   "scripts/validate-kinflo-primary-configure-metric.mjs",
+  "scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2331,6 +2333,21 @@ requireIncludes("docs/phase153-primary-configure-metric.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase154-side-by-side-mobile-preview.md", [
+  "Phase 154: Side-By-Side Mobile Preview",
+  "npm run kinflo:validate-side-by-side-mobile-preview",
+  "side-by-side-mobile-preview",
+  "ClientWebsiteSideBySideMobilePreview",
+  "section-kinflo-client-side-by-side-mobile-preview",
+  "section-kinflo-client-desktop-preview-pane",
+  "section-kinflo-client-mobile-preview-pane",
+  "section-kinflo-client-mobile-device-frame",
+  "text-kinflo-client-mobile-preview-url",
+  "button-open-client-website-mobile-preview",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -2974,6 +2991,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-gate-card-pattern\"",
   "\"npm run kinflo:validate-client-studio-lane-anchor\"",
   "\"npm run kinflo:validate-primary-configure-metric\"",
+  "\"npm run kinflo:validate-side-by-side-mobile-preview\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
@@ -3133,6 +3151,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-gate-card-pattern\"",
   "\"kinflo:validate-client-studio-lane-anchor\"",
   "\"kinflo:validate-primary-configure-metric\"",
+  "\"kinflo:validate-side-by-side-mobile-preview\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4534,6 +4553,18 @@ requireIncludes("scripts/validate-kinflo-primary-configure-metric.mjs", [
   "primary Configure metric does not import generated API",
   "primary Configure metric does not execute live Convex",
   "KinFlo primary Configure metric validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-side-by-side-mobile-preview.mjs", [
+  "docs/phase154-side-by-side-mobile-preview.md",
+  "side-by-side-mobile-preview",
+  "ClientWebsiteSideBySideMobilePreview",
+  "section-kinflo-client-side-by-side-mobile-preview",
+  "section-kinflo-client-mobile-preview-pane",
+  "text-kinflo-client-mobile-preview-url",
+  "side-by-side mobile preview does not import generated API",
+  "side-by-side mobile preview does not execute live Convex",
+  "KinFlo side-by-side mobile preview validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [

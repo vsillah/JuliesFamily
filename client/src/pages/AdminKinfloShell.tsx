@@ -859,6 +859,198 @@ function ConfigurationPrimaryMetricPanel({
   );
 }
 
+function ClientWebsiteSideBySideMobilePreview({
+  site,
+  defaultPages,
+  statusLabel,
+  readinessPercent,
+  readyCount,
+  readiness,
+  previewPath,
+  desktopHref,
+  mobileHref,
+  persona,
+  journeyStage,
+}: {
+  site?: ShellClientWebsiteStudioSite;
+  defaultPages: string[];
+  statusLabel: string;
+  readinessPercent: number;
+  readyCount: number;
+  readiness: { label: string; done: boolean }[];
+  previewPath: string;
+  desktopHref: string;
+  mobileHref: string;
+  persona?: string;
+  journeyStage?: string;
+}) {
+  const pageItems = defaultPages.slice(0, 5);
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
+      <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
+        <div className="flex min-w-0 items-center gap-2">
+          <Globe2 className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">{previewPath}</span>
+        </div>
+        <Badge variant="outline" className="shrink-0 border-slate-300 bg-white">Preview only</Badge>
+      </div>
+      <div
+        className="grid gap-4 p-4 xl:grid-cols-[minmax(0,1fr)_minmax(300px,390px)] lg:p-5"
+        data-testid="section-kinflo-client-side-by-side-mobile-preview"
+      >
+        <div className="min-w-0 space-y-4" data-testid="section-kinflo-client-desktop-preview-pane">
+          <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-device-frame">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div className="min-w-0 text-sm font-semibold text-slate-950">{site?.label}</div>
+              <Badge variant="secondary" className="shrink-0">{statusLabel}</Badge>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-3 text-xs font-medium text-slate-500">
+              {pageItems.map((page) => (
+                <span key={page}>{page}</span>
+              ))}
+            </div>
+            <div
+              className="mt-5 grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs sm:grid-cols-3"
+              data-testid="section-kinflo-client-preview-link-context"
+            >
+              <div className="min-w-0">
+                <div className="font-medium uppercase tracking-normal text-slate-500">Persona</div>
+                <div className="mt-1 truncate font-semibold text-slate-950">{persona}</div>
+              </div>
+              <div className="min-w-0">
+                <div className="font-medium uppercase tracking-normal text-slate-500">Journey</div>
+                <div className="mt-1 truncate font-semibold text-slate-950">{journeyStage}</div>
+              </div>
+              <div className="min-w-0">
+                <div className="font-medium uppercase tracking-normal text-slate-500">Source</div>
+                <div className="mt-1 truncate font-semibold text-slate-950">site-studio-preview</div>
+              </div>
+            </div>
+            <h3 className="mt-5 max-w-2xl text-2xl font-semibold leading-tight tracking-normal text-slate-950 md:text-3xl">
+              {site?.heroDirection}
+            </h3>
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
+              {site?.trustSignal}
+            </p>
+            <div className="mt-5 border-t border-dashed border-slate-200 pt-3" data-testid="section-kinflo-client-fold-line">
+              <div className="flex flex-col gap-1 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                <span>Desktop canvas</span>
+                <span>Hero, proof, and CTA must remain scannable before launch.</span>
+              </div>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <Button size="sm" asChild data-testid="button-open-client-website-preview">
+                <Link href={desktopHref}>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Open preview
+                </Link>
+              </Button>
+              <Button size="sm" disabled variant="outline" data-testid="button-client-website-publish-gated">
+                <Rocket className="mr-2 h-4 w-4" />
+                Publish gated
+              </Button>
+            </div>
+            <div className="mt-6 grid gap-2 border-t border-slate-100 pt-4 sm:grid-cols-3">
+              <div className="min-w-0">
+                <div className="text-xs font-medium uppercase tracking-normal text-slate-500">CTA</div>
+                <div className="mt-1 truncate text-sm font-medium">{site?.primaryCTA}</div>
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Audience</div>
+                <div className="mt-1 truncate text-sm font-medium">{site?.audience}</div>
+              </div>
+              <div>
+                <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Launch</div>
+                <div className="mt-1 text-sm font-medium">Approval gated</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">Design readiness</span>
+              <span className="text-slate-500">{readinessPercent}%</span>
+            </div>
+            <Progress value={readinessPercent} className="mt-2" />
+            <Badge variant="secondary" className="mt-3" data-testid="text-kinflo-client-website-readiness">
+              {readyCount}/{readiness.length} ready
+            </Badge>
+            <div className="mt-4 grid gap-2 sm:grid-cols-2">
+              {readiness.map((item) => (
+                <div key={item.label} className="flex items-center gap-2 text-xs text-slate-600">
+                  {item.done ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                  ) : (
+                    <CircleDashed className="h-3.5 w-3.5 shrink-0" />
+                  )}
+                  <span>{item.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-950 p-3 text-white shadow-sm" data-testid="section-kinflo-client-mobile-preview-pane">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-400">Persistent mobile review</div>
+              <div className="mt-1 truncate text-sm font-semibold">{site?.label}</div>
+            </div>
+            <Badge variant="outline" className="shrink-0 border-white/20 bg-white/10 text-white">390px</Badge>
+          </div>
+
+          <div className="mx-auto mt-3 w-full max-w-[390px] rounded-[28px] border border-white/15 bg-white p-2 text-slate-950">
+            <div className="rounded-[22px] border border-slate-200 bg-white p-3" data-testid="section-kinflo-client-mobile-device-frame">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="min-w-0 truncate text-sm font-semibold">{site?.label}</div>
+                <span className="rounded-full bg-slate-950 px-2 py-1 text-[10px] font-medium text-white">local</span>
+              </div>
+              <div className="mt-3 flex gap-2 overflow-hidden text-[11px] font-medium text-slate-500">
+                {pageItems.slice(0, 3).map((page) => (
+                  <span key={page} className="shrink-0">{page}</span>
+                ))}
+              </div>
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-2 text-[11px]" data-testid="section-kinflo-client-mobile-preview-context">
+                <div className="font-medium uppercase tracking-normal text-slate-500">Mobile URL</div>
+                <div className="mt-1 truncate font-semibold text-slate-950" data-testid="text-kinflo-client-mobile-preview-url" title={mobileHref}>
+                  {mobileHref}
+                </div>
+              </div>
+              <h4 className="mt-4 text-lg font-semibold leading-tight tracking-normal">{site?.heroDirection}</h4>
+              <p className="mt-3 text-xs leading-5 text-slate-600">{site?.trustSignal}</p>
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-2">
+                <div className="text-[10px] font-medium uppercase tracking-normal text-emerald-700">Primary CTA</div>
+                <div className="mt-1 text-sm font-semibold text-emerald-950">{site?.primaryCTA}</div>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">
+                <div className="rounded-lg border border-slate-200 bg-white p-2">
+                  <div className="font-medium uppercase tracking-normal text-slate-500">Audience</div>
+                  <div className="mt-1 truncate font-semibold">{site?.audience}</div>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-white p-2">
+                  <div className="font-medium uppercase tracking-normal text-slate-500">Journey</div>
+                  <div className="mt-1 truncate font-semibold">{journeyStage}</div>
+                </div>
+              </div>
+              <Button size="sm" asChild className="mt-4 w-full" data-testid="button-open-client-website-mobile-preview">
+                <Link href={mobileHref}>
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Open mobile preview
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">
+            Mobile review stays visible beside the desktop canvas on wide screens and stacks below it on smaller screens. Public launch, lead writes, and client sharing remain blocked.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ClientHandoffPermissionStrip({
   site,
   permissionPreset,
@@ -9503,105 +9695,19 @@ export default function AdminKinfloShell() {
                         </div>
                       </div>
                     </div>
-                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
-                      <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
-                        <div className="flex items-center gap-2">
-                          <Globe2 className="h-3.5 w-3.5" />
-                          <span className="truncate">{clientWebsiteStudioPreviewPath}</span>
-                        </div>
-                        <Badge variant="outline" className="border-slate-300 bg-white">Preview only</Badge>
-                      </div>
-                      <div className="grid gap-5 p-4 2xl:grid-cols-[minmax(0,1fr)_220px] lg:p-5">
-                        <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-testid="section-kinflo-client-device-frame">
-                          <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-4">
-                            <div className="min-w-0 text-sm font-semibold text-slate-950">{selectedClientWebsiteStudioSite?.label}</div>
-                            <Badge variant="secondary" className="shrink-0">{clientWebsiteStudioStatusLabel}</Badge>
-                          </div>
-                          <div className="mt-5 flex flex-wrap gap-3 text-xs font-medium text-slate-500">
-                            {(selectedClientWebsiteLaunchBlueprint?.defaultPages ?? []).slice(0, 5).map((page) => (
-                              <span key={page}>{page}</span>
-                            ))}
-                          </div>
-                          <div
-                            className="mt-5 grid gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs sm:grid-cols-3"
-                            data-testid="section-kinflo-client-preview-link-context"
-                          >
-                            <div className="min-w-0">
-                              <div className="font-medium uppercase tracking-normal text-slate-500">Persona</div>
-                              <div className="mt-1 truncate font-semibold text-slate-950">{clientWebsiteStudioPreviewPersona}</div>
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-medium uppercase tracking-normal text-slate-500">Journey</div>
-                              <div className="mt-1 truncate font-semibold text-slate-950">{clientWebsiteStudioPreviewJourneyStage}</div>
-                            </div>
-                            <div className="min-w-0">
-                              <div className="font-medium uppercase tracking-normal text-slate-500">Source</div>
-                              <div className="mt-1 truncate font-semibold text-slate-950">site-studio-preview</div>
-                            </div>
-                          </div>
-                          <h3 className="mt-5 max-w-2xl text-2xl font-semibold leading-tight tracking-normal text-slate-950 md:text-3xl">
-                            {selectedClientWebsiteStudioSite?.heroDirection}
-                          </h3>
-                          <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
-                            {selectedClientWebsiteStudioSite?.trustSignal}
-                          </p>
-                          <div className="mt-5 border-t border-dashed border-slate-200 pt-3" data-testid="section-kinflo-client-fold-line">
-                            <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
-                              <span>390px fold check</span>
-                              <span>Hero, proof, and CTA must remain scannable before launch.</span>
-                            </div>
-                          </div>
-                          <div className="mt-5 flex flex-wrap gap-2">
-                            <Button size="sm" asChild data-testid="button-open-client-website-preview">
-                              <Link href={clientWebsiteStudioPreviewHref}>
-                                <ExternalLink className="mr-2 h-4 w-4" />
-                                Open preview
-                              </Link>
-                            </Button>
-                            <Button size="sm" disabled variant="outline" data-testid="button-client-website-publish-gated">
-                              <Rocket className="mr-2 h-4 w-4" />
-                              Publish gated
-                            </Button>
-                          </div>
-                          <div className="mt-6 grid gap-2 border-t border-slate-100 pt-4 sm:grid-cols-3">
-                            <div>
-                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">CTA</div>
-                              <div className="mt-1 truncate text-sm font-medium">{selectedClientWebsiteStudioSite?.primaryCTA}</div>
-                            </div>
-                            <div>
-                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Audience</div>
-                              <div className="mt-1 truncate text-sm font-medium">{selectedClientWebsiteStudioSite?.audience}</div>
-                            </div>
-                            <div>
-                              <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Launch</div>
-                              <div className="mt-1 text-sm font-medium">Approval gated</div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="rounded-xl border border-slate-200 bg-white p-4">
-                          <div className="flex items-center justify-between text-sm">
-                            <span className="font-medium">Design readiness</span>
-                            <span className="text-slate-500">{clientWebsiteStudioReadinessPercent}%</span>
-                          </div>
-                          <Progress value={clientWebsiteStudioReadinessPercent} className="mt-2" />
-                          <Badge variant="secondary" className="mt-3" data-testid="text-kinflo-client-website-readiness">
-                            {clientWebsiteStudioReadyCount}/{clientWebsiteStudioReadiness.length} ready
-                          </Badge>
-                          <div className="mt-4 space-y-2">
-                            {clientWebsiteStudioReadiness.map((item) => (
-                              <div key={item.label} className="flex items-center gap-2 text-xs text-slate-600">
-                                {item.done ? (
-                                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                                ) : (
-                                  <CircleDashed className="h-3.5 w-3.5" />
-                                )}
-                                <span>{item.label}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <ClientWebsiteSideBySideMobilePreview
+                      site={selectedClientWebsiteStudioSite}
+                      defaultPages={selectedClientWebsiteLaunchBlueprint?.defaultPages ?? []}
+                      statusLabel={clientWebsiteStudioStatusLabel}
+                      readinessPercent={clientWebsiteStudioReadinessPercent}
+                      readyCount={clientWebsiteStudioReadyCount}
+                      readiness={clientWebsiteStudioReadiness}
+                      previewPath={clientWebsiteStudioPreviewPath}
+                      desktopHref={clientWebsiteStudioPreviewHref}
+                      mobileHref={clientWebsiteStudioMobilePreviewHref}
+                      persona={clientWebsiteStudioPreviewPersona}
+                      journeyStage={clientWebsiteStudioPreviewJourneyStage}
+                    />
 
                     <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:grid-cols-3" data-testid="section-kinflo-client-control-room-path">
                       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">

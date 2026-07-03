@@ -20,7 +20,7 @@ function requireFile(path) {
     pass(`${path} exists`);
     return true;
   }
-  fail(`${path} exists`, "Expected primary Configure metric artifact was not found.");
+  fail(`${path} exists`, "Expected side-by-side mobile preview artifact was not found.");
   return false;
 }
 
@@ -34,7 +34,7 @@ function requireIncludes(path, patterns) {
     if (contents.includes(pattern)) {
       pass(`${path} includes ${pattern}`);
     } else {
-      fail(`${path} includes ${pattern}`, "Expected primary Configure metric text was not found.");
+      fail(`${path} includes ${pattern}`, "Expected side-by-side mobile preview text was not found.");
     }
   }
 }
@@ -58,7 +58,7 @@ if (trackedSecretFiles.length > 0) {
 }
 
 for (const path of [
-  "docs/phase153-primary-configure-metric.md",
+  "docs/phase154-side-by-side-mobile-preview.md",
   "docs/kinflo-claude-code-frame-response.json",
   "docs/kinflo-design-frame-adoption-backlog.json",
   "docs/kinflo-saas-execution-ledger.json",
@@ -66,97 +66,88 @@ for (const path of [
   "docs/phase75-design-frame-adoption-backlog.md",
   "client/src/pages/AdminKinfloShell.tsx",
   "package.json",
-  "scripts/validate-kinflo-primary-configure-metric.mjs",
+  "scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
 ]) {
   requireFile(path);
 }
 
-requireIncludes("docs/phase153-primary-configure-metric.md", [
-  "Phase 153: Primary Configure Metric",
-  "npm run kinflo:validate-primary-configure-metric",
-  "primary-metric-per-panel",
-  "ConfigurationPrimaryMetricPanel",
-  "section-kinflo-client-configuration-primary-metric-review",
-  "section-kinflo-client-configuration-primary-metric-change",
-  "section-kinflo-client-configuration-primary-metric-approval",
-  "section-kinflo-client-configuration-primary-metric-save",
+requireIncludes("docs/phase154-side-by-side-mobile-preview.md", [
+  "Phase 154: Side-By-Side Mobile Preview",
+  "npm run kinflo:validate-side-by-side-mobile-preview",
+  "side-by-side-mobile-preview",
+  "ClientWebsiteSideBySideMobilePreview",
+  "section-kinflo-client-side-by-side-mobile-preview",
+  "section-kinflo-client-desktop-preview-pane",
+  "section-kinflo-client-mobile-preview-pane",
+  "section-kinflo-client-mobile-device-frame",
+  "text-kinflo-client-mobile-preview-url",
+  "button-open-client-website-mobile-preview",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
 
 requireIncludes("docs/kinflo-claude-code-frame-response.json", [
-  "\"id\": \"primary-metric-per-panel\"",
-  "\"summary\": \"Give each Configure panel one primary status and metric before expandable evidence detail.\"",
-  "\"Panel density needs a primary metric so scanning does not require reading every label.\"",
+  "\"id\": \"side-by-side-mobile-preview\"",
+  "\"summary\": \"Promote mobile review into a persistent 390px preview beside the desktop canvas when space allows.\"",
+  "\"Side-by-side preview must collapse below tablet width.\"",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
-  "function ConfigurationPrimaryMetricPanel({",
-  "label: string;",
-  "value: string | number;",
-  "status: string;",
-  "detail: string;",
-  "items: { label: string; value: string | number }[];",
-  "data-testid={`${testId}-value`}",
-  "data-testid={`${testId}-status`}",
-  "data-testid={`${testId}-detail`}",
-  "section-kinflo-client-configuration-primary-metric-review",
-  "section-kinflo-client-configuration-primary-metric-change",
-  "section-kinflo-client-configuration-primary-metric-approval",
-  "section-kinflo-client-configuration-primary-metric-save",
-  "Save blockers",
-  "Draft changes",
-  "Required approvals",
-  "Payload items",
-  "{ label: \"Writes\", value: \"0\" }",
+  "function ClientWebsiteSideBySideMobilePreview({",
+  "data-testid=\"section-kinflo-client-side-by-side-mobile-preview\"",
+  "data-testid=\"section-kinflo-client-desktop-preview-pane\"",
+  "data-testid=\"section-kinflo-client-mobile-preview-pane\"",
+  "data-testid=\"section-kinflo-client-mobile-device-frame\"",
+  "data-testid=\"text-kinflo-client-mobile-preview-url\"",
+  "data-testid=\"button-open-client-website-mobile-preview\"",
+  "max-w-[390px]",
+  "xl:grid-cols-[minmax(0,1fr)_minmax(300px,390px)]",
+  "mobileHref",
+  "Public launch, lead writes, and client sharing remain blocked.",
+  "ClientWebsiteSideBySideMobilePreview",
+  "clientWebsiteStudioMobilePreviewHref",
 ]);
 
 requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
-  "\"primary-metric-per-panel\"",
-  "\"phaseDoc\": \"docs/phase153-primary-configure-metric.md\"",
-  "\"validationCommand\": \"npm run kinflo:validate-primary-configure-metric\"",
-  "\"status\": \"implemented_provider_light\"",
+  "\"side-by-side-mobile-preview\"",
   "\"phaseDoc\": \"docs/phase154-side-by-side-mobile-preview.md\"",
   "\"validationCommand\": \"npm run kinflo:validate-side-by-side-mobile-preview\"",
+  "\"status\": \"implemented_provider_light\"",
   "\"nextAction\": \"Continue the accepted provider-light deltas in order, with handoff readiness checklist next after the Phase 154 side-by-side mobile preview.\"",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
-  "\"docs/phase153-primary-configure-metric.md\"",
-  "\"npm run kinflo:validate-primary-configure-metric\"",
   "\"docs/phase154-side-by-side-mobile-preview.md\"",
   "\"npm run kinflo:validate-side-by-side-mobile-preview\"",
-  "Phase 153 primary Configure metric",
+  "Phase 154 side-by-side mobile preview",
 ]);
 
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
-  "Phase 153 primary Configure metric",
-  "npm run kinflo:validate-primary-configure-metric",
+  "Phase 154 side-by-side mobile preview",
+  "npm run kinflo:validate-side-by-side-mobile-preview",
 ]);
 
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
-  "Phase 153 implements the primary Configure metric",
-  "npm run kinflo:validate-primary-configure-metric",
   "Phase 154 implements the side-by-side mobile preview",
   "npm run kinflo:validate-side-by-side-mobile-preview",
   "handoff readiness checklist remains the next provider-light design delta",
 ]);
 
 requireIncludes("package.json", [
-  "\"kinflo:validate-primary-configure-metric\"",
+  "\"kinflo:validate-side-by-side-mobile-preview\"",
 ]);
 
 const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
 if (shellContents.includes("convex/_generated/api")) {
-  fail("primary Configure metric does not import generated API", "Generated API imports remain gated until hosted activation approval.");
+  fail("side-by-side mobile preview does not import generated API", "Generated API imports remain gated until hosted activation approval.");
 } else {
-  pass("primary Configure metric does not import generated API");
+  pass("side-by-side mobile preview does not import generated API");
 }
 
 if (shellContents.includes("useMutation(") || shellContents.includes("useAction(")) {
-  fail("primary Configure metric does not execute live Convex", "Live Convex execution must remain blocked.");
+  fail("side-by-side mobile preview does not execute live Convex", "Live Convex execution must remain blocked.");
 } else {
-  pass("primary Configure metric does not execute live Convex");
+  pass("side-by-side mobile preview does not execute live Convex");
 }
 
 const failed = checks.filter((check) => !check.ok);
@@ -170,9 +161,9 @@ for (const check of checks) {
   }
 }
 
-console.log("\nKinFlo primary Configure metric validation");
-console.log("Route: /admin/kinflo-os?tab=site-studio&studioLane=configuration");
-console.log("Claude Code delta: primary-metric-per-panel");
+console.log("\nKinFlo side-by-side mobile preview validation");
+console.log("Route: /admin/kinflo-os?tab=site-studio&studioLane=workbench");
+console.log("Claude Code delta: side-by-side-mobile-preview");
 console.log("Local state only: yes");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
@@ -182,8 +173,8 @@ console.log("Provider APIs touched: no");
 console.log("Secrets read or printed: no");
 
 if (failed.length > 0) {
-  console.error(`\nKinFlo primary Configure metric validation failed: ${failed.length} check(s) failed.`);
+  console.error(`\nKinFlo side-by-side mobile preview validation failed: ${failed.length} check(s) failed.`);
   process.exit(1);
 }
 
-console.log(`\nKinFlo primary Configure metric validation passed: ${checks.length} checks.`);
+console.log(`\nKinFlo side-by-side mobile preview validation passed: ${checks.length} checks.`);

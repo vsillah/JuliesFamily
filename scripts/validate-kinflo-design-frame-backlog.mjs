@@ -122,6 +122,8 @@ requireIncludes(backlogPath, [
   "\"npm run kinflo:validate-client-studio-lane-anchor\"",
   "\"docs/phase153-primary-configure-metric.md\"",
   "\"npm run kinflo:validate-primary-configure-metric\"",
+  "\"docs/phase154-side-by-side-mobile-preview.md\"",
+  "\"npm run kinflo:validate-side-by-side-mobile-preview\"",
 ]);
 
 requireIncludes("package.json", [
