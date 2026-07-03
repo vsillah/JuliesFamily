@@ -146,6 +146,7 @@
         "docs/phase113-client-configuration-save-request.md",
         "docs/phase114-client-configuration-audit-timeline.md",
         "docs/phase115-client-configuration-rollback-checkpoint.md",
+        "docs/phase116-client-configuration-publish-readiness.md",
         "docs/kinflo-design-frame-adoption-backlog.json",
         "docs/kinflo-claude-frame-ingestion-packet.json",
         "npm run kinflo:validate-design-frame-backlog",
@@ -163,6 +164,7 @@
         "npm run kinflo:validate-client-configuration-save-request",
         "npm run kinflo:validate-client-configuration-audit-timeline",
         "npm run kinflo:validate-client-configuration-rollback-checkpoint",
+        "npm run kinflo:validate-client-configuration-publish-readiness",
         "npm run kinflo:validate-control-room-polish"
       ],
       "nextGate": "Continue implementing accepted provider-light design deltas from the Phase 75 backlog, then validate desktop and mobile browser frames before client handoff."
@@ -234,6 +236,7 @@
     "npm run kinflo:validate-client-configuration-review-packet",
     "npm run kinflo:validate-client-configuration-change-set",
     "npm run kinflo:validate-client-configuration-rollback-checkpoint",
+    "npm run kinflo:validate-client-configuration-publish-readiness",
     "npm run kinflo:validate-configuration-profile-generated-api-coverage",
     "npm run kinflo:validate-site-studio-deep-links",
     "npm run kinflo:validate-site-studio-site-deep-links",

@@ -83,6 +83,7 @@
     "kinflo:validate-client-configuration-save-request": "node scripts/validate-kinflo-client-configuration-save-request.mjs",
     "kinflo:validate-client-configuration-audit-timeline": "node scripts/validate-kinflo-client-configuration-audit-timeline.mjs",
     "kinflo:validate-client-configuration-rollback-checkpoint": "node scripts/validate-kinflo-client-configuration-rollback-checkpoint.mjs",
+    "kinflo:validate-client-configuration-publish-readiness": "node scripts/validate-kinflo-client-configuration-publish-readiness.mjs",
     "kinflo:validate-configuration-profile-generated-api-coverage": "node scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
     "kinflo:validate-claude-frame-ingestion": "node scripts/validate-kinflo-claude-frame-ingestion.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",

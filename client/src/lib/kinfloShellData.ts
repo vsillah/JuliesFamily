@@ -855,6 +855,34 @@ export type ShellClientWebsiteConfigurationRollbackCheckpoint = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteConfigurationPublishReadiness = {
+  siteKey: string;
+  label: string;
+  publishPosture: "provider-light-publish-readiness";
+  readinessStatus: "ready_for_review" | "blocked_human_gate" | "draft";
+  readinessScore: number;
+  readyCriteriaCount: number;
+  blockedCriteriaCount: number;
+  criteria: {
+    key: string;
+    label: string;
+    status: "ready" | "blocked" | "pending";
+    evidence: string;
+    requiredBeforePublish: string;
+  }[];
+  publishBlockers: string[];
+  rollbackRequirements: string[];
+  blockedLiveActions: string[];
+  nextGate: string;
+  canRequestPublish: false;
+  canPublish: false;
+  canSaveConfig: false;
+  canRecordAudit: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -1076,6 +1104,7 @@ export type ShellClientWebsiteStudio = {
   configurationSaveRequests: ShellClientWebsiteConfigurationSaveRequest[];
   configurationAuditTimelines: ShellClientWebsiteConfigurationAuditTimeline[];
   configurationRollbackCheckpoints: ShellClientWebsiteConfigurationRollbackCheckpoint[];
+  configurationPublishReadiness: ShellClientWebsiteConfigurationPublishReadiness[];
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
   onboardingReadiness: ShellClientWebsiteOnboardingReadiness[];
@@ -3214,6 +3243,107 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  configurationPublishReadiness: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family publish readiness checkpoint",
+      publishPosture: "provider-light-publish-readiness",
+      readinessStatus: "ready_for_review",
+      readinessScore: 68,
+      readyCriteriaCount: 3,
+      blockedCriteriaCount: 2,
+      criteria: [
+        { key: "configuration-review", label: "Configuration review packet", status: "ready", evidence: "selected surfaces and save blockers are mapped", requiredBeforePublish: "Keep selected surfaces in the review packet." },
+        { key: "rollback-owner", label: "Rollback owner assigned", status: "ready", evidence: "platform super admin owns rollback", requiredBeforePublish: "Keep fixture rollback available." },
+        { key: "visual-qa", label: "Visual QA evidence", status: "ready", evidence: "local mobile and desktop QA accepted", requiredBeforePublish: "Attach visual QA evidence to publish packet." },
+        { key: "hosted-read", label: "Hosted read smoke", status: "blocked", evidence: "hosted Convex and generated API review pending", requiredBeforePublish: "Pass read-only hosted smoke before publish." },
+        { key: "lead-route", label: "Lead route smoke", status: "blocked", evidence: "CRM lead write remains disabled", requiredBeforePublish: "Approve lead route smoke and rollback." },
+      ],
+      publishBlockers: ["hosted Convex deployment approval", "generated API review", "read-only hosted smoke", "CRM lead route smoke"],
+      rollbackRequirements: ["fixture public route remains available", "source content fallback remains mapped", "publish rollback owner remains platform.super_admin"],
+      blockedLiveActions: ["configuration save mutation", "public publish write", "CRM lead write", "client sharing"],
+      nextGate: "Approve hosted read-only smoke and lead route smoke before publish can be requested.",
+      canRequestPublish: false,
+      canPublish: false,
+      canSaveConfig: false,
+      canRecordAudit: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "publicSite.resolvePublishedSite",
+        "siteBuilder.publishPage",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client publish readiness checkpoint",
+      publishPosture: "provider-light-publish-readiness",
+      readinessStatus: "blocked_human_gate",
+      readinessScore: 36,
+      readyCriteriaCount: 1,
+      blockedCriteriaCount: 4,
+      criteria: [
+        { key: "fixture-profile", label: "Fixture profile", status: "ready", evidence: "advisor fixture profile exists", requiredBeforePublish: "Keep advisor fixture route active." },
+        { key: "tenant-owner", label: "Tenant owner approval", status: "blocked", evidence: "owner signoff pending", requiredBeforePublish: "Approve tenant ownership and admin scope." },
+        { key: "hosted-read", label: "Hosted read smoke", status: "blocked", evidence: "hosted read transcript pending", requiredBeforePublish: "Pass generated API read smoke." },
+        { key: "domain", label: "Domain readiness", status: "pending", evidence: "domain posture note pending", requiredBeforePublish: "Approve domain and SSL rollback plan." },
+        { key: "admin-invite", label: "Client admin invite", status: "blocked", evidence: "invite delivery approval pending", requiredBeforePublish: "Approve invitation delivery and rollback." },
+      ],
+      publishBlockers: ["tenant owner approval", "hosted read smoke", "domain readiness", "client admin invitation approval"],
+      rollbackRequirements: ["fixture adapter remains default", "domain remains unattached", "client invitation remains disabled"],
+      blockedLiveActions: ["tenant create mutation", "site create mutation", "client admin invitation", "public publish write", "domain attach"],
+      nextGate: "Capture tenant owner, hosted read, domain, and admin invite evidence before publish review.",
+      canRequestPublish: false,
+      canPublish: false,
+      canSaveConfig: false,
+      canRecordAudit: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite publish readiness checkpoint",
+      publishPosture: "provider-light-publish-readiness",
+      readinessStatus: "blocked_human_gate",
+      readinessScore: 28,
+      readyCriteriaCount: 1,
+      blockedCriteriaCount: 4,
+      criteria: [
+        { key: "fixture-content", label: "Fixture content pack", status: "ready", evidence: "campaign fixture content exists", requiredBeforePublish: "Keep fixture content fallback." },
+        { key: "consent", label: "Consent approval", status: "blocked", evidence: "campaign consent note pending", requiredBeforePublish: "Approve consent language." },
+        { key: "lead-routing", label: "Lead routing smoke", status: "blocked", evidence: "public form write remains disabled", requiredBeforePublish: "Pass lead write smoke and cleanup plan." },
+        { key: "provider-send", label: "Provider-send boundary", status: "blocked", evidence: "email/SMS send boundary pending", requiredBeforePublish: "Approve no-send smoke and rollback." },
+        { key: "ai-copy", label: "AI copy approval", status: "blocked", evidence: "AI copy provenance pending", requiredBeforePublish: "Approve generated copy provenance." },
+      ],
+      publishBlockers: ["campaign consent approval", "lead route smoke", "provider-send boundary", "AI copy provenance review"],
+      rollbackRequirements: ["campaign sends remain paused", "public form write remains disabled", "AI copy remains unpublished"],
+      blockedLiveActions: ["campaign send", "public form write", "AI copy publish", "public publish write", "client sharing"],
+      nextGate: "Accept consent, lead routing, provider-send, and AI copy evidence before publish review.",
+      canRequestPublish: false,
+      canPublish: false,
+      canSaveConfig: false,
+      canRecordAudit: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsitePreviewReviewPackets",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+      ],
+    },
+  ],
   launchPackets: [
     {
       siteKey: "julies-family-public",
@@ -4390,6 +4520,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
     "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
     "siteFactory.listClientWebsiteConfigurationAuditTimelines",
     "siteFactory.listClientWebsiteConfigurationProfiles",
+    "siteFactory.listClientWebsiteConfigurationPublishReadiness",
     "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
     "siteFactory.listClientWebsiteConfigurationSaveRequests",
     "siteFactory.listClientWebsiteLaunchDecisionPackets",
@@ -6435,11 +6566,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 81,
-    queryBindings: 43,
+    totalBindings: 82,
+    queryBindings: 44,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 36,
+    smokeManifestGaps: 37,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -6492,8 +6623,8 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 20,
-        queryBindings: 19,
+        totalBindings: 21,
+        queryBindings: 20,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
@@ -6503,6 +6634,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
           "siteFactory.listClientWebsiteConfigurationChangeSets",
           "siteFactory.listClientWebsiteConfigurationReviewPackets",
           "siteFactory.listClientWebsiteConfigurationProfiles",
+          "siteFactory.listClientWebsiteConfigurationPublishReadiness",
           "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
           "siteFactory.listClientWebsiteConfigurationSaveRequests",
           "siteFactory.listClientWebsiteLaunchBlueprints",

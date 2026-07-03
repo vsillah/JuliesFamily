@@ -116,11 +116,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 81",
-  "Query bindings: 43",
+  "Generated API bindings: 82",
+  "Query bindings: 44",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 36",
+  "Smoke-manifest review gaps: 37",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -131,14 +131,15 @@ requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 81",
-  "queryBindings: 43",
+  "totalBindings: 82",
+  "queryBindings: 44",
   "mutationBindings: 38",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 36",
+  "smokeManifestGaps: 37",
   "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
   "siteFactory.listClientWebsiteConfigurationAuditTimelines",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
+  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
   "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
@@ -151,6 +152,7 @@ requireIncludes(generatedContractPath, [
   "siteFactoryListClientWebsiteConfigurationApprovalMatrices",
   "siteFactoryListClientWebsiteConfigurationAuditTimelines",
   "siteFactoryListClientWebsiteConfigurationChangeSets",
+  "siteFactoryListClientWebsiteConfigurationPublishReadiness",
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
@@ -161,6 +163,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "siteFactoryListClientWebsiteConfigurationApprovalMatrices: \"siteFactory.listClientWebsiteConfigurationApprovalMatrices\"",
   "siteFactoryListClientWebsiteConfigurationAuditTimelines: \"siteFactory.listClientWebsiteConfigurationAuditTimelines\"",
   "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
+  "siteFactoryListClientWebsiteConfigurationPublishReadiness: \"siteFactory.listClientWebsiteConfigurationPublishReadiness\"",
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints: \"siteFactory.listClientWebsiteConfigurationRollbackCheckpoints\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
@@ -236,6 +239,7 @@ for (const [surface, counts] of bySurface) {
 if (
   reviewBoardBlock.includes("requiredFunctions: [") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationChangeSets\"") &&
+  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationPublishReadiness\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationReviewPackets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationProfiles\"")
 ) {
