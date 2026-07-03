@@ -457,6 +457,42 @@ export type ShellHostedActivationEnvCodegenReview = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationPreflightCheck = {
+  id: string;
+  label: string;
+  commandScope: string;
+  expectedEvidence: string;
+  abortIf: string;
+  rollback: string;
+};
+
+export type ShellHostedActivationPreflightReview = {
+  status: "prepare_only_activation_preflight_review";
+  decisionId: "activation-preflight-window";
+  owner: "Vambah";
+  totalChecks: number;
+  blockedUntilPriorGate: number;
+  acceptedChecks: number;
+  nextGate: string;
+  reviewPacketPath: string;
+  command: "npm run kinflo:activation-preflight";
+  sourceDocuments: string[];
+  checks: ShellHostedActivationPreflightCheck[];
+  expectedOutputs: string[];
+  blockedActions: string[];
+  canRecordDecision: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -471,6 +507,7 @@ export type ShellHostedActivationRunbook = {
   repoSharingRiskReview: ShellHostedActivationRepoSharingRiskReview;
   hostedOwnershipReview: ShellHostedActivationOwnershipReview;
   envCodegenReview: ShellHostedActivationEnvCodegenReview;
+  activationPreflightReview: ShellHostedActivationPreflightReview;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -7828,6 +7865,109 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canCommitGeneratedApi: false,
     canImportGeneratedApi: false,
     canSetGeneratedApiAvailable: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  activationPreflightReview: {
+    status: "prepare_only_activation_preflight_review",
+    decisionId: "activation-preflight-window",
+    owner: "Vambah",
+    totalChecks: 6,
+    blockedUntilPriorGate: 6,
+    acceptedChecks: 0,
+    nextGate: "Activation preflight may only run against real hosted env values after credential rotation, repo-sharing posture, hosted ownership, and env/codegen window approval are accepted.",
+    reviewPacketPath: "docs/phase125-hosted-activation-preflight-review.md",
+    command: "npm run kinflo:activation-preflight",
+    sourceDocuments: [
+      "docs/phase17-convex-activation-preflight.md",
+      "docs/phase24-live-convex-handoff.md",
+      "docs/phase26-generated-api-contract.md",
+      "docs/phase27-live-smoke-manifest.md",
+      "docs/phase28-live-smoke-dry-runner.md",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase120-hosted-activation-decision-checkpoint.md",
+      "docs/phase123-hosted-activation-ownership-review.md",
+      "docs/phase124-hosted-activation-env-codegen-review.md",
+    ],
+    checks: [
+      {
+        id: "tracked-secret-check",
+        label: "Tracked secret and generated-file check",
+        commandScope: "confirm `.env.local` and `convex/_generated` remain untracked before any hosted command",
+        expectedEvidence: "Preflight output reports `.env.local is not tracked` and generated Convex files are not tracked.",
+        abortIf: "Abort if secret-like files or generated Convex API files are tracked.",
+        rollback: "Stop activation, remove tracked secret/generated file changes from the branch, and keep fixture adapters selected.",
+      },
+      {
+        id: "env-placeholder-check",
+        label: "Env placeholder documentation check",
+        commandScope: "verify `CONVEX_DEPLOYMENT`, `VITE_CONVEX_URL`, `CONVEX_AUTH_ISSUER`, and `CONVEX_AUTH_CLIENT_ID` placeholders exist",
+        expectedEvidence: "Preflight output confirms placeholders are documented without revealing actual values.",
+        abortIf: "Abort if any required hosted env placeholder is missing from `.env.example`.",
+        rollback: "Patch placeholders only; do not enter real env values in committed source.",
+      },
+      {
+        id: "hosted-env-visibility-check",
+        label: "Hosted env visibility check",
+        commandScope: "review whether hosted Convex env is visible to the process without printing secret values",
+        expectedEvidence: "Preflight output says only yes or no for hosted env visibility, never raw secret values.",
+        abortIf: "Abort if output includes raw env values, tokens, URLs meant to stay private, or provider credentials.",
+        rollback: "Clear local shell exports if needed and rerun only after redaction behavior is confirmed.",
+      },
+      {
+        id: "activation-command-scope",
+        label: "Activation command scope check",
+        commandScope: "confirm the preflight command validates local readiness only and does not create resources",
+        expectedEvidence: "Preflight output keeps external writes at 0 and hosted deployment touched at no.",
+        abortIf: "Abort if the command attempts provider creation, auth setup, codegen, imports, or live Convex execution.",
+        rollback: "Keep hosted activation blocked and remove any command path that performs external writes.",
+      },
+      {
+        id: "post-preflight-order",
+        label: "Post-preflight command order check",
+        commandScope: "preserve order from preflight to codegen, generated API review, Convex check, and hosted smoke",
+        expectedEvidence: "Review packet keeps `npm run convex:codegen` and generated API import behind later approval.",
+        abortIf: "Abort if codegen, generated API import, live smoke, or adapter switch becomes reachable from preflight.",
+        rollback: "Delete generated files from the working tree and keep `generatedApiAvailable` false.",
+      },
+      {
+        id: "evidence-capture-check",
+        label: "Evidence capture and cleanup check",
+        commandScope: "define where preflight output and abort notes are captured without committing secrets",
+        expectedEvidence: "Owner stores raw command output outside committed source if it contains local paths or private deployment context.",
+        abortIf: "Abort if evidence requires committing secret-bearing logs or private provider dashboard details.",
+        rollback: "Keep only sanitized summary in repo docs and retain private command output outside source control.",
+      },
+    ],
+    expectedOutputs: [
+      "Local .env.local present: yes or no",
+      "Generated Convex directory present: yes or no",
+      "Hosted Convex env visible to this process: yes or no",
+      "External writes: 0",
+      "Hosted deployment touched: no",
+      "Convex activation preflight passed only after local contract checks pass",
+    ],
+    blockedActions: [
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "print or commit secret-bearing preflight output",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "set generatedApiAvailable true",
+      "execute hosted read or mutation smoke",
+      "switch fixture adapter to generated API",
+      "perform provider writes or client launch",
+    ],
+    canRecordDecision: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
     canExecuteLiveSmoke: false,
     canReadSecrets: false,
     canPrintSecrets: false,
