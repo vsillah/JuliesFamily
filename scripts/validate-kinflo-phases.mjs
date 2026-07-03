@@ -191,6 +191,7 @@ for (const path of [
   "docs/phase138-site-studio-handoff-deep-links.md",
   "docs/phase139-admin-handoff-matrix-filters.md",
   "docs/phase140-configuration-review-deep-links.md",
+  "docs/phase142-configuration-change-set-deep-links.md",
   "docs/phase141-configuration-save-request-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
@@ -2399,6 +2400,22 @@ requireIncludes("docs/phase140-configuration-review-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase142-configuration-change-set-deep-links.md", [
+  "Phase 142: Configuration Change Set Deep Links",
+  "npm run kinflo:validate-configuration-change-set-deep-links",
+  "studioChange=blockers|evidence|functions",
+  "studioConfig=blockers|evidence|functions",
+  "studioSave=blockers|evidence|audit|rollback|publish|domain|invite|experience|functions",
+  "readInitialClientConfigurationChangeDetail",
+  "selectClientConfigurationChangeDetail",
+  "tabs-kinflo-client-configuration-change-set-detail",
+  "section-kinflo-client-configuration-change-blockers",
+  "section-kinflo-client-configuration-change-evidence",
+  "section-kinflo-client-configuration-change-functions",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase141-configuration-save-request-deep-links.md", [
   "Phase 141: Configuration Save Request Deep Links",
   "npm run kinflo:validate-configuration-save-request-deep-links",
@@ -2675,6 +2692,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase138-site-studio-handoff-deep-links.md\"",
   "\"docs/phase139-admin-handoff-matrix-filters.md\"",
   "\"docs/phase140-configuration-review-deep-links.md\"",
+  "\"docs/phase142-configuration-change-set-deep-links.md\"",
   "\"docs/phase141-configuration-save-request-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
@@ -2735,6 +2753,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-site-studio-handoff-deep-links\"",
   "\"npm run kinflo:validate-admin-handoff-matrix-filters\"",
   "\"npm run kinflo:validate-configuration-review-deep-links\"",
+  "\"npm run kinflo:validate-configuration-change-set-deep-links\"",
   "\"npm run kinflo:validate-configuration-save-request-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
@@ -2882,6 +2901,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-site-studio-handoff-deep-links\"",
   "\"kinflo:validate-admin-handoff-matrix-filters\"",
   "\"kinflo:validate-configuration-review-deep-links\"",
+  "\"kinflo:validate-configuration-change-set-deep-links\"",
   "\"kinflo:validate-configuration-save-request-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
@@ -4316,6 +4336,18 @@ requireIncludes("scripts/validate-kinflo-configuration-save-request-deep-links.m
   "configuration save-request deep links do not import generated API",
   "configuration save-request deep links do not execute live Convex",
   "KinFlo configuration save-request deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-change-set-deep-links.mjs", [
+  "docs/phase142-configuration-change-set-deep-links.md",
+  "studioChange",
+  "studioConfig",
+  "studioSave",
+  "readInitialClientConfigurationChangeDetail",
+  "selectClientConfigurationChangeDetail",
+  "configuration change-set deep links do not import generated API",
+  "configuration change-set deep links do not execute live Convex",
+  "KinFlo configuration change-set deep-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [
