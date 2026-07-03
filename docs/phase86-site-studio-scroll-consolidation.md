@@ -33,6 +33,7 @@ npm run kinflo:validate-site-studio-scroll-consolidation
 - Tabs: `tabs-kinflo-client-provisioning-workbench`
 - Order tab: `tab-kinflo-client-provisioning-order`
 - Dry run tab: `tab-kinflo-client-provisioning-dry-run`
+- Deep link state: `studioProvisioning=order|dry-run`
 - Compact order cockpit: `section-kinflo-client-provisioning-order-cockpit`
 - Order detail tabs: `tabs-kinflo-client-provisioning-order-detail`
 - Evidence panel: `section-kinflo-client-provisioning-evidence-panel`
@@ -78,7 +79,8 @@ The prior right-rail provisioning content stacked a large provisioning order car
 - the provisioning workbench itself is capped at 338px on narrow review widths and 356px at the small breakpoint, with order and dry-run interiors using local scroll so the page does not fall back into a tall proof stack.
 - duplicate disabled gate buttons are screen-reader-only because the compact workbench already shows the gated state in the header badge.
 - the workbench card uses local vertical scrolling rather than clipping content when a nested panel has more detail than the compact viewport can show.
-- the provisioning view is controlled by an explicit `Order` / `Dry run` sub-tab state, keeping the default surface summary-first and preventing the execution dry run from reappearing as a second stacked card.
+- the provisioning view is controlled by an explicit `Order` / `Dry run` sub-tab state and a `studioProvisioning=order|dry-run` deep link, keeping the default surface summary-first and preventing the execution dry run from reappearing as a second stacked card.
+- changing the provisioning sub-tab updates the Site Studio route while preserving the active site, workbench launch stage, and provisioning dossier, so browser refresh/share flows do not reopen into an inconsistent long-scroll state.
 - setup, evidence, blocked-action, and function panels now share a 92px narrow cap and 104px small-screen cap, with the scroll behavior owned by the active panel rather than the whole order cockpit.
 - the narrow setup panel can show the full three-step order without reintroducing the stacked dry-run card below it.
 

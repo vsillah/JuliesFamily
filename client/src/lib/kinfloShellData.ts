@@ -714,6 +714,45 @@ export type ShellHostedActivationSanitizedPreflightResultCapture = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationSanitizedPreflightResultCommitReviewItem = {
+  id: string;
+  label: string;
+  requiredEvidence: string;
+  approvedCommitShape: string;
+  rejectionCondition: string;
+  reviewState: "blocked_until_sanitized_capture_exists";
+};
+
+export type ShellHostedActivationSanitizedPreflightResultCommitReview = {
+  phase: 135;
+  status: "prepare_only_sanitized_preflight_result_commit_review";
+  decisionId: "sanitized-preflight-result-commit-review";
+  owner: "Vambah";
+  totalReviewItems: number;
+  pendingReviewItems: number;
+  acceptedReviewItems: number;
+  nextGate: string;
+  reviewPacketPath: "docs/phase135-hosted-activation-sanitized-preflight-result-commit-review.md";
+  sourceDocuments: string[];
+  reviewItems: ShellHostedActivationSanitizedPreflightResultCommitReviewItem[];
+  commitRules: string[];
+  blockedActions: string[];
+  canReviewSanitizedResult: false;
+  canCommitSanitizedResult: false;
+  canRecordApprovedResult: false;
+  canCommitRawOutput: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -735,6 +774,7 @@ export type ShellHostedActivationRunbook = {
   rawPreflightOutputStorageReview: ShellHostedActivationRawPreflightOutputStorageReview;
   rawPreflightOutputRedactionChecklist: ShellHostedActivationRawPreflightOutputRedactionChecklist;
   sanitizedPreflightResultCapture: ShellHostedActivationSanitizedPreflightResultCapture;
+  sanitizedPreflightResultCommitReview: ShellHostedActivationSanitizedPreflightResultCommitReview;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -8731,6 +8771,99 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     ],
     canCaptureSanitizedResult: false,
     canCommitSanitizedResult: false,
+    canCommitRawOutput: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  sanitizedPreflightResultCommitReview: {
+    phase: 135,
+    status: "prepare_only_sanitized_preflight_result_commit_review",
+    decisionId: "sanitized-preflight-result-commit-review",
+    owner: "Vambah",
+    totalReviewItems: 5,
+    pendingReviewItems: 5,
+    acceptedReviewItems: 0,
+    nextGate: "After a sanitized result exists, review the owner approval, six-field shape, stop conditions, private evidence pointer, and public note before committing it.",
+    reviewPacketPath: "docs/phase135-hosted-activation-sanitized-preflight-result-commit-review.md",
+    sourceDocuments: [
+      "docs/phase128-hosted-activation-preflight-result-contract.md",
+      "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
+      "docs/phase133-hosted-activation-raw-preflight-output-redaction-checklist.md",
+      "docs/phase134-hosted-activation-sanitized-preflight-result-capture.md",
+    ],
+    reviewItems: [
+      {
+        id: "owner-approval-record",
+        label: "Owner approval record",
+        requiredEvidence: "Explicit owner approval that private raw-output storage, raw-output redaction, and sanitized capture shape are accepted.",
+        approvedCommitShape: "Commit only approved | blocked plus the decision id; no private approval text, note ids, links, or screenshots.",
+        rejectionCondition: "Missing approval or approval that includes private raw-output details keeps the result out of committed source.",
+        reviewState: "blocked_until_sanitized_capture_exists",
+      },
+      {
+        id: "six-field-shape-match",
+        label: "Six-field shape match",
+        requiredEvidence: "The committed result contains exactly local-env-present, generated-directory-present, hosted-env-visible, external-writes, hosted-deployment-touched, and preflight-result-status.",
+        approvedCommitShape: "Commit the six field ids only in the accepted contract order with boolean, number, or enum values.",
+        rejectionCondition: "Any extra field, missing field, raw text field, path, URL, id, command output, or generated API content blocks commit.",
+        reviewState: "blocked_until_sanitized_capture_exists",
+      },
+      {
+        id: "private-evidence-pointer",
+        label: "Private evidence pointer",
+        requiredEvidence: "The result references the approved private storage surface by safe label without disclosing private locations or provider identifiers.",
+        approvedCommitShape: "Commit a generic private evidence label such as owner-approved private raw-output store.",
+        rejectionCondition: "Any local path, secure note id, dashboard URL, hosted deployment name, provider request id, or secret fragment blocks commit.",
+        reviewState: "blocked_until_sanitized_capture_exists",
+      },
+      {
+        id: "stop-condition-review",
+        label: "Stop condition review",
+        requiredEvidence: "external-writes is 0 and hosted-deployment-touched is false before any repo-safe result can proceed.",
+        approvedCommitShape: "Commit only external-writes: 0 and hosted-deployment-touched: false for a repo-safe result.",
+        rejectionCondition: "external-writes greater than 0, hosted-deployment-touched true, provider response, mutation response, or created resource id blocks commit.",
+        reviewState: "blocked_until_sanitized_capture_exists",
+      },
+      {
+        id: "sanitized-note-review",
+        label: "Sanitized note review",
+        requiredEvidence: "The optional result note is short, non-secret, non-identifying, and written for repo review rather than raw debugging.",
+        approvedCommitShape: "Commit one short note with no stack trace, command output, provider text, env names, paths, URLs, ids, or secret-shaped fragments.",
+        rejectionCondition: "Any copied raw log line, stack frame, provider text, environment name/value, local path, URL, identifier, or masked secret blocks commit.",
+        reviewState: "blocked_until_sanitized_capture_exists",
+      },
+    ],
+    commitRules: [
+      "Commit a sanitized result only after Phase 132 storage, Phase 133 redaction, Phase 134 capture, and owner commit review are all accepted.",
+      "Commit only the six accepted fields, owner-approved decision posture, and one short non-secret note.",
+      "Never commit raw command output, stack traces, private evidence locations, provider ids, hosted deployment identifiers, local paths, URLs, secrets, or masked secret fragments.",
+      "Treat any nonzero external write, hosted deployment touch, provider response, mutation response, or created resource id as blocked private evidence.",
+      "Do not use this review packet as approval to run hosted preflight, codegen, generated API import, live smoke, adapter switch, or provider writes.",
+    ],
+    blockedActions: [
+      "review sanitized result before a sanitized capture exists",
+      "commit sanitized result before owner commit review",
+      "commit raw activation preflight output or logs",
+      "commit private evidence locations, provider identifiers, local paths, URLs, secrets, or stack traces",
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "execute hosted read or mutation smoke",
+      "perform provider writes or client launch",
+    ],
+    canReviewSanitizedResult: false,
+    canCommitSanitizedResult: false,
+    canRecordApprovedResult: false,
     canCommitRawOutput: false,
     canEnterEnvValues: false,
     canRunAgainstRealEnv: false,

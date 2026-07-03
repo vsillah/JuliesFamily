@@ -333,6 +333,16 @@ function readInitialClientWebsiteLaunchDossier(): ClientWebsiteLaunchDossier {
     : "provisioning";
 }
 
+function readInitialClientWebsiteProvisioningView(): ClientWebsiteProvisioningView {
+  if (typeof window === "undefined") {
+    return "order";
+  }
+  const view = new URLSearchParams(window.location.search).get("studioProvisioning");
+  return clientWebsiteProvisioningViewValues.includes(view as ClientWebsiteProvisioningView)
+    ? (view as ClientWebsiteProvisioningView)
+    : "order";
+}
+
 function buildClientWebsiteStudioPreviewHref({
   previewPath,
   siteKey,
@@ -2248,7 +2258,7 @@ export default function AdminKinfloShell() {
   const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>(readInitialClientWebsiteStudioLane);
   const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
   const [clientWebsiteLaunchDossier, setClientWebsiteLaunchDossier] = useState<ClientWebsiteLaunchDossier>(readInitialClientWebsiteLaunchDossier);
-  const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>("order");
+  const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -3242,12 +3252,14 @@ export default function AdminKinfloShell() {
     const shouldKeepDossier = tab === "site-studio"
       && clientWebsiteStudioLane === "workbench"
       && clientWebsiteWorkbenchStage === "launch";
+    const shouldKeepProvisioningView = shouldKeepDossier && clientWebsiteLaunchDossier === "provisioning";
     updateKinfloShellRoute({
       tab,
       studioSite: tab === "site-studio" ? clientWebsiteStudioSiteKey : undefined,
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
+      studioProvisioning: shouldKeepProvisioningView ? clientWebsiteProvisioningView : undefined,
       adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
       adapterSurface: tab === "adapter-switch" ? adapterSwitchSurfaceId : undefined,
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
@@ -3266,6 +3278,9 @@ export default function AdminKinfloShell() {
       studioLane: clientWebsiteStudioLane,
       studioStage: clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      studioProvisioning: clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && clientWebsiteLaunchDossier === "provisioning"
+        ? clientWebsiteProvisioningView
+        : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3284,6 +3299,9 @@ export default function AdminKinfloShell() {
       studioLane: lane,
       studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      studioProvisioning: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" && clientWebsiteLaunchDossier === "provisioning"
+        ? clientWebsiteProvisioningView
+        : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3303,6 +3321,7 @@ export default function AdminKinfloShell() {
       studioLane: "workbench",
       studioStage: stage,
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
+      studioProvisioning: stage === "launch" && clientWebsiteLaunchDossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3323,6 +3342,29 @@ export default function AdminKinfloShell() {
       studioLane: "workbench",
       studioStage: "launch",
       studioDossier: dossier,
+      studioProvisioning: dossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+    });
+  };
+
+  const selectClientWebsiteProvisioningView = (view: ClientWebsiteProvisioningView) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("workbench");
+    setClientWebsiteWorkbenchStage("launch");
+    setClientWebsiteLaunchDossier("provisioning");
+    setClientWebsiteProvisioningView(view);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "workbench",
+      studioStage: "launch",
+      studioDossier: "provisioning",
+      studioProvisioning: view,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -5695,6 +5737,77 @@ export default function AdminKinfloShell() {
                           {snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.commitRules.map((rule) => (
                             <div key={rule} className="flex items-start gap-2 rounded-lg border border-sky-200 bg-white p-2 text-xs leading-5 text-slate-700">
                               <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-700" />
+                              <span>{rule}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-3" data-testid="section-kinflo-hosted-sanitized-preflight-result-commit-review">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-teal-300 bg-white text-teal-900">
+                            Phase {snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.phase}
+                          </Badge>
+                          <Badge className="bg-teal-800 hover:bg-teal-800">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.status.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <h4 className="mt-3 text-sm font-semibold text-teal-950">Sanitized result commit review</h4>
+                        <p className="mt-1 max-w-3xl text-xs leading-5 text-teal-900" data-testid="text-kinflo-hosted-sanitized-preflight-result-commit-review">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.nextGate}
+                        </p>
+                      </div>
+                      <Button size="sm" disabled variant="outline" className="self-start border-teal-300 bg-white text-teal-900 hover:bg-white hover:text-teal-900" data-testid="button-hosted-sanitized-preflight-result-commit-review-gated">
+                        <ShieldCheck className="mr-2 h-3 w-3" />
+                        Commit review gated
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs" data-testid="section-kinflo-hosted-sanitized-preflight-result-commit-review-summary">
+                      {[
+                        { label: "Items", value: snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.totalReviewItems },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.pendingReviewItems },
+                        { label: "Accepted", value: snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.acceptedReviewItems },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-lg border border-teal-200 bg-white px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-teal-700">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+                      <div className="grid max-h-[280px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-result-commit-review-items">
+                        {snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.reviewItems.map((item) => (
+                          <div key={item.id} className="rounded-lg border border-teal-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{item.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{item.requiredEvidence}</div>
+                              </div>
+                              <Badge variant="outline" className="w-fit shrink-0 border-teal-200 bg-teal-50 text-teal-800">{item.reviewState.replaceAll("_", " ")}</Badge>
+                            </div>
+                            <p className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-900">{item.approvedCommitShape}</p>
+                            <p className="mt-2 rounded-md border border-rose-100 bg-rose-50 p-2 text-xs leading-5 text-rose-800">{item.rejectionCondition}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="min-w-0 space-y-2">
+                        <div className="rounded-lg border border-teal-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-teal-700">Review packet</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.reviewPacketPath}
+                          </div>
+                        </div>
+                        <div className="max-h-[170px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-result-commit-review-rules">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightResultCommitReview.commitRules.map((rule) => (
+                            <div key={rule} className="flex items-start gap-2 rounded-lg border border-teal-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-teal-700" />
                               <span>{rule}</span>
                             </div>
                           ))}
@@ -8426,7 +8539,7 @@ export default function AdminKinfloShell() {
 
                     <Tabs
                       value={clientWebsiteProvisioningView}
-                      onValueChange={(value) => setClientWebsiteProvisioningView(value as ClientWebsiteProvisioningView)}
+                      onValueChange={(value) => selectClientWebsiteProvisioningView(value as ClientWebsiteProvisioningView)}
                       className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden"
                       data-testid="tabs-kinflo-client-provisioning-workbench"
                     >
