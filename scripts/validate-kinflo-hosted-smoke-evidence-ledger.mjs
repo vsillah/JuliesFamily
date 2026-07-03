@@ -48,6 +48,17 @@ function extractBlock(contents, name, nextName) {
   return match[1];
 }
 
+function parseJson(path) {
+  try {
+    const parsed = JSON.parse(read(path));
+    pass(`${path} parses as JSON`);
+    return parsed;
+  } catch (error) {
+    fail(`${path} parses as JSON`, error instanceof Error ? error.message : String(error));
+    return undefined;
+  }
+}
+
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" })
   .split("\n")
   .filter(Boolean);
@@ -90,8 +101,10 @@ requireIncludes("docs/phase92-hosted-smoke-evidence-ledger.md", [
   "section-kinflo-hosted-smoke-evidence-scroll",
   "Total evidence entries: 6",
   "Pending entries: 6",
-  "Total functions: 16",
+  "Total functions: 28",
   "Blocked entries: 6",
+  "Phase 165 refreshes this evidence ledger against the current Phase 91 sequencer.",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
   "No hosted smoke transcript is recorded.",
@@ -105,8 +118,11 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "provider_light_hosted_smoke_evidence_ledger",
   "totalEvidenceEntries: 6",
   "pendingEntries: 6",
-  "totalFunctions: 16",
+  "totalFunctions: 28",
   "blockedEntries: 6",
+  "functionCount: 14",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "launch composer response",
   "canRecord: false",
   "providerWrites: false",
   "liveConvexExecution: false",
@@ -135,6 +151,20 @@ requireIncludes("package.json", [
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const shellPage = read("client/src/pages/AdminKinfloShell.tsx");
 const evidenceBlock = extractBlock(shellData, "fixtureHostedSmokeEvidenceLedger", "fixtureHostedActivationRunbook");
+const plan = parseJson("docs/convex-adapter-switch-plan.json");
+const liveSmoke = parseJson("docs/convex-live-smoke-manifest.json");
+const smokeFunctions = new Set((liveSmoke?.smokeSteps ?? []).flatMap((step) => step.functions ?? []));
+const gapFunctions = [...new Set((plan?.switchBatches ?? []).flatMap((batch) =>
+  (batch.surfaces ?? []).flatMap((surface) => surface.convexFunctions ?? []),
+))]
+  .filter((functionName) => !smokeFunctions.has(functionName))
+  .sort();
+const gapsByBatch = Object.fromEntries((plan?.switchBatches ?? []).map((batch) => [
+  batch.id,
+  [...new Set((batch.surfaces ?? []).flatMap((surface) => surface.convexFunctions ?? []))]
+    .filter((functionName) => !smokeFunctions.has(functionName))
+    .sort(),
+]));
 
 const expectedBatchIds = [
   "read-only-core",
@@ -150,6 +180,22 @@ for (const batchId of expectedBatchIds) {
     pass(`evidence ledger includes batch ${batchId}`);
   } else {
     fail(`evidence ledger includes batch ${batchId}`, "Expected hosted smoke evidence entry was not represented.");
+  }
+}
+
+if (gapFunctions.length === 28) {
+  pass("hosted smoke evidence ledger has twenty-eight gap functions to cover");
+} else {
+  fail("hosted smoke evidence ledger has twenty-eight gap functions to cover", `Received ${gapFunctions.length}: ${gapFunctions.join(", ")}`);
+}
+
+for (const [batchId, functions] of Object.entries(gapsByBatch)) {
+  const batchEntryMarker = `batchId: "${batchId}"`;
+  const countMarker = `functionCount: ${functions.length}`;
+  if (evidenceBlock.includes(batchEntryMarker) && evidenceBlock.includes(countMarker)) {
+    pass(`evidence ledger function count matches ${batchId}`);
+  } else {
+    fail(`evidence ledger function count matches ${batchId}`, `Expected ${countMarker}.`);
   }
 }
 
@@ -175,7 +221,8 @@ for (const [label, count] of countChecks) {
 for (const marker of [
   "hosted response excerpt without secrets",
   "other-user deny proof",
-  "publish and invite disabled proof",
+  "save, publish, and invite disabled proof",
+  "launch composer response",
   "notification pause proof",
   "provider-call disabled proof",
   "AI provenance read and upsert proof",
@@ -223,7 +270,7 @@ console.log("\nKinFlo hosted smoke evidence ledger validation");
 console.log("Admin route: /admin/kinflo-os?tab=hosted-activation");
 console.log("Evidence entries: 6");
 console.log("Pending entries: 6");
-console.log("Sequenced functions: 16");
+console.log("Sequenced functions: 28");
 console.log("Blocked entries: 6");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");

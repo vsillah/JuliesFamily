@@ -22,7 +22,7 @@ npm run kinflo:validate-hosted-smoke-evidence-ledger
 
 - Total evidence entries: 6
 - Pending entries: 6
-- Total functions: 16
+- Total functions: 28
 - Blocked entries: 6
 
 ## Evidence Order
@@ -35,6 +35,8 @@ npm run kinflo:validate-hosted-smoke-evidence-ledger
 6. `campaign-and-ai-governance`
 
 Each entry records expected transcript shape, evidence slots, acceptance criteria, abort condition, rollback reference, owner, blocked-until state, and explicit `canRecord: false` posture.
+
+Phase 165 refreshes this evidence ledger against the current Phase 91 sequencer. The adapter-switch plan maps 42 functions, the live-smoke manifest covers 14 adapter-switch functions, and the six evidence entries now cover the remaining 28 gaps. The `site-creation-and-admin` evidence entry covers `siteFactory.listClientWebsiteLaunchComposer` plus configuration, domain, invitation, blueprint, experience preset, and permission-preset reads.
 
 ## Provider Boundary
 

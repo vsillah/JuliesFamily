@@ -202,6 +202,7 @@ for (const path of [
   "docs/phase162-client-website-launch-composer-switch-evidence.md",
   "docs/phase163-client-website-launch-composer-hosted-smoke-gap.md",
   "docs/phase164-hosted-smoke-sequencer-parity.md",
+  "docs/phase165-hosted-smoke-evidence-ledger-parity.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -393,6 +394,7 @@ for (const path of [
   "scripts/validate-kinflo-client-website-launch-composer-switch-evidence.mjs",
   "scripts/validate-kinflo-client-website-launch-composer-hosted-smoke-gap.mjs",
   "scripts/validate-kinflo-hosted-smoke-sequencer-parity.mjs",
+  "scripts/validate-kinflo-hosted-smoke-evidence-ledger-parity.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2560,6 +2562,18 @@ requireIncludes("docs/phase164-hosted-smoke-sequencer-parity.md", [
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase165-hosted-smoke-evidence-ledger-parity.md", [
+  "Phase 165: Hosted Smoke Evidence Ledger Parity",
+  "npm run kinflo:validate-hosted-smoke-evidence-ledger-parity",
+  "42 generated Convex functions",
+  "28 hosted smoke gaps",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No hosted smoke transcript is recorded.",
+  "No secret values are read or printed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -3038,7 +3052,9 @@ requireIncludes("docs/phase92-hosted-smoke-evidence-ledger.md", [
   "section-kinflo-hosted-smoke-evidence-scroll",
   "Total evidence entries: 6",
   "Pending entries: 6",
-  "Total functions: 16",
+  "Total functions: 28",
+  "Phase 165 refreshes this evidence ledger against the current Phase 91 sequencer.",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "Blocked entries: 6",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -3125,6 +3141,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-website-launch-composer-hosted-smoke-gap\"",
   "\"docs/phase164-hosted-smoke-sequencer-parity.md\"",
   "\"npm run kinflo:validate-hosted-smoke-sequencer-parity\"",
+  "\"docs/phase165-hosted-smoke-evidence-ledger-parity.md\"",
+  "\"npm run kinflo:validate-hosted-smoke-evidence-ledger-parity\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3254,6 +3272,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-hosted-smoke-gap-backlog\"",
   "\"npm run kinflo:validate-hosted-smoke-execution-sequencer\"",
   "\"npm run kinflo:validate-hosted-smoke-evidence-ledger\"",
+  "\"npm run kinflo:validate-hosted-smoke-evidence-ledger-parity\"",
   "\"npm run kinflo:validate-adapter-switch-cutover-checklist\"",
   "\"npm run kinflo:validate-adapter-switch-batch-deep-links\"",
   "\"npm run kinflo:validate-adapter-switch-surface-deep-links\"",
@@ -3425,6 +3444,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-smoke-gap-backlog\"",
   "\"kinflo:validate-hosted-smoke-execution-sequencer\"",
   "\"kinflo:validate-hosted-smoke-evidence-ledger\"",
+  "\"kinflo:validate-hosted-smoke-evidence-ledger-parity\"",
   "\"kinflo:validate-adapter-switch-cutover-checklist\"",
   "\"kinflo:validate-adapter-switch-batch-deep-links\"",
   "\"kinflo:validate-adapter-switch-surface-deep-links\"",
@@ -5257,12 +5277,26 @@ requireIncludes("scripts/validate-kinflo-hosted-smoke-evidence-ledger.mjs", [
   "ShellHostedSmokeEvidenceLedger",
   "section-kinflo-hosted-smoke-evidence-ledger",
   "section-kinflo-hosted-smoke-evidence-scroll",
+  "gapFunctions.length === 28",
+  "gapsByBatch",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "Sequenced functions: 28",
   "canRecord false entry count is 6",
   "providerWrites false entry count is 6",
   "liveConvexExecution false entry count is 6",
   "pending human gate entry count is 6",
   "hosted smoke evidence ledger does not import generated API",
   "KinFlo hosted smoke evidence ledger validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-smoke-evidence-ledger-parity.mjs", [
+  "docs/phase165-hosted-smoke-evidence-ledger-parity.md",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "gapFunctions.length === 28",
+  "evidence parity count matches",
+  "hosted smoke evidence ledger parity does not import generated API",
+  "hosted smoke evidence ledger parity does not execute live Convex",
+  "KinFlo hosted smoke evidence ledger parity validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs", [

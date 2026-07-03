@@ -153,6 +153,7 @@
     "kinflo:validate-hosted-smoke-gap-backlog": "node scripts/validate-kinflo-hosted-smoke-gap-backlog.mjs",
     "kinflo:validate-hosted-smoke-execution-sequencer": "node scripts/validate-kinflo-hosted-smoke-execution-sequencer.mjs",
     "kinflo:validate-hosted-smoke-evidence-ledger": "node scripts/validate-kinflo-hosted-smoke-evidence-ledger.mjs",
+    "kinflo:validate-hosted-smoke-evidence-ledger-parity": "node scripts/validate-kinflo-hosted-smoke-evidence-ledger-parity.mjs",
     "kinflo:validate-hosted-smoke-evidence-deep-links": "node scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
     "kinflo:validate-adapter-switch-cutover-checklist": "node scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs",
     "kinflo:validate-hosted-activation-step-deep-links": "node scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
