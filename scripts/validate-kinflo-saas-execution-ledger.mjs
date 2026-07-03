@@ -467,7 +467,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 102 adapter switch batch deep links",
   "Phase 103 adapter switch surface deep links",
   "Phase 156 PR preview deployment checkpoint",
-  "Vercel scope authorization remains an owner-access gate",
+  "current PR head's Vercel preview is ready for integration review",
 ]);
 
 requireIncludes("package.json", [

@@ -14,22 +14,23 @@ npm run kinflo:validate-pr-preview-deployment-checkpoint
 - Branch: `codex/kinflo-phase-0-convex-plan`
 - Head commit source: current PR #1 head at the time the checkpoint is read
 - GitHub status context: `Vercel`
-- GitHub status state: `PENDING`
+- GitHub status state: `SUCCESS`
 - Vercel target source: GitHub PR #1 `Vercel` status check target URL, which changes with each pushed head
-- Vercel connector result: scope authorization blocked for `vsillahs-projects`
+- Vercel deployment result: deployment completed for the current PR head
 - Preview comments check: `SUCCESS`
+- Merge readiness: `ready_for_integration_review`
 
-## Owner Gate
+## Review Gate
 
-Before this PR can be treated as deployment-verified, Vambah needs to refresh Vercel access for the `vsillahs-projects` scope or review the pending deployment directly in Vercel.
+The current PR head is deployment-verified for staged review. If another commit is pushed, GitHub will create a new Vercel status target and this checkpoint must be refreshed before merge.
 
 Steps:
 
-1. Open the Vercel target from the PR status check.
-2. Confirm the deployment belongs to the KinFlo website project.
-3. If prompted, re-authenticate Vercel for the `vsillahs-projects` scope.
-4. Confirm whether the deployment is still building, failed, canceled, or ready.
-5. Send back the final Vercel state and any failed build log line if the deployment failed.
+1. Run `npm run kinflo:validate-pr-review-state`.
+2. Confirm the current head SHA matches the PR branch head.
+3. Confirm Vercel reports `SUCCESS`.
+4. Confirm Vercel Preview Comments reports `SUCCESS`.
+5. Keep the PR draft until Integration Captain decides when to merge and verify deployments.
 
 ## Provider Boundary
 
@@ -53,4 +54,4 @@ No secret values are read or printed.
 
 ## Why This Matters
 
-The local provider-light shell and validators are green, but PR merge readiness still needs deployment truth. This checkpoint keeps that distinction explicit: local proof is complete for this phase, while Vercel preview verification remains an owner-access gate.
+The local provider-light shell and validators are green, and the current PR head has deployment truth. This checkpoint keeps the distinction explicit: local proof is complete for this phase, PR preview verification is complete for the current head, and hosted Convex activation remains a separate owner approval gate.

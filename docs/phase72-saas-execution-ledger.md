@@ -28,7 +28,7 @@ The branch now contains Phase 0 intake proof, provider-light Convex modules, the
 - `site-factory-and-client-launch`: provider-light review contracts.
 - `design-polish`: provider-light polish in progress.
 - `hosted-activation`: human-gate blocked with owner approval packet prepared.
-- `preview-deployment`: Phase 156 PR preview deployment checkpoint captured; Vercel scope authorization remains an owner-access gate.
+- `preview-deployment`: Phase 156 PR preview deployment checkpoint captured; Vercel reports `SUCCESS` for the current PR head, and the current PR head's Vercel preview is ready for integration review.
 
 ## Provider Boundary
 

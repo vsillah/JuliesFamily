@@ -2390,10 +2390,10 @@ requireIncludes("docs/phase156-pr-preview-deployment-checkpoint.md", [
   "https://github.com/vsillah/JuliesFamily/pull/1",
   "codex/kinflo-phase-0-convex-plan",
   "GitHub status context: `Vercel`",
-  "GitHub status state: `PENDING`",
-  "Vercel connector result: scope authorization blocked for `vsillahs-projects`",
+  "GitHub status state: `SUCCESS`",
+  "Vercel deployment result: deployment completed for the current PR head",
   "Preview comments check: `SUCCESS`",
-  "Vambah needs to refresh Vercel access for the `vsillahs-projects` scope",
+  "Merge readiness: `ready_for_integration_review`",
   "No Vercel deployment is created from this checkpoint.",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -4643,8 +4643,8 @@ requireIncludes("scripts/validate-kinflo-side-by-side-mobile-preview.mjs", [
 
 requireIncludes("scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs", [
   "docs/phase156-pr-preview-deployment-checkpoint.md",
-  "GitHub status state: `PENDING`",
-  "Vercel connector result: scope authorization blocked for `vsillahs-projects`",
+  "GitHub status state: `SUCCESS`",
+  "live Vercel preview succeeded for current PR head",
   "PR preview checkpoint contains no secret assignments",
   "KinFlo PR preview deployment checkpoint validation",
 ]);

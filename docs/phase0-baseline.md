@@ -140,7 +140,7 @@ Current command run:
 gh pr view 1 --json url,state,isDraft,headRefName,headRefOid,mergeStateStatus,statusCheckRollup
 ```
 
-Current result: PR #1 is open and draft on `codex/kinflo-phase-0-convex-plan`. Vercel Preview Comments reports `SUCCESS`; the Vercel deployment check is still `PENDING` and remains required before merge.
+Current result: PR #1 is open and draft on `codex/kinflo-phase-0-convex-plan`. Vercel Preview Comments reports `SUCCESS`; the Vercel deployment check reports `SUCCESS` for the current head, so PR preview readiness is `ready_for_integration_review`.
 
 Current TypeScript status:
 
