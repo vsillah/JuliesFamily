@@ -4610,7 +4610,7 @@ requireIncludes("scripts/validate-kinflo-client-studio-lane-anchor.mjs", [
   "clientWebsiteStudioLaneSectionTestIds",
   "scrollClientWebsiteStudioLaneToTop",
   "tabs-kinflo-client-studio-lanes",
-  "client Studio lane rail renders in the Site Studio header above lane sections",
+  "client Studio lane rail renders first in the Site Studio header above identity and lane sections",
   "client Studio lane rail is not rendered inside the compact lane body",
   "section-kinflo-client-studio-lane-configuration",
   "client Studio lane anchor does not import generated API",

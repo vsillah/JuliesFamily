@@ -193,7 +193,7 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "section-kinflo-client-studio-compact-shell",
   "compact shell trims duplicate mobile summary chrome",
   "lane toolbar stays as a sticky header rail",
-  "under the persistent identity strip",
+  "before the persistent identity strip",
   "sticky top-0 placement",
   "tabs-kinflo-client-workbench-stage",
   "section-kinflo-client-launch-rail",
@@ -290,17 +290,16 @@ if (
   controlRoomIndex !== -1 &&
   operatingFrameIndex !== -1 &&
   workbenchContractIndex !== -1 &&
-  persistentIdentityIndex < siteStudioIndex &&
-  persistentIdentityIndex < headerRailRenderIndex &&
+  headerRailRenderIndex < persistentIdentityIndex &&
   headerRailRenderIndex < controlRoomIndex &&
   headerRailRenderIndex < operatingFrameIndex &&
   headerRailRenderIndex < workbenchContractIndex
 ) {
-  pass("Site Studio lane switcher renders in the header above the compact working section");
+  pass("Site Studio lane switcher renders first in the header above identity and lane sections");
 } else {
   fail(
-    "Site Studio lane switcher renders in the header above the compact working section",
-    "The lane switcher must stay under the persistent identity strip and before the control-room and lane-specific summary cards so it does not jump lower as lanes change."
+    "Site Studio lane switcher renders first in the header above identity and lane sections",
+    "The lane switcher must stay before the persistent identity strip, control-room, and lane-specific summary cards so it does not jump lower as lanes change."
   );
 }
 

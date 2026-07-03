@@ -161,7 +161,10 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
 const laneSwitcherIndex = shellContents.indexOf("section-kinflo-client-studio-lane-switcher");
 const persistentIdentityIndex = shellContents.indexOf("section-kinflo-persistent-identity-strip");
 const controlRoomIndex = shellContents.indexOf("section-kinflo-client-control-room-frame");
-const configurationLaneIndex = shellContents.indexOf("section-kinflo-client-studio-lane-configuration");
+const configurationLaneIndex = shellContents.indexOf(
+  'data-testid="section-kinflo-client-studio-lane-configuration"',
+  controlRoomIndex
+);
 if (
   laneSwitcherIndex !== -1 &&
   persistentIdentityIndex !== -1 &&

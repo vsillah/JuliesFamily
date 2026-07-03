@@ -22,7 +22,7 @@ npm run kinflo:validate-client-studio-lane-anchor
 
 ## What Changed
 
-The shared Site Studio lane rail renders under the persistent identity strip and above the control room, selected-site summaries, and lane content. Phase 152 adds explicit lane-switch behavior so each lane change scrolls the rail back into view and resets the selected lane container to its top position.
+The shared Site Studio lane rail renders before the persistent identity strip, control room, selected-site summaries, and lane content. Phase 152 adds explicit lane-switch behavior so each lane change scrolls the rail back into view and resets the selected lane container to its top position.
 
 This keeps the same controls at the top of every Site Studio lane instead of allowing prior lane scroll state or lane-specific card height to make the next lane feel like it starts in the middle of the page.
 

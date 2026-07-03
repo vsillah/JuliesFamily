@@ -5020,6 +5020,7 @@ export default function AdminKinfloShell() {
               </Button>
             </div>
           </div>
+          {activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null}
           <div
             className="grid min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]"
             data-testid="section-kinflo-persistent-identity-strip"
@@ -5072,7 +5073,6 @@ export default function AdminKinfloShell() {
               actionTestId="button-kinflo-persistent-identity-gated"
             />
           </div>
-          {activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null}
           <div
             className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]`}
             data-testid="section-kinflo-active-object-signal"

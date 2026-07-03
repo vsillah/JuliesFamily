@@ -149,14 +149,14 @@ if (
   headerRailRenderIndex !== -1 &&
   persistentIdentityIndex !== -1 &&
   controlRoomIndex !== -1 &&
-  persistentIdentityIndex < headerRailRenderIndex &&
+  headerRailRenderIndex < persistentIdentityIndex &&
   headerRailRenderIndex < controlRoomIndex
 ) {
-  pass("client Studio lane rail renders in the Site Studio header above lane sections");
+  pass("client Studio lane rail renders first in the Site Studio header above identity and lane sections");
 } else {
   fail(
-    "client Studio lane rail renders in the Site Studio header above lane sections",
-    "The lane rail must render under the persistent identity strip and above the control-room frame so each lane starts from the same top control position."
+    "client Studio lane rail renders first in the Site Studio header above identity and lane sections",
+    "The lane rail must render before the persistent identity strip and above the control-room frame so each lane starts from the same top control position."
   );
 }
 
