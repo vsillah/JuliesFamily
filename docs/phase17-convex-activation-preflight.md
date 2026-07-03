@@ -13,7 +13,15 @@ It does not provision Convex. It does not run codegen. It does not create tenant
 
 ## Preflight Command
 
-Run:
+Preferred 1Password-backed command:
+
+```bash
+OP_KINFLO_CONVEX_ITEM="KinFlo Convex" npm run kinflo:activation-preflight:1password
+```
+
+That command reads the required Convex values from 1Password, injects them into the child process, and does not print secret values or write `.env.local`.
+
+The direct local command remains available when the env values are already present in the shell:
 
 ```bash
 npm run kinflo:activation-preflight
@@ -42,6 +50,30 @@ Documented placeholders:
 
 These belong in local or deployment environment configuration after approval. They should not be written into committed source files.
 
+## 1Password Runtime Env
+
+The repo supports a no-`.env.local` activation path through `scripts/run-kinflo-with-1password-env.mjs`.
+
+Use either a single 1Password item:
+
+```bash
+OP_KINFLO_CONVEX_ITEM="KinFlo Convex" npm run kinflo:1password-env-check
+```
+
+The item must expose fields labeled with the required env keys or close labels such as `convex deployment`, `convex url`, `auth issuer`, and `auth client id`.
+
+Or use direct 1Password secret references:
+
+```bash
+OP_KINFLO_CONVEX_DEPLOYMENT_REF="op://vault/item/CONVEX_DEPLOYMENT" \
+OP_KINFLO_VITE_CONVEX_URL_REF="op://vault/item/VITE_CONVEX_URL" \
+OP_KINFLO_CONVEX_AUTH_ISSUER_REF="op://vault/item/CONVEX_AUTH_ISSUER" \
+OP_KINFLO_CONVEX_AUTH_CLIENT_ID_REF="op://vault/item/CONVEX_AUTH_CLIENT_ID" \
+npm run kinflo:1password-env-check
+```
+
+The check reports only whether each key is present. It does not print raw values.
+
 ## Provider Boundary
 
 No hosted Convex deployment is created by this phase.
@@ -57,9 +89,9 @@ No external write is performed by `npm run kinflo:activation-preflight`.
 ## Activation Sequence After Approval
 
 1. Provision the hosted Convex project.
-2. Configure auth provider and env values outside committed source.
-3. Run `npm run kinflo:activation-preflight`.
-4. Run `npm run convex:codegen`.
+2. Configure auth provider and env values in 1Password or another approved secret store outside committed source.
+3. Run `OP_KINFLO_CONVEX_ITEM="KinFlo Convex" npm run kinflo:activation-preflight:1password`.
+4. Run `OP_KINFLO_CONVEX_ITEM="KinFlo Convex" npm run kinflo:convex-codegen:1password`.
 5. Review generated files and generated API function names.
 6. Run `npm run convex:check`.
 7. Sign in as Vambah.
