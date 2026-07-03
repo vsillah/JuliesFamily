@@ -207,6 +207,7 @@ for (const path of [
   "docs/phase167-adapter-switch-cutover-evidence-parity.md",
   "docs/phase168-generated-api-cutover-owner-review.md",
   "docs/phase169-generated-api-cutover-owner-review-shell.md",
+  "docs/phase170-generated-api-cutover-owner-review-shell-parity.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -404,6 +405,7 @@ for (const path of [
   "scripts/validate-kinflo-adapter-switch-cutover-evidence-parity.mjs",
   "scripts/validate-kinflo-generated-api-cutover-owner-review.mjs",
   "scripts/validate-kinflo-generated-api-cutover-owner-review-shell.mjs",
+  "scripts/validate-kinflo-generated-api-cutover-owner-review-shell-parity.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -1488,6 +1490,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "npm run kinflo:validate-generated-api-cutover-owner-review",
   "Phase 169 generated API cutover owner review shell",
   "npm run kinflo:validate-generated-api-cutover-owner-review-shell",
+  "Phase 170 generated API cutover owner review shell parity",
+  "npm run kinflo:validate-generated-api-cutover-owner-review-shell-parity",
   "npm run kinflo:validate-hosted-activation-raw-preflight-output-storage",
   "npm run kinflo:validate-hosted-activation-raw-preflight-output-redaction-checklist",
   "npm run kinflo:validate-hosted-activation-sanitized-preflight-result-capture",
@@ -3182,6 +3186,26 @@ requireIncludes("docs/phase169-generated-api-cutover-owner-review-shell.md", [
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase170-generated-api-cutover-owner-review-shell-parity.md", [
+  "Phase 170: Generated API Cutover Owner Review Shell Parity",
+  "npm run kinflo:validate-generated-api-cutover-owner-review-shell-parity",
+  "docs/convex-generated-api-cutover-owner-review.json",
+  "hostedActivationRunbook.generatedApiCutoverOwnerReview",
+  "Generated API bindings: 86",
+  "Generated API review surfaces: 14",
+  "Cutover batches: 6",
+  "Cutover mapped functions: 44",
+  "Hosted-smoke evidence gaps: 28",
+  "Review items: 5",
+  "Ready review items: 0",
+  "Pending review items: 5",
+  "No generated Convex API files are committed or imported.",
+  "No fixture adapter switch is performed.",
+  "No hosted smoke is executed.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
 requireIncludes("docs/phase73-hosted-activation-decision-register.md", [
   "npm run kinflo:validate-hosted-activation-decisions",
   "hostedActivationRunbook.decisionRegister",
@@ -3251,9 +3275,11 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-adapter-switch-cutover-evidence-parity\"",
   "\"docs/phase168-generated-api-cutover-owner-review.md\"",
   "\"docs/phase169-generated-api-cutover-owner-review-shell.md\"",
+  "\"docs/phase170-generated-api-cutover-owner-review-shell-parity.md\"",
   "\"docs/convex-generated-api-cutover-owner-review.json\"",
   "\"npm run kinflo:validate-generated-api-cutover-owner-review\"",
   "\"npm run kinflo:validate-generated-api-cutover-owner-review-shell\"",
+  "\"npm run kinflo:validate-generated-api-cutover-owner-review-shell-parity\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3498,6 +3524,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-adapter-switch-cutover-evidence-parity\"",
   "\"kinflo:validate-generated-api-cutover-owner-review\"",
   "\"kinflo:validate-generated-api-cutover-owner-review-shell\"",
+  "\"kinflo:validate-generated-api-cutover-owner-review-shell-parity\"",
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-active-object-signal\"",
   "\"kinflo:validate-client-workbench-grid\"",
@@ -5474,6 +5501,18 @@ requireIncludes("scripts/validate-kinflo-generated-api-cutover-owner-review-shel
   "generated API cutover owner-review shell does not import generated API",
   "generated API cutover owner-review shell does not execute live Convex",
   "KinFlo generated API cutover owner-review shell validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-generated-api-cutover-owner-review-shell-parity.mjs", [
+  "docs/phase170-generated-api-cutover-owner-review-shell-parity.md",
+  "docs/convex-generated-api-cutover-owner-review.json",
+  "generated API cutover owner-review shell parity",
+  "shell review item array length",
+  "shell batch summary array length",
+  "shell decision boundary canOpenCodegenWindow",
+  "generated API cutover owner-review shell parity does not import generated API",
+  "generated API cutover owner-review shell parity does not execute live Convex",
+  "KinFlo generated API cutover owner-review shell parity validation",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [

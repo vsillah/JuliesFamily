@@ -160,6 +160,7 @@
     "kinflo:validate-adapter-switch-cutover-evidence-parity": "node scripts/validate-kinflo-adapter-switch-cutover-evidence-parity.mjs",
     "kinflo:validate-generated-api-cutover-owner-review": "node scripts/validate-kinflo-generated-api-cutover-owner-review.mjs",
     "kinflo:validate-generated-api-cutover-owner-review-shell": "node scripts/validate-kinflo-generated-api-cutover-owner-review-shell.mjs",
+    "kinflo:validate-generated-api-cutover-owner-review-shell-parity": "node scripts/validate-kinflo-generated-api-cutover-owner-review-shell-parity.mjs",
     "kinflo:validate-hosted-activation-step-deep-links": "node scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",

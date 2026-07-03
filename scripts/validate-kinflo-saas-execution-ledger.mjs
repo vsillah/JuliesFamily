@@ -152,6 +152,7 @@ for (const path of [
   "docs/phase167-adapter-switch-cutover-evidence-parity.md",
   "docs/phase168-generated-api-cutover-owner-review.md",
   "docs/phase169-generated-api-cutover-owner-review-shell.md",
+  "docs/phase170-generated-api-cutover-owner-review-shell-parity.md",
   "docs/convex-generated-api-cutover-owner-review.json",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
@@ -256,6 +257,7 @@ for (const path of [
   "scripts/validate-kinflo-adapter-switch-cutover-evidence-parity.mjs",
   "scripts/validate-kinflo-generated-api-cutover-owner-review.mjs",
   "scripts/validate-kinflo-generated-api-cutover-owner-review-shell.mjs",
+  "scripts/validate-kinflo-generated-api-cutover-owner-review-shell-parity.mjs",
   "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
 ]) {
   requireFile(path);
@@ -480,6 +482,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "npm run kinflo:validate-generated-api-cutover-owner-review",
   "Phase 169 generated API cutover owner review shell",
   "npm run kinflo:validate-generated-api-cutover-owner-review-shell",
+  "Phase 170 generated API cutover owner review shell parity",
+  "npm run kinflo:validate-generated-api-cutover-owner-review-shell-parity",
   "Phase 84 Claude frame ingestion packet",
   "Phase 149 Claude Code frame response",
   "Phase 156 PR preview deployment checkpoint",
@@ -620,6 +624,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-adapter-switch-cutover-evidence-parity\"",
   "\"kinflo:validate-generated-api-cutover-owner-review\"",
   "\"kinflo:validate-generated-api-cutover-owner-review-shell\"",
+  "\"kinflo:validate-generated-api-cutover-owner-review-shell-parity\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 
@@ -651,9 +656,11 @@ for (const marker of [
   "\"npm run kinflo:validate-adapter-switch-cutover-evidence-parity\"",
   "\"docs/phase168-generated-api-cutover-owner-review.md\"",
   "\"docs/phase169-generated-api-cutover-owner-review-shell.md\"",
+  "\"docs/phase170-generated-api-cutover-owner-review-shell-parity.md\"",
   "\"docs/convex-generated-api-cutover-owner-review.json\"",
   "\"npm run kinflo:validate-generated-api-cutover-owner-review\"",
   "\"npm run kinflo:validate-generated-api-cutover-owner-review-shell\"",
+  "\"npm run kinflo:validate-generated-api-cutover-owner-review-shell-parity\"",
   "Vercel build-rate limiting",
 ]) {
   if (ledgerText.includes(marker)) {
