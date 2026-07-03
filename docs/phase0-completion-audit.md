@@ -47,10 +47,13 @@ The latest local validation set passed:
 - `npm run build`
 - `git diff --check`
 
-The current PR checks passed:
+Current PR review state:
 
-- Vercel: `SUCCESS`
-- Vercel Preview Comments: `SUCCESS`
+- PR: `https://github.com/vsillah/JuliesFamily/pull/1`
+- Head source: current `codex/kinflo-phase-0-convex-plan` head.
+- Required before merge: Vercel `SUCCESS` and Vercel Preview Comments `SUCCESS`.
+- Latest observed state on July 3, 2026 after the most recent push: Vercel `PENDING`, Vercel Preview Comments `SUCCESS`.
+- Merge readiness: blocked until the Vercel status check reports `SUCCESS` on the current PR head.
 
 Current local-only artifacts intentionally excluded from the provider-light PR:
 

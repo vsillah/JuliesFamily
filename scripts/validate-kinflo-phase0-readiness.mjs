@@ -95,6 +95,7 @@ const humanOwnedGates = manifest.humanOwnedGates ?? [];
 const localValidationCommands = manifest.localValidationCommands ?? [];
 const localOnlyUntrackedArtifacts = manifest.localOnlyUntrackedArtifacts ?? [];
 const currentReviewEvidence = manifest.currentReviewEvidence ?? {};
+const latestObservedReviewState = currentReviewEvidence.latestObservedState ?? {};
 
 requireArrayIncludes(
   "repo-complete requirement ids",
@@ -206,6 +207,30 @@ if (currentReviewEvidence.pullRequest === "https://github.com/vsillah/JuliesFami
 const reviewCheckNames = (currentReviewEvidence.checks ?? []).map((check) => check.name);
 requireArrayIncludes("current review checks", reviewCheckNames, ["Vercel", "Vercel Preview Comments"]);
 
+if (latestObservedReviewState.vercel === "PENDING") {
+  pass("latest observed Vercel state is pending");
+} else {
+  fail("latest observed Vercel state is pending", `Received ${latestObservedReviewState.vercel ?? "(missing)"}.`);
+}
+
+if (latestObservedReviewState.vercelPreviewComments === "SUCCESS") {
+  pass("latest observed Vercel Preview Comments state is success");
+} else {
+  fail(
+    "latest observed Vercel Preview Comments state is success",
+    `Received ${latestObservedReviewState.vercelPreviewComments ?? "(missing)"}.`,
+  );
+}
+
+if (latestObservedReviewState.mergeReadiness === "blocked_until_vercel_success") {
+  pass("latest observed merge readiness remains blocked on Vercel success");
+} else {
+  fail(
+    "latest observed merge readiness remains blocked on Vercel success",
+    `Received ${latestObservedReviewState.mergeReadiness ?? "(missing)"}.`,
+  );
+}
+
 for (const path of [
   "docs/phase0-baseline.md",
   "docs/phase0-completion-audit.md",
@@ -224,11 +249,21 @@ for (const path of [
 
 requireIncludes("docs/phase0-completion-audit.md", [
   "This branch satisfies those repo-complete conditions.",
+  "Current PR review state",
+  "Latest observed state on July 3, 2026 after the most recent push: Vercel `PENDING`, Vercel Preview Comments `SUCCESS`.",
+  "Merge readiness: blocked until the Vercel status check reports `SUCCESS` on the current PR head.",
   "Human-Owned Gates Still Pending",
   "Do not treat it as approval to create providers",
   ".cursor/",
   "docs/terminal-command-cheatsheet.md",
 ]);
+
+const phase0AuditContents = read("docs/phase0-completion-audit.md");
+if (phase0AuditContents.includes("The current PR checks passed:")) {
+  fail("Phase 0 audit does not claim current PR checks passed while Vercel is pending", "Replace stale PR pass language with current status-check evidence.");
+} else {
+  pass("Phase 0 audit does not claim current PR checks passed while Vercel is pending");
+}
 
 requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
   "npm run kinflo:validate-phase0-readiness",

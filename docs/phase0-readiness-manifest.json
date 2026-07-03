@@ -15,6 +15,13 @@
   "currentReviewEvidence": {
     "pullRequest": "https://github.com/vsillah/JuliesFamily/pull/1",
     "liveVerificationCommand": "gh pr view 1 --repo vsillah/JuliesFamily --json headRefOid,statusCheckRollup,url",
+    "latestObservedState": {
+      "observedDate": "2026-07-03",
+      "headSource": "current PR #1 head at the time the command is run",
+      "vercel": "PENDING",
+      "vercelPreviewComments": "SUCCESS",
+      "mergeReadiness": "blocked_until_vercel_success"
+    },
     "checks": [
       {
         "name": "Vercel",

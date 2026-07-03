@@ -2,7 +2,7 @@
 
 Initial intake date: June 30, 2026
 
-Current validation date: July 2, 2026
+Current validation date: July 3, 2026
 
 Workspace: `/Users/vambahsillah/Documents/KinFlo CRM`
 
@@ -77,7 +77,7 @@ Notes:
 
 - Vite production build completed.
 - Browserlist data is stale.
-- Main JS bundle is large at roughly 3 MB minified, 749 KB gzip.
+- Main JS bundle is large. The current build reports roughly 3.9 MB minified and 880 KB gzip for the main JS asset.
 
 Initial command run:
 
@@ -133,6 +133,14 @@ npm run kinflo:audit-secret-history
 ```
 
 Current result: pass, with historical remediation still required before public or client sharing.
+
+Current command run:
+
+```bash
+gh pr view 1 --json url,state,isDraft,headRefName,headRefOid,mergeStateStatus,statusCheckRollup
+```
+
+Current result: PR #1 is open and draft on `codex/kinflo-phase-0-convex-plan`. Vercel Preview Comments reports `SUCCESS`; the Vercel deployment check is still `PENDING` and remains required before merge.
 
 Current TypeScript status:
 
