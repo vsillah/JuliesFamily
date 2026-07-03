@@ -78,6 +78,8 @@ The prior right-rail provisioning content stacked a large provisioning order car
 - the provisioning workbench itself is capped at 340px on narrow review widths, with order and dry-run interiors capped at 190px before the small breakpoint so the page does not fall back into a tall proof stack.
 - duplicate disabled gate buttons wait for desktop width because the narrow workbench already shows the gated state in the header badge.
 - the workbench card uses local vertical scrolling rather than clipping content when a nested panel has more detail than the compact viewport can show.
+- the provisioning view is controlled by an explicit `Order` / `Dry run` sub-tab state, keeping the default surface summary-first and preventing the execution dry run from reappearing as a second stacked card.
+- setup, evidence, blocked-action, and function panels now share the tighter 108px narrow cap and 145px small-screen cap, with the scroll behavior owned by the active panel rather than the whole order cockpit.
 
 Launch packets, content packs, onboarding evidence, simulations, polish scorecards, visual QA, proof-before-publish, and launch decisions remain available in the rail, but they now sit inside a launch dossier with `Provision`, `Packets`, `QA`, and `Decision` tabs. The left command column keeps the active site, gated launch controls, and provider boundary visible while the right dossier scrolls internally.
 

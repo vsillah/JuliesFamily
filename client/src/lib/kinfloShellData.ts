@@ -305,6 +305,26 @@ export type ShellHostedSmokeEvidenceLedger = {
   entries: ShellHostedSmokeEvidenceEntry[];
 };
 
+export type ShellHostedActivationDecisionCheckpoint = {
+  status: "prepare_only_decision_checkpoint";
+  totalDecisions: number;
+  pendingOwnerDecisions: number;
+  blockedUntilPriorGate: number;
+  readyToRecord: number;
+  nextOwnerDecisionId: string;
+  nextHumanGate: string;
+  approvalPacketPath: string;
+  sourceDocuments: string[];
+  blockedActions: string[];
+  canRecordApproval: false;
+  canCreateHostedDeployment: false;
+  canRunCodegen: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -314,6 +334,7 @@ export type ShellHostedActivationRunbook = {
   hostedSmokeGapBacklog: ShellHostedSmokeGapBacklog;
   hostedSmokeExecutionSequencer: ShellHostedSmokeExecutionSequencer;
   hostedSmokeEvidenceLedger: ShellHostedSmokeEvidenceLedger;
+  decisionCheckpoint: ShellHostedActivationDecisionCheckpoint;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -7318,6 +7339,37 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog,
   hostedSmokeExecutionSequencer: fixtureHostedSmokeExecutionSequencer,
   hostedSmokeEvidenceLedger: fixtureHostedSmokeEvidenceLedger,
+  decisionCheckpoint: {
+    status: "prepare_only_decision_checkpoint",
+    totalDecisions: 8,
+    pendingOwnerDecisions: 2,
+    blockedUntilPriorGate: 6,
+    readyToRecord: 0,
+    nextOwnerDecisionId: "credential-rotation-review",
+    nextHumanGate: "Credential rotation review and repository sharing posture must be resolved before hosted Convex ownership, codegen, generated bindings, or live smoke can begin.",
+    approvalPacketPath: "docs/convex-hosted-activation-approval-packet.json",
+    sourceDocuments: [
+      "docs/phase73-hosted-activation-decision-register.md",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase96-hosted-activation-owner-checklist.md",
+      "docs/phase104-hosted-smoke-evidence-deep-links.md",
+    ],
+    blockedActions: [
+      "create hosted Convex deployment",
+      "run npm run convex:codegen",
+      "import generated Convex API module",
+      "execute live Convex smoke",
+      "switch fixture adapter",
+      "perform provider writes or client launch",
+    ],
+    canRecordApproval: false,
+    canCreateHostedDeployment: false,
+    canRunCodegen: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
   decisionRegister: [
     {
       id: "credential-rotation-review",

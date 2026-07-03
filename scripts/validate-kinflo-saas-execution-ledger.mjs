@@ -99,6 +99,7 @@ for (const path of [
   "docs/phase97-client-website-configuration-profiles.md",
   "docs/phase98-configuration-profile-generated-api-coverage.md",
   "docs/phase96-hosted-activation-owner-checklist.md",
+  "docs/phase120-hosted-activation-decision-checkpoint.md",
   "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase104-hosted-smoke-evidence-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
@@ -134,6 +135,7 @@ for (const path of [
   "scripts/validate-kinflo-client-website-configuration-profiles.mjs",
   "scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
   "scripts/validate-kinflo-hosted-activation-owner-checklist.mjs",
+  "scripts/validate-kinflo-hosted-activation-decision-checkpoint.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
@@ -267,6 +269,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
   "npm run kinflo:validate-hosted-activation-owner-checklist",
+  "npm run kinflo:validate-hosted-activation-decision-checkpoint",
   "npm run kinflo:validate-hosted-activation-step-deep-links",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -305,6 +308,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 84 Claude frame ingestion packet",
   "Phase 85 hosted activation approval packet",
   "Phase 96 hosted activation owner checklist",
+  "Phase 120 hosted activation decision checkpoint",
   "Phase 101 hosted activation step deep links",
   "Phase 104 hosted smoke evidence deep links",
   "Site Studio scroll consolidation",
@@ -323,7 +327,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 93 adapter switch cutover checklist",
   "Phase 102 adapter switch batch deep links",
   "Phase 103 adapter switch surface deep links",
-  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
+  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
 ]);
 
 requireIncludes("package.json", [
@@ -343,6 +347,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-configuration-change-set\"",
   "\"kinflo:validate-configuration-profile-generated-api-coverage\"",
   "\"kinflo:validate-hosted-activation-owner-checklist\"",
+  "\"kinflo:validate-hosted-activation-decision-checkpoint\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
