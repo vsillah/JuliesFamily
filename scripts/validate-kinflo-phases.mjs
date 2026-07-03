@@ -195,6 +195,7 @@ for (const path of [
   "docs/phase143-configuration-approval-matrix-deep-links.md",
   "docs/phase144-configuration-workspace-panels.md",
   "docs/phase145-configuration-profile-switcher.md",
+  "docs/phase146-configuration-admin-permission-preset.md",
   "docs/phase141-configuration-save-request-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
@@ -363,6 +364,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-approval-matrix-deep-links.mjs",
   "scripts/validate-kinflo-configuration-workspace-panels.mjs",
   "scripts/validate-kinflo-configuration-profile-switcher.mjs",
+  "scripts/validate-kinflo-configuration-admin-permission-preset.mjs",
   "scripts/validate-kinflo-configuration-save-request-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
@@ -2480,6 +2482,24 @@ requireIncludes("docs/phase145-configuration-profile-switcher.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase146-configuration-admin-permission-preset.md", [
+  "Phase 146: Configuration Admin Permission Preset",
+  "npm run kinflo:validate-configuration-admin-permission-preset",
+  "studioSite=julies-family-public|advisor-client-site|campaign-microsite",
+  "studioConfigure=review|change|approval|save",
+  "section-kinflo-client-configuration-admin-permission-preset",
+  "text-kinflo-client-configuration-admin-permission-preset",
+  "section-kinflo-client-configuration-admin-permission-scope",
+  "section-kinflo-client-configuration-admin-permission-set",
+  "section-kinflo-client-configuration-admin-permission-gates",
+  "section-kinflo-client-configuration-admin-permission-blocked",
+  "section-kinflo-client-configuration-admin-permission-functions",
+  "button-client-configuration-admin-permission-gated",
+  "selectedClientWebsiteAdminPermissionPreset",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase141-configuration-save-request-deep-links.md", [
   "Phase 141: Configuration Save Request Deep Links",
   "npm run kinflo:validate-configuration-save-request-deep-links",
@@ -2760,6 +2780,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase143-configuration-approval-matrix-deep-links.md\"",
   "\"docs/phase144-configuration-workspace-panels.md\"",
   "\"docs/phase145-configuration-profile-switcher.md\"",
+  "\"docs/phase146-configuration-admin-permission-preset.md\"",
   "\"docs/phase141-configuration-save-request-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
@@ -2824,6 +2845,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-configuration-approval-matrix-deep-links\"",
   "\"npm run kinflo:validate-configuration-workspace-panels\"",
   "\"npm run kinflo:validate-configuration-profile-switcher\"",
+  "\"npm run kinflo:validate-configuration-admin-permission-preset\"",
   "\"npm run kinflo:validate-configuration-save-request-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
@@ -2975,6 +2997,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-approval-matrix-deep-links\"",
   "\"kinflo:validate-configuration-workspace-panels\"",
   "\"kinflo:validate-configuration-profile-switcher\"",
+  "\"kinflo:validate-configuration-admin-permission-preset\"",
   "\"kinflo:validate-configuration-save-request-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
@@ -4459,6 +4482,17 @@ requireIncludes("scripts/validate-kinflo-configuration-profile-switcher.mjs", [
   "configuration profile switcher does not import generated API",
   "configuration profile switcher does not execute live Convex",
   "KinFlo configuration profile switcher validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-admin-permission-preset.mjs", [
+  "docs/phase146-configuration-admin-permission-preset.md",
+  "studioSite",
+  "selectedPermissionPreset",
+  "section-kinflo-client-configuration-admin-permission-preset",
+  "button-client-configuration-admin-permission-gated",
+  "configuration admin permission preset does not import generated API",
+  "configuration admin permission preset does not execute live Convex",
+  "KinFlo configuration admin permission preset validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [

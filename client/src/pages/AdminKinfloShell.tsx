@@ -1206,6 +1206,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedInvitationReadiness,
   selectedExperiencePreset,
   selectedRollbackCheckpoint,
+  selectedPermissionPreset,
   selectedSiteKey,
   onSiteChange,
   workspace,
@@ -1231,6 +1232,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedInvitationReadiness?: ShellClientWebsiteAdminInvitationReadinessPacket;
   selectedExperiencePreset?: ShellClientWebsiteExperienceConfigurationPreset;
   selectedRollbackCheckpoint?: ShellClientWebsiteConfigurationRollbackCheckpoint;
+  selectedPermissionPreset?: ShellClientWebsiteAdminPermissionPreset;
   selectedSiteKey: string;
   onSiteChange: (siteKey: string) => void;
   workspace: ClientConfigurationWorkspace;
@@ -1344,6 +1346,93 @@ function ClientWebsiteConfigurationProfiles({
           })}
         </div>
       </div>
+
+      {selectedPermissionPreset ? (
+        <div
+          className="mt-3 rounded-xl border border-slate-200 bg-white p-3"
+          data-testid="section-kinflo-client-configuration-admin-permission-preset"
+        >
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="bg-slate-50">
+                  Admin permission preset
+                </Badge>
+                <Badge variant="secondary" data-testid="section-kinflo-client-configuration-admin-permission-scope">
+                  {selectedPermissionPreset.scope} scope
+                </Badge>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-slate-950" data-testid="text-kinflo-client-configuration-admin-permission-preset">
+                {selectedPermissionPreset.label}
+              </div>
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                {selectedPermissionPreset.description}
+              </p>
+            </div>
+            <Button disabled variant="outline" className="shrink-0 justify-start" data-testid="button-client-configuration-admin-permission-gated">
+              <UserRoundCog className="mr-2 h-4 w-4" />
+              Permission write gated
+            </Button>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {[
+                { label: "Owner", value: selectedPermissionPreset.ownerRole },
+                { label: "Invite", value: selectedPermissionPreset.inviteRole },
+              ].map((item) => (
+                <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-2">
+                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+                  <div className="mt-1 truncate font-semibold text-slate-950">{item.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-2" data-testid="section-kinflo-client-configuration-admin-permission-set">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Permission set</div>
+              <div className="mt-2 flex max-h-[74px] flex-wrap gap-1.5 overflow-y-auto pr-1">
+                {selectedPermissionPreset.permissionSet.map((permission) => (
+                  <Badge key={permission} variant="outline" className="bg-white text-[10px]">{permission}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-2" data-testid="section-kinflo-client-configuration-admin-permission-gates">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Approval gates</div>
+              <div className="mt-2 max-h-[92px] space-y-1.5 overflow-y-auto pr-1">
+                {selectedPermissionPreset.approvalGates.map((gate) => (
+                  <div key={gate} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                    <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <span>{gate}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-2" data-testid="section-kinflo-client-configuration-admin-permission-blocked">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Blocked permission actions</div>
+              <div className="mt-2 max-h-[92px] space-y-1.5 overflow-y-auto pr-1">
+                {selectedPermissionPreset.blockedActions.map((action) => (
+                  <div key={action} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
+                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                    <span>{action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex max-h-[72px] flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-2" data-testid="section-kinflo-client-configuration-admin-permission-functions">
+            {selectedPermissionPreset.convexFunctions.map((functionName) => (
+              <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all bg-white text-left text-[10px]">
+                {functionName}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <Tabs
         value={workspace}
@@ -8782,6 +8871,7 @@ export default function AdminKinfloShell() {
                     selectedInvitationReadiness={selectedClientWebsiteAdminInvitationReadinessPacket}
                     selectedExperiencePreset={selectedClientWebsiteExperienceConfigurationPreset}
                     selectedRollbackCheckpoint={selectedClientWebsiteConfigurationRollbackCheckpoint}
+                    selectedPermissionPreset={selectedClientWebsiteAdminPermissionPreset}
                     selectedSiteKey={clientWebsiteStudioSiteKey}
                     onSiteChange={selectClientWebsiteStudioSite}
                     workspace={clientConfigurationWorkspace}

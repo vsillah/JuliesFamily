@@ -118,6 +118,7 @@
     "kinflo:validate-configuration-approval-matrix-deep-links": "node scripts/validate-kinflo-configuration-approval-matrix-deep-links.mjs",
     "kinflo:validate-configuration-workspace-panels": "node scripts/validate-kinflo-configuration-workspace-panels.mjs",
     "kinflo:validate-configuration-profile-switcher": "node scripts/validate-kinflo-configuration-profile-switcher.mjs",
+    "kinflo:validate-configuration-admin-permission-preset": "node scripts/validate-kinflo-configuration-admin-permission-preset.mjs",
     "kinflo:validate-configuration-save-request-deep-links": "node scripts/validate-kinflo-configuration-save-request-deep-links.mjs",
     "kinflo:validate-client-public-preview-context-links": "node scripts/validate-kinflo-client-public-preview-context-links.mjs",
     "kinflo:validate-client-preview-review-packet": "node scripts/validate-kinflo-client-preview-review-packet.mjs",
