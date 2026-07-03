@@ -22,7 +22,7 @@ npm run kinflo:validate-adapter-switch-cutover-checklist
 
 - Total batches: 6
 - Total surfaces: 12
-- Total functions: 32
+- Total functions: 43
 - Ready batches: 0
 - Blocked batches: 6
 

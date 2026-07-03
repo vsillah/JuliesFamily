@@ -328,6 +328,35 @@ type ClientWebsiteDomainReadinessPacket = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteAdminInvitationReadinessPacket = {
+  siteKey: string;
+  label: string;
+  invitationPosture: "provider-light-admin-invitation";
+  invitationStatus: "super_admin_only" | "tenant_admin_ready_not_sent" | "site_editor_blocked";
+  inviteRole: string;
+  inviteScope: "platform" | "tenant" | "site";
+  inviteRecipientLabel: string;
+  deliveryMode: "disabled" | "manual_review_only";
+  evidenceChecklist: {
+    key: string;
+    label: string;
+    status: "ready" | "pending" | "blocked";
+    evidence: string;
+  }[];
+  copyBlocks: string[];
+  rollbackPlan: string;
+  blockedLiveActions: string[];
+  nextGate: string;
+  canCreateInvitation: false;
+  canSendEmail: false;
+  canGrantMembership: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 type ClientWebsiteExperienceConfigurationPreset = {
   siteKey: string;
   label: string;
@@ -3189,6 +3218,119 @@ export const listClientWebsiteDomainReadinessPackets = query({
     clientWebsiteDomainReadinessPackets.map((packet) => ({
       ...packet,
       providerBoundary: "Read-only client website domain readiness query. It records hostname posture, DNS checklist, SSL posture, provider state, rollback plan, blocked live actions, and gates only; it does not attach domains, verify DNS, issue SSL, save configuration, publish, call providers, run codegen, import generated API, or execute hosted Convex.",
+    })),
+});
+
+const clientWebsiteAdminInvitationReadinessPackets: ClientWebsiteAdminInvitationReadinessPacket[] = [
+  {
+    siteKey: "julies-family-public",
+    label: "Julie Family founding admin invitation readiness",
+    invitationPosture: "provider-light-admin-invitation",
+    invitationStatus: "super_admin_only",
+    inviteRole: "platform.super_admin",
+    inviteScope: "platform",
+    inviteRecipientLabel: "Founding platform steward",
+    deliveryMode: "disabled",
+    evidenceChecklist: [
+      { key: "founding-owner", label: "Founding owner", status: "ready", evidence: "platform.super_admin remains the only active admin in fixture review" },
+      { key: "role-scope", label: "Role scope", status: "ready", evidence: "platform steward scope is mapped in admin permission preset" },
+      { key: "email-delivery", label: "Email delivery", status: "blocked", evidence: "client invitation delivery is disabled until hosted auth smoke" },
+      { key: "membership-rollback", label: "Membership rollback", status: "ready", evidence: "no fixture membership write is required for founding review" },
+    ],
+    copyBlocks: ["Founding owner note", "Platform steward scope", "Blocked invitation register"],
+    rollbackPlan: "Keep Julie Family in super-admin-only fixture review until hosted auth, invitation list, and rollback evidence are accepted.",
+    blockedLiveActions: ["controlPlane.createInvitation mutation", "invitation email send", "membership grant", "client sharing"],
+    nextGate: "Approve hosted auth read smoke and invitation rollback review before preparing any non-super-admin invite.",
+    canCreateInvitation: false,
+    canSendEmail: false,
+    canGrantMembership: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+      "siteFactory.listClientWebsiteAdminPermissionPresets",
+      "controlPlane.listInvitations",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "advisor-client-site",
+    label: "Advisor client admin invitation readiness",
+    invitationPosture: "provider-light-admin-invitation",
+    invitationStatus: "tenant_admin_ready_not_sent",
+    inviteRole: "tenant.admin",
+    inviteScope: "tenant",
+    inviteRecipientLabel: "Client content reviewer",
+    deliveryMode: "manual_review_only",
+    evidenceChecklist: [
+      { key: "tenant-owner", label: "Tenant owner", status: "blocked", evidence: "tenant owner approval is still pending" },
+      { key: "role-scope", label: "Role scope", status: "ready", evidence: "Client content reviewer preset is mapped to tenant-scoped permissions" },
+      { key: "domain-gate", label: "Domain gate", status: "pending", evidence: "domain readiness packet remains pending DNS and rollback evidence" },
+      { key: "hosted-auth", label: "Hosted auth", status: "blocked", evidence: "hosted invitation list and accept/revoke smoke are not approved" },
+    ],
+    copyBlocks: ["Client admin invite summary", "Tenant role scope", "Owner signoff request", "Rollback note"],
+    rollbackPlan: "Keep advisor admin invite as a review-only packet; discard pending invite copy if owner, domain, hosted auth, or rollback evidence fails.",
+    blockedLiveActions: ["controlPlane.createInvitation mutation", "invitation email send", "membership grant", "tenant create mutation"],
+    nextGate: "Approve tenant owner, hosted auth invitation smoke, domain posture, and invite rollback before sending a client admin invitation.",
+    canCreateInvitation: false,
+    canSendEmail: false,
+    canGrantMembership: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+      "siteFactory.listClientWebsiteAdminPermissionPresets",
+      "siteFactory.listClientWebsiteDomainReadinessPackets",
+      "controlPlane.listInvitations",
+      "controlPlane.createInvitation",
+    ],
+  },
+  {
+    siteKey: "campaign-microsite",
+    label: "Campaign editor invitation readiness",
+    invitationPosture: "provider-light-admin-invitation",
+    invitationStatus: "site_editor_blocked",
+    inviteRole: "site.editor",
+    inviteScope: "site",
+    inviteRecipientLabel: "Campaign editor",
+    deliveryMode: "manual_review_only",
+    evidenceChecklist: [
+      { key: "campaign-consent", label: "Campaign consent", status: "blocked", evidence: "campaign consent and public copy approval pending" },
+      { key: "editor-scope", label: "Editor scope", status: "pending", evidence: "site editor scope is drafted but not approved" },
+      { key: "provider-send", label: "Provider send", status: "blocked", evidence: "campaign send boundary and rollback remain blocked" },
+      { key: "hosted-auth", label: "Hosted auth", status: "blocked", evidence: "hosted invitation smoke and revoke path are pending" },
+    ],
+    copyBlocks: ["Campaign editor scope", "Consent reminder", "Provider-send blocker", "Revoke fallback"],
+    rollbackPlan: "Keep editor invite blocked until consent, editor scope, hosted auth smoke, and provider-send rollback are accepted.",
+    blockedLiveActions: ["controlPlane.createInvitation mutation", "site editor invitation email", "campaign send", "AI copy publish"],
+    nextGate: "Accept consent, editor scope, hosted auth smoke, and provider-send rollback before a campaign editor invite can be sent.",
+    canCreateInvitation: false,
+    canSendEmail: false,
+    canGrantMembership: false,
+    canSaveConfig: false,
+    canPublish: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+    convexFunctions: [
+      "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+      "siteFactory.listClientWebsiteAdminPermissionPresets",
+      "campaigns.requestCampaignApproval",
+      "controlPlane.listInvitations",
+      "controlPlane.createInvitation",
+    ],
+  },
+];
+
+export const listClientWebsiteAdminInvitationReadinessPackets = query({
+  args: {},
+  handler: async () =>
+    clientWebsiteAdminInvitationReadinessPackets.map((packet) => ({
+      ...packet,
+      providerBoundary: "Read-only client admin invitation readiness query. It records invite role, scope, evidence, copy blocks, rollback plan, blocked live actions, and gates only; it does not create invitations, send email, grant membership, save configuration, publish, call providers, run codegen, import generated API, or execute hosted Convex.",
     })),
 });
 

@@ -121,6 +121,8 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "siteFactory.listClientWebsiteConfigurationSaveRequests",
   "siteFactoryListClientWebsiteDomainReadinessPackets",
   "siteFactory.listClientWebsiteDomainReadinessPackets",
+  "siteFactoryListClientWebsiteAdminInvitationReadinessPackets",
+  "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
   "siteFactoryListClientWebsiteExperienceConfigurationPresets",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
   "configuration profile read",
@@ -129,6 +131,7 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "configuration rollback checkpoint read",
   "configuration save request read",
   "client website domain readiness read",
+  "client website admin invitation readiness read",
   "experience configuration preset read",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -144,6 +147,7 @@ requireIncludes(runtimePath, [
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints: \"siteFactory.listClientWebsiteConfigurationRollbackCheckpoints\"",
   "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
   "siteFactoryListClientWebsiteDomainReadinessPackets: \"siteFactory.listClientWebsiteDomainReadinessPackets\"",
+  "siteFactoryListClientWebsiteAdminInvitationReadinessPackets: \"siteFactory.listClientWebsiteAdminInvitationReadinessPackets\"",
   "siteFactoryListClientWebsiteExperienceConfigurationPresets: \"siteFactory.listClientWebsiteExperienceConfigurationPresets\"",
 ]);
 
@@ -162,6 +166,8 @@ requireIncludes(generatedContractPath, [
   "client website configuration publish readiness includes publish criteria, blockers, rollback requirements, blocked actions, and provider boundaries",
   "siteFactoryListClientWebsiteDomainReadinessPackets",
   "client website domain readiness packets include hostname posture, DNS checklist, SSL posture, provider state, rollback plan, and provider boundaries",
+  "siteFactoryListClientWebsiteAdminInvitationReadinessPackets",
+  "client website admin invitation readiness packets include invite role, scope, evidence, copy blocks, rollback plan, and provider boundaries",
   "siteFactoryListClientWebsiteExperienceConfigurationPresets",
   "client website experience configuration presets include audience, journey, layout density, tone, navigation mode, admin preset, personalization rules, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
@@ -180,13 +186,14 @@ requireIncludes(convexPath, [
   "export const listClientWebsiteConfigurationRollbackCheckpoints",
   "export const listClientWebsiteConfigurationSaveRequests",
   "export const listClientWebsiteDomainReadinessPackets",
+  "export const listClientWebsiteAdminInvitationReadinessPackets",
   "export const listClientWebsiteExperienceConfigurationPresets",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 84",
-  "Query bindings: 46",
-  "Smoke-manifest review gaps: 39",
+  "Generated API bindings: 85",
+  "Query bindings: 47",
+  "Smoke-manifest review gaps: 40",
 ]);
 
 requireIncludes(shellDataPath, [
@@ -200,6 +207,7 @@ requireIncludes(shellDataPath, [
   "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactory.listClientWebsiteConfigurationSaveRequests",
   "siteFactory.listClientWebsiteDomainReadinessPackets",
+  "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
 ]);
 
@@ -295,6 +303,20 @@ for (const [label, surface] of [
     pass(`${label} includes client website domain readiness smoke evidence`);
   } else {
     fail(`${label} includes client website domain readiness smoke evidence`, "Client website domain readiness read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteAdminInvitationReadinessPackets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteAdminInvitationReadinessPackets")) {
+    pass(`${label} includes client website admin invitation readiness function`);
+  } else {
+    fail(`${label} includes client website admin invitation readiness function`, "Client website admin invitation readiness read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("client website admin invitation readiness read")
+    || surface?.smokeEvidenceRequired?.includes("client website admin invitation readiness read")) {
+    pass(`${label} includes client website admin invitation readiness smoke evidence`);
+  } else {
+    fail(`${label} includes client website admin invitation readiness smoke evidence`, "Client website admin invitation readiness read evidence must be required before adapter switch.");
   }
 
   if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteExperienceConfigurationPresets")

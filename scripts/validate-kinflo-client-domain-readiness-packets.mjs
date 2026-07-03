@@ -129,11 +129,11 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "hostname: \"campaign.example.invalid\"",
   "dnsChecklist",
   "siteFactory.listClientWebsiteDomainReadinessPackets",
-  "totalBindings: 84",
-  "queryBindings: 46",
-  "smokeManifestGaps: 39",
-  "totalBindings: 23",
-  "queryBindings: 22",
+  "totalBindings: 85",
+  "queryBindings: 47",
+  "smokeManifestGaps: 40",
+  "totalBindings: 24",
+  "queryBindings: 23",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
@@ -143,7 +143,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "tab-kinflo-client-domain-readiness-packet",
   "section-kinflo-client-domain-readiness-packet",
   "selectedDomainReadiness?.dnsChecklist.map",
-  "sm:grid-cols-8",
+  "sm:grid-cols-9",
   "max-h-[145px]",
 ]);
 
@@ -158,9 +158,9 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 84",
-  "Query bindings: 46",
-  "Smoke-manifest review gaps: 39",
+  "Generated API bindings: 85",
+  "Query bindings: 47",
+  "Smoke-manifest review gaps: 40",
   "siteFactory.listClientWebsiteDomainReadinessPackets",
 ]);
 

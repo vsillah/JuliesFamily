@@ -102,7 +102,7 @@ requireIncludes("docs/phase93-adapter-switch-cutover-checklist.md", [
   "button-adapter-switch-cutover-gated",
   "Total batches: 6",
   "Total surfaces: 12",
-  "Total functions: 32",
+  "Total functions: 43",
   "Ready batches: 0",
   "Blocked batches: 6",
   "No generated Convex API files are committed or imported.",
@@ -117,7 +117,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "provider_light_adapter_cutover_checklist",
   "totalBatches: 6",
   "totalSurfaces: 12",
-  "totalFunctions: 32",
+  "totalFunctions: 43",
   "readyBatches: 0",
   "blockedBatches: 6",
   "canCutover: false",
@@ -175,10 +175,10 @@ if (totals.surfaces === 12) {
   fail("cutover plan has twelve surfaces", `Received ${totals.surfaces}.`);
 }
 
-if (totals.functions === 32) {
-  pass("cutover plan has thirty-two mapped functions");
+if (totals.functions === 43) {
+  pass("cutover plan has forty-three mapped functions");
 } else {
-  fail("cutover plan has thirty-two mapped functions", `Received ${totals.functions}.`);
+  fail("cutover plan has forty-three mapped functions", `Received ${totals.functions}.`);
 }
 
 for (const item of uniqueFunctionsByBatch) {

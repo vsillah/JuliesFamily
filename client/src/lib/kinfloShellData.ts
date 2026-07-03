@@ -941,6 +941,35 @@ export type ShellClientWebsiteDomainReadinessPacket = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteAdminInvitationReadinessPacket = {
+  siteKey: string;
+  label: string;
+  invitationPosture: "provider-light-admin-invitation";
+  invitationStatus: "super_admin_only" | "tenant_admin_ready_not_sent" | "site_editor_blocked";
+  inviteRole: string;
+  inviteScope: "platform" | "tenant" | "site";
+  inviteRecipientLabel: string;
+  deliveryMode: "disabled" | "manual_review_only";
+  evidenceChecklist: {
+    key: string;
+    label: string;
+    status: "ready" | "pending" | "blocked";
+    evidence: string;
+  }[];
+  copyBlocks: string[];
+  rollbackPlan: string;
+  blockedLiveActions: string[];
+  nextGate: string;
+  canCreateInvitation: false;
+  canSendEmail: false;
+  canGrantMembership: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -1164,6 +1193,7 @@ export type ShellClientWebsiteStudio = {
   configurationRollbackCheckpoints: ShellClientWebsiteConfigurationRollbackCheckpoint[];
   configurationPublishReadiness: ShellClientWebsiteConfigurationPublishReadiness[];
   domainReadinessPackets: ShellClientWebsiteDomainReadinessPacket[];
+  adminInvitationReadinessPackets: ShellClientWebsiteAdminInvitationReadinessPacket[];
   experienceConfigurationPresets: ShellClientWebsiteExperienceConfigurationPreset[];
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
@@ -3505,6 +3535,109 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  adminInvitationReadinessPackets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family founding admin invitation readiness",
+      invitationPosture: "provider-light-admin-invitation",
+      invitationStatus: "super_admin_only",
+      inviteRole: "platform.super_admin",
+      inviteScope: "platform",
+      inviteRecipientLabel: "Founding platform steward",
+      deliveryMode: "disabled",
+      evidenceChecklist: [
+        { key: "founding-owner", label: "Founding owner", status: "ready", evidence: "platform.super_admin remains the only active admin in fixture review" },
+        { key: "role-scope", label: "Role scope", status: "ready", evidence: "platform steward scope is mapped in admin permission preset" },
+        { key: "email-delivery", label: "Email delivery", status: "blocked", evidence: "client invitation delivery is disabled until hosted auth smoke" },
+        { key: "membership-rollback", label: "Membership rollback", status: "ready", evidence: "no fixture membership write is required for founding review" },
+      ],
+      copyBlocks: ["Founding owner note", "Platform steward scope", "Blocked invitation register"],
+      rollbackPlan: "Keep Julie Family in super-admin-only fixture review until hosted auth, invitation list, and rollback evidence are accepted.",
+      blockedLiveActions: ["controlPlane.createInvitation mutation", "invitation email send", "membership grant", "client sharing"],
+      nextGate: "Approve hosted auth read smoke and invitation rollback review before preparing any non-super-admin invite.",
+      canCreateInvitation: false,
+      canSendEmail: false,
+      canGrantMembership: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "controlPlane.listInvitations",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client admin invitation readiness",
+      invitationPosture: "provider-light-admin-invitation",
+      invitationStatus: "tenant_admin_ready_not_sent",
+      inviteRole: "tenant.admin",
+      inviteScope: "tenant",
+      inviteRecipientLabel: "Client content reviewer",
+      deliveryMode: "manual_review_only",
+      evidenceChecklist: [
+        { key: "tenant-owner", label: "Tenant owner", status: "blocked", evidence: "tenant owner approval is still pending" },
+        { key: "role-scope", label: "Role scope", status: "ready", evidence: "Client content reviewer preset is mapped to tenant-scoped permissions" },
+        { key: "domain-gate", label: "Domain gate", status: "pending", evidence: "domain readiness packet remains pending DNS and rollback evidence" },
+        { key: "hosted-auth", label: "Hosted auth", status: "blocked", evidence: "hosted invitation list and accept/revoke smoke are not approved" },
+      ],
+      copyBlocks: ["Client admin invite summary", "Tenant role scope", "Owner signoff request", "Rollback note"],
+      rollbackPlan: "Keep advisor admin invite as a review-only packet; discard pending invite copy if owner, domain, hosted auth, or rollback evidence fails.",
+      blockedLiveActions: ["controlPlane.createInvitation mutation", "invitation email send", "membership grant", "tenant create mutation"],
+      nextGate: "Approve tenant owner, hosted auth invitation smoke, domain posture, and invite rollback before sending a client admin invitation.",
+      canCreateInvitation: false,
+      canSendEmail: false,
+      canGrantMembership: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "siteFactory.listClientWebsiteDomainReadinessPackets",
+        "controlPlane.listInvitations",
+        "controlPlane.createInvitation",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign editor invitation readiness",
+      invitationPosture: "provider-light-admin-invitation",
+      invitationStatus: "site_editor_blocked",
+      inviteRole: "site.editor",
+      inviteScope: "site",
+      inviteRecipientLabel: "Campaign editor",
+      deliveryMode: "manual_review_only",
+      evidenceChecklist: [
+        { key: "campaign-consent", label: "Campaign consent", status: "blocked", evidence: "campaign consent and public copy approval pending" },
+        { key: "editor-scope", label: "Editor scope", status: "pending", evidence: "site editor scope is drafted but not approved" },
+        { key: "provider-send", label: "Provider send", status: "blocked", evidence: "campaign send boundary and rollback remain blocked" },
+        { key: "hosted-auth", label: "Hosted auth", status: "blocked", evidence: "hosted invitation smoke and revoke path are pending" },
+      ],
+      copyBlocks: ["Campaign editor scope", "Consent reminder", "Provider-send blocker", "Revoke fallback"],
+      rollbackPlan: "Keep editor invite blocked until consent, editor scope, hosted auth smoke, and provider-send rollback are accepted.",
+      blockedLiveActions: ["controlPlane.createInvitation mutation", "site editor invitation email", "campaign send", "AI copy publish"],
+      nextGate: "Accept consent, editor scope, hosted auth smoke, and provider-send rollback before a campaign editor invite can be sent.",
+      canCreateInvitation: false,
+      canSendEmail: false,
+      canGrantMembership: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "campaigns.requestCampaignApproval",
+        "controlPlane.listInvitations",
+        "controlPlane.createInvitation",
+      ],
+    },
+  ],
   experienceConfigurationPresets: [
     {
       siteKey: "julies-family-public",
@@ -4786,6 +4919,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
     "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
     "siteFactory.listClientWebsiteConfigurationSaveRequests",
     "siteFactory.listClientWebsiteDomainReadinessPackets",
+    "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
     "siteFactory.listClientWebsiteExperienceConfigurationPresets",
     "siteFactory.listClientWebsiteLaunchDecisionPackets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
@@ -5797,11 +5931,22 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
       label: "Site creation, invitations, and activation readiness",
       acceptancePosture: "blocked_smoke_gap",
       surfaceCount: 2,
-      functionCount: 6,
+      functionCount: 17,
       generatedContractCoverage: "complete",
       smokeCoveredFunctions: 4,
       smokeMissingFunctions: [
         "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+        "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+        "siteFactory.listClientWebsiteConfigurationChangeSets",
+        "siteFactory.listClientWebsiteConfigurationReviewPackets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsiteConfigurationSaveRequests",
+        "siteFactory.listClientWebsiteDomainReadinessPackets",
+        "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+        "siteFactory.listClientWebsiteExperienceConfigurationPresets",
         "siteFactory.listClientWebsiteLaunchBlueprints",
       ],
       nextHumanGate: "Approve client permission preset and launch blueprint read smokes before template creation or invite smoke can advance.",
@@ -5987,7 +6132,7 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
     status: "provider_light_adapter_cutover_checklist",
     totalBatches: 6,
     totalSurfaces: 12,
-    totalFunctions: 32,
+    totalFunctions: 43,
     readyBatches: 0,
     blockedBatches: 6,
     approvalGate: "Cutover is prepared only. Hosted Convex ownership, generated API review, Phase 92 evidence acceptance, rollback owner, and owner signoff must pass before any fixture adapter can import generated bindings.",
@@ -6072,7 +6217,7 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
         batchId: "site-creation-and-admin",
         label: "Site creation, invitations, and activation readiness",
         surfaceCount: 2,
-        functionCount: 6,
+        functionCount: 17,
         entryCriteria: [
           "client site factory read evidence is accepted",
           "smoke site cleanup policy is accepted",
@@ -6209,11 +6354,11 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
 
 const fixtureHostedSmokeGapBacklog: ShellHostedSmokeGapBacklog = {
   status: "provider_light_hosted_smoke_gap_backlog",
-  totalGaps: 16,
-  readOnlyGaps: 8,
+  totalGaps: 27,
+  readOnlyGaps: 21,
   mutationGaps: 3,
-  providerGatedGaps: 1,
-  governanceGaps: 4,
+  providerGatedGaps: 2,
+  governanceGaps: 5,
   approvalGate: "Hosted smoke gap backlog cannot run until hosted Convex ownership, generated API review, live-smoke dry run, rollback owner, and Vambah's smoke execution approval are accepted.",
   providerBoundary: "This backlog is review-only. It does not create a hosted Convex deployment, run codegen, import generated API files, execute live Convex functions, write provider metadata, send campaigns, call AI providers, or publish client sites.",
   sourceDocuments: [
@@ -6279,6 +6424,171 @@ const fixtureHostedSmokeGapBacklog: ShellHostedSmokeGapBacklog = {
       rollbackArtifact: "Fixture permission presets remain active if hosted role scope diverges.",
       owner: "platform.super_admin",
       blockedUntil: "Client permission preset smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-approval-matrices",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+      smokeMode: "read_only",
+      localProof: "Phase 112 maps approval roles, evidence, blockers, and capture gates in fixtures.",
+      hostedProofRequired: "Run a read-only hosted approval matrix query and confirm approver roles remain site scoped.",
+      rollbackArtifact: "Fixture approval matrix remains active if hosted approval rows diverge.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration approval matrix read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-audit-timelines",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+      smokeMode: "read_only",
+      localProof: "Phase 114 maps configuration audit events, rollback notes, and blocked actions locally.",
+      hostedProofRequired: "Run a read-only hosted audit timeline query and confirm evidence events remain selected-site scoped.",
+      rollbackArtifact: "Fixture audit timeline remains active if hosted evidence or actor scope diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration audit timeline read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-change-sets",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationChangeSets",
+      smokeMode: "read_only",
+      localProof: "Phase 111 maps draft configuration changes and locked permission surfaces without saving.",
+      hostedProofRequired: "Run a read-only hosted change-set query and confirm draft changes stay review-only.",
+      rollbackArtifact: "Fixture change set remains active if hosted drafts expose save paths.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration change set read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-review-packets",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationReviewPackets",
+      smokeMode: "read_only",
+      localProof: "Phase 110 maps selected-site review packets, save blockers, and required evidence.",
+      hostedProofRequired: "Run a read-only hosted review packet query and confirm editable and locked surfaces match fixtures.",
+      rollbackArtifact: "Fixture review packet remains active if hosted surface state diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration review packet read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-profiles",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationProfiles",
+      smokeMode: "read_only",
+      localProof: "Phase 97 maps template, brand, navigation, CRM, and locked configuration surfaces.",
+      hostedProofRequired: "Run a read-only hosted configuration profile query and confirm selected-site profile parity.",
+      rollbackArtifact: "Fixture configuration profile remains active if hosted profile state diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration profile read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-publish-readiness",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+      smokeMode: "read_only",
+      localProof: "Phase 116 maps publish criteria, blockers, rollback requirements, and blocked actions.",
+      hostedProofRequired: "Run a read-only hosted publish readiness query and confirm publish stays blocked.",
+      rollbackArtifact: "Fixture publish readiness remains active if hosted readiness overstates launch state.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration publish readiness read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-rollback-checkpoints",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+      smokeMode: "read_only",
+      localProof: "Phase 115 maps rollback checkpoints, rehearsal steps, owners, and blocked actions.",
+      hostedProofRequired: "Run a read-only hosted rollback checkpoint query and confirm rollback owners are present.",
+      rollbackArtifact: "Fixture rollback checkpoint remains active if hosted rollback evidence is incomplete.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration rollback checkpoint read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-configuration-save-requests",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteConfigurationSaveRequests",
+      smokeMode: "read_only",
+      localProof: "Phase 113 maps save payload, approval evidence, blockers, and rollback posture without saving.",
+      hostedProofRequired: "Run a read-only hosted save request query and confirm live save remains disabled.",
+      rollbackArtifact: "Fixture save request remains active if hosted save packet exposes mutation paths.",
+      owner: "platform.super_admin",
+      blockedUntil: "Configuration save request read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-domain-readiness-packets",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteDomainReadinessPackets",
+      smokeMode: "read_only",
+      localProof: "Phase 118 maps hostname posture, DNS checklist, SSL posture, and rollback plan locally.",
+      hostedProofRequired: "Run a read-only hosted domain readiness query and confirm domain attach remains blocked.",
+      rollbackArtifact: "Fixture domain readiness remains active if hosted DNS or SSL posture diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Client website domain readiness read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-admin-invitation-readiness-packets",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+      smokeMode: "read_only",
+      localProof: "Phase 119 maps invite role, scope, evidence, copy blocks, and rollback posture locally.",
+      hostedProofRequired: "Run a read-only hosted admin invitation readiness query and confirm invitation delivery remains blocked.",
+      rollbackArtifact: "Fixture admin invitation readiness remains active if hosted invite posture diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Client admin invitation readiness read smoke is approved.",
+      canRun: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
+    {
+      id: "site-factory-experience-configuration-presets",
+      batchId: "site-creation-and-admin",
+      surface: "Site factory",
+      functionName: "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+      smokeMode: "read_only",
+      localProof: "Phase 117 maps audience, journey, layout density, tone, navigation mode, and personalization rules.",
+      hostedProofRequired: "Run a read-only hosted experience preset query and confirm preset apply remains blocked.",
+      rollbackArtifact: "Fixture experience preset remains active if hosted personalization state diverges.",
+      owner: "platform.super_admin",
+      blockedUntil: "Experience configuration preset read smoke is approved.",
       canRun: false,
       providerWrites: false,
       liveConvexExecution: false,
@@ -6830,11 +7140,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 84,
-    queryBindings: 46,
+    totalBindings: 85,
+    queryBindings: 47,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 39,
+    smokeManifestGaps: 40,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -6887,8 +7197,8 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 23,
-        queryBindings: 22,
+        totalBindings: 24,
+        queryBindings: 23,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
@@ -6902,6 +7212,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
           "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
           "siteFactory.listClientWebsiteConfigurationSaveRequests",
           "siteFactory.listClientWebsiteDomainReadinessPackets",
+          "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
           "siteFactory.listClientWebsiteExperienceConfigurationPresets",
           "siteFactory.listClientWebsiteLaunchBlueprints",
           "siteFactory.listClientWebsitePreviewReviewPackets",

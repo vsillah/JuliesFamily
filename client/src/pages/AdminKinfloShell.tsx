@@ -73,6 +73,7 @@ import {
   type ShellClientWebsiteConfigurationRollbackCheckpoint,
   type ShellClientWebsiteConfigurationReviewPacket,
   type ShellClientWebsiteConfigurationSaveRequest,
+  type ShellClientWebsiteAdminInvitationReadinessPacket,
   type ShellClientWebsiteDomainReadinessPacket,
   type ShellClientWebsiteExperienceConfigurationPreset,
   type ShellClientWebsiteSpinUpQueue,
@@ -1001,6 +1002,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedAuditTimeline,
   selectedPublishReadiness,
   selectedDomainReadiness,
+  selectedInvitationReadiness,
   selectedExperiencePreset,
   selectedRollbackCheckpoint,
   testIds,
@@ -1013,6 +1015,7 @@ function ClientWebsiteConfigurationProfiles({
   selectedAuditTimeline?: ShellClientWebsiteConfigurationAuditTimeline;
   selectedPublishReadiness?: ShellClientWebsiteConfigurationPublishReadiness;
   selectedDomainReadiness?: ShellClientWebsiteDomainReadinessPacket;
+  selectedInvitationReadiness?: ShellClientWebsiteAdminInvitationReadinessPacket;
   selectedExperiencePreset?: ShellClientWebsiteExperienceConfigurationPreset;
   selectedRollbackCheckpoint?: ShellClientWebsiteConfigurationRollbackCheckpoint;
   testIds: typeof clientWebsiteConfigurationProfileTestIds;
@@ -1411,13 +1414,14 @@ function ClientWebsiteConfigurationProfiles({
             </div>
 
             <Tabs defaultValue="blockers" className="min-w-0" data-testid="tabs-kinflo-client-configuration-save-request-detail">
-              <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1 sm:grid-cols-8">
+              <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1 sm:grid-cols-9">
                 <TabsTrigger value="blockers" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-blockers">Blockers</TabsTrigger>
                 <TabsTrigger value="evidence" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-evidence">Evidence</TabsTrigger>
                 <TabsTrigger value="audit" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-audit-timeline">Audit</TabsTrigger>
                 <TabsTrigger value="rollback" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-rollback-checkpoint">Rollback</TabsTrigger>
                 <TabsTrigger value="publish" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-publish-readiness">Publish</TabsTrigger>
                 <TabsTrigger value="domain" className="px-1 text-[11px]" data-testid="tab-kinflo-client-domain-readiness-packet">Domain</TabsTrigger>
+                <TabsTrigger value="invite" className="px-1 text-[11px]" data-testid="tab-kinflo-client-admin-invitation-readiness-packet">Invite</TabsTrigger>
                 <TabsTrigger value="experience" className="px-1 text-[11px]" data-testid="tab-kinflo-client-experience-configuration-preset">Experience</TabsTrigger>
                 <TabsTrigger value="functions" className="px-1 text-[11px]" data-testid="tab-kinflo-client-configuration-save-request-functions">Functions</TabsTrigger>
               </TabsList>
@@ -1540,6 +1544,38 @@ function ClientWebsiteConfigurationProfiles({
                     <p className="mt-2 text-slate-600">{selectedDomainReadiness?.rollbackPlan}</p>
                   </div>
                   {selectedDomainReadiness?.dnsChecklist.map((item) => (
+                    <div key={item.key} className="rounded-lg border border-slate-200 bg-white p-2 text-xs leading-5">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-medium text-slate-950">{item.label}</div>
+                          <p className="mt-1 text-slate-600">{item.evidence}</p>
+                        </div>
+                        <Badge variant={item.status === "ready" ? "secondary" : "outline"} className="shrink-0 text-[10px]">
+                          {item.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  )) ?? null}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="invite" className="mt-2" data-testid="section-kinflo-client-admin-invitation-readiness-packet">
+                <div className="max-h-[145px] space-y-2 overflow-y-auto pr-1">
+                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="font-medium text-slate-950">{selectedInvitationReadiness?.label}</div>
+                        <div className="mt-0.5 text-[10px] uppercase tracking-normal text-slate-500">
+                          {selectedInvitationReadiness?.inviteRole} / {selectedInvitationReadiness?.inviteScope}
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="shrink-0 text-[10px]">
+                        {selectedInvitationReadiness?.invitationStatus.replaceAll("_", " ")}
+                      </Badge>
+                    </div>
+                    <p className="mt-2 text-slate-600">{selectedInvitationReadiness?.rollbackPlan}</p>
+                  </div>
+                  {selectedInvitationReadiness?.evidenceChecklist.map((item) => (
                     <div key={item.key} className="rounded-lg border border-slate-200 bg-white p-2 text-xs leading-5">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
@@ -2565,6 +2601,11 @@ export default function AdminKinfloShell() {
     () => snapshot.clientWebsiteStudio.domainReadinessPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
       ?? snapshot.clientWebsiteStudio.domainReadinessPackets[0],
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.domainReadinessPackets],
+  );
+  const selectedClientWebsiteAdminInvitationReadinessPacket = useMemo(
+    () => snapshot.clientWebsiteStudio.adminInvitationReadinessPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
+      ?? snapshot.clientWebsiteStudio.adminInvitationReadinessPackets[0],
+    [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.adminInvitationReadinessPackets],
   );
   const selectedClientWebsiteExperienceConfigurationPreset = useMemo(
     () => snapshot.clientWebsiteStudio.experienceConfigurationPresets.find((preset) => preset.siteKey === selectedClientWebsiteStudioSite?.key)
@@ -6662,6 +6703,7 @@ export default function AdminKinfloShell() {
                     selectedAuditTimeline={selectedClientWebsiteConfigurationAuditTimeline}
                     selectedPublishReadiness={selectedClientWebsiteConfigurationPublishReadiness}
                     selectedDomainReadiness={selectedClientWebsiteDomainReadinessPacket}
+                    selectedInvitationReadiness={selectedClientWebsiteAdminInvitationReadinessPacket}
                     selectedExperiencePreset={selectedClientWebsiteExperienceConfigurationPreset}
                     selectedRollbackCheckpoint={selectedClientWebsiteConfigurationRollbackCheckpoint}
                     testIds={clientWebsiteConfigurationProfileTestIds}

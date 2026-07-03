@@ -117,7 +117,9 @@
         "npm run kinflo:validate-client-preview-review-contract",
         "npm run kinflo:validate-preview-review-shell-adapter",
         "npm run kinflo:validate-site-studio-launch-dossier-deep-links",
-        "npm run kinflo:validate-client-launch-decisions"
+        "npm run kinflo:validate-client-launch-decisions",
+        "docs/phase119-client-admin-invitation-readiness-packets.md",
+        "npm run kinflo:validate-client-admin-invitation-readiness-packets"
       ],
       "nextGate": "Approved hosted read-only smokes, mutation order, invite delivery gate, provider setup, and launch signoff."
     },
@@ -149,6 +151,7 @@
         "docs/phase116-client-configuration-publish-readiness.md",
         "docs/phase117-client-experience-configuration-presets.md",
         "docs/phase118-client-domain-readiness-packets.md",
+        "docs/phase119-client-admin-invitation-readiness-packets.md",
         "docs/kinflo-design-frame-adoption-backlog.json",
         "docs/kinflo-claude-frame-ingestion-packet.json",
         "npm run kinflo:validate-design-frame-backlog",
@@ -169,6 +172,7 @@
         "npm run kinflo:validate-client-configuration-publish-readiness",
         "npm run kinflo:validate-client-experience-configuration-presets",
         "npm run kinflo:validate-client-domain-readiness-packets",
+        "npm run kinflo:validate-client-admin-invitation-readiness-packets",
         "npm run kinflo:validate-control-room-polish"
       ],
       "nextGate": "Continue implementing accepted provider-light design deltas from the Phase 75 backlog, then validate desktop and mobile browser frames before client handoff."
@@ -243,6 +247,7 @@
     "npm run kinflo:validate-client-configuration-publish-readiness",
     "npm run kinflo:validate-client-experience-configuration-presets",
     "npm run kinflo:validate-client-domain-readiness-packets",
+    "npm run kinflo:validate-client-admin-invitation-readiness-packets",
     "npm run kinflo:validate-configuration-profile-generated-api-coverage",
     "npm run kinflo:validate-site-studio-deep-links",
     "npm run kinflo:validate-site-studio-site-deep-links",

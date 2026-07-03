@@ -110,11 +110,11 @@ requireIncludes("docs/phase90-hosted-smoke-gap-backlog.md", [
   "hostedActivationRunbook.hostedSmokeGapBacklog",
   "section-kinflo-hosted-smoke-gap-backlog",
   "section-kinflo-hosted-smoke-gap-scroll",
-  "Total gaps: 16",
-  "Read-only gaps: 8",
+  "Total gaps: 27",
+  "Read-only gaps: 21",
   "Mutation gaps: 3",
-  "Provider-gated metadata gaps: 1",
-  "Governance gaps: 4",
+  "Provider-gated metadata gaps: 2",
+  "Governance gaps: 5",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -124,11 +124,11 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "fixtureHostedSmokeGapBacklog",
   "hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog",
   "provider_light_hosted_smoke_gap_backlog",
-  "totalGaps: 16",
-  "readOnlyGaps: 8",
+  "totalGaps: 27",
+  "readOnlyGaps: 21",
   "mutationGaps: 3",
-  "providerGatedGaps: 1",
-  "governanceGaps: 4",
+  "providerGatedGaps: 2",
+  "governanceGaps: 5",
   "canRun: false",
   "providerWrites: false",
   "liveConvexExecution: false",
@@ -169,10 +169,10 @@ const expectedGaps = [...new Set((plan?.switchBatches ?? []).flatMap((batch) =>
 
 const contractMissing = expectedGaps.filter((functionName) => !contractFunctions.has(functionName));
 
-if (expectedGaps.length === 16) {
-  pass("adapter switch plan has sixteen hosted smoke gaps");
+if (expectedGaps.length === 27) {
+  pass("adapter switch plan has twenty-seven hosted smoke gaps");
 } else {
-  fail("adapter switch plan has sixteen hosted smoke gaps", `Received ${expectedGaps.length}: ${expectedGaps.join(", ")}`);
+  fail("adapter switch plan has twenty-seven hosted smoke gaps", `Received ${expectedGaps.length}: ${expectedGaps.join(", ")}`);
 }
 
 if (contractMissing.length === 0) {
@@ -197,10 +197,10 @@ const modeCounts = {
 };
 
 const expectedModeCounts = {
-  read_only: 8,
+  read_only: 21,
   mutation_smoke_required: 3,
-  provider_gated_metadata: 1,
-  governance: 4,
+  provider_gated_metadata: 2,
+  governance: 5,
 };
 
 for (const [mode, expected] of Object.entries(expectedModeCounts)) {

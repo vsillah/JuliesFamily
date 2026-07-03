@@ -21,15 +21,15 @@ npm run kinflo:validate-hosted-smoke-gap-backlog
 
 ## Current Backlog Counts
 
-- Total gaps: 16
-- Read-only gaps: 8
+- Total gaps: 27
+- Read-only gaps: 21
 - Mutation gaps: 3
-- Provider-gated metadata gaps: 1
-- Governance gaps: 4
+- Provider-gated metadata gaps: 2
+- Governance gaps: 5
 
 ## Why This Exists
 
-The adapter switch plan maps 32 functions across six fixture-to-live batches. The live-smoke manifest covers 16 of those functions. The remaining 16 cannot be ignored before a generated Convex adapter switch.
+The adapter switch plan maps 43 functions across six fixture-to-live batches. The live-smoke manifest covers 16 of those functions. The remaining 27 cannot be ignored before a generated Convex adapter switch.
 
 This phase gives every missing function an owner-facing backlog row with:
 
