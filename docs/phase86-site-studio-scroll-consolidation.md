@@ -68,13 +68,13 @@ The launch stage now keeps a full-width dossier below desktop and only switches 
 
 The prior right-rail provisioning content stacked a large provisioning order card and a large execution dry-run card. The layout keeps the same evidence and gated actions but moves them into one compact card:
 
-- plan, template, owner, and invite become summary chips,
+- plan, template, owner, and invite become one-row summary chips even at narrow review widths,
 - setup order stays visible in a compact order cockpit,
 - approval evidence, blocked actions, and function references move into internal `Evidence`, `Blocked`, and `Functions` tabs inside the `Order` tab,
 - manifest, dry-run counters, selected order steps, provider boundary, and blocked-until gates live under the `Dry run` tab,
 - long lists use bounded internal scroll areas instead of increasing the full page height,
 - local setup, evidence, blocked-action, and function lists use 108px caps at narrow review widths, 145px caps at small widths, and expand to 230px on desktop,
-- the provisioning cockpit uses a compact two-column split by default so setup order and evidence controls do not stack into a tall proof column.
+- the provisioning summary stays in a compact four-chip row by default so plan, template, owner, and invite do not stack into the tall card column shown in earlier review captures.
 - the provisioning workbench itself is capped at 340px on narrow review widths, with order and dry-run interiors capped at 190px before the small breakpoint so the page does not fall back into a tall proof stack.
 - duplicate disabled gate buttons wait for desktop width because the narrow workbench already shows the gated state in the header badge.
 - the workbench card uses local vertical scrolling rather than clipping content when a nested panel has more detail than the compact viewport can show.

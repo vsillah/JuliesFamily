@@ -7343,16 +7343,16 @@ export default function AdminKinfloShell() {
                       <Badge variant="outline" className="shrink-0">{selectedClientWebsiteProvisioningOrder?.orderStatus.replaceAll("_", " ")}</Badge>
                     </div>
 
-                    <div className="mt-2 grid shrink-0 grid-cols-2 gap-1 sm:grid-cols-4 sm:gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
+                    <div className="mt-2 grid shrink-0 grid-cols-4 gap-1 sm:gap-2" data-testid="section-kinflo-client-provisioning-summary-chips">
                       {[
                         { label: "Plan", value: selectedClientWebsiteProvisioningOrder?.requestedPlan },
                         { label: "Template", value: selectedClientWebsiteProvisioningOrder?.templateKey },
                         { label: "Owner", value: selectedClientWebsiteProvisioningOrder?.ownerRole },
                         { label: "Invite", value: selectedClientWebsiteProvisioningOrder?.inviteRole },
                       ].map((item) => (
-                        <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-1.5 py-1 sm:px-2 sm:py-2">
-                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-                          <div className="mt-0.5 truncate text-[11px] font-semibold text-slate-950 sm:text-xs" title={item.value}>
+                        <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-slate-50 px-1 py-1 sm:px-2 sm:py-2">
+                          <div className="truncate text-[9px] font-medium uppercase tracking-normal text-slate-500 sm:text-[10px]">{item.label}</div>
+                          <div className="mt-0.5 truncate text-[10px] font-semibold text-slate-950 sm:text-xs" title={item.value}>
                             {item.value}
                           </div>
                         </div>
