@@ -64,6 +64,7 @@ import {
   type ShellClientWebsiteLaunchBlueprint,
   type ShellClientWebsiteLaunchPacket,
   type ShellClientWebsiteLaunchSimulation,
+  type ShellClientWebsiteLaunchComposer,
   type ShellClientWebsiteOnboardingReadiness,
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
@@ -321,6 +322,15 @@ const clientWebsitePortfolioRegistryTestIds = {
   table: "section-kinflo-client-website-portfolio-table",
   blocked: "section-kinflo-client-website-portfolio-blocked",
   gatedAction: "button-client-website-portfolio-gated",
+} as const;
+
+const clientWebsiteLaunchComposerTestIds = {
+  root: "section-kinflo-client-website-launch-composer",
+  selected: "section-kinflo-client-website-launch-composer-selected",
+  steps: "section-kinflo-client-website-launch-composer-steps",
+  evidence: "section-kinflo-client-website-launch-composer-evidence",
+  blocked: "section-kinflo-client-website-launch-composer-blocked",
+  gatedAction: "button-client-website-launch-composer-gated",
 } as const;
 
 const clientWebsiteConfigurationProfileTestIds = {
@@ -1840,6 +1850,133 @@ function ClientWebsitePortfolioRegistry({
 
         <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
           {registry.providerBoundary}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ClientWebsiteLaunchComposer({
+  composer,
+  selectedSiteKey,
+  testIds,
+}: {
+  composer: ShellClientWebsiteLaunchComposer;
+  selectedSiteKey: string;
+  testIds: typeof clientWebsiteLaunchComposerTestIds;
+}) {
+  const selectedRow = composer.rows.find((row) => row.siteKey === selectedSiteKey) ?? composer.rows[0];
+
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3" data-testid={testIds.root}>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+              <ListChecks className="mr-1 h-3 w-3" />
+              Launch composer
+            </Badge>
+            <Badge className="bg-slate-950 hover:bg-slate-950">provider-light composition</Badge>
+          </div>
+          <h3 className="mt-2 text-base font-semibold text-slate-950">Selected launch composition</h3>
+          <p className="mt-1 max-w-2xl text-sm leading-5 text-slate-600">
+            The selected site&apos;s tenant, template, admin preset, evidence, and mutation order stay reviewable before any live write is allowed.
+          </p>
+        </div>
+        <Button disabled variant="outline" className="self-start" data-testid={testIds.gatedAction}>
+          <Rocket className="mr-2 h-4 w-4" />
+          Launch composition gated
+        </Button>
+      </div>
+
+      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid={testIds.selected}>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-slate-950">{selectedRow.label}</div>
+            <div className="mt-1 text-xs leading-5 text-slate-500">
+              {selectedRow.tenantSlug} · {selectedRow.requestedPlan} · {selectedRow.templateKey}
+            </div>
+          </div>
+          <Badge variant="outline" className="self-start bg-white">{selectedRow.composerStatus.replaceAll("_", " ")}</Badge>
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-2">
+          {[
+            { label: "Admin", value: selectedRow.adminPresetLabel },
+            { label: "Owner", value: selectedRow.ownerRole },
+            { label: "Invite", value: selectedRow.inviteRole },
+            { label: "Scope", value: selectedRow.scope },
+          ].map((item) => (
+            <div key={item.label} className="min-w-0 rounded-md border border-slate-200 bg-white px-3 py-2">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+              <div className="mt-1 truncate text-xs font-semibold text-slate-950" title={String(item.value)}>{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(210px,0.4fr)]">
+        <div className="rounded-lg border border-slate-200 bg-white p-3" data-testid={testIds.steps}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm font-medium text-slate-950">Execution order</div>
+            <Badge variant="outline" className="bg-white">Live writes off</Badge>
+          </div>
+          <div className="mt-3 max-h-[190px] space-y-2 overflow-y-auto pr-1">
+            {selectedRow.executionSteps.map((step) => (
+              <div key={`${selectedRow.siteKey}-${step.order}`} className="grid grid-cols-[1.5rem_minmax(0,1fr)] gap-2 rounded-md border border-slate-100 bg-slate-50 px-2 py-2 text-xs leading-5">
+                <div className="flex h-6 w-6 items-center justify-center rounded-full border border-slate-200 bg-white text-[10px] font-semibold text-slate-500">
+                  {step.order}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-medium text-slate-800">{step.label}</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5 text-slate-500">
+                    <Badge variant="outline" className="bg-white text-[10px]">{step.mode}</Badge>
+                    <span>{step.blockedLiveAction}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Next gate</div>
+            <p className="mt-1 text-xs leading-5 text-amber-900">{selectedRow.nextGate}</p>
+          </div>
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3" data-testid={testIds.evidence}>
+            <div className="text-[11px] font-medium uppercase tracking-normal text-emerald-700">Approval evidence</div>
+            <div className="mt-2 flex max-h-[90px] flex-wrap gap-1.5 overflow-y-auto">
+              {selectedRow.approvalEvidence.map((item) => (
+                <Badge key={item} variant="outline" className="border-emerald-200 bg-white text-emerald-700">
+                  {item}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3" data-testid={testIds.blocked}>
+          <div className="text-[11px] font-medium uppercase tracking-normal text-rose-700">Blocked execution switches</div>
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+            {[
+              ["Tenant", selectedRow.canCreateTenant],
+              ["Site", selectedRow.canCreateSite],
+              ["Invite", selectedRow.canInviteAdmin],
+              ["Publish", selectedRow.canPublish],
+              ["Provider", selectedRow.providerWrites],
+              ["Convex", selectedRow.liveConvexExecution],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="rounded-md border border-rose-100 bg-white px-2 py-1.5 text-xs">
+                <div className="text-[10px] uppercase tracking-normal text-rose-500">{label}</div>
+                <div className="mt-1 font-semibold text-rose-700">{value ? "on" : "off"}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+          {composer.providerBoundary}
         </div>
       </div>
     </section>
@@ -9974,12 +10111,17 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className={isClientWebsiteLaunchWorkbench ? "hidden" : "block"}>
+              <div className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "grid"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
                 <ClientWebsiteConfigurationCommandSurface
                   site={selectedClientWebsiteStudioSite}
                   profile={selectedClientWebsiteConfigurationProfile}
                   launchBlueprint={selectedClientWebsiteLaunchBlueprint}
                   permissionPreset={selectedClientWebsiteAdminPermissionPreset}
+                />
+                <ClientWebsiteLaunchComposer
+                  composer={snapshot.clientWebsiteStudio.launchComposer}
+                  selectedSiteKey={clientWebsiteStudioSiteKey}
+                  testIds={clientWebsiteLaunchComposerTestIds}
                 />
               </div>
 

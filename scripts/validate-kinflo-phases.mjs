@@ -197,6 +197,7 @@ for (const path of [
   "docs/phase157-client-configuration-command-surface.md",
   "docs/phase158-preview-recovery-gate.md",
   "docs/phase159-client-website-portfolio-registry.md",
+  "docs/phase160-client-website-launch-composer.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -383,6 +384,7 @@ for (const path of [
   "scripts/validate-kinflo-client-configuration-command-surface.mjs",
   "scripts/validate-kinflo-preview-recovery-gate.mjs",
   "scripts/validate-kinflo-client-website-portfolio-registry.mjs",
+  "scripts/validate-kinflo-client-website-launch-composer.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -1452,6 +1454,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "npm run kinflo:validate-preview-recovery-gate",
   "Phase 159 client website portfolio registry",
   "npm run kinflo:validate-client-website-portfolio-registry",
+  "Phase 160 client website launch composer",
+  "npm run kinflo:validate-client-website-launch-composer",
   "Vercel build-rate limit",
   "do not treat the preview as integration-ready",
   "Phase 91 hosted smoke execution sequencer",
@@ -2473,6 +2477,29 @@ requireIncludes("docs/phase159-client-website-portfolio-registry.md", [
   "No provider APIs are touched.",
 ]);
 
+requireIncludes("docs/phase160-client-website-launch-composer.md", [
+  "Phase 160: Client Website Launch Composer",
+  "npm run kinflo:validate-client-website-launch-composer",
+  "clientWebsiteStudio.launchComposer",
+  "ClientWebsiteLaunchComposer",
+  "section-kinflo-client-website-launch-composer",
+  "section-kinflo-client-website-launch-composer-selected",
+  "section-kinflo-client-website-launch-composer-steps",
+  "section-kinflo-client-website-launch-composer-evidence",
+  "section-kinflo-client-website-launch-composer-blocked",
+  "button-client-website-launch-composer-gated",
+  "Total compositions: 3",
+  "Review ready: 1",
+  "Blocked compositions: 2",
+  "Total steps: 12",
+  "platform.super_admin",
+  "tenant.admin",
+  "site.editor",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No provider API is called.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -3024,6 +3051,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-preview-recovery-gate\"",
   "\"docs/phase159-client-website-portfolio-registry.md\"",
   "\"npm run kinflo:validate-client-website-portfolio-registry\"",
+  "\"docs/phase160-client-website-launch-composer.md\"",
+  "\"npm run kinflo:validate-client-website-launch-composer\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3294,6 +3323,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-configuration-command-surface\"",
   "\"kinflo:validate-preview-recovery-gate\"",
   "\"kinflo:validate-client-website-portfolio-registry\"",
+  "\"kinflo:validate-client-website-launch-composer\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4767,6 +4797,16 @@ requireIncludes("scripts/validate-kinflo-client-website-portfolio-registry.mjs",
   "button-client-website-portfolio-gated",
   "portfolio registry does not execute live Convex",
   "KinFlo client website portfolio registry validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-website-launch-composer.mjs", [
+  "docs/phase160-client-website-launch-composer.md",
+  "clientWebsiteStudio.launchComposer",
+  "ClientWebsiteLaunchComposer",
+  "section-kinflo-client-website-launch-composer",
+  "button-client-website-launch-composer-gated",
+  "launch composer does not execute live Convex",
+  "KinFlo client website launch composer validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [
