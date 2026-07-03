@@ -188,6 +188,7 @@ for (const path of [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
   "docs/phase105-site-studio-site-deep-links.md",
+  "docs/phase138-site-studio-handoff-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
   "docs/phase108-client-preview-review-contract.md",
@@ -348,6 +349,7 @@ for (const path of [
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
+  "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
   "scripts/validate-kinflo-client-preview-review-contract.mjs",
@@ -2351,6 +2353,19 @@ requireIncludes("docs/phase105-site-studio-site-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase138-site-studio-handoff-deep-links.md", [
+  "Phase 138: Site Studio Handoff Deep Links",
+  "npm run kinflo:validate-site-studio-handoff-deep-links",
+  "studioHandoff=selected|matrix",
+  "readInitialClientWebsiteHandoffWorkspace",
+  "selectClientWebsiteHandoffWorkspace",
+  "tabs-kinflo-client-handoff-workspace",
+  "section-kinflo-client-handoff-workspace-selected",
+  "section-kinflo-client-handoff-workspace-matrix",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase106-client-public-preview-context-links.md", [
   "Phase 106: Client Public Preview Context Links",
   "npm run kinflo:validate-client-public-preview-context-links",
@@ -2603,6 +2618,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
   "\"docs/phase99-site-studio-deep-links.md\"",
   "\"docs/phase105-site-studio-site-deep-links.md\"",
+  "\"docs/phase138-site-studio-handoff-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
   "\"docs/phase108-client-preview-review-contract.md\"",
@@ -2659,6 +2675,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
+  "\"npm run kinflo:validate-site-studio-handoff-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
   "\"npm run kinflo:validate-client-preview-review-contract\"",
@@ -2802,6 +2819,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
+  "\"kinflo:validate-site-studio-handoff-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
   "\"kinflo:validate-client-preview-review-contract\"",
@@ -4193,6 +4211,16 @@ requireIncludes("scripts/validate-kinflo-site-studio-site-deep-links.mjs", [
   "Site Studio site deep links do not import generated API",
   "Site Studio site deep links do not execute live Convex",
   "KinFlo Site Studio site deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-site-studio-handoff-deep-links.mjs", [
+  "docs/phase138-site-studio-handoff-deep-links.md",
+  "studioHandoff",
+  "readInitialClientWebsiteHandoffWorkspace",
+  "selectClientWebsiteHandoffWorkspace",
+  "Site Studio handoff deep links do not import generated API",
+  "Site Studio handoff deep links do not execute live Convex",
+  "KinFlo Site Studio handoff deep-link validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [

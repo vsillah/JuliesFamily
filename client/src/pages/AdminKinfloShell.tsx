@@ -142,6 +142,8 @@ const clientWebsiteLaunchDossierValues = ["provisioning", "packets", "qa", "deci
 type ClientWebsiteLaunchDossier = (typeof clientWebsiteLaunchDossierValues)[number];
 const clientWebsiteProvisioningViewValues = ["order", "dry-run"] as const;
 type ClientWebsiteProvisioningView = (typeof clientWebsiteProvisioningViewValues)[number];
+const clientWebsiteHandoffWorkspaceValues = ["selected", "matrix"] as const;
+type ClientWebsiteHandoffWorkspace = (typeof clientWebsiteHandoffWorkspaceValues)[number];
 
 const shellTabLabels: Record<ShellTabValue, string> = {
   tenants: "Tenants",
@@ -341,6 +343,16 @@ function readInitialClientWebsiteProvisioningView(): ClientWebsiteProvisioningVi
   return clientWebsiteProvisioningViewValues.includes(view as ClientWebsiteProvisioningView)
     ? (view as ClientWebsiteProvisioningView)
     : "order";
+}
+
+function readInitialClientWebsiteHandoffWorkspace(): ClientWebsiteHandoffWorkspace {
+  if (typeof window === "undefined") {
+    return "selected";
+  }
+  const workspace = new URLSearchParams(window.location.search).get("studioHandoff");
+  return clientWebsiteHandoffWorkspaceValues.includes(workspace as ClientWebsiteHandoffWorkspace)
+    ? (workspace as ClientWebsiteHandoffWorkspace)
+    : "selected";
 }
 
 function buildClientWebsiteStudioPreviewHref({
@@ -2259,6 +2271,7 @@ export default function AdminKinfloShell() {
   const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
   const [clientWebsiteLaunchDossier, setClientWebsiteLaunchDossier] = useState<ClientWebsiteLaunchDossier>(readInitialClientWebsiteLaunchDossier);
   const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
+  const [clientWebsiteHandoffWorkspace, setClientWebsiteHandoffWorkspace] = useState<ClientWebsiteHandoffWorkspace>(readInitialClientWebsiteHandoffWorkspace);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -3134,6 +3147,7 @@ export default function AdminKinfloShell() {
     );
     const nextStage = readInitialClientWebsiteWorkbenchStage();
     const nextDossier = readInitialClientWebsiteLaunchDossier();
+    const nextHandoffWorkspace = readInitialClientWebsiteHandoffWorkspace();
     const nextAdapterSwitchBatchId = readInitialAdapterSwitchBatchId(
       snapshot.adapterSwitchReadiness.defaultBatchId,
       adapterSwitchBatchIds,
@@ -3166,6 +3180,7 @@ export default function AdminKinfloShell() {
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
+    setClientWebsiteHandoffWorkspace((current) => (current === nextHandoffWorkspace ? current : nextHandoffWorkspace));
     setAdapterSwitchBatchId((current) => (current === nextAdapterSwitchBatchId ? current : nextAdapterSwitchBatchId));
     setAdapterSwitchSurfaceId((current) => (current === nextAdapterSwitchSurfaceId ? current : nextAdapterSwitchSurfaceId));
     setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
@@ -3253,6 +3268,7 @@ export default function AdminKinfloShell() {
       && clientWebsiteStudioLane === "workbench"
       && clientWebsiteWorkbenchStage === "launch";
     const shouldKeepProvisioningView = shouldKeepDossier && clientWebsiteLaunchDossier === "provisioning";
+    const shouldKeepHandoffWorkspace = tab === "site-studio" && clientWebsiteStudioLane === "handoff";
     updateKinfloShellRoute({
       tab,
       studioSite: tab === "site-studio" ? clientWebsiteStudioSiteKey : undefined,
@@ -3260,6 +3276,7 @@ export default function AdminKinfloShell() {
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: shouldKeepProvisioningView ? clientWebsiteProvisioningView : undefined,
+      studioHandoff: shouldKeepHandoffWorkspace ? clientWebsiteHandoffWorkspace : undefined,
       adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
       adapterSurface: tab === "adapter-switch" ? adapterSwitchSurfaceId : undefined,
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
@@ -3281,6 +3298,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && clientWebsiteLaunchDossier === "provisioning"
         ? clientWebsiteProvisioningView
         : undefined,
+      studioHandoff: clientWebsiteStudioLane === "handoff" ? clientWebsiteHandoffWorkspace : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3302,6 +3320,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" && clientWebsiteLaunchDossier === "provisioning"
         ? clientWebsiteProvisioningView
         : undefined,
+      studioHandoff: lane === "handoff" ? clientWebsiteHandoffWorkspace : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3322,6 +3341,7 @@ export default function AdminKinfloShell() {
       studioStage: stage,
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: stage === "launch" && clientWebsiteLaunchDossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
+      studioHandoff: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3343,6 +3363,7 @@ export default function AdminKinfloShell() {
       studioStage: "launch",
       studioDossier: dossier,
       studioProvisioning: dossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
+      studioHandoff: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3365,6 +3386,28 @@ export default function AdminKinfloShell() {
       studioStage: "launch",
       studioDossier: "provisioning",
       studioProvisioning: view,
+      studioHandoff: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+    });
+  };
+
+  const selectClientWebsiteHandoffWorkspace = (workspace: ClientWebsiteHandoffWorkspace) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("handoff");
+    setClientWebsiteHandoffWorkspace(workspace);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "handoff",
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: workspace,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3386,6 +3429,8 @@ export default function AdminKinfloShell() {
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
       adapterBatch: batchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
@@ -3404,6 +3449,8 @@ export default function AdminKinfloShell() {
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
       adapterBatch: adapterSwitchBatchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
@@ -3422,6 +3469,8 @@ export default function AdminKinfloShell() {
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: stepId,
@@ -3440,6 +3489,8 @@ export default function AdminKinfloShell() {
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -3458,6 +3509,8 @@ export default function AdminKinfloShell() {
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -3476,6 +3529,8 @@ export default function AdminKinfloShell() {
       studioLane: undefined,
       studioStage: undefined,
       studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -8169,7 +8224,12 @@ export default function AdminKinfloShell() {
                   className={`${clientWebsiteStudioLane === "handoff" ? "block" : "hidden"} mt-2 max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1`}
                   data-testid="section-kinflo-client-studio-lane-handoff"
                 >
-                  <Tabs defaultValue="selected" className="min-w-0" data-testid={clientHandoffWorkspaceTestIds.root}>
+                  <Tabs
+                    value={clientWebsiteHandoffWorkspace}
+                    onValueChange={(value) => selectClientWebsiteHandoffWorkspace(value as ClientWebsiteHandoffWorkspace)}
+                    className="min-w-0"
+                    data-testid={clientHandoffWorkspaceTestIds.root}
+                  >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <TabsList className="grid h-auto w-full grid-cols-2 bg-slate-100 p-1 lg:max-w-xl">
                         <TabsTrigger value="selected" data-testid="tab-kinflo-client-handoff-selected">Selected site</TabsTrigger>

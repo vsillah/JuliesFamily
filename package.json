@@ -111,6 +111,7 @@
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-site-studio-deep-links": "node scripts/validate-kinflo-site-studio-deep-links.mjs",
     "kinflo:validate-site-studio-site-deep-links": "node scripts/validate-kinflo-site-studio-site-deep-links.mjs",
+    "kinflo:validate-site-studio-handoff-deep-links": "node scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
     "kinflo:validate-client-public-preview-context-links": "node scripts/validate-kinflo-client-public-preview-context-links.mjs",
     "kinflo:validate-client-preview-review-packet": "node scripts/validate-kinflo-client-preview-review-packet.mjs",
     "kinflo:validate-client-preview-review-contract": "node scripts/validate-kinflo-client-preview-review-contract.mjs",
