@@ -193,6 +193,7 @@
             "siteFactory.listClientWebsiteConfigurationPublishReadiness",
             "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
             "siteFactory.listClientWebsiteConfigurationSaveRequests",
+            "siteFactory.listClientWebsiteDomainReadinessPackets",
             "siteFactory.listClientWebsiteExperienceConfigurationPresets",
             "siteFactory.listClientWebsiteLaunchBlueprints",
             "siteFactory.createSiteFromTemplate"
@@ -207,6 +208,7 @@
             "configuration publish readiness read",
             "configuration rollback checkpoint read",
             "configuration save request read",
+            "client website domain readiness read",
             "experience configuration preset read",
             "draft site created from template",
             "owner invite scoped"

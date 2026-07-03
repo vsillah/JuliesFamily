@@ -912,6 +912,35 @@ export type ShellClientWebsiteExperienceConfigurationPreset = {
   convexFunctions: string[];
 };
 
+export type ShellClientWebsiteDomainReadinessPacket = {
+  siteKey: string;
+  label: string;
+  domainPosture: "provider-light-domain-readiness";
+  domainStatus: "verified_fixture" | "pending_dns" | "blocked_plan_gate";
+  hostname: string;
+  isPrimary: boolean;
+  sslStatus: "issued_fixture" | "not_requested" | "blocked";
+  providerStatus: "attached_fixture" | "ready_for_dns" | "blocked";
+  verificationMode: "fixture_token" | "manual_dns_review" | "disabled";
+  dnsChecklist: {
+    key: string;
+    label: string;
+    status: "ready" | "pending" | "blocked";
+    evidence: string;
+  }[];
+  rollbackPlan: string;
+  blockedLiveActions: string[];
+  nextGate: string;
+  canAttachDomain: false;
+  canVerifyDns: false;
+  canIssueSsl: false;
+  canSaveConfig: false;
+  canPublish: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+  convexFunctions: string[];
+};
+
 export type ShellClientWebsiteLaunchPacket = {
   siteKey: string;
   label: string;
@@ -1134,6 +1163,7 @@ export type ShellClientWebsiteStudio = {
   configurationAuditTimelines: ShellClientWebsiteConfigurationAuditTimeline[];
   configurationRollbackCheckpoints: ShellClientWebsiteConfigurationRollbackCheckpoint[];
   configurationPublishReadiness: ShellClientWebsiteConfigurationPublishReadiness[];
+  domainReadinessPackets: ShellClientWebsiteDomainReadinessPacket[];
   experienceConfigurationPresets: ShellClientWebsiteExperienceConfigurationPreset[];
   launchPackets: ShellClientWebsiteLaunchPacket[];
   starterContentPacks: ShellClientWebsiteStarterContentPack[];
@@ -3374,6 +3404,107 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       ],
     },
   ],
+  domainReadinessPackets: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family founding domain readiness",
+      domainPosture: "provider-light-domain-readiness",
+      domainStatus: "verified_fixture",
+      hostname: "juliesfamily.org",
+      isPrimary: true,
+      sslStatus: "issued_fixture",
+      providerStatus: "attached_fixture",
+      verificationMode: "fixture_token",
+      dnsChecklist: [
+        { key: "source-domain-note", label: "Source domain note", status: "ready", evidence: "legacy public hostname is mapped as fixture evidence only" },
+        { key: "resolver-smoke", label: "Resolver smoke", status: "blocked", evidence: "hosted public resolver smoke pending" },
+        { key: "rollback-owner", label: "Rollback owner", status: "ready", evidence: "platform.super_admin owns fixture fallback" },
+        { key: "provider-write", label: "Provider write", status: "blocked", evidence: "Vercel domain attach remains disabled" },
+      ],
+      rollbackPlan: "Keep Julie Family on fixture preview routing until hosted resolver, DNS, SSL, and rollback owner evidence are accepted.",
+      blockedLiveActions: ["domain attach", "DNS verification write", "SSL provisioning", "public publish write"],
+      nextGate: "Approve hosted public resolver smoke and DNS evidence before using the real hostname.",
+      canAttachDomain: false,
+      canVerifyDns: false,
+      canIssueSsl: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteDomainReadinessPackets",
+        "siteBuilder.upsertDomain",
+        "entitlements.checkEntitlementLimit",
+        "publicSite.resolvePublishedSite",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client domain readiness",
+      domainPosture: "provider-light-domain-readiness",
+      domainStatus: "pending_dns",
+      hostname: "advisor.example.invalid",
+      isPrimary: true,
+      sslStatus: "not_requested",
+      providerStatus: "ready_for_dns",
+      verificationMode: "manual_dns_review",
+      dnsChecklist: [
+        { key: "plan-limit", label: "Plan limit", status: "pending", evidence: "custom domain entitlement review pending" },
+        { key: "tenant-owner", label: "Tenant owner", status: "blocked", evidence: "tenant owner approval pending" },
+        { key: "dns-token", label: "DNS token", status: "pending", evidence: "TXT token is fixture-only until hosted approval" },
+        { key: "ssl-rollback", label: "SSL rollback", status: "blocked", evidence: "SSL and Vercel rollback owner pending" },
+      ],
+      rollbackPlan: "Keep advisor client site on fixture preview route until DNS TXT and hosted resolver smoke pass.",
+      blockedLiveActions: ["domain attach", "DNS TXT verification", "SSL provisioning", "tenant admin invite"],
+      nextGate: "Approve plan limit, tenant owner, DNS token, SSL rollback owner, and hosted resolver smoke before domain attach.",
+      canAttachDomain: false,
+      canVerifyDns: false,
+      canIssueSsl: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteDomainReadinessPackets",
+        "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+        "siteBuilder.upsertDomain",
+        "entitlements.checkEntitlementLimit",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite domain readiness",
+      domainPosture: "provider-light-domain-readiness",
+      domainStatus: "blocked_plan_gate",
+      hostname: "campaign.example.invalid",
+      isPrimary: false,
+      sslStatus: "blocked",
+      providerStatus: "blocked",
+      verificationMode: "disabled",
+      dnsChecklist: [
+        { key: "campaign-consent", label: "Campaign consent", status: "blocked", evidence: "consent copy approval pending" },
+        { key: "plan-limit", label: "Plan limit", status: "blocked", evidence: "campaign custom domain entitlement pending" },
+        { key: "lead-cleanup", label: "Lead cleanup", status: "blocked", evidence: "public form cleanup plan pending" },
+        { key: "provider-send", label: "Provider-send boundary", status: "blocked", evidence: "campaign send boundary pending" },
+      ],
+      rollbackPlan: "Keep campaign hostname disabled until plan limit, launch copy, lead cleanup, and provider-send rollback are reviewed.",
+      blockedLiveActions: ["domain attach", "DNS verification write", "SSL provisioning", "campaign send", "public form lead write"],
+      nextGate: "Accept consent, plan limit, lead cleanup, and provider-send rollback evidence before domain readiness can move to DNS review.",
+      canAttachDomain: false,
+      canVerifyDns: false,
+      canIssueSsl: false,
+      canSaveConfig: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteDomainReadinessPackets",
+        "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+      ],
+    },
+  ],
   experienceConfigurationPresets: [
     {
       siteKey: "julies-family-public",
@@ -4654,6 +4785,7 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
     "siteFactory.listClientWebsiteConfigurationPublishReadiness",
     "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
     "siteFactory.listClientWebsiteConfigurationSaveRequests",
+    "siteFactory.listClientWebsiteDomainReadinessPackets",
     "siteFactory.listClientWebsiteExperienceConfigurationPresets",
     "siteFactory.listClientWebsiteLaunchDecisionPackets",
     "siteFactory.listClientWebsiteLaunchBlueprints",
@@ -6698,11 +6830,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 83,
-    queryBindings: 45,
+    totalBindings: 84,
+    queryBindings: 46,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 38,
+    smokeManifestGaps: 39,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -6755,8 +6887,8 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 22,
-        queryBindings: 21,
+        totalBindings: 23,
+        queryBindings: 22,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
@@ -6769,6 +6901,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
           "siteFactory.listClientWebsiteConfigurationPublishReadiness",
           "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
           "siteFactory.listClientWebsiteConfigurationSaveRequests",
+          "siteFactory.listClientWebsiteDomainReadinessPackets",
           "siteFactory.listClientWebsiteExperienceConfigurationPresets",
           "siteFactory.listClientWebsiteLaunchBlueprints",
           "siteFactory.listClientWebsitePreviewReviewPackets",

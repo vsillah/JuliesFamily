@@ -116,11 +116,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 83",
-  "Query bindings: 45",
+  "Generated API bindings: 84",
+  "Query bindings: 46",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 38",
+  "Smoke-manifest review gaps: 39",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -131,15 +131,16 @@ requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 83",
-  "queryBindings: 45",
+  "totalBindings: 84",
+  "queryBindings: 46",
   "mutationBindings: 38",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 38",
+  "smokeManifestGaps: 39",
   "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
   "siteFactory.listClientWebsiteConfigurationAuditTimelines",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
   "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+  "siteFactory.listClientWebsiteDomainReadinessPackets",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
   "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
@@ -154,6 +155,7 @@ requireIncludes(generatedContractPath, [
   "siteFactoryListClientWebsiteConfigurationAuditTimelines",
   "siteFactoryListClientWebsiteConfigurationChangeSets",
   "siteFactoryListClientWebsiteConfigurationPublishReadiness",
+  "siteFactoryListClientWebsiteDomainReadinessPackets",
   "siteFactoryListClientWebsiteExperienceConfigurationPresets",
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
@@ -166,6 +168,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "siteFactoryListClientWebsiteConfigurationAuditTimelines: \"siteFactory.listClientWebsiteConfigurationAuditTimelines\"",
   "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
   "siteFactoryListClientWebsiteConfigurationPublishReadiness: \"siteFactory.listClientWebsiteConfigurationPublishReadiness\"",
+  "siteFactoryListClientWebsiteDomainReadinessPackets: \"siteFactory.listClientWebsiteDomainReadinessPackets\"",
   "siteFactoryListClientWebsiteExperienceConfigurationPresets: \"siteFactory.listClientWebsiteExperienceConfigurationPresets\"",
   "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints: \"siteFactory.listClientWebsiteConfigurationRollbackCheckpoints\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
@@ -243,6 +246,7 @@ if (
   reviewBoardBlock.includes("requiredFunctions: [") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationChangeSets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationPublishReadiness\"") &&
+  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteDomainReadinessPackets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteExperienceConfigurationPresets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationReviewPackets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationProfiles\"")

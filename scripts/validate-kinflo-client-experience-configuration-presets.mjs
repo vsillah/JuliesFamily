@@ -127,11 +127,11 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "layoutDensity: \"campaign\"",
   "personalizationRules",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
-  "totalBindings: 83",
-  "queryBindings: 45",
-  "smokeManifestGaps: 38",
-  "totalBindings: 22",
-  "queryBindings: 21",
+  "totalBindings: 84",
+  "queryBindings: 46",
+  "smokeManifestGaps: 39",
+  "totalBindings: 23",
+  "queryBindings: 22",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
@@ -141,7 +141,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "tab-kinflo-client-experience-configuration-preset",
   "section-kinflo-client-experience-configuration-preset",
   "selectedExperiencePreset?.personalizationRules.map",
-  "grid-cols-7",
+  "sm:grid-cols-8",
   "max-h-[145px]",
 ]);
 
@@ -156,9 +156,9 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 83",
-  "Query bindings: 45",
-  "Smoke-manifest review gaps: 38",
+  "Generated API bindings: 84",
+  "Query bindings: 46",
+  "Smoke-manifest review gaps: 39",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
 ]);
 
