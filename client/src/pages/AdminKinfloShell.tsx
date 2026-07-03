@@ -4878,6 +4878,87 @@ export default function AdminKinfloShell() {
                   </div>
                 </section>
 
+                <section
+                  className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm"
+                  data-testid="section-kinflo-hosted-activation-env-codegen-review"
+                >
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant="outline" className="border-slate-300 bg-slate-50 text-slate-800">
+                          Env and codegen
+                        </Badge>
+                        <Badge className="bg-slate-950 hover:bg-slate-950">
+                          {snapshot.hostedActivationRunbook.envCodegenReview.status.replaceAll("_", " ")}
+                        </Badge>
+                      </div>
+                      <h3 className="mt-3 text-base font-semibold text-slate-950">Env and codegen window review</h3>
+                      <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600" data-testid="text-hosted-activation-env-codegen-next-gate">
+                        {snapshot.hostedActivationRunbook.envCodegenReview.nextGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-hosted-activation-env-codegen-gated">
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      Codegen gated
+                    </Button>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2" data-testid="section-kinflo-hosted-activation-env-codegen-summary">
+                    {[
+                      { label: "Items", value: snapshot.hostedActivationRunbook.envCodegenReview.totalReadinessItems },
+                      { label: "Blocked", value: snapshot.hostedActivationRunbook.envCodegenReview.blockedUntilPriorGate },
+                      { label: "Accepted", value: snapshot.hostedActivationRunbook.envCodegenReview.acceptedItems },
+                    ].map((item) => (
+                      <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
+                        <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                        <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
+                    <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Readiness items</div>
+                        <Badge variant="outline" className="bg-white">{snapshot.hostedActivationRunbook.envCodegenReview.decisionId}</Badge>
+                      </div>
+                      <div className="mt-3 grid max-h-[280px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-activation-env-codegen-items-scroll">
+                        {snapshot.hostedActivationRunbook.envCodegenReview.readinessItems.map((item) => (
+                          <div key={item.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{item.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{item.commandScope}</div>
+                              </div>
+                              <Badge variant="secondary" className="w-fit shrink-0">{item.id}</Badge>
+                            </div>
+                            <p className="mt-2 text-xs leading-5 text-slate-600">{item.evidenceTarget}</p>
+                            <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">{item.blockedUntil}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 space-y-3">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                        <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Review packet</div>
+                        <div className="mt-2 break-all text-xs leading-5 text-amber-950">
+                          {snapshot.hostedActivationRunbook.envCodegenReview.reviewPacketPath}
+                        </div>
+                      </div>
+
+                      <div className="max-h-[190px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-activation-env-codegen-blocked-actions">
+                        {snapshot.hostedActivationRunbook.envCodegenReview.blockedActions.map((action) => (
+                          <div key={action} className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                            <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                            <span>{action}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
                 <Card className="overflow-hidden border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-activation-console">
                   <CardHeader className="border-b border-slate-100 bg-slate-950 text-white">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

@@ -103,6 +103,7 @@ for (const path of [
   "docs/phase121-hosted-activation-credential-rotation-review.md",
   "docs/phase122-hosted-activation-repo-sharing-risk-review.md",
   "docs/phase123-hosted-activation-ownership-review.md",
+  "docs/phase124-hosted-activation-env-codegen-review.md",
   "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase104-hosted-smoke-evidence-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
@@ -142,6 +143,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-credential-rotation-review.mjs",
   "scripts/validate-kinflo-hosted-activation-repo-sharing-risk-review.mjs",
   "scripts/validate-kinflo-hosted-activation-ownership-review.mjs",
+  "scripts/validate-kinflo-hosted-activation-env-codegen-review.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
@@ -279,6 +281,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-hosted-activation-credential-rotation-review",
   "npm run kinflo:validate-hosted-activation-repo-sharing-risk-review",
   "npm run kinflo:validate-hosted-activation-ownership-review",
+  "npm run kinflo:validate-hosted-activation-env-codegen-review",
   "npm run kinflo:validate-hosted-activation-step-deep-links",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -321,6 +324,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 121 hosted activation credential rotation review",
   "Phase 122 hosted activation repo sharing risk review",
   "Phase 123 hosted activation ownership review",
+  "Phase 124 hosted activation env/codegen review",
   "Phase 101 hosted activation step deep links",
   "Phase 104 hosted smoke evidence deep links",
   "Site Studio scroll consolidation",
@@ -339,7 +343,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 93 adapter switch cutover checklist",
   "Phase 102 adapter switch batch deep links",
   "Phase 103 adapter switch surface deep links",
-  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 121 hosted activation credential rotation review, Phase 122 hosted activation repo sharing risk review, Phase 123 hosted activation ownership review, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
+  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 121 hosted activation credential rotation review, Phase 122 hosted activation repo sharing risk review, Phase 123 hosted activation ownership review, Phase 124 hosted activation env/codegen review, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
 ]);
 
 requireIncludes("package.json", [
@@ -363,6 +367,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-credential-rotation-review\"",
   "\"kinflo:validate-hosted-activation-repo-sharing-risk-review\"",
   "\"kinflo:validate-hosted-activation-ownership-review\"",
+  "\"kinflo:validate-hosted-activation-env-codegen-review\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",

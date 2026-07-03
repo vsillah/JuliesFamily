@@ -423,6 +423,40 @@ export type ShellHostedActivationOwnershipReview = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedEnvCodegenReadinessItem = {
+  id: string;
+  label: string;
+  commandScope: string;
+  evidenceTarget: string;
+  blockedUntil: string;
+};
+
+export type ShellHostedActivationEnvCodegenReview = {
+  status: "prepare_only_env_codegen_review";
+  decisionId: "env-and-codegen-window";
+  owner: "Vambah";
+  totalReadinessItems: number;
+  blockedUntilPriorGate: number;
+  acceptedItems: number;
+  nextGate: string;
+  reviewPacketPath: string;
+  sourceDocuments: string[];
+  readinessItems: ShellHostedEnvCodegenReadinessItem[];
+  blockedActions: string[];
+  canRecordDecision: false;
+  canEnterEnvValues: false;
+  canRunActivationPreflight: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canSetGeneratedApiAvailable: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -436,6 +470,7 @@ export type ShellHostedActivationRunbook = {
   credentialRotationReview: ShellHostedActivationCredentialRotationReview;
   repoSharingRiskReview: ShellHostedActivationRepoSharingRiskReview;
   hostedOwnershipReview: ShellHostedActivationOwnershipReview;
+  envCodegenReview: ShellHostedActivationEnvCodegenReview;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -7456,6 +7491,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "docs/phase121-hosted-activation-credential-rotation-review.md",
       "docs/phase122-hosted-activation-repo-sharing-risk-review.md",
       "docs/phase123-hosted-activation-ownership-review.md",
+      "docs/phase124-hosted-activation-env-codegen-review.md",
       "docs/phase104-hosted-smoke-evidence-deep-links.md",
     ],
     blockedActions: [
@@ -7702,6 +7738,96 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canEnterEnvValues: false,
     canRunCodegen: false,
     canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  envCodegenReview: {
+    status: "prepare_only_env_codegen_review",
+    decisionId: "env-and-codegen-window",
+    owner: "Vambah",
+    totalReadinessItems: 6,
+    blockedUntilPriorGate: 6,
+    acceptedItems: 0,
+    nextGate: "Hosted ownership, env policy, credential rotation, and repo-sharing posture must be accepted before local env entry, activation preflight, or npm run convex:codegen can begin.",
+    reviewPacketPath: "docs/phase124-hosted-activation-env-codegen-review.md",
+    sourceDocuments: [
+      "docs/phase17-convex-activation-preflight.md",
+      "docs/phase26-generated-api-contract.md",
+      "docs/phase28-live-smoke-dry-runner.md",
+      "docs/phase49-hosted-activation-packet.md",
+      "docs/phase73-hosted-activation-decision-register.md",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase96-hosted-activation-owner-checklist.md",
+      "docs/phase120-hosted-activation-decision-checkpoint.md",
+      "docs/phase121-hosted-activation-credential-rotation-review.md",
+      "docs/phase122-hosted-activation-repo-sharing-risk-review.md",
+      "docs/phase123-hosted-activation-ownership-review.md",
+    ],
+    readinessItems: [
+      {
+        id: "env-source-policy",
+        label: "Env source policy",
+        commandScope: "where real Convex, auth, provider, and smoke env values may be entered",
+        evidenceTarget: "Owner note confirms env values live only in approved local/provider surfaces and never in committed source.",
+        blockedUntil: "Credential rotation, repo-sharing risk, and hosted ownership reviews are accepted.",
+      },
+      {
+        id: "local-env-entry-window",
+        label: "Local env entry window",
+        commandScope: "when `.env.local` may receive real hosted Convex and auth values",
+        evidenceTarget: "Owner-approved maintenance window and local-only handling note before any real values are entered.",
+        blockedUntil: "No real env values are entered by this provider-light phase.",
+      },
+      {
+        id: "activation-preflight-window",
+        label: "Activation preflight window",
+        commandScope: "when `npm run kinflo:activation-preflight` may be run against real local env configuration",
+        evidenceTarget: "Preflight output is reviewed without printing secret values or creating provider resources.",
+        blockedUntil: "Activation preflight remains unrun against real hosted env values.",
+      },
+      {
+        id: "codegen-command-window",
+        label: "Codegen command window",
+        commandScope: "when `npm run convex:codegen` may run and who reviews the generated diff",
+        evidenceTarget: "Owner note names reviewer, expected generated file paths, and stop conditions before codegen runs.",
+        blockedUntil: "No Convex codegen is run by this provider-light phase.",
+      },
+      {
+        id: "generated-file-review",
+        label: "Generated file review",
+        commandScope: "how generated bindings are compared with `KINFLO_GENERATED_API_BINDINGS` before import",
+        evidenceTarget: "Generated API diff review plan covers binding names, module surface, and smoke manifest coverage.",
+        blockedUntil: "No `convex/_generated` file is committed or imported.",
+      },
+      {
+        id: "rollback-cleanup",
+        label: "Rollback and cleanup",
+        commandScope: "how to return to fixture mode if env, codegen, or binding review fails",
+        evidenceTarget: "Rollback note keeps `generatedApiAvailable` false, deletes generated files from the working tree, and preserves fixture adapters.",
+        blockedUntil: "Adapter switching and live smoke remain blocked.",
+      },
+    ],
+    blockedActions: [
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "set generatedApiAvailable true",
+      "execute hosted read or mutation smoke",
+      "switch fixture adapter to generated API",
+      "perform provider writes or client launch",
+    ],
+    canRecordDecision: false,
+    canEnterEnvValues: false,
+    canRunActivationPreflight: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canSetGeneratedApiAvailable: false,
     canExecuteLiveSmoke: false,
     canReadSecrets: false,
     canPrintSecrets: false,
