@@ -5490,6 +5490,77 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
+                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-hosted-raw-preflight-output-storage-review">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-amber-300 bg-white text-amber-900">
+                            Phase {snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.phase}
+                          </Badge>
+                          <Badge className="bg-amber-800 hover:bg-amber-800">
+                            {snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.status.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <h4 className="mt-3 text-sm font-semibold text-amber-950">Raw preflight output storage review</h4>
+                        <p className="mt-1 max-w-3xl text-xs leading-5 text-amber-900" data-testid="text-kinflo-hosted-raw-preflight-output-storage-review">
+                          {snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.nextGate}
+                        </p>
+                      </div>
+                      <Button size="sm" disabled variant="outline" className="self-start border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900" data-testid="button-hosted-raw-preflight-output-storage-gated">
+                        <ShieldCheck className="mr-2 h-3 w-3" />
+                        Storage approval gated
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs" data-testid="section-kinflo-hosted-raw-preflight-output-storage-summary">
+                      {[
+                        { label: "Options", value: snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.totalOptions },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.pendingOptions },
+                        { label: "Accepted", value: snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.acceptedOptions },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-lg border border-amber-200 bg-white px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+                      <div className="grid max-h-[230px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-raw-preflight-output-storage-options">
+                        {snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.storageOptions.map((option) => (
+                          <div key={option.id} className="rounded-lg border border-amber-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{option.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{option.storageSurface}</div>
+                              </div>
+                              <Badge variant="outline" className="w-fit shrink-0 border-amber-200 bg-amber-50 text-amber-800">{option.approvalState.replaceAll("_", " ")}</Badge>
+                            </div>
+                            <p className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-900">{option.allowedMaterial}</p>
+                            <p className="mt-2 rounded-md border border-rose-100 bg-rose-50 p-2 text-xs leading-5 text-rose-800">{option.prohibitedMaterial}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="min-w-0 space-y-2">
+                        <div className="rounded-lg border border-amber-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Review packet</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.reviewPacketPath}
+                          </div>
+                        </div>
+                        <div className="max-h-[150px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-raw-preflight-output-storage-rules">
+                          {snapshot.hostedActivationRunbook.rawPreflightOutputStorageReview.commitRules.map((rule) => (
+                            <div key={rule} className="flex items-start gap-2 rounded-lg border border-amber-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
+                              <span>{rule}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
                     <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -8046,11 +8117,34 @@ export default function AdminKinfloShell() {
                     </Card>
                   </TabsContent>
 
-                  <TabsContent value="launch" className="mt-4" data-testid="section-kinflo-client-workbench-launch">
+                  <TabsContent value="launch" className="mt-2" data-testid="section-kinflo-client-workbench-launch">
                     <div
-                      className="grid max-h-[calc(100vh-14rem)] min-w-0 gap-3 overflow-y-auto overflow-x-hidden pr-1 lg:h-[min(650px,calc(100vh-14rem))] lg:min-h-[520px] lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] lg:overflow-hidden lg:pr-0"
+                      className="grid max-h-[calc(100vh-12rem)] min-w-0 gap-2 overflow-y-auto overflow-x-hidden pr-1 lg:h-[clamp(360px,calc(100vh-25rem),520px)] lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] lg:gap-3 lg:overflow-hidden lg:pr-0"
                       data-testid="section-kinflo-client-launch-rail"
                     >
+                      <div className="rounded-lg border border-slate-200 bg-slate-950 p-2 text-white shadow-sm lg:hidden" data-testid="section-kinflo-client-launch-mobile-summary">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="truncate text-xs font-semibold">{selectedClientWebsiteStudioSite?.label}</div>
+                            <div className="mt-0.5 text-[10px] uppercase tracking-normal text-slate-400">Provider-light launch cockpit</div>
+                          </div>
+                          <Badge className={`shrink-0 border text-[10px] ${clientWebsiteLaunchDecisionTone}`}>
+                            {clientWebsiteLaunchDecisionLabel}
+                          </Badge>
+                        </div>
+                        <div className="mt-2 grid grid-cols-3 gap-1.5">
+                          {[
+                            { label: "Ready", value: clientWebsiteLaunchDecisionReadyCount },
+                            { label: "Blocked", value: clientWebsiteLaunchDecisionBlockedCount },
+                            { label: "Signoffs", value: selectedClientWebsiteLaunchDecisionPacket?.requiredSignoffs.length ?? 0 },
+                          ].map((item) => (
+                            <div key={item.label} className="rounded-md border border-white/10 bg-white/5 px-2 py-1">
+                              <div className="text-[9px] uppercase tracking-normal text-slate-400">{item.label}</div>
+                              <div className="text-xs font-semibold">{item.value}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                       <div className="hidden min-h-0 min-w-0 space-y-3 overflow-y-auto overflow-x-hidden pr-1 lg:block" data-testid="section-kinflo-client-launch-command-column">
                   <div className="rounded-2xl border border-slate-900 bg-slate-950 p-3 text-white shadow-sm lg:p-4">
                     <div className="flex items-start justify-between gap-3">
@@ -8144,7 +8238,7 @@ export default function AdminKinfloShell() {
                         className="flex min-h-0 min-w-0 flex-col overflow-hidden"
                         data-testid="tabs-kinflo-client-launch-dossier"
                       >
-                        <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
+                        <TabsList className="grid h-8 w-full grid-cols-4 bg-slate-100 p-1">
                           <TabsTrigger value="provisioning" data-testid="tab-kinflo-client-launch-dossier-provisioning">Provision</TabsTrigger>
                           <TabsTrigger value="packets" data-testid="tab-kinflo-client-launch-dossier-packets">Packets</TabsTrigger>
                           <TabsTrigger value="qa" data-testid="tab-kinflo-client-launch-dossier-qa">QA</TabsTrigger>
@@ -8157,7 +8251,7 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="flex h-[min(338px,calc(100vh-14rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(356px,calc(100vh-18rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="flex h-[min(318px,calc(100vh-12rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(348px,calc(100vh-18rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -11457,7 +11551,7 @@ export default function AdminKinfloShell() {
           </TabsContent>
         </Tabs>
 
-        <div className="mt-8 flex flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className={`${activeTab === "site-studio" ? "hidden" : "mt-8 flex"} flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between`}>
           <div>
             <h2 className="text-base font-semibold">Next Activation Gate</h2>
             <p className="text-sm text-muted-foreground">Convex deployment, generated API bindings, and live admin smoke.</p>

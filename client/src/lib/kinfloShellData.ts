@@ -598,6 +598,44 @@ export type ShellHostedActivationPreflightResultTemplatePacket = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationRawPreflightOutputStorageOption = {
+  id: string;
+  label: string;
+  storageSurface: string;
+  allowedMaterial: string;
+  prohibitedMaterial: string;
+  approvalState: "pending_owner_decision";
+};
+
+export type ShellHostedActivationRawPreflightOutputStorageReview = {
+  phase: 132;
+  status: "prepare_only_raw_preflight_output_storage_review";
+  decisionId: "raw-preflight-output-storage";
+  owner: "Vambah";
+  totalOptions: number;
+  pendingOptions: number;
+  acceptedOptions: number;
+  nextGate: string;
+  reviewPacketPath: "docs/phase132-hosted-activation-raw-preflight-output-storage.md";
+  sourceDocuments: string[];
+  storageOptions: ShellHostedActivationRawPreflightOutputStorageOption[];
+  commitRules: string[];
+  blockedActions: string[];
+  canSelectStorageLocation: false;
+  canRecordRawOutput: false;
+  canCommitRawLogs: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -616,6 +654,7 @@ export type ShellHostedActivationRunbook = {
   activationPreflightEvidenceLedger: ShellHostedActivationPreflightEvidenceLedger;
   activationPreflightResultContract: ShellHostedActivationPreflightResultContract;
   activationPreflightResultTemplatePacket: ShellHostedActivationPreflightResultTemplatePacket;
+  rawPreflightOutputStorageReview: ShellHostedActivationRawPreflightOutputStorageReview;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -8341,6 +8380,81 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canEnterEnvValues: false,
     canRunAgainstRealEnv: false,
     canCommitRawLogs: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  rawPreflightOutputStorageReview: {
+    phase: 132,
+    status: "prepare_only_raw_preflight_output_storage_review",
+    decisionId: "raw-preflight-output-storage",
+    owner: "Vambah",
+    totalOptions: 3,
+    pendingOptions: 3,
+    acceptedOptions: 0,
+    nextGate: "Choose the private raw-output storage surface before the first hosted activation preflight runs against real env values.",
+    reviewPacketPath: "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
+    sourceDocuments: [
+      "docs/phase125-hosted-activation-preflight-review.md",
+      "docs/phase126-hosted-activation-preflight-evidence-ledger.md",
+      "docs/phase128-hosted-activation-preflight-result-contract.md",
+      "docs/phase130-hosted-activation-preflight-result-template.md",
+      "docs/phase131-hosted-activation-preflight-result-template-packet.md",
+    ],
+    storageOptions: [
+      {
+        id: "onepassword-secure-note",
+        label: "1Password secure note",
+        storageSurface: "A private 1Password note or item field controlled by Vambah.",
+        allowedMaterial: "Raw command output, timestamps, and private deployment context only when it stays outside committed source.",
+        prohibitedMaterial: "Do not paste secrets, tokens, client ids, provider URLs, or item contents into repo files or chat.",
+        approvalState: "pending_owner_decision",
+      },
+      {
+        id: "local-private-artifact",
+        label: "Local private artifact",
+        storageSurface: "A local ignored folder or private machine note outside git tracking.",
+        allowedMaterial: "Raw output snapshots and abort notes for short-term owner review.",
+        prohibitedMaterial: "Do not add the folder to git, public docs, generated API review, or deployment artifacts.",
+        approvalState: "pending_owner_decision",
+      },
+      {
+        id: "provider-console-private-note",
+        label: "Provider console private note",
+        storageSurface: "A private provider/dashboard note if one exists and Vambah approves it.",
+        allowedMaterial: "Provider-adjacent context that should remain with the hosted deployment record.",
+        prohibitedMaterial: "Do not create provider resources, mutate settings, or expose dashboard details from this review packet.",
+        approvalState: "pending_owner_decision",
+      },
+    ],
+    commitRules: [
+      "Commit only sanitized yes/no or enum result fields plus a short sanitized note.",
+      "Keep raw command output outside committed source when it contains local paths, provider context, hosted identifiers, or secret-like values.",
+      "Record the selected private storage surface only after owner approval.",
+      "Do not use this review packet as approval to enter hosted env values or run the activation preflight.",
+    ],
+    blockedActions: [
+      "select a raw-output storage location without owner approval",
+      "commit raw activation preflight logs",
+      "paste secret-bearing output into repo docs, chat, or generated artifacts",
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "execute hosted read or mutation smoke",
+      "perform provider writes or client launch",
+    ],
+    canSelectStorageLocation: false,
+    canRecordRawOutput: false,
+    canCommitRawLogs: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
     canRunCodegen: false,
     canCommitGeneratedApi: false,
     canImportGeneratedApi: false,

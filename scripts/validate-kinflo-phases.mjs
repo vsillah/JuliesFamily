@@ -176,6 +176,7 @@ for (const path of [
   "docs/phase129-hosted-activation-preflight-result-deep-links.md",
   "docs/phase130-hosted-activation-preflight-result-template.md",
   "docs/phase131-hosted-activation-preflight-result-template-packet.md",
+  "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
   "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
@@ -330,6 +331,7 @@ for (const path of [
   "scripts/dry-run-kinflo-activation-preflight-result.mjs",
   "scripts/validate-kinflo-hosted-activation-preflight-result-template.mjs",
   "scripts/validate-kinflo-hosted-activation-preflight-result-template-packet.mjs",
+  "scripts/validate-kinflo-hosted-activation-raw-preflight-output-storage.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
@@ -1375,6 +1377,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 97 client website configuration profiles",
   "npm run kinflo:validate-client-website-configuration-profiles",
   "Phase 91 hosted smoke execution sequencer",
+  "Phase 132 hosted activation raw preflight output storage review",
+  "npm run kinflo:validate-hosted-activation-raw-preflight-output-storage",
 ]);
 
 requireIncludes("docs/phase76-active-object-signal.md", [
@@ -2036,6 +2040,28 @@ requireIncludes("docs/phase131-hosted-activation-preflight-result-template-packe
   "No hosted preflight result is recorded.",
 ]);
 
+requireIncludes("docs/phase132-hosted-activation-raw-preflight-output-storage.md", [
+  "Phase 132: Hosted Activation Raw Preflight Output Storage",
+  "npm run kinflo:validate-hosted-activation-raw-preflight-output-storage",
+  "rawPreflightOutputStorageReview",
+  "ShellHostedActivationRawPreflightOutputStorageReview",
+  "ShellHostedActivationRawPreflightOutputStorageOption",
+  "section-kinflo-hosted-raw-preflight-output-storage-review",
+  "section-kinflo-hosted-raw-preflight-output-storage-summary",
+  "text-kinflo-hosted-raw-preflight-output-storage-review",
+  "section-kinflo-hosted-raw-preflight-output-storage-options",
+  "section-kinflo-hosted-raw-preflight-output-storage-rules",
+  "button-hosted-raw-preflight-output-storage-gated",
+  "onepassword-secure-note",
+  "local-private-artifact",
+  "provider-console-private-note",
+  "No raw activation preflight output is recorded.",
+  "No raw activation preflight logs are committed.",
+  "No activation preflight is run against real hosted env values.",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase84-claude-frame-ingestion-packet.md", [
   "Phase 84: Claude Frame Ingestion Packet",
   "npm run kinflo:validate-claude-frame-ingestion",
@@ -2419,6 +2445,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase129-hosted-activation-preflight-result-deep-links.md\"",
   "\"docs/phase130-hosted-activation-preflight-result-template.md\"",
   "\"docs/phase131-hosted-activation-preflight-result-template-packet.md\"",
+  "\"docs/phase132-hosted-activation-raw-preflight-output-storage.md\"",
   "\"docs/convex-activation-preflight-result-template.json\"",
   "\"docs/phase101-hosted-activation-step-deep-links.md\"",
   "\"docs/phase84-claude-frame-ingestion-packet.md\"",
@@ -2459,6 +2486,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:dry-run-activation-preflight-result\"",
   "\"npm run kinflo:validate-hosted-activation-preflight-result-template\"",
   "\"npm run kinflo:validate-hosted-activation-preflight-result-template-packet\"",
+  "\"npm run kinflo:validate-hosted-activation-raw-preflight-output-storage\"",
   "\"npm run kinflo:validate-hosted-activation-step-deep-links\"",
   "\"npm run kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"npm run kinflo:validate-client-website-configuration-profiles\"",
@@ -2592,6 +2620,7 @@ requireIncludes("package.json", [
   "\"kinflo:dry-run-activation-preflight-result\"",
   "\"kinflo:validate-hosted-activation-preflight-result-template\"",
   "\"kinflo:validate-hosted-activation-preflight-result-template-packet\"",
+  "\"kinflo:validate-hosted-activation-raw-preflight-output-storage\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"kinflo:validate-design-frame-backlog\"",
@@ -3781,6 +3810,22 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-preflight-result-temp
   "Live Convex execution: no",
   "Provider writes: 0",
   "Hosted preflight result recorded: no",
+]);
+
+requireIncludes("scripts/validate-kinflo-hosted-activation-raw-preflight-output-storage.mjs", [
+  "docs/phase132-hosted-activation-raw-preflight-output-storage.md",
+  "ShellHostedActivationRawPreflightOutputStorageReview",
+  "section-kinflo-hosted-raw-preflight-output-storage-review",
+  "raw output storage review does not import generated API",
+  "raw output storage review does not execute live Convex",
+  "Raw preflight output recorded: no",
+  "Raw preflight logs committed: no",
+  "Hosted env values read or printed: no",
+  "Activation preflight against real env: no",
+  "Convex codegen run: no",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+  "Provider writes: 0",
 ]);
 
 requireIncludes("scripts/validate-kinflo-hosted-activation-step-deep-links.mjs", [
