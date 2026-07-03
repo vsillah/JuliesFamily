@@ -33,6 +33,8 @@ The Configure workspace now gives every main panel one primary metric before the
 
 The supporting counts remain visible below the primary number, including the `Writes: 0` reminder on live-write-adjacent panels.
 
+This builds on the Phase 152 lane anchor: Spin up, Configure, Handoff, and Workbench now open directly below the lane switcher before secondary context blocks.
+
 ## Provider Boundary
 
 No hosted Convex deployment is created.

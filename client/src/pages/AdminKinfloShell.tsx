@@ -548,6 +548,22 @@ function readInitialHostedPreflightResultFieldId(defaultFieldId: string, fieldId
   return fieldId && fieldIds.includes(fieldId) ? fieldId : defaultFieldId;
 }
 
+function readInitialGeneratedApiCutoverReviewItemId(defaultItemId: string, itemIds: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultItemId;
+  }
+  const itemId = new URLSearchParams(window.location.search).get("cutoverReview");
+  return itemId && itemIds.includes(itemId) ? itemId : defaultItemId;
+}
+
+function readInitialGeneratedApiCutoverBatchId(defaultBatchId: string, batchIds: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultBatchId;
+  }
+  const batchId = new URLSearchParams(window.location.search).get("cutoverBatch");
+  return batchId && batchIds.includes(batchId) ? batchId : defaultBatchId;
+}
+
 function readInitialAdapterSwitchBatchId(defaultBatchId: string, batchIds: string[]): string {
   if (typeof window === "undefined") {
     return defaultBatchId;
@@ -3694,6 +3710,22 @@ export default function AdminKinfloShell() {
     hostedPreflightResultFieldIds[0] ?? "",
     hostedPreflightResultFieldIds,
   ));
+  const generatedApiCutoverReviewItemIds = useMemo(
+    () => snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewItemsList.map((item) => item.id),
+    [snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewItemsList],
+  );
+  const [generatedApiCutoverReviewItemId, setGeneratedApiCutoverReviewItemId] = useState(() => readInitialGeneratedApiCutoverReviewItemId(
+    generatedApiCutoverReviewItemIds[0] ?? "",
+    generatedApiCutoverReviewItemIds,
+  ));
+  const generatedApiCutoverBatchIds = useMemo(
+    () => snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.batchSummaries.map((batch) => batch.batchId),
+    [snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.batchSummaries],
+  );
+  const [generatedApiCutoverBatchId, setGeneratedApiCutoverBatchId] = useState(() => readInitialGeneratedApiCutoverBatchId(
+    generatedApiCutoverBatchIds[0] ?? "",
+    generatedApiCutoverBatchIds,
+  ));
   const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
   const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
@@ -3867,6 +3899,16 @@ export default function AdminKinfloShell() {
     () => snapshot.hostedActivationRunbook.activationPreflightResultContract.fields.find((field) => field.id === hostedPreflightResultFieldId)
       ?? snapshot.hostedActivationRunbook.activationPreflightResultContract.fields[0],
     [hostedPreflightResultFieldId, snapshot.hostedActivationRunbook.activationPreflightResultContract.fields],
+  );
+  const selectedGeneratedApiCutoverReviewItem = useMemo(
+    () => snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewItemsList.find((item) => item.id === generatedApiCutoverReviewItemId)
+      ?? snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewItemsList[0],
+    [generatedApiCutoverReviewItemId, snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewItemsList],
+  );
+  const selectedGeneratedApiCutoverBatch = useMemo(
+    () => snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.batchSummaries.find((batch) => batch.batchId === generatedApiCutoverBatchId)
+      ?? snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.batchSummaries[0],
+    [generatedApiCutoverBatchId, snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.batchSummaries],
   );
   const hostedActivationTotals = useMemo(() => {
     const steps = snapshot.hostedActivationRunbook.steps;
@@ -4690,6 +4732,14 @@ export default function AdminKinfloShell() {
       hostedPreflightResultFieldIds[0] ?? "",
       hostedPreflightResultFieldIds,
     );
+    const nextGeneratedApiCutoverReviewItemId = readInitialGeneratedApiCutoverReviewItemId(
+      generatedApiCutoverReviewItemIds[0] ?? "",
+      generatedApiCutoverReviewItemIds,
+    );
+    const nextGeneratedApiCutoverBatchId = readInitialGeneratedApiCutoverBatchId(
+      generatedApiCutoverBatchIds[0] ?? "",
+      generatedApiCutoverBatchIds,
+    );
     setActiveTab((current) => (current === nextTab ? current : nextTab));
     setClientWebsiteStudioSiteKey((current) => (current === nextSiteKey ? current : nextSiteKey));
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
@@ -4708,9 +4758,13 @@ export default function AdminKinfloShell() {
     setHostedSmokeEvidenceBatchId((current) => (current === nextHostedSmokeEvidenceBatchId ? current : nextHostedSmokeEvidenceBatchId));
     setHostedPreflightEvidenceId((current) => (current === nextHostedPreflightEvidenceId ? current : nextHostedPreflightEvidenceId));
     setHostedPreflightResultFieldId((current) => (current === nextHostedPreflightResultFieldId ? current : nextHostedPreflightResultFieldId));
+    setGeneratedApiCutoverReviewItemId((current) => (current === nextGeneratedApiCutoverReviewItemId ? current : nextGeneratedApiCutoverReviewItemId));
+    setGeneratedApiCutoverBatchId((current) => (current === nextGeneratedApiCutoverBatchId ? current : nextGeneratedApiCutoverBatchId));
   }, [
     adapterSwitchBatchIds,
     clientWebsiteStudioSiteKeys,
+    generatedApiCutoverBatchIds,
+    generatedApiCutoverReviewItemIds,
     hostedActivationStepIds,
     hostedPreflightEvidenceEntryIds,
     hostedPreflightResultFieldIds,
@@ -4766,6 +4820,47 @@ export default function AdminKinfloShell() {
         ?.scrollIntoView({ block: "start" });
     }, 250);
   }, [activeTab, hostedPreflightResultFieldId, location]);
+
+  useEffect(() => {
+    if (activeTab !== "hosted-activation" || typeof window === "undefined") {
+      return;
+    }
+    const hasCutoverReviewParam = new URLSearchParams(window.location.search).has("cutoverReview");
+    if (!hasCutoverReviewParam) {
+      return;
+    }
+    window.setTimeout(() => {
+      document
+        .querySelector('[data-testid="section-kinflo-generated-api-cutover-review-focus"]')
+        ?.scrollIntoView({ block: "start" });
+    }, 250);
+  }, [activeTab, generatedApiCutoverReviewItemId, location]);
+
+  useEffect(() => {
+    if (activeTab !== "hosted-activation" || typeof window === "undefined") {
+      return;
+    }
+    const hasCutoverBatchParam = new URLSearchParams(window.location.search).has("cutoverBatch");
+    if (!hasCutoverBatchParam) {
+      return;
+    }
+    window.setTimeout(() => {
+      document
+        .querySelector('[data-testid="section-kinflo-generated-api-cutover-batch-focus"]')
+        ?.scrollIntoView({ block: "start" });
+    }, 250);
+  }, [activeTab, generatedApiCutoverBatchId, location]);
+
+  useEffect(() => {
+    if (activeTab !== "site-studio" || typeof window === "undefined") {
+      return;
+    }
+    window.setTimeout(() => {
+      document
+        .querySelector('[data-testid="section-kinflo-client-studio-compact-shell"]')
+        ?.scrollIntoView({ block: "start" });
+    }, 80);
+  }, [activeTab, clientWebsiteStudioLane, clientWebsiteWorkbenchStage, location]);
 
   const updateKinfloShellRoute = (updates: Record<string, string | undefined>) => {
     if (typeof window === "undefined") {
@@ -4842,6 +4937,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: tab === "hosted-activation" ? hostedSmokeEvidenceBatchId : undefined,
       preflightEvidence: tab === "hosted-activation" ? hostedPreflightEvidenceId : undefined,
       preflightResult: tab === "hosted-activation" ? hostedPreflightResultFieldId : undefined,
+      cutoverReview: tab === "hosted-activation" ? generatedApiCutoverReviewItemId : undefined,
+      cutoverBatch: tab === "hosted-activation" ? generatedApiCutoverBatchId : undefined,
     });
   };
 
@@ -4872,6 +4969,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -4903,6 +5002,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -4931,6 +5032,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -4959,6 +5062,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -4987,6 +5092,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5014,6 +5121,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5042,6 +5151,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5069,6 +5180,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5097,6 +5210,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5126,6 +5241,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5153,6 +5270,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5181,6 +5300,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5210,6 +5331,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5236,6 +5359,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: undefined,
       preflightEvidence: undefined,
       preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
     });
   };
 
@@ -5262,6 +5387,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: hostedSmokeEvidenceBatchId,
       preflightEvidence: hostedPreflightEvidenceId,
       preflightResult: hostedPreflightResultFieldId,
+      cutoverReview: generatedApiCutoverReviewItemId,
+      cutoverBatch: generatedApiCutoverBatchId,
     });
   };
 
@@ -5288,6 +5415,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: batchId,
       preflightEvidence: hostedPreflightEvidenceId,
       preflightResult: hostedPreflightResultFieldId,
+      cutoverReview: generatedApiCutoverReviewItemId,
+      cutoverBatch: generatedApiCutoverBatchId,
     });
   };
 
@@ -5314,6 +5443,8 @@ export default function AdminKinfloShell() {
       smokeEvidence: hostedSmokeEvidenceBatchId,
       preflightEvidence: entryId,
       preflightResult: hostedPreflightResultFieldId,
+      cutoverReview: generatedApiCutoverReviewItemId,
+      cutoverBatch: generatedApiCutoverBatchId,
     });
   };
 
@@ -5340,6 +5471,64 @@ export default function AdminKinfloShell() {
       smokeEvidence: hostedSmokeEvidenceBatchId,
       preflightEvidence: hostedPreflightEvidenceId,
       preflightResult: fieldId,
+      cutoverReview: generatedApiCutoverReviewItemId,
+      cutoverBatch: generatedApiCutoverBatchId,
+    });
+  };
+
+  const selectGeneratedApiCutoverReviewItem = (itemId: string) => {
+    setActiveTab("hosted-activation");
+    setGeneratedApiCutoverReviewItemId(itemId);
+    updateKinfloShellRoute({
+      tab: "hosted-activation",
+      studioSite: undefined,
+      studioLane: undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      studioConfigure: undefined,
+      studioConfig: undefined,
+      studioChange: undefined,
+      studioApproval: undefined,
+      studioSave: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: hostedActivationStepId,
+      smokeEvidence: hostedSmokeEvidenceBatchId,
+      preflightEvidence: hostedPreflightEvidenceId,
+      preflightResult: hostedPreflightResultFieldId,
+      cutoverReview: itemId,
+      cutoverBatch: generatedApiCutoverBatchId,
+    });
+  };
+
+  const selectGeneratedApiCutoverBatch = (batchId: string) => {
+    setActiveTab("hosted-activation");
+    setGeneratedApiCutoverBatchId(batchId);
+    updateKinfloShellRoute({
+      tab: "hosted-activation",
+      studioSite: undefined,
+      studioLane: undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      studioConfigure: undefined,
+      studioConfig: undefined,
+      studioChange: undefined,
+      studioApproval: undefined,
+      studioSave: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: hostedActivationStepId,
+      smokeEvidence: hostedSmokeEvidenceBatchId,
+      preflightEvidence: hostedPreflightEvidenceId,
+      preflightResult: hostedPreflightResultFieldId,
+      cutoverReview: generatedApiCutoverReviewItemId,
+      cutoverBatch: batchId,
     });
   };
 
@@ -5357,7 +5546,7 @@ export default function AdminKinfloShell() {
 
   const clientWebsiteStudioLaneRail = (
     <div
-      className="sticky top-0 z-30 -mx-1 bg-slate-50/95 px-1 pb-2 pt-0 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80"
+      className="order-1 sticky top-0 z-30 -mx-1 bg-slate-50/95 px-1 pb-2 pt-0 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80"
       data-testid="tabs-kinflo-client-studio-lanes"
     >
       <div
@@ -8272,6 +8461,92 @@ export default function AdminKinfloShell() {
                       ))}
                     </div>
 
+                    <div className="grid gap-3 lg:grid-cols-2">
+                      <div className="rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-generated-api-cutover-review-focus">
+                        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <ListChecks className="h-4 w-4 text-amber-700" />
+                              <h4 className="text-sm font-semibold text-amber-950">{selectedGeneratedApiCutoverReviewItem?.label}</h4>
+                              <Badge variant="outline" className="border-amber-300 bg-white text-amber-800">
+                                {selectedGeneratedApiCutoverReviewItem?.status.replaceAll("_", " ")}
+                              </Badge>
+                            </div>
+                            <p className="mt-2 text-xs leading-5 text-amber-900" data-testid="text-kinflo-generated-api-cutover-review-focus">
+                              {selectedGeneratedApiCutoverReviewItem?.evidence}
+                            </p>
+                          </div>
+                          <div className="grid w-full gap-2 lg:w-[260px]">
+                            <Select value={selectedGeneratedApiCutoverReviewItem?.id ?? ""} onValueChange={selectGeneratedApiCutoverReviewItem}>
+                              <SelectTrigger data-testid="select-kinflo-generated-api-cutover-review">
+                                <SelectValue placeholder="Select owner review" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewItemsList.map((item) => (
+                                  <SelectItem key={item.id} value={item.id}>
+                                    {item.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button size="sm" disabled variant="outline" className="border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900" data-testid="button-generated-api-cutover-review-focus-gated">
+                              <ShieldCheck className="mr-2 h-3 w-3" />
+                              Owner decision gated
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="mt-3 rounded-md border border-amber-200 bg-white p-2 text-xs leading-5 text-amber-950">
+                          <span className="font-semibold">Blocked until: </span>
+                          {selectedGeneratedApiCutoverReviewItem?.blockedUntil}
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-generated-api-cutover-batch-focus">
+                        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Workflow className="h-4 w-4 text-slate-600" />
+                              <h4 className="text-sm font-semibold text-slate-950">{selectedGeneratedApiCutoverBatch?.label}</h4>
+                              <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                                {selectedGeneratedApiCutoverBatch?.ownerReviewStatus.replaceAll("_", " ")}
+                              </Badge>
+                            </div>
+                            <p className="mt-2 break-all text-xs leading-5 text-slate-600" data-testid="text-kinflo-generated-api-cutover-batch-focus">
+                              {selectedGeneratedApiCutoverBatch?.batchId}
+                            </p>
+                          </div>
+                          <div className="grid w-full gap-2 lg:w-[260px]">
+                            <Select value={selectedGeneratedApiCutoverBatch?.batchId ?? ""} onValueChange={selectGeneratedApiCutoverBatch}>
+                              <SelectTrigger data-testid="select-kinflo-generated-api-cutover-batch">
+                                <SelectValue placeholder="Select cutover batch" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.batchSummaries.map((batch) => (
+                                  <SelectItem key={batch.batchId} value={batch.batchId}>
+                                    {batch.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <Button size="sm" disabled variant="outline" data-testid="button-generated-api-cutover-batch-focus-gated">
+                              <ShieldCheck className="mr-2 h-3 w-3" />
+                              Cutover gated
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                          <div className="rounded-md border border-white bg-white px-2 py-1">
+                            <div className="text-slate-500">Cutover funcs</div>
+                            <div className="font-medium text-slate-950">{selectedGeneratedApiCutoverBatch?.cutoverFunctionCount}</div>
+                          </div>
+                          <div className="rounded-md border border-white bg-white px-2 py-1">
+                            <div className="text-slate-500">Smoke gaps</div>
+                            <div className="font-medium text-slate-950">{selectedGeneratedApiCutoverBatch?.hostedSmokeEvidenceGapCount}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="grid gap-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
                       <div className="space-y-3">
                         <div className="flex items-center justify-between gap-3">
@@ -10165,7 +10440,7 @@ export default function AdminKinfloShell() {
               {clientWebsiteStudioLaneRail}
 
               <div
-                className={`${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
+                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
               >
                 <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -10225,7 +10500,7 @@ export default function AdminKinfloShell() {
                 </div>
               </div>
 
-              <div className={shouldShowClientWebsiteStudioContext ? "block" : "hidden"}>
+              <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "block" : "hidden"}`}>
                 <ClientWebsitePortfolioRegistry
                   registry={snapshot.clientWebsiteStudio.portfolioRegistry}
                   selectedSiteKey={clientWebsiteStudioSiteKey}
@@ -10235,7 +10510,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-studio-operating-frame"
               >
                 {clientWebsiteStudioReviewStats.map((stat) => (
@@ -10246,7 +10521,7 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className={`${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
+              <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
                 <ClientWebsiteConfigurationCommandSurface
                   site={selectedClientWebsiteStudioSite}
                   profile={selectedClientWebsiteConfigurationProfile}
@@ -10261,7 +10536,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-workbench-grid-contract"
               >
                 {clientWebsiteWorkbenchGridContract.map((item) => (
@@ -10277,7 +10552,7 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className="contents">
+              <div className="order-2 min-w-0">
                 <div
                   className={`${clientWebsiteStudioLane === "queue" ? "block" : "hidden"} mt-2 max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1`}
                   data-testid="section-kinflo-client-studio-lane-queue"

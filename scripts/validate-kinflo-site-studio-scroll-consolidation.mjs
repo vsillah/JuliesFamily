@@ -197,7 +197,8 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "compact shell trims duplicate mobile summary chrome",
   "lane toolbar stays as a sticky compact-section rail",
   "before the control-room frame",
-  "Spin up, Configure, and Handoff now bypass the Workbench context stack",
+  "Spin up, Configure, Handoff, and Workbench now open directly below the lane switcher",
+  "secondary context blocks",
   "sticky top-0 placement",
   "tabs-kinflo-client-workbench-stage",
   "section-kinflo-client-launch-rail",
@@ -333,15 +334,15 @@ if (
 
 const studioContextGuardIndex = shellContents.indexOf("const shouldShowClientWebsiteStudioContext =");
 const controlRoomClassIndex = shellContents.indexOf(
-  'className={`${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`',
+  'className={`order-3 ${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`',
   siteStudioIndex
 );
 const registryGuardIndex = shellContents.indexOf(
-  'className={shouldShowClientWebsiteStudioContext ? "block" : "hidden"}',
+  'className={`order-3 ${shouldShowClientWebsiteStudioContext ? "block" : "hidden"}`}',
   siteStudioIndex
 );
 const commandSurfaceGuardIndex = shellContents.indexOf(
-  '${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]',
+  'order-3 ${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]',
   siteStudioIndex
 );
 const queueLaneIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-lane-queue"', siteStudioIndex);
@@ -352,14 +353,14 @@ if (
   registryGuardIndex !== -1 &&
   commandSurfaceGuardIndex !== -1 &&
   queueLaneIndex !== -1 &&
-  laneRailRenderIndex < controlRoomClassIndex &&
-  controlRoomClassIndex < queueLaneIndex
+  shellContents.includes("order-1 sticky top-0") &&
+  shellContents.includes('className="order-2 min-w-0"')
 ) {
-  pass("Site Studio non-Workbench lanes bypass the Workbench context stack");
+  pass("Site Studio active lanes render above the secondary context stack");
 } else {
   fail(
-    "Site Studio non-Workbench lanes bypass the Workbench context stack",
-    "Spin up, Configure, and Handoff must open directly below the lane rail instead of inheriting the Workbench control-room, registry, composer, and contract stack."
+    "Site Studio active lanes render above the secondary context stack",
+    "Spin up, Configure, Handoff, and Workbench must open directly below the lane rail instead of inheriting the Workbench control-room, registry, composer, and contract stack."
   );
 }
 

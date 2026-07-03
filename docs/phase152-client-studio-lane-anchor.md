@@ -22,11 +22,11 @@ npm run kinflo:validate-client-studio-lane-anchor
 
 ## What Changed
 
-The shared Site Studio lane rail renders as the first control inside the compact Site Studio working shell, before the control room, selected-site summaries, and lane content. Phase 152 adds explicit lane-switch behavior so each lane change scrolls the rail back into view and resets the selected lane container to its top position.
+The shared Site Studio lane rail renders as the first control inside the compact Site Studio working shell. The active lane workspace renders directly below it, and the control room, selected-site summaries, and Workbench context stack are ordered after the active workspace. Phase 152 adds explicit lane-switch behavior so each lane change scrolls the compact shell and rail back into view and resets the selected lane container to its top position.
 
 This keeps the same controls at the top of every Site Studio lane instead of allowing prior lane scroll state or lane-specific card height to make the next lane feel like it starts in the middle of the page.
 
-Spin up, Configure, and Handoff now bypass the Workbench context stack after the rail. The Workbench lane keeps the control room, portfolio registry, configuration command surface, launch composer, operating frame, and workbench contract, while the operational lanes open directly below the lane switcher.
+Spin up, Configure, Handoff, and Workbench now open directly below the lane switcher. The Workbench lane still keeps the control room, portfolio registry, configuration command surface, launch composer, operating frame, and workbench contract, but those secondary context blocks sit after the active Workbench surface instead of pushing the lane controls into a long vertical preamble.
 
 The page, main content, and compact Site Studio shell use `overflow-x-clip` instead of hidden horizontal overflow. That keeps wide child panels clipped without turning the shell wrappers into overflow containers that can break the `sticky top-0` lane rail.
 

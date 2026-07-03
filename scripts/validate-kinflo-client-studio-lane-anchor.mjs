@@ -82,7 +82,8 @@ requireIncludes("docs/phase152-client-studio-lane-anchor.md", [
   "section-kinflo-client-studio-lane-configuration",
   "section-kinflo-client-studio-lane-handoff",
   "section-kinflo-client-studio-lane-workbench",
-  "Spin up, Configure, and Handoff now bypass the Workbench context stack",
+  "Spin up, Configure, Handoff, and Workbench now open directly below the lane switcher",
+  "secondary context blocks sit after the active Workbench surface",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -97,6 +98,8 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "querySelector('[data-testid=\"tabs-kinflo-client-studio-lanes\"]')",
   "scrollIntoView({ block: \"start\" })",
   "section-kinflo-client-studio-compact-shell",
+  "querySelector('[data-testid=\"section-kinflo-client-studio-compact-shell\"]')",
+  "clientWebsiteWorkbenchStage, location",
   "min-h-screen overflow-x-clip bg-slate-50",
   "max-w-7xl overflow-x-clip px-4",
   "flex min-w-0 flex-col gap-2 overflow-x-clip",
@@ -108,6 +111,9 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane]",
   "laneSection.scrollTo({ top: 0 })",
   "scrollClientWebsiteStudioLaneToTop(lane)",
+  "order-1 sticky top-0",
+  "order-2 min-w-0",
+  "order-3 ${shouldShowClientWebsiteStudioContext",
 ]);
 
 requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
@@ -158,6 +164,10 @@ const commandSurfaceGuardIndex = shellContents.indexOf(
   siteStudioIndex
 );
 const queueLaneIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-lane-queue"', siteStudioIndex);
+const compactShellScrollEffectIndex = shellContents.indexOf(
+  'querySelector(\'[data-testid="section-kinflo-client-studio-compact-shell"]\')'
+);
+const laneStageLocationDepsIndex = shellContents.indexOf("[activeTab, clientWebsiteStudioLane, clientWebsiteWorkbenchStage, location]");
 
 if (
   siteStudioIndex !== -1 &&
@@ -183,14 +193,28 @@ if (
   controlRoomIndex !== -1 &&
   commandSurfaceGuardIndex !== -1 &&
   queueLaneIndex !== -1 &&
-  railRenderIndex < controlRoomIndex &&
-  controlRoomIndex < queueLaneIndex
+  shellContents.includes("order-1 sticky top-0") &&
+  shellContents.includes('className="order-2 min-w-0"') &&
+  shellContents.includes("order-3 ${shouldShowClientWebsiteStudioContext")
 ) {
-  pass("client Studio non-Workbench lanes open below the lane rail");
+  pass("client Studio lanes render above the secondary context stack");
 } else {
   fail(
-    "client Studio non-Workbench lanes open below the lane rail",
-    "Spin up, Configure, and Handoff must bypass the Workbench context stack so the active lane does not start halfway down a shared scroll."
+    "client Studio lanes render above the secondary context stack",
+    "The active Spin up, Configure, Handoff, or Workbench lane must render directly below the lane rail, with secondary context ordered after the active lane workspace."
+  );
+}
+
+if (
+  compactShellScrollEffectIndex !== -1 &&
+  laneStageLocationDepsIndex !== -1 &&
+  compactShellScrollEffectIndex < controlRoomIndex
+) {
+  pass("client Studio lane changes reset to the compact shell top");
+} else {
+  fail(
+    "client Studio lane changes reset to the compact shell top",
+    "Changing Site Studio lanes or Workbench stage must scroll the compact shell into view so the lane rail does not appear mid-page after preserved SPA scroll."
   );
 }
 
