@@ -8901,10 +8901,13 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="site-studio" className="mt-2">
-            <section className="flex min-w-0 flex-col gap-2 overflow-hidden" data-testid="section-kinflo-client-studio-compact-shell">
-              <div className="contents" data-testid="tabs-kinflo-client-studio-lanes">
+            <section className="flex min-w-0 flex-col gap-2 overflow-x-hidden" data-testid="section-kinflo-client-studio-compact-shell">
+              <div
+                className="sticky top-0 z-30 order-first -mx-1 bg-slate-50/95 px-1 pb-2 pt-0 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80"
+                data-testid="tabs-kinflo-client-studio-lanes"
+              >
                 <div
-                  className="relative z-10 flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm sm:gap-2 sm:p-2 lg:flex-row lg:items-center lg:justify-between"
+                  className="flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm sm:gap-2 sm:p-2 lg:flex-row lg:items-center lg:justify-between"
                   data-testid="section-kinflo-client-studio-lane-switcher"
                 >
                   <div className="flex items-center justify-between gap-2 lg:hidden">

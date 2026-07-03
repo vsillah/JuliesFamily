@@ -86,7 +86,9 @@ const compactMarkers = [
   "${isClientWebsiteLaunchWorkbench ? \"hidden\" : \"hidden lg:grid\"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4",
   "tabs-kinflo-client-studio-lanes",
   "section-kinflo-client-studio-lane-switcher",
-  "relative z-10",
+  "overflow-x-hidden",
+  "sticky top-0 z-30 order-first",
+  "bg-slate-50/95 px-1 pb-2",
   "rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm",
   "Studio lanes",
   "grid h-auto w-full grid-cols-4 gap-1",
@@ -188,11 +190,13 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "npm run kinflo:validate-site-studio-scroll-consolidation",
   "section-kinflo-client-studio-compact-shell",
   "compact shell trims duplicate mobile summary chrome",
-  "lane toolbar stays as a static top rail",
+  "lane toolbar stays as a sticky top rail",
+  "sticky top-0 order-first",
   "tabs-kinflo-client-workbench-stage",
   "section-kinflo-client-launch-rail",
   "viewport-bounded launch rail",
   "top-level lane switcher",
+  "avoiding a hidden vertical overflow ancestor",
   "Workbench is the default lane",
   "Spin up, Configure, and Handoff lanes stay available without adding to the default page height",
   "desktop-only command rail",
@@ -287,15 +291,20 @@ if (
   );
 }
 
-const laneSwitcherClassWindow = laneSwitcherIndex === -1
+const laneRailIndex = shellContents.indexOf("tabs-kinflo-client-studio-lanes");
+const laneRailClassWindow = laneRailIndex === -1
   ? ""
-  : shellContents.slice(Math.max(0, laneSwitcherIndex - 360), laneSwitcherIndex + 120);
-if (laneSwitcherClassWindow.includes("relative z-10") && !laneSwitcherClassWindow.includes("sticky top-0")) {
-  pass("Site Studio lane switcher uses a static top rail instead of sticky positioning");
+  : shellContents.slice(Math.max(0, laneRailIndex - 360), laneRailIndex + 120);
+if (
+  laneRailClassWindow.includes("sticky top-0 z-30 order-first") &&
+  laneRailClassWindow.includes("bg-slate-50/95") &&
+  !laneRailClassWindow.includes("relative z-10")
+) {
+  pass("Site Studio lane switcher uses a sticky top rail");
 } else {
   fail(
-    "Site Studio lane switcher uses a static top rail instead of sticky positioning",
-    "The lane switcher must not use sticky top-0 because it can appear lower in the page as lane content changes."
+    "Site Studio lane switcher uses a sticky top rail",
+    "The lane switcher must stay in the top control band with sticky top-0 order-first placement."
   );
 }
 
