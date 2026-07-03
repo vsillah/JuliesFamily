@@ -83,6 +83,41 @@ type ClientWebsiteProvisioningOrder = {
   convexFunctions: string[];
 };
 
+type ClientWebsiteLaunchComposer = {
+  status: "provider-light-client-website-launch-composer";
+  totalCompositions: number;
+  reviewReady: number;
+  blockedCompositions: number;
+  totalSteps: number;
+  rows: {
+    siteKey: string;
+    label: string;
+    tenantSlug: string;
+    requestedPlan: string;
+    templateKey: string;
+    adminPresetLabel: string;
+    ownerRole: string;
+    inviteRole: string;
+    scope: "platform" | "tenant" | "site";
+    composerStatus: "review_ready" | "blocked_human_gate" | "draft";
+    nextGate: string;
+    approvalEvidence: string[];
+    executionSteps: {
+      order: number;
+      label: string;
+      mode: "read" | "write" | "mixed";
+      blockedLiveAction: string;
+    }[];
+    canCreateTenant: false;
+    canCreateSite: false;
+    canInviteAdmin: false;
+    canPublish: false;
+    providerWrites: false;
+    liveConvexExecution: false;
+    convexFunctions: string[];
+  }[];
+};
+
 type ClientWebsiteConfigurationProfile = {
   siteKey: string;
   label: string;
@@ -3443,6 +3478,123 @@ export const listClientWebsiteExperienceConfigurationPresets = query({
       ...preset,
       providerBoundary: "Read-only client experience preset query. It records audience, journey, layout density, tone, navigation mode, admin permission preset, personalization rules, locked controls, and gates only; it does not apply presets, save configuration, publish, write leads, invite admins, attach domains, call providers, run codegen, import generated API, or execute hosted Convex.",
     })),
+});
+
+const clientWebsiteLaunchComposer: ClientWebsiteLaunchComposer = {
+  status: "provider-light-client-website-launch-composer",
+  totalCompositions: 3,
+  reviewReady: 1,
+  blockedCompositions: 2,
+  totalSteps: 12,
+  rows: [
+    {
+      siteKey: "julies-family-public",
+      label: "Julie Family founding launch composition",
+      tenantSlug: "julies-family",
+      requestedPlan: "Founding platform",
+      templateKey: "nonprofit-learning-center",
+      adminPresetLabel: "Founding platform steward",
+      ownerRole: "platform.super_admin",
+      inviteRole: "platform.super_admin",
+      scope: "platform",
+      composerStatus: "review_ready",
+      nextGate: "Confirm seeded tenant ownership, content provenance, public renderer parity, and lead smoke before live publish.",
+      approvalEvidence: ["seeded tenant ownership note", "content provenance review", "public renderer fixture-to-live smoke"],
+      executionSteps: [
+        { order: 1, label: "Confirm founding tenant remains seeded", mode: "read", blockedLiveAction: "membership grant" },
+        { order: 2, label: "Map existing pages into reusable content blocks", mode: "read", blockedLiveAction: "content publish write" },
+        { order: 3, label: "Run public preview and lead smoke review", mode: "read", blockedLiveAction: "CRM lead write" },
+        { order: 4, label: "Accept launch packet before publish", mode: "write", blockedLiveAction: "public publish write" },
+      ],
+      canCreateTenant: false,
+      canCreateSite: false,
+      canInviteAdmin: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchComposer",
+        "publicSite.resolvePublishedSite",
+        "siteBuilder.updatePage",
+        "siteBuilder.publishPage",
+        "crm.submitLead",
+      ],
+    },
+    {
+      siteKey: "advisor-client-site",
+      label: "Advisor client launch composition",
+      tenantSlug: "advisor-client-starter",
+      requestedPlan: "Client Build",
+      templateKey: "advisor-consultant",
+      adminPresetLabel: "Tenant admin launch owner",
+      ownerRole: "tenant.admin",
+      inviteRole: "tenant.admin",
+      scope: "tenant",
+      composerStatus: "blocked_human_gate",
+      nextGate: "Approve plan entitlement, tenant owner, admin invite scope, domain posture, and hosted read smoke before execution.",
+      approvalEvidence: ["plan entitlement approval", "tenant owner signoff", "domain readiness smoke", "lead capture read-only smoke"],
+      executionSteps: [
+        { order: 1, label: "Confirm Client Build plan and tenant owner", mode: "read", blockedLiveAction: "Stripe billing activation" },
+        { order: 2, label: "Create tenant after approval", mode: "write", blockedLiveAction: "controlPlane.createTenant mutation" },
+        { order: 3, label: "Create site from Advisor Consultant template", mode: "write", blockedLiveAction: "siteFactory.createSiteFromTemplate mutation" },
+        { order: 4, label: "Invite tenant admin after smoke evidence", mode: "write", blockedLiveAction: "client admin invitation email" },
+      ],
+      canCreateTenant: false,
+      canCreateSite: false,
+      canInviteAdmin: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchComposer",
+        "controlPlane.createTenant",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "controlPlane.grantMembership",
+      ],
+    },
+    {
+      siteKey: "campaign-microsite",
+      label: "Campaign microsite launch composition",
+      tenantSlug: "campaign-microsite-lab",
+      requestedPlan: "Campaign Lab",
+      templateKey: "campaign-microsite",
+      adminPresetLabel: "Site editor campaign operator",
+      ownerRole: "site.editor",
+      inviteRole: "site.editor",
+      scope: "site",
+      composerStatus: "draft",
+      nextGate: "Approve campaign consent, lead routing, provider-send boundary, and AI copy provenance before editor handoff.",
+      approvalEvidence: ["campaign consent review", "site-scoped editor approval", "lead routing approval", "AI copy provenance review"],
+      executionSteps: [
+        { order: 1, label: "Confirm campaign scope and consent", mode: "read", blockedLiveAction: "campaign send" },
+        { order: 2, label: "Create campaign microsite after approval", mode: "write", blockedLiveAction: "siteFactory.createSiteFromTemplate mutation" },
+        { order: 3, label: "Invite site editor with campaign scope", mode: "write", blockedLiveAction: "site editor invitation email" },
+        { order: 4, label: "Route leads only after smoke evidence", mode: "mixed", blockedLiveAction: "public form lead write" },
+      ],
+      canCreateTenant: false,
+      canCreateSite: false,
+      canInviteAdmin: false,
+      canPublish: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+      convexFunctions: [
+        "siteFactory.listClientWebsiteLaunchComposer",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation",
+        "crm.submitLead",
+        "campaigns.requestCampaignApproval",
+      ],
+    },
+  ],
+};
+
+export const listClientWebsiteLaunchComposer = query({
+  args: {},
+  handler: async () => ({
+    ...clientWebsiteLaunchComposer,
+    providerBoundary: "Read-only launch composer query. It records selected-site tenant, template, admin preset, approval evidence, execution order, and blocked live switches only; it does not create tenants, create sites, invite admins, publish pages, write leads, attach domains, call providers, run codegen, import generated API, or execute hosted Convex.",
+  }),
 });
 
 const clientWebsiteProvisioningOrders: ClientWebsiteProvisioningOrder[] = [

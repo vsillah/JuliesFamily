@@ -8013,11 +8013,11 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
-    totalBindings: 85,
-    queryBindings: 47,
+    totalBindings: 86,
+    queryBindings: 48,
     mutationBindings: 38,
     smokeManifestFunctions: 45,
-    smokeManifestGaps: 40,
+    smokeManifestGaps: 41,
     firstSwitchBatch: "read-only-core",
     approvalGate: "Run npm run convex:codegen only after hosted ownership, env policy, and generated binding review window are approved.",
     providerBoundary: "Generated API review is a local contract check only. It does not run codegen, commit convex/_generated files, import generated API, execute hosted Convex, read secrets, or switch the fixture adapter.",
@@ -8070,8 +8070,8 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       },
       {
         surface: "site factory",
-        totalBindings: 24,
-        queryBindings: 23,
+        totalBindings: 25,
+        queryBindings: 24,
         mutationBindings: 1,
         requiredFunctions: [
           "siteFactory.listStarterTemplates",
@@ -8088,6 +8088,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
           "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
           "siteFactory.listClientWebsiteExperienceConfigurationPresets",
           "siteFactory.listClientWebsiteLaunchBlueprints",
+          "siteFactory.listClientWebsiteLaunchComposer",
           "siteFactory.listClientWebsitePreviewReviewPackets",
           "siteFactory.createSiteFromTemplate",
         ],

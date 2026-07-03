@@ -198,6 +198,7 @@ for (const path of [
   "docs/phase158-preview-recovery-gate.md",
   "docs/phase159-client-website-portfolio-registry.md",
   "docs/phase160-client-website-launch-composer.md",
+  "docs/phase161-client-website-launch-composer-query.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -385,6 +386,7 @@ for (const path of [
   "scripts/validate-kinflo-preview-recovery-gate.mjs",
   "scripts/validate-kinflo-client-website-portfolio-registry.mjs",
   "scripts/validate-kinflo-client-website-launch-composer.mjs",
+  "scripts/validate-kinflo-client-website-launch-composer-query.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2500,6 +2502,22 @@ requireIncludes("docs/phase160-client-website-launch-composer.md", [
   "No provider API is called.",
 ]);
 
+requireIncludes("docs/phase161-client-website-launch-composer-query.md", [
+  "Phase 161: Client Website Launch Composer Query",
+  "npm run kinflo:validate-client-website-launch-composer-query",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "siteFactoryListClientWebsiteLaunchComposer",
+  "ClientWebsiteLaunchComposer",
+  "clientWebsiteLaunchComposer",
+  "Total compositions: 3",
+  "Review ready: 1",
+  "Blocked compositions: 2",
+  "Total steps: 12",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed from the shell.",
+  "No secret values are read or printed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -2905,11 +2923,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 85",
-  "Query bindings: 47",
+  "Generated API bindings: 86",
+  "Query bindings: 48",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 40",
+  "Smoke-manifest review gaps: 41",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -3053,6 +3071,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-website-portfolio-registry\"",
   "\"docs/phase160-client-website-launch-composer.md\"",
   "\"npm run kinflo:validate-client-website-launch-composer\"",
+  "\"docs/phase161-client-website-launch-composer-query.md\"",
+  "\"npm run kinflo:validate-client-website-launch-composer-query\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3324,6 +3344,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-preview-recovery-gate\"",
   "\"kinflo:validate-client-website-portfolio-registry\"",
   "\"kinflo:validate-client-website-launch-composer\"",
+  "\"kinflo:validate-client-website-launch-composer-query\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4809,6 +4830,16 @@ requireIncludes("scripts/validate-kinflo-client-website-launch-composer.mjs", [
   "KinFlo client website launch composer validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-client-website-launch-composer-query.mjs", [
+  "docs/phase161-client-website-launch-composer-query.md",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "siteFactoryListClientWebsiteLaunchComposer",
+  "ClientWebsiteLaunchComposer",
+  "clientWebsiteLaunchComposer",
+  "launch composer query block is read-only",
+  "KinFlo client website launch composer query validation",
+]);
+
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "tabs-kinflo-client-workbench-stage",
@@ -5512,6 +5543,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "preferencesUpsertMyPreferences",
   "siteFactoryListClientWebsiteAdminPermissionPresets",
   "siteFactoryListClientWebsiteLaunchBlueprints",
+  "siteFactoryListClientWebsiteLaunchComposer",
   "siteFactoryListClientWebsiteProvisioningOrders",
   "crmListJourneyProgressionRules",
   "crmUpsertJourneyProgressionRule",

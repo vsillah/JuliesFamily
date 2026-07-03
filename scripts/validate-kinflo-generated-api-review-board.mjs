@@ -116,11 +116,11 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 85",
-  "Query bindings: 47",
+  "Generated API bindings: 86",
+  "Query bindings: 48",
   "Mutation bindings: 38",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 40",
+  "Smoke-manifest review gaps: 41",
   "Surface groups: 14",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -131,11 +131,11 @@ requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 85",
-  "queryBindings: 47",
+  "totalBindings: 86",
+  "queryBindings: 48",
   "mutationBindings: 38",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 40",
+  "smokeManifestGaps: 41",
   "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
   "siteFactory.listClientWebsiteConfigurationAuditTimelines",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
@@ -143,6 +143,7 @@ requireIncludes(shellDataPath, [
   "siteFactory.listClientWebsiteDomainReadinessPackets",
   "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
   "siteFactory.listClientWebsiteConfigurationReviewPackets",
   "siteFactory.listClientWebsiteConfigurationProfiles",
@@ -163,6 +164,7 @@ requireIncludes(generatedContractPath, [
   "siteFactoryListClientWebsiteConfigurationReviewPackets",
   "siteFactoryListClientWebsiteConfigurationProfiles",
   "siteFactoryListClientWebsiteConfigurationSaveRequests",
+  "siteFactoryListClientWebsiteLaunchComposer",
 ]);
 
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
@@ -177,6 +179,7 @@ requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
   "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
   "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
+  "siteFactoryListClientWebsiteLaunchComposer: \"siteFactory.listClientWebsiteLaunchComposer\"",
 ]);
 
 requireIncludes(shellPath, [
@@ -250,9 +253,10 @@ if (
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationChangeSets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationPublishReadiness\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteDomainReadinessPackets\"") &&
-  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteAdminInvitationReadinessPackets\"") &&
-  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteExperienceConfigurationPresets\"") &&
-  reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationReviewPackets\"") &&
+    reviewBoardBlock.includes("\"siteFactory.listClientWebsiteAdminInvitationReadinessPackets\"") &&
+    reviewBoardBlock.includes("\"siteFactory.listClientWebsiteExperienceConfigurationPresets\"") &&
+    reviewBoardBlock.includes("\"siteFactory.listClientWebsiteLaunchComposer\"") &&
+    reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationReviewPackets\"") &&
   reviewBoardBlock.includes("\"siteFactory.listClientWebsiteConfigurationProfiles\"")
 ) {
   pass("site factory configuration profile function is visible in review board");

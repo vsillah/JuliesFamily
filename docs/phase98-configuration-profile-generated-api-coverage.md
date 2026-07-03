@@ -21,6 +21,7 @@ npm run kinflo:validate-configuration-profile-generated-api-coverage
 - Runtime function key: `siteFactoryListClientWebsiteDomainReadinessPackets`
 - Runtime function key: `siteFactoryListClientWebsiteAdminInvitationReadinessPackets`
 - Runtime function key: `siteFactoryListClientWebsiteExperienceConfigurationPresets`
+- Runtime function key: `siteFactoryListClientWebsiteLaunchComposer`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationReviewPackets`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationApprovalMatrices`
 - Convex function path: `siteFactory.listClientWebsiteConfigurationAuditTimelines`
@@ -32,6 +33,7 @@ npm run kinflo:validate-configuration-profile-generated-api-coverage
 - Convex function path: `siteFactory.listClientWebsiteDomainReadinessPackets`
 - Convex function path: `siteFactory.listClientWebsiteAdminInvitationReadinessPackets`
 - Convex function path: `siteFactory.listClientWebsiteExperienceConfigurationPresets`
+- Convex function path: `siteFactory.listClientWebsiteLaunchComposer`
 - Generated API binding surface: `site factory`
 - Adapter-switch surface: `site-factory`
 - Required switch evidence: `configuration review packet read`
@@ -45,8 +47,9 @@ npm run kinflo:validate-configuration-profile-generated-api-coverage
 - Required switch evidence: `client website domain readiness read`
 - Required switch evidence: `client website admin invitation readiness read`
 - Required switch evidence: `experience configuration preset read`
+- Required switch evidence: `client website launch composer read`
 
-The Site Factory adapter-switch surface now requires configuration review packet, configuration approval matrix, configuration audit timeline, configuration change set, configuration profile, configuration publish readiness, configuration rollback checkpoint, configuration save request, client website domain readiness, client website admin invitation readiness, and experience configuration preset read evidence before the fixture adapter can move toward generated Convex bindings.
+The Site Factory adapter-switch surface now requires configuration review packet, configuration approval matrix, configuration audit timeline, configuration change set, configuration profile, configuration publish readiness, configuration rollback checkpoint, configuration save request, client website domain readiness, client website admin invitation readiness, experience configuration preset, and client website launch composer read evidence before the fixture adapter can move toward generated Convex bindings.
 
 ## Provider Boundary
 
@@ -64,4 +67,4 @@ No secret values are read or printed.
 
 ## Why This Matters
 
-Client websites are becoming configurable products, not one-off pages. The generated API review path must include each site's template, brand, navigation, CRM pipeline, editable surfaces, locked surfaces, approval matrix, audit timeline, draft change set, publish readiness, domain readiness, admin invitation readiness, rollback checkpoint, save request packet, experience preset, and provider boundary before hosted activation can safely replace local fixtures.
+Client websites are becoming configurable products, not one-off pages. The generated API review path must include each site's template, brand, navigation, CRM pipeline, editable surfaces, locked surfaces, approval matrix, audit timeline, draft change set, publish readiness, domain readiness, admin invitation readiness, rollback checkpoint, save request packet, experience preset, launch composer, and provider boundary before hosted activation can safely replace local fixtures.

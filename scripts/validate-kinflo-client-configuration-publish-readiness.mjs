@@ -127,9 +127,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "publishBlockers",
   "rollbackRequirements",
   "siteFactory.listClientWebsiteConfigurationPublishReadiness",
-  "totalBindings: 85",
-  "queryBindings: 47",
-  "smokeManifestGaps: 40",
+  "totalBindings: 86",
+  "queryBindings: 48",
+  "smokeManifestGaps: 41",
   "totalBindings: 24",
   "queryBindings: 23",
 ]);
@@ -156,9 +156,9 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 85",
-  "Query bindings: 47",
-  "Smoke-manifest review gaps: 40",
+  "Generated API bindings: 86",
+  "Query bindings: 48",
+  "Smoke-manifest review gaps: 41",
   "siteFactory.listClientWebsiteConfigurationPublishReadiness",
 ]);
 

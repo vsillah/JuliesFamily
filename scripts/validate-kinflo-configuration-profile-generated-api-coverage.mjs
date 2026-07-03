@@ -125,6 +125,8 @@ requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", 
   "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
   "siteFactoryListClientWebsiteExperienceConfigurationPresets",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "siteFactoryListClientWebsiteLaunchComposer",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "configuration profile read",
   "configuration audit timeline read",
   "configuration publish readiness read",
@@ -149,6 +151,7 @@ requireIncludes(runtimePath, [
   "siteFactoryListClientWebsiteDomainReadinessPackets: \"siteFactory.listClientWebsiteDomainReadinessPackets\"",
   "siteFactoryListClientWebsiteAdminInvitationReadinessPackets: \"siteFactory.listClientWebsiteAdminInvitationReadinessPackets\"",
   "siteFactoryListClientWebsiteExperienceConfigurationPresets: \"siteFactory.listClientWebsiteExperienceConfigurationPresets\"",
+  "siteFactoryListClientWebsiteLaunchComposer: \"siteFactory.listClientWebsiteLaunchComposer\"",
 ]);
 
 requireIncludes(generatedContractPath, [
@@ -174,6 +177,8 @@ requireIncludes(generatedContractPath, [
   "client website configuration rollback checkpoints include fixture baselines, rollback owners, rehearsal steps, blocked actions, and provider boundaries",
   "siteFactoryListClientWebsiteConfigurationSaveRequests",
   "client website configuration save requests include selected payloads, approval evidence, blockers, rollback posture, and provider boundaries",
+  "siteFactoryListClientWebsiteLaunchComposer",
+  "client website launch composer includes tenant, template, admin preset, approval evidence, execution steps, blocked live switches, and provider boundaries",
 ]);
 
 requireIncludes(convexPath, [
@@ -188,12 +193,13 @@ requireIncludes(convexPath, [
   "export const listClientWebsiteDomainReadinessPackets",
   "export const listClientWebsiteAdminInvitationReadinessPackets",
   "export const listClientWebsiteExperienceConfigurationPresets",
+  "export const listClientWebsiteLaunchComposer",
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 85",
-  "Query bindings: 47",
-  "Smoke-manifest review gaps: 40",
+  "Generated API bindings: 86",
+  "Query bindings: 48",
+  "Smoke-manifest review gaps: 41",
 ]);
 
 requireIncludes(shellDataPath, [
@@ -209,6 +215,7 @@ requireIncludes(shellDataPath, [
   "siteFactory.listClientWebsiteDomainReadinessPackets",
   "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
   "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "siteFactory.listClientWebsiteLaunchComposer",
 ]);
 
 requireIncludes(shellPath, [

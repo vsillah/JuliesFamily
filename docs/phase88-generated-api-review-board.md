@@ -20,15 +20,16 @@ The hosted activation shell now shows the generated API review state before code
 - `siteFactory.listClientWebsiteDomainReadinessPackets` is visible as a site-factory smoke-manifest review gap,
 - `siteFactory.listClientWebsiteAdminInvitationReadinessPackets` is visible as a site-factory smoke-manifest review gap,
 - `siteFactory.listClientWebsiteExperienceConfigurationPresets` is visible as a site-factory smoke-manifest review gap,
+- `siteFactory.listClientWebsiteLaunchComposer` is visible as a site-factory smoke-manifest review gap,
 - every generated API import and codegen step stays blocked until hosted ownership, env policy, generated binding review, and smoke evidence are approved.
 
 ## Current Contract Counts
 
-- Generated API bindings: 85
-- Query bindings: 47
+- Generated API bindings: 86
+- Query bindings: 48
 - Mutation bindings: 38
 - Live smoke manifest functions: 45
-- Smoke-manifest review gaps: 40
+- Smoke-manifest review gaps: 41
 - Surface groups: 14
 - First fixture-to-live batch: `read-only-core`
 

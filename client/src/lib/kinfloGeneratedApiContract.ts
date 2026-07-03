@@ -99,6 +99,7 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("siteFactoryListStarterTemplates", "query", "site factory", "starter templates include quality contract metadata"),
   binding("siteFactoryListClientWebsiteLaunchDecisionPackets", "query", "site factory", "client launch decision packets include go/no-go criteria, rollback posture, signoffs, and provider boundaries"),
   binding("siteFactoryListClientWebsiteLaunchBlueprints", "query", "site factory", "client website launch blueprints include template quality contracts and provider boundaries"),
+  binding("siteFactoryListClientWebsiteLaunchComposer", "query", "site factory", "client website launch composer includes tenant, template, admin preset, approval evidence, execution steps, blocked live switches, and provider boundaries"),
   binding("siteFactoryListClientWebsiteLaunchSimulations", "query", "site factory", "client launch simulations include target minutes, preview links, invite posture, blockers, and provider boundaries"),
   binding("siteFactoryListClientWebsiteOnboardingReadiness", "query", "site factory", "client onboarding readiness includes task groups, blockers, scores, and provider boundaries"),
   binding("siteFactoryListClientWebsitePolishScorecards", "query", "site factory", "client polish scorecards include design criteria, viewport checks, accessibility posture, and provider boundaries"),
