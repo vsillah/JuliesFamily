@@ -125,6 +125,7 @@
     "kinflo:validate-client-website-launch-composer-query": "node scripts/validate-kinflo-client-website-launch-composer-query.mjs",
     "kinflo:validate-client-website-launch-composer-switch-evidence": "node scripts/validate-kinflo-client-website-launch-composer-switch-evidence.mjs",
     "kinflo:validate-client-website-launch-composer-hosted-smoke-gap": "node scripts/validate-kinflo-client-website-launch-composer-hosted-smoke-gap.mjs",
+    "kinflo:validate-hosted-smoke-sequencer-parity": "node scripts/validate-kinflo-hosted-smoke-sequencer-parity.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-site-studio-deep-links": "node scripts/validate-kinflo-site-studio-deep-links.mjs",
     "kinflo:validate-site-studio-site-deep-links": "node scripts/validate-kinflo-site-studio-site-deep-links.mjs",

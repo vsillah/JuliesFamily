@@ -201,6 +201,7 @@ for (const path of [
   "docs/phase161-client-website-launch-composer-query.md",
   "docs/phase162-client-website-launch-composer-switch-evidence.md",
   "docs/phase163-client-website-launch-composer-hosted-smoke-gap.md",
+  "docs/phase164-hosted-smoke-sequencer-parity.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -391,6 +392,7 @@ for (const path of [
   "scripts/validate-kinflo-client-website-launch-composer-query.mjs",
   "scripts/validate-kinflo-client-website-launch-composer-switch-evidence.mjs",
   "scripts/validate-kinflo-client-website-launch-composer-hosted-smoke-gap.mjs",
+  "scripts/validate-kinflo-hosted-smoke-sequencer-parity.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2547,6 +2549,17 @@ requireIncludes("docs/phase163-client-website-launch-composer-hosted-smoke-gap.m
   "No secret values are read or printed.",
 ]);
 
+requireIncludes("docs/phase164-hosted-smoke-sequencer-parity.md", [
+  "Phase 164: Hosted Smoke Sequencer Parity",
+  "npm run kinflo:validate-hosted-smoke-sequencer-parity",
+  "42 generated Convex functions",
+  "28 gaps",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -3006,9 +3019,11 @@ requireIncludes("docs/phase91-hosted-smoke-execution-sequencer.md", [
   "section-kinflo-hosted-smoke-execution-summary",
   "section-kinflo-hosted-smoke-execution-scroll",
   "Total batches: 6",
-  "Total functions: 16",
+  "Total functions: 28",
+  "Phase 164 refreshes this sequencer against the current Phase 90 backlog.",
   "Blocked batches: 6",
   "Read-only first: yes",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -3108,6 +3123,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-website-launch-composer-switch-evidence\"",
   "\"docs/phase163-client-website-launch-composer-hosted-smoke-gap.md\"",
   "\"npm run kinflo:validate-client-website-launch-composer-hosted-smoke-gap\"",
+  "\"docs/phase164-hosted-smoke-sequencer-parity.md\"",
+  "\"npm run kinflo:validate-hosted-smoke-sequencer-parity\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3382,6 +3399,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-client-website-launch-composer-query\"",
   "\"kinflo:validate-client-website-launch-composer-switch-evidence\"",
   "\"kinflo:validate-client-website-launch-composer-hosted-smoke-gap\"",
+  "\"kinflo:validate-hosted-smoke-sequencer-parity\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4894,6 +4912,16 @@ requireIncludes("scripts/validate-kinflo-client-website-launch-composer-hosted-s
   "KinFlo client website launch composer hosted smoke gap validation",
 ]);
 
+requireIncludes("scripts/validate-kinflo-hosted-smoke-sequencer-parity.mjs", [
+  "docs/phase164-hosted-smoke-sequencer-parity.md",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "gapFunctions.length === 28",
+  "sequencer total matches hosted smoke gap count",
+  "hosted smoke sequencer parity does not import generated API",
+  "hosted smoke sequencer parity does not execute live Convex",
+  "KinFlo hosted smoke sequencer parity validation",
+]);
+
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [
   "docs/phase86-site-studio-scroll-consolidation.md",
   "tabs-kinflo-client-workbench-stage",
@@ -5214,7 +5242,8 @@ requireIncludes("scripts/validate-kinflo-hosted-smoke-execution-sequencer.mjs", 
   "ShellHostedSmokeExecutionSequencer",
   "section-kinflo-hosted-smoke-execution-sequencer",
   "section-kinflo-hosted-smoke-execution-scroll",
-  "adapter switch plan has sixteen sequenced hosted smoke gaps",
+  "adapter switch plan has twenty-eight sequenced hosted smoke gaps",
+  "expectedGapsByBatch",
   "sequenced hosted smoke gaps have generated contract coverage",
   "canRun false batch count is 6",
   "providerWrites false batch count is 6",

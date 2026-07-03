@@ -21,7 +21,7 @@ npm run kinflo:validate-hosted-smoke-execution-sequencer
 ## Sequencer Counts
 
 - Total batches: 6
-- Total functions: 16
+- Total functions: 28
 - Blocked batches: 6
 - Read-only first: yes
 
@@ -35,6 +35,8 @@ npm run kinflo:validate-hosted-smoke-execution-sequencer
 6. `campaign-and-ai-governance`
 
 Each batch records required approval, evidence target, abort condition, rollback plan, owner, blocked-until state, and explicit `canRun: false` posture.
+
+Phase 164 refreshes this sequencer against the current Phase 90 backlog. The adapter-switch plan maps 42 functions, the live-smoke manifest covers 14 adapter-switch functions, and the remaining 28 gaps are now all represented in the execution order. The `site-creation-and-admin` batch includes the launch composer read contract, `siteFactory.listClientWebsiteLaunchComposer`, alongside the configuration, domain, invitation, blueprint, and permission-preset read smokes.
 
 ## Provider Boundary
 

@@ -112,9 +112,11 @@ requireIncludes("docs/phase91-hosted-smoke-execution-sequencer.md", [
   "section-kinflo-hosted-smoke-execution-summary",
   "section-kinflo-hosted-smoke-execution-scroll",
   "Total batches: 6",
-  "Total functions: 16",
+  "Total functions: 28",
   "Blocked batches: 6",
   "Read-only first: yes",
+  "Phase 164 refreshes this sequencer against the current Phase 90 backlog.",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -125,10 +127,11 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "hostedSmokeExecutionSequencer: fixtureHostedSmokeExecutionSequencer",
   "provider_light_hosted_smoke_execution_sequencer",
   "totalBatches: 6",
-  "totalFunctions: 16",
+  "totalFunctions: 28",
   "blockedBatches: 6",
   "readOnlyFirst: true",
   "read-only-core",
+  "siteFactory.listClientWebsiteLaunchComposer",
   "campaign-and-ai-governance",
   "canRun: false",
   "providerWrites: false",
@@ -164,6 +167,13 @@ const expectedGaps = [...new Set((plan?.switchBatches ?? []).flatMap((batch) =>
   .filter((functionName) => !smokeFunctions.has(functionName))
   .sort();
 
+const expectedGapsByBatch = Object.fromEntries((plan?.switchBatches ?? []).map((batch) => [
+  batch.id,
+  [...new Set((batch.surfaces ?? []).flatMap((surface) => surface.convexFunctions ?? []))]
+    .filter((functionName) => !smokeFunctions.has(functionName))
+    .sort(),
+]));
+
 const expectedBatchIds = [
   "read-only-core",
   "user-scoped-preferences",
@@ -175,10 +185,10 @@ const expectedBatchIds = [
 
 const contractMissing = expectedGaps.filter((functionName) => !contractFunctions.has(functionName));
 
-if (expectedGaps.length === 16) {
-  pass("adapter switch plan has sixteen sequenced hosted smoke gaps");
+if (expectedGaps.length === 28) {
+  pass("adapter switch plan has twenty-eight sequenced hosted smoke gaps");
 } else {
-  fail("adapter switch plan has sixteen sequenced hosted smoke gaps", `Received ${expectedGaps.length}: ${expectedGaps.join(", ")}`);
+  fail("adapter switch plan has twenty-eight sequenced hosted smoke gaps", `Received ${expectedGaps.length}: ${expectedGaps.join(", ")}`);
 }
 
 if (contractMissing.length === 0) {
@@ -192,6 +202,17 @@ for (const batchId of expectedBatchIds) {
     pass(`sequencer includes batch ${batchId}`);
   } else {
     fail(`sequencer includes batch ${batchId}`, "Expected sequencer batch was not represented.");
+  }
+}
+
+for (const [batchId, functions] of Object.entries(expectedGapsByBatch)) {
+  if (sequencerBlock.includes(`id: "${batchId}"`) && sequencerBlock.includes(`functionCount: ${functions.length}`)) {
+    pass(`sequencer batch ${batchId} function count matches hosted smoke gaps`);
+  } else {
+    fail(
+      `sequencer batch ${batchId} function count matches hosted smoke gaps`,
+      `Expected functionCount: ${functions.length}.`,
+    );
   }
 }
 
@@ -268,7 +289,7 @@ for (const check of checks) {
 console.log("\nKinFlo hosted smoke execution sequencer validation");
 console.log("Admin route: /admin/kinflo-os?tab=hosted-activation");
 console.log("Sequenced batches: 6");
-console.log("Sequenced functions: 16");
+console.log("Sequenced functions: 28");
 console.log("Blocked batches: 6");
 console.log("Read-only first: yes");
 console.log("External writes: 0");
