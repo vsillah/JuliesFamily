@@ -8237,6 +8237,131 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
+                <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-generated-api-cutover-owner-review">
+                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CardTitle className="text-base">Generated API Cutover Owner Review</CardTitle>
+                        <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                          {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.status.replaceAll("_", " ")}
+                        </Badge>
+                      </div>
+                      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid="text-kinflo-generated-api-cutover-owner-review">
+                        {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.approvalGate}
+                      </p>
+                    </div>
+                    <Button disabled variant="outline" data-testid="button-generated-api-cutover-owner-review-gated">
+                      <ListChecks className="mr-2 h-4 w-4" />
+                      Owner review gated
+                    </Button>
+                  </CardHeader>
+                  <CardContent className="space-y-5">
+                    <div className="grid gap-3 md:grid-cols-6">
+                      {[
+                        { label: "Bindings", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.totalBindings },
+                        { label: "Surfaces", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewSurfaces },
+                        { label: "Batches", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.cutoverBatches },
+                        { label: "Functions", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.cutoverMappedFunctions },
+                        { label: "Smoke gaps", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.hostedSmokeEvidenceGaps },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.pendingReviewItems },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid gap-3 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-sm font-semibold text-slate-950">Owner review items</div>
+                          <Badge variant="outline" className="bg-white">
+                            {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.readyReviewItems} ready
+                          </Badge>
+                        </div>
+                        <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-generated-api-cutover-review-items">
+                          {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.reviewItemsList.map((item) => (
+                            <div key={item.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="text-sm font-semibold text-slate-950">{item.label}</div>
+                                  <p className="mt-1 text-xs leading-5 text-slate-600">{item.evidence}</p>
+                                </div>
+                                <Badge variant="outline" className="shrink-0 border-amber-200 bg-amber-50 text-amber-700">
+                                  {item.status.replaceAll("_", " ")}
+                                </Badge>
+                              </div>
+                              <div className="mt-3 rounded-md bg-slate-50 p-2 text-xs leading-5 text-slate-600">
+                                <span className="font-medium text-slate-900">Blocked until: </span>
+                                {item.blockedUntil}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="text-sm font-semibold text-slate-950">Cutover batches</div>
+                          <Badge variant="outline" className="bg-white">
+                            {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.cutoverBatches} blocked
+                          </Badge>
+                        </div>
+                        <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-generated-api-cutover-batches">
+                          {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.batchSummaries.map((batch) => (
+                            <div key={batch.batchId} className="rounded-lg border border-slate-200 bg-white p-3">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <div className="text-sm font-semibold text-slate-950">{batch.label}</div>
+                                  <div className="mt-1 text-xs text-slate-600">{batch.batchId}</div>
+                                </div>
+                                <Badge variant="outline" className="shrink-0 border-slate-200 bg-slate-50 text-slate-700">
+                                  {batch.ownerReviewStatus.replaceAll("_", " ")}
+                                </Badge>
+                              </div>
+                              <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                <div className="rounded-md border border-slate-100 px-2 py-1">
+                                  <div className="text-slate-500">Cutover funcs</div>
+                                  <div className="font-medium text-slate-950">{batch.cutoverFunctionCount}</div>
+                                </div>
+                                <div className="rounded-md border border-slate-100 px-2 py-1">
+                                  <div className="text-slate-500">Smoke gaps</div>
+                                  <div className="font-medium text-slate-950">{batch.hostedSmokeEvidenceGapCount}</div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                      {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.sourceDocuments.map((documentPath) => (
+                        <div key={documentPath} className="rounded-md border border-slate-200 px-3 py-2 text-xs">
+                          <FileText className="mr-1 inline h-3 w-3 text-slate-500" />
+                          <span className="break-all">{documentPath}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                      <div className="mb-2 text-xs font-medium uppercase tracking-normal text-slate-500">Blocked live actions</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.blockedActions.map((action) => (
+                          <Badge key={action} variant="outline" className="border-slate-200 bg-white text-[11px] font-normal text-slate-700">
+                            {action}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <p className="text-sm leading-6 text-muted-foreground">
+                      {snapshot.hostedActivationRunbook.generatedApiCutoverOwnerReview.providerBoundary}
+                    </p>
+                  </CardContent>
+                </Card>
+
                 <Card className="border-slate-200 shadow-sm" data-testid="section-kinflo-hosted-smoke-gap-backlog">
                   <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
                     <div>

@@ -850,12 +850,58 @@ export type ShellHostedActivationSanitizedPreflightRepositoryRecordApproval = {
   liveConvexExecution: false;
 };
 
+export type ShellGeneratedApiCutoverOwnerReviewItem = {
+  id: string;
+  label: string;
+  status: "pending_owner_review";
+  evidence: string;
+  blockedUntil: string;
+  canApprove: false;
+};
+
+export type ShellGeneratedApiCutoverOwnerReviewBatch = {
+  batchId: string;
+  label: string;
+  cutoverFunctionCount: number;
+  hostedSmokeEvidenceGapCount: number;
+  ownerReviewStatus: "blocked_until_hosted_evidence";
+  canCutover: false;
+};
+
+export type ShellGeneratedApiCutoverOwnerReview = {
+  phase: 169;
+  status: "provider_light_generated_api_cutover_owner_review_shell";
+  packetPath: "docs/convex-generated-api-cutover-owner-review.json";
+  totalBindings: number;
+  reviewSurfaces: number;
+  cutoverBatches: number;
+  cutoverMappedFunctions: number;
+  hostedSmokeEvidenceGaps: number;
+  reviewItems: number;
+  readyReviewItems: number;
+  pendingReviewItems: number;
+  approvalGate: string;
+  sourceDocuments: string[];
+  reviewItemsList: ShellGeneratedApiCutoverOwnerReviewItem[];
+  batchSummaries: ShellGeneratedApiCutoverOwnerReviewBatch[];
+  blockedActions: string[];
+  providerBoundary: string;
+  canOpenCodegenWindow: false;
+  canImportGeneratedApi: false;
+  canSwitchFixtureAdapter: false;
+  canExecuteHostedSmoke: false;
+  canApproveCutover: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
   providerBoundary: string;
   activationConsole: ShellHostedActivationConsole;
   generatedApiReviewBoard: ShellGeneratedApiReviewBoard;
+  generatedApiCutoverOwnerReview: ShellGeneratedApiCutoverOwnerReview;
   hostedSmokeGapBacklog: ShellHostedSmokeGapBacklog;
   hostedSmokeExecutionSequencer: ShellHostedSmokeExecutionSequencer;
   hostedSmokeEvidenceLedger: ShellHostedSmokeEvidenceLedger;
@@ -8226,6 +8272,138 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
         blockedUntil: "AI reviewer, source-safety, and provider-call signoff",
       },
     ],
+  },
+  generatedApiCutoverOwnerReview: {
+    phase: 169,
+    status: "provider_light_generated_api_cutover_owner_review_shell",
+    packetPath: "docs/convex-generated-api-cutover-owner-review.json",
+    totalBindings: 86,
+    reviewSurfaces: 14,
+    cutoverBatches: 6,
+    cutoverMappedFunctions: 44,
+    hostedSmokeEvidenceGaps: 28,
+    reviewItems: 5,
+    readyReviewItems: 0,
+    pendingReviewItems: 5,
+    approvalGate: "Owner review is visible in the shell only. Hosted ownership, env policy, generated binding review, hosted-smoke evidence acceptance, rollback owner signoff, and Phase 85 approval must pass before codegen, generated API import, fixture adapter switch, hosted smoke, or provider writes.",
+    sourceDocuments: [
+      "docs/phase168-generated-api-cutover-owner-review.md",
+      "docs/convex-generated-api-cutover-owner-review.json",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase88-generated-api-review-board.md",
+      "docs/phase92-hosted-smoke-evidence-ledger.md",
+      "docs/phase93-adapter-switch-cutover-checklist.md",
+      "docs/phase167-adapter-switch-cutover-evidence-parity.md",
+    ],
+    reviewItemsList: [
+      {
+        id: "generated-binding-contract",
+        label: "Generated binding contract review",
+        status: "pending_owner_review",
+        evidence: "Phase 88 records 86 generated API bindings across 14 surfaces with 48 query bindings and 38 mutation bindings.",
+        blockedUntil: "Hosted ownership, env policy, and generated binding review window are accepted.",
+        canApprove: false,
+      },
+      {
+        id: "cutover-batch-parity",
+        label: "Cutover batch parity review",
+        status: "pending_owner_review",
+        evidence: "Phase 167 proves all six cutover batch ids match the hosted-smoke evidence ledger before owner review.",
+        blockedUntil: "Phase 92 evidence is accepted and rollback owners are named.",
+        canApprove: false,
+      },
+      {
+        id: "hosted-smoke-evidence",
+        label: "Hosted-smoke evidence review",
+        status: "pending_owner_review",
+        evidence: "The evidence ledger still contains 28 hosted-smoke evidence gaps and no accepted hosted run.",
+        blockedUntil: "Read-only hosted smoke authorization and sanitized evidence capture are approved.",
+        canApprove: false,
+      },
+      {
+        id: "rollback-and-fixture-fallback",
+        label: "Rollback and fixture fallback review",
+        status: "pending_owner_review",
+        evidence: "The cutover checklist keeps every batch blocked with generatedApiAvailable false and fixture fallback selected.",
+        blockedUntil: "Rollback owner, rollback artifact, and fixture restore checks are accepted.",
+        canApprove: false,
+      },
+      {
+        id: "phase85-owner-approval",
+        label: "Phase 85 owner approval envelope",
+        status: "pending_owner_review",
+        evidence: "The hosted activation approval packet remains the signature surface and records no approval values in committed source.",
+        blockedUntil: "Credential rotation, repo-sharing risk, hosted ownership, env/codegen, smoke, mutation, adapter-switch, provider-write, and launch signoffs pass.",
+        canApprove: false,
+      },
+    ],
+    batchSummaries: [
+      {
+        batchId: "read-only-core",
+        label: "Read-only core shell data",
+        cutoverFunctionCount: 8,
+        hostedSmokeEvidenceGapCount: 1,
+        ownerReviewStatus: "blocked_until_hosted_evidence",
+        canCutover: false,
+      },
+      {
+        batchId: "user-scoped-preferences",
+        label: "User-scoped preference reads and writes",
+        cutoverFunctionCount: 2,
+        hostedSmokeEvidenceGapCount: 2,
+        ownerReviewStatus: "blocked_until_hosted_evidence",
+        canCutover: false,
+      },
+      {
+        batchId: "site-creation-and-admin",
+        label: "Site creation, invitations, and activation readiness",
+        cutoverFunctionCount: 18,
+        hostedSmokeEvidenceGapCount: 14,
+        ownerReviewStatus: "blocked_until_hosted_evidence",
+        canCutover: false,
+      },
+      {
+        batchId: "public-crm-loop",
+        label: "Public lead capture and CRM workflow",
+        cutoverFunctionCount: 6,
+        hostedSmokeEvidenceGapCount: 3,
+        ownerReviewStatus: "blocked_until_hosted_evidence",
+        canCutover: false,
+      },
+      {
+        batchId: "provider-readiness-records",
+        label: "Provider readiness metadata without provider writes",
+        cutoverFunctionCount: 4,
+        hostedSmokeEvidenceGapCount: 2,
+        ownerReviewStatus: "blocked_until_hosted_evidence",
+        canCutover: false,
+      },
+      {
+        batchId: "campaign-and-ai-governance",
+        label: "Campaign and AI governance records",
+        cutoverFunctionCount: 6,
+        hostedSmokeEvidenceGapCount: 6,
+        ownerReviewStatus: "blocked_until_hosted_evidence",
+        canCutover: false,
+      },
+    ],
+    blockedActions: [
+      "create hosted Convex deployment",
+      "run npm run convex:codegen",
+      "commit or import convex/_generated/api",
+      "execute live Convex query, mutation, or action",
+      "switch fixture adapter to generated bindings",
+      "run hosted smoke without owner authorization",
+      "perform provider writes or client launch",
+    ],
+    providerBoundary: "Generated API cutover owner review is a shell-only, provider-light evidence surface. It does not create hosted Convex, run codegen, commit or import generated API, switch fixtures, execute hosted smoke, call providers, write live data, or print secrets.",
+    canOpenCodegenWindow: false,
+    canImportGeneratedApi: false,
+    canSwitchFixtureAdapter: false,
+    canExecuteHostedSmoke: false,
+    canApproveCutover: false,
+    providerWrites: false,
+    liveConvexExecution: false,
   },
   hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog,
   hostedSmokeExecutionSequencer: fixtureHostedSmokeExecutionSequencer,
