@@ -5632,6 +5632,77 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
+                  <div className="mt-4 rounded-xl border border-sky-200 bg-sky-50 p-3" data-testid="section-kinflo-hosted-sanitized-preflight-result-capture">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-sky-300 bg-white text-sky-900">
+                            Phase {snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.phase}
+                          </Badge>
+                          <Badge className="bg-sky-800 hover:bg-sky-800">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.status.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <h4 className="mt-3 text-sm font-semibold text-sky-950">Sanitized result capture packet</h4>
+                        <p className="mt-1 max-w-3xl text-xs leading-5 text-sky-900" data-testid="text-kinflo-hosted-sanitized-preflight-result-capture">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.nextGate}
+                        </p>
+                      </div>
+                      <Button size="sm" disabled variant="outline" className="self-start border-sky-300 bg-white text-sky-900 hover:bg-white hover:text-sky-900" data-testid="button-hosted-sanitized-preflight-result-capture-gated">
+                        <ShieldCheck className="mr-2 h-3 w-3" />
+                        Result capture gated
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs" data-testid="section-kinflo-hosted-sanitized-preflight-result-capture-summary">
+                      {[
+                        { label: "Fields", value: snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.totalFields },
+                        { label: "Pending", value: snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.pendingFields },
+                        { label: "Accepted", value: snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.acceptedFields },
+                      ].map((item) => (
+                        <div key={item.label} className="rounded-lg border border-sky-200 bg-white px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-sky-700">{item.label}</div>
+                          <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+                      <div className="grid max-h-[260px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-result-capture-fields">
+                        {snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.fields.map((field) => (
+                          <div key={field.id} className="rounded-lg border border-sky-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{field.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{field.allowedShape} - {field.pendingValue}</div>
+                              </div>
+                              <Badge variant="outline" className="w-fit shrink-0 border-sky-200 bg-sky-50 text-sky-800">{field.approvalState.replaceAll("_", " ")}</Badge>
+                            </div>
+                            <p className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-900">{field.commitShape}</p>
+                            <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">{field.evidenceSource}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="min-w-0 space-y-2">
+                        <div className="rounded-lg border border-sky-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-sky-700">Review packet</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.reviewPacketPath}
+                          </div>
+                        </div>
+                        <div className="max-h-[160px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-sanitized-preflight-result-capture-rules">
+                          {snapshot.hostedActivationRunbook.sanitizedPreflightResultCapture.commitRules.map((rule) => (
+                            <div key={rule} className="flex items-start gap-2 rounded-lg border border-sky-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-sky-700" />
+                              <span>{rule}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
                     <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -8322,7 +8393,7 @@ export default function AdminKinfloShell() {
                           data-testid="section-kinflo-client-launch-dossier-provisioning"
                         >
 
-                  <div className="flex h-[min(318px,calc(100vh-12rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(348px,calc(100vh-18rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
+                  <div className="flex h-[min(338px,calc(100vh-14rem))] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:h-[min(356px,calc(100vh-18rem))] sm:p-3 lg:h-full lg:p-4" data-testid="section-kinflo-client-provisioning-workbench">
                     <div className="flex shrink-0 items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
