@@ -325,6 +325,38 @@ export type ShellHostedActivationDecisionCheckpoint = {
   liveConvexExecution: false;
 };
 
+export type ShellCredentialRotationFamilyReview = {
+  id: string;
+  label: string;
+  scope: string;
+  evidenceTarget: string;
+  blockedUntil: string;
+};
+
+export type ShellHostedActivationCredentialRotationReview = {
+  status: "prepare_only_credential_rotation_review";
+  decisionId: "credential-rotation-review";
+  owner: "Vambah";
+  totalCredentialFamilies: number;
+  pendingCredentialFamilies: number;
+  acceptedCredentialFamilies: number;
+  nextGate: string;
+  reviewPacketPath: string;
+  sourceDocuments: string[];
+  reviewLocations: string[];
+  credentialFamilies: ShellCredentialRotationFamilyReview[];
+  blockedActions: string[];
+  canRecordDecision: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  canRotateSecrets: false;
+  canValidateProviderCredentials: false;
+  canCreateHostedDeployment: false;
+  canRunCodegen: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -335,6 +367,7 @@ export type ShellHostedActivationRunbook = {
   hostedSmokeExecutionSequencer: ShellHostedSmokeExecutionSequencer;
   hostedSmokeEvidenceLedger: ShellHostedSmokeEvidenceLedger;
   decisionCheckpoint: ShellHostedActivationDecisionCheckpoint;
+  credentialRotationReview: ShellHostedActivationCredentialRotationReview;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -7352,6 +7385,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "docs/phase73-hosted-activation-decision-register.md",
       "docs/phase85-hosted-activation-approval-packet.md",
       "docs/phase96-hosted-activation-owner-checklist.md",
+      "docs/phase121-hosted-activation-credential-rotation-review.md",
       "docs/phase104-hosted-smoke-evidence-deep-links.md",
     ],
     blockedActions: [
@@ -7367,6 +7401,99 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     canRunCodegen: false,
     canImportGeneratedApi: false,
     canExecuteLiveSmoke: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  credentialRotationReview: {
+    status: "prepare_only_credential_rotation_review",
+    decisionId: "credential-rotation-review",
+    owner: "Vambah",
+    totalCredentialFamilies: 7,
+    pendingCredentialFamilies: 7,
+    acceptedCredentialFamilies: 0,
+    nextGate: "Owner confirms each credential family was rotated or accepted as safe outside committed source before hosted env entry begins.",
+    reviewPacketPath: "docs/phase121-hosted-activation-credential-rotation-review.md",
+    sourceDocuments: [
+      "docs/phase0-completion-audit.md",
+      "docs/phase73-hosted-activation-decision-register.md",
+      "docs/phase85-hosted-activation-approval-packet.md",
+      "docs/phase96-hosted-activation-owner-checklist.md",
+      "docs/phase120-hosted-activation-decision-checkpoint.md",
+    ],
+    reviewLocations: [
+      "1Password item names and vault placement only",
+      "provider dashboards reviewed by owner",
+      "secret-history audit summary",
+      "local .env.example variable families",
+      "hosted activation approval packet",
+    ],
+    credentialFamilies: [
+      {
+        id: "convex",
+        label: "Convex project, deploy key, and auth env",
+        scope: "Hosted Convex activation",
+        evidenceTarget: "Owner note confirms future hosted Convex credentials are new or accepted safe before env entry.",
+        blockedUntil: "Credential posture is accepted before hosted Convex project URL or deploy key is entered.",
+      },
+      {
+        id: "auth",
+        label: "Authentication provider secrets",
+        scope: "Admin and client session boundary",
+        evidenceTarget: "Owner note confirms auth client/server secrets are rotated or accepted safe outside committed source.",
+        blockedUntil: "Hosted auth policy is approved before codegen or smoke users are configured.",
+      },
+      {
+        id: "database-and-import",
+        label: "Database, import, and source export credentials",
+        scope: "Drizzle-to-Convex migration and production import",
+        evidenceTarget: "Owner note confirms historical database/import credentials are retired, rotated, or accepted safe.",
+        blockedUntil: "Production import smoke remains blocked.",
+      },
+      {
+        id: "email-sms",
+        label: "Email and SMS provider credentials",
+        scope: "Invites, campaigns, and notifications",
+        evidenceTarget: "Owner note confirms SendGrid/Twilio-style credentials are rotated or provider sends remain disabled.",
+        blockedUntil: "Invite delivery, campaign sends, and notification writes remain gated.",
+      },
+      {
+        id: "storage-media",
+        label: "Storage and media provider credentials",
+        scope: "Assets, uploads, and public media",
+        evidenceTarget: "Owner note confirms storage/media credentials are rotated or uploads remain disabled.",
+        blockedUntil: "Object storage uploads and public asset writes remain gated.",
+      },
+      {
+        id: "billing-domain",
+        label: "Billing, domain, DNS, and deployment credentials",
+        scope: "Stripe, domains, Vercel, DNS, and launch",
+        evidenceTarget: "Owner note confirms billing/domain/deployment credentials are rotated or launch writes remain disabled.",
+        blockedUntil: "Billing, domain attachment, DNS, and production deploy writes remain gated.",
+      },
+      {
+        id: "ai-integrations",
+        label: "AI and third-party integration credentials",
+        scope: "AI review, generated content, and external integrations",
+        evidenceTarget: "Owner note confirms AI/integration credentials are rotated or provider calls remain disabled.",
+        blockedUntil: "AI generation, provider integrations, and external API calls remain gated.",
+      },
+    ],
+    blockedActions: [
+      "record credential approval in committed source",
+      "read or print secret values",
+      "rotate provider credentials from the repo",
+      "validate credentials against provider dashboards",
+      "enter hosted Convex env values",
+      "run npm run convex:codegen",
+      "execute hosted smoke or provider writes",
+    ],
+    canRecordDecision: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    canRotateSecrets: false,
+    canValidateProviderCredentials: false,
+    canCreateHostedDeployment: false,
+    canRunCodegen: false,
     providerWrites: false,
     liveConvexExecution: false,
   },
