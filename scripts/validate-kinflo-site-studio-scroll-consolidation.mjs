@@ -81,8 +81,8 @@ const compactMarkers = [
   "activeTab === \"site-studio\" ? \"hidden sm:block\" : \"block\"",
   "activeTab === \"site-studio\" ? \"mb-1 hidden rounded-md px-2 py-1.5 lg:block\"",
   "const clientWebsiteStudioLaneRail = (",
-  "activeTab === \"site-studio\" ? clientWebsiteStudioLaneRail : null",
   "section-kinflo-client-studio-compact-shell",
+  "{clientWebsiteStudioLaneRail}",
   "hidden max-w-3xl text-sm leading-5 text-slate-600 sm:block",
   "hidden grid-cols-2 gap-2 sm:grid lg:grid-cols-4",
   "${isClientWebsiteLaunchWorkbench ? \"hidden\" : \"hidden lg:grid\"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4",
@@ -192,8 +192,8 @@ requireIncludes("docs/phase86-site-studio-scroll-consolidation.md", [
   "npm run kinflo:validate-site-studio-scroll-consolidation",
   "section-kinflo-client-studio-compact-shell",
   "compact shell trims duplicate mobile summary chrome",
-  "lane toolbar stays as a sticky header rail",
-  "before the persistent identity strip",
+  "lane toolbar stays as a sticky compact-section rail",
+  "before the control-room frame",
   "sticky top-0 placement",
   "tabs-kinflo-client-workbench-stage",
   "section-kinflo-client-launch-rail",
@@ -274,7 +274,8 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
 
 const laneSwitcherIndex = shellContents.indexOf("section-kinflo-client-studio-lane-switcher");
 const siteStudioIndex = shellContents.indexOf('value="site-studio"');
-const laneRailRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", siteStudioIndex);
+const compactShellIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-compact-shell"', siteStudioIndex);
+const laneRailRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", compactShellIndex);
 const headerRailRenderIndex = shellContents.indexOf('activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null');
 const persistentIdentityIndex = shellContents.indexOf("section-kinflo-persistent-identity-strip");
 const controlRoomIndex = shellContents.indexOf("section-kinflo-client-control-room-frame", siteStudioIndex);
@@ -284,22 +285,24 @@ const workbenchContractIndex = shellContents.indexOf("section-kinflo-client-work
 if (
   laneSwitcherIndex !== -1 &&
   siteStudioIndex !== -1 &&
-  laneRailRenderIndex === -1 &&
-  headerRailRenderIndex !== -1 &&
+  compactShellIndex !== -1 &&
+  laneRailRenderIndex !== -1 &&
+  headerRailRenderIndex === -1 &&
   persistentIdentityIndex !== -1 &&
   controlRoomIndex !== -1 &&
   operatingFrameIndex !== -1 &&
   workbenchContractIndex !== -1 &&
-  headerRailRenderIndex < persistentIdentityIndex &&
-  headerRailRenderIndex < controlRoomIndex &&
-  headerRailRenderIndex < operatingFrameIndex &&
-  headerRailRenderIndex < workbenchContractIndex
+  persistentIdentityIndex < compactShellIndex &&
+  compactShellIndex < laneRailRenderIndex &&
+  laneRailRenderIndex < controlRoomIndex &&
+  laneRailRenderIndex < operatingFrameIndex &&
+  laneRailRenderIndex < workbenchContractIndex
 ) {
-  pass("Site Studio lane switcher renders first in the header above identity and lane sections");
+  pass("Site Studio lane switcher renders first in the compact section above lane sections");
 } else {
   fail(
-    "Site Studio lane switcher renders first in the header above identity and lane sections",
-    "The lane switcher must stay before the persistent identity strip, control-room, and lane-specific summary cards so it does not jump lower as lanes change."
+    "Site Studio lane switcher renders first in the compact section above lane sections",
+    "The lane switcher must stay inside the compact Site Studio shell before the control-room and lane-specific summary cards so it does not jump lower as lanes change."
   );
 }
 
@@ -316,11 +319,11 @@ if (
   !laneRailClassWindow.includes("order-first") &&
   !laneRailClassWindow.includes("relative z-10")
 ) {
-  pass("Site Studio lane switcher uses a sticky header top rail");
+  pass("Site Studio lane switcher uses a sticky compact-section top rail");
 } else {
   fail(
-    "Site Studio lane switcher uses a sticky header top rail",
-    "The lane switcher must stay in the Site Studio header with sticky top-0 placement before lane content."
+    "Site Studio lane switcher uses a sticky compact-section top rail",
+    "The lane switcher must stay in the compact Site Studio shell with sticky top-0 placement before lane content."
   );
 }
 

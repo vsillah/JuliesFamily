@@ -5134,7 +5134,6 @@ export default function AdminKinfloShell() {
               </Button>
             </div>
           </div>
-          {activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null}
           <div
             className="grid min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]"
             data-testid="section-kinflo-persistent-identity-strip"
@@ -9658,6 +9657,8 @@ export default function AdminKinfloShell() {
 
           <TabsContent value="site-studio" className="mt-2">
             <section className="flex min-w-0 flex-col gap-2 overflow-x-hidden" data-testid="section-kinflo-client-studio-compact-shell">
+              {clientWebsiteStudioLaneRail}
+
               <div
                 className={`${isClientWebsiteLaunchWorkbench ? "hidden" : "overflow-hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"

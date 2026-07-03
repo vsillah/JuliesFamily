@@ -159,6 +159,9 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
 }
 
 const laneSwitcherIndex = shellContents.indexOf("section-kinflo-client-studio-lane-switcher");
+const siteStudioIndex = shellContents.indexOf('value="site-studio"');
+const compactShellIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-compact-shell"', siteStudioIndex);
+const laneRailRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", compactShellIndex);
 const persistentIdentityIndex = shellContents.indexOf("section-kinflo-persistent-identity-strip");
 const controlRoomIndex = shellContents.indexOf("section-kinflo-client-control-room-frame");
 const configurationLaneIndex = shellContents.indexOf(
@@ -167,18 +170,22 @@ const configurationLaneIndex = shellContents.indexOf(
 );
 if (
   laneSwitcherIndex !== -1 &&
+  siteStudioIndex !== -1 &&
+  compactShellIndex !== -1 &&
+  laneRailRenderIndex !== -1 &&
   persistentIdentityIndex !== -1 &&
   controlRoomIndex !== -1 &&
   configurationLaneIndex !== -1 &&
-  laneSwitcherIndex < persistentIdentityIndex &&
-  laneSwitcherIndex < controlRoomIndex &&
-  laneSwitcherIndex < configurationLaneIndex
+  persistentIdentityIndex < compactShellIndex &&
+  compactShellIndex < laneRailRenderIndex &&
+  laneRailRenderIndex < controlRoomIndex &&
+  laneRailRenderIndex < configurationLaneIndex
 ) {
-  pass("studio lanes stay at the top before identity and lane-specific sections");
+  pass("studio lanes stay at the top of the compact Site Studio shell");
 } else {
   fail(
-    "studio lanes stay at the top before identity and lane-specific sections",
-    "The shared Site Studio lane rail must render before the persistent identity strip, control room, and lane-specific panels."
+    "studio lanes stay at the top of the compact Site Studio shell",
+    "The shared Site Studio lane rail must render inside the compact Site Studio shell before the control room and lane-specific panels."
   );
 }
 
