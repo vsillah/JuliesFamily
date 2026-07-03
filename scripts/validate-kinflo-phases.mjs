@@ -195,6 +195,7 @@ for (const path of [
   "docs/phase155-handoff-readiness-checklist.md",
   "docs/phase156-pr-preview-deployment-checkpoint.md",
   "docs/phase157-client-configuration-command-surface.md",
+  "docs/phase158-preview-recovery-gate.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -379,6 +380,7 @@ for (const path of [
   "scripts/validate-kinflo-handoff-readiness-checklist.mjs",
   "scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
   "scripts/validate-kinflo-client-configuration-command-surface.mjs",
+  "scripts/validate-kinflo-preview-recovery-gate.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -1444,6 +1446,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 97 client website configuration profiles",
   "npm run kinflo:validate-client-website-configuration-profiles",
   "Phase 157 client configuration command surface",
+  "Phase 158 preview recovery gate",
+  "npm run kinflo:validate-preview-recovery-gate",
   "Vercel build-rate limit",
   "do not treat the preview as integration-ready",
   "Phase 91 hosted smoke execution sequencer",
@@ -2424,6 +2428,25 @@ requireIncludes("docs/phase157-client-configuration-command-surface.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase158-preview-recovery-gate.md", [
+  "Phase 158: Preview Recovery Gate",
+  "npm run kinflo:validate-preview-recovery-gate",
+  "activationConsole.previewRecoveryGate",
+  "section-kinflo-hosted-preview-recovery-gate",
+  "text-kinflo-hosted-preview-recovery-gate",
+  "text-kinflo-hosted-preview-local-posture",
+  "section-kinflo-hosted-preview-recovery-facts",
+  "section-kinflo-hosted-preview-recovery-steps",
+  "section-kinflo-hosted-preview-recovery-validators",
+  "section-kinflo-hosted-preview-recovery-blocked-actions",
+  "button-hosted-preview-recovery-gated",
+  "external_rate_limit_blocked",
+  "164629f60e67edd4edeec71c9dcbf34a5c50ffbd",
+  "No Vercel deployment is created or retried by this phase.",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -2971,6 +2994,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase117-client-experience-configuration-presets.md\"",
   "\"docs/phase157-client-configuration-command-surface.md\"",
   "\"npm run kinflo:validate-client-configuration-command-surface\"",
+  "\"docs/phase158-preview-recovery-gate.md\"",
+  "\"npm run kinflo:validate-preview-recovery-gate\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3239,6 +3264,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-handoff-readiness-checklist\"",
   "\"kinflo:validate-pr-preview-deployment-checkpoint\"",
   "\"kinflo:validate-client-configuration-command-surface\"",
+  "\"kinflo:validate-preview-recovery-gate\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4689,6 +4715,19 @@ requireIncludes("scripts/validate-kinflo-client-configuration-command-surface.mj
   "client configuration command surface does not import generated API",
   "client configuration command surface does not execute live Convex",
   "KinFlo client configuration command surface validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-preview-recovery-gate.mjs", [
+  "docs/phase158-preview-recovery-gate.md",
+  "activationConsole.previewRecoveryGate",
+  "section-kinflo-hosted-preview-recovery-gate",
+  "text-kinflo-hosted-preview-recovery-gate",
+  "button-hosted-preview-recovery-gated",
+  "164629f60e67edd4edeec71c9dcbf34a5c50ffbd",
+  "preview recovery gate renders before pre-activation command order",
+  "preview recovery gate does not execute live Convex",
+  "Vercel deployment retried: no",
+  "KinFlo preview recovery gate validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [

@@ -7709,6 +7709,82 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-5 p-5">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-4" data-testid="section-kinflo-hosted-preview-recovery-gate">
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="outline" className="border-amber-300 bg-white text-amber-800">
+                              Phase {snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.phase}
+                            </Badge>
+                            <Badge className="bg-amber-700 text-white hover:bg-amber-700">
+                              {snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.status.replaceAll("_", " ")}
+                            </Badge>
+                          </div>
+                          <h3 className="mt-3 text-base font-semibold text-amber-950">Preview recovery gate</h3>
+                          <p className="mt-1 max-w-3xl text-sm leading-6 text-amber-900" data-testid="text-kinflo-hosted-preview-recovery-gate">
+                            {snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.nextGate}
+                          </p>
+                        </div>
+                        <Button disabled variant="outline" className="self-start border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900" data-testid="button-hosted-preview-recovery-gated">
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          Preview recovery gated
+                        </Button>
+                      </div>
+
+                      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.42fr)]">
+                        <div className="min-w-0 space-y-3">
+                          <div className="grid gap-2 sm:grid-cols-2" data-testid="section-kinflo-hosted-preview-recovery-facts">
+                            {[
+                              { label: "Branch", value: snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.branch },
+                              { label: "Remote PR head", value: snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.remotePrHead.slice(0, 7) },
+                              { label: "Blocker", value: snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.blocker },
+                              { label: "PR", value: snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.prUrl },
+                            ].map((item) => (
+                              <div key={item.label} className="min-w-0 rounded-lg border border-amber-200 bg-white px-3 py-2">
+                                <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">{item.label}</div>
+                                <div className="mt-1 break-all text-xs font-semibold leading-5 text-slate-950">{item.value}</div>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="rounded-lg border border-amber-200 bg-white p-3 text-xs leading-5 text-amber-900" data-testid="text-kinflo-hosted-preview-local-posture">
+                            {snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.localPosture}
+                          </p>
+                        </div>
+
+                        <div className="min-w-0 space-y-2">
+                          <div className="rounded-lg border border-amber-200 bg-white p-3">
+                            <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Recovery order</div>
+                            <div className="mt-2 max-h-[150px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-preview-recovery-steps">
+                              {snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.recoverySteps.map((step) => (
+                                <div key={step} className="flex items-start gap-2 text-xs leading-5 text-slate-700">
+                                  <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-700" />
+                                  <span>{step}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          <div className="rounded-lg border border-amber-200 bg-white p-3">
+                            <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Validators</div>
+                            <div className="mt-2 flex flex-wrap gap-1.5" data-testid="section-kinflo-hosted-preview-recovery-validators">
+                              {snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.validationCommands.map((command) => (
+                                <Badge key={command} variant="outline" className="border-amber-200 bg-amber-50 text-[11px] text-amber-900">
+                                  {command}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 flex flex-wrap gap-2" data-testid="section-kinflo-hosted-preview-recovery-blocked-actions">
+                        {snapshot.hostedActivationRunbook.activationConsole.previewRecoveryGate.blockedActions.map((action) => (
+                          <Badge key={action} variant="outline" className="border-rose-200 bg-white text-rose-700">
+                            {action}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
                       <div className="min-w-0">
                         <div className="text-sm font-medium">Pre-activation command order</div>

@@ -175,6 +175,24 @@ export type ShellHostedActivationConsole = {
   status: "provider_light_activation_console";
   decision: "blocked_until_approval";
   nextHumanGate: string;
+  previewRecoveryGate: {
+    phase: 158;
+    status: "external_rate_limit_blocked";
+    branch: "codex/kinflo-phase-0-convex-plan";
+    prUrl: "https://github.com/vsillah/JuliesFamily/pull/1";
+    remotePrHead: string;
+    blocker: string;
+    localPosture: string;
+    nextGate: string;
+    recoverySteps: string[];
+    validationCommands: string[];
+    blockedActions: string[];
+    canPushPreview: false;
+    canScheduleMerge: false;
+    canRunHostedActivation: false;
+    providerWrites: false;
+    liveConvexExecution: false;
+  };
   preActivationCommands: string[];
   blockedLiveActions: string[];
   evidenceSummary: string[];
@@ -7653,6 +7671,40 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     status: "provider_light_activation_console",
     decision: "blocked_until_approval",
     nextHumanGate: "Approve hosted Convex ownership, billing, backup, auth, env policy, and codegen window before generated API files are created.",
+    previewRecoveryGate: {
+      phase: 158,
+      status: "external_rate_limit_blocked",
+      branch: "codex/kinflo-phase-0-convex-plan",
+      prUrl: "https://github.com/vsillah/JuliesFamily/pull/1",
+      remotePrHead: "164629f60e67edd4edeec71c9dcbf34a5c50ffbd",
+      blocker: "Vercel build-rate limit blocks the PR preview deployment for the remote PR head.",
+      localPosture: "Local provider-light shell and preview-gate commits are ahead of the remote PR head. Treat the PR preview as stale until Vercel capacity recovers and the local commits are pushed.",
+      nextGate: "Resolve or wait out the Vercel quota gate, push the local provider-light commits, then rerun PR review and integration handoff validators before scheduling merge or hosted activation.",
+      recoverySteps: [
+        "Wait for Vercel build-rate limit recovery or resolve quota outside the repo.",
+        "Push the local provider-light commits after preview capacity is available.",
+        "Rerun npm run kinflo:validate-pr-review-state and npm run kinflo:validate-integration-review-handoff.",
+        "Only then schedule integration review, hosted activation preflight, codegen, generated API import, or hosted smoke.",
+      ],
+      validationCommands: [
+        "npm run kinflo:validate-pr-review-state",
+        "npm run kinflo:validate-pr-preview-deployment-checkpoint",
+        "npm run kinflo:validate-integration-review-handoff",
+      ],
+      blockedActions: [
+        "push a preview retry while Vercel is rate-limited",
+        "schedule merge from stale PR preview evidence",
+        "run hosted activation preflight",
+        "run npm run convex:codegen",
+        "import generated Convex API",
+        "execute hosted smoke or provider writes",
+      ],
+      canPushPreview: false,
+      canScheduleMerge: false,
+      canRunHostedActivation: false,
+      providerWrites: false,
+      liveConvexExecution: false,
+    },
     preActivationCommands: [
       "npm run kinflo:audit-secret-history",
       "npm run kinflo:inventory-env",

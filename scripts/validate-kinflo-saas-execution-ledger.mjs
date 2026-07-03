@@ -95,6 +95,7 @@ for (const path of [
   "docs/phase155-handoff-readiness-checklist.md",
   "docs/phase156-pr-preview-deployment-checkpoint.md",
   "docs/phase157-client-configuration-command-surface.md",
+  "docs/phase158-preview-recovery-gate.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -205,6 +206,7 @@ for (const path of [
   "scripts/validate-kinflo-handoff-readiness-checklist.mjs",
   "scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
   "scripts/validate-kinflo-client-configuration-command-surface.mjs",
+  "scripts/validate-kinflo-preview-recovery-gate.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
@@ -335,6 +337,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-handoff-readiness-checklist",
   "npm run kinflo:validate-pr-preview-deployment-checkpoint",
   "npm run kinflo:validate-client-configuration-command-surface",
+  "npm run kinflo:validate-preview-recovery-gate",
   "npm run kinflo:validate-site-studio-scroll-consolidation",
   "npm run kinflo:validate-site-studio-deep-links",
   "npm run kinflo:validate-site-studio-site-deep-links",
@@ -562,6 +565,8 @@ for (const marker of [
   "\"external_rate_limit_blocked\"",
   "\"docs/phase157-client-configuration-command-surface.md\"",
   "\"npm run kinflo:validate-client-configuration-command-surface\"",
+  "\"docs/phase158-preview-recovery-gate.md\"",
+  "\"npm run kinflo:validate-preview-recovery-gate\"",
   "Vercel build-rate limiting",
 ]) {
   if (ledgerText.includes(marker)) {
