@@ -388,6 +388,14 @@ function readInitialHostedPreflightEvidenceId(defaultEntryId: string, entryIds: 
   return entryId && entryIds.includes(entryId) ? entryId : defaultEntryId;
 }
 
+function readInitialHostedPreflightResultFieldId(defaultFieldId: string, fieldIds: string[]): string {
+  if (typeof window === "undefined") {
+    return defaultFieldId;
+  }
+  const fieldId = new URLSearchParams(window.location.search).get("preflightResult");
+  return fieldId && fieldIds.includes(fieldId) ? fieldId : defaultFieldId;
+}
+
 function readInitialAdapterSwitchBatchId(defaultBatchId: string, batchIds: string[]): string {
   if (typeof window === "undefined") {
     return defaultBatchId;
@@ -2179,6 +2187,14 @@ export default function AdminKinfloShell() {
     hostedPreflightEvidenceEntryIds[0] ?? "",
     hostedPreflightEvidenceEntryIds,
   ));
+  const hostedPreflightResultFieldIds = useMemo(
+    () => snapshot.hostedActivationRunbook.activationPreflightResultContract.fields.map((field) => field.id),
+    [snapshot.hostedActivationRunbook.activationPreflightResultContract.fields],
+  );
+  const [hostedPreflightResultFieldId, setHostedPreflightResultFieldId] = useState(() => readInitialHostedPreflightResultFieldId(
+    hostedPreflightResultFieldIds[0] ?? "",
+    hostedPreflightResultFieldIds,
+  ));
   const [wizardTemplateKey, setWizardTemplateKey] = useState(snapshot.siteCreationWizard.defaultTemplateKey);
   const [wizardSiteName, setWizardSiteName] = useState(snapshot.siteCreationWizard.defaultSiteName);
   const [wizardSubdomain, setWizardSubdomain] = useState(snapshot.siteCreationWizard.defaultSubdomain);
@@ -2340,6 +2356,11 @@ export default function AdminKinfloShell() {
     () => snapshot.hostedActivationRunbook.activationPreflightEvidenceLedger.entries.find((entry) => entry.id === hostedPreflightEvidenceId)
       ?? snapshot.hostedActivationRunbook.activationPreflightEvidenceLedger.entries[0],
     [hostedPreflightEvidenceId, snapshot.hostedActivationRunbook.activationPreflightEvidenceLedger.entries],
+  );
+  const selectedHostedPreflightResultField = useMemo(
+    () => snapshot.hostedActivationRunbook.activationPreflightResultContract.fields.find((field) => field.id === hostedPreflightResultFieldId)
+      ?? snapshot.hostedActivationRunbook.activationPreflightResultContract.fields[0],
+    [hostedPreflightResultFieldId, snapshot.hostedActivationRunbook.activationPreflightResultContract.fields],
   );
   const hostedActivationTotals = useMemo(() => {
     const steps = snapshot.hostedActivationRunbook.steps;
@@ -3126,6 +3147,10 @@ export default function AdminKinfloShell() {
       hostedPreflightEvidenceEntryIds[0] ?? "",
       hostedPreflightEvidenceEntryIds,
     );
+    const nextHostedPreflightResultFieldId = readInitialHostedPreflightResultFieldId(
+      hostedPreflightResultFieldIds[0] ?? "",
+      hostedPreflightResultFieldIds,
+    );
     setActiveTab((current) => (current === nextTab ? current : nextTab));
     setClientWebsiteStudioSiteKey((current) => (current === nextSiteKey ? current : nextSiteKey));
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
@@ -3136,11 +3161,13 @@ export default function AdminKinfloShell() {
     setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
     setHostedSmokeEvidenceBatchId((current) => (current === nextHostedSmokeEvidenceBatchId ? current : nextHostedSmokeEvidenceBatchId));
     setHostedPreflightEvidenceId((current) => (current === nextHostedPreflightEvidenceId ? current : nextHostedPreflightEvidenceId));
+    setHostedPreflightResultFieldId((current) => (current === nextHostedPreflightResultFieldId ? current : nextHostedPreflightResultFieldId));
   }, [
     adapterSwitchBatchIds,
     clientWebsiteStudioSiteKeys,
     hostedActivationStepIds,
     hostedPreflightEvidenceEntryIds,
+    hostedPreflightResultFieldIds,
     hostedSmokeEvidenceBatchIds,
     location,
     snapshot.adapterSwitchReadiness.batches,
@@ -3179,6 +3206,21 @@ export default function AdminKinfloShell() {
     }, 250);
   }, [activeTab, hostedPreflightEvidenceId, location]);
 
+  useEffect(() => {
+    if (activeTab !== "hosted-activation" || typeof window === "undefined") {
+      return;
+    }
+    const hasPreflightResultParam = new URLSearchParams(window.location.search).has("preflightResult");
+    if (!hasPreflightResultParam) {
+      return;
+    }
+    window.setTimeout(() => {
+      document
+        .querySelector('[data-testid="section-kinflo-hosted-preflight-result-focus"]')
+        ?.scrollIntoView({ block: "start" });
+    }, 250);
+  }, [activeTab, hostedPreflightResultFieldId, location]);
+
   const updateKinfloShellRoute = (updates: Record<string, string | undefined>) => {
     if (typeof window === "undefined") {
       return;
@@ -3211,6 +3253,7 @@ export default function AdminKinfloShell() {
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
       smokeEvidence: tab === "hosted-activation" ? hostedSmokeEvidenceBatchId : undefined,
       preflightEvidence: tab === "hosted-activation" ? hostedPreflightEvidenceId : undefined,
+      preflightResult: tab === "hosted-activation" ? hostedPreflightResultFieldId : undefined,
     });
   };
 
@@ -3228,6 +3271,7 @@ export default function AdminKinfloShell() {
       activationStep: undefined,
       smokeEvidence: undefined,
       preflightEvidence: undefined,
+      preflightResult: undefined,
     });
   };
 
@@ -3245,6 +3289,7 @@ export default function AdminKinfloShell() {
       activationStep: undefined,
       smokeEvidence: undefined,
       preflightEvidence: undefined,
+      preflightResult: undefined,
     });
   };
 
@@ -3263,6 +3308,7 @@ export default function AdminKinfloShell() {
       activationStep: undefined,
       smokeEvidence: undefined,
       preflightEvidence: undefined,
+      preflightResult: undefined,
     });
   };
 
@@ -3282,6 +3328,7 @@ export default function AdminKinfloShell() {
       activationStep: undefined,
       smokeEvidence: undefined,
       preflightEvidence: undefined,
+      preflightResult: undefined,
     });
   };
 
@@ -3302,6 +3349,7 @@ export default function AdminKinfloShell() {
       activationStep: undefined,
       smokeEvidence: undefined,
       preflightEvidence: undefined,
+      preflightResult: undefined,
     });
   };
 
@@ -3319,6 +3367,7 @@ export default function AdminKinfloShell() {
       activationStep: undefined,
       smokeEvidence: undefined,
       preflightEvidence: undefined,
+      preflightResult: undefined,
     });
   };
 
@@ -3336,6 +3385,7 @@ export default function AdminKinfloShell() {
       activationStep: stepId,
       smokeEvidence: hostedSmokeEvidenceBatchId,
       preflightEvidence: hostedPreflightEvidenceId,
+      preflightResult: hostedPreflightResultFieldId,
     });
   };
 
@@ -3353,6 +3403,7 @@ export default function AdminKinfloShell() {
       activationStep: hostedActivationStepId,
       smokeEvidence: batchId,
       preflightEvidence: hostedPreflightEvidenceId,
+      preflightResult: hostedPreflightResultFieldId,
     });
   };
 
@@ -3370,6 +3421,25 @@ export default function AdminKinfloShell() {
       activationStep: hostedActivationStepId,
       smokeEvidence: hostedSmokeEvidenceBatchId,
       preflightEvidence: entryId,
+      preflightResult: hostedPreflightResultFieldId,
+    });
+  };
+
+  const selectHostedPreflightResultField = (fieldId: string) => {
+    setActiveTab("hosted-activation");
+    setHostedPreflightResultFieldId(fieldId);
+    updateKinfloShellRoute({
+      tab: "hosted-activation",
+      studioSite: undefined,
+      studioLane: undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: hostedActivationStepId,
+      smokeEvidence: hostedSmokeEvidenceBatchId,
+      preflightEvidence: hostedPreflightEvidenceId,
+      preflightResult: fieldId,
     });
   };
 
@@ -5301,6 +5371,52 @@ export default function AdminKinfloShell() {
                         <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
                       </div>
                     ))}
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-hosted-preflight-result-focus">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <FileText className="h-4 w-4 text-slate-500" />
+                          <h4 className="text-sm font-semibold text-slate-950">{selectedHostedPreflightResultField?.label}</h4>
+                          <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">
+                            {selectedHostedPreflightResultField?.id}
+                          </Badge>
+                        </div>
+                        <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-hosted-preflight-result-focus">
+                          Accepted shape: {selectedHostedPreflightResultField?.allowedShape}
+                        </p>
+                      </div>
+                      <div className="grid w-full gap-2 lg:w-[320px]">
+                        <Select value={selectedHostedPreflightResultField?.id ?? ""} onValueChange={selectHostedPreflightResultField}>
+                          <SelectTrigger data-testid="select-kinflo-hosted-preflight-result">
+                            <SelectValue placeholder="Select result field" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {snapshot.hostedActivationRunbook.activationPreflightResultContract.fields.map((field) => (
+                              <SelectItem key={field.id} value={field.id}>
+                                {field.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button size="sm" disabled variant="outline" data-testid="button-hosted-preflight-result-focus-gated">
+                          <ShieldCheck className="mr-2 h-3 w-3" />
+                          Result write gated
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 grid gap-2 text-xs lg:grid-cols-2">
+                      <div className="rounded-md border border-amber-100 bg-amber-50 p-3">
+                        <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Required redaction</div>
+                        <p className="mt-2 leading-5 text-amber-900">{selectedHostedPreflightResultField?.requiredRedaction}</p>
+                      </div>
+                      <div className="rounded-md border border-white bg-white p-3">
+                        <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Failure meaning</div>
+                        <p className="mt-2 leading-5 text-slate-600">{selectedHostedPreflightResultField?.failureMeaning}</p>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">

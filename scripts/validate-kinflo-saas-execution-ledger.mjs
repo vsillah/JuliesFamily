@@ -108,6 +108,7 @@ for (const path of [
   "docs/phase126-hosted-activation-preflight-evidence-ledger.md",
   "docs/phase127-hosted-activation-preflight-evidence-deep-links.md",
   "docs/phase128-hosted-activation-preflight-result-contract.md",
+  "docs/phase129-hosted-activation-preflight-result-deep-links.md",
   "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase104-hosted-smoke-evidence-deep-links.md",
   "docs/phase87-adapter-switch-runway.md",
@@ -152,6 +153,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-preflight-evidence-ledger.mjs",
   "scripts/validate-kinflo-hosted-activation-preflight-evidence-deep-links.mjs",
   "scripts/validate-kinflo-hosted-activation-preflight-result-contract.mjs",
+  "scripts/validate-kinflo-hosted-activation-preflight-result-deep-links.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
@@ -294,6 +296,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-hosted-activation-preflight-evidence-ledger",
   "npm run kinflo:validate-hosted-activation-preflight-evidence-deep-links",
   "npm run kinflo:validate-hosted-activation-preflight-result-contract",
+  "npm run kinflo:validate-hosted-activation-preflight-result-deep-links",
   "npm run kinflo:validate-hosted-activation-step-deep-links",
   "npm run kinflo:validate-phase0-readiness",
   "npm run kinflo:validate-phases",
@@ -341,6 +344,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 126 hosted activation preflight evidence ledger",
   "Phase 127 hosted activation preflight evidence deep links",
   "Phase 128 hosted activation preflight result contract",
+  "Phase 129 hosted activation preflight result deep links",
   "Phase 101 hosted activation step deep links",
   "Phase 104 hosted smoke evidence deep links",
   "Site Studio scroll consolidation",
@@ -359,7 +363,7 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 93 adapter switch cutover checklist",
   "Phase 102 adapter switch batch deep links",
   "Phase 103 adapter switch surface deep links",
-  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 121 hosted activation credential rotation review, Phase 122 hosted activation repo sharing risk review, Phase 123 hosted activation ownership review, Phase 124 hosted activation env/codegen review, Phase 125 hosted activation preflight review, Phase 126 hosted activation preflight evidence ledger, Phase 127 hosted activation preflight evidence deep links, Phase 128 hosted activation preflight result contract, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
+  "human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 121 hosted activation credential rotation review, Phase 122 hosted activation repo sharing risk review, Phase 123 hosted activation ownership review, Phase 124 hosted activation env/codegen review, Phase 125 hosted activation preflight review, Phase 126 hosted activation preflight evidence ledger, Phase 127 hosted activation preflight evidence deep links, Phase 128 hosted activation preflight result contract, Phase 129 hosted activation preflight result deep links, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current without storing secrets",
 ]);
 
 requireIncludes("package.json", [
@@ -388,6 +392,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-preflight-evidence-ledger\"",
   "\"kinflo:validate-hosted-activation-preflight-evidence-deep-links\"",
   "\"kinflo:validate-hosted-activation-preflight-result-contract\"",
+  "\"kinflo:validate-hosted-activation-preflight-result-deep-links\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
