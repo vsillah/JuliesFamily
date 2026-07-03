@@ -150,6 +150,8 @@ for (const path of [
   "docs/phase165-hosted-smoke-evidence-ledger-parity.md",
   "docs/phase166-hosted-smoke-evidence-deep-link-parity.md",
   "docs/phase167-adapter-switch-cutover-evidence-parity.md",
+  "docs/phase168-generated-api-cutover-owner-review.md",
+  "docs/convex-generated-api-cutover-owner-review.json",
   "docs/phase87-adapter-switch-runway.md",
   "docs/phase88-generated-api-review-board.md",
   "docs/phase89-adapter-switch-acceptance-matrix.md",
@@ -251,6 +253,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-link-parity.mjs",
   "scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs",
   "scripts/validate-kinflo-adapter-switch-cutover-evidence-parity.mjs",
+  "scripts/validate-kinflo-generated-api-cutover-owner-review.mjs",
   "scripts/validate-kinflo-hosted-activation-approval-packet.mjs",
 ]) {
   requireFile(path);
@@ -394,6 +397,7 @@ requireArrayIncludes("validation commands", ledger.validationCommands ?? [], [
   "npm run kinflo:validate-hosted-smoke-evidence-deep-links",
   "npm run kinflo:validate-adapter-switch-cutover-checklist",
   "npm run kinflo:validate-adapter-switch-cutover-evidence-parity",
+  "npm run kinflo:validate-generated-api-cutover-owner-review",
   "npm run kinflo:validate-hosted-activation-decisions",
   "npm run kinflo:validate-hosted-activation-approval-packet",
   "npm run kinflo:validate-hosted-activation-owner-checklist",
@@ -469,6 +473,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "npm run kinflo:validate-hosted-smoke-evidence-deep-link-parity",
   "Phase 167 adapter switch cutover evidence parity",
   "npm run kinflo:validate-adapter-switch-cutover-evidence-parity",
+  "Phase 168 generated API cutover owner review",
+  "npm run kinflo:validate-generated-api-cutover-owner-review",
   "Phase 84 Claude frame ingestion packet",
   "Phase 149 Claude Code frame response",
   "Phase 156 PR preview deployment checkpoint",
@@ -607,6 +613,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"kinflo:validate-adapter-switch-cutover-checklist\"",
   "\"kinflo:validate-adapter-switch-cutover-evidence-parity\"",
+  "\"kinflo:validate-generated-api-cutover-owner-review\"",
   "\"kinflo:validate-hosted-activation-approval-packet\"",
 ]);
 
@@ -636,6 +643,9 @@ for (const marker of [
   "\"npm run kinflo:validate-hosted-smoke-evidence-deep-link-parity\"",
   "\"docs/phase167-adapter-switch-cutover-evidence-parity.md\"",
   "\"npm run kinflo:validate-adapter-switch-cutover-evidence-parity\"",
+  "\"docs/phase168-generated-api-cutover-owner-review.md\"",
+  "\"docs/convex-generated-api-cutover-owner-review.json\"",
+  "\"npm run kinflo:validate-generated-api-cutover-owner-review\"",
   "Vercel build-rate limiting",
 ]) {
   if (ledgerText.includes(marker)) {

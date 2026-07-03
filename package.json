@@ -158,6 +158,7 @@
     "kinflo:validate-hosted-smoke-evidence-deep-link-parity": "node scripts/validate-kinflo-hosted-smoke-evidence-deep-link-parity.mjs",
     "kinflo:validate-adapter-switch-cutover-checklist": "node scripts/validate-kinflo-adapter-switch-cutover-checklist.mjs",
     "kinflo:validate-adapter-switch-cutover-evidence-parity": "node scripts/validate-kinflo-adapter-switch-cutover-evidence-parity.mjs",
+    "kinflo:validate-generated-api-cutover-owner-review": "node scripts/validate-kinflo-generated-api-cutover-owner-review.mjs",
     "kinflo:validate-hosted-activation-step-deep-links": "node scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
     "kinflo:inventory-env": "node scripts/inventory-kinflo-env.mjs",
     "kinflo:audit-secret-history": "node scripts/audit-kinflo-secret-history.mjs",

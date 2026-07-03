@@ -1,0 +1,161 @@
+{
+  "phase": 168,
+  "id": "generated-api-cutover-owner-review",
+  "status": "prepare_only_generated_api_cutover_owner_review",
+  "owner": "Vambah",
+  "approvalRecordedInCommittedSource": false,
+  "summary": {
+    "generatedApiBindings": 86,
+    "generatedApiReviewSurfaces": 14,
+    "queryBindings": 48,
+    "mutationBindings": 38,
+    "smokeManifestFunctions": 45,
+    "smokeManifestReviewGaps": 41,
+    "cutoverBatches": 6,
+    "cutoverMappedFunctions": 44,
+    "hostedSmokeEvidenceBatches": 6,
+    "hostedSmokeEvidenceGaps": 28,
+    "reviewItems": 5,
+    "readyReviewItems": 0,
+    "pendingReviewItems": 5
+  },
+  "approvalGate": "Owner review is prepare-only. Hosted ownership, env policy, generated binding review, hosted-smoke evidence acceptance, rollback owner signoff, and Phase 85 approval must pass before any codegen window, generated API import, fixture adapter switch, hosted smoke, or provider write.",
+  "sourceDocuments": [
+    "docs/phase85-hosted-activation-approval-packet.md",
+    "docs/phase88-generated-api-review-board.md",
+    "docs/phase92-hosted-smoke-evidence-ledger.md",
+    "docs/phase93-adapter-switch-cutover-checklist.md",
+    "docs/phase167-adapter-switch-cutover-evidence-parity.md",
+    "docs/convex-hosted-activation-approval-packet.json",
+    "docs/convex-adapter-switch-plan.json",
+    "client/src/lib/kinfloGeneratedApiContract.ts",
+    "client/src/lib/kinfloShellData.ts"
+  ],
+  "reviewItems": [
+    {
+      "id": "generated-binding-contract",
+      "label": "Generated binding contract review",
+      "status": "pending_owner_review",
+      "evidence": "Phase 88 records 86 generated API bindings across 14 surfaces with 48 query bindings and 38 mutation bindings.",
+      "blockedUntil": "Hosted ownership, env policy, and generated binding review window are accepted.",
+      "canApprove": false
+    },
+    {
+      "id": "cutover-batch-parity",
+      "label": "Cutover batch parity review",
+      "status": "pending_owner_review",
+      "evidence": "Phase 167 proves all six cutover batch ids match the hosted-smoke evidence ledger before owner review.",
+      "blockedUntil": "Phase 92 evidence is accepted and rollback owners are named.",
+      "canApprove": false
+    },
+    {
+      "id": "hosted-smoke-evidence",
+      "label": "Hosted-smoke evidence review",
+      "status": "pending_owner_review",
+      "evidence": "The evidence ledger still contains 28 hosted-smoke evidence gaps and no accepted hosted run.",
+      "blockedUntil": "Read-only hosted smoke authorization and sanitized evidence capture are approved.",
+      "canApprove": false
+    },
+    {
+      "id": "rollback-and-fixture-fallback",
+      "label": "Rollback and fixture fallback review",
+      "status": "pending_owner_review",
+      "evidence": "The cutover checklist keeps every batch blocked with generatedApiAvailable false and fixture fallback selected.",
+      "blockedUntil": "Rollback owner, rollback artifact, and fixture restore checks are accepted.",
+      "canApprove": false
+    },
+    {
+      "id": "phase85-owner-approval",
+      "label": "Phase 85 owner approval envelope",
+      "status": "pending_owner_review",
+      "evidence": "The hosted activation approval packet remains the signature surface and records no approval values in committed source.",
+      "blockedUntil": "Credential rotation, repo-sharing risk, hosted ownership, env/codegen, smoke, mutation, adapter-switch, provider-write, and launch signoffs pass.",
+      "canApprove": false
+    }
+  ],
+  "batchSummaries": [
+    {
+      "batchId": "read-only-core",
+      "label": "Read-only core shell data",
+      "cutoverFunctionCount": 8,
+      "hostedSmokeEvidenceGapCount": 1,
+      "ownerReviewStatus": "blocked_until_hosted_evidence",
+      "canCutover": false
+    },
+    {
+      "batchId": "user-scoped-preferences",
+      "label": "User-scoped preference reads and writes",
+      "cutoverFunctionCount": 2,
+      "hostedSmokeEvidenceGapCount": 2,
+      "ownerReviewStatus": "blocked_until_hosted_evidence",
+      "canCutover": false
+    },
+    {
+      "batchId": "site-creation-and-admin",
+      "label": "Site creation, invitations, and activation readiness",
+      "cutoverFunctionCount": 18,
+      "hostedSmokeEvidenceGapCount": 14,
+      "ownerReviewStatus": "blocked_until_hosted_evidence",
+      "canCutover": false
+    },
+    {
+      "batchId": "public-crm-loop",
+      "label": "Public lead capture and CRM workflow",
+      "cutoverFunctionCount": 6,
+      "hostedSmokeEvidenceGapCount": 3,
+      "ownerReviewStatus": "blocked_until_hosted_evidence",
+      "canCutover": false
+    },
+    {
+      "batchId": "provider-readiness-records",
+      "label": "Provider readiness metadata without provider writes",
+      "cutoverFunctionCount": 4,
+      "hostedSmokeEvidenceGapCount": 2,
+      "ownerReviewStatus": "blocked_until_hosted_evidence",
+      "canCutover": false
+    },
+    {
+      "batchId": "campaign-and-ai-governance",
+      "label": "Campaign and AI governance records",
+      "cutoverFunctionCount": 6,
+      "hostedSmokeEvidenceGapCount": 6,
+      "ownerReviewStatus": "blocked_until_hosted_evidence",
+      "canCutover": false
+    }
+  ],
+  "blockedActions": [
+    "create hosted Convex deployment",
+    "run npm run convex:codegen",
+    "commit or import convex/_generated/api",
+    "execute live Convex query, mutation, or action",
+    "switch fixture adapter to generated bindings",
+    "run hosted smoke without owner authorization",
+    "publish a client site",
+    "write a live lead",
+    "send an invite, email, SMS, campaign, or provider request",
+    "attach or verify a live domain",
+    "share with clients before credential rotation and repository risk decisions"
+  ],
+  "providerBoundary": {
+    "hostedConvexDeploymentCreated": false,
+    "convexCodegenRun": false,
+    "generatedConvexApiFilesCommitted": false,
+    "generatedConvexApiImported": false,
+    "fixtureAdapterSwitched": false,
+    "hostedSmokeExecuted": false,
+    "liveConvexExecution": false,
+    "providerWrites": false,
+    "productionDataImported": false,
+    "tenantSiteLaunchExecuted": false,
+    "clientSharingApproved": false,
+    "secretValuesRead": false,
+    "secretValuesPrinted": false
+  },
+  "decisionFlags": {
+    "canOpenCodegenWindow": false,
+    "canImportGeneratedApi": false,
+    "canSwitchFixtureAdapter": false,
+    "canExecuteHostedSmoke": false,
+    "canApproveCutover": false
+  }
+}
