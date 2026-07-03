@@ -146,6 +146,8 @@ const clientWebsiteHandoffWorkspaceValues = ["selected", "matrix"] as const;
 type ClientWebsiteHandoffWorkspace = (typeof clientWebsiteHandoffWorkspaceValues)[number];
 const clientAdminHandoffMatrixFilterValues = ["all", "blocked", "ready", "platform", "tenant", "site"] as const;
 type ClientAdminHandoffMatrixFilter = (typeof clientAdminHandoffMatrixFilterValues)[number];
+const clientConfigurationWorkspaceValues = ["review", "change", "approval", "save"] as const;
+type ClientConfigurationWorkspace = (typeof clientConfigurationWorkspaceValues)[number];
 const clientConfigurationReviewDetailValues = ["blockers", "evidence", "functions"] as const;
 type ClientConfigurationReviewDetail = (typeof clientConfigurationReviewDetailValues)[number];
 const clientConfigurationChangeDetailValues = ["blockers", "evidence", "functions"] as const;
@@ -382,6 +384,27 @@ function readInitialClientAdminHandoffMatrixFilter(): ClientAdminHandoffMatrixFi
   return clientAdminHandoffMatrixFilterValues.includes(filter as ClientAdminHandoffMatrixFilter)
     ? (filter as ClientAdminHandoffMatrixFilter)
     : "all";
+}
+
+function readInitialClientConfigurationWorkspace(): ClientConfigurationWorkspace {
+  if (typeof window === "undefined") {
+    return "review";
+  }
+  const params = new URLSearchParams(window.location.search);
+  const workspace = params.get("studioConfigure");
+  if (clientConfigurationWorkspaceValues.includes(workspace as ClientConfigurationWorkspace)) {
+    return workspace as ClientConfigurationWorkspace;
+  }
+  if (params.has("studioApproval")) {
+    return "approval";
+  }
+  if (params.has("studioChange")) {
+    return "change";
+  }
+  if (params.has("studioSave")) {
+    return "save";
+  }
+  return "review";
 }
 
 function readInitialClientConfigurationReviewDetail(): ClientConfigurationReviewDetail {
@@ -1183,6 +1206,8 @@ function ClientWebsiteConfigurationProfiles({
   selectedInvitationReadiness,
   selectedExperiencePreset,
   selectedRollbackCheckpoint,
+  workspace,
+  onWorkspaceChange,
   reviewDetail,
   onReviewDetailChange,
   changeDetail,
@@ -1204,6 +1229,8 @@ function ClientWebsiteConfigurationProfiles({
   selectedInvitationReadiness?: ShellClientWebsiteAdminInvitationReadinessPacket;
   selectedExperiencePreset?: ShellClientWebsiteExperienceConfigurationPreset;
   selectedRollbackCheckpoint?: ShellClientWebsiteConfigurationRollbackCheckpoint;
+  workspace: ClientConfigurationWorkspace;
+  onWorkspaceChange: (workspace: ClientConfigurationWorkspace) => void;
   reviewDetail: ClientConfigurationReviewDetail;
   onReviewDetailChange: (detail: ClientConfigurationReviewDetail) => void;
   changeDetail: ClientConfigurationChangeDetail;
@@ -1219,6 +1246,12 @@ function ClientWebsiteConfigurationProfiles({
     { label: "Ready", value: profiles.readyProfiles },
     { label: "Blocked", value: profiles.blockedProfiles },
     { label: "Writes", value: "0" },
+  ];
+  const workspaceItems: { value: ClientConfigurationWorkspace; label: string; count: number; testId: string }[] = [
+    { value: "review", label: "Review", count: selectedReviewPacket?.saveBlockerCount ?? 0, testId: "tab-kinflo-client-configuration-workspace-review" },
+    { value: "change", label: "Changes", count: selectedChangeSet?.draftChangeCount ?? 0, testId: "tab-kinflo-client-configuration-workspace-change" },
+    { value: "approval", label: "Approvals", count: selectedApprovalMatrix?.requiredApprovalCount ?? 0, testId: "tab-kinflo-client-configuration-workspace-approval" },
+    { value: "save", label: "Save", count: selectedSaveRequest?.payloadCount ?? 0, testId: "tab-kinflo-client-configuration-workspace-save" },
   ];
 
   return (
@@ -1251,7 +1284,28 @@ function ClientWebsiteConfigurationProfiles({
         ))}
       </div>
 
-      {selectedReviewPacket ? (
+      <Tabs
+        value={workspace}
+        onValueChange={(value) => onWorkspaceChange(value as ClientConfigurationWorkspace)}
+        className="mt-4"
+        data-testid="tabs-kinflo-client-configuration-workspace"
+      >
+        <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
+          {workspaceItems.map((item) => (
+            <TabsTrigger
+              key={item.value}
+              value={item.value}
+              className="min-w-0 px-1 py-1.5 text-[11px] sm:text-xs"
+              data-testid={item.testId}
+            >
+              <span className="truncate">{item.label}</span>
+              <span className="ml-1 hidden text-[10px] text-slate-500 sm:inline">{item.count}</span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
+
+      {selectedReviewPacket && workspace === "review" ? (
         <div
           className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3"
           data-testid="section-kinflo-client-configuration-review-packet"
@@ -1361,7 +1415,7 @@ function ClientWebsiteConfigurationProfiles({
         </div>
       ) : null}
 
-      {selectedChangeSet ? (
+      {selectedChangeSet && workspace === "change" ? (
         <div
           className="mt-4 rounded-xl border border-slate-200 bg-white p-3"
           data-testid="section-kinflo-client-configuration-change-set"
@@ -1468,7 +1522,7 @@ function ClientWebsiteConfigurationProfiles({
         </div>
       ) : null}
 
-      {selectedApprovalMatrix ? (
+      {selectedApprovalMatrix && workspace === "approval" ? (
         <div
           className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3"
           data-testid="section-kinflo-client-configuration-approval-matrix"
@@ -1574,7 +1628,7 @@ function ClientWebsiteConfigurationProfiles({
         </div>
       ) : null}
 
-      {selectedSaveRequest ? (
+      {selectedSaveRequest && workspace === "save" ? (
         <div
           className="mt-4 rounded-xl border border-slate-200 bg-white p-3"
           data-testid="section-kinflo-client-configuration-save-request"
@@ -2447,6 +2501,7 @@ export default function AdminKinfloShell() {
   const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
   const [clientWebsiteHandoffWorkspace, setClientWebsiteHandoffWorkspace] = useState<ClientWebsiteHandoffWorkspace>(readInitialClientWebsiteHandoffWorkspace);
   const [clientAdminHandoffMatrixFilter, setClientAdminHandoffMatrixFilter] = useState<ClientAdminHandoffMatrixFilter>(readInitialClientAdminHandoffMatrixFilter);
+  const [clientConfigurationWorkspace, setClientConfigurationWorkspace] = useState<ClientConfigurationWorkspace>(readInitialClientConfigurationWorkspace);
   const [clientConfigurationReviewDetail, setClientConfigurationReviewDetail] = useState<ClientConfigurationReviewDetail>(readInitialClientConfigurationReviewDetail);
   const [clientConfigurationChangeDetail, setClientConfigurationChangeDetail] = useState<ClientConfigurationChangeDetail>(readInitialClientConfigurationChangeDetail);
   const [clientConfigurationApprovalDetail, setClientConfigurationApprovalDetail] = useState<ClientConfigurationApprovalDetail>(readInitialClientConfigurationApprovalDetail);
@@ -3328,6 +3383,7 @@ export default function AdminKinfloShell() {
     const nextDossier = readInitialClientWebsiteLaunchDossier();
     const nextHandoffWorkspace = readInitialClientWebsiteHandoffWorkspace();
     const nextHandoffMatrixFilter = readInitialClientAdminHandoffMatrixFilter();
+    const nextConfigurationWorkspace = readInitialClientConfigurationWorkspace();
     const nextConfigurationReviewDetail = readInitialClientConfigurationReviewDetail();
     const nextConfigurationChangeDetail = readInitialClientConfigurationChangeDetail();
     const nextConfigurationApprovalDetail = readInitialClientConfigurationApprovalDetail();
@@ -3366,6 +3422,7 @@ export default function AdminKinfloShell() {
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
     setClientWebsiteHandoffWorkspace((current) => (current === nextHandoffWorkspace ? current : nextHandoffWorkspace));
     setClientAdminHandoffMatrixFilter((current) => (current === nextHandoffMatrixFilter ? current : nextHandoffMatrixFilter));
+    setClientConfigurationWorkspace((current) => (current === nextConfigurationWorkspace ? current : nextConfigurationWorkspace));
     setClientConfigurationReviewDetail((current) => (current === nextConfigurationReviewDetail ? current : nextConfigurationReviewDetail));
     setClientConfigurationChangeDetail((current) => (current === nextConfigurationChangeDetail ? current : nextConfigurationChangeDetail));
     setClientConfigurationApprovalDetail((current) => (current === nextConfigurationApprovalDetail ? current : nextConfigurationApprovalDetail));
@@ -3459,6 +3516,7 @@ export default function AdminKinfloShell() {
     const shouldKeepProvisioningView = shouldKeepDossier && clientWebsiteLaunchDossier === "provisioning";
     const shouldKeepHandoffWorkspace = tab === "site-studio" && clientWebsiteStudioLane === "handoff";
     const shouldKeepHandoffMatrixFilter = shouldKeepHandoffWorkspace && clientWebsiteHandoffWorkspace === "matrix";
+    const shouldKeepConfigurationWorkspace = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     const shouldKeepConfigurationReviewDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     const shouldKeepConfigurationChangeDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     const shouldKeepConfigurationApprovalDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
@@ -3472,6 +3530,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: shouldKeepProvisioningView ? clientWebsiteProvisioningView : undefined,
       studioHandoff: shouldKeepHandoffWorkspace ? clientWebsiteHandoffWorkspace : undefined,
       studioMatrix: shouldKeepHandoffMatrixFilter ? clientAdminHandoffMatrixFilter : undefined,
+      studioConfigure: shouldKeepConfigurationWorkspace ? clientConfigurationWorkspace : undefined,
       studioConfig: shouldKeepConfigurationReviewDetail ? clientConfigurationReviewDetail : undefined,
       studioChange: shouldKeepConfigurationChangeDetail ? clientConfigurationChangeDetail : undefined,
       studioApproval: shouldKeepConfigurationApprovalDetail ? clientConfigurationApprovalDetail : undefined,
@@ -3501,6 +3560,7 @@ export default function AdminKinfloShell() {
       studioMatrix: clientWebsiteStudioLane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
         ? clientAdminHandoffMatrixFilter
         : undefined,
+      studioConfigure: clientWebsiteStudioLane === "configuration" ? clientConfigurationWorkspace : undefined,
       studioConfig: clientWebsiteStudioLane === "configuration" ? clientConfigurationReviewDetail : undefined,
       studioChange: clientWebsiteStudioLane === "configuration" ? clientConfigurationChangeDetail : undefined,
       studioApproval: clientWebsiteStudioLane === "configuration" ? clientConfigurationApprovalDetail : undefined,
@@ -3530,6 +3590,7 @@ export default function AdminKinfloShell() {
       studioMatrix: lane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
         ? clientAdminHandoffMatrixFilter
         : undefined,
+      studioConfigure: lane === "configuration" ? clientConfigurationWorkspace : undefined,
       studioConfig: lane === "configuration" ? clientConfigurationReviewDetail : undefined,
       studioChange: lane === "configuration" ? clientConfigurationChangeDetail : undefined,
       studioApproval: lane === "configuration" ? clientConfigurationApprovalDetail : undefined,
@@ -3546,6 +3607,7 @@ export default function AdminKinfloShell() {
   const selectClientConfigurationReviewDetail = (detail: ClientConfigurationReviewDetail) => {
     setActiveTab("site-studio");
     setClientWebsiteStudioLane("configuration");
+    setClientConfigurationWorkspace("review");
     setClientConfigurationReviewDetail(detail);
     updateKinfloShellRoute({
       tab: "site-studio",
@@ -3556,6 +3618,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: "review",
       studioConfig: detail,
       studioChange: clientConfigurationChangeDetail,
       studioApproval: clientConfigurationApprovalDetail,
@@ -3572,6 +3635,7 @@ export default function AdminKinfloShell() {
   const selectClientConfigurationChangeDetail = (detail: ClientConfigurationChangeDetail) => {
     setActiveTab("site-studio");
     setClientWebsiteStudioLane("configuration");
+    setClientConfigurationWorkspace("change");
     setClientConfigurationChangeDetail(detail);
     updateKinfloShellRoute({
       tab: "site-studio",
@@ -3582,6 +3646,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: "change",
       studioConfig: clientConfigurationReviewDetail,
       studioChange: detail,
       studioApproval: clientConfigurationApprovalDetail,
@@ -3598,6 +3663,7 @@ export default function AdminKinfloShell() {
   const selectClientConfigurationApprovalDetail = (detail: ClientConfigurationApprovalDetail) => {
     setActiveTab("site-studio");
     setClientWebsiteStudioLane("configuration");
+    setClientConfigurationWorkspace("approval");
     setClientConfigurationApprovalDetail(detail);
     updateKinfloShellRoute({
       tab: "site-studio",
@@ -3608,6 +3674,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: "approval",
       studioConfig: clientConfigurationReviewDetail,
       studioChange: clientConfigurationChangeDetail,
       studioApproval: detail,
@@ -3621,9 +3688,37 @@ export default function AdminKinfloShell() {
     });
   };
 
+  const selectClientConfigurationWorkspace = (workspace: ClientConfigurationWorkspace) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("configuration");
+    setClientConfigurationWorkspace(workspace);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "configuration",
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      studioConfigure: workspace,
+      studioConfig: clientConfigurationReviewDetail,
+      studioChange: clientConfigurationChangeDetail,
+      studioApproval: clientConfigurationApprovalDetail,
+      studioSave: clientConfigurationSaveDetail,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+    });
+  };
+
   const selectClientConfigurationSaveDetail = (detail: ClientConfigurationSaveDetail) => {
     setActiveTab("site-studio");
     setClientWebsiteStudioLane("configuration");
+    setClientConfigurationWorkspace("save");
     setClientConfigurationSaveDetail(detail);
     updateKinfloShellRoute({
       tab: "site-studio",
@@ -3634,6 +3729,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: "save",
       studioConfig: clientConfigurationReviewDetail,
       studioChange: clientConfigurationChangeDetail,
       studioApproval: clientConfigurationApprovalDetail,
@@ -3660,6 +3756,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: stage === "launch" && clientWebsiteLaunchDossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3687,6 +3784,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: dossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3715,6 +3813,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: view,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3741,6 +3840,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: workspace,
       studioMatrix: workspace === "matrix" ? clientAdminHandoffMatrixFilter : undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3768,6 +3868,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: "matrix",
       studioMatrix: filter,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3796,6 +3897,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3821,6 +3923,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3846,6 +3949,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3871,6 +3975,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3896,6 +4001,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -3921,6 +4027,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: undefined,
       studioHandoff: undefined,
       studioMatrix: undefined,
+      studioConfigure: undefined,
       studioConfig: undefined,
       studioChange: undefined,
       studioApproval: undefined,
@@ -8610,6 +8717,8 @@ export default function AdminKinfloShell() {
                     selectedInvitationReadiness={selectedClientWebsiteAdminInvitationReadinessPacket}
                     selectedExperiencePreset={selectedClientWebsiteExperienceConfigurationPreset}
                     selectedRollbackCheckpoint={selectedClientWebsiteConfigurationRollbackCheckpoint}
+                    workspace={clientConfigurationWorkspace}
+                    onWorkspaceChange={selectClientConfigurationWorkspace}
                     reviewDetail={clientConfigurationReviewDetail}
                     onReviewDetailChange={selectClientConfigurationReviewDetail}
                     changeDetail={clientConfigurationChangeDetail}

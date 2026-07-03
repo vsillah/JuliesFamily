@@ -193,6 +193,7 @@ for (const path of [
   "docs/phase140-configuration-review-deep-links.md",
   "docs/phase142-configuration-change-set-deep-links.md",
   "docs/phase143-configuration-approval-matrix-deep-links.md",
+  "docs/phase144-configuration-workspace-panels.md",
   "docs/phase141-configuration-save-request-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
@@ -359,6 +360,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-review-deep-links.mjs",
   "scripts/validate-kinflo-configuration-change-set-deep-links.mjs",
   "scripts/validate-kinflo-configuration-approval-matrix-deep-links.mjs",
+  "scripts/validate-kinflo-configuration-workspace-panels.mjs",
   "scripts/validate-kinflo-configuration-save-request-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
@@ -2436,6 +2438,27 @@ requireIncludes("docs/phase143-configuration-approval-matrix-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase144-configuration-workspace-panels.md", [
+  "Phase 144: Configuration Workspace Panels",
+  "npm run kinflo:validate-configuration-workspace-panels",
+  "studioConfigure=review|change|approval|save",
+  "studioConfig=blockers|evidence|functions",
+  "studioChange=blockers|evidence|functions",
+  "studioApproval=blockers|evidence|functions",
+  "studioSave=blockers|evidence|audit|rollback|publish|domain|invite|experience|functions",
+  "tabs-kinflo-client-configuration-workspace",
+  "tab-kinflo-client-configuration-workspace-review",
+  "tab-kinflo-client-configuration-workspace-change",
+  "tab-kinflo-client-configuration-workspace-approval",
+  "tab-kinflo-client-configuration-workspace-save",
+  "section-kinflo-client-configuration-review-packet",
+  "section-kinflo-client-configuration-change-set",
+  "section-kinflo-client-configuration-approval-matrix",
+  "section-kinflo-client-configuration-save-request",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase141-configuration-save-request-deep-links.md", [
   "Phase 141: Configuration Save Request Deep Links",
   "npm run kinflo:validate-configuration-save-request-deep-links",
@@ -2714,6 +2737,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase140-configuration-review-deep-links.md\"",
   "\"docs/phase142-configuration-change-set-deep-links.md\"",
   "\"docs/phase143-configuration-approval-matrix-deep-links.md\"",
+  "\"docs/phase144-configuration-workspace-panels.md\"",
   "\"docs/phase141-configuration-save-request-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
@@ -2776,6 +2800,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-configuration-review-deep-links\"",
   "\"npm run kinflo:validate-configuration-change-set-deep-links\"",
   "\"npm run kinflo:validate-configuration-approval-matrix-deep-links\"",
+  "\"npm run kinflo:validate-configuration-workspace-panels\"",
   "\"npm run kinflo:validate-configuration-save-request-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
@@ -2925,6 +2950,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-review-deep-links\"",
   "\"kinflo:validate-configuration-change-set-deep-links\"",
   "\"kinflo:validate-configuration-approval-matrix-deep-links\"",
+  "\"kinflo:validate-configuration-workspace-panels\"",
   "\"kinflo:validate-configuration-save-request-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
@@ -4384,6 +4410,18 @@ requireIncludes("scripts/validate-kinflo-configuration-approval-matrix-deep-link
   "configuration approval-matrix deep links do not import generated API",
   "configuration approval-matrix deep links do not execute live Convex",
   "KinFlo configuration approval-matrix deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-workspace-panels.mjs", [
+  "docs/phase144-configuration-workspace-panels.md",
+  "studioConfigure",
+  "readInitialClientConfigurationWorkspace",
+  "selectClientConfigurationWorkspace",
+  "tabs-kinflo-client-configuration-workspace",
+  "section-kinflo-client-studio-lane-switcher",
+  "configuration workspace panels do not import generated API",
+  "configuration workspace panels do not execute live Convex",
+  "KinFlo configuration workspace panel validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [

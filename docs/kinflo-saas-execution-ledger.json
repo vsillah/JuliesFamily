@@ -105,6 +105,7 @@
         "docs/phase140-configuration-review-deep-links.md",
         "docs/phase142-configuration-change-set-deep-links.md",
         "docs/phase143-configuration-approval-matrix-deep-links.md",
+        "docs/phase144-configuration-workspace-panels.md",
         "docs/phase141-configuration-save-request-deep-links.md",
         "docs/phase106-client-public-preview-context-links.md",
         "docs/phase107-client-preview-review-packet.md",
@@ -123,6 +124,7 @@
         "npm run kinflo:validate-configuration-review-deep-links",
         "npm run kinflo:validate-configuration-change-set-deep-links",
         "npm run kinflo:validate-configuration-approval-matrix-deep-links",
+        "npm run kinflo:validate-configuration-workspace-panels",
         "npm run kinflo:validate-configuration-save-request-deep-links",
         "npm run kinflo:validate-client-public-preview-context-links",
         "npm run kinflo:validate-client-preview-review-packet",
@@ -156,6 +158,7 @@
         "docs/phase83-client-handoff-permission-strip.md",
         "docs/phase84-claude-frame-ingestion-packet.md",
         "docs/phase86-site-studio-scroll-consolidation.md",
+        "docs/phase144-configuration-workspace-panels.md",
         "docs/phase112-client-configuration-approval-matrix.md",
         "docs/phase113-client-configuration-save-request.md",
         "docs/phase114-client-configuration-audit-timeline.md",
@@ -177,6 +180,7 @@
         "npm run kinflo:validate-client-handoff-permission-strip",
         "npm run kinflo:validate-claude-frame-ingestion",
         "npm run kinflo:validate-site-studio-scroll-consolidation",
+        "npm run kinflo:validate-configuration-workspace-panels",
         "npm run kinflo:validate-client-configuration-approval-matrix",
         "npm run kinflo:validate-client-configuration-save-request",
         "npm run kinflo:validate-client-configuration-audit-timeline",
@@ -264,7 +268,7 @@
   "nextRepoSafeActions": [
     "Keep tightening fixture-to-live parity, adapter-switch evidence, the Phase 87 switch runway, the Phase 88 generated API review board, the Phase 89 switch acceptance matrix, the Phase 90 hosted smoke gap backlog, the Phase 91 hosted smoke execution sequencer, the Phase 92 hosted smoke evidence ledger, the Phase 93 adapter switch cutover checklist, the Phase 102 adapter switch batch deep links, and the Phase 103 adapter switch surface deep links without importing convex/_generated/api.",
     "Keep the human-gate decision register, Phase 85 owner approval packet, Phase 96 hosted activation owner checklist, Phase 120 hosted activation decision checkpoint, Phase 121 hosted activation credential rotation review, Phase 122 hosted activation repo sharing risk review, Phase 123 hosted activation ownership review, Phase 124 hosted activation env/codegen review, Phase 125 hosted activation preflight review, Phase 126 hosted activation preflight evidence ledger, Phase 127 hosted activation preflight evidence deep links, Phase 128 hosted activation preflight result contract, Phase 129 hosted activation preflight result deep links, Phase 130 hosted activation preflight result template, Phase 131 hosted activation preflight result template packet, Phase 132 hosted activation raw preflight output storage review, Phase 133 hosted activation raw preflight output redaction checklist, Phase 134 hosted activation sanitized preflight result capture, Phase 135 hosted activation sanitized preflight result commit review, Phase 136 hosted activation sanitized preflight repository record, Phase 137 hosted activation sanitized preflight repository record approval, Phase 101 hosted activation step deep links, and Phase 104 hosted smoke evidence deep links current for credential rotation, history purge, hosted ownership, codegen approval, preflight authorization, redacted preflight evidence capture, sanitized result capture, sanitized result commit review, sanitized repository record review, sanitized repository record approval, targeted result review, dry-run result packet review, shell template packet review, private raw-output storage approval, raw-output redaction review, smoke authorization, rollback order, adapter switch review, and provider-write signoff.",
-    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, the Phase 95 client website spin-up queue, the Phase 97 client website configuration profiles, the Phase 110 client configuration review packet, the Phase 111 client configuration change set, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the Phase 94 client admin handoff matrix, Site Studio scroll consolidation, Phase 99 Site Studio deep links, Phase 105 Site Studio site deep links, Phase 138 Site Studio handoff deep links, Phase 139 admin handoff matrix filters, Phase 140 configuration review deep links, Phase 142 configuration change set deep links, Phase 143 configuration approval matrix deep links, Phase 141 configuration save request deep links, Phase 106 client public preview context links, Phase 107 client preview review packet, Phase 108 client preview review contract, Phase 109 preview review shell adapter, Phase 100 Site Studio launch dossier deep links, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
+    "Continue provider-light shell configuration work around tenant/site permissions, client admin handoff, the Phase 95 client website spin-up queue, the Phase 97 client website configuration profiles, the Phase 110 client configuration review packet, the Phase 111 client configuration change set, launch decisions, visual QA evidence, proof-before-publish cards, mobile inspection mode, workflow navigation rail, configuration field affordances, client handoff permission strip, the Phase 94 client admin handoff matrix, Site Studio scroll consolidation, Phase 99 Site Studio deep links, Phase 105 Site Studio site deep links, Phase 138 Site Studio handoff deep links, Phase 139 admin handoff matrix filters, Phase 140 configuration review deep links, Phase 142 configuration change set deep links, Phase 143 configuration approval matrix deep links, Phase 144 configuration workspace panels, Phase 141 configuration save request deep links, Phase 106 client public preview context links, Phase 107 client preview review packet, Phase 108 client preview review contract, Phase 109 preview review shell adapter, Phase 100 Site Studio launch dossier deep links, the active-object signal, client workbench grid, decision gate rails, the Phase 75 design-frame adoption backlog, and the Phase 84 Claude frame ingestion packet."
   ],
   "blockedLiveActions": [
     "create hosted Convex deployment",
@@ -306,6 +310,7 @@
     "npm run kinflo:validate-configuration-review-deep-links",
     "npm run kinflo:validate-configuration-change-set-deep-links",
     "npm run kinflo:validate-configuration-approval-matrix-deep-links",
+    "npm run kinflo:validate-configuration-workspace-panels",
     "npm run kinflo:validate-configuration-save-request-deep-links",
     "npm run kinflo:validate-client-public-preview-context-links",
     "npm run kinflo:validate-client-preview-review-packet",
