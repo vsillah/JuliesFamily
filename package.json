@@ -120,6 +120,7 @@
     "kinflo:validate-pr-preview-deployment-checkpoint": "node scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
     "kinflo:validate-client-configuration-command-surface": "node scripts/validate-kinflo-client-configuration-command-surface.mjs",
     "kinflo:validate-preview-recovery-gate": "node scripts/validate-kinflo-preview-recovery-gate.mjs",
+    "kinflo:validate-client-website-portfolio-registry": "node scripts/validate-kinflo-client-website-portfolio-registry.mjs",
     "kinflo:validate-site-studio-scroll-consolidation": "node scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
     "kinflo:validate-site-studio-deep-links": "node scripts/validate-kinflo-site-studio-deep-links.mjs",
     "kinflo:validate-site-studio-site-deep-links": "node scripts/validate-kinflo-site-studio-site-deep-links.mjs",

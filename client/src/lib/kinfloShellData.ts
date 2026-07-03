@@ -1156,6 +1156,39 @@ export type ShellClientAdminHandoffMatrix = {
   }[];
 };
 
+export type ShellClientWebsitePortfolioRegistry = {
+  status: "provider-light-client-website-portfolio-registry";
+  totalSites: number;
+  readyForReview: number;
+  blockedSites: number;
+  draftSites: number;
+  providerBoundary: string;
+  rows: {
+    siteKey: string;
+    label: string;
+    tenantSlug: string;
+    requestedPlan: string;
+    templateKey: string;
+    previewPath: string;
+    adminPresetLabel: string;
+    ownerRole: string;
+    inviteRole: string;
+    scope: "platform" | "tenant" | "site";
+    configurationStatus: "ready_for_review" | "blocked_human_gate" | "draft";
+    launchDecision: "go" | "review" | "no_go";
+    readinessPercent: number;
+    nextGate: string;
+    blockedActions: string[];
+    canCreateTenant: false;
+    canCreateSite: false;
+    canInviteAdmin: false;
+    canPublish: false;
+    providerWrites: false;
+    liveConvexExecution: false;
+    convexFunctions: string[];
+  }[];
+};
+
 export type ShellClientWebsiteProvisioningOrder = {
   siteKey: string;
   label: string;
@@ -1742,6 +1775,7 @@ export type ShellClientWebsiteStudio = {
   launchBlueprints: ShellClientWebsiteLaunchBlueprint[];
   adminPermissionPresets: ShellClientWebsiteAdminPermissionPreset[];
   adminHandoffMatrix: ShellClientAdminHandoffMatrix;
+  portfolioRegistry: ShellClientWebsitePortfolioRegistry;
   provisioningOrders: ShellClientWebsiteProvisioningOrder[];
   provisioningExecution: ShellClientWebsiteProvisioningExecution;
   spinUpQueue: ShellClientWebsiteSpinUpQueue;
@@ -2654,6 +2688,103 @@ const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
       appliesTo: ["julies-family-public", "advisor-client-site", "campaign-microsite"],
     },
   ],
+  portfolioRegistry: {
+    status: "provider-light-client-website-portfolio-registry",
+    totalSites: 3,
+    readyForReview: 1,
+    blockedSites: 1,
+    draftSites: 1,
+    providerBoundary: "The portfolio registry is a super-admin planning surface only. It does not create tenants, create sites, invite admins, publish pages, write leads, attach domains, run generated API imports, execute hosted Convex, or call providers.",
+    rows: [
+      {
+        siteKey: "julies-family-public",
+        label: "Julie Family Public Site",
+        tenantSlug: "julies-family",
+        requestedPlan: "Founding platform",
+        templateKey: "nonprofit-learning-center",
+        previewPath: "/kinflo-sites/julies-family",
+        adminPresetLabel: "Founding platform steward",
+        ownerRole: "platform.super_admin",
+        inviteRole: "platform.super_admin",
+        scope: "platform",
+        configurationStatus: "ready_for_review",
+        launchDecision: "review",
+        readinessPercent: 60,
+        nextGate: "Confirm founding tenant ownership and public renderer parity before accepting live configuration.",
+        blockedActions: ["public publish write", "CRM lead write", "domain attachment", "client sharing"],
+        canCreateTenant: false,
+        canCreateSite: false,
+        canInviteAdmin: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.listClientWebsiteConfigurationProfiles",
+          "siteFactory.listClientWebsiteAdminPermissionPresets",
+          "publicSite.resolvePublishedSite",
+          "siteBuilder.publishPage",
+        ],
+      },
+      {
+        siteKey: "advisor-client-site",
+        label: "Advisor Client Site",
+        tenantSlug: "advisor-client-starter",
+        requestedPlan: "Client Build",
+        templateKey: "advisor-consultant",
+        previewPath: "/kinflo-sites/advisor-client-site",
+        adminPresetLabel: "Tenant admin launch owner",
+        ownerRole: "tenant.admin",
+        inviteRole: "tenant.admin",
+        scope: "tenant",
+        configurationStatus: "blocked_human_gate",
+        launchDecision: "review",
+        readinessPercent: 45,
+        nextGate: "Approve plan entitlement, tenant owner, domain posture, admin invitation scope, and hosted read smoke before launch handoff.",
+        blockedActions: ["tenant create", "site create", "client admin invitation", "Stripe billing activation", "domain verification"],
+        canCreateTenant: false,
+        canCreateSite: false,
+        canInviteAdmin: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "controlPlane.createTenant",
+          "siteFactory.createSiteFromTemplate",
+          "controlPlane.createInvitation",
+          "crm.submitLead",
+        ],
+      },
+      {
+        siteKey: "campaign-microsite",
+        label: "Campaign Microsite",
+        tenantSlug: "campaign-microsite-lab",
+        requestedPlan: "Campaign Lab",
+        templateKey: "campaign-microsite",
+        previewPath: "/kinflo-sites/campaign-microsite",
+        adminPresetLabel: "Site editor campaign operator",
+        ownerRole: "site.editor",
+        inviteRole: "site.editor",
+        scope: "site",
+        configurationStatus: "draft",
+        launchDecision: "no_go",
+        readinessPercent: 32,
+        nextGate: "Approve campaign consent, site scope, lead routing, provider-send boundary, and AI copy review before any campaign handoff.",
+        blockedActions: ["site create", "editor invitation", "public form lead write", "campaign send", "AI copy publish"],
+        canCreateTenant: false,
+        canCreateSite: false,
+        canInviteAdmin: false,
+        canPublish: false,
+        providerWrites: false,
+        liveConvexExecution: false,
+        convexFunctions: [
+          "siteFactory.createSiteFromTemplate",
+          "controlPlane.createInvitation",
+          "campaigns.requestCampaignApproval",
+          "crm.submitLead",
+        ],
+      },
+    ],
+  },
   launchBlueprints: [
     {
       siteKey: "julies-family-public",

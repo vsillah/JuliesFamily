@@ -196,6 +196,7 @@ for (const path of [
   "docs/phase156-pr-preview-deployment-checkpoint.md",
   "docs/phase157-client-configuration-command-surface.md",
   "docs/phase158-preview-recovery-gate.md",
+  "docs/phase159-client-website-portfolio-registry.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -381,6 +382,7 @@ for (const path of [
   "scripts/validate-kinflo-pr-preview-deployment-checkpoint.mjs",
   "scripts/validate-kinflo-client-configuration-command-surface.mjs",
   "scripts/validate-kinflo-preview-recovery-gate.mjs",
+  "scripts/validate-kinflo-client-website-portfolio-registry.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -1448,6 +1450,8 @@ requireIncludes("docs/phase72-saas-execution-ledger.md", [
   "Phase 157 client configuration command surface",
   "Phase 158 preview recovery gate",
   "npm run kinflo:validate-preview-recovery-gate",
+  "Phase 159 client website portfolio registry",
+  "npm run kinflo:validate-client-website-portfolio-registry",
   "Vercel build-rate limit",
   "do not treat the preview as integration-ready",
   "Phase 91 hosted smoke execution sequencer",
@@ -2447,6 +2451,28 @@ requireIncludes("docs/phase158-preview-recovery-gate.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase159-client-website-portfolio-registry.md", [
+  "Phase 159: Client Website Portfolio Registry",
+  "npm run kinflo:validate-client-website-portfolio-registry",
+  "clientWebsiteStudio.portfolioRegistry",
+  "ClientWebsitePortfolioRegistry",
+  "section-kinflo-client-website-portfolio-registry",
+  "section-kinflo-client-website-portfolio-summary",
+  "section-kinflo-client-website-portfolio-table",
+  "section-kinflo-client-website-portfolio-blocked",
+  "button-client-website-portfolio-gated",
+  "Total sites: 3",
+  "Ready for review: 1",
+  "Blocked sites: 1",
+  "Draft sites: 1",
+  "platform.super_admin",
+  "tenant.admin",
+  "site.editor",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No provider APIs are touched.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -2996,6 +3022,8 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-configuration-command-surface\"",
   "\"docs/phase158-preview-recovery-gate.md\"",
   "\"npm run kinflo:validate-preview-recovery-gate\"",
+  "\"docs/phase159-client-website-portfolio-registry.md\"",
+  "\"npm run kinflo:validate-client-website-portfolio-registry\"",
   "Vercel build-rate limiting",
   "\"docs/phase96-hosted-activation-owner-checklist.md\"",
   "\"docs/phase120-hosted-activation-decision-checkpoint.md\"",
@@ -3265,6 +3293,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-pr-preview-deployment-checkpoint\"",
   "\"kinflo:validate-client-configuration-command-surface\"",
   "\"kinflo:validate-preview-recovery-gate\"",
+  "\"kinflo:validate-client-website-portfolio-registry\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4728,6 +4757,16 @@ requireIncludes("scripts/validate-kinflo-preview-recovery-gate.mjs", [
   "preview recovery gate does not execute live Convex",
   "Vercel deployment retried: no",
   "KinFlo preview recovery gate validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-client-website-portfolio-registry.mjs", [
+  "docs/phase159-client-website-portfolio-registry.md",
+  "clientWebsiteStudio.portfolioRegistry",
+  "ClientWebsitePortfolioRegistry",
+  "section-kinflo-client-website-portfolio-registry",
+  "button-client-website-portfolio-gated",
+  "portfolio registry does not execute live Convex",
+  "KinFlo client website portfolio registry validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [

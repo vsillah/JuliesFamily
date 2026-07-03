@@ -67,6 +67,7 @@ import {
   type ShellClientWebsiteOnboardingReadiness,
   type ShellClientWebsiteLaunchDecisionPacket,
   type ShellClientWebsitePolishScorecard,
+  type ShellClientWebsitePortfolioRegistry,
   type ShellClientWebsiteConfigurationApprovalMatrix,
   type ShellClientWebsiteConfigurationAuditTimeline,
   type ShellClientWebsiteConfigurationChangeSet,
@@ -312,6 +313,14 @@ const clientWebsiteSpinUpQueueTestIds = {
   summary: "section-kinflo-client-website-spin-up-summary",
   scroll: "section-kinflo-client-website-spin-up-scroll",
   gatedAction: "button-client-website-spin-up-gated",
+} as const;
+
+const clientWebsitePortfolioRegistryTestIds = {
+  root: "section-kinflo-client-website-portfolio-registry",
+  summary: "section-kinflo-client-website-portfolio-summary",
+  table: "section-kinflo-client-website-portfolio-table",
+  blocked: "section-kinflo-client-website-portfolio-blocked",
+  gatedAction: "button-client-website-portfolio-gated",
 } as const;
 
 const clientWebsiteConfigurationProfileTestIds = {
@@ -1685,6 +1694,154 @@ function ClientWebsiteSpinUpQueue({
       <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
         {queue.providerBoundary}
       </p>
+    </section>
+  );
+}
+
+function ClientWebsitePortfolioRegistry({
+  registry,
+  selectedSiteKey,
+  onSiteChange,
+  testIds,
+}: {
+  registry: ShellClientWebsitePortfolioRegistry;
+  selectedSiteKey: string;
+  onSiteChange: (siteKey: string) => void;
+  testIds: typeof clientWebsitePortfolioRegistryTestIds;
+}) {
+  const selectedRow = registry.rows.find((row) => row.siteKey === selectedSiteKey) ?? registry.rows[0];
+  const selectedBlockedActions = selectedRow?.blockedActions ?? [];
+
+  return (
+    <section className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3" data-testid={testIds.root}>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+              <Boxes className="mr-1 h-3 w-3" />
+              Portfolio registry
+            </Badge>
+            <Badge className="bg-slate-950 hover:bg-slate-950">provider-light registry</Badge>
+          </div>
+          <h3 className="mt-2 text-base font-semibold text-slate-950">Client website portfolio</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-5 text-slate-600">
+            Super-admin view of every configurable client site, tenant scope, admin preset, readiness, and next gate before any live creation or handoff action.
+          </p>
+        </div>
+        <Button disabled variant="outline" className="self-start" data-testid={testIds.gatedAction}>
+          <ShieldCheck className="mr-2 h-4 w-4" />
+          Portfolio actions gated
+        </Button>
+      </div>
+
+      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
+        {[
+          { label: "Sites", value: registry.totalSites },
+          { label: "Review", value: registry.readyForReview },
+          { label: "Blocked", value: registry.blockedSites },
+          { label: "Draft", value: registry.draftSites },
+        ].map((item) => (
+          <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 hidden overflow-hidden rounded-lg border border-slate-200 lg:block" data-testid={testIds.table}>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Client site</TableHead>
+              <TableHead>Plan</TableHead>
+              <TableHead>Admin preset</TableHead>
+              <TableHead>Readiness</TableHead>
+              <TableHead>Next gate</TableHead>
+              <TableHead className="text-right">State</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {registry.rows.map((row) => (
+              <TableRow
+                key={row.siteKey}
+                className={row.siteKey === selectedSiteKey ? "bg-slate-50" : undefined}
+                data-testid={`row-client-website-portfolio-${row.siteKey}`}
+              >
+                <TableCell>
+                  <button
+                    type="button"
+                    onClick={() => onSiteChange(row.siteKey)}
+                    className="text-left"
+                    data-testid={`button-client-website-portfolio-select-${row.siteKey}`}
+                  >
+                    <div className="font-medium text-slate-950">{row.label}</div>
+                    <div className="mt-0.5 text-xs text-slate-500">{row.tenantSlug} · {row.templateKey}</div>
+                  </button>
+                </TableCell>
+                <TableCell>{row.requestedPlan}</TableCell>
+                <TableCell>
+                  <div className="text-sm font-medium">{row.adminPresetLabel}</div>
+                  <div className="mt-0.5 text-xs text-slate-500">{row.ownerRole} / {row.scope}</div>
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Progress value={row.readinessPercent} className="h-2 w-20" />
+                    <span className="text-xs font-medium text-slate-700">{row.readinessPercent}%</span>
+                  </div>
+                </TableCell>
+                <TableCell className="max-w-[300px] text-xs leading-5 text-slate-600">{row.nextGate}</TableCell>
+                <TableCell className="text-right">
+                  <Badge variant={row.configurationStatus === "ready_for_review" ? "secondary" : "outline"} className="bg-white">
+                    {row.configurationStatus.replaceAll("_", " ")}
+                  </Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      <div className="mt-3 grid max-h-[420px] gap-2 overflow-y-auto pr-1 lg:hidden" data-testid={`${testIds.table}-cards`}>
+        {registry.rows.map((row) => (
+          <button
+            key={row.siteKey}
+            type="button"
+            onClick={() => onSiteChange(row.siteKey)}
+            className={`rounded-lg border p-3 text-left ${row.siteKey === selectedSiteKey ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white"}`}
+            data-testid={`button-client-website-portfolio-card-${row.siteKey}`}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="font-medium text-slate-950">{row.label}</div>
+                <div className="mt-1 text-xs leading-5 text-slate-500">{row.tenantSlug} · {row.requestedPlan}</div>
+              </div>
+              <Badge variant="outline" className="shrink-0 bg-white">{row.scope}</Badge>
+            </div>
+            <div className="mt-3 flex items-center gap-2">
+              <Progress value={row.readinessPercent} className="h-2 flex-1" />
+              <span className="text-xs font-medium text-slate-700">{row.readinessPercent}%</span>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-600">{row.nextGate}</p>
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-3" data-testid={testIds.blocked}>
+          <div className="text-[11px] font-medium uppercase tracking-normal text-rose-700">Selected blocked actions</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {selectedBlockedActions.map((action) => (
+              <Badge key={action} variant="outline" className="border-rose-200 bg-white text-rose-700">
+                {action}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
+          {registry.providerBoundary}
+        </div>
+      </div>
     </section>
   );
 }
@@ -9794,6 +9951,15 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <div className={isClientWebsiteLaunchWorkbench ? "hidden" : "block"}>
+                <ClientWebsitePortfolioRegistry
+                  registry={snapshot.clientWebsiteStudio.portfolioRegistry}
+                  selectedSiteKey={clientWebsiteStudioSiteKey}
+                  onSiteChange={selectClientWebsiteStudioSite}
+                  testIds={clientWebsitePortfolioRegistryTestIds}
+                />
               </div>
 
               <div
