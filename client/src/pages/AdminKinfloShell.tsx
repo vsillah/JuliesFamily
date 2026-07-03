@@ -5419,6 +5419,77 @@ export default function AdminKinfloShell() {
                     </div>
                   </div>
 
+                  <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3" data-testid="section-kinflo-hosted-preflight-result-template-packet">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="outline" className="border-emerald-300 bg-white text-emerald-800">
+                            Phase {snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.phase}
+                          </Badge>
+                          <Badge className="bg-emerald-800 hover:bg-emerald-800">
+                            {snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.status.replaceAll("_", " ")}
+                          </Badge>
+                        </div>
+                        <h4 className="mt-3 text-sm font-semibold text-emerald-950">Sanitized result template packet</h4>
+                        <p className="mt-1 max-w-3xl text-xs leading-5 text-emerald-900" data-testid="text-kinflo-hosted-preflight-result-template-packet">
+                          {snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.nextGate}
+                        </p>
+                      </div>
+                      <Button size="sm" disabled variant="outline" className="self-start border-emerald-300 bg-white text-emerald-900 hover:bg-white hover:text-emerald-900" data-testid="button-hosted-preflight-result-template-packet-gated">
+                        <ShieldCheck className="mr-2 h-3 w-3" />
+                        Template review gated
+                      </Button>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-xs" data-testid="section-kinflo-hosted-preflight-result-template-packet-summary">
+                      {[
+                        { label: "Template", value: snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.templatePath },
+                        { label: "Dry run", value: snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.command },
+                        { label: "Validator", value: snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.validator },
+                      ].map((item) => (
+                        <div key={item.label} className="min-w-0 rounded-lg border border-emerald-200 bg-white px-3 py-2">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-emerald-700">{item.label}</div>
+                          <div className="mt-1 truncate font-semibold text-slate-950" title={item.value}>{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(128px,0.46fr)] gap-3">
+                      <div className="grid max-h-[220px] gap-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-preflight-result-template-fields">
+                        {snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.fields.map((field) => (
+                          <div key={field.id} className="rounded-lg border border-emerald-200 bg-white p-3">
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="min-w-0">
+                                <div className="text-sm font-semibold text-slate-950">{field.label}</div>
+                                <div className="mt-1 text-xs leading-5 text-slate-500">{field.allowedShape} - example: {field.sanitizedValueExample}</div>
+                              </div>
+                              <Badge variant="secondary" className="w-fit shrink-0">{field.id}</Badge>
+                            </div>
+                            <p className="mt-2 rounded-md border border-emerald-100 bg-emerald-50 p-2 text-xs leading-5 text-emerald-900">{field.commitPolicy}</p>
+                            <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-600">{field.rawValuePolicy}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="min-w-0 space-y-2">
+                        <div className="rounded-lg border border-emerald-200 bg-white p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-emerald-700">Review route</div>
+                          <div className="mt-2 break-all text-xs leading-5 text-slate-700">
+                            {snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.reviewRoute}
+                          </div>
+                        </div>
+                        <div className="max-h-[150px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-preflight-result-template-rules">
+                          {snapshot.hostedActivationRunbook.activationPreflightResultTemplatePacket.commitRules.map((rule) => (
+                            <div key={rule} className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-white p-2 text-xs leading-5 text-slate-700">
+                              <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-700" />
+                              <span>{rule}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.42fr)]">
                     <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50 p-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">

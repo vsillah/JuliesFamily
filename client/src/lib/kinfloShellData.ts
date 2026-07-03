@@ -562,6 +562,42 @@ export type ShellHostedActivationPreflightResultContract = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationPreflightResultTemplateField = {
+  id: string;
+  label: string;
+  allowedShape: string;
+  sanitizedValueExample: string;
+  commitPolicy: string;
+  rawValuePolicy: string;
+};
+
+export type ShellHostedActivationPreflightResultTemplatePacket = {
+  phase: 131;
+  status: "prepare_only_preflight_result_template_packet";
+  command: "npm run kinflo:dry-run-activation-preflight-result";
+  validator: "npm run kinflo:validate-hosted-activation-preflight-result-template-packet";
+  templatePath: "docs/convex-activation-preflight-result-template.json";
+  reviewRoute: "/admin/kinflo-os?tab=hosted-activation&preflightResult=preflight-result-status";
+  resultFieldCount: number;
+  nextGate: string;
+  sourceDocuments: string[];
+  fields: ShellHostedActivationPreflightResultTemplateField[];
+  commitRules: string[];
+  blockedActions: string[];
+  canRecordResult: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canCommitRawLogs: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -579,6 +615,7 @@ export type ShellHostedActivationRunbook = {
   activationPreflightReview: ShellHostedActivationPreflightReview;
   activationPreflightEvidenceLedger: ShellHostedActivationPreflightEvidenceLedger;
   activationPreflightResultContract: ShellHostedActivationPreflightResultContract;
+  activationPreflightResultTemplatePacket: ShellHostedActivationPreflightResultTemplatePacket;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -8189,6 +8226,103 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
         requiredRedaction: "Commit only the enum status and sanitized note; do not commit raw command logs, stack traces with local paths, or provider output.",
         failureMeaning: "Blocked or aborted keeps codegen, generated API import, live smoke, adapter switch, and provider writes disabled.",
       },
+    ],
+    blockedActions: [
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "record raw activation preflight logs in committed source",
+      "commit secret-bearing preflight output",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "set generatedApiAvailable true",
+      "execute hosted read or mutation smoke",
+      "switch fixture adapter to generated API",
+      "perform provider writes or client launch",
+    ],
+    canRecordResult: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canCommitRawLogs: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  activationPreflightResultTemplatePacket: {
+    phase: 131,
+    status: "prepare_only_preflight_result_template_packet",
+    command: "npm run kinflo:dry-run-activation-preflight-result",
+    validator: "npm run kinflo:validate-hosted-activation-preflight-result-template-packet",
+    templatePath: "docs/convex-activation-preflight-result-template.json",
+    reviewRoute: "/admin/kinflo-os?tab=hosted-activation&preflightResult=preflight-result-status",
+    resultFieldCount: 6,
+    nextGate: "Review the sanitized template packet, then approve the hosted preflight window and private raw-output storage location before real hosted env values are used.",
+    sourceDocuments: [
+      "docs/phase128-hosted-activation-preflight-result-contract.md",
+      "docs/phase129-hosted-activation-preflight-result-deep-links.md",
+      "docs/phase130-hosted-activation-preflight-result-template.md",
+      "docs/convex-activation-preflight-result-template.json",
+    ],
+    fields: [
+      {
+        id: "local-env-present",
+        label: "Local env present",
+        allowedShape: "boolean",
+        sanitizedValueExample: "yes | no",
+        commitPolicy: "Commit yes/no only.",
+        rawValuePolicy: "Do not commit .env.local contents, shell exports, copied secret values, or command output containing local private context.",
+      },
+      {
+        id: "generated-directory-present",
+        label: "Generated directory present",
+        allowedShape: "boolean",
+        sanitizedValueExample: "yes | no",
+        commitPolicy: "Commit yes/no only.",
+        rawValuePolicy: "Do not commit generated API file contents, generated import snippets, or generatedApiAvailable true state.",
+      },
+      {
+        id: "hosted-env-visible",
+        label: "Hosted env visible",
+        allowedShape: "boolean",
+        sanitizedValueExample: "yes | no",
+        commitPolicy: "Commit yes/no only.",
+        rawValuePolicy: "Do not commit deployment URLs, auth issuer values, client ids, tokens, provider identifiers, 1Password item contents, or copied dashboard values.",
+      },
+      {
+        id: "external-writes",
+        label: "External writes",
+        allowedShape: "number",
+        sanitizedValueExample: "0",
+        commitPolicy: "Committed value must be 0 before owner approval.",
+        rawValuePolicy: "Do not commit provider request logs, provider response logs, mutation output, or resource ids.",
+      },
+      {
+        id: "hosted-deployment-touched",
+        label: "Hosted deployment touched",
+        allowedShape: "boolean",
+        sanitizedValueExample: "false",
+        commitPolicy: "Committed value must be false in prepare-only packets.",
+        rawValuePolicy: "Do not commit deployment ids, dashboard details, hosted query output, or hosted mutation output.",
+      },
+      {
+        id: "preflight-result-status",
+        label: "Preflight result status",
+        allowedShape: "passed | blocked | aborted",
+        sanitizedValueExample: "blocked",
+        commitPolicy: "Commit only the enum status plus a short sanitized note.",
+        rawValuePolicy: "Do not commit raw command logs, stack traces with local paths, provider output, token-like strings, URLs, or secret-bearing diagnostics.",
+      },
+    ],
+    commitRules: [
+      "Commit only the six sanitized fields and a short sanitized note.",
+      "Keep raw command output outside committed source if it contains local paths, private provider context, hosted identifiers, or secret-like values.",
+      "Do not use this template packet as approval to run the hosted activation preflight.",
+      "Do not run codegen, import generated API bindings, execute live Convex, switch adapters, or perform provider writes from this packet.",
     ],
     blockedActions: [
       "enter real hosted Convex or auth env values",

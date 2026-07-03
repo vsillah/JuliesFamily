@@ -175,6 +175,7 @@ for (const path of [
   "docs/phase128-hosted-activation-preflight-result-contract.md",
   "docs/phase129-hosted-activation-preflight-result-deep-links.md",
   "docs/phase130-hosted-activation-preflight-result-template.md",
+  "docs/phase131-hosted-activation-preflight-result-template-packet.md",
   "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase85-hosted-activation-approval-packet.md",
@@ -328,6 +329,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-activation-preflight-result-deep-links.mjs",
   "scripts/dry-run-kinflo-activation-preflight-result.mjs",
   "scripts/validate-kinflo-hosted-activation-preflight-result-template.mjs",
+  "scripts/validate-kinflo-hosted-activation-preflight-result-template-packet.mjs",
   "scripts/validate-kinflo-hosted-activation-step-deep-links.mjs",
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
@@ -2014,6 +2016,26 @@ requireIncludes("docs/convex-activation-preflight-result-template.json", [
   "\"preflight-result-status\"",
 ]);
 
+requireIncludes("docs/phase131-hosted-activation-preflight-result-template-packet.md", [
+  "Phase 131: Hosted Activation Preflight Result Template Packet",
+  "npm run kinflo:validate-hosted-activation-preflight-result-template-packet",
+  "activationPreflightResultTemplatePacket",
+  "ShellHostedActivationPreflightResultTemplatePacket",
+  "ShellHostedActivationPreflightResultTemplateField",
+  "docs/convex-activation-preflight-result-template.json",
+  "section-kinflo-hosted-preflight-result-template-packet",
+  "section-kinflo-hosted-preflight-result-template-packet-summary",
+  "text-kinflo-hosted-preflight-result-template-packet",
+  "section-kinflo-hosted-preflight-result-template-fields",
+  "section-kinflo-hosted-preflight-result-template-rules",
+  "button-hosted-preflight-result-template-packet-gated",
+  "No hosted Convex deployment is created or selected.",
+  "No activation preflight is run against real hosted env values.",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+  "No hosted preflight result is recorded.",
+]);
+
 requireIncludes("docs/phase84-claude-frame-ingestion-packet.md", [
   "Phase 84: Claude Frame Ingestion Packet",
   "npm run kinflo:validate-claude-frame-ingestion",
@@ -2396,6 +2418,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase128-hosted-activation-preflight-result-contract.md\"",
   "\"docs/phase129-hosted-activation-preflight-result-deep-links.md\"",
   "\"docs/phase130-hosted-activation-preflight-result-template.md\"",
+  "\"docs/phase131-hosted-activation-preflight-result-template-packet.md\"",
   "\"docs/convex-activation-preflight-result-template.json\"",
   "\"docs/phase101-hosted-activation-step-deep-links.md\"",
   "\"docs/phase84-claude-frame-ingestion-packet.md\"",
@@ -2435,6 +2458,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-hosted-activation-preflight-result-deep-links\"",
   "\"npm run kinflo:dry-run-activation-preflight-result\"",
   "\"npm run kinflo:validate-hosted-activation-preflight-result-template\"",
+  "\"npm run kinflo:validate-hosted-activation-preflight-result-template-packet\"",
   "\"npm run kinflo:validate-hosted-activation-step-deep-links\"",
   "\"npm run kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"npm run kinflo:validate-client-website-configuration-profiles\"",
@@ -2567,6 +2591,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-hosted-activation-preflight-result-deep-links\"",
   "\"kinflo:dry-run-activation-preflight-result\"",
   "\"kinflo:validate-hosted-activation-preflight-result-template\"",
+  "\"kinflo:validate-hosted-activation-preflight-result-template-packet\"",
   "\"kinflo:validate-hosted-activation-step-deep-links\"",
   "\"kinflo:validate-hosted-smoke-evidence-deep-links\"",
   "\"kinflo:validate-design-frame-backlog\"",
@@ -3742,6 +3767,22 @@ requireIncludes("scripts/validate-kinflo-hosted-activation-preflight-result-temp
   "Hosted preflight result recorded: no",
 ]);
 
+requireIncludes("scripts/validate-kinflo-hosted-activation-preflight-result-template-packet.mjs", [
+  "docs/phase131-hosted-activation-preflight-result-template-packet.md",
+  "docs/convex-activation-preflight-result-template.json",
+  "ShellHostedActivationPreflightResultTemplatePacket",
+  "section-kinflo-hosted-preflight-result-template-packet",
+  "template packet does not import generated API",
+  "template packet does not execute live Convex",
+  "Hosted env values read or printed: no",
+  "Activation preflight against real env: no",
+  "Convex codegen run: no",
+  "Generated API imported: no",
+  "Live Convex execution: no",
+  "Provider writes: 0",
+  "Hosted preflight result recorded: no",
+]);
+
 requireIncludes("scripts/validate-kinflo-hosted-activation-step-deep-links.mjs", [
   "docs/phase101-hosted-activation-step-deep-links.md",
   "activationStep",
@@ -3817,7 +3858,7 @@ requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", 
   "section-kinflo-client-launch-dossier-decision",
   "min-h-0",
   "max-h-[calc(100vh-14rem)]",
-  "sm:h-[min(336px,calc(100vh-18rem))]",
+  "sm:h-[min(356px,calc(100vh-18rem))]",
   "overflow-y-auto",
   "overflow-x-hidden",
   "lg:overflow-hidden",
