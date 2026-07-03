@@ -12,8 +12,9 @@ npm run kinflo:validate-design-frame-backlog
 
 - Backlog: `docs/kinflo-design-frame-adoption-backlog.json`
 - Status: `provider_light_design_frame_backlog`
-- Implementation backlog items: 9
+- Implementation backlog items: 10
 - Claude Desktop task: completed and captured
+- Claude Code task: completed and captured
 
 ## What Changed
 
@@ -28,7 +29,7 @@ This phase creates a concrete queue for the next UI passes:
 - configuration field affordances,
 - client handoff permission strip,
 - Claude frame ingestion after the desktop task completes.
-- Phase 84 Claude Code packet for a repeatable two-frame critique after CLI auth is repaired.
+- Phase 84 Claude Code packet and Phase 149 response capture for the repaired two-frame critique.
 
 ## Claude Desktop Boundary
 
@@ -42,13 +43,23 @@ The response is captured in this phase as summarized design signals, not as a ra
 - accepted recommendations: inline blocked reasons, unified launch panel, device-framed preview canvas, evidence cards, AI-content watermarking, blast-radius confirmations, and tab state dots,
 - next action: convert accepted recommendations into scoped provider-light UI phases.
 
-## Phase 84 Claude Code Packet
+## Phase 84 Claude Code Packet And Phase 149 Response
 
 The follow-up packet is stored at `docs/kinflo-claude-frame-ingestion-packet.json`.
 
-Status: `pending_claude_code_auth`.
+Status: `completed_captured`.
 
-The packet adds refreshed public design research, a sanitized two-frame Claude prompt, redaction rules, and ingestion rules. It does not claim that Claude Code reviewed the frames while the CLI credential probe returns `401 Invalid authentication credentials`.
+The summarized response is stored at `docs/kinflo-claude-code-frame-response.json`.
+
+The captured Claude Code response accepted five provider-light deltas:
+
+- persistent identity strip,
+- shared gate-card pattern,
+- primary metric per Configure panel,
+- side-by-side mobile preview,
+- handoff readiness checklist.
+
+The packet and response preserve redaction rules, prompt boundaries, and provider gates. They do not claim hosted Convex readiness or enable live writes.
 
 ## Provider Boundary
 

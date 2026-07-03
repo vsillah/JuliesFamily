@@ -90,13 +90,20 @@ const requiredUrls = [
   "https://www.saasui.design/blog/7-saas-ui-design-trends-2026",
   "https://webflow.com/blog/saas-website-design-examples",
   "https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/",
+  "https://developer.apple.com/design/human-interface-guidelines/layout",
+  "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+  "https://www.awwwards.com/",
+  "https://muz.li/inspiration/dashboard-inspiration/",
+  "https://www.925studios.co/blog/saas-dashboard-design-examples-2026",
+  "https://mockflow.com/blog/saas-website-design-trends",
 ];
 
 requireIncludes("docs/phase84-claude-frame-ingestion-packet.md", [
   "Phase 84: Claude Frame Ingestion Packet",
   "npm run kinflo:validate-claude-frame-ingestion",
-  "pending_claude_code_auth",
-  "401 Invalid authentication credentials",
+  "completed_captured",
+  "docs/kinflo-claude-code-frame-response.json",
+  "authenticated response captured",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
   "No secret values are read or printed.",
@@ -105,8 +112,9 @@ requireIncludes("docs/phase84-claude-frame-ingestion-packet.md", [
 
 requireIncludes(packetPath, [
   "\"phase\": 84",
-  "\"status\": \"pending_claude_code_auth\"",
-  "\"blocked_invalid_credentials\"",
+  "\"status\": \"completed_captured\"",
+  "\"authenticated_response_captured\"",
+  "\"responseArtifact\": \"docs/kinflo-claude-code-frame-response.json\"",
   "\"super-admin-command-frame\"",
   "\"client-site-studio-frame\"",
   "\"critique_only_then_provider_light_deltas\"",
@@ -120,14 +128,17 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"claudeCodeFramePacket\"",
   "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
   "\"docs/phase84-claude-frame-ingestion-packet.md\"",
-  "\"pending_claude_code_auth\"",
+  "\"completed_captured\"",
+  "\"docs/kinflo-claude-code-frame-response.json\"",
   "\"claude-frame-ingestion\"",
 ]);
 
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
   "Phase 84 Claude Code packet",
-  "pending_claude_code_auth",
+  "Phase 149 response",
+  "completed_captured",
   "docs/kinflo-claude-frame-ingestion-packet.json",
+  "docs/kinflo-claude-code-frame-response.json",
 ]);
 
 requireIncludes("docs/kinflo-saas-execution-ledger.json", [
@@ -154,10 +165,10 @@ if (packet) {
     fail("packet phase is 84", `Received ${packet.phase}.`);
   }
 
-  if (packet.status === "pending_claude_code_auth") {
-    pass("packet status is pending_claude_code_auth");
+  if (packet.status === "completed_captured") {
+    pass("packet status is completed_captured");
   } else {
-    fail("packet status is pending_claude_code_auth", `Received ${packet.status}.`);
+    fail("packet status is completed_captured", `Received ${packet.status}.`);
   }
 
   for (const key of [
@@ -178,10 +189,10 @@ if (packet) {
     }
   }
 
-  if (packet.cliAuth?.status === "blocked_invalid_credentials") {
-    pass("Claude Code auth is recorded as blocked");
+  if (packet.cliAuth?.status === "authenticated_response_captured" && packet.responseArtifact === "docs/kinflo-claude-code-frame-response.json") {
+    pass("Claude Code response is recorded as captured");
   } else {
-    fail("Claude Code auth is recorded as blocked", "Do not imply Claude Code review passed while auth is broken.");
+    fail("Claude Code response is recorded as captured", "Claude Code response capture must link the Phase 149 artifact.");
   }
 
   if (packet.credentialBoundary?.secretValuesRead === false && packet.credentialBoundary?.secretValuesPrinted === false) {
@@ -191,10 +202,10 @@ if (packet) {
   }
 
   const sources = packet.researchSources ?? [];
-  if (sources.length >= 7) {
-    pass("packet has seven research sources");
+  if (sources.length >= requiredUrls.length) {
+    pass("packet has current research sources");
   } else {
-    fail("packet has seven research sources", `Received ${sources.length}.`);
+    fail("packet has current research sources", `Received ${sources.length}.`);
   }
 
   for (const source of sources) {
@@ -268,7 +279,7 @@ for (const check of checks) {
 console.log("\nKinFlo Claude frame ingestion validation");
 console.log(`Research sources: ${packet?.researchSources?.length ?? 0}`);
 console.log(`Frames: ${packet?.kinfloFrames?.length ?? 0}`);
-console.log(`Claude Code auth: ${packet?.cliAuth?.status ?? "unknown"}`);
+console.log(`Claude Code response: ${packet?.cliAuth?.status ?? "unknown"}`);
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Convex codegen run: no");

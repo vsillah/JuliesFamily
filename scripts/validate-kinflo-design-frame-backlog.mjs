@@ -78,6 +78,8 @@ for (const path of [
   "docs/phase69-client-launch-decisions.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/kinflo-claude-frame-ingestion-packet.json",
+  "docs/phase149-claude-code-frame-response.md",
+  "docs/kinflo-claude-code-frame-response.json",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-kinflo-design-frame-backlog.mjs",
@@ -89,8 +91,9 @@ for (const path of [
 requireIncludes("docs/phase75-design-frame-adoption-backlog.md", [
   "npm run kinflo:validate-design-frame-backlog",
   "provider_light_design_frame_backlog",
-  "Implementation backlog items: 9",
+  "Implementation backlog items: 10",
   "Claude Desktop task: completed and captured",
+  "Claude Code task: completed and captured",
   "No live Convex query, mutation, or action is executed.",
 ]);
 
@@ -106,13 +109,16 @@ requireIncludes(backlogPath, [
   "\"decision-gate-rail\"",
   "\"claude-frame-ingestion\"",
   "\"claudeCodeFramePacket\"",
-  "\"pending_claude_code_auth\"",
+  "\"completed_captured\"",
   "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
+  "\"docs/kinflo-claude-code-frame-response.json\"",
+  "\"claude-code-frame-response-capture\"",
 ]);
 
 requireIncludes("package.json", [
   "\"kinflo:validate-design-frame-backlog\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
+  "\"kinflo:validate-claude-code-frame-response\"",
 ]);
 
 for (const path of [
@@ -203,16 +209,21 @@ if (backlog) {
   }
 
   const claudeCodePacket = backlog.designInputs?.claudeCodeFramePacket;
-  if (claudeCodePacket?.status === "pending_claude_code_auth") {
-    pass("Claude Code frame packet is pending auth repair");
+  if (claudeCodePacket?.status === "completed_captured") {
+    pass("Claude Code frame response is captured");
   } else {
-    fail("Claude Code frame packet is pending auth repair", "Do not imply Claude Code review passed while CLI auth is broken.");
+    fail("Claude Code frame response is captured", "Claude Code response should be captured after auth repair.");
   }
 
-  if (claudeCodePacket?.packet === "docs/kinflo-claude-frame-ingestion-packet.json" && claudeCodePacket?.phaseDoc === "docs/phase84-claude-frame-ingestion-packet.md") {
-    pass("Claude Code packet artifacts are linked");
+  if (
+    claudeCodePacket?.packet === "docs/kinflo-claude-frame-ingestion-packet.json" &&
+    claudeCodePacket?.phaseDoc === "docs/phase84-claude-frame-ingestion-packet.md" &&
+    claudeCodePacket?.response === "docs/kinflo-claude-code-frame-response.json" &&
+    claudeCodePacket?.responsePhaseDoc === "docs/phase149-claude-code-frame-response.md"
+  ) {
+    pass("Claude Code packet and response artifacts are linked");
   } else {
-    fail("Claude Code packet artifacts are linked", "Backlog must link the packet JSON and Phase 84 doc.");
+    fail("Claude Code packet and response artifacts are linked", "Backlog must link the packet JSON, Phase 84 doc, response JSON, and Phase 149 doc.");
   }
 
   const principles = backlog.adoptionPrinciples ?? [];
@@ -223,10 +234,10 @@ if (backlog) {
   }
 
   const items = backlog.implementationBacklog ?? [];
-  if (items.length === 9) {
-    pass("backlog includes nine implementation items");
+  if (items.length === 10) {
+    pass("backlog includes ten implementation items");
   } else {
-    fail("backlog includes nine implementation items", `Received ${items.length}.`);
+    fail("backlog includes ten implementation items", `Received ${items.length}.`);
   }
 
   const ids = new Set();

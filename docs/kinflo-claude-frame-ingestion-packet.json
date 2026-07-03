@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "phase": 84,
   "name": "KinFlo Claude Code design frame ingestion packet",
-  "status": "pending_claude_code_auth",
-  "updatedAt": "2026-07-02",
+  "status": "completed_captured",
+  "updatedAt": "2026-07-03",
   "objective": "Prepare a sanitized, source-backed Claude Code frame critique packet for KinFlo OS without sending secrets, private customer data, provider credentials, or live-provider actions.",
   "providerBoundary": {
     "externalWrites": false,
@@ -15,16 +15,18 @@
     "tenantSiteLaunchExecuted": false,
     "clientSharingApproved": false,
     "secretsReadOrPrinted": false,
-    "notes": "This packet is local-only design review preparation. Claude Code execution remains blocked until CLI credentials are repaired."
+    "notes": "This packet stayed local-only and sanitized. Claude Code execution completed after auth repair and the summarized response is stored in docs/kinflo-claude-code-frame-response.json."
   },
   "cliAuth": {
     "tool": "Claude Code",
     "versionObserved": "2.1.139",
-    "status": "blocked_invalid_credentials",
-    "lastProbeDate": "2026-07-02",
-    "lastProbeSummary": "Non-interactive claude -p readiness probe returned 401 Invalid authentication credentials.",
+    "status": "authenticated_response_captured",
+    "lastProbeDate": "2026-07-03",
+    "lastProbeSummary": "Claude Code auth status succeeded and a sanitized non-interactive prompt returned a structured provider-light JSON critique.",
     "onePasswordStatus": "CLI account visible; item reads timed out at local authorization.",
-    "nextHumanStep": "Approve or repair the local 1Password and Claude Code credential path, then retry the sanitized prompt in this packet."
+    "nextHumanStep": "Review accepted provider-light deltas before any UI implementation that changes client-facing workflows.",
+    "previousBlockedStatus": "blocked_invalid_credentials",
+    "responseArtifact": "docs/kinflo-claude-code-frame-response.json"
   },
   "credentialBoundary": {
     "allowedToSendToClaude": [
@@ -81,6 +83,36 @@
       "name": "Muzli dashboard design examples 2026",
       "url": "https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/",
       "designSignal": "Effective dashboards surface the right data at the right hierarchy with minimal visual noise."
+    },
+    {
+      "name": "Apple Human Interface Guidelines - Layout",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+      "designSignal": "Design stable full-screen layouts first and collapse only when the full layout no longer fits."
+    },
+    {
+      "name": "Apple Human Interface Guidelines - Tab bars",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+      "designSignal": "Use tabs for peer sections and keep navigation stable, predictable, and not overloaded with actions."
+    },
+    {
+      "name": "Awwwards web design inspiration",
+      "url": "https://www.awwwards.com/",
+      "designSignal": "Award-level web work signals object, proof, and action path quickly with high craft."
+    },
+    {
+      "name": "Muzli dashboard inspiration",
+      "url": "https://muz.li/inspiration/dashboard-inspiration/",
+      "designSignal": "Dashboard inspiration should be filtered into operational hierarchy, not copied as decorative chrome."
+    },
+    {
+      "name": "2026 SaaS dashboard pattern research",
+      "url": "https://www.925studios.co/blog/saas-dashboard-design-examples-2026",
+      "designSignal": "Premium dashboards prioritize what matters now, progressive disclosure, and status color with meaning rather than decoration."
+    },
+    {
+      "name": "2026 SaaS website trend research",
+      "url": "https://mockflow.com/blog/saas-website-design-trends",
+      "designSignal": "Current SaaS design favors product-led surfaces, trust-first proof, clarity-led minimalism, and interactive demos."
     }
   ],
   "kinfloFrames": [
@@ -155,5 +187,13 @@
     "Convert accepted recommendations into scoped provider-light backlog items before implementation.",
     "Reject any recommendation that enables hosted Convex, generated API imports, provider writes, tenant launch, public publish, invite delivery, lead writes, domain verification, campaign sends, AI provider calls, production import, or client sharing before the human gate."
   ],
-  "validationCommand": "npm run kinflo:validate-claude-frame-ingestion"
+  "validationCommand": "npm run kinflo:validate-claude-frame-ingestion",
+  "responseArtifact": "docs/kinflo-claude-code-frame-response.json",
+  "acceptedProviderLightDeltas": [
+    "persistent-identity-strip",
+    "gate-card-pattern",
+    "primary-metric-per-panel",
+    "side-by-side-mobile-preview",
+    "handoff-readiness-checklist"
+  ]
 }
