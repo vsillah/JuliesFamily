@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
   ListChecks,
   MailPlus,
+  MailX,
   FileText,
   MonitorSmartphone,
   Palette,
@@ -1430,6 +1431,107 @@ function ClientWebsiteConfigurationProfiles({
                 {functionName}
               </Badge>
             ))}
+          </div>
+        </div>
+      ) : null}
+
+      {selectedInvitationReadiness ? (
+        <div
+          className="mt-3 max-h-[360px] overflow-y-auto overflow-x-hidden rounded-xl border border-slate-200 bg-slate-50 p-3 pr-2"
+          data-testid="section-kinflo-client-configuration-admin-invitation-readiness"
+        >
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="bg-white">
+                  Admin invitation readiness
+                </Badge>
+                <Badge variant="secondary" data-testid="section-kinflo-client-configuration-admin-invitation-scope">
+                  {selectedInvitationReadiness.inviteScope} scope
+                </Badge>
+                <Badge variant="outline" className="bg-white">
+                  {selectedInvitationReadiness.deliveryMode.replaceAll("_", " ")}
+                </Badge>
+              </div>
+              <div className="mt-2 text-sm font-semibold text-slate-950" data-testid="text-kinflo-client-configuration-admin-invitation-readiness">
+                {selectedInvitationReadiness.label}
+              </div>
+              <p className="mt-1 text-xs leading-5 text-slate-600">
+                {selectedInvitationReadiness.nextGate}
+              </p>
+            </div>
+            <Button disabled variant="outline" className="shrink-0 justify-start bg-white" data-testid="button-client-configuration-admin-invitation-gated">
+              <MailX className="mr-2 h-4 w-4" />
+              Admin invite gated
+            </Button>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,0.76fr)_minmax(0,1.24fr)]">
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {[
+                { label: "Recipient", value: selectedInvitationReadiness.inviteRecipientLabel },
+                { label: "Role", value: selectedInvitationReadiness.inviteRole },
+              ].map((item) => (
+                <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-white p-2">
+                  <div className="text-[10px] uppercase tracking-normal text-slate-500">{item.label}</div>
+                  <div className="mt-1 truncate font-semibold text-slate-950" title={item.value}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="min-w-0 rounded-lg border border-slate-200 bg-white p-2" data-testid="section-kinflo-client-configuration-admin-invitation-copy">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Invite copy blocks</div>
+              <div className="mt-2 flex max-h-[74px] flex-wrap gap-1.5 overflow-y-auto pr-1">
+                {selectedInvitationReadiness.copyBlocks.map((copyBlock) => (
+                  <Badge key={copyBlock} variant="outline" className="bg-slate-50 text-[10px]">{copyBlock}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 bg-white p-2" data-testid="section-kinflo-client-configuration-admin-invitation-checklist">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Invitation evidence</div>
+              <div className="mt-2 max-h-[118px] space-y-1.5 overflow-y-auto pr-1">
+                {selectedInvitationReadiness.evidenceChecklist.map((item) => (
+                  <div key={item.key} className="rounded-md border border-slate-200 bg-slate-50 p-2 text-xs leading-5">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-medium text-slate-950">{item.label}</span>
+                      <Badge variant={item.status === "ready" ? "secondary" : "outline"} className="shrink-0 bg-white text-[10px]">
+                        {item.status}
+                      </Badge>
+                    </div>
+                    <p className="mt-1 text-slate-600">{item.evidence}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-2" data-testid="section-kinflo-client-configuration-admin-invitation-blocked">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Blocked invitation actions</div>
+              <div className="mt-2 max-h-[118px] space-y-1.5 overflow-y-auto pr-1">
+                {selectedInvitationReadiness.blockedLiveActions.map((action) => (
+                  <div key={action} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
+                    <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
+                    <span>{action}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
+            <div className="rounded-lg border border-slate-200 bg-white p-2 text-xs leading-5 text-slate-700">
+              <div className="font-semibold text-slate-950">Rollback</div>
+              <p className="mt-1">{selectedInvitationReadiness.rollbackPlan}</p>
+            </div>
+            <div className="flex max-h-[72px] flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-slate-200 bg-white p-2" data-testid="section-kinflo-client-configuration-admin-invitation-functions">
+              {selectedInvitationReadiness.convexFunctions.map((functionName) => (
+                <Badge key={functionName} variant="outline" className="max-w-full whitespace-normal break-all bg-slate-50 text-left text-[10px]">
+                  {functionName}
+                </Badge>
+              ))}
+            </div>
           </div>
         </div>
       ) : null}
