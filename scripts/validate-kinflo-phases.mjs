@@ -194,6 +194,7 @@ for (const path of [
   "docs/phase142-configuration-change-set-deep-links.md",
   "docs/phase143-configuration-approval-matrix-deep-links.md",
   "docs/phase144-configuration-workspace-panels.md",
+  "docs/phase145-configuration-profile-switcher.md",
   "docs/phase141-configuration-save-request-deep-links.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
@@ -361,6 +362,7 @@ for (const path of [
   "scripts/validate-kinflo-configuration-change-set-deep-links.mjs",
   "scripts/validate-kinflo-configuration-approval-matrix-deep-links.mjs",
   "scripts/validate-kinflo-configuration-workspace-panels.mjs",
+  "scripts/validate-kinflo-configuration-profile-switcher.mjs",
   "scripts/validate-kinflo-configuration-save-request-deep-links.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
@@ -2459,6 +2461,25 @@ requireIncludes("docs/phase144-configuration-workspace-panels.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase145-configuration-profile-switcher.md", [
+  "Phase 145: Configuration Profile Switcher",
+  "npm run kinflo:validate-configuration-profile-switcher",
+  "studioSite=julies-family-public|advisor-client-site|campaign-microsite",
+  "studioConfigure=review|change|approval|save",
+  "studioConfig=blockers|evidence|functions",
+  "studioChange=blockers|evidence|functions",
+  "studioApproval=blockers|evidence|functions",
+  "studioSave=blockers|evidence|audit|rollback|publish|domain|invite|experience|functions",
+  "section-kinflo-client-configuration-profile-switcher",
+  "tabs-kinflo-client-configuration-profile-sites",
+  "text-kinflo-client-configuration-selected-profile",
+  "button-kinflo-client-configuration-profile-julies-family-public",
+  "button-kinflo-client-configuration-profile-advisor-client-site",
+  "button-kinflo-client-configuration-profile-campaign-microsite",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase141-configuration-save-request-deep-links.md", [
   "Phase 141: Configuration Save Request Deep Links",
   "npm run kinflo:validate-configuration-save-request-deep-links",
@@ -2738,6 +2759,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase142-configuration-change-set-deep-links.md\"",
   "\"docs/phase143-configuration-approval-matrix-deep-links.md\"",
   "\"docs/phase144-configuration-workspace-panels.md\"",
+  "\"docs/phase145-configuration-profile-switcher.md\"",
   "\"docs/phase141-configuration-save-request-deep-links.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
@@ -2801,6 +2823,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-configuration-change-set-deep-links\"",
   "\"npm run kinflo:validate-configuration-approval-matrix-deep-links\"",
   "\"npm run kinflo:validate-configuration-workspace-panels\"",
+  "\"npm run kinflo:validate-configuration-profile-switcher\"",
   "\"npm run kinflo:validate-configuration-save-request-deep-links\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
@@ -2951,6 +2974,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-change-set-deep-links\"",
   "\"kinflo:validate-configuration-approval-matrix-deep-links\"",
   "\"kinflo:validate-configuration-workspace-panels\"",
+  "\"kinflo:validate-configuration-profile-switcher\"",
   "\"kinflo:validate-configuration-save-request-deep-links\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
@@ -4422,6 +4446,19 @@ requireIncludes("scripts/validate-kinflo-configuration-workspace-panels.mjs", [
   "configuration workspace panels do not import generated API",
   "configuration workspace panels do not execute live Convex",
   "KinFlo configuration workspace panel validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-configuration-profile-switcher.mjs", [
+  "docs/phase145-configuration-profile-switcher.md",
+  "studioSite",
+  "selectedSiteKey",
+  "onSiteChange",
+  "section-kinflo-client-configuration-profile-switcher",
+  "studio lanes stay at the top before lane-specific sections",
+  "button-kinflo-client-configuration-profile-advisor-client-site",
+  "configuration profile switcher does not import generated API",
+  "configuration profile switcher does not execute live Convex",
+  "KinFlo configuration profile switcher validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [

@@ -129,7 +129,8 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-configuration-approval-matrix",
   "section-kinflo-client-configuration-save-request",
   "data-testid=\"section-kinflo-client-studio-lane-switcher\"",
-  "className=\"relative z-10 flex flex-col gap-1 border-y border-slate-200 bg-white",
+  "className=\"relative z-10 flex flex-col gap-1 rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm",
+  "Studio lanes",
 ]);
 
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
