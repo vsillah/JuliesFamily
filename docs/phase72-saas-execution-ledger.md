@@ -89,6 +89,7 @@ npm run kinflo:validate-client-admin-invitation-readiness-packets
 npm run kinflo:validate-configuration-profile-generated-api-coverage
 npm run kinflo:validate-claude-frame-ingestion
 npm run kinflo:validate-claude-code-frame-response
+npm run kinflo:validate-persistent-identity-strip
 npm run kinflo:validate-site-studio-scroll-consolidation
 npm run kinflo:validate-site-studio-deep-links
 npm run kinflo:validate-site-studio-site-deep-links

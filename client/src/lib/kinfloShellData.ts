@@ -870,6 +870,7 @@ export type ShellActiveObjectSignal = {
   siteKey: string;
   environment: string;
   environmentDetail: string;
+  lastVerifiedLabel: string;
   readinessLabel: string;
   readinessPercent: number;
   launchPosture: string;
@@ -2180,6 +2181,7 @@ const fixtureActiveObjectSignal: ShellActiveObjectSignal = {
   siteKey: "julies-family-public",
   environment: "Fixture review",
   environmentDetail: "Provider-light shell using typed local fixtures until hosted Convex activation and generated API review pass.",
+  lastVerifiedLabel: "2026-07-03 local fixture review",
   readinessLabel: "3 of 5 Site Studio gates ready",
   readinessPercent: 60,
   launchPosture: "Review, not publish",

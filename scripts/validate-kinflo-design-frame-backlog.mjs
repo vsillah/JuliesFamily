@@ -104,6 +104,7 @@ requireIncludes(backlogPath, [
   "\"frameResponseCaptured\": true",
   "\"Sanitized product and design brief only",
   "\"acceptedRecommendations\"",
+  "\"implementedDeltas\"",
   "\"first-viewport-object-signal\"",
   "\"client-studio-workbench-grid\"",
   "\"decision-gate-rail\"",
@@ -113,6 +114,7 @@ requireIncludes(backlogPath, [
   "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
   "\"docs/kinflo-claude-code-frame-response.json\"",
   "\"claude-code-frame-response-capture\"",
+  "\"docs/phase150-persistent-identity-strip.md\"",
 ]);
 
 requireIncludes("package.json", [

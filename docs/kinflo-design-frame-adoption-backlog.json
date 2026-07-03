@@ -75,8 +75,16 @@
         "side-by-side-mobile-preview",
         "handoff-readiness-checklist"
       ],
+      "implementedDeltas": [
+        {
+          "id": "persistent-identity-strip",
+          "phaseDoc": "docs/phase150-persistent-identity-strip.md",
+          "validationCommand": "npm run kinflo:validate-persistent-identity-strip",
+          "status": "implemented_provider_light"
+        }
+      ],
       "rejectedRecommendations": [],
-      "nextAction": "Implement the accepted provider-light deltas in order, starting with persistent identity strip and GateCard pattern, while all live-provider actions remain gated."
+      "nextAction": "Continue the accepted provider-light deltas in order, with GateCard pattern next after the Phase 150 persistent identity strip."
     }
   },
   "adoptionPrinciples": [

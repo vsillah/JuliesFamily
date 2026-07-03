@@ -3339,6 +3339,23 @@ export default function AdminKinfloShell() {
   const clientWebsiteLaunchDecisionTone = selectedClientWebsiteLaunchDecisionPacket?.launchDecision === "no_go"
     ? "border-rose-200 bg-rose-50 text-rose-700"
     : "border-amber-200 bg-amber-50 text-amber-700";
+  const persistentIdentity = {
+    objectType: activeTab === "site-studio" ? "Client site" : snapshot.activeObjectSignal.objectType,
+    label: activeTab === "site-studio"
+      ? selectedClientWebsiteStudioSite?.label ?? snapshot.activeObjectSignal.label
+      : snapshot.activeObjectSignal.label,
+    tenantSlug: activeTab === "site-studio"
+      ? selectedClientWebsiteStudioSite?.tenantSlug ?? snapshot.activeObjectSignal.tenantSlug
+      : snapshot.activeObjectSignal.tenantSlug,
+    siteKey: activeTab === "site-studio"
+      ? selectedClientWebsiteStudioSite?.key ?? snapshot.activeObjectSignal.siteKey
+      : snapshot.activeObjectSignal.siteKey,
+    environment: snapshot.activeObjectSignal.environment,
+    lastVerifiedLabel: snapshot.activeObjectSignal.lastVerifiedLabel,
+    launchPosture: activeTab === "site-studio" ? clientWebsiteLaunchDecisionLabel : snapshot.activeObjectSignal.launchPosture,
+    gateLabel: snapshot.activeObjectSignal.disabledActionLabel,
+    gateReason: snapshot.activeObjectSignal.disabledActionReason,
+  };
   const isClientWebsiteLaunchWorkbench =
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch";
   const clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context ?? [];
@@ -4427,6 +4444,66 @@ export default function AdminKinfloShell() {
                 <Globe2 className="mr-2 h-4 w-4" />
                 New Site
               </Button>
+            </div>
+          </div>
+          <div
+            className="grid min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]"
+            data-testid="section-kinflo-persistent-identity-strip"
+          >
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                  {persistentIdentity.objectType}
+                </Badge>
+                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700" data-testid="text-kinflo-persistent-identity-environment">
+                  {persistentIdentity.environment}
+                </Badge>
+                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                  {snapshot.dataMode.runtimeLabel}
+                </Badge>
+              </div>
+              <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
+                <div className="min-w-0">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Active object</div>
+                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-site">
+                    {persistentIdentity.label}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Tenant</div>
+                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-tenant">
+                    {persistentIdentity.tenantSlug}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Verified</div>
+                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-last-verified">
+                    {persistentIdentity.lastVerifiedLabel}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="min-w-0 rounded-md border border-amber-200 bg-white p-2 lg:w-[320px]" data-testid="section-kinflo-persistent-identity-gate">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-amber-700">Gate</div>
+                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-gate">
+                    {persistentIdentity.launchPosture}
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-50 hover:text-amber-900"
+                  disabled
+                  data-testid="button-kinflo-persistent-identity-gated"
+                  title={persistentIdentity.gateReason}
+                >
+                  <ShieldCheck className="mr-2 h-3 w-3" />
+                  {persistentIdentity.gateLabel}
+                </Button>
+              </div>
             </div>
           </div>
           <div

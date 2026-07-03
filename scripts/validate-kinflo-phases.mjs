@@ -185,6 +185,7 @@ for (const path of [
   "docs/phase101-hosted-activation-step-deep-links.md",
   "docs/phase84-claude-frame-ingestion-packet.md",
   "docs/phase149-claude-code-frame-response.md",
+  "docs/phase150-persistent-identity-strip.md",
   "docs/phase85-hosted-activation-approval-packet.md",
   "docs/phase86-site-studio-scroll-consolidation.md",
   "docs/phase99-site-studio-deep-links.md",
@@ -359,6 +360,7 @@ for (const path of [
   "scripts/validate-kinflo-hosted-smoke-evidence-deep-links.mjs",
   "scripts/validate-kinflo-claude-frame-ingestion.mjs",
   "scripts/validate-kinflo-site-studio-scroll-consolidation.mjs",
+  "scripts/validate-kinflo-persistent-identity-strip.mjs",
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
@@ -2265,6 +2267,22 @@ requireIncludes("docs/phase149-claude-code-frame-response.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase150-persistent-identity-strip.md", [
+  "Phase 150: Persistent Identity Strip",
+  "npm run kinflo:validate-persistent-identity-strip",
+  "persistent-identity-strip",
+  "section-kinflo-persistent-identity-strip",
+  "text-kinflo-persistent-identity-tenant",
+  "text-kinflo-persistent-identity-site",
+  "text-kinflo-persistent-identity-environment",
+  "text-kinflo-persistent-identity-last-verified",
+  "button-kinflo-persistent-identity-gated",
+  "ShellActiveObjectSignal",
+  "lastVerifiedLabel",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase85-hosted-activation-approval-packet.md", [
   "Phase 85: Hosted Activation Approval Packet",
   "npm run kinflo:validate-hosted-activation-approval-packet",
@@ -2833,6 +2851,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/kinflo-claude-frame-ingestion-packet.json\"",
   "\"docs/phase149-claude-code-frame-response.md\"",
   "\"docs/kinflo-claude-code-frame-response.json\"",
+  "\"docs/phase150-persistent-identity-strip.md\"",
   "\"docs/phase85-hosted-activation-approval-packet.md\"",
   "\"docs/convex-hosted-activation-approval-packet.json\"",
   "\"docs/phase86-site-studio-scroll-consolidation.md\"",
@@ -2903,6 +2922,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-client-handoff-permission-strip\"",
   "\"npm run kinflo:validate-claude-frame-ingestion\"",
   "\"npm run kinflo:validate-claude-code-frame-response\"",
+  "\"npm run kinflo:validate-persistent-identity-strip\"",
   "\"npm run kinflo:validate-site-studio-scroll-consolidation\"",
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
@@ -3058,6 +3078,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-configuration-profile-generated-api-coverage\"",
   "\"kinflo:validate-claude-frame-ingestion\"",
   "\"kinflo:validate-claude-code-frame-response\"",
+  "\"kinflo:validate-persistent-identity-strip\"",
   "\"kinflo:validate-site-studio-scroll-consolidation\"",
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
@@ -4410,6 +4431,21 @@ requireIncludes("scripts/validate-kinflo-claude-code-frame-response.mjs", [
   "side-by-side-mobile-preview",
   "handoff-readiness-checklist",
   "KinFlo Claude Code frame response validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-persistent-identity-strip.mjs", [
+  "docs/phase150-persistent-identity-strip.md",
+  "docs/kinflo-claude-code-frame-response.json",
+  "persistent-identity-strip",
+  "section-kinflo-persistent-identity-strip",
+  "text-kinflo-persistent-identity-tenant",
+  "text-kinflo-persistent-identity-site",
+  "text-kinflo-persistent-identity-environment",
+  "text-kinflo-persistent-identity-last-verified",
+  "button-kinflo-persistent-identity-gated",
+  "persistent identity strip does not import generated API",
+  "persistent identity strip does not execute live Convex",
+  "KinFlo persistent identity strip validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-site-studio-scroll-consolidation.mjs", [

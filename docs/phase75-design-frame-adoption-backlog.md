@@ -59,6 +59,8 @@ The captured Claude Code response accepted five provider-light deltas:
 - side-by-side mobile preview,
 - handoff readiness checklist.
 
+Phase 150 implements the first delta as `docs/phase150-persistent-identity-strip.md` with `npm run kinflo:validate-persistent-identity-strip`. GateCard pattern remains the next provider-light design delta.
+
 The packet and response preserve redaction rules, prompt boundaries, and provider gates. They do not claim hosted Convex readiness or enable live writes.
 
 ## Provider Boundary
