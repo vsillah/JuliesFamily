@@ -528,6 +528,40 @@ export type ShellHostedActivationPreflightEvidenceLedger = {
   liveConvexExecution: false;
 };
 
+export type ShellHostedActivationPreflightResultField = {
+  id: string;
+  label: string;
+  allowedShape: string;
+  requiredRedaction: string;
+  failureMeaning: string;
+};
+
+export type ShellHostedActivationPreflightResultContract = {
+  status: "prepare_only_preflight_result_contract";
+  decisionId: "activation-preflight-window";
+  owner: "Vambah";
+  totalFields: number;
+  requiredFields: number;
+  acceptedFields: number;
+  nextGate: string;
+  reviewPacketPath: string;
+  sourceDocuments: string[];
+  fields: ShellHostedActivationPreflightResultField[];
+  blockedActions: string[];
+  canRecordResult: false;
+  canEnterEnvValues: false;
+  canRunAgainstRealEnv: false;
+  canCommitRawLogs: false;
+  canRunCodegen: false;
+  canCommitGeneratedApi: false;
+  canImportGeneratedApi: false;
+  canExecuteLiveSmoke: false;
+  canReadSecrets: false;
+  canPrintSecrets: false;
+  providerWrites: false;
+  liveConvexExecution: false;
+};
+
 export type ShellHostedActivationRunbook = {
   status: "prepare_only_evidence_ledger";
   defaultStepId: string;
@@ -544,6 +578,7 @@ export type ShellHostedActivationRunbook = {
   envCodegenReview: ShellHostedActivationEnvCodegenReview;
   activationPreflightReview: ShellHostedActivationPreflightReview;
   activationPreflightEvidenceLedger: ShellHostedActivationPreflightEvidenceLedger;
+  activationPreflightResultContract: ShellHostedActivationPreflightResultContract;
   decisionRegister: ShellHostedActivationDecision[];
   documents: string[];
   steps: ShellHostedActivationStep[];
@@ -8083,6 +8118,92 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "perform provider writes or client launch",
     ],
     canRecordEvidence: false,
+    canEnterEnvValues: false,
+    canRunAgainstRealEnv: false,
+    canCommitRawLogs: false,
+    canRunCodegen: false,
+    canCommitGeneratedApi: false,
+    canImportGeneratedApi: false,
+    canExecuteLiveSmoke: false,
+    canReadSecrets: false,
+    canPrintSecrets: false,
+    providerWrites: false,
+    liveConvexExecution: false,
+  },
+  activationPreflightResultContract: {
+    status: "prepare_only_preflight_result_contract",
+    decisionId: "activation-preflight-window",
+    owner: "Vambah",
+    totalFields: 6,
+    requiredFields: 6,
+    acceptedFields: 0,
+    nextGate: "Approve the hosted preflight window, then record only the sanitized field-level result; raw logs and hosted identifiers stay outside committed source.",
+    reviewPacketPath: "docs/phase128-hosted-activation-preflight-result-contract.md",
+    sourceDocuments: [
+      "docs/phase17-convex-activation-preflight.md",
+      "docs/phase24-live-convex-handoff.md",
+      "docs/phase125-hosted-activation-preflight-review.md",
+      "docs/phase126-hosted-activation-preflight-evidence-ledger.md",
+      "docs/phase127-hosted-activation-preflight-evidence-deep-links.md",
+    ],
+    fields: [
+      {
+        id: "local-env-present",
+        label: "Local env present",
+        allowedShape: "boolean",
+        requiredRedaction: "Record yes/no only; never include .env.local contents, shell exports, or copied secret values.",
+        failureMeaning: "If false after approval, hosted activation cannot proceed because required local env is not visible to the process.",
+      },
+      {
+        id: "generated-directory-present",
+        label: "Generated directory present",
+        allowedShape: "boolean",
+        requiredRedaction: "Record yes/no only; never include generated API file contents or import snippets.",
+        failureMeaning: "If true before the approved codegen window, pause and confirm generated files remain untracked and unimported.",
+      },
+      {
+        id: "hosted-env-visible",
+        label: "Hosted env visible",
+        allowedShape: "boolean",
+        requiredRedaction: "Record yes/no only; never include deployment URLs, auth issuer, client id, tokens, or 1Password item contents.",
+        failureMeaning: "If false after approval, do not run codegen or live smoke until env visibility is corrected outside committed source.",
+      },
+      {
+        id: "external-writes",
+        label: "External writes",
+        allowedShape: "number",
+        requiredRedaction: "Committed result must be 0 before owner approval; do not include provider request or response logs.",
+        failureMeaning: "Any value above 0 means the command crossed the provider boundary and activation remains blocked.",
+      },
+      {
+        id: "hosted-deployment-touched",
+        label: "Hosted deployment touched",
+        allowedShape: "boolean",
+        requiredRedaction: "Committed result must be false in the prepare-only packet; do not include deployment ids or dashboard details.",
+        failureMeaning: "A true value means the preflight touched hosted Convex and must be reviewed outside the source repo before continuing.",
+      },
+      {
+        id: "preflight-result-status",
+        label: "Preflight result status",
+        allowedShape: "passed | blocked | aborted",
+        requiredRedaction: "Commit only the enum status and sanitized note; do not commit raw command logs, stack traces with local paths, or provider output.",
+        failureMeaning: "Blocked or aborted keeps codegen, generated API import, live smoke, adapter switch, and provider writes disabled.",
+      },
+    ],
+    blockedActions: [
+      "enter real hosted Convex or auth env values",
+      "run npm run kinflo:activation-preflight against real hosted env values",
+      "record raw activation preflight logs in committed source",
+      "commit secret-bearing preflight output",
+      "run npm run convex:codegen",
+      "commit generated Convex API files",
+      "import convex/_generated/api",
+      "set generatedApiAvailable true",
+      "execute hosted read or mutation smoke",
+      "switch fixture adapter to generated API",
+      "perform provider writes or client launch",
+    ],
+    canRecordResult: false,
     canEnterEnvValues: false,
     canRunAgainstRealEnv: false,
     canCommitRawLogs: false,
