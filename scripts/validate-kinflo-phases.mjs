@@ -189,6 +189,7 @@ for (const path of [
   "docs/phase99-site-studio-deep-links.md",
   "docs/phase105-site-studio-site-deep-links.md",
   "docs/phase138-site-studio-handoff-deep-links.md",
+  "docs/phase139-admin-handoff-matrix-filters.md",
   "docs/phase106-client-public-preview-context-links.md",
   "docs/phase107-client-preview-review-packet.md",
   "docs/phase108-client-preview-review-contract.md",
@@ -350,6 +351,7 @@ for (const path of [
   "scripts/validate-kinflo-site-studio-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-site-deep-links.mjs",
   "scripts/validate-kinflo-site-studio-handoff-deep-links.mjs",
+  "scripts/validate-kinflo-admin-handoff-matrix-filters.mjs",
   "scripts/validate-kinflo-client-public-preview-context-links.mjs",
   "scripts/validate-kinflo-client-preview-review-packet.mjs",
   "scripts/validate-kinflo-client-preview-review-contract.mjs",
@@ -2366,6 +2368,19 @@ requireIncludes("docs/phase138-site-studio-handoff-deep-links.md", [
   "No live Convex query, mutation, or action is executed.",
 ]);
 
+requireIncludes("docs/phase139-admin-handoff-matrix-filters.md", [
+  "Phase 139: Admin Handoff Matrix Filters",
+  "npm run kinflo:validate-admin-handoff-matrix-filters",
+  "studioMatrix=all|blocked|ready|platform|tenant|site",
+  "readInitialClientAdminHandoffMatrixFilter",
+  "selectClientAdminHandoffMatrixFilter",
+  "tabs-kinflo-client-admin-handoff-matrix-filter",
+  "section-kinflo-client-admin-handoff-matrix-table-empty",
+  "section-kinflo-client-admin-handoff-matrix-blocked-empty",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
 requireIncludes("docs/phase106-client-public-preview-context-links.md", [
   "Phase 106: Client Public Preview Context Links",
   "npm run kinflo:validate-client-public-preview-context-links",
@@ -2619,6 +2634,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"docs/phase99-site-studio-deep-links.md\"",
   "\"docs/phase105-site-studio-site-deep-links.md\"",
   "\"docs/phase138-site-studio-handoff-deep-links.md\"",
+  "\"docs/phase139-admin-handoff-matrix-filters.md\"",
   "\"docs/phase106-client-public-preview-context-links.md\"",
   "\"docs/phase107-client-preview-review-packet.md\"",
   "\"docs/phase108-client-preview-review-contract.md\"",
@@ -2676,6 +2692,7 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
   "\"npm run kinflo:validate-site-studio-deep-links\"",
   "\"npm run kinflo:validate-site-studio-site-deep-links\"",
   "\"npm run kinflo:validate-site-studio-handoff-deep-links\"",
+  "\"npm run kinflo:validate-admin-handoff-matrix-filters\"",
   "\"npm run kinflo:validate-client-public-preview-context-links\"",
   "\"npm run kinflo:validate-client-preview-review-packet\"",
   "\"npm run kinflo:validate-client-preview-review-contract\"",
@@ -2820,6 +2837,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-site-studio-deep-links\"",
   "\"kinflo:validate-site-studio-site-deep-links\"",
   "\"kinflo:validate-site-studio-handoff-deep-links\"",
+  "\"kinflo:validate-admin-handoff-matrix-filters\"",
   "\"kinflo:validate-client-public-preview-context-links\"",
   "\"kinflo:validate-client-preview-review-packet\"",
   "\"kinflo:validate-client-preview-review-contract\"",
@@ -4221,6 +4239,16 @@ requireIncludes("scripts/validate-kinflo-site-studio-handoff-deep-links.mjs", [
   "Site Studio handoff deep links do not import generated API",
   "Site Studio handoff deep links do not execute live Convex",
   "KinFlo Site Studio handoff deep-link validation",
+]);
+
+requireIncludes("scripts/validate-kinflo-admin-handoff-matrix-filters.mjs", [
+  "docs/phase139-admin-handoff-matrix-filters.md",
+  "studioMatrix",
+  "readInitialClientAdminHandoffMatrixFilter",
+  "selectClientAdminHandoffMatrixFilter",
+  "admin handoff matrix filters do not import generated API",
+  "admin handoff matrix filters do not execute live Convex",
+  "KinFlo admin handoff matrix filter validation",
 ]);
 
 requireIncludes("scripts/validate-kinflo-client-public-preview-context-links.mjs", [

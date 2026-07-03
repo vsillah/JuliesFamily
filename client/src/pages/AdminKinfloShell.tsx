@@ -144,6 +144,8 @@ const clientWebsiteProvisioningViewValues = ["order", "dry-run"] as const;
 type ClientWebsiteProvisioningView = (typeof clientWebsiteProvisioningViewValues)[number];
 const clientWebsiteHandoffWorkspaceValues = ["selected", "matrix"] as const;
 type ClientWebsiteHandoffWorkspace = (typeof clientWebsiteHandoffWorkspaceValues)[number];
+const clientAdminHandoffMatrixFilterValues = ["all", "blocked", "ready", "platform", "tenant", "site"] as const;
+type ClientAdminHandoffMatrixFilter = (typeof clientAdminHandoffMatrixFilterValues)[number];
 
 const shellTabLabels: Record<ShellTabValue, string> = {
   tenants: "Tenants",
@@ -256,8 +258,17 @@ const clientHandoffPermissionStripTestIds = {
 const clientAdminHandoffMatrixTestIds = {
   root: "section-kinflo-client-admin-handoff-matrix",
   summary: "section-kinflo-client-admin-handoff-matrix-summary",
+  filters: "tabs-kinflo-client-admin-handoff-matrix-filter",
+  filterAll: "tabs-kinflo-client-admin-handoff-matrix-filter-all",
+  filterBlocked: "tabs-kinflo-client-admin-handoff-matrix-filter-blocked",
+  filterReady: "tabs-kinflo-client-admin-handoff-matrix-filter-ready",
+  filterPlatform: "tabs-kinflo-client-admin-handoff-matrix-filter-platform",
+  filterTenant: "tabs-kinflo-client-admin-handoff-matrix-filter-tenant",
+  filterSite: "tabs-kinflo-client-admin-handoff-matrix-filter-site",
   table: "section-kinflo-client-admin-handoff-matrix-table",
+  tableEmpty: "section-kinflo-client-admin-handoff-matrix-table-empty",
   blocked: "section-kinflo-client-admin-handoff-matrix-blocked",
+  blockedEmpty: "section-kinflo-client-admin-handoff-matrix-blocked-empty",
   gatedAction: "button-client-admin-handoff-matrix-gated",
 } as const;
 
@@ -353,6 +364,16 @@ function readInitialClientWebsiteHandoffWorkspace(): ClientWebsiteHandoffWorkspa
   return clientWebsiteHandoffWorkspaceValues.includes(workspace as ClientWebsiteHandoffWorkspace)
     ? (workspace as ClientWebsiteHandoffWorkspace)
     : "selected";
+}
+
+function readInitialClientAdminHandoffMatrixFilter(): ClientAdminHandoffMatrixFilter {
+  if (typeof window === "undefined") {
+    return "all";
+  }
+  const filter = new URLSearchParams(window.location.search).get("studioMatrix");
+  return clientAdminHandoffMatrixFilterValues.includes(filter as ClientAdminHandoffMatrixFilter)
+    ? (filter as ClientAdminHandoffMatrixFilter)
+    : "all";
 }
 
 function buildClientWebsiteStudioPreviewHref({
@@ -777,11 +798,45 @@ function ClientHandoffPermissionStrip({
 
 function ClientAdminHandoffMatrix({
   matrix,
+  filter,
+  onFilterChange,
   testIds,
 }: {
   matrix: ShellClientAdminHandoffMatrix;
+  filter: ClientAdminHandoffMatrixFilter;
+  onFilterChange: (filter: ClientAdminHandoffMatrixFilter) => void;
   testIds: typeof clientAdminHandoffMatrixTestIds;
 }) {
+  const filteredRows = matrix.rows.filter((row) => {
+    if (filter === "blocked") {
+      return !Boolean(row.canInvite) || !Boolean(row.canGrantMembership);
+    }
+    if (filter === "ready") {
+      return Boolean(row.canInvite) && Boolean(row.canGrantMembership);
+    }
+    if (filter === "platform" || filter === "tenant" || filter === "site") {
+      return row.scope === filter;
+    }
+    return true;
+  });
+
+  const filterOptions: { value: ClientAdminHandoffMatrixFilter; label: string; count: number }[] = [
+    { value: "all", label: "All", count: matrix.rows.length },
+    { value: "blocked", label: "Blocked", count: matrix.rows.filter((row) => !Boolean(row.canInvite) || !Boolean(row.canGrantMembership)).length },
+    { value: "ready", label: "Ready", count: matrix.rows.filter((row) => Boolean(row.canInvite) && Boolean(row.canGrantMembership)).length },
+    { value: "platform", label: "Platform", count: matrix.rows.filter((row) => row.scope === "platform").length },
+    { value: "tenant", label: "Tenant", count: matrix.rows.filter((row) => row.scope === "tenant").length },
+    { value: "site", label: "Site", count: matrix.rows.filter((row) => row.scope === "site").length },
+  ];
+  const filterTestIds: Record<ClientAdminHandoffMatrixFilter, string> = {
+    all: testIds.filterAll,
+    blocked: testIds.filterBlocked,
+    ready: testIds.filterReady,
+    platform: testIds.filterPlatform,
+    tenant: testIds.filterTenant,
+    site: testIds.filterSite,
+  };
+
   const summaryItems = [
     { label: "Sites", value: matrix.totalSites },
     { label: "Platform", value: matrix.platformScoped },
@@ -789,6 +844,7 @@ function ClientAdminHandoffMatrix({
     { label: "Site", value: matrix.siteScoped },
     { label: "Ready", value: matrix.readyForInvite },
     { label: "Blocked", value: matrix.blockedInvites },
+    { label: "Showing", value: filteredRows.length },
   ];
 
   return (
@@ -812,13 +868,37 @@ function ClientAdminHandoffMatrix({
         </Button>
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-2 lg:grid-cols-6" data-testid={testIds.summary}>
+      <div className="mt-4 grid grid-cols-3 gap-2 lg:grid-cols-7" data-testid={testIds.summary}>
         {summaryItems.map((item) => (
           <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
             <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
             <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
           </div>
         ))}
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-1 rounded-lg bg-slate-100 p-1 sm:grid-cols-3 lg:grid-cols-6" role="tablist" aria-label="Client admin handoff matrix filter" data-testid={testIds.filters}>
+        {filterOptions.map((option) => {
+          const isActiveFilter = filter === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={isActiveFilter}
+              onClick={() => onFilterChange(option.value)}
+              className={`min-w-0 rounded-md px-2 py-2 text-xs font-medium transition ${
+                isActiveFilter
+                  ? "bg-white text-slate-950 shadow-sm"
+                  : "text-slate-600 hover:bg-white/70 hover:text-slate-900"
+              }`}
+              data-testid={filterTestIds[option.value]}
+            >
+              <span>{option.label}</span>
+              <span className="ml-1 text-slate-500">{option.count}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-4 max-h-[360px] overflow-y-auto rounded-xl border border-slate-200" data-testid={testIds.table}>
@@ -834,7 +914,7 @@ function ClientAdminHandoffMatrix({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {matrix.rows.map((row) => (
+            {filteredRows.length > 0 ? filteredRows.map((row) => (
               <TableRow key={row.siteKey}>
                 <TableCell className="min-w-[180px]">
                   <div className="font-medium text-slate-950">{row.label}</div>
@@ -863,7 +943,13 @@ function ClientAdminHandoffMatrix({
                   <div className="mt-1 text-xs leading-5 text-slate-500">{row.missingArtifact}</div>
                 </TableCell>
               </TableRow>
-            ))}
+            )) : (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8 text-center text-sm text-slate-500" data-testid={testIds.tableEmpty}>
+                  No client admin handoff rows match this review filter.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -872,12 +958,16 @@ function ClientAdminHandoffMatrix({
         <div className="max-h-[220px] overflow-y-auto rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid={testIds.blocked}>
           <div className="text-sm font-semibold text-amber-950">Blocked handoff actions</div>
           <div className="mt-2 grid gap-2 md:grid-cols-3">
-            {matrix.rows.map((row) => (
+            {filteredRows.length > 0 ? filteredRows.map((row) => (
               <div key={row.siteKey} className="rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900">
                 <div className="font-semibold">{row.blockedInviteAction}</div>
                 <div>{row.nextHumanGate}</div>
               </div>
-            ))}
+            )) : (
+              <div className="rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900" data-testid={testIds.blockedEmpty}>
+                No blocked handoff action is visible for this filter.
+              </div>
+            )}
           </div>
         </div>
         <p className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
@@ -2272,6 +2362,7 @@ export default function AdminKinfloShell() {
   const [clientWebsiteLaunchDossier, setClientWebsiteLaunchDossier] = useState<ClientWebsiteLaunchDossier>(readInitialClientWebsiteLaunchDossier);
   const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
   const [clientWebsiteHandoffWorkspace, setClientWebsiteHandoffWorkspace] = useState<ClientWebsiteHandoffWorkspace>(readInitialClientWebsiteHandoffWorkspace);
+  const [clientAdminHandoffMatrixFilter, setClientAdminHandoffMatrixFilter] = useState<ClientAdminHandoffMatrixFilter>(readInitialClientAdminHandoffMatrixFilter);
   const defaultAsset = snapshot.assetLibrary.assets.find((asset) => asset.key === snapshot.assetLibrary.defaultAssetKey)
     ?? snapshot.assetLibrary.assets[0];
   const [assetSiteKey, setAssetSiteKey] = useState(snapshot.assetLibrary.defaultSiteKey);
@@ -3148,6 +3239,7 @@ export default function AdminKinfloShell() {
     const nextStage = readInitialClientWebsiteWorkbenchStage();
     const nextDossier = readInitialClientWebsiteLaunchDossier();
     const nextHandoffWorkspace = readInitialClientWebsiteHandoffWorkspace();
+    const nextHandoffMatrixFilter = readInitialClientAdminHandoffMatrixFilter();
     const nextAdapterSwitchBatchId = readInitialAdapterSwitchBatchId(
       snapshot.adapterSwitchReadiness.defaultBatchId,
       adapterSwitchBatchIds,
@@ -3181,6 +3273,7 @@ export default function AdminKinfloShell() {
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
     setClientWebsiteHandoffWorkspace((current) => (current === nextHandoffWorkspace ? current : nextHandoffWorkspace));
+    setClientAdminHandoffMatrixFilter((current) => (current === nextHandoffMatrixFilter ? current : nextHandoffMatrixFilter));
     setAdapterSwitchBatchId((current) => (current === nextAdapterSwitchBatchId ? current : nextAdapterSwitchBatchId));
     setAdapterSwitchSurfaceId((current) => (current === nextAdapterSwitchSurfaceId ? current : nextAdapterSwitchSurfaceId));
     setHostedActivationStepId((current) => (current === nextHostedActivationStepId ? current : nextHostedActivationStepId));
@@ -3269,6 +3362,7 @@ export default function AdminKinfloShell() {
       && clientWebsiteWorkbenchStage === "launch";
     const shouldKeepProvisioningView = shouldKeepDossier && clientWebsiteLaunchDossier === "provisioning";
     const shouldKeepHandoffWorkspace = tab === "site-studio" && clientWebsiteStudioLane === "handoff";
+    const shouldKeepHandoffMatrixFilter = shouldKeepHandoffWorkspace && clientWebsiteHandoffWorkspace === "matrix";
     updateKinfloShellRoute({
       tab,
       studioSite: tab === "site-studio" ? clientWebsiteStudioSiteKey : undefined,
@@ -3277,6 +3371,7 @@ export default function AdminKinfloShell() {
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: shouldKeepProvisioningView ? clientWebsiteProvisioningView : undefined,
       studioHandoff: shouldKeepHandoffWorkspace ? clientWebsiteHandoffWorkspace : undefined,
+      studioMatrix: shouldKeepHandoffMatrixFilter ? clientAdminHandoffMatrixFilter : undefined,
       adapterBatch: tab === "adapter-switch" ? adapterSwitchBatchId : undefined,
       adapterSurface: tab === "adapter-switch" ? adapterSwitchSurfaceId : undefined,
       activationStep: tab === "hosted-activation" ? hostedActivationStepId : undefined,
@@ -3299,6 +3394,9 @@ export default function AdminKinfloShell() {
         ? clientWebsiteProvisioningView
         : undefined,
       studioHandoff: clientWebsiteStudioLane === "handoff" ? clientWebsiteHandoffWorkspace : undefined,
+      studioMatrix: clientWebsiteStudioLane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
+        ? clientAdminHandoffMatrixFilter
+        : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3321,6 +3419,9 @@ export default function AdminKinfloShell() {
         ? clientWebsiteProvisioningView
         : undefined,
       studioHandoff: lane === "handoff" ? clientWebsiteHandoffWorkspace : undefined,
+      studioMatrix: lane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
+        ? clientAdminHandoffMatrixFilter
+        : undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3342,6 +3443,7 @@ export default function AdminKinfloShell() {
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: stage === "launch" && clientWebsiteLaunchDossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3364,6 +3466,7 @@ export default function AdminKinfloShell() {
       studioDossier: dossier,
       studioProvisioning: dossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3387,6 +3490,7 @@ export default function AdminKinfloShell() {
       studioDossier: "provisioning",
       studioProvisioning: view,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3408,6 +3512,30 @@ export default function AdminKinfloShell() {
       studioDossier: undefined,
       studioProvisioning: undefined,
       studioHandoff: workspace,
+      studioMatrix: workspace === "matrix" ? clientAdminHandoffMatrixFilter : undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+    });
+  };
+
+  const selectClientAdminHandoffMatrixFilter = (filter: ClientAdminHandoffMatrixFilter) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("handoff");
+    setClientWebsiteHandoffWorkspace("matrix");
+    setClientAdminHandoffMatrixFilter(filter);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "handoff",
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: "matrix",
+      studioMatrix: filter,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: undefined,
@@ -3431,6 +3559,7 @@ export default function AdminKinfloShell() {
       studioDossier: undefined,
       studioProvisioning: undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: batchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
@@ -3451,6 +3580,7 @@ export default function AdminKinfloShell() {
       studioDossier: undefined,
       studioProvisioning: undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: adapterSwitchBatchId,
       adapterSurface: surfaceId,
       activationStep: undefined,
@@ -3471,6 +3601,7 @@ export default function AdminKinfloShell() {
       studioDossier: undefined,
       studioProvisioning: undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: stepId,
@@ -3491,6 +3622,7 @@ export default function AdminKinfloShell() {
       studioDossier: undefined,
       studioProvisioning: undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -3511,6 +3643,7 @@ export default function AdminKinfloShell() {
       studioDossier: undefined,
       studioProvisioning: undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -3531,6 +3664,7 @@ export default function AdminKinfloShell() {
       studioDossier: undefined,
       studioProvisioning: undefined,
       studioHandoff: undefined,
+      studioMatrix: undefined,
       adapterBatch: undefined,
       adapterSurface: undefined,
       activationStep: hostedActivationStepId,
@@ -8254,6 +8388,8 @@ export default function AdminKinfloShell() {
                     <TabsContent value="matrix" className="mt-3" data-testid={clientHandoffWorkspaceTestIds.matrix}>
                       <ClientAdminHandoffMatrix
                         matrix={snapshot.clientWebsiteStudio.adminHandoffMatrix}
+                        filter={clientAdminHandoffMatrixFilter}
+                        onFilterChange={selectClientAdminHandoffMatrixFilter}
                         testIds={clientAdminHandoffMatrixTestIds}
                       />
                     </TabsContent>
