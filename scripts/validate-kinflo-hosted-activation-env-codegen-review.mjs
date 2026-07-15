@@ -153,9 +153,12 @@ requireIncludes("package.json", [
 
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const reviewStart = shellData.indexOf("envCodegenReview: {");
-const reviewEnd = shellData.indexOf("decisionRegister: [", reviewStart);
+const reviewEnd = shellData.indexOf("activationPreflightReview: {", reviewStart);
 const reviewBlock = reviewStart >= 0 && reviewEnd > reviewStart ? shellData.slice(reviewStart, reviewEnd) : "";
-const itemIds = (reviewBlock.match(/id: "/g) ?? []).length;
+const readinessStart = reviewBlock.indexOf("readinessItems: [");
+const readinessEnd = reviewBlock.indexOf("blockedActions: [", readinessStart);
+const readinessBlock = readinessStart >= 0 && readinessEnd > readinessStart ? reviewBlock.slice(readinessStart, readinessEnd) : "";
+const itemIds = (readinessBlock.match(/id: "/g) ?? []).length;
 
 if (itemIds === 6) {
   pass("env/codegen readiness item count matches packet");
