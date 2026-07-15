@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 export const platformRole = v.union(
   v.literal("user"),
@@ -143,19 +144,27 @@ export const approvalStatus = v.union(
 );
 
 export default defineSchema({
+  ...authTables,
+
   users: defineTable({
-    subject: v.string(),
-    email: v.optional(v.string()),
     name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    subject: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
-    platformRole,
+    platformRole: v.optional(platformRole),
     persona: v.optional(v.string()),
-    createdAt: v.number(),
-    updatedAt: v.number(),
+    createdAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
     lastSeenAt: v.optional(v.number()),
   })
+    .index("email", ["email"])
+    .index("phone", ["phone"])
     .index("by_subject", ["subject"])
-    .index("by_email", ["email"])
     .index("by_platform_role", ["platformRole"]),
 
   tenants: defineTable({
