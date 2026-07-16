@@ -72,12 +72,20 @@ requireIncludes("docs/phase71-hosted-activation-console.md", [
   "Hosted Activation Console",
   "hostedActivationRunbook.activationConsole",
   "section-kinflo-hosted-activation-console",
+  "section-kinflo-hosted-activation-gate-truth",
   "text-kinflo-hosted-activation-next-gate",
+  "section-kinflo-hosted-activation-evidence-summary",
   "section-kinflo-hosted-activation-blocked-actions",
   "button-hosted-activation-console-gated",
-  "Pre-activation commands: 8",
+  "Env contract present",
+  "Convex Auth configured",
+  "Activation preflight gated",
+  "Codegen gated",
+  "Generated API gated",
+  "Live smoke gated",
+  "Pre-activation commands: 9",
   "Evidence summary items: 6",
-  "Blocked live actions: 6",
+  "Blocked live actions: 7",
   "Decision: `blocked_until_approval`",
   "Status: `provider_light_activation_console`",
   "does not create or select a hosted Convex deployment",
@@ -88,8 +96,12 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "activationConsole: ShellHostedActivationConsole",
   "provider_light_activation_console",
   "blocked_until_approval",
-  "Approve hosted Convex ownership, billing, backup, auth, env policy, and codegen window",
+  "Env contract is present and Convex Auth is configured",
+  "1Password-backed KinFlo Convex Hosted Env",
+  "Convex Auth configured",
+  "run activation preflight against hosted env values",
   "npm run kinflo:activation-preflight",
+  "npm run kinflo:1password-env-check",
   "npm run convex:check",
   "create hosted Convex deployment",
   "run npm run convex:codegen",
@@ -99,13 +111,19 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-hosted-activation-console",
+  "section-kinflo-hosted-activation-gate-truth",
   "text-kinflo-hosted-activation-next-gate",
+  "section-kinflo-hosted-activation-evidence-summary",
   "button-hosted-activation-console-gated",
   "section-kinflo-hosted-activation-blocked-actions",
   "snapshot.hostedActivationRunbook.activationConsole.preActivationCommands",
   "snapshot.hostedActivationRunbook.activationConsole.evidenceSummary",
   "snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions",
   "Hosted Convex remains approval-gated",
+  "Env contract",
+  "Convex Auth",
+  "Activation preflight",
+  "generatedApiAvailable remains false",
 ]);
 
 requireIncludes("package.json", [
@@ -116,6 +134,7 @@ const shellData = read("client/src/lib/kinfloShellData.ts");
 const commandMatches = shellData.match(/npm run kinflo:|npm run convex:check/g) ?? [];
 const blockedActionPatterns = [
   "create hosted Convex deployment",
+  "run activation preflight against hosted env values",
   "run npm run convex:codegen",
   "import convex/_generated/api",
   "execute live Convex query, mutation, or action",
@@ -130,10 +149,10 @@ if (commandMatches.length >= 8) {
   fail("activation console includes at least eight pre-activation command references", `Found ${commandMatches.length}.`);
 }
 
-if (blockedActionMatches.length >= 6) {
-  pass("activation console includes six blocked live actions");
+if (blockedActionMatches.length >= 7) {
+  pass("activation console includes seven blocked live actions");
 } else {
-  fail("activation console includes six blocked live actions", `Found ${blockedActionMatches.length}.`);
+  fail("activation console includes seven blocked live actions", `Found ${blockedActionMatches.length}.`);
 }
 
 const shellContents = read("client/src/pages/AdminKinfloShell.tsx");

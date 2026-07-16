@@ -157,7 +157,10 @@ const shellData = read("client/src/lib/kinfloShellData.ts");
 const reviewStart = shellData.indexOf("activationPreflightReview: {");
 const reviewEnd = shellData.indexOf("decisionRegister: [", reviewStart);
 const reviewBlock = reviewStart >= 0 && reviewEnd > reviewStart ? shellData.slice(reviewStart, reviewEnd) : "";
-const checkIds = (reviewBlock.match(/id: "/g) ?? []).length;
+const checksStart = reviewBlock.indexOf("checks: [");
+const checksEnd = reviewBlock.indexOf("expectedOutputs: [", checksStart);
+const checksBlock = checksStart >= 0 && checksEnd > checksStart ? reviewBlock.slice(checksStart, checksEnd) : "";
+const checkIds = (checksBlock.match(/id: "/g) ?? []).length;
 
 if (checkIds === 6) {
   pass("activation preflight review check count matches packet");

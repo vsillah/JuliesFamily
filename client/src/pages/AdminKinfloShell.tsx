@@ -8279,6 +8279,38 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
+                    <div className="rounded-xl border border-slate-200 bg-white p-4" data-testid="section-kinflo-hosted-activation-gate-truth">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <div className="text-sm font-medium text-slate-950">Current gate truth</div>
+                          <p className="mt-1 text-xs leading-5 text-slate-600">
+                            Passed setup is separated from the four steps that still require explicit approval.
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="w-fit bg-slate-50">no live execution</Badge>
+                      </div>
+                      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                        {[
+                          { label: "Env contract", status: "present", detail: "1Password-backed contract only; no .env.local fallback.", tone: "border-emerald-200 bg-emerald-50 text-emerald-800" },
+                          { label: "Convex Auth", status: "configured", detail: "Hosted dev auth setup is recorded as configured.", tone: "border-emerald-200 bg-emerald-50 text-emerald-800" },
+                          { label: "Activation preflight", status: "gated", detail: "No run against hosted env values without approval.", tone: "border-amber-200 bg-amber-50 text-amber-800" },
+                          { label: "Codegen", status: "gated", detail: "npm run convex:codegen is not approved in this lane.", tone: "border-amber-200 bg-amber-50 text-amber-800" },
+                          { label: "Generated API import", status: "gated", detail: "generatedApiAvailable remains false.", tone: "border-rose-200 bg-rose-50 text-rose-700" },
+                          { label: "Live smoke", status: "gated", detail: "Hosted read/write smoke awaits sanitized evidence and rollback approval.", tone: "border-rose-200 bg-rose-50 text-rose-700" },
+                        ].map((item) => (
+                          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0 text-sm font-medium text-slate-950">{item.label}</div>
+                              <Badge variant="outline" className={`${item.tone} shrink-0`}>
+                                {item.status}
+                              </Badge>
+                            </div>
+                            <p className="mt-2 text-xs leading-5 text-slate-600">{item.detail}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
                       <div className="min-w-0">
                         <div className="text-sm font-medium">Pre-activation command order</div>
@@ -8292,8 +8324,8 @@ export default function AdminKinfloShell() {
                       </div>
                       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                         <div className="text-sm font-medium">Evidence posture</div>
-                        <div className="mt-3 space-y-2">
-                          {snapshot.hostedActivationRunbook.activationConsole.evidenceSummary.slice(0, 4).map((item) => (
+                        <div className="mt-3 max-h-[260px] space-y-2 overflow-y-auto pr-1" data-testid="section-kinflo-hosted-activation-evidence-summary">
+                          {snapshot.hostedActivationRunbook.activationConsole.evidenceSummary.map((item) => (
                             <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
                               <CircleDashed className="mt-0.5 h-3.5 w-3.5 text-slate-400" />
                               <span>{item}</span>

@@ -8094,7 +8094,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
   activationConsole: {
     status: "provider_light_activation_console",
     decision: "blocked_until_approval",
-    nextHumanGate: "Approve hosted Convex ownership, billing, backup, auth, env policy, and codegen window before generated API files are created.",
+    nextHumanGate: "Env contract is present and Convex Auth is configured; activation preflight, codegen, generated API import, and live smoke remain blocked until Sundiata/Vambah approve the next gate.",
     previewRecoveryGate: {
       phase: 158,
       status: "external_rate_limit_blocked",
@@ -8132,6 +8132,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     preActivationCommands: [
       "npm run kinflo:audit-secret-history",
       "npm run kinflo:inventory-env",
+      "npm run kinflo:1password-env-check",
       "npm run kinflo:activation-preflight",
       "npm run kinflo:validate-generated-api",
       "npm run kinflo:validate-generated-api-review-board",
@@ -8142,6 +8143,7 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
     ],
     blockedLiveActions: [
       "create hosted Convex deployment",
+      "run activation preflight against hosted env values",
       "run npm run convex:codegen",
       "import generated Convex API module",
       "execute live Convex query, mutation, or action",
@@ -8149,14 +8151,14 @@ const fixtureHostedActivationRunbook: ShellHostedActivationRunbook = {
       "publish site, write lead, send invite, attach domain, send campaign, or call provider",
     ],
     evidenceSummary: [
-      "Repo history posture and sharing decision are recorded before external/client review.",
-      "Hosted Convex project URL and ownership notes are captured outside committed source.",
-      "Generated bindings are reviewed against KINFLO_GENERATED_API_BINDINGS before imports.",
-      "Read-only hosted smokes pass before mutation smokes.",
-      "Cross-tenant deny proof is captured before adapter switch.",
-      "Rollback path keeps generatedApiAvailable false until a reviewed switch lands.",
+      "Env contract present: 1Password-backed KinFlo Convex Hosted Env is the only approved env path; no .env.local fallback.",
+      "Convex Auth configured: hosted dev deployment auth files and discovery contract are in place.",
+      "Activation preflight gated: no run against hosted env values until the owner window is approved.",
+      "Codegen gated: npm run convex:codegen remains blocked until Sundiata/Vambah approve it.",
+      "Generated API gated: generatedApiAvailable remains false and convex/_generated/api stays unimported.",
+      "Live smoke gated: read-only and mutation smokes wait for sanitized evidence, rollback owner, and execution approval.",
     ],
-    providerBoundary: "This console is a read-only activation gate. It summarizes approvals, commands, evidence, and blocked actions only; it does not create providers, run codegen, import generated API, execute live Convex, or print secrets.",
+    providerBoundary: "This console is a read-only activation gate. It summarizes approvals, commands, evidence, and blocked actions only; it does not create providers, run preflight against hosted env values, run codegen, import generated API, execute live Convex, or print secrets.",
   },
   generatedApiReviewBoard: {
     status: "provider_light_generated_api_review",
