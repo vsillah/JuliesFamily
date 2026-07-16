@@ -164,7 +164,7 @@ requireIncludes("package.json", [
 
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const contractStart = shellData.indexOf("activationPreflightResultContract: {");
-const contractEnd = shellData.indexOf("decisionRegister: [", contractStart);
+const contractEnd = shellData.indexOf("activationPreflightResultTemplatePacket: {", contractStart);
 const contractBlock = contractStart >= 0 && contractEnd > contractStart ? shellData.slice(contractStart, contractEnd) : "";
 const fieldIds = (contractBlock.match(/id: "/g) ?? []).length;
 
