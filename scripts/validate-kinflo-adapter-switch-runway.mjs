@@ -51,7 +51,7 @@ function parseJson(path) {
 }
 
 function extractRunwayBlock(contents) {
-  const match = contents.match(/runwaySteps:\s*\[([\s\S]*?)\],\n\s*batches:/);
+  const match = contents.match(/runwaySteps:\s*\[([\s\S]*?)\n\s*\],\n\s*acceptanceMatrix:/);
   if (!match) {
     fail("adapter switch runway block exists", "Could not find adapterSwitchReadiness.runwaySteps.");
     return "";
