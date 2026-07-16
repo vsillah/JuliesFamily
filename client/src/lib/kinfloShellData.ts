@@ -7307,10 +7307,10 @@ const fixtureAdapterSwitchReadiness: ShellAdapterSwitchReadiness = {
 const fixtureHostedSmokeGapBacklog: ShellHostedSmokeGapBacklog = {
   status: "provider_light_hosted_smoke_gap_backlog",
   totalGaps: 28,
-  readOnlyGaps: 22,
+  readOnlyGaps: 20,
   mutationGaps: 3,
-  providerGatedGaps: 2,
-  governanceGaps: 5,
+  providerGatedGaps: 1,
+  governanceGaps: 4,
   approvalGate: "Hosted smoke gap backlog cannot run until hosted Convex ownership, generated API review, live-smoke dry run, rollback owner, and Vambah's smoke execution approval are accepted.",
   providerBoundary: "This backlog is review-only. It does not create a hosted Convex deployment, run codegen, import generated API files, execute live Convex functions, write provider metadata, send campaigns, call AI providers, or publish client sites.",
   sourceDocuments: [

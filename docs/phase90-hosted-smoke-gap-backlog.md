@@ -22,10 +22,10 @@ npm run kinflo:validate-hosted-smoke-gap-backlog
 ## Current Backlog Counts
 
 - Total gaps: 28
-- Read-only gaps: 22
+- Read-only gaps: 20
 - Mutation gaps: 3
-- Provider-gated metadata gaps: 2
-- Governance gaps: 5
+- Provider-gated metadata gaps: 1
+- Governance gaps: 4
 
 ## Why This Exists
 
