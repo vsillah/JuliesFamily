@@ -113,6 +113,7 @@
     "kinflo:validate-claude-code-frame-response": "node scripts/validate-kinflo-claude-code-frame-response.mjs",
     "kinflo:validate-persistent-identity-strip": "node scripts/validate-kinflo-persistent-identity-strip.mjs",
     "kinflo:validate-gate-card-pattern": "node scripts/validate-kinflo-gate-card-pattern.mjs",
+    "kinflo:validate-workos-identity-spike": "node scripts/validate-kinflo-workos-identity-spike.mjs",
     "kinflo:validate-client-studio-lane-anchor": "node scripts/validate-kinflo-client-studio-lane-anchor.mjs",
     "kinflo:validate-primary-configure-metric": "node scripts/validate-kinflo-primary-configure-metric.mjs",
     "kinflo:validate-side-by-side-mobile-preview": "node scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
