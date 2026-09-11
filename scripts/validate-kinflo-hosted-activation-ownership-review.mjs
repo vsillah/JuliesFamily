@@ -148,7 +148,7 @@ requireIncludes("package.json", [
 
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const reviewStart = shellData.indexOf("hostedOwnershipReview: {");
-const reviewEnd = shellData.indexOf("decisionRegister: [", reviewStart);
+const reviewEnd = shellData.indexOf("blockedActions: [", reviewStart);
 const reviewBlock = reviewStart >= 0 && reviewEnd > reviewStart ? shellData.slice(reviewStart, reviewEnd) : "";
 const criterionIds = (reviewBlock.match(/id: "/g) ?? []).length;
 
@@ -184,6 +184,32 @@ if (shellPage.includes("useMutation(") || shellPage.includes("useAction(")) {
   fail("hosted ownership review does not execute live Convex", "Live Convex execution must remain blocked.");
 } else {
   pass("hosted ownership review does not execute live Convex");
+}
+
+// Validate the actionable handoff against the existing five-criterion contract.
+const readinessPath = "docs/phase1-hosted-convex-ownership-readiness.md";
+if (requireFile(readinessPath)) {
+  const packet = read(readinessPath);
+  const expectedIds = [...reviewBlock.matchAll(/id: "([^"]+)"/g)].map((match) => match[1]).sort();
+  const packetIds = [...packet.matchAll(/^\| `([^`]+)` \|/gm)].map((match) => match[1]).sort();
+  if (JSON.stringify(packetIds) === JSON.stringify(expectedIds)) {
+    pass("readiness checklist matches shell ownership criteria exactly");
+  } else {
+    fail("readiness checklist matches shell ownership criteria exactly", "Missing, duplicate, or unknown checklist criteria.");
+  }
+  for (const match of packet.matchAll(/\]\(([^)]+)\)/g)) {
+    const target = match[1];
+    if (!target.includes(":") && !target.startsWith("/") && existsSync(`docs/${target}`)) {
+      pass(`readiness source link resolves: ${target}`);
+    } else {
+      fail("readiness source link resolves locally", `Invalid local source: ${target}`);
+    }
+  }
+}
+if (existsSync(".env.local")) {
+  fail(".env.local remains absent", "Remove this lane's env-file dependency; do not read the file.");
+} else {
+  pass(".env.local remains absent");
 }
 
 const failed = checks.filter((check) => !check.ok);

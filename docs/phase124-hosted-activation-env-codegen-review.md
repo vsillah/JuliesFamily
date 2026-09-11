@@ -33,7 +33,7 @@ npm run kinflo:validate-hosted-activation-env-codegen-review
 ## Readiness Items
 
 1. `env-source-policy`: where real Convex, auth, provider, and smoke env values may be entered.
-2. `local-env-entry-window`: when `.env.local` may receive real hosted Convex and auth values.
+2. `local-env-entry-window`: historical gate identifier; the current policy requires an approved secret-store child-process injection window. `.env.local` must remain absent.
 3. `activation-preflight-window`: when `npm run kinflo:activation-preflight` may run against real local env configuration.
 4. `codegen-command-window`: when `npm run convex:codegen` may run and who reviews the generated diff.
 5. `generated-file-review`: how generated bindings are compared with `KINFLO_GENERATED_API_BINDINGS` before import.
