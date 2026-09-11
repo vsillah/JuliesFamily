@@ -8,6 +8,8 @@ Command:
 npm run kinflo:validate-hosted-activation-ownership-review
 ```
 
+Current owner handoff: [Phase 1 ownership readiness packet](phase1-hosted-convex-ownership-readiness.md). It supplies the evidence checklist and current secret-store policy; this historical review's five criteria remain unaccepted.
+
 ## Added Surface
 
 - data object: `hostedActivationRunbook.hostedOwnershipReview`
