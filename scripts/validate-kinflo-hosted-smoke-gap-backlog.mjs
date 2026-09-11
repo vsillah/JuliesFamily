@@ -50,7 +50,7 @@ function parseJson(path) {
 }
 
 function extractBacklogBlock(contents) {
-  const match = contents.match(/const fixtureHostedSmokeGapBacklog:\s*ShellHostedSmokeGapBacklog\s*=\s*\{([\s\S]*?)\n\};\n\nconst fixtureHostedActivationRunbook/);
+  const match = contents.match(/const fixtureHostedSmokeGapBacklog:\s*ShellHostedSmokeGapBacklog\s*=\s*\{([\s\S]*?)\n\};\n\nconst fixtureHostedSmokeExecutionSequencer/);
   if (!match) {
     fail("hosted smoke gap backlog block exists", "Could not find fixtureHostedSmokeGapBacklog.");
     return "";
@@ -111,11 +111,11 @@ requireIncludes("docs/phase90-hosted-smoke-gap-backlog.md", [
   "section-kinflo-hosted-smoke-gap-backlog",
   "section-kinflo-hosted-smoke-gap-scroll",
   "Total gaps: 28",
-  "Read-only gaps: 22",
+  "Read-only gaps: 20",
   "siteFactory.listClientWebsiteLaunchComposer",
   "Mutation gaps: 3",
-  "Provider-gated metadata gaps: 2",
-  "Governance gaps: 5",
+  "Provider-gated metadata gaps: 1",
+  "Governance gaps: 4",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -126,10 +126,10 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "hostedSmokeGapBacklog: fixtureHostedSmokeGapBacklog",
   "provider_light_hosted_smoke_gap_backlog",
   "totalGaps: 28",
-  "readOnlyGaps: 22",
+  "readOnlyGaps: 20",
   "mutationGaps: 3",
-  "providerGatedGaps: 2",
-  "governanceGaps: 5",
+  "providerGatedGaps: 1",
+  "governanceGaps: 4",
   "canRun: false",
   "providerWrites: false",
   "liveConvexExecution: false",
@@ -199,10 +199,10 @@ const modeCounts = {
 };
 
 const expectedModeCounts = {
-  read_only: 22,
+  read_only: 20,
   mutation_smoke_required: 3,
-  provider_gated_metadata: 2,
-  governance: 5,
+  provider_gated_metadata: 1,
+  governance: 4,
 };
 
 for (const [mode, expected] of Object.entries(expectedModeCounts)) {
