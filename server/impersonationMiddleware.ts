@@ -68,6 +68,10 @@ export async function applyImpersonation(req: Request, res: Response, next: Next
     if (!session) {
       return next();
     }
+    if (!session.impersonatedUserId) {
+      console.warn(`[Impersonation] Session ${session.id} has no impersonated user`);
+      return next();
+    }
 
     // Get impersonated user
     const [impersonatedUser] = await db

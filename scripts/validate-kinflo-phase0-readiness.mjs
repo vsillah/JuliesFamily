@@ -1,0 +1,377 @@
+import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+
+const checks = [];
+
+function pass(label) {
+  checks.push({ label, ok: true });
+}
+
+function fail(label, detail) {
+  checks.push({ label, ok: false, detail });
+}
+
+function read(path) {
+  return readFileSync(path, "utf8");
+}
+
+function requireFile(path) {
+  if (existsSync(path)) {
+    pass(`${path} exists`);
+    return true;
+  }
+  fail(`${path} exists`, "Missing required Phase 0 readiness artifact.");
+  return false;
+}
+
+function requireIncludes(path, patterns) {
+  if (!requireFile(path)) {
+    return;
+  }
+
+  const contents = read(path);
+  for (const pattern of patterns) {
+    if (contents.includes(pattern)) {
+      pass(`${path} includes ${pattern}`);
+    } else {
+      fail(`${path} includes ${pattern}`, "Expected Phase 0 readiness text was not found.");
+    }
+  }
+}
+
+function git(args) {
+  return execFileSync("git", args, { encoding: "utf8" }).trim();
+}
+
+function requireEqual(label, actual, expected) {
+  if (actual === expected) {
+    pass(label);
+  } else {
+    fail(label, `Expected ${expected}, received ${actual || "(empty)"}.`);
+  }
+}
+
+function requireArrayIncludes(label, values, requiredValues) {
+  for (const value of requiredValues) {
+    if (values.includes(value)) {
+      pass(`${label} includes ${value}`);
+    } else {
+      fail(`${label} includes ${value}`, "Required value is missing.");
+    }
+  }
+}
+
+const manifestPath = "docs/phase0-readiness-manifest.json";
+requireFile(manifestPath);
+const manifest = JSON.parse(read(manifestPath));
+
+requireEqual("manifest phase is 0", String(manifest.phase), "0");
+requireEqual("manifest source repository", manifest.sourceRepository, "https://github.com/vsillah/JuliesFamily");
+requireEqual("manifest branch", manifest.branch, "codex/kinflo-phase-0-convex-plan");
+requireEqual("manifest review status", manifest.reviewStatus, "repo_complete_external_rate_limit_blocked");
+
+const providerBoundary = manifest.providerBoundary ?? {};
+for (const key of [
+  "hostedConvexDeploymentCreated",
+  "convexCodegenRun",
+  "generatedConvexApiFilesCommitted",
+  "liveConvexExecution",
+  "providerWrites",
+  "productionDataImported",
+  "secretValuesRead",
+  "secretValuesPrinted",
+  "gitHistoryRewritten",
+  "credentialsRotatedByBranch",
+]) {
+  if (providerBoundary[key] === false) {
+    pass(`provider boundary ${key} is false`);
+  } else {
+    fail(`provider boundary ${key} is false`, "Provider boundary must remain explicitly false.");
+  }
+}
+
+const repoCompleteRequirements = manifest.repoCompleteRequirements ?? [];
+const humanOwnedGates = manifest.humanOwnedGates ?? [];
+const localValidationCommands = manifest.localValidationCommands ?? [];
+const localOnlyUntrackedArtifacts = manifest.localOnlyUntrackedArtifacts ?? [];
+const currentReviewEvidence = manifest.currentReviewEvidence ?? {};
+const lastLocalReviewObservation = currentReviewEvidence.lastLocalObservation ?? {};
+
+requireArrayIncludes(
+  "repo-complete requirement ids",
+  repoCompleteRequirements.map((item) => item.id),
+  [
+    "source_checkout",
+    "branch_and_dirty_state",
+    "dependency_install",
+    "build_baseline",
+    "typecheck_baseline",
+    "env_inventory",
+    "current_secret_quarantine",
+    "migration_map",
+    "implementation_phase_plan",
+    "provider_free_boundary",
+    "generated_api_boundary",
+    "shell_route_smoke",
+    "local_admin_browser_smoke",
+  ],
+);
+
+requireArrayIncludes("local-only untracked artifacts", localOnlyUntrackedArtifacts, [
+  ".cursor/",
+  "Terminal Commands.md",
+  "commands/",
+  "docs/terminal-command-cheatsheet.md",
+  "excalidraw.log",
+]);
+
+for (const requirement of repoCompleteRequirements) {
+  if (requirement.status === "repo_complete") {
+    pass(`${requirement.id} is repo_complete`);
+  } else {
+    fail(`${requirement.id} is repo_complete`, `Received ${requirement.status}.`);
+  }
+
+  if (Array.isArray(requirement.evidence) && requirement.evidence.length > 0) {
+    pass(`${requirement.id} has evidence`);
+  } else {
+    fail(`${requirement.id} has evidence`, "Repo-complete requirements need explicit evidence.");
+  }
+}
+
+requireArrayIncludes(
+  "human-owned gate ids",
+  humanOwnedGates.map((item) => item.id),
+  [
+    "credential_rotation_review",
+    "history_purge_decision",
+    "hosted_convex_activation",
+    "integration_merge",
+  ],
+);
+
+for (const gate of humanOwnedGates) {
+  if (gate.status === "human_owned_pending") {
+    pass(`${gate.id} remains human_owned_pending`);
+  } else {
+    fail(`${gate.id} remains human_owned_pending`, `Received ${gate.status}.`);
+  }
+}
+
+requireArrayIncludes("local validation commands", localValidationCommands, [
+  "npm run kinflo:validate-phase0-readiness",
+  "npm run kinflo:validate-pr-review-state",
+  "npm run kinflo:validate-integration-review-handoff",
+  "npm run kinflo:audit-secret-history",
+  "npm run kinflo:inventory-env",
+  "npm run kinflo:validate-phases",
+  "npm run kinflo:validate-map",
+  "npm run kinflo:check-baseline",
+  "npm run kinflo:validate-shell-routes",
+  "npm run kinflo:validate-local-admin-fixture",
+  "npm run convex:check",
+  "npm run build",
+  "git diff --check",
+]);
+
+requireEqual("git origin remote", git(["remote", "get-url", "origin"]), "https://github.com/vsillah/JuliesFamily.git");
+requireEqual("git branch", git(["branch", "--show-current"]), "codex/kinflo-phase-0-convex-plan");
+
+const trackedFiles = git(["ls-files"]).split("\n").filter(Boolean);
+if (trackedFiles.includes(".env.local")) {
+  fail(".env.local is not tracked", "Remove tracked secrets before continuing.");
+} else {
+  pass(".env.local is not tracked");
+}
+
+if (trackedFiles.some((file) => file.startsWith("convex/_generated/"))) {
+  fail("Convex generated files are not tracked", "Generated API files stay gated until hosted approval.");
+} else {
+  pass("Convex generated files are not tracked");
+}
+
+for (const artifact of localOnlyUntrackedArtifacts) {
+  const normalizedArtifact = artifact.endsWith("/") ? artifact.slice(0, -1) : artifact;
+  const isTracked = trackedFiles.some((file) => file === normalizedArtifact || file.startsWith(`${normalizedArtifact}/`));
+  if (isTracked) {
+    fail(`${artifact} remains outside tracked source`, "Local-only artifact was found in git tracked files.");
+  } else {
+    pass(`${artifact} remains outside tracked source`);
+  }
+}
+
+if (currentReviewEvidence.pullRequest === "https://github.com/vsillah/JuliesFamily/pull/1") {
+  pass("current review evidence includes PR #1");
+} else {
+  fail("current review evidence includes PR #1", "Expected the Phase 0 readiness manifest to point at PR #1.");
+}
+
+const reviewCheckNames = (currentReviewEvidence.checks ?? []).map((check) => check.name);
+requireArrayIncludes("current review checks", reviewCheckNames, ["Vercel", "Vercel Preview Comments"]);
+
+const lastObservationMergeReadiness = lastLocalReviewObservation.mergeReadiness;
+const lastObservationIsRateLimited = lastLocalReviewObservation.vercel === "FAILURE"
+  && typeof lastLocalReviewObservation.vercelTarget === "string"
+  && lastLocalReviewObservation.vercelTarget.includes("build-rate-limit")
+  && lastObservationMergeReadiness === "external_rate_limit_blocked";
+
+if (["PENDING", "SUCCESS"].includes(lastLocalReviewObservation.vercel)) {
+  pass(`last local Vercel observation is non-failing: ${lastLocalReviewObservation.vercel}`);
+} else if (lastObservationIsRateLimited) {
+  pass("last local Vercel observation is classified external_rate_limit_blocked");
+} else {
+  fail("last local Vercel observation is non-failing or classified external_rate_limit_blocked", `Received ${lastLocalReviewObservation.vercel ?? "(missing)"}.`);
+}
+
+if (lastLocalReviewObservation.vercelPreviewComments === "SUCCESS") {
+  pass("last local Vercel Preview Comments observation is success");
+} else if (lastObservationIsRateLimited && lastLocalReviewObservation.vercelPreviewComments === "MISSING_UNTIL_DEPLOYMENT_RECOVERS") {
+  pass("last local Vercel Preview Comments observation is unavailable during rate limit");
+} else {
+  fail(
+    "last local Vercel Preview Comments observation is success or unavailable during rate limit",
+    `Received ${lastLocalReviewObservation.vercelPreviewComments ?? "(missing)"}.`,
+  );
+}
+
+if (["blocked_until_vercel_success", "ready_for_integration_review", "external_rate_limit_blocked"].includes(lastLocalReviewObservation.mergeReadiness)) {
+  pass(`last local merge readiness is recognized: ${lastLocalReviewObservation.mergeReadiness}`);
+} else {
+  fail(
+    "last local merge readiness is recognized",
+    `Received ${lastLocalReviewObservation.mergeReadiness ?? "(missing)"}.`,
+  );
+}
+
+for (const path of [
+  "docs/phase0-baseline.md",
+  "docs/phase0-completion-audit.md",
+  "docs/phase0-pr-review-state.md",
+  "docs/phase0-integration-review-handoff.md",
+  "docs/phase0-env-inventory.md",
+  "docs/phase0-secret-remediation.md",
+  "docs/drizzle-to-convex-migration-map.md",
+  "docs/kinflo-saas-adoption-plan.md",
+  "docs/phase32-phase0-readiness-manifest.md",
+  "scripts/validate-kinflo-phase0-readiness.mjs",
+  "scripts/validate-kinflo-pr-review-state.mjs",
+  "scripts/validate-kinflo-integration-review-handoff.mjs",
+  "scripts/validate-kinflo-phases.mjs",
+  "scripts/inventory-kinflo-env.mjs",
+  "scripts/audit-kinflo-secret-history.mjs",
+]) {
+  requireFile(path);
+}
+
+requireIncludes("docs/phase0-completion-audit.md", [
+  "This branch satisfies those repo-complete conditions.",
+  "Current PR review state",
+  "Last local observation on July 3, 2026 after this artifact update: Vercel `FAILURE`",
+  "Merge readiness from that observation: `external_rate_limit_blocked`.",
+  "Live refresh command: `npm run kinflo:validate-pr-review-state`.",
+  "Integration handoff command: `npm run kinflo:validate-integration-review-handoff` remains expected to fail",
+  "After any new push, the live refresh command is authoritative",
+  "Human-Owned Gates Still Pending",
+  "Do not treat it as approval to create providers",
+  ".cursor/",
+  "docs/terminal-command-cheatsheet.md",
+]);
+
+const phase0AuditContents = read("docs/phase0-completion-audit.md");
+if (phase0AuditContents.includes("The current PR checks passed:")) {
+  fail("Phase 0 audit does not claim current PR checks passed while Vercel is pending", "Replace stale PR pass language with current status-check evidence.");
+} else {
+  pass("Phase 0 audit does not claim current PR checks passed while Vercel is pending");
+}
+
+if (phase0AuditContents.includes("Latest observed state on July 3, 2026 after the most recent push")) {
+  fail("Phase 0 audit does not claim static observation is current after future pushes", "Use last-local-observation language plus the live refresh command.");
+} else {
+  pass("Phase 0 audit does not claim static observation is current after future pushes");
+}
+
+requireIncludes("docs/phase32-phase0-readiness-manifest.md", [
+  "npm run kinflo:validate-phase0-readiness",
+  "npm run kinflo:validate-integration-review-handoff",
+  "known local-only artifacts are documented",
+  "repo_complete_external_rate_limit_blocked",
+  "No hosted Convex deployment is created.",
+  "No live Convex query, mutation, or action is executed.",
+  "No credentials are read, printed, rotated, or copied.",
+]);
+
+requireIncludes("package.json", [
+  "\"kinflo:validate-phase0-readiness\"",
+  "\"kinflo:validate-pr-review-state\"",
+  "\"kinflo:validate-integration-review-handoff\"",
+]);
+
+requireIncludes("docs/phase0-pr-review-state.md", [
+  "Phase 0 PR Review State Gate",
+  "npm run kinflo:validate-pr-review-state",
+  "blocked_until_vercel_success",
+  "external_rate_limit_blocked",
+  "ready_for_integration_review",
+  "No hosted Convex deployment is created.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
+requireIncludes("scripts/validate-kinflo-pr-review-state.mjs", [
+  "gh",
+  "pr",
+  "view",
+  "vsillah/JuliesFamily",
+  "Vercel status context is present",
+  "Vercel Preview Comments check is present or rate-limited unavailable",
+  "external_rate_limit_blocked",
+  "blocked_until_vercel_success",
+  "ready_for_integration_review",
+  "Provider APIs touched: no",
+]);
+
+requireIncludes("docs/phase0-integration-review-handoff.md", [
+  "Phase 0 Integration Review Handoff",
+  "npm run kinflo:validate-integration-review-handoff",
+  "Current gate: `external_rate_limit_blocked`",
+  "Target merge readiness: `ready_for_integration_review`",
+  "No hosted Convex deployment is created.",
+  "No live Convex query, mutation, or action is executed.",
+  "No secret values are read or printed.",
+]);
+
+requireIncludes("scripts/validate-kinflo-integration-review-handoff.mjs", [
+  "gh",
+  "vsillah/JuliesFamily",
+  "PR #1 remains open",
+  "PR merge state is clean",
+  "Vercel succeeded for current PR head",
+  "merge readiness is ready_for_integration_review",
+  "Provider APIs touched: no",
+]);
+
+console.log("KinFlo Phase 0 readiness validation");
+console.log(`Repo-complete requirements: ${repoCompleteRequirements.length}`);
+console.log(`Human-owned gates: ${humanOwnedGates.length}`);
+console.log(`Local validation commands: ${localValidationCommands.length}`);
+console.log("External writes: 0");
+console.log("Hosted deployment touched: no");
+console.log("Live Convex execution: no");
+
+const failed = checks.filter((check) => !check.ok);
+
+for (const check of checks) {
+  if (check.ok) {
+    console.log(`✓ ${check.label}`);
+  } else {
+    console.error(`✗ ${check.label}`);
+    console.error(`  ${check.detail}`);
+  }
+}
+
+if (failed.length > 0) {
+  console.error(`\nKinFlo Phase 0 readiness validation failed: ${failed.length} check(s) failed.`);
+  process.exit(1);
+}
+
+console.log(`\nKinFlo Phase 0 readiness validation passed: ${checks.length} checks.`);

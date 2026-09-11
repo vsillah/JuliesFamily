@@ -307,7 +307,7 @@ export async function syncTaskToCalendar(
     }
 
     // Get assignee information for calendar invite
-    const assignee = await storage.getUserById(task.assignedTo);
+    const assignee = await storage.getUser(task.assignedTo);
     if (!assignee || !assignee.email) {
       console.log(`Task ${task.id} assignee has no email, cannot send calendar invite`);
       return null;

@@ -1,0 +1,315 @@
+{
+  "schemaVersion": 1,
+  "phase": 75,
+  "name": "KinFlo design frame adoption backlog",
+  "status": "provider_light_design_frame_backlog",
+  "updatedAt": "2026-07-03",
+  "objective": "Turn the current design research, Claude Desktop frame response, and captured Claude Code design pass into an implementation-ready backlog for the KinFlo OS super-admin shell and Client Site Studio without claiming live provider readiness.",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "convexCodegenRun": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "providerApisTouched": false,
+    "tenantSiteLaunchExecuted": false,
+    "clientSharingApproved": false,
+    "secretsReadOrPrinted": false,
+    "notes": "This backlog is a local planning and validation artifact. It does not publish UI, execute live Convex, call providers, read secrets, or share client data."
+  },
+  "designInputs": {
+    "researchMatrix": "docs/convex-adapter-switch-evidence-matrix.json",
+    "controlRoomPolish": "docs/phase70-control-room-polish.md",
+    "clientWebsiteStudio": "docs/phase55-client-website-design-studio.md",
+    "visualQaEvidence": "docs/phase68-client-visual-qa-evidence.md",
+    "launchDecisionPackets": "docs/phase69-client-launch-decisions.md",
+    "claudeDesktopReview": {
+      "status": "completed_captured",
+      "submittedAt": "2026-07-02",
+      "capturedAt": "2026-07-02",
+      "taskTitle": "KinFlo OS design frames",
+      "taskUrl": "claude.ai/cowork/local_5eebaa1f-0bfe-44ff-a22a-ad88cf6cd9c9",
+      "frameResponseCaptured": true,
+      "promptBoundary": "Sanitized product and design brief only. No secrets, private customer records, provider credentials, or raw local files were sent.",
+      "capturedSignals": [
+        "Make the active tenant the first-viewport object, paired with environment badge, launch-readiness score, and one next decision.",
+        "Use a two-level navigation system: left rail for primary workspaces and horizontal tabs for workspace-specific configuration states.",
+        "Separate configuration, evidence, blocked actions, and decision gates into consistent visual registers.",
+        "Keep disabled controls visible with inline reason, unblock condition, and owner instead of hiding them in tooltips.",
+        "Use a persistent decision rail for approval gates and reserve the strongest accent color for decisions.",
+        "Make the Client Site Studio a three-region workbench: page tree, device-framed preview canvas, and context inspector or launch panel.",
+        "Unify visual QA, AI review, permissions, launch decision, and handoff into one launch panel instead of forcing operators to reconcile separate tabs.",
+        "Make mobile inspection first-class with 390px review, touch/truncation checks, fold-line awareness, and screenshot evidence.",
+        "Prioritize inline blocked reasons, unified launch panel, device-framed preview canvas, reusable evidence cards, AI-content watermarking, blast-radius confirmations, and tab state dots."
+      ],
+      "acceptedRecommendations": [
+        "inline blocked-reason lines under disabled controls",
+        "unified launch panel for QA, AI review, permissions, launch, and handoff",
+        "device-framed preview canvas with fold-line and mobile toggle",
+        "reusable evidence-card component with provenance line",
+        "AI-content watermarking until approval",
+        "blast-radius confirmations for publish and handoff",
+        "tab state dots and gate-accent color system"
+      ],
+      "rejectedRecommendations": [],
+      "nextAction": "Convert the accepted recommendations into scoped provider-light UI phases, starting with first-viewport object signal and Client Site Studio workbench grid."
+    },
+    "claudeCodeFramePacket": {
+      "status": "completed_captured",
+      "createdAt": "2026-07-02",
+      "capturedAt": "2026-07-03",
+      "packet": "docs/kinflo-claude-frame-ingestion-packet.json",
+      "response": "docs/kinflo-claude-code-frame-response.json",
+      "phaseDoc": "docs/phase84-claude-frame-ingestion-packet.md",
+      "responsePhaseDoc": "docs/phase149-claude-code-frame-response.md",
+      "validationCommand": "npm run kinflo:validate-claude-code-frame-response",
+      "frames": [
+        "super-admin-command-frame",
+        "client-site-studio-frame"
+      ],
+      "promptBoundary": "Sanitized product/design packet and public design research only. No secrets, private customer records, provider credentials, production data, .env contents, or raw private files were sent.",
+      "acceptedRecommendations": [
+        "persistent-identity-strip",
+        "gate-card-pattern",
+        "primary-metric-per-panel",
+        "side-by-side-mobile-preview",
+        "handoff-readiness-checklist"
+      ],
+      "implementedDeltas": [
+        {
+          "id": "persistent-identity-strip",
+          "phaseDoc": "docs/phase150-persistent-identity-strip.md",
+          "validationCommand": "npm run kinflo:validate-persistent-identity-strip",
+          "status": "implemented_provider_light"
+        },
+        {
+          "id": "gate-card-pattern",
+          "phaseDoc": "docs/phase151-gate-card-pattern.md",
+          "validationCommand": "npm run kinflo:validate-gate-card-pattern",
+          "status": "implemented_provider_light"
+        },
+        {
+          "id": "client-studio-lane-anchor",
+          "phaseDoc": "docs/phase152-client-studio-lane-anchor.md",
+          "validationCommand": "npm run kinflo:validate-client-studio-lane-anchor",
+          "status": "implemented_provider_light"
+        },
+        {
+          "id": "primary-metric-per-panel",
+          "phaseDoc": "docs/phase153-primary-configure-metric.md",
+          "validationCommand": "npm run kinflo:validate-primary-configure-metric",
+          "status": "implemented_provider_light"
+        },
+        {
+          "id": "side-by-side-mobile-preview",
+          "phaseDoc": "docs/phase154-side-by-side-mobile-preview.md",
+          "validationCommand": "npm run kinflo:validate-side-by-side-mobile-preview",
+          "status": "implemented_provider_light"
+        },
+        {
+          "id": "handoff-readiness-checklist",
+          "phaseDoc": "docs/phase155-handoff-readiness-checklist.md",
+          "validationCommand": "npm run kinflo:validate-handoff-readiness-checklist",
+          "status": "implemented_provider_light"
+        }
+      ],
+      "rejectedRecommendations": [],
+      "nextAction": "All accepted Claude Code provider-light deltas are implemented; continue hosted activation owner gates or choose the next design-frame backlog item."
+    }
+  },
+  "adoptionPrinciples": [
+    "Make the active tenant, site, launch packet, or preview object visible in the first viewport.",
+    "Keep operational density calm: compact controls, small headings, clear status, and no decorative distraction.",
+    "Show what can be configured now, what is blocked, why it is blocked, who owns it, and what evidence unlocks it.",
+    "Treat proof, approval, rollback, and visual QA as first-class UI, not secondary notes.",
+    "Keep desktop and mobile inspection paths explicit before any client handoff.",
+    "Never imply hosted Convex, provider writes, campaign sends, domain attachment, invite delivery, lead writes, or public launch are active."
+  ],
+  "implementationBacklog": [
+    {
+      "id": "first-viewport-object-signal",
+      "priority": "P0",
+      "frame": "super-admin-shell",
+      "surface": "Kinflo OS command header",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx",
+        "client/src/lib/kinfloShellData.ts"
+      ],
+      "change": "Create a tighter first-viewport command header that foregrounds selected tenant/site, data mode, launch posture, blocked live actions, and next human gate.",
+      "validationGate": "Browser QA confirms the active object and next gate are visible without scrolling at 1280x900 and 390x844.",
+      "blockedLiveActions": [
+        "switch adapter",
+        "run hosted smoke",
+        "publish site"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "workflow-navigation-rail",
+      "priority": "P0",
+      "frame": "super-admin-shell",
+      "surface": "Kinflo OS workflow navigation",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx"
+      ],
+      "change": "Group tabs into operational lanes: Control, Build, Launch, Growth, Evidence, and Hosted Activation so users can scan the system by work mode instead of raw feature count.",
+      "validationGate": "Static validator confirms lane labels, existing tabs remain reachable, and no live action is enabled.",
+      "blockedLiveActions": [
+        "client sharing",
+        "provider writes"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "decision-gate-rail",
+      "priority": "P0",
+      "frame": "super-admin-shell",
+      "surface": "Hosted activation and launch decision surfaces",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx",
+        "client/src/lib/kinfloShellData.ts"
+      ],
+      "change": "Add a consistent right-side decision rail pattern for owner, required evidence, rollback, blockers, and disabled primary action across launch, hosted activation, and adapter switch views.",
+      "validationGate": "Focused validators confirm each decision rail includes owner, evidence, rollback, and disabled live-action copy.",
+      "blockedLiveActions": [
+        "codegen",
+        "mutation smoke",
+        "provider setup"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "client-studio-workbench-grid",
+      "priority": "P0",
+      "frame": "client-site-studio",
+      "surface": "Client Website Design Studio",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx"
+      ],
+      "change": "Refine the Site Studio into a stable workbench grid: site rail, preview canvas, evidence/decision rail, and compact launch controls with fixed responsive constraints.",
+      "validationGate": "Desktop and mobile browser QA confirms no overlap, no horizontal overflow, stable preview dimensions, and disabled publish/handoff controls.",
+      "blockedLiveActions": [
+        "publish public site",
+        "send invite",
+        "attach domain"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "mobile-inspection-mode",
+      "priority": "P1",
+      "frame": "client-site-studio",
+      "surface": "Preview QA Studio and public preview links",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx",
+        "client/src/pages/KinfloPublicSitePreview.tsx"
+      ],
+      "change": "Make mobile inspection a first-class mode with device, persona, journey stage, screenshot evidence, accessibility status, and launch decision visible together.",
+      "validationGate": "Mobile 390px browser QA confirms preview controls, evidence posture, and launch blocker copy are readable without text clipping.",
+      "blockedLiveActions": [
+        "public launch",
+        "lead write"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "proof-before-publish-cards",
+      "priority": "P1",
+      "frame": "client-site-studio",
+      "surface": "Visual QA evidence and launch decision packets",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx",
+        "client/src/lib/kinfloShellData.ts"
+      ],
+      "change": "Turn visual QA, accessibility, performance, approval, and open-risk evidence into uniform proof cards that sit next to launch decisions.",
+      "validationGate": "Validator confirms every launch decision packet has QA evidence, open risks, approval checklist, rollback, and disabled launch action.",
+      "blockedLiveActions": [
+        "tenant handoff",
+        "campaign traffic"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "configuration-field-affordances",
+      "priority": "P1",
+      "frame": "super-admin-shell",
+      "surface": "Content, brand, navigation, asset, domain, integration, campaign, and AI configuration forms",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx"
+      ],
+      "change": "Standardize configuration fields with concise labels, state badges, provenance notes, and disabled save/send/publish controls that explain the hosted gate.",
+      "validationGate": "Static validators confirm every configuration surface has activation evidence and blocked live action copy.",
+      "blockedLiveActions": [
+        "save live content",
+        "send campaign",
+        "call AI provider"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "client-handoff-permission-strip",
+      "priority": "P1",
+      "frame": "client-site-studio",
+      "surface": "Admin permission presets and onboarding readiness",
+      "targetFiles": [
+        "client/src/pages/AdminKinfloShell.tsx",
+        "client/src/lib/kinfloShellData.ts"
+      ],
+      "change": "Add a compact permission strip that shows who can see/edit/publish, what invite is blocked, and what client handoff artifact is still missing.",
+      "validationGate": "Validator confirms permission preset, onboarding readiness, and launch packet references stay connected by site key.",
+      "blockedLiveActions": [
+        "send tenant admin invite",
+        "grant live membership"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "claude-frame-ingestion",
+      "priority": "P2",
+      "frame": "cross-frame",
+      "surface": "Design review operations",
+      "targetFiles": [
+        "docs/kinflo-design-frame-adoption-backlog.json",
+        "docs/phase75-design-frame-adoption-backlog.md",
+        "docs/kinflo-claude-frame-ingestion-packet.json",
+        "docs/phase84-claude-frame-ingestion-packet.md"
+      ],
+      "change": "Keep Claude Desktop recommendations summarized in this backlog and maintain a sanitized Claude Code packet with current design research, auth status, redaction rules, and provider-light implementation gates.",
+      "validationGate": "Backlog and packet record captured response date, accepted recommendations, rejected recommendations, CLI auth status, source URLs, and implementation phase targets without exposing secrets.",
+      "blockedLiveActions": [
+        "none"
+      ],
+      "providerLight": true
+    },
+    {
+      "id": "claude-code-frame-response-capture",
+      "priority": "P2",
+      "frame": "cross-frame",
+      "surface": "Design review operations",
+      "targetFiles": [
+        "docs/kinflo-claude-code-frame-response.json",
+        "docs/phase149-claude-code-frame-response.md",
+        "docs/kinflo-claude-frame-ingestion-packet.json",
+        "docs/kinflo-design-frame-adoption-backlog.json"
+      ],
+      "change": "Capture the repaired Claude Code two-frame critique as a summarized provider-light response and classify the accepted deltas for implementation.",
+      "validationGate": "Validator confirms the response artifact, accepted deltas, prompt boundary, safety list, and provider gates without storing raw transcript text.",
+      "blockedLiveActions": [
+        "none"
+      ],
+      "providerLight": true
+    }
+  ],
+  "nextImplementationOrder": [
+    "first-viewport-object-signal",
+    "client-studio-workbench-grid",
+    "decision-gate-rail",
+    "proof-before-publish-cards",
+    "mobile-inspection-mode",
+    "workflow-navigation-rail",
+    "configuration-field-affordances",
+    "client-handoff-permission-strip",
+    "claude-frame-ingestion",
+    "claude-code-frame-response-capture"
+  ]
+}

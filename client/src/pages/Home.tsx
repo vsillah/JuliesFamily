@@ -62,8 +62,8 @@ export default function Home() {
     queryKey: ["/api/content/visible/lead_magnet", { persona: effectivePersona, funnelStage: effectiveFunnelStage }],
     queryFn: async () => {
       const params = new URLSearchParams();
-      params.append('persona', effectivePersona);
-      params.append('funnelStage', effectiveFunnelStage);
+      if (effectivePersona) params.append('persona', effectivePersona);
+      if (effectiveFunnelStage) params.append('funnelStage', effectiveFunnelStage);
       const res = await fetch(`/api/content/visible/lead_magnet?${params}`);
       if (!res.ok) throw new Error('Failed to fetch lead magnets');
       return res.json();

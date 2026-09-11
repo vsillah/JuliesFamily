@@ -40,7 +40,7 @@ async function sendEmail(issue: ChatbotIssue): Promise<{ success: boolean; error
         <p>${issue.description.replace(/\n/g, '<br>')}</p>
         ${issue.diagnosticData ? `<p><strong>Diagnostic Data:</strong></p><pre>${JSON.stringify(issue.diagnosticData, null, 2)}</pre>` : ''}
         <p><strong>Issue ID:</strong> ${issue.id}</p>
-        <p><strong>Time:</strong> ${new Date(issue.createdAt).toLocaleString()}</p>
+        <p><strong>Time:</strong> ${new Date(issue.createdAt || new Date()).toLocaleString()}</p>
       `,
     };
 

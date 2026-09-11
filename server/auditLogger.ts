@@ -7,12 +7,15 @@ import { auditLogs } from "@shared/schema";
  */
 
 export interface AuditLogEntry {
-  actorId: number;
+  actorId: number | string;
   action: string;
   tableName: string;
   recordId?: string;
   changes?: Record<string, any>;
   metadata?: Record<string, any>;
+  userId?: number | string;
+  previousRole?: string;
+  newRole?: string;
 }
 
 /**
@@ -23,12 +26,17 @@ export interface AuditLogEntry {
 export async function createAuditLog(entry: AuditLogEntry) {
   try {
     const [auditLog] = await db.insert(auditLogs).values({
-      userId: entry.actorId,
+      userId: entry.userId !== undefined ? String(entry.userId) : undefined,
+      actorId: String(entry.actorId),
       action: entry.action,
-      tableName: entry.tableName,
-      recordId: entry.recordId,
-      changes: entry.changes,
-      metadata: entry.metadata,
+      previousRole: entry.previousRole,
+      newRole: entry.newRole,
+      metadata: {
+        ...entry.metadata,
+        tableName: entry.tableName,
+        recordId: entry.recordId,
+        changes: entry.changes,
+      },
     }).returning();
 
     return auditLog;
@@ -140,9 +148,12 @@ export async function auditRoleChange(
 ) {
   return createAuditLog({
     actorId,
+    userId: targetUserId,
     action: 'change_role',
     tableName: 'users',
     recordId: String(targetUserId),
+    previousRole: oldRole,
+    newRole,
     changes: {
       oldRole,
       newRole,

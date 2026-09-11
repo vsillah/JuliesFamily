@@ -1,0 +1,95 @@
+{
+  "phase": 68,
+  "status": "provider-light-qa-evidence-packet",
+  "convexFunction": "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "screenshotsCaptured": false,
+    "accessibilityCrawlerRun": false,
+    "lighthouseRun": false,
+    "providersCalled": false,
+    "evidenceArtifactsWritten": false
+  },
+  "targetGate": "Visual QA evidence packets define required artifact slots, approval checklist, open risks, and blocked actions before hosted QA evidence can be accepted.",
+  "blockedUntil": [
+    "Hosted Convex project ownership, billing, backup, auth, and env setup are approved",
+    "Generated Convex API files are produced and reviewed outside this provider-light branch",
+    "Hosted screenshot capture is approved for desktop, tablet, and 390px public routes",
+    "Accessibility crawler, keyboard smoke, and contrast audit order is approved",
+    "Lighthouse or equivalent hosted performance trace is approved",
+    "Client owner, approval decision, rollback owner, domain, storage, lead, campaign, and provider gates are confirmed"
+  ],
+  "evidencePackets": [
+    {
+      "siteKey": "julies-family-public",
+      "label": "Julie Family visual QA evidence packet",
+      "evidenceItemCount": 4,
+      "acceptedEvidenceCount": 2,
+      "pendingEvidenceCount": 2,
+      "blockedEvidenceCount": 0,
+      "approvalChecklistCount": 3,
+      "blockedApprovalCount": 2,
+      "openRiskCount": 3,
+      "blockedEvidenceActions": ["capture hosted screenshot", "run accessibility crawler", "run Lighthouse trace", "publish public site"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "siteFactory.listClientWebsitePolishScorecards",
+        "publicSite.resolvePublishedSite",
+        "launchReadiness.getSiteLaunchReadiness"
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "label": "Advisor client visual QA evidence packet",
+      "evidenceItemCount": 4,
+      "acceptedEvidenceCount": 1,
+      "pendingEvidenceCount": 3,
+      "blockedEvidenceCount": 0,
+      "approvalChecklistCount": 3,
+      "blockedApprovalCount": 2,
+      "openRiskCount": 3,
+      "blockedEvidenceActions": ["create tenant", "send tenant admin invite", "run hosted intake accessibility smoke", "attach custom domain"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite"
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "label": "Campaign microsite visual QA evidence packet",
+      "evidenceItemCount": 4,
+      "acceptedEvidenceCount": 1,
+      "pendingEvidenceCount": 1,
+      "blockedEvidenceCount": 2,
+      "approvalChecklistCount": 3,
+      "blockedApprovalCount": 2,
+      "openRiskCount": 3,
+      "blockedEvidenceActions": ["send campaign", "write public form lead", "run provider-send trace", "approve mobile screenshot"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite"
+      ]
+    }
+  ],
+  "totals": {
+    "evidencePackets": 3,
+    "evidenceItems": 12,
+    "acceptedEvidenceItems": 4,
+    "pendingEvidenceItems": 6,
+    "blockedEvidenceItems": 2,
+    "approvalChecklistItems": 9,
+    "blockedApprovalItems": 6,
+    "openRisks": 9
+  }
+}

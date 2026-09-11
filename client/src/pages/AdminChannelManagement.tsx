@@ -59,6 +59,14 @@ interface EconomicsSettings {
   avgDonorLifespanMonths: number;
 }
 
+const defaultChannelForm = {
+  name: "",
+  slug: "",
+  channelType: "paid_ads" as const,
+  description: "",
+  isActive: true,
+};
+
 export default function AdminChannelManagement() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
@@ -73,13 +81,7 @@ export default function AdminChannelManagement() {
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
 
   // Form states
-  const [channelForm, setChannelForm] = useState({ 
-    name: "", 
-    slug: "", 
-    channelType: "paid_ads" as const, 
-    description: "", 
-    isActive: true 
-  });
+  const [channelForm, setChannelForm] = useState(defaultChannelForm);
   const [campaignForm, setCampaignForm] = useState({ 
     name: "", channelId: "", description: "", budget: "", 
     startDate: "", endDate: "", isActive: true 
@@ -147,7 +149,7 @@ export default function AdminChannelManagement() {
       });
       setChannelDialogOpen(false);
       setEditingChannel(null);
-      setChannelForm({ name: "", description: "", isActive: true });
+      setChannelForm(defaultChannelForm);
     },
     onError: (error: any) => {
       toast({
@@ -386,7 +388,7 @@ export default function AdminChannelManagement() {
                       <Button 
                         onClick={() => {
                           setEditingChannel(null);
-                          setChannelForm({ name: "", slug: "", channelType: "paid_ads", description: "", isActive: true });
+                          setChannelForm(defaultChannelForm);
                         }}
                         data-testid="button-add-channel"
                       >

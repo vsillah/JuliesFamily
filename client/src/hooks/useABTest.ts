@@ -99,8 +99,9 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
         
         if (adminVariantOverrides) {
           try {
-            const overrides = JSON.parse(adminVariantOverrides);
-            adminVariantId = overrides[test.id];
+            const overrides = JSON.parse(adminVariantOverrides) as Record<string, unknown>;
+            const override = overrides[test.id];
+            adminVariantId = typeof override === "string" ? override : null;
           } catch (e) {
             // Invalid JSON, ignore
           }
@@ -117,9 +118,11 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
             testId: test.id,
             variantId: adminVariantId,
             sessionId,
+            visitorId,
+            userId: null,
             persona: persona || null,
             funnelStage: funnelStage || null,
-            assignedAt: new Date().toISOString(),
+            assignedAt: new Date(),
           };
           setAssignment(assignmentData);
         } else {
@@ -181,7 +184,7 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     const adminOverrides = sessionStorage.getItem("admin-variant-override");
     if (adminOverrides) {
       try {
-        const overrides = JSON.parse(adminOverrides);
+        const overrides = JSON.parse(adminOverrides) as Record<string, unknown>;
         const variantOverride = overrides[test.id];
         if (variantOverride && variantOverride !== "auto" && variantOverride !== "random") {
           return; // Admin is previewing specific variant, don't track
@@ -213,7 +216,7 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     const adminOverrides = sessionStorage.getItem("admin-variant-override");
     if (adminOverrides) {
       try {
-        const overrides = JSON.parse(adminOverrides);
+        const overrides = JSON.parse(adminOverrides) as Record<string, unknown>;
         const variantOverride = overrides[test.id];
         if (variantOverride && variantOverride !== "auto" && variantOverride !== "random") {
           return; // Admin is previewing specific variant, don't track
@@ -238,9 +241,10 @@ export function useABTest(testType: string, options: UseABTestOptions = {}) {
     try {
       const overrides = sessionStorage.getItem("admin-variant-override");
       if (!overrides) return false;
-      const parsed = JSON.parse(overrides);
-      const variantOverride = parsed[test?.id];
-      return test?.id && variantOverride && variantOverride !== "auto" && variantOverride !== "random";
+      if (!test?.id) return false;
+      const parsed = JSON.parse(overrides) as Record<string, unknown>;
+      const variantOverride = parsed[test.id];
+      return typeof variantOverride === "string" && variantOverride !== "auto" && variantOverride !== "random";
     } catch {
       return false;
     }

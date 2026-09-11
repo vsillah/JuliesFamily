@@ -1,0 +1,246 @@
+import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+
+const checks = [];
+
+function pass(label) {
+  checks.push({ label, ok: true });
+}
+
+function fail(label, detail) {
+  checks.push({ label, ok: false, detail });
+}
+
+function read(path) {
+  return readFileSync(path, "utf8");
+}
+
+function requireFile(path) {
+  if (existsSync(path)) {
+    pass(`${path} exists`);
+    return true;
+  }
+  fail(`${path} exists`, "Missing activation preflight artifact.");
+  return false;
+}
+
+function requireIncludes(path, patterns) {
+  if (!requireFile(path)) {
+    return;
+  }
+  const contents = read(path);
+  for (const pattern of patterns) {
+    if (contents.includes(pattern)) {
+      pass(`${path} includes ${pattern}`);
+    } else {
+      fail(`${path} includes ${pattern}`, "Expected activation preflight text was not found.");
+    }
+  }
+}
+
+function trackedFiles() {
+  return execFileSync("git", ["ls-files"], { encoding: "utf8" })
+    .split("\n")
+    .filter(Boolean);
+}
+
+const tracked = trackedFiles();
+const trackedEnvLocal = tracked.includes(".env.local");
+const trackedGenerated = tracked.filter((file) => file.startsWith("convex/_generated/"));
+const localEnvExists = existsSync(".env.local");
+const generatedDirExists = existsSync("convex/_generated");
+
+if (trackedEnvLocal) {
+  fail(".env.local is not tracked", "Remove tracked secrets before hosted activation.");
+} else {
+  pass(".env.local is not tracked");
+}
+
+if (trackedGenerated.length > 0) {
+  fail("Convex generated files are not tracked", `Tracked generated files: ${trackedGenerated.join(", ")}`);
+} else {
+  pass("Convex generated files are not tracked");
+}
+
+for (const path of [
+  ".env.example",
+  "package.json",
+  "convex/schema.ts",
+  "convex/controlPlane.ts",
+  "convex/siteBuilder.ts",
+  "convex/siteFactory.ts",
+  "convex/publicSite.ts",
+  "convex/activation.ts",
+  "convex/entitlements.ts",
+  "convex/crm.ts",
+  "docs/phase3-convex-activation-smoke.md",
+  "docs/phase16-site-factory-launch-packets.md",
+  "docs/phase17-convex-activation-preflight.md",
+  "docs/phase24-live-convex-handoff.md",
+  "docs/phase25-live-adapter-contract.md",
+  "docs/phase26-generated-api-contract.md",
+  "docs/phase27-live-smoke-manifest.md",
+  "docs/phase28-live-smoke-dry-runner.md",
+  "docs/phase29-typescript-baseline-gate.md",
+  "docs/convex-live-smoke-manifest.json",
+  "scripts/validate-convex-live-handoff.mjs",
+  "scripts/validate-kinflo-live-adapter.mjs",
+  "scripts/validate-kinflo-generated-api-contract.mjs",
+  "scripts/validate-kinflo-live-smoke-manifest.mjs",
+  "scripts/dry-run-kinflo-live-smoke.mjs",
+  "scripts/validate-kinflo-typescript-baseline.mjs",
+]) {
+  requireFile(path);
+}
+
+requireIncludes(".env.example", [
+  "CONVEX_DEPLOYMENT=",
+  "VITE_CONVEX_URL=",
+  "CONVEX_AUTH_ISSUER=",
+  "CONVEX_AUTH_CLIENT_ID=",
+]);
+
+requireIncludes("package.json", [
+  "\"convex:codegen\"",
+  "\"convex:check\"",
+  "\"kinflo:activation-preflight\"",
+  "\"kinflo:live-handoff\"",
+  "\"kinflo:validate-live-adapter\"",
+  "\"kinflo:validate-generated-api\"",
+  "\"kinflo:validate-live-smoke\"",
+  "\"kinflo:dry-run-live-smoke\"",
+  "\"kinflo:check-baseline\"",
+]);
+
+requireIncludes("convex/activation.ts", [
+  "export const readiness",
+  "export const seedSmokeSite",
+  "resolverArgs",
+]);
+
+requireIncludes("convex/controlPlane.ts", [
+  "export const upsertCurrentUser",
+  "export const bootstrapPlatformAdmin",
+  "export const createTenant",
+  "export const createInvitation",
+]);
+
+requireIncludes("convex/siteFactory.ts", [
+  "export const listStarterTemplates",
+  "export const createSiteFromTemplate",
+]);
+
+requireIncludes("convex/siteBuilder.ts", [
+  "export const upsertDomain",
+  "requireEntitlementLimit",
+  "customDomains",
+]);
+
+requireIncludes("convex/publicSite.ts", [
+  "export const resolvePublishedSite",
+]);
+
+requireIncludes("convex/crm.ts", [
+  "export const submitLead",
+  "export const listLeads",
+  "export const getLeadTimeline",
+]);
+
+requireIncludes("convex/entitlements.ts", [
+  "export const entitlementUsageSnapshot",
+  "export const checkEntitlementLimit",
+  "export async function requireEntitlementLimit",
+]);
+
+requireIncludes("docs/phase17-convex-activation-preflight.md", [
+  "npm run kinflo:activation-preflight",
+  "No hosted Convex deployment is created",
+  "CONVEX_DEPLOYMENT",
+  "VITE_CONVEX_URL",
+  "activation.seedSmokeSite",
+]);
+
+requireIncludes("docs/phase24-live-convex-handoff.md", [
+  "npm run kinflo:live-handoff",
+  "npm run convex:codegen",
+  "npm run kinflo:validate-live-smoke",
+  "npm run kinflo:dry-run-live-smoke",
+  "Generated API bindings are reviewed",
+  "No hosted Convex deployment is created",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase27-live-smoke-manifest.md", [
+  "docs/convex-live-smoke-manifest.json",
+  "npm run kinflo:validate-live-smoke",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase28-live-smoke-dry-runner.md", [
+  "npm run kinflo:dry-run-live-smoke",
+  "ordered activation packet",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase29-typescript-baseline-gate.md", [
+  "npm run kinflo:check-baseline",
+  "npm run check",
+  "No generated API is imported",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/convex-live-smoke-manifest.json", [
+  "\"phase\": 27",
+  "\"externalWrites\": false",
+  "\"hostedDeploymentTouched\": false",
+  "\"generatedApiImported\": false",
+  "\"liveConvexExecution\": false",
+]);
+
+requireIncludes("docs/phase25-live-adapter-contract.md", [
+  "selectKinfloShellDataAdapter",
+  "liveKinfloShellAdapter",
+  "No generated Convex API files are committed",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+requireIncludes("docs/phase26-generated-api-contract.md", [
+  "KINFLO_GENERATED_API_BINDINGS",
+  "npm run kinflo:validate-generated-api",
+  "No generated Convex API files are committed",
+  "No live Convex query, mutation, or action is executed",
+]);
+
+const liveReadiness = {
+  localEnvExists,
+  generatedDirExists,
+  requiredEnvPlaceholdersDocumented: existsSync(".env.example"),
+  hostedDeploymentConfigured: Boolean(process.env.CONVEX_DEPLOYMENT || process.env.VITE_CONVEX_URL),
+};
+
+const failed = checks.filter((check) => !check.ok);
+
+for (const check of checks) {
+  if (check.ok) {
+    console.log(`✓ ${check.label}`);
+  } else {
+    console.error(`✗ ${check.label}`);
+    console.error(`  ${check.detail}`);
+  }
+}
+
+console.log("\nKinFlo Convex activation preflight");
+console.log(`Local .env.local present: ${liveReadiness.localEnvExists ? "yes" : "no"}`);
+console.log(`Generated Convex directory present: ${liveReadiness.generatedDirExists ? "yes" : "no"}`);
+console.log(`Hosted Convex env visible to this process: ${liveReadiness.hostedDeploymentConfigured ? "yes" : "no"}`);
+console.log("External writes: 0");
+console.log("Hosted deployment touched: no");
+
+if (failed.length > 0) {
+  console.error(`\nConvex activation preflight failed: ${failed.length} check(s) failed.`);
+  process.exit(1);
+}
+
+console.log(`\nConvex activation preflight passed: ${checks.length} checks.`);

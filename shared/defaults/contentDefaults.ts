@@ -11,6 +11,12 @@ export interface ContentVisibilityDefaults {
 // Services defaults - base content exists in database, these define persona×stage visibility/ordering
 export const SERVICE_DEFAULTS: Record<string, Record<Persona, Record<FunnelStage, ContentVisibilityDefaults>>> = {
   "Family Development": {
+    default: {
+      awareness: { isVisible: true, order: 2 },
+      consideration: { isVisible: true, order: 1 },
+      decision: { isVisible: true, order: 2 },
+      retention: { isVisible: true, order: 1 }
+    },
     student: {
       awareness: { isVisible: true, order: 2 },
       consideration: { isVisible: true, order: 1 },
@@ -43,6 +49,12 @@ export const SERVICE_DEFAULTS: Record<string, Record<Persona, Record<FunnelStage
     }
   },
   "Adult Basic Education": {
+    default: {
+      awareness: { isVisible: true, order: 1 },
+      consideration: { isVisible: true, order: 3 },
+      decision: { isVisible: true, order: 3 },
+      retention: { isVisible: true, order: 2 }
+    },
     student: {
       awareness: { isVisible: true, order: 1 },
       consideration: { isVisible: true, order: 3 },
@@ -75,6 +87,12 @@ export const SERVICE_DEFAULTS: Record<string, Record<Persona, Record<FunnelStage
     }
   },
   "Tech Goes Home": {
+    default: {
+      awareness: { isVisible: true, order: 1 },
+      consideration: { isVisible: true, order: 1 },
+      decision: { isVisible: true, order: 1 },
+      retention: { isVisible: true, order: 1 }
+    },
     student: {
       awareness: { isVisible: true, order: 1 },
       consideration: { isVisible: true, order: 1 },
@@ -110,6 +128,12 @@ export const SERVICE_DEFAULTS: Record<string, Record<Persona, Record<FunnelStage
 
 // Events are visible to all personas/stages by default with consistent ordering
 export const EVENT_DEFAULTS: Record<Persona, Record<FunnelStage, ContentVisibilityDefaults>> = {
+  default: {
+    awareness: { isVisible: true, order: 0 },
+    consideration: { isVisible: true, order: 0 },
+    decision: { isVisible: true, order: 0 },
+    retention: { isVisible: true, order: 0 }
+  },
   student: {
     awareness: { isVisible: true, order: 0 },
     consideration: { isVisible: true, order: 0 },
@@ -144,6 +168,12 @@ export const EVENT_DEFAULTS: Record<Persona, Record<FunnelStage, ContentVisibili
 
 // Testimonials are visible to all personas/stages by default with consistent ordering
 export const TESTIMONIAL_DEFAULTS: Record<Persona, Record<FunnelStage, ContentVisibilityDefaults>> = {
+  default: {
+    awareness: { isVisible: true, order: 0 },
+    consideration: { isVisible: true, order: 0 },
+    decision: { isVisible: true, order: 0 },
+    retention: { isVisible: true, order: 0 }
+  },
   student: {
     awareness: { isVisible: true, order: 0 },
     consideration: { isVisible: true, order: 0 },
@@ -179,6 +209,12 @@ export const TESTIMONIAL_DEFAULTS: Record<Persona, Record<FunnelStage, ContentVi
 // Lead magnets have specific persona×stage targeting by design
 export const LEAD_MAGNET_VISIBILITY_DEFAULTS: Record<string, Record<Persona, Record<FunnelStage, ContentVisibilityDefaults>>> = {
   "Find Your Perfect Program": {
+    default: {
+      awareness: { isVisible: true, order: 1 },
+      consideration: { isVisible: false, order: 0 },
+      decision: { isVisible: false, order: 0 },
+      retention: { isVisible: false, order: 0 }
+    },
     student: {
       awareness: { isVisible: true, order: 1 },
       consideration: { isVisible: false, order: 0 },
@@ -211,6 +247,12 @@ export const LEAD_MAGNET_VISIBILITY_DEFAULTS: Record<string, Record<Persona, Rec
     }
   },
   "Success Stories Guide": {
+    default: {
+      awareness: { isVisible: false, order: 0 },
+      consideration: { isVisible: true, order: 1 },
+      decision: { isVisible: false, order: 0 },
+      retention: { isVisible: false, order: 0 }
+    },
     student: {
       awareness: { isVisible: false, order: 0 },
       consideration: { isVisible: true, order: 1 },

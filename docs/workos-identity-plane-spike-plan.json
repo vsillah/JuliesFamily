@@ -1,0 +1,118 @@
+{
+  "id": "workos-identity-plane-spike",
+  "phase": 174,
+  "status": "architecture_recommendation_ready",
+  "updatedAt": "2026-09-11",
+  "roadmapSource": "docs/kinflo-program-roadmap.md",
+  "adrSource": "docs/adr-001-workos-identity-plane.md",
+  "recommendedLane": {
+    "name": "Mansa Musa - WorkOS Identity Architecture Spike",
+    "branch": "codex/kinflo-workos-identity-spike",
+    "worktreeRequired": true,
+    "captainOwnsSequencing": true
+  },
+  "decision": {
+    "recommendedOption": "workos_identity_plus_convex_product_data",
+    "tenantMapping": "separate_kinflo_tenant_with_unique_workosOrganizationId",
+    "roleModel": "workos_coarse_allowlisted_roles_plus_convex_product_permissions",
+    "invitationModel": "workos_invitation_wrapped_by_kinflo_approval_gate",
+    "rationale": "WorkOS establishes identity and organization context; Convex remains authoritative for KinFlo tenant, site, CRM, workflow, and product permissions."
+  },
+  "architectureLayers": [
+    {"layer": "identity_plane", "owner": "WorkOS candidate", "posture": "buy_first_spike"},
+    {"layer": "product_data_plane", "owner": "Convex", "posture": "build"},
+    {"layer": "workflow_control_plane", "owner": "KinFlo OS", "posture": "build"}
+  ],
+  "objectMappingRecommendation": [
+    {"kinfloObject": "users", "workosObject": "user", "ownership": "hybrid", "link": "workosUserId"},
+    {"kinfloObject": "tenants", "workosObject": "organization", "ownership": "convex", "link": "workosOrganizationId"},
+    {"kinfloObject": "sites", "workosObject": "none", "ownership": "convex", "link": null},
+    {"kinfloObject": "memberships", "workosObject": "organization_membership", "ownership": "hybrid", "link": "workosOrganizationMembershipId"},
+    {"kinfloObject": "roles", "workosObject": "roles_permissions", "ownership": "hybrid_allowlist", "link": "coarse_role_slug"},
+    {"kinfloObject": "invitations", "workosObject": "invitation_or_widget", "ownership": "hybrid_kinflo_gate", "link": "workosInvitationId"},
+    {"kinfloObject": "auditEvents", "workosObject": "events_or_audit_logs_optional", "ownership": "hybrid", "link": "externalEventId"}
+  ],
+  "authorizationInvariants": [
+    "validated_workos_jwt_required_in_spike_mode",
+    "org_id_must_map_to_exactly_one_active_kinflo_tenant",
+    "active_convex_membership_required",
+    "site_grants_remain_in_convex",
+    "unknown_workos_roles_are_denied",
+    "final_permissions_are_calculated_from_convex_role_catalog",
+    "platform_admin_requires_existing_convex_platform_role",
+    "tokens_and_secrets_never_enter_snapshots_or_logs"
+  ],
+  "minimumProof": [
+    "signed_in_user_has_workos_sub_org_id_and_role_signal",
+    "kinflo_user_maps_without_credentials_tokens_or_env_local",
+    "workos_organization_maps_to_unique_workosOrganizationId",
+    "workos_membership_maps_to_active_convex_tenant_membership",
+    "membership_maps_to_viewerPermissionSnapshot",
+    "tenant_viewer_reads_only_allowed_tenant_and_sites",
+    "site_editor_cannot_publish_without_convex_permission",
+    "unassigned_user_cannot_read_other_tenant_sites_or_crm",
+    "invitation_readiness_remains_kinflo_gated",
+    "role_change_requires_session_refresh_and_rechecks_convex_projection",
+    "rollback_to_convex_auth_only_passes"
+  ],
+  "proofStages": [
+    {"id": "static_local", "authorizedNow": true, "providerWrites": false, "secretReads": false},
+    {"id": "workos_staging_sign_in", "authorizedNow": false, "providerWrites": true, "secretReads": true},
+    {"id": "convex_identity_projection", "authorizedNow": false, "hostedConvexWrites": true},
+    {"id": "isolation_and_rollback", "authorizedNow": false, "hostedConvexWrites": true}
+  ],
+  "envContract": {
+    "storage": "approved_secret_store_child_process_injection",
+    "forbidEnvLocal": true,
+    "serverOnly": ["WORKOS_API_KEY", "WORKOS_COOKIE_PASSWORD"],
+    "identifiers": ["WORKOS_CLIENT_ID", "VITE_WORKOS_CLIENT_ID", "VITE_WORKOS_REDIRECT_URI", "VITE_CONVEX_URL"],
+    "forbiddenInBrowser": ["WORKOS_API_KEY", "WORKOS_COOKIE_PASSWORD"]
+  },
+  "likelyCodeSurfaces": [
+    "package.json",
+    "package-lock.json",
+    "convex/auth.config.ts",
+    "convex/auth.ts",
+    "convex/schema.ts",
+    "convex/controlPlane.ts",
+    "convex/accessPolicy.ts",
+    "convex/roleCatalog.ts",
+    "client/src/main.tsx",
+    "client/src/App.tsx",
+    "client/src/hooks/useAuth.ts",
+    "client/src/lib/kinfloConvexRuntime.ts",
+    "scripts/run-kinflo-with-1password-env.mjs"
+  ],
+  "rollback": {
+    "defaultModeUntilApproval": "convex_auth",
+    "schemaChangesMustBeAdditive": true,
+    "preserveConvexAuth": true,
+    "requiresExternalResourceDeletion": false
+  },
+  "gates": {
+    "productionWorkosEnvironment": false,
+    "workosBillingSetup": false,
+    "productionSsoOrDirectorySync": false,
+    "providerWrites": false,
+    "publicPublish": false,
+    "clientSharing": false,
+    "secretReads": false,
+    "envLocalCreation": false,
+    "generatedApiImport": false,
+    "fixtureToLiveAdapterSwitch": false,
+    "hostedConvexMutationSmoke": false,
+    "merge": false,
+    "deployment": false
+  },
+  "sourceUrls": [
+    "https://workos.com/docs/authkit/sessions",
+    "https://workos.com/docs/authkit/roles-and-permissions",
+    "https://workos.com/docs/authkit/users-organizations",
+    "https://workos.com/docs/authkit/invitations",
+    "https://workos.com/docs/authkit/environments",
+    "https://workos.com/docs/widgets",
+    "https://workos.com/docs/widgets-api/authentication-tokens",
+    "https://docs.convex.dev/auth/authkit/add-to-app"
+  ],
+  "nextDecision": "Authorize only the named WorkOS staging writes and approved-secret-store reads needed for Stage 1, or stop with the architecture recommendation."
+}

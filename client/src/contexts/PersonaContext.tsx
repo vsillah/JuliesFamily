@@ -54,7 +54,7 @@ export const personaConfigs: PersonaConfig[] = [
 
 interface PersonaContextType {
   persona: Persona;
-  setPersona: (persona: Persona) => Promise<void>;
+  setPersona: (persona: Persona | null) => Promise<void>;
   funnelStage: FunnelStage;
   passions: PassionOption[] | null;
   showPersonaModal: boolean;
@@ -62,12 +62,18 @@ interface PersonaContextType {
   isPersonaLoading: boolean;
 }
 
-const PersonaContext = createContext<PersonaContextType | undefined>(undefined);
+export const PersonaContext = createContext<PersonaContextType | undefined>(undefined);
 
 const PERSONA_STORAGE_KEY = "julies-persona";
 const PERSONA_MODAL_SHOWN_KEY = "julies-persona-modal-shown";
 const ADMIN_PERSONA_KEY = "admin-persona-override";
 const ADMIN_FUNNEL_KEY = "admin-funnel-override";
+
+type PersonaPreferenceUser = {
+  persona?: Persona | null;
+  funnelStage?: BaseFunnelStage | null;
+  passions?: string[] | null;
+};
 
 export function PersonaProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -96,6 +102,8 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
+    const personaUser = user as PersonaPreferenceUser | null | undefined;
+
     // Don't do anything while auth is loading
     if (isLoading) {
       setIsPersonaLoading(true);
@@ -111,10 +119,10 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     if (adminOverride && adminOverride !== "none") {
       // Admin override takes priority
       setPersonaState(adminOverride as Persona);
-    } else if (isAuthenticated && user) {
+    } else if (isAuthenticated && personaUser) {
       // For authenticated users, load persona from database
-      if (user.persona) {
-        setPersonaState(user.persona as Persona);
+      if (personaUser.persona) {
+        setPersonaState(personaUser.persona);
       }
       // Don't show modal for authenticated users
     } else {
@@ -151,17 +159,17 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
       setFunnelStage(adminFunnelOverride as FunnelStage);
     } else {
       // Use server-provided funnel stage for authenticated users
-      if (isAuthenticated && user && user.funnelStage) {
-        setFunnelStage(user.funnelStage as FunnelStage);
+      if (isAuthenticated && personaUser?.funnelStage) {
+        setFunnelStage(personaUser.funnelStage);
       } else {
         setFunnelStage("awareness");
       }
     }
 
     // Load passions from authenticated user
-    if (isAuthenticated && user && user.passions) {
+    if (isAuthenticated && personaUser?.passions) {
       // Transform string[] to PassionOption[]
-      const passionOptions = user.passions.map((passionId: string) => ({
+      const passionOptions = personaUser.passions.map((passionId) => ({
         id: passionId,
         label: passionId.charAt(0).toUpperCase() + passionId.slice(1)
       }));
@@ -174,8 +182,9 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
     setIsPersonaLoading(false);
   }, [isAuthenticated, user, isLoading, location]);
 
-  const setPersona = async (newPersona: Persona) => {
-    setPersonaState(newPersona);
+  const setPersona = async (newPersona: Persona | null) => {
+    const effectivePersona = newPersona ?? "default";
+    setPersonaState(effectivePersona);
     
     if (isAuthenticated) {
       // For authenticated users, save to database

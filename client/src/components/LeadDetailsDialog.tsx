@@ -18,6 +18,7 @@ import {
   ListTodo, Plus, Clock, BarChart3, Activity, ExternalLink
 } from "lucide-react";
 import type { Lead, Interaction, LeadEmailOpen, LeadEmailClick, LeadStatus } from "@shared/schema";
+import { leadStatusEnum } from "@shared/schema";
 import CommunicationTimeline from "@/components/CommunicationTimeline";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -49,6 +50,11 @@ const getInteractionIcon = (type: string) => {
     page_view: History,
   };
   return iconMap[type] || MessageSquare;
+};
+
+const normalizeLeadStatus = (status: string | null | undefined): LeadStatus => {
+  const parsed = leadStatusEnum.safeParse(status);
+  return parsed.success ? parsed.data : "active";
 };
 
 interface LeadDetailsDialogProps {
@@ -320,7 +326,7 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
       setNotes(lead.notes);
     }
     // Always set lead status - default to 'active' if not set
-    setEditedLeadStatus(lead?.leadStatus || 'active');
+    setEditedLeadStatus(normalizeLeadStatus(lead?.leadStatus));
   }, [lead]);
 
   const personaLabels: Record<string, string> = {
@@ -561,7 +567,7 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
                     </div>
                     {isEditingStatus ? (
                       <div className="flex gap-2">
-                        <Select value={editedLeadStatus} onValueChange={setEditedLeadStatus}>
+                        <Select value={editedLeadStatus} onValueChange={(value) => setEditedLeadStatus(normalizeLeadStatus(value))}>
                           <SelectTrigger data-testid="select-lead-status">
                             <SelectValue />
                           </SelectTrigger>
@@ -584,7 +590,7 @@ export default function LeadDetailsDialog({ leadId, open, onOpenChange }: LeadDe
                           size="icon" 
                           variant="outline" 
                           onClick={() => {
-                            setEditedLeadStatus(lead.leadStatus || 'active');
+                            setEditedLeadStatus(normalizeLeadStatus(lead.leadStatus));
                             setIsEditingStatus(false);
                           }} 
                           disabled={updateLeadStatusMutation.isPending}

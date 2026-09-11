@@ -65,7 +65,7 @@ export function createAdminProvisioningStorage(db: NodePgDatabase<any>): IAdminP
     // ====================
     
     async createProgram(program: InsertProgram): Promise<Program> {
-      const [created] = await db.insert(programs).values(program).returning();
+      const [created] = await db.insert(programs).values(program as typeof programs.$inferInsert).returning();
       return created;
     },
     
@@ -109,7 +109,7 @@ export function createAdminProvisioningStorage(db: NodePgDatabase<any>): IAdminP
     async updateProgram(id: string, updates: Partial<InsertProgram>): Promise<Program | undefined> {
       const [updated] = await db
         .update(programs)
-        .set({ ...updates, updatedAt: new Date() })
+        .set({ ...(updates as Partial<typeof programs.$inferInsert>), updatedAt: new Date() })
         .where(eq(programs.id, id))
         .returning();
       return updated;
@@ -152,7 +152,7 @@ export function createAdminProvisioningStorage(db: NodePgDatabase<any>): IAdminP
         let volunteerEnrollmentId: string | null = null;
         
         // 2. Create test enrollment based on program type
-        if (program.programType === 'student_program' || program.programType === 'student_tgh') {
+        if (program.programType === 'student_program') {
           // Create Tech Goes Home enrollment with auto-populated progress
           const autoConfig = program.autoPopulateConfig || {};
           const progressPercent = autoConfig.progressPercent || 50;

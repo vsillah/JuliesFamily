@@ -199,7 +199,7 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", authLimiter, (req, res, next) => {
     const returnTo = req.query.returnTo as string;
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
-      req.session.returnTo = returnTo;
+      (req.session as typeof req.session & { returnTo?: string }).returnTo = returnTo;
     }
     passport.authenticate(STRATEGY_NAME, {
       prompt: "login consent",

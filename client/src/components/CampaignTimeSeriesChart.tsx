@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,17 +29,21 @@ export default function CampaignTimeSeriesChart({
   const { toast } = useToast();
 
   // Fetch time-series data
-  const { data: timeSeriesData, isLoading } = useQuery<TimeSeriesDataPoint[]>({
+  const { data: timeSeriesData = [], isLoading, error } = useQuery<TimeSeriesDataPoint[], Error>({
     queryKey: ['/api/email-campaigns', campaignId, 'time-series', selectedMetric, selectedInterval],
     queryFn: async () => {
       const params = new URLSearchParams({
         metric: selectedMetric,
         interval: selectedInterval
       });
-      return await apiRequest('GET', `/api/email-campaigns/${campaignId}/time-series?${params}`);
+      const res = await apiRequest('GET', `/api/email-campaigns/${campaignId}/time-series?${params}`);
+      return res.json();
     },
     enabled: !!campaignId,
-    onError: (error) => {
+  });
+
+  useEffect(() => {
+    if (error) {
       toast({
         variant: "destructive",
         title: "Failed to load chart data",
@@ -47,7 +51,7 @@ export default function CampaignTimeSeriesChart({
       });
       console.error("Time-series fetch error:", error);
     }
-  });
+  }, [error, toast]);
 
   // Format timestamp based on interval
   const formatTimestamp = (timestamp: string) => {

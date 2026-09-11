@@ -1,8 +1,8 @@
-import { google } from 'googleapis';
+import { Auth, google, sheets_v4 } from 'googleapis';
 
 let connectionSettings: any;
 
-function getGoogleAuthClient(): google.auth.GoogleAuth | null {
+function getGoogleAuthClient(): Auth.GoogleAuth | null {
   const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   const path = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
   if (json && json.trim().startsWith('{')) {
@@ -57,7 +57,7 @@ async function getAccessToken(): Promise<string> {
   return accessToken;
 }
 
-export async function getUncachableGoogleSheetClient() {
+export async function getUncachableGoogleSheetClient(): Promise<sheets_v4.Sheets> {
   const auth = getGoogleAuthClient();
   if (auth) {
     return google.sheets({ version: 'v4', auth: auth as any });

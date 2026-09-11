@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 1,
+  "phase": 74,
+  "name": "KinFlo adapter switch evidence matrix",
+  "status": "provider_light_adapter_switch_evidence",
+  "updatedAt": "2026-07-02",
+  "objective": "Prove every fixture-to-live adapter surface has generated API coverage, ordered smoke evidence, rollback posture, design-quality gates, and human approval blockers before any live switch can be considered.",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "convexCodegenRun": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "providerApisTouched": false,
+    "secretsReadOrPrinted": false,
+    "notes": "This matrix reads existing local contracts only. It does not create a hosted deployment, run codegen, import convex/_generated/api, execute hosted Convex, call providers, or expose secrets."
+  },
+  "sourceContracts": {
+    "switchPlan": "docs/convex-adapter-switch-plan.json",
+    "generatedApiContract": "client/src/lib/kinfloGeneratedApiContract.ts",
+    "runtimeBoundary": "client/src/lib/kinfloConvexRuntime.ts",
+    "shellData": "client/src/lib/kinfloShellData.ts",
+    "liveSmokeManifest": "docs/convex-live-smoke-manifest.json",
+    "hostedActivationDecisionRegister": "docs/phase73-hosted-activation-decision-register.md"
+  },
+  "designResearch": {
+    "researchedAt": "2026-07-02",
+    "sources": [
+      {
+        "name": "Webby Awards 2026 Websites and Mobile Sites winners",
+        "url": "https://winners.webbyawards.com/winners/websites-and-mobile-sites",
+        "signal": "Top sites combine clear first-screen identity, disciplined interaction, data visualization, and editorial-grade proof surfaces."
+      },
+      {
+        "name": "UX Design Awards winners",
+        "url": "https://ux-design-awards.com/winners",
+        "signal": "Award-caliber products document usability, accessibility, user value, and system fit instead of relying on visual polish alone."
+      },
+      {
+        "name": "Awwwards SaaS inspiration",
+        "url": "https://www.awwwards.com/inspiration/saas-category-wonderlist-design-1",
+        "signal": "Modern SaaS pages use sharp hierarchy, product specificity, and polished responsive states."
+      },
+      {
+        "name": "SaaS UI design trends 2026",
+        "url": "https://www.saasui.design/blog/7-saas-ui-design-trends-2026",
+        "signal": "Current SaaS patterns favor calmer dashboards, AI-native workflows, command surfaces, and strategic minimalism."
+      },
+      {
+        "name": "Muzli dashboard examples 2026",
+        "url": "https://muz.li/blog/best-dashboard-design-examples-inspirations-for-2026/",
+        "signal": "Strong dashboards prioritize hierarchy, scan speed, dense but legible data, and low visual noise."
+      }
+    ],
+    "appliedCriteria": [
+      "first-screen signal: the active site, tenant, or launch object is immediately visible",
+      "calm operational density: tables, controls, and evidence are compact but readable",
+      "configuration clarity: users can see what they can configure, what is gated, and why",
+      "proof before publish: every launch surface shows evidence, blockers, rollback, and owner",
+      "responsive inspection: desktop and mobile states must be reviewable before client handoff",
+      "restrained motion and polish: motion supports orientation without obscuring status or action",
+      "accessibility and state clarity: disabled, blocked, review, go, and no-go states are explicit"
+    ],
+    "claudeCodeFrameReview": {
+      "status": "pending_cli_auth_repair",
+      "lastLocalCheck": "Claude Code CLI installed, but the credential path returned 401 Invalid authentication credentials.",
+      "nextAction": "Retry a Claude Code two-frame design critique after CLI credentials are repaired; apply only reviewed, provider-light design deltas."
+    }
+  },
+  "globalEvidenceRequiredBeforeSwitch": [
+    "Vambah approves hosted Convex ownership, billing, backup, auth, env, and codegen window.",
+    "Generated API bindings are produced locally and reviewed against KINFLO_GENERATED_API_BINDINGS.",
+    "Read-only smokes pass before mutation-backed surfaces are switched.",
+    "Mutation smokes run in docs/convex-live-smoke-manifest.json order.",
+    "Rollback owner, fallback adapter path, and fixture restore criteria are documented.",
+    "Design QA confirms desktop and mobile states preserve hierarchy, spacing, accessibility, and no-overlap constraints.",
+    "Provider writes stay disabled until separate provider setup and client launch signoff pass."
+  ],
+  "surfaceEvidenceMatrix": [
+    {
+      "id": "tenant-control-plane",
+      "batchId": "read-only-core",
+      "surface": "Tenant control plane",
+      "evidenceStage": "read_only_first",
+      "generatedApiCoverage": [
+        "controlPlane.listTenants",
+        "controlPlane.listSitesForTenant",
+        "controlPlane.listAuditEvents"
+      ],
+      "smokeEvidenceRequired": [
+        "super admin tenant list",
+        "tenant-scoped site list",
+        "audit trail smoke"
+      ],
+      "designGate": "Super admin must see tenant, site, and audit proof without cross-tenant ambiguity.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "generated API review",
+        "read-only hosted smoke"
+      ],
+      "rollback": "Return tenant/site/audit tables to fixtureKinfloShellAdapter if scope filtering or audit visibility fails.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "plans-and-entitlements",
+      "batchId": "read-only-core",
+      "surface": "Plans and entitlements",
+      "evidenceStage": "read_only_first",
+      "generatedApiCoverage": [
+        "entitlements.entitlementUsageSnapshot",
+        "entitlements.checkEntitlementLimit"
+      ],
+      "smokeEvidenceRequired": [
+        "usage snapshot matches site data",
+        "manual override honored",
+        "limit rejection audited"
+      ],
+      "designGate": "Plan limits and override reasons must be visible before a client site can be created or sold.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "generated API review",
+        "entitlement smoke"
+      ],
+      "rollback": "Restore fixture plan and entitlement cards if usage math, overrides, or limits diverge.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "public-renderer",
+      "batchId": "read-only-core",
+      "surface": "Public renderer",
+      "evidenceStage": "read_only_first",
+      "generatedApiCoverage": [
+        "publicSite.resolvePublishedSite"
+      ],
+      "smokeEvidenceRequired": [
+        "published site resolves",
+        "draft site hidden",
+        "verified domain required"
+      ],
+      "designGate": "Public preview must show a polished, client-specific first viewport on desktop and mobile before launch.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "generated API review",
+        "public resolver smoke",
+        "visual QA evidence"
+      ],
+      "rollback": "Keep /kinflo-sites preview routed to local fixtures if published/draft filtering or public-safe data fails.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "launch-readiness",
+      "batchId": "read-only-core",
+      "surface": "Launch readiness",
+      "evidenceStage": "read_only_first",
+      "generatedApiCoverage": [
+        "launchReadiness.getSiteLaunchReadiness",
+        "activation.readiness"
+      ],
+      "smokeEvidenceRequired": [
+        "site:view scoped",
+        "read-only launch packet",
+        "provider actions gated"
+      ],
+      "designGate": "Launch readiness must be a decision surface, not a passive checklist: owner, status, blockers, rollback, and proof must be scannable.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "generated API review",
+        "read-only launch smoke"
+      ],
+      "rollback": "Restore fixture launch readiness if any launch gate is overstated or cross-tenant evidence leaks.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "admin-experience-preferences",
+      "batchId": "user-scoped-preferences",
+      "surface": "Admin experience preferences",
+      "evidenceStage": "user_scoped_mixed",
+      "generatedApiCoverage": [
+        "preferences.getMyPreferences",
+        "preferences.upsertMyPreferences"
+      ],
+      "smokeEvidenceRequired": [
+        "viewer reads own scoped preferences",
+        "tenant/site scoped preferences require matching access"
+      ],
+      "designGate": "Configurable shell controls must make density, default landing, filters, and site context clear without layout shift.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "generated API review",
+        "preference permission smoke"
+      ],
+      "rollback": "Return preference controls to local state if tenant/site permission checks or personal defaults fail.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "activation-readiness",
+      "batchId": "site-creation-and-admin",
+      "surface": "Activation readiness",
+      "evidenceStage": "mutation_smoke_required",
+      "generatedApiCoverage": [
+        "activation.readiness",
+        "activation.seedSmokeSite"
+      ],
+      "smokeEvidenceRequired": [
+        "readiness counts",
+        "activation smoke audit event"
+      ],
+      "designGate": "Activation status must distinguish local readiness, hosted readiness, codegen, read-only smoke, and mutation smoke.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "codegen approval",
+        "mutation smoke approval"
+      ],
+      "rollback": "Keep activation smoke records labeled as smoke data and leave data mode on fixtures if seed output differs from manifest expectations.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "site-factory",
+      "batchId": "site-creation-and-admin",
+      "surface": "Site factory",
+      "evidenceStage": "mutation_smoke_required",
+      "generatedApiCoverage": [
+        "siteFactory.listStarterTemplates",
+        "siteFactory.listClientWebsiteAdminPermissionPresets",
+        "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+        "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+        "siteFactory.listClientWebsiteConfigurationChangeSets",
+        "siteFactory.listClientWebsiteConfigurationReviewPackets",
+        "siteFactory.listClientWebsiteConfigurationProfiles",
+        "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+        "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+        "siteFactory.listClientWebsiteConfigurationSaveRequests",
+        "siteFactory.listClientWebsiteDomainReadinessPackets",
+        "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+        "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+        "siteFactory.listClientWebsiteLaunchBlueprints",
+        "siteFactory.listClientWebsiteLaunchComposer",
+        "siteFactory.createSiteFromTemplate"
+      ],
+      "smokeEvidenceRequired": [
+        "template list",
+        "configuration approval matrix read",
+        "configuration audit timeline read",
+        "configuration change set read",
+        "configuration review packet read",
+        "configuration profile read",
+        "configuration publish readiness read",
+        "configuration rollback checkpoint read",
+        "configuration save request read",
+        "client website domain readiness read",
+        "client website admin invitation readiness read",
+        "experience configuration preset read",
+        "client website launch composer read",
+        "draft site created from template",
+        "owner invite scoped"
+      ],
+      "designGate": "Client site creation must show template fit, configuration profile, permissions, launch packet, launch composer, invite posture, and rollback before execution.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "template smoke",
+        "owner invite policy",
+        "client launch signoff"
+      ],
+      "rollback": "Archive the smoke site, revoke pending invites, and return launch packets to fixtures if template creation or owner scope fails.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "crm-lead-workspace",
+      "batchId": "public-crm-loop",
+      "surface": "CRM lead workspace",
+      "evidenceStage": "mutation_smoke_required",
+      "generatedApiCoverage": [
+        "crm.submitLead",
+        "crm.listLeads",
+        "crm.getLeadTimeline",
+        "crm.listJourneyProgressionRules",
+        "crm.upsertJourneyProgressionRule",
+        "crm.transitionLeadStage"
+      ],
+      "smokeEvidenceRequired": [
+        "public form creates lead",
+        "tenant admin sees scoped lead",
+        "pipeline transition appends pipeline, journey, timeline, and audit events"
+      ],
+      "designGate": "Lead intake and CRM status must be legible from first response through timeline, task, and stage movement.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "lead write smoke",
+        "notification provider gate"
+      ],
+      "rollback": "Mark smoke leads and workflow data as test-only, restore fixture CRM tables, and keep outbound notifications paused.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "domain-metadata",
+      "batchId": "provider-readiness-records",
+      "surface": "Domain metadata",
+      "evidenceStage": "provider_gated_metadata",
+      "generatedApiCoverage": [
+        "siteBuilder.upsertDomain",
+        "entitlements.checkEntitlementLimit"
+      ],
+      "smokeEvidenceRequired": [
+        "customDomains limit enforced",
+        "primary verified hostname set",
+        "duplicate hostname rejected"
+      ],
+      "designGate": "Domain readiness must separate metadata review from DNS, SSL, and Vercel attachment execution.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "domain entitlement smoke",
+        "provider-write signoff"
+      ],
+      "rollback": "Deactivate smoke domain metadata and keep DNS/SSL/Vercel attachment blocked if hostname or entitlement checks fail.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "integration-readiness",
+      "batchId": "provider-readiness-records",
+      "surface": "Integration readiness",
+      "evidenceStage": "provider_gated_metadata",
+      "generatedApiCoverage": [
+        "integrations.listIntegrationSettings",
+        "integrations.upsertIntegrationSetting"
+      ],
+      "smokeEvidenceRequired": [
+        "integration:manage scoped",
+        "secret values excluded",
+        "provider writes gated"
+      ],
+      "designGate": "Provider setup must show env-key references, status, owner, and approval notes without exposing secret values.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "integration permission smoke",
+        "provider setup signoff"
+      ],
+      "rollback": "Return integration readiness rows to fixtures and keep provider env activation blocked if settings expose secrets or scope incorrectly.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "campaign-automation",
+      "batchId": "campaign-and-ai-governance",
+      "surface": "Campaign automation",
+      "evidenceStage": "provider_gated_metadata",
+      "generatedApiCoverage": [
+        "campaigns.listCampaignDrafts",
+        "campaigns.upsertCampaignDraft",
+        "campaigns.approveCampaignDraft"
+      ],
+      "smokeEvidenceRequired": [
+        "campaign:manage scoped",
+        "campaign limit enforced",
+        "provider sends gated"
+      ],
+      "designGate": "Campaign screens must make draft, approval, consent, audience, and send-blocking status unmistakable.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "campaign governance smoke",
+        "email/SMS provider signoff"
+      ],
+      "rollback": "Pause campaign records, restore fixture campaign review state, and keep email/SMS/automation sends blocked.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "ai-review-provenance",
+      "batchId": "campaign-and-ai-governance",
+      "surface": "AI review provenance",
+      "evidenceStage": "provider_gated_metadata",
+      "generatedApiCoverage": [
+        "aiReview.listAiGenerationRecords",
+        "aiReview.upsertAiGenerationRecord",
+        "aiReview.reviewAiGenerationRecord"
+      ],
+      "smokeEvidenceRequired": [
+        "ai:draft scoped",
+        "ai:review required",
+        "provider calls gated"
+      ],
+      "designGate": "AI output must carry source summary, reviewer decision, publish target, and blocked provider-call status.",
+      "blockedBy": [
+        "hosted Convex approval",
+        "AI provenance smoke",
+        "AI provider signoff"
+      ],
+      "rollback": "Keep generated output unpublished, return AI review rows to fixtures, and block AI provider calls until provenance smoke passes.",
+      "switchAllowed": false,
+      "providerWrites": false,
+      "liveConvexExecution": false
+    }
+  ]
+}

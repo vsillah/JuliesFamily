@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "phase": 149,
+  "name": "KinFlo Claude Code frame response",
+  "status": "completed_captured",
+  "capturedAt": "2026-07-03",
+  "sourcePacket": "docs/kinflo-claude-frame-ingestion-packet.json",
+  "phaseDoc": "docs/phase149-claude-code-frame-response.md",
+  "validationCommand": "npm run kinflo:validate-claude-code-frame-response",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "convexCodegenRun": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "providerApisTouched": false,
+    "tenantSiteLaunchExecuted": false,
+    "clientSharingApproved": false,
+    "secretsReadOrPrinted": false,
+    "notes": "This artifact summarizes a sanitized Claude Code design critique. It does not activate hosted providers or live writes.",
+    "secretValuesRead": false,
+    "secretValuesPrinted": false
+  },
+  "claudeCodeRun": {
+    "tool": "Claude Code",
+    "versionObserved": "2.1.139",
+    "status": "authenticated_response_captured",
+    "promptBoundary": "Sanitized product/design packet and public design research only. No secrets, private customer records, provider credentials, production data, .env contents, or raw private files were sent.",
+    "rawTranscriptStored": false,
+    "responseShape": [
+      "principles",
+      "superAdminFrameCritique",
+      "clientSiteStudioFrameCritique",
+      "providerLightDeltas",
+      "mobileRisks",
+      "doNotChange"
+    ]
+  },
+  "researchSources": [
+    {
+      "name": "Apple Human Interface Guidelines",
+      "url": "https://developer.apple.com/design/human-interface-guidelines",
+      "designSignal": "Use platform-grade layout, typography, controls, and accessibility fundamentals."
+    },
+    {
+      "name": "Apple Human Interface Guidelines - Layout",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+      "designSignal": "Build stable full-screen layouts first and collapse only when the full layout no longer fits."
+    },
+    {
+      "name": "Apple Human Interface Guidelines - Tab bars",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+      "designSignal": "Use tabs for peer sections and avoid overloading navigation with actions."
+    },
+    {
+      "name": "Awwwards web design inspiration",
+      "url": "https://www.awwwards.com/",
+      "designSignal": "Award-level web work signals object, proof, and action path quickly with high craft."
+    },
+    {
+      "name": "Muzli dashboard inspiration",
+      "url": "https://muz.li/inspiration/dashboard-inspiration/",
+      "designSignal": "Dashboard inspiration should be filtered into operational hierarchy, not copied as decorative chrome."
+    },
+    {
+      "name": "2026 SaaS dashboard pattern research",
+      "url": "https://www.925studios.co/blog/saas-dashboard-design-examples-2026",
+      "designSignal": "Premium dashboards prioritize what matters now, progressive disclosure, and status color with meaning."
+    },
+    {
+      "name": "2026 SaaS website trend research",
+      "url": "https://mockflow.com/blog/saas-website-design-trends",
+      "designSignal": "Current SaaS websites favor product-led surfaces, trust-first proof, clarity-led minimalism, and interactive demos."
+    }
+  ],
+  "principles": [
+    {
+      "id": "object-first-clarity",
+      "name": "Object-first clarity",
+      "summary": "Every frame should name the active tenant, site, environment, and verification state before exposing controls."
+    },
+    {
+      "id": "gates-are-ui",
+      "name": "Gates are UI, not friction",
+      "summary": "Blocked actions should read as intentional trust affordances with reason, unblock path, and owner."
+    },
+    {
+      "id": "calm-density-progressive-proof",
+      "name": "Calm density, progressive proof",
+      "summary": "Default panels should show primary status and proof summary first, with evidence details revealed on demand."
+    }
+  ],
+  "frameCritiques": [
+    {
+      "frame": "super-admin-command-frame",
+      "route": "/admin/kinflo-os",
+      "strengths": [
+        "Workflow rail plus active-object signal follows the right hierarchy.",
+        "Decision gates make the human approval posture visible.",
+        "Adapter switch evidence differentiates fixture mode from hosted readiness."
+      ],
+      "issues": [
+        "Active tenant and site need stronger first-viewport identity.",
+        "Decision gates need a clearer current-blocker hierarchy.",
+        "Disabled controls need consistent reason and unblock-path copy.",
+        "Panel density needs a primary metric so scanning does not require reading every label.",
+        "Fixture-versus-hosted evidence should remain visible as operators scroll."
+      ]
+    },
+    {
+      "frame": "client-site-studio-frame",
+      "route": "/admin/kinflo-os?tab=site-studio",
+      "strengths": [
+        "Device-framed preview and mobile inspection match modern site-builder patterns.",
+        "Proof-before-publish cards reinforce the trust posture.",
+        "The lane switcher now gives a stable Spin up to Configure to Handoff to Workbench progression."
+      ],
+      "issues": [
+        "The selected site preview should become the visual center of gravity.",
+        "Mobile review should be persistent enough that reviewers cannot skip it accidentally.",
+        "Handoff readiness should be enumerated as criteria, not only summarized as permission status.",
+        "Proof evidence should sit nearer to the blocked publish/handoff actions.",
+        "Configuration panel affordances should be normalized across profile, permission, domain, invitation, publish, rollback, change, approval, and save panels."
+      ]
+    }
+  ],
+  "providerLightDeltas": [
+    {
+      "id": "persistent-identity-strip",
+      "status": "accepted",
+      "targetFrame": "cross-frame",
+      "summary": "Add a fixture-backed identity strip with tenant, site, environment badge, and last verified timestamp.",
+      "blockedLiveActions": [
+        "hosted Convex deployment",
+        "generated API import",
+        "provider writes"
+      ]
+    },
+    {
+      "id": "gate-card-pattern",
+      "status": "accepted",
+      "targetFrame": "cross-frame",
+      "summary": "Introduce a shared GateCard pattern with title, state, reason blocked, unblock path, and owner.",
+      "blockedLiveActions": [
+        "publish",
+        "invite delivery",
+        "domain verification",
+        "lead writes",
+        "campaign sends"
+      ]
+    },
+    {
+      "id": "primary-metric-per-panel",
+      "status": "accepted",
+      "targetFrame": "client-site-studio-frame",
+      "summary": "Give each Configure panel one primary status and metric before expandable evidence detail.",
+      "blockedLiveActions": [
+        "live content save",
+        "provider writes"
+      ]
+    },
+    {
+      "id": "side-by-side-mobile-preview",
+      "status": "accepted",
+      "targetFrame": "client-site-studio-frame",
+      "summary": "Promote mobile review into a persistent 390px preview beside the desktop canvas when space allows.",
+      "blockedLiveActions": [
+        "public launch",
+        "lead writes",
+        "client sharing"
+      ]
+    },
+    {
+      "id": "handoff-readiness-checklist",
+      "status": "accepted",
+      "targetFrame": "client-site-studio-frame",
+      "summary": "Turn handoff readiness into an enumerated checklist linked to gates for profile, permissions, domain, invite, and publish evidence.",
+      "blockedLiveActions": [
+        "tenant admin invite",
+        "public publish",
+        "domain attachment"
+      ]
+    }
+  ],
+  "mobileRisks": [
+    "Identity strip can truncate at 390px unless tenant/environment stay required and site becomes a second line.",
+    "Workflow rail and decision rail cannot both stay full-width on mobile.",
+    "Side-by-side preview must collapse below tablet width.",
+    "Gate cards can become a long scroll unless blocked cards sort first.",
+    "Evidence toggles must preserve 44px tap targets."
+  ],
+  "doNotChange": [
+    "Provider-light fixture mode remains the default.",
+    "Generated Convex API imports remain blocked.",
+    "Publish action stays gated behind human approval.",
+    "Handoff invite delivery stays gated.",
+    "Lead writes remain blocked.",
+    "Domain attachment and verification remain blocked.",
+    "Client sharing remains unapproved.",
+    "Campaign sends, AI provider calls, and production imports remain blocked.",
+    "Disabled live actions remain visible with reason and unblock path.",
+    "No secrets, .env values, or provider credentials enter UI or docs."
+  ],
+  "nextImplementationOrder": [
+    "persistent-identity-strip",
+    "gate-card-pattern",
+    "primary-metric-per-panel",
+    "side-by-side-mobile-preview",
+    "handoff-readiness-checklist"
+  ]
+}

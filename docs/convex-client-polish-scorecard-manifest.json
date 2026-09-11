@@ -1,0 +1,99 @@
+{
+  "phase": 66,
+  "status": "provider-light-polish-review",
+  "convexFunction": "siteFactory.listClientWebsitePolishScorecards",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "contentWritten": false,
+    "assetsReplaced": false,
+    "sitePublished": false,
+    "providersCalled": false
+  },
+  "targetGate": "Public demo sites and the admin shell can be reviewed against a repeatable Apple-grade polish scorecard before live provider activation.",
+  "blockedUntil": [
+    "Hosted Convex project ownership, billing, backup, auth, and env setup are approved",
+    "Generated Convex API files are produced and reviewed outside this provider-light branch",
+    "Desktop, tablet, and 390px visual QA screenshots pass against the hosted preview",
+    "Accessibility contrast and keyboard checks pass on the hosted public renderer",
+    "Final client proof, image direction, consent, and launch-copy review are approved",
+    "Domain, storage, email, SMS, AI, billing, campaign, lead, and publish provider gates pass where applicable"
+  ],
+  "polishScorecards": [
+    {
+      "siteKey": "julies-family-public",
+      "label": "Julie Family Apple-grade polish scorecard",
+      "overallScore": 82,
+      "mobileScore": 84,
+      "proofScore": 80,
+      "accessibilityScore": 78,
+      "criteriaCount": 4,
+      "passCount": 2,
+      "reviewCount": 2,
+      "blockedCount": 0,
+      "viewportCheckCount": 3,
+      "blockedPolishActions": ["publish public site", "replace fixture assets with provider storage", "write CRM lead", "switch adapter"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsitePolishScorecards",
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "siteFactory.listClientWebsiteOnboardingReadiness",
+        "publicSite.resolvePublishedSite",
+        "launchReadiness.getSiteLaunchReadiness"
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "label": "Advisor client Apple-grade polish scorecard",
+      "overallScore": 85,
+      "mobileScore": 86,
+      "proofScore": 84,
+      "accessibilityScore": 82,
+      "criteriaCount": 4,
+      "passCount": 3,
+      "reviewCount": 1,
+      "blockedCount": 0,
+      "viewportCheckCount": 3,
+      "blockedPolishActions": ["create tenant", "send tenant admin invite", "attach custom domain", "publish public site"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsitePolishScorecards",
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "publicSite.resolvePublishedSite"
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "label": "Campaign microsite Apple-grade polish scorecard",
+      "overallScore": 76,
+      "mobileScore": 72,
+      "proofScore": 78,
+      "accessibilityScore": 77,
+      "criteriaCount": 4,
+      "passCount": 1,
+      "reviewCount": 2,
+      "blockedCount": 1,
+      "viewportCheckCount": 3,
+      "blockedPolishActions": ["send campaign", "write public form lead", "publish AI copy", "send SMS/email"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsitePolishScorecards",
+        "siteFactory.listClientWebsiteLaunchSimulations",
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "campaigns.requestCampaignApproval",
+        "publicSite.resolvePublishedSite"
+      ]
+    }
+  ],
+  "totals": {
+    "scorecards": 3,
+    "criteria": 12,
+    "viewportChecks": 9,
+    "passingCriteria": 6,
+    "reviewCriteria": 5,
+    "blockedCriteria": 1,
+    "averageOverallScore": 81,
+    "averageMobileScore": 81
+  }
+}

@@ -19,6 +19,7 @@ import type { DonationCampaign, EmailTemplate, SmsTemplate } from "@shared/schem
 import { insertDonationCampaignSchema } from "@shared/schema";
 import { z } from "zod";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { Link } from "wouter";
 
 const PASSION_OPTIONS = [
   { id: 'literacy', label: 'Literacy & Reading' },

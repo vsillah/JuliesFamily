@@ -36,16 +36,7 @@ export class AutomationEngineService {
   async evaluateAutomationRules(): Promise<AutomationEvaluationResult> {
     const startTime = new Date();
     const candidates: AutomationCandidate[] = [];
-
-    // Create automation run record
-    const run = await this.storage.createAbTestAutomationRun({
-      ruleId: null, // Global evaluation run
-      status: 'running',
-      candidatesFound: 0,
-      testsCreated: 0,
-      variantsGenerated: 0,
-      results: { startedAt: startTime.toISOString() },
-    });
+    let runId: string | undefined;
 
     try {
       // Get safety limits
@@ -56,6 +47,27 @@ export class AutomationEngineService {
 
       // Get active automation rules
       const activeRules = await this.storage.getActiveAbTestAutomationRules();
+      if (activeRules.length === 0) {
+        return {
+          candidates: [],
+          rulesEvaluated: 0,
+          contentEvaluated: 0,
+          safetyLimitsEnforced: false,
+        };
+      }
+
+      // Create automation run record against the first evaluated rule.
+      const run = await this.storage.createAbTestAutomationRun({
+        ruleId: activeRules[0].id,
+        status: 'running',
+        triggerType: 'scheduled',
+        evaluationStart: startTime,
+        opportunitiesDetected: 0,
+        testsCreated: 0,
+        variantsGenerated: 0,
+        executionLog: { startedAt: startTime.toISOString(), rulesEvaluated: activeRules.length },
+      });
+      runId = run.id;
 
       // Track all content evaluated across ALL rules for statistics
       const allEvaluatedContent = new Set<string>();
@@ -73,8 +85,9 @@ export class AutomationEngineService {
       // Update run record
       await this.storage.updateAbTestAutomationRun(run.id, {
         status: 'completed',
-        candidatesFound: limitedCandidates.length,
-        results: {
+        opportunitiesDetected: limitedCandidates.length,
+        evaluationEnd: new Date(),
+        executionLog: {
           startedAt: startTime.toISOString(),
           completedAt: new Date().toISOString(),
           rulesEvaluated: activeRules.length,
@@ -93,13 +106,17 @@ export class AutomationEngineService {
       };
     } catch (error) {
       // Update run with error
-      await this.storage.updateAbTestAutomationRun(run.id, {
-        status: 'failed',
-        results: {
-          startedAt: startTime.toISOString(),
-          error: error instanceof Error ? error.message : 'Unknown error',
-        },
-      });
+      if (runId) {
+        await this.storage.updateAbTestAutomationRun(runId, {
+          status: 'failed',
+          evaluationEnd: new Date(),
+          errorMessage: error instanceof Error ? error.message : 'Unknown error',
+          executionLog: {
+            startedAt: startTime.toISOString(),
+            error: error instanceof Error ? error.message : 'Unknown error',
+          },
+        });
+      }
 
       throw error;
     }
@@ -122,7 +139,7 @@ export class AutomationEngineService {
 
     // Get metric weight profile for this content type
     const weightProfiles = await this.storage.getMetricWeightProfilesByContentType(rule.contentType);
-    const profile = weightProfiles.find(p => p.isDefault) || weightProfiles[0];
+    const profile = weightProfiles.find(p => p.persona === rule.targetPersona) || weightProfiles[0];
     if (!profile) {
       console.warn(`No metric weight profile found for ${rule.contentType}`);
       return candidates;
@@ -135,15 +152,11 @@ export class AutomationEngineService {
       allEvaluatedContent.add(contentKey);
 
       // Check against target personas and funnel stages
-      const targetPersonas = rule.targetPersonas || ['parent', 'educator', 'donor', 'volunteer', 'community_partner', 'student'];
-      const targetFunnelStages = rule.targetFunnelStages || ['awareness', 'consideration', 'conversion', 'retention'];
+      const targetPersonas = rule.targetPersona ? [rule.targetPersona] : ['parent', 'educator', 'donor', 'volunteer', 'community_partner', 'student'];
+      const targetFunnelStages = rule.targetFunnelStage ? [rule.targetFunnelStage] : ['awareness', 'consideration', 'conversion', 'retention'];
 
       for (const persona of targetPersonas) {
         for (const funnelStage of targetFunnelStages) {
-          // Skip if targeting filters don't match
-          if (rule.targetPersonas && !rule.targetPersonas.includes(persona)) continue;
-          if (rule.targetFunnelStages && !rule.targetFunnelStages.includes(funnelStage)) continue;
-
           // Get baseline for this content×persona×stage combination
           const baselines = await this.storage.getAbTestPerformanceBaselines({
             contentType: rule.contentType,
@@ -315,7 +328,7 @@ export class AutomationEngineService {
     candidates: AutomationCandidate[],
     safetyLimits: any
   ): AutomationCandidate[] {
-    const maxConcurrentTests = safetyLimits.maxConcurrentTests || 10;
+    const maxConcurrentTests = safetyLimits.maxConcurrentAutomatedTests || 10;
 
     // Limit number of candidates to max concurrent tests
     // Prioritize by composite score (lowest first - worst performers)
@@ -339,8 +352,11 @@ export class AutomationEngineService {
     const contentItems = new Set<string>();
 
     for (const test of tests) {
-      if (test.contentType === contentType) {
-        contentItems.add(test.contentItemId);
+      const variants = await this.storage.getAbTestVariants(test.id);
+      for (const variant of variants) {
+        if (variant.contentType === contentType && variant.contentItemId) {
+          contentItems.add(variant.contentItemId);
+        }
       }
     }
 
@@ -360,6 +376,9 @@ export class AutomationEngineService {
 
     const lastRun = runs[0];
     const lastRunTime = lastRun.createdAt;
+    if (!lastRunTime) {
+      return true;
+    }
     const timeSinceLastRun = Date.now() - lastRunTime.getTime();
 
     // Run every 24 hours

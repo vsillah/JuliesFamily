@@ -386,6 +386,7 @@ export class CacLtgpAnalyticsService {
     // LTGP = Lifetime Revenue - Delivery Costs
     const lifetimeRevenue = economics.lifetimeRevenue || 0;
     const deliveryCosts = economics.actualDeliveryCosts || economics.estimatedDeliveryCosts || 0;
+    const customerAcquisitionCost = economics.customerAcquisitionCost || 0;
     
     const ltgp = lifetimeRevenue - deliveryCosts;
     
@@ -393,8 +394,8 @@ export class CacLtgpAnalyticsService {
     await this.storage.updateDonorEconomics(leadId, {
       lifetimeGrossProfit: ltgp,
       grossMarginPercent: lifetimeRevenue > 0 ? Math.round((ltgp / lifetimeRevenue) * 100) : 0,
-      ltgpToCacRatio: economics.customerAcquisitionCost > 0 
-        ? Math.round((ltgp / economics.customerAcquisitionCost) * 100) 
+      ltgpToCacRatio: customerAcquisitionCost > 0
+        ? Math.round((ltgp / customerAcquisitionCost) * 100)
         : 0,
     });
     

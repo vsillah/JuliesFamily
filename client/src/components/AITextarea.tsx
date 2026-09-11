@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { ToastAction } from "@/components/ui/toast";
 import { Sparkles, Loader2, Undo2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -68,19 +69,23 @@ export function AITextarea({
         toast({
           title: "AI Generated",
           description: "Text has been generated. You can edit it further or undo.",
-          action: previousValueRef.current !== null ? {
-            label: "Undo",
-            onClick: () => {
-              if (previousValueRef.current !== null) {
-                onChange(previousValueRef.current);
-                previousValueRef.current = null;
-                toast({
-                  title: "Undone",
-                  description: "AI generation has been undone.",
-                });
-              }
-            },
-          } : undefined,
+          action: previousValueRef.current !== null ? (
+            <ToastAction
+              altText="Undo AI generation"
+              onClick={() => {
+                if (previousValueRef.current !== null) {
+                  onChange(previousValueRef.current);
+                  previousValueRef.current = null;
+                  toast({
+                    title: "Undone",
+                    description: "AI generation has been undone.",
+                  });
+                }
+              }}
+            >
+              Undo
+            </ToastAction>
+          ) : undefined,
         });
       }
     } catch (error: any) {

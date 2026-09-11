@@ -1,8 +1,8 @@
-import { google } from 'googleapis';
+import { Auth, calendar_v3, google } from 'googleapis';
 
 let connectionSettings: any;
 
-function getGoogleAuthClient(): google.auth.GoogleAuth | null {
+function getGoogleAuthClient(): Auth.GoogleAuth | null {
   const json = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   const path = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH;
   if (json && json.trim().startsWith('{')) {
@@ -57,7 +57,7 @@ async function getAccessToken(): Promise<string> {
   return accessToken;
 }
 
-async function getUncachableGoogleCalendarClient() {
+async function getUncachableGoogleCalendarClient(): Promise<calendar_v3.Calendar> {
   const auth = getGoogleAuthClient();
   if (auth) {
     return google.calendar({ version: 'v3', auth: auth as any });
@@ -105,6 +105,7 @@ export class CalendarService {
       
       const response = await calendar.events.insert({
         calendarId: this.CALENDAR_ID,
+        sendUpdates: 'all',
         requestBody: {
           summary: event.summary,
           description: event.description,
@@ -112,7 +113,6 @@ export class CalendarService {
           start: event.start,
           end: event.end,
           attendees: event.attendees,
-          sendUpdates: 'all',
         },
       });
 

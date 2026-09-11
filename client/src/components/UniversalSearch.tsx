@@ -30,6 +30,14 @@ interface DynamicSearchResult {
   score?: number;
 }
 
+function getContentSubtitle(metadata: unknown): string {
+  if (metadata && typeof metadata === "object" && "subtitle" in metadata) {
+    const subtitle = (metadata as { subtitle?: unknown }).subtitle;
+    return typeof subtitle === "string" ? subtitle : "";
+  }
+  return "";
+}
+
 const categoryLabels: Record<SearchCategory, string> = {
   navigation: "Navigation",
   content: "Content",
@@ -228,10 +236,12 @@ export function UniversalSearch() {
         lead_magnet: "Lead Magnet",
       };
       
+      const subtitle = getContentSubtitle(item.metadata);
+
       results.push({
         id: `content-${item.id}`,
         title: item.title,
-        description: `${contentTypeLabels[item.type] || item.type} • ${item.subtitle || ''}`,
+        description: `${contentTypeLabels[item.type] || item.type} • ${subtitle}`,
         category: "content",
         icon: FileText,
         route: `/admin/content#${item.type}`,

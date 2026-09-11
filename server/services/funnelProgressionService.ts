@@ -69,7 +69,8 @@ export async function evaluateLeadProgression(
     throw new Error(`Lead ${leadId} not found`);
   }
   
-  const { funnelStage, persona, engagementScore = 0, lastFunnelUpdateAt } = lead;
+  const { funnelStage, persona, lastFunnelUpdateAt } = lead;
+  const engagementScore = lead.engagementScore ?? 0;
   
   // Check for auto-progression events first (bypass threshold)
   // Find the rule that matches this auto-progress event
@@ -155,7 +156,8 @@ async function evaluateRule(
   lead: typeof leads.$inferSelect,
   rule: FunnelProgressionRule
 ): Promise<boolean> {
-  const { engagementScore = 0, lastFunnelUpdateAt } = lead;
+  const { lastFunnelUpdateAt } = lead;
+  const engagementScore = lead.engagementScore ?? 0;
   
   // Check engagement score threshold
   if (engagementScore < rule.engagementScoreThreshold) {
@@ -294,7 +296,7 @@ export async function getLeadProgressionHistory(leadId: string) {
       fromStage: funnelProgressionHistory.fromStage,
       toStage: funnelProgressionHistory.toStage,
       reason: funnelProgressionHistory.reason,
-      engagementScore: funnelProgressionHistory.engagementScore,
+      engagementScore: funnelProgressionHistory.engagementScoreAtChange,
       triggeredBy: funnelProgressionHistory.triggeredBy,
       createdAt: funnelProgressionHistory.createdAt,
       lead: {

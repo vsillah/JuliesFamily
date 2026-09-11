@@ -188,17 +188,17 @@ export async function processBulkSmsCampaign(campaignId: string): Promise<Proces
             
             await db.insert(communicationLogs).values({
               leadId: lead.id,
-              type: 'sms',
+              communicationType: 'sms',
               direction: 'outbound',
               subject: 'Bulk SMS Campaign',
-              body: messageContent,
-              sentAt: null,
-              status: 'failed',
+              content: messageContent,
               metadata: {
                 campaignId: campaign.id,
                 templateId: template?.id,
                 error: errorMessage,
-                exception: true
+                exception: true,
+                status: 'failed',
+                sentAt: null
               }
             });
           } catch (auditError: any) {
@@ -367,18 +367,18 @@ async function sendSmsToLead(
   // Create communication log entry
   await db.insert(communicationLogs).values({
     leadId: lead.id,
-    type: 'sms',
+    communicationType: 'sms',
     direction: 'outbound',
     subject: 'Bulk SMS Campaign',
-    body: finalMessage,
-    sentAt: twilioResult.success ? new Date() : null,
-    status: twilioResult.success ? 'sent' : (twilioResult.blocked ? 'blocked' : 'failed'),
+    content: finalMessage,
     metadata: {
       campaignId: campaign.id,
       templateId: template?.id,
       messageId: twilioResult.messageId,
       blocked: twilioResult.blocked,
-      error: twilioResult.error
+      error: twilioResult.error,
+      status: twilioResult.success ? 'sent' : (twilioResult.blocked ? 'blocked' : 'failed'),
+      sentAt: twilioResult.success ? new Date().toISOString() : null
     }
   });
   

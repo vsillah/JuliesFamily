@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { submitKinfloLeadCapture } from "@/lib/kinfloLeadCapture";
 import {
   Sparkles,
   Users,
@@ -38,11 +38,11 @@ export default function ProductLanding() {
 
   const submitLeadMutation = useMutation({
     mutationFn: async (data: { email: string; firstName: string; lastName: string }) => {
-      return await apiRequest("POST", "/api/leads", {
+      return await submitKinfloLeadCapture({
         ...data,
         persona: "provider",
-        funnelStage: "awareness",
-        leadSource: "Product Landing Page",
+        journeyStage: "awareness",
+        source: "Product Landing Page",
       });
     },
     onSuccess: () => {

@@ -1,7 +1,7 @@
 import { IStorage } from "../storage";
 import { AiContentGeneratorService, GenerationRequest } from "./aiContentGenerator";
 import { AutomationCandidate } from "./automationEngine";
-import { AbTest, AbTestVariant, InsertAbTest, InsertAbTestVariant } from "@shared/schema";
+import { AbTest, AbTestVariant } from "@shared/schema";
 
 export interface TestCreationResult {
   test: AbTest;
@@ -40,20 +40,22 @@ export class TestLifecycleManagerService {
     const test = await this.storage.createAbTest({
       name: `Auto: ${candidate.ruleName} - ${candidate.persona}/${candidate.funnelStage}`,
       description: `Automated test triggered by ${candidate.ruleName}. Underperforming metrics: ${candidate.triggeredMetrics.join(', ')}`,
-      contentType: candidate.contentType,
-      contentItemId: candidate.contentItemId,
+      type: candidate.contentType,
       status: 'draft',
       trafficAllocation: 100, // Full traffic allocation for automated tests
       startDate: new Date(),
       source: 'automated', // Explicit source for priority handling
       isAutomated: true, // DEPRECATED: Use 'source' field instead
+      automationRuleId: candidate.ruleId,
     });
 
     // Create control variant
     const controlVariant = await this.storage.createAbTestVariant({
       testId: test.id,
       name: 'Control (Original)',
-      presentationOverrides: controlData,
+      contentType: candidate.contentType,
+      contentItemId: candidate.contentItemId,
+      configuration: { kind: 'presentation', ...controlData },
       isControl: true,
     });
 
@@ -162,7 +164,7 @@ export class TestLifecycleManagerService {
     await this.storage.updateAbTest(testId, {
       status: 'completed',
       endDate: new Date(),
-      winnerId: winnerId || null,
+      winnerVariantId: winnerId || null,
     });
   }
 

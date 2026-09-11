@@ -55,6 +55,51 @@ export const VALUE_EQUATION_TEMPLATES: Record<Persona, {
     examples: string[];
   };
 }> = {
+  default: {
+    label: 'General Audience',
+    description: 'Broad appeal for all community members exploring Julie\'s programs',
+    dreamOutcome: {
+      label: 'What transformation will they experience?',
+      placeholder: 'e.g., Transform your life through education',
+      examples: [
+        'Build a brighter future for your family',
+        'Achieve your educational goals',
+        'Gain skills that open doors',
+        'Find the right program for your next step'
+      ]
+    },
+    perceivedLikelihood: {
+      label: 'Why should they trust you?',
+      placeholder: 'e.g., 20+ years serving families, proven results',
+      examples: [
+        '20+ years of proven community impact',
+        'Trusted by thousands of local families',
+        'Free, high-quality programs',
+        'Experienced, caring staff'
+      ]
+    },
+    timeDelay: {
+      label: 'How quickly will they see results?',
+      placeholder: 'e.g., See progress within weeks',
+      examples: [
+        'Start seeing results quickly',
+        'Immediate access to services',
+        'Progress you can measure',
+        'Fast-track your goals'
+      ]
+    },
+    effortSacrifice: {
+      label: 'How easy is it for them?',
+      placeholder: 'e.g., Flexible schedules, free programs, welcoming environment',
+      examples: [
+        'Completely free programs',
+        'Flexible scheduling options',
+        'Convenient locations',
+        'Welcoming, supportive environment',
+        'Simple registration support'
+      ]
+    }
+  },
   student: {
     label: 'Adult Education Student',
     description: 'Someone seeking to improve their education and skills for better opportunities',

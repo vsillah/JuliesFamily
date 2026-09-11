@@ -293,10 +293,14 @@ export default function AdminStudentEnrollments() {
                         <TableCell>
                           <div className="flex gap-2">
                             {enrollment.chromebookReceived && (
-                              <Laptop className="w-4 h-4 text-green-600" title="Chromebook received" />
+                              <span title="Chromebook received" aria-label="Chromebook received">
+                                <Laptop className="w-4 h-4 text-green-600" />
+                              </span>
                             )}
                             {enrollment.internetActivated && (
-                              <Wifi className="w-4 h-4 text-blue-600" title="Internet activated" />
+                              <span title="Internet activated" aria-label="Internet activated">
+                                <Wifi className="w-4 h-4 text-blue-600" />
+                              </span>
                             )}
                           </div>
                         </TableCell>

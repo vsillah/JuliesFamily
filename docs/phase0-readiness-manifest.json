@@ -1,0 +1,178 @@
+{
+  "phase": 0,
+  "name": "Phase 0 readiness manifest",
+  "objective": "Create a real KinFlo working tree from the Julie's Family GitHub source, harden secret and environment handling, run baseline validation, and produce the Drizzle-to-Convex migration map before implementation phases proceed.",
+  "workspace": "/Users/vambahsillah/Documents/KinFlo CRM",
+  "sourceRepository": "https://github.com/vsillah/JuliesFamily",
+  "branch": "codex/kinflo-phase-0-convex-plan",
+  "localOnlyUntrackedArtifacts": [
+    ".cursor/",
+    "Terminal Commands.md",
+    "commands/",
+    "docs/terminal-command-cheatsheet.md",
+    "excalidraw.log"
+  ],
+  "currentReviewEvidence": {
+    "pullRequest": "https://github.com/vsillah/JuliesFamily/pull/1",
+    "liveVerificationCommand": "gh pr view 1 --repo vsillah/JuliesFamily --json headRefOid,statusCheckRollup,url",
+    "lastLocalObservation": {
+      "observedDate": "2026-07-03",
+      "scope": "read-only local check after local commits; remote PR head remains behind the local branch and Vercel is build-rate-limited",
+      "localHead": "6a56a08d9c6e25c628e4465cb2fae7085cd6741f",
+      "remotePrHead": "164629f60e67edd4edeec71c9dcbf34a5c50ffbd",
+      "localCommitsAheadOfOrigin": 2,
+      "vercel": "FAILURE",
+      "vercelTarget": "https://vercel.com/vsillahs-projects?upgradeToPro=build-rate-limit",
+      "vercelPreviewComments": "MISSING_UNTIL_DEPLOYMENT_RECOVERS",
+      "mergeReadiness": "external_rate_limit_blocked"
+    },
+    "checks": [
+      {
+        "name": "Vercel",
+        "requiredStateBeforeMerge": "SUCCESS"
+      },
+      {
+        "name": "Vercel Preview Comments",
+        "requiredStateBeforeMerge": "SUCCESS"
+      }
+    ]
+  },
+  "providerBoundary": {
+    "hostedConvexDeploymentCreated": false,
+    "convexCodegenRun": false,
+    "generatedConvexApiFilesCommitted": false,
+    "liveConvexExecution": false,
+    "providerWrites": false,
+    "productionDataImported": false,
+    "secretValuesRead": false,
+    "secretValuesPrinted": false,
+    "gitHistoryRewritten": false,
+    "credentialsRotatedByBranch": false
+  },
+  "repoCompleteRequirements": [
+    {
+      "id": "source_checkout",
+      "requirement": "Create a real KinFlo working tree from the Julie's Family GitHub source.",
+      "status": "repo_complete",
+      "evidence": ["git remote get-url origin", "docs/phase0-baseline.md", "docs/kinflo-saas-adoption-plan.md"]
+    },
+    {
+      "id": "branch_and_dirty_state",
+      "requirement": "Confirm current branch, remotes, and dirty state.",
+      "status": "repo_complete",
+      "evidence": [
+        "git status --short --branch",
+        "known_untracked: .cursor/",
+        "known_untracked: Terminal Commands.md",
+        "known_untracked: commands/",
+        "known_untracked: docs/terminal-command-cheatsheet.md",
+        "known_untracked: excalidraw.log"
+      ]
+    },
+    {
+      "id": "dependency_install",
+      "requirement": "Run dependency install and record the dependency baseline.",
+      "status": "repo_complete",
+      "evidence": ["docs/phase0-baseline.md"]
+    },
+    {
+      "id": "build_baseline",
+      "requirement": "Run build baseline.",
+      "status": "repo_complete",
+      "evidence": ["npm run build", "docs/phase0-baseline.md"]
+    },
+    {
+      "id": "typecheck_baseline",
+      "requirement": "Run typecheck baseline.",
+      "status": "repo_complete",
+      "evidence": ["npm run kinflo:check-baseline", "docs/phase29-typescript-baseline-gate.md"]
+    },
+    {
+      "id": "env_inventory",
+      "requirement": "Inventory env vars without printing secrets.",
+      "status": "repo_complete",
+      "evidence": ["npm run kinflo:inventory-env", "docs/phase0-env-inventory.md"]
+    },
+    {
+      "id": "current_secret_quarantine",
+      "requirement": "Remove or quarantine tracked .env.local from the current tree.",
+      "status": "repo_complete",
+      "evidence": ["npm run kinflo:audit-secret-history", "git ls-files", "docs/phase0-secret-remediation.md"]
+    },
+    {
+      "id": "migration_map",
+      "requirement": "Create and validate the Drizzle-to-Convex migration map.",
+      "status": "repo_complete",
+      "evidence": ["docs/drizzle-to-convex-migration-map.md", "npm run kinflo:validate-map"]
+    },
+    {
+      "id": "implementation_phase_plan",
+      "requirement": "Mark Julie-specific content, reusable KinFlo modules, and implementation phases.",
+      "status": "repo_complete",
+      "evidence": ["docs/kinflo-saas-adoption-plan.md", "docs/drizzle-to-convex-migration-map.md", "docs/phase1-convex-control-plane.md"]
+    },
+    {
+      "id": "provider_free_boundary",
+      "requirement": "Preserve the provider-free Convex boundary until activation is approved.",
+      "status": "repo_complete",
+      "evidence": ["npm run kinflo:validate-phases", "npm run kinflo:activation-preflight", "npm run kinflo:live-handoff"]
+    },
+    {
+      "id": "generated_api_boundary",
+      "requirement": "Keep generated Convex API files untracked until hosted setup approval.",
+      "status": "repo_complete",
+      "evidence": ["git ls-files convex/_generated", "npm run kinflo:validate-generated-api"]
+    },
+    {
+      "id": "shell_route_smoke",
+      "requirement": "Smoke-check provider-light shell and public preview route wiring.",
+      "status": "repo_complete",
+      "evidence": ["npm run kinflo:validate-shell-routes", "docs/phase30-shell-route-smoke.md"]
+    },
+    {
+      "id": "local_admin_browser_smoke",
+      "requirement": "Prepare a repeatable local admin browser smoke without hosted auth or database setup.",
+      "status": "repo_complete",
+      "evidence": ["npm run kinflo:validate-local-admin-fixture", "npm run kinflo:serve-local-admin-smoke", "docs/phase31-local-admin-smoke-fixture.md"]
+    }
+  ],
+  "humanOwnedGates": [
+    {
+      "id": "credential_rotation_review",
+      "status": "human_owned_pending",
+      "requirement": "Rotate or confirm rotation of any real credentials that appeared in historical .env.local."
+    },
+    {
+      "id": "history_purge_decision",
+      "status": "human_owned_pending",
+      "requirement": "Decide whether to purge historical .env.local blobs before public or client sharing."
+    },
+    {
+      "id": "hosted_convex_activation",
+      "status": "human_owned_pending",
+      "requirement": "Approve hosted Convex ownership, auth, backup, environment setup, codegen, generated API review, and live smoke execution."
+    },
+    {
+      "id": "integration_merge",
+      "status": "human_owned_pending",
+      "requirement": "Decide when Integration Captain should merge PR #1 and verify deployments."
+    }
+  ],
+  "localValidationCommands": [
+    "npm run kinflo:validate-phase0-readiness",
+    "npm run kinflo:validate-pr-review-state",
+    "npm run kinflo:validate-integration-review-handoff",
+    "npm run kinflo:audit-secret-history",
+    "npm run kinflo:inventory-env",
+    "npm run kinflo:validate-phases",
+    "npm run kinflo:validate-map",
+    "npm run kinflo:check-baseline",
+    "npm run kinflo:validate-shell-routes",
+    "npm run kinflo:validate-local-admin-fixture",
+    "npm run convex:check",
+    "npm run build",
+    "git diff --check"
+  ],
+  "reviewStatus": "repo_complete_external_rate_limit_blocked",
+  "nextActivationGate": "Wait for Vercel build-rate limit recovery, push the local commits when preview capacity is available, then rerun PR checks and the integration review handoff before merge scheduling."
+}

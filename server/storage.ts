@@ -11,6 +11,7 @@ import {
   googleReviews, donations, wishlistItems, donationCampaigns,
   campaignMembers, campaignTestimonials,
   emailTemplates, emailLogs, emailOpens, emailLinks, emailClicks, emailSendTimeInsights, emailReportSchedules, smsTemplates, smsSends, communicationLogs,
+  smsBulkCampaigns,
   emailCampaigns, emailSequenceSteps, emailCampaignEnrollments,
   pipelineStages, leadAssignments, tasks, pipelineHistory,
   adminPreferences, auditLogs,
@@ -20,6 +21,8 @@ import {
   volunteerEvents, volunteerShifts, volunteerEnrollments, volunteerSessionLogs,
   segments, emailUnsubscribes,
   programs, adminEntitlements, adminImpersonationSessions,
+  acquisitionChannels, marketingCampaigns, channelSpendLedger,
+  leadAttribution, donorLifecycleStages, donorEconomics, economicsSettings,
   type User, type UpsertUser,
   type Organization, type InsertOrganization, 
   type Lead, type InsertLead,
@@ -54,8 +57,10 @@ import {
   type EmailClick, type InsertEmailClick,
   type EmailSendTimeInsight, type InsertEmailSendTimeInsight,
   type EmailReportSchedule, type InsertEmailReportSchedule,
+  type LeadEmailOpen, type LeadEmailClick,
   type SmsTemplate, type InsertSmsTemplate,
   type SmsSend, type InsertSmsSend,
+  type SmsBulkCampaign, type InsertSmsBulkCampaign,
   type CommunicationLog, type InsertCommunicationLog,
   type EmailCampaign, type InsertEmailCampaign,
   type EmailSequenceStep, type InsertEmailSequenceStep,
@@ -81,10 +86,17 @@ import {
   type Program, type InsertProgram,
   type AdminEntitlement, type InsertAdminEntitlement,
   type AdminImpersonationSession, type InsertAdminImpersonationSession,
+  type AcquisitionChannel, type InsertAcquisitionChannel,
+  type MarketingCampaign, type InsertMarketingCampaign,
+  type ChannelSpendLedger, type InsertChannelSpendLedger,
+  type LeadAttribution, type InsertLeadAttribution,
+  type DonorLifecycleStage, type InsertDonorLifecycleStage,
+  type DonorEconomics, type InsertDonorEconomics,
+  type EconomicsSettings, type InsertEconomicsSettings,
   type ProgramType,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and, or, sql, inArray } from "drizzle-orm";
+import { eq, desc, and, or, sql, inArray, getTableColumns } from "drizzle-orm";
 import { createCacLtgpStorage, type ICacLtgpStorage } from "./storage/cacLtgpStorage";
 import { createTechGoesHomeStorage, type ITechGoesHomeStorage } from "./storage/tghStorage";
 import { createAdminProvisioningStorage, type IAdminProvisioningStorage } from "./storage/adminProvisioningStorage";
@@ -122,6 +134,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   createLead(lead: InsertLead): Promise<Lead>;
   getLead(id: string): Promise<Lead | undefined>;
   getLeadByEmail(email: string): Promise<Lead | undefined>;
+  getLeadByPhone(phone: string): Promise<Lead | undefined>;
   getAllLeads(): Promise<Lead[]>;
   getLeadsByPersona(persona: string): Promise<Lead[]>;
   getLeadsByFunnelStage(funnelStage: string): Promise<Lead[]>;
@@ -186,6 +199,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   
   // A/B Test Variant operations
   createAbTestVariant(variant: InsertAbTestVariant): Promise<AbTestVariant>;
+  getAbTestVariant(id: string): Promise<AbTestVariant | undefined>;
   getAbTestVariants(testId: string): Promise<AbTestVariant[]>;
   updateAbTestVariant(id: string, updates: Partial<InsertAbTestVariant>): Promise<AbTestVariant | undefined>;
   deleteAbTestVariant(id: string): Promise<void>;
@@ -270,6 +284,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   // Automated A/B Testing - Automation Runs (Append-only + Query)
   createAbTestAutomationRun(run: InsertAbTestAutomationRun): Promise<AbTestAutomationRun>;
   getAbTestAutomationRun(id: string): Promise<AbTestAutomationRun | undefined>;
+  getAllAbTestAutomationRuns(limit?: number): Promise<AbTestAutomationRun[]>;
   getAbTestAutomationRuns(filters: {
     ruleId?: string;
     status?: string;
@@ -371,6 +386,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   deleteWishlistItem(id: string): Promise<boolean>;
   
   // Email Template operations
+  getEmailTemplate(id: string): Promise<EmailTemplate | undefined>;
   getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined>;
   getAllEmailTemplates(): Promise<EmailTemplate[]>;
   createEmailTemplate(template: InsertEmailTemplate): Promise<EmailTemplate>;
@@ -453,6 +469,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   // SMS Template operations
   createSmsTemplate(template: InsertSmsTemplate): Promise<SmsTemplate>;
   getAllSmsTemplates(): Promise<SmsTemplate[]>;
+  getSmsTemplate(id: string): Promise<SmsTemplate | undefined>;
   getSmsTemplateById(id: string): Promise<SmsTemplate | undefined>;
   getSmsTemplatesByPersona(persona: string): Promise<SmsTemplate[]>;
   updateSmsTemplate(id: string, updates: Partial<InsertSmsTemplate>): Promise<SmsTemplate | undefined>;
@@ -504,7 +521,10 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   getEmailReportSchedule(id: string): Promise<EmailReportSchedule | undefined>;
   getActiveEmailReportSchedules(): Promise<EmailReportSchedule[]>;
   getSchedulesDueForExecution(): Promise<EmailReportSchedule[]>;
-  updateEmailReportSchedule(id: string, updates: Partial<InsertEmailReportSchedule>): Promise<EmailReportSchedule | undefined>;
+  updateEmailReportSchedule(
+    id: string,
+    updates: Partial<InsertEmailReportSchedule> & { lastRunAt?: Date | null }
+  ): Promise<EmailReportSchedule | undefined>;
   deleteEmailReportSchedule(id: string): Promise<void>;
   
   // Segment operations
@@ -727,6 +747,7 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   
   // Channel Spend Ledger
   createSpendEntry(entry: InsertChannelSpendLedger): Promise<ChannelSpendLedger>;
+  getAllSpendEntries(): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByChannel(channelId: string): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByCampaign(campaignId: string): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByPeriod(periodKey: string): Promise<ChannelSpendLedger[]>;
@@ -746,6 +767,8 @@ export interface IStorage extends ICacLtgpStorage, ITechGoesHomeStorage, IAdminP
   getAllDonorLifecycleStages(): Promise<DonorLifecycleStage[]>;
   getDonorsByStage(stage: string): Promise<DonorLifecycleStage[]>;
   updateDonorLifecycleStage(leadId: string, updates: Partial<InsertDonorLifecycleStage>): Promise<DonorLifecycleStage | undefined>;
+  listLifecycleWithLeads(params: { stage?: string; page: number; limit: number }): Promise<{ donors: any[]; total: number }>;
+  countLifecycleByStage(): Promise<Record<string, number>>;
   
   // Donor Economics
   createDonorEconomics(economics: InsertDonorEconomics): Promise<DonorEconomics>;
@@ -870,6 +893,7 @@ export class DatabaseStorage implements IStorage {
   updateMarketingCampaign!: ICacLtgpStorage['updateMarketingCampaign'];
   deleteMarketingCampaign!: ICacLtgpStorage['deleteMarketingCampaign'];
   createSpendEntry!: ICacLtgpStorage['createSpendEntry'];
+  getAllSpendEntries!: ICacLtgpStorage['getAllSpendEntries'];
   getSpendEntriesByChannel!: ICacLtgpStorage['getSpendEntriesByChannel'];
   getSpendEntriesByCampaign!: ICacLtgpStorage['getSpendEntriesByCampaign'];
   getSpendEntriesByPeriod!: ICacLtgpStorage['getSpendEntriesByPeriod'];
@@ -885,6 +909,8 @@ export class DatabaseStorage implements IStorage {
   getAllDonorLifecycleStages!: ICacLtgpStorage['getAllDonorLifecycleStages'];
   getDonorsByStage!: ICacLtgpStorage['getDonorsByStage'];
   updateDonorLifecycleStage!: ICacLtgpStorage['updateDonorLifecycleStage'];
+  listLifecycleWithLeads!: ICacLtgpStorage['listLifecycleWithLeads'];
+  countLifecycleByStage!: ICacLtgpStorage['countLifecycleByStage'];
   createDonorEconomics!: ICacLtgpStorage['createDonorEconomics'];
   getDonorEconomics!: ICacLtgpStorage['getDonorEconomics'];
   updateDonorEconomics!: ICacLtgpStorage['updateDonorEconomics'];
@@ -950,6 +976,7 @@ export class DatabaseStorage implements IStorage {
     this.updateMarketingCampaign = this.cacLtgpStorage.updateMarketingCampaign.bind(this.cacLtgpStorage);
     this.deleteMarketingCampaign = this.cacLtgpStorage.deleteMarketingCampaign.bind(this.cacLtgpStorage);
     this.createSpendEntry = this.cacLtgpStorage.createSpendEntry.bind(this.cacLtgpStorage);
+    this.getAllSpendEntries = this.cacLtgpStorage.getAllSpendEntries.bind(this.cacLtgpStorage);
     this.getSpendEntriesByChannel = this.cacLtgpStorage.getSpendEntriesByChannel.bind(this.cacLtgpStorage);
     this.getSpendEntriesByCampaign = this.cacLtgpStorage.getSpendEntriesByCampaign.bind(this.cacLtgpStorage);
     this.getSpendEntriesByPeriod = this.cacLtgpStorage.getSpendEntriesByPeriod.bind(this.cacLtgpStorage);
@@ -965,6 +992,8 @@ export class DatabaseStorage implements IStorage {
     this.getAllDonorLifecycleStages = this.cacLtgpStorage.getAllDonorLifecycleStages.bind(this.cacLtgpStorage);
     this.getDonorsByStage = this.cacLtgpStorage.getDonorsByStage.bind(this.cacLtgpStorage);
     this.updateDonorLifecycleStage = this.cacLtgpStorage.updateDonorLifecycleStage.bind(this.cacLtgpStorage);
+    this.listLifecycleWithLeads = this.cacLtgpStorage.listLifecycleWithLeads.bind(this.cacLtgpStorage);
+    this.countLifecycleByStage = this.cacLtgpStorage.countLifecycleByStage.bind(this.cacLtgpStorage);
     this.createDonorEconomics = this.cacLtgpStorage.createDonorEconomics.bind(this.cacLtgpStorage);
     this.getDonorEconomics = this.cacLtgpStorage.getDonorEconomics.bind(this.cacLtgpStorage);
     this.updateDonorEconomics = this.cacLtgpStorage.updateDonorEconomics.bind(this.cacLtgpStorage);
@@ -1005,6 +1034,28 @@ export class DatabaseStorage implements IStorage {
     this.getCurrentlyImpersonatedUser = this.adminProvisioningStorage.getCurrentlyImpersonatedUser.bind(this.adminProvisioningStorage);
     this.hasActiveImpersonation = this.adminProvisioningStorage.hasActiveImpersonation.bind(this.adminProvisioningStorage);
   }
+
+  async calculateDonorLTGP(leadId: string): Promise<number> {
+    const economics = await this.getDonorEconomics(leadId);
+
+    if (!economics) {
+      return 0;
+    }
+
+    const lifetimeRevenue = economics.lifetimeRevenue || 0;
+    const deliveryCosts = economics.actualDeliveryCosts || economics.estimatedDeliveryCosts || 0;
+    const ltgp = lifetimeRevenue - deliveryCosts;
+
+    await this.updateDonorEconomics(leadId, {
+      lifetimeGrossProfit: ltgp,
+      grossMarginPercent: lifetimeRevenue > 0 ? Math.round((ltgp / lifetimeRevenue) * 100) : 0,
+      ltgpToCacRatio: economics.customerAcquisitionCost
+        ? Math.round((ltgp / economics.customerAcquisitionCost) * 100)
+        : 0,
+    });
+
+    return ltgp;
+  }
   
   // User operations
   async getUser(id: string): Promise<User | undefined> {
@@ -1026,7 +1077,7 @@ export class DatabaseStorage implements IStorage {
     // Join with leads table to include funnel stage
     const usersWithFunnelStage = await db
       .select({
-        ...users,
+        ...getTableColumns(users),
         funnelStage: leads.funnelStage,
       })
       .from(users)
@@ -1086,11 +1137,6 @@ export class DatabaseStorage implements IStorage {
       if (userData.passions !== undefined) {
         updateData.passions = userData.passions;
       }
-      // Allow updating funnelStage from OIDC claims (used for testing/demo purposes)
-      if (userData.funnelStage !== undefined) {
-        updateData.funnelStage = userData.funnelStage;
-      }
-      
       try {
         const [user] = await db
           .update(users)
@@ -1158,11 +1204,6 @@ export class DatabaseStorage implements IStorage {
             if (userData.passions !== undefined) {
               updateData.passions = userData.passions;
             }
-            // Allow updating funnelStage from OIDC claims (used for testing/demo purposes)
-            if (userData.funnelStage !== undefined) {
-              updateData.funnelStage = userData.funnelStage;
-            }
-            
             try {
               const [user] = await db
                 .update(users)
@@ -1368,6 +1409,11 @@ export class DatabaseStorage implements IStorage {
 
   async getLeadByEmail(email: string): Promise<Lead | undefined> {
     const [lead] = await db.select().from(leads).where(eq(leads.email, email));
+    return lead;
+  }
+
+  async getLeadByPhone(phone: string): Promise<Lead | undefined> {
+    const [lead] = await db.select().from(leads).where(eq(leads.phone, phone));
     return lead;
   }
 
@@ -1757,7 +1803,7 @@ export class DatabaseStorage implements IStorage {
           : or(
               sql`${contentVisibility.persona} IS NULL`,
               eq(contentVisibility.persona, persona)
-            )
+            )!
       );
     }
     
@@ -1769,11 +1815,11 @@ export class DatabaseStorage implements IStorage {
           : or(
               sql`${contentVisibility.funnelStage} IS NULL`,
               eq(contentVisibility.funnelStage, funnelStage)
-            )
+            )!
       );
     }
     
-    let query = db
+    const query = db
       .selectDistinctOn([contentItems.id], {
         id: contentItems.id,
         type: contentItems.type,
@@ -1802,13 +1848,11 @@ export class DatabaseStorage implements IStorage {
       );
 
     // Apply standard ordering (passion-based sorting temporarily disabled due to array parameter issue)
-    query = query.orderBy(
+    return query.orderBy(
       contentItems.id, // For DISTINCT ON
       sql`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
       contentItems.createdAt
     );
-
-    return query;
   }
 
   async getVisibleContentItems(
@@ -1984,17 +2028,17 @@ export class DatabaseStorage implements IStorage {
     // If multiple tests of same priority, select most recent by startDate
     const prioritizedTests = new Set<string>();
     
-    for (const [key, testsForTarget] of testsByTarget.entries()) {
+    for (const [, testsForTarget] of Array.from(testsByTarget.entries())) {
       // Separate manual and automated tests
       // Fallback to isAutomated field for legacy tests without source field
-      const manualTests = testsForTarget.filter(t => {
+      const manualTests = testsForTarget.filter((t: AbTest) => {
         if (t.source === 'manual') return true;
         if (t.source === 'automated') return false;
         // Legacy: fall back to isAutomated field (explicit false check)
         return t.isAutomated === false;
       });
       
-      const automatedTests = testsForTarget.filter(t => {
+      const automatedTests = testsForTarget.filter((t: AbTest) => {
         if (t.source === 'automated') return true;
         if (t.source === 'manual') return false;
         // Legacy: fall back to isAutomated field (explicit true check or null defaults to automated)
@@ -2005,17 +2049,17 @@ export class DatabaseStorage implements IStorage {
       
       if (manualTests.length > 0) {
         // Prefer manual tests - select most recent by startDate (or createdAt if no startDate)
-        selectedTest = manualTests.sort((a, b) => {
+        selectedTest = manualTests.sort((a: AbTest, b: AbTest) => {
           const dateA = a.startDate || a.createdAt;
           const dateB = b.startDate || b.createdAt;
-          return dateB.getTime() - dateA.getTime();
+          return (dateB?.getTime() || 0) - (dateA?.getTime() || 0);
         })[0];
       } else if (automatedTests.length > 0) {
         // Fall back to automated tests if no manual tests exist
-        selectedTest = automatedTests.sort((a, b) => {
+        selectedTest = automatedTests.sort((a: AbTest, b: AbTest) => {
           const dateA = a.startDate || a.createdAt;
           const dateB = b.startDate || b.createdAt;
-          return dateB.getTime() - dateA.getTime();
+          return (dateB?.getTime() || 0) - (dateA?.getTime() || 0);
         })[0];
       }
       
@@ -2075,6 +2119,14 @@ export class DatabaseStorage implements IStorage {
   // A/B Test Variant operations
   async createAbTestVariant(variantData: InsertAbTestVariant): Promise<AbTestVariant> {
     const [variant] = await db.insert(abTestVariants).values(variantData).returning();
+    return variant;
+  }
+
+  async getAbTestVariant(id: string): Promise<AbTestVariant | undefined> {
+    const [variant] = await db
+      .select()
+      .from(abTestVariants)
+      .where(eq(abTestVariants.id, id));
     return variant;
   }
 
@@ -2294,6 +2346,8 @@ export class DatabaseStorage implements IStorage {
         return null;
       }
 
+      const metadata = firstItem.metadata as { primaryButton?: string; secondaryButton?: string } | null;
+
       // Return configuration matching variant structure
       return {
         kind: 'presentation',
@@ -2302,8 +2356,8 @@ export class DatabaseStorage implements IStorage {
         imageName: firstItem.imageName || undefined,
         imageUrl: firstItem.imageUrl || undefined,
         // Extract CTA text from metadata if available
-        ctaText: firstItem.metadata?.primaryButton || undefined,
-        secondaryCtaText: firstItem.metadata?.secondaryButton || undefined,
+        ctaText: metadata?.primaryButton || undefined,
+        secondaryCtaText: metadata?.secondaryButton || undefined,
       };
     }
 
@@ -2705,6 +2759,10 @@ export class DatabaseStorage implements IStorage {
       .from(abTestAutomationRuns)
       .where(eq(abTestAutomationRuns.id, id));
     return run;
+  }
+
+  async getAllAbTestAutomationRuns(limit: number = 50): Promise<AbTestAutomationRun[]> {
+    return this.getAbTestAutomationRuns({ limit });
   }
 
   async getAbTestAutomationRuns(filters: {
@@ -3266,6 +3324,14 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Email Template operations
+  async getEmailTemplate(id: string): Promise<EmailTemplate | undefined> {
+    const [template] = await db
+      .select()
+      .from(emailTemplates)
+      .where(eq(emailTemplates.id, id));
+    return template;
+  }
+
   async getEmailTemplateByName(name: string): Promise<EmailTemplate | undefined> {
     const [template] = await db
       .select()
@@ -3717,9 +3783,10 @@ export class DatabaseStorage implements IStorage {
       ? `AND status IN ('sent', 'delivered', 'queued')`
       : '';
     
+    const escapedCampaignId = campaignId.replace(/'/g, "''");
+
     // Execute time-series query with date_trunc for bucketing
     // Uses new indexes: campaign_id+sent_at for email_logs, campaign_id+opened_at/clicked_at for email_opens/clicks
-    // Using parameterized query for campaignId to prevent SQL injection
     const results = await db.execute<{
       bucket: string;
       count: number;
@@ -3728,12 +3795,12 @@ export class DatabaseStorage implements IStorage {
         date_trunc('${interval}', ${timestampCol}) as bucket,
         COUNT(*) as count
       FROM ${table}
-      WHERE campaign_id = $1
+      WHERE campaign_id = '${escapedCampaignId}'
         ${statusFilter}
         ${dateFilter}
       GROUP BY bucket
       ORDER BY bucket ASC
-    `, [campaignId]));
+    `));
 
     return results.rows.map(row => ({
       timestamp: row.bucket,
@@ -3752,14 +3819,12 @@ export class DatabaseStorage implements IStorage {
     try {
       // Build scope filter based on scope type
       let scopeFilter = '';
-      const params: string[] = [];
+      const escapedScopeId = scopeId?.replace(/'/g, "''");
       
-      if (scope === 'campaign' && scopeId) {
-        scopeFilter = 'AND el.campaign_id = $1';
-        params.push(scopeId);
-      } else if (scope === 'persona' && scopeId) {
-        scopeFilter = 'AND COALESCE(el.persona, l.persona) = $1';
-        params.push(scopeId);
+      if (scope === 'campaign' && escapedScopeId) {
+        scopeFilter = `AND el.campaign_id = '${escapedScopeId}'`;
+      } else if (scope === 'persona' && escapedScopeId) {
+        scopeFilter = `AND COALESCE(el.persona, l.persona) = '${escapedScopeId}'`;
       }
       // global scope has no filter
       
@@ -3842,7 +3907,7 @@ export class DatabaseStorage implements IStorage {
         FROM aggregated a
         CROSS JOIN baseline b
         ORDER BY a.day_of_week, a.hour_of_day
-      `, params));
+      `));
       
       // Calculate metrics and confidence scores for each bucket
       const now = new Date();
@@ -4007,7 +4072,8 @@ export class DatabaseStorage implements IStorage {
       const filtered = insights.filter(i => i.confidenceScore >= minConfidence);
       
       // Calculate baseline open rate from metadata (use first insight's metadata)
-      const baselineOpenRate = filtered[0]?.metadata?.baselineOpenRate || 0;
+      const baselineMetadata = filtered[0]?.metadata as { baselineOpenRate?: number } | null | undefined;
+      const baselineOpenRate = baselineMetadata?.baselineOpenRate || 0;
       
       // Calculate top 3 windows sorted by confidence then open rate
       const topWindows = filtered
@@ -4060,6 +4126,10 @@ export class DatabaseStorage implements IStorage {
   async getSmsTemplateById(id: string): Promise<SmsTemplate | undefined> {
     const [template] = await db.select().from(smsTemplates).where(eq(smsTemplates.id, id));
     return template;
+  }
+
+  async getSmsTemplate(id: string): Promise<SmsTemplate | undefined> {
+    return this.getSmsTemplateById(id);
   }
 
   async getSmsTemplatesByPersona(persona: string): Promise<SmsTemplate[]> {
@@ -4343,7 +4413,10 @@ export class DatabaseStorage implements IStorage {
       .orderBy(emailReportSchedules.nextRunAt);
   }
 
-  async updateEmailReportSchedule(id: string, updates: Partial<InsertEmailReportSchedule>): Promise<EmailReportSchedule | undefined> {
+  async updateEmailReportSchedule(
+    id: string,
+    updates: Partial<InsertEmailReportSchedule> & { lastRunAt?: Date | null }
+  ): Promise<EmailReportSchedule | undefined> {
     const [updated] = await db
       .update(emailReportSchedules)
       .set({ ...updates, updatedAt: new Date() })
@@ -5210,7 +5283,7 @@ export class DatabaseStorage implements IStorage {
 
       // Get row count from backup table
       const countResult = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${quotedBackupTable}`));
-      const rowCount = parseInt(countResult.rows[0]?.count || '0');
+      const rowCount = parseInt(String(countResult.rows[0]?.count || '0'));
 
       // Create snapshot metadata record
       const [snapshot] = await db.insert(backupSnapshots).values({
@@ -5301,7 +5374,7 @@ export class DatabaseStorage implements IStorage {
 
       // Get count of rows in restored table
       const countResult = await db.execute(sql.raw(`SELECT COUNT(*) as count FROM ${quotedTable}`));
-      const rowsRestored = parseInt(countResult.rows[0]?.count || '0');
+      const rowsRestored = parseInt(String(countResult.rows[0]?.count || '0'));
 
       // Commit transaction
       await db.execute(sql.raw(`COMMIT`));
@@ -5663,16 +5736,18 @@ export class DatabaseStorage implements IStorage {
 
   async getUpcomingShifts(eventId?: string, limit: number = 10): Promise<VolunteerShift[]> {
     const now = new Date();
-    let query = db.select().from(volunteerShifts).where(sql`${volunteerShifts.shiftDate} >= ${now}`);
+    const conditions = [sql`${volunteerShifts.shiftDate} >= ${now}`];
     
     if (eventId) {
-      query = query.where(and(
-        eq(volunteerShifts.eventId, eventId),
-        sql`${volunteerShifts.shiftDate} >= ${now}`
-      ) as any);
+      conditions.push(eq(volunteerShifts.eventId, eventId));
     }
     
-    return await query.orderBy(volunteerShifts.shiftDate).limit(limit);
+    return await db
+      .select()
+      .from(volunteerShifts)
+      .where(and(...conditions))
+      .orderBy(volunteerShifts.shiftDate)
+      .limit(limit);
   }
 
   async updateVolunteerShift(id: string, updates: Partial<InsertVolunteerShift>): Promise<VolunteerShift | undefined> {

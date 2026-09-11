@@ -1,0 +1,100 @@
+{
+  "phase": 64,
+  "status": "provider-light-readiness-contract",
+  "convexFunction": "siteFactory.listClientWebsiteOnboardingReadiness",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "onboardingTasksWritten": false,
+    "invitesSent": false,
+    "providersCalled": false
+  },
+  "blockedUntil": [
+    "Hosted Convex project ownership, billing, backup, auth, and env setup are approved",
+    "Generated Convex API files are produced and reviewed outside this provider-light branch",
+    "Read-only hosted smokes pass for tenant, site, launch readiness, and public preview queries",
+    "Tenant creation, site creation, invitation delivery, lead write, and publish mutation smoke order is approved",
+    "Client launch packet destination, privacy, and owner handoff are approved",
+    "Provider send, domain, storage, email, SMS, AI, and billing smokes pass where applicable"
+  ],
+  "readinessTrackers": [
+    {
+      "siteKey": "julies-family-public",
+      "label": "Julie Family founding onboarding tracker",
+      "readinessScore": 67,
+      "completedTasks": 8,
+      "totalTasks": 12,
+      "openTasks": 4,
+      "taskGroupCount": 2,
+      "blockedTaskCount": 2,
+      "criticalBlockers": [
+        "Hosted Convex read-only smoke not approved",
+        "Public lead write smoke not approved",
+        "History purge or private-repo residual-risk decision still pending"
+      ],
+      "blockedActivationActions": ["publish public site", "write CRM lead", "switch adapter", "send external launch packet"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteOnboardingReadiness",
+        "siteFactory.listClientWebsiteStarterContentPacks",
+        "launchReadiness.getSiteLaunchReadiness",
+        "publicSite.resolvePublishedSite",
+        "crm.submitLead"
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "label": "Advisor client onboarding tracker",
+      "readinessScore": 58,
+      "completedTasks": 7,
+      "totalTasks": 12,
+      "openTasks": 5,
+      "taskGroupCount": 2,
+      "blockedTaskCount": 2,
+      "criticalBlockers": [
+        "Tenant creation mutation not approved",
+        "Tenant admin invitation delivery not approved",
+        "Domain and lead capture smokes not approved"
+      ],
+      "blockedActivationActions": ["create tenant", "send tenant admin invite", "attach custom domain", "publish public site"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteOnboardingReadiness",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "siteFactory.createSiteFromTemplate",
+        "launchReadiness.getSiteLaunchReadiness"
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "label": "Campaign microsite onboarding tracker",
+      "readinessScore": 42,
+      "completedTasks": 5,
+      "totalTasks": 12,
+      "openTasks": 7,
+      "taskGroupCount": 2,
+      "blockedTaskCount": 3,
+      "criticalBlockers": [
+        "Campaign consent review not approved",
+        "Provider send and SMS/email smokes not approved",
+        "Public form lead write not approved"
+      ],
+      "blockedActivationActions": ["send campaign", "write public form lead", "publish AI copy", "send SMS/email"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteOnboardingReadiness",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite",
+        "launchReadiness.getSiteLaunchReadiness"
+      ]
+    }
+  ],
+  "totals": {
+    "trackers": 3,
+    "taskGroups": 6,
+    "tasks": 18,
+    "blockedTasks": 7,
+    "criticalBlockers": 9
+  }
+}

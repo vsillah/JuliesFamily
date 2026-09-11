@@ -26,7 +26,6 @@ export interface GenerationResult {
 
 export class AiContentGeneratorService {
   private genai: GoogleGenAI;
-  private model: any;
 
   constructor(
     private storage: IStorage,
@@ -38,7 +37,6 @@ export class AiContentGeneratorService {
     }
     
     this.genai = new GoogleGenAI({ apiKey: key });
-    this.model = this.genai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
   }
 
   /**
@@ -50,9 +48,11 @@ export class AiContentGeneratorService {
 
     try {
       // Generate content using Gemini
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      const generatedText = response.text();
+      const response = await this.genai.models.generateContent({
+        model: "gemini-2.0-flash-exp",
+        contents: prompt,
+      });
+      const generatedText = response.text || "";
 
       // Parse generated content based on content type
       const generatedContent = this.parseGeneratedContent(
@@ -338,7 +338,9 @@ RETENTION STAGE:
     const variant = await this.storage.createAbTestVariant({
       testId: request.testId,
       name: `AI Generated ${new Date().toISOString().split('T')[0]}`,
-      presentationOverrides: generatedContent,
+      contentType: request.contentType,
+      contentItemId: request.contentItemId,
+      configuration: { kind: 'presentation', ...generatedContent },
       isControl: false,
     });
 
@@ -366,12 +368,12 @@ RETENTION STAGE:
 
     const generation: InsertAbTestVariantAiGeneration = {
       variantId: variantId!,
-      provider: 'gemini',
-      model: 'gemini-2.0-flash-exp',
-      prompt,
-      generatedContent,
+      aiProvider: 'gemini',
+      aiModel: 'gemini-2.0-flash-exp',
+      userPrompt: prompt,
+      aiResponse: JSON.stringify(generatedContent),
       tokensUsed,
-      status,
+      generationStatus: status,
       errorMessage,
     };
 

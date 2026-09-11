@@ -68,6 +68,10 @@ interface CampaignMember {
   notificationChannels: string[];
 }
 
+interface MemberCampaignSummary extends CampaignMember {
+  campaign: Campaign;
+}
+
 export default function MemberCampaignDashboard() {
   const { campaignId } = useParams();
   const [, setLocation] = useLocation();
@@ -97,11 +101,11 @@ export default function MemberCampaignDashboard() {
     },
   });
 
-  const { data: campaigns } = useQuery({
+  const { data: campaigns = [] } = useQuery<MemberCampaignSummary[]>({
     queryKey: ['/api/my-campaigns'],
   });
 
-  const memberInfo = campaigns?.find((c: any) => c.campaign.id === campaignId) as CampaignMember | undefined;
+  const memberInfo = campaigns.find((c) => c.campaign.id === campaignId);
 
   const updatePreferencesMutation = useMutation({
     mutationFn: async (data: { notifyOnDonation: boolean }) => {

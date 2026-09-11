@@ -1,5 +1,13 @@
 import type { ContentItem, AbTestVariantConfiguration } from "@shared/schema";
 
+type PresentationVariantConfiguration = Extract<AbTestVariantConfiguration, { kind: "presentation" }>;
+
+function isPresentationConfiguration(
+  variantConfig: AbTestVariantConfiguration
+): variantConfig is PresentationVariantConfiguration {
+  return variantConfig.kind === "presentation";
+}
+
 /**
  * Apply A/B test variant configuration overrides to a content item
  * This allows testing different presentations while maintaining persona×journey content selection
@@ -13,6 +21,10 @@ export function applyABVariantOverrides(
   variantConfig: AbTestVariantConfiguration | null | undefined
 ): ContentItem {
   if (!variantConfig) {
+    return content;
+  }
+
+  if (!isPresentationConfiguration(variantConfig)) {
     return content;
   }
 

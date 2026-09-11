@@ -1,0 +1,305 @@
+{
+  "schemaVersion": 1,
+  "phase": 27,
+  "name": "KinFlo Convex live smoke manifest",
+  "status": "provider-light-contract",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "notes": "This manifest defines the approved hosted smoke order only. It does not execute Convex functions, import generated API files, create provider resources, or write production data."
+  },
+  "blockedUntil": [
+    "Hosted Convex deployment exists and is owned by Vambah.",
+    "CONVEX_DEPLOYMENT and VITE_CONVEX_URL are configured outside committed source.",
+    "Convex auth issuer and client id are configured outside committed source.",
+    "npm run kinflo:activation-preflight, npm run kinflo:validate-generated-api, npm run kinflo:validate-live-smoke, and npm run kinflo:live-handoff pass immediately before codegen.",
+    "npm run convex:codegen runs after hosted setup approval and generated API bindings are reviewed.",
+    "Rollback owner is named and fixture adapter fallback is confirmed."
+  ],
+  "smokeSteps": [
+    {
+      "id": "preflight-provider-boundary",
+      "order": 10,
+      "surface": "preflight",
+      "mode": "read",
+      "functions": [],
+      "evidence": [
+        "secret env files are untracked",
+        "convex/_generated files are untracked before approved codegen",
+        "generated API remains unimported until hosted setup approval"
+      ],
+      "auditEvidence": "No audit event expected because no hosted mutation runs.",
+      "rollback": "Keep fixture adapters selected and do not run hosted Convex commands.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "identity-bootstrap",
+      "order": 20,
+      "surface": "identity",
+      "mode": "write",
+      "functions": [
+        "controlPlane.upsertCurrentUser",
+        "controlPlane.bootstrapPlatformAdmin",
+        "controlPlane.viewer"
+      ],
+      "evidence": [
+        "signed-in user is synced",
+        "platform admin bootstrap is idempotent",
+        "viewer returns expected membership and platform role"
+      ],
+      "auditEvidence": "Bootstrap mutation writes an identity/admin audit event or confirms the existing idempotent admin record.",
+      "rollback": "Keep admin shell on fixtures, pause new invitations, and preserve bootstrap audit output.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "activation-seed",
+      "order": 30,
+      "surface": "activation",
+      "mode": "write",
+      "functions": [
+        "activation.readiness",
+        "activation.seedSmokeSite"
+      ],
+      "evidence": [
+        "readiness counts tenants, sites, users, roles, billing plans, and published pages",
+        "smoke seed creates tenant, site, page, resolver args, entitlements, and audit event"
+      ],
+      "auditEvidence": "activation.seedSmokeSite records activation_smoke_seeded with tenant and site ids.",
+      "rollback": "Delete only approved smoke records or leave them marked as smoke data; do not import production records.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "access-policy",
+      "order": 40,
+      "surface": "access",
+      "mode": "write",
+      "functions": [
+        "roleCatalog.syncDefaultRoles",
+        "accessPolicy.viewerPermissionSnapshot",
+        "accessPolicy.canPerform"
+      ],
+      "evidence": [
+        "default role catalog is synced",
+        "viewer permission snapshot is tenant and site scoped",
+        "allow and deny checks match expected role capabilities"
+      ],
+      "auditEvidence": "roleCatalog.syncDefaultRoles writes role_catalog_synced audit evidence.",
+      "rollback": "Keep permission guards on fixture/REST fallback and do not invite client admins until deny checks pass.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "tenant-control-plane-readonly",
+      "order": 50,
+      "surface": "tenant control plane",
+      "mode": "read",
+      "functions": [
+        "controlPlane.listTenants",
+        "controlPlane.listSitesForTenant",
+        "controlPlane.listAuditEvents"
+      ],
+      "evidence": [
+        "super admin sees only expected tenants",
+        "tenant-scoped site query excludes other tenants",
+        "audit event list is permission guarded"
+      ],
+      "auditEvidence": "Read-only step captures prior audit events from identity, activation, and role sync.",
+      "rollback": "Keep shell tenant tables on fixture data until read-only scope checks pass.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "plan-entitlement-readonly",
+      "order": 60,
+      "surface": "plans and entitlements",
+      "mode": "read",
+      "functions": [
+        "controlPlane.listPlanCatalog",
+        "controlPlane.entitlementSnapshot",
+        "entitlements.entitlementUsageSnapshot",
+        "entitlements.checkEntitlementLimit"
+      ],
+      "evidence": [
+        "default plan catalog is available",
+        "effective entitlement snapshot resolves plan and overrides",
+        "usage snapshot reports current, limit, remaining, and allowed values"
+      ],
+      "auditEvidence": "Read-only step captures entitlement snapshots after activation seed.",
+      "rollback": "Keep entitlement UI on fixture data and block live site creation if limits are inconsistent.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "site-factory-client-site",
+      "order": 70,
+      "surface": "site factory",
+      "mode": "write",
+      "functions": [
+        "siteFactory.listStarterTemplates",
+        "siteFactory.createSiteFromTemplate",
+        "controlPlane.createInvitation"
+      ],
+      "evidence": [
+        "starter templates include quality contract metadata",
+        "draft client site is created from template",
+        "client admin invitation is scoped to tenant and site"
+      ],
+      "auditEvidence": "siteFactory.createSiteFromTemplate and controlPlane.createInvitation write site creation and invitation audit events.",
+      "rollback": "Archive smoke site or keep it unpublished, revoke invite, and keep launch packets fixture-backed.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "public-renderer-readonly",
+      "order": 80,
+      "surface": "public renderer",
+      "mode": "read",
+      "functions": [
+        "publicSite.resolvePublishedSite"
+      ],
+      "evidence": [
+        "published verified site resolves",
+        "draft page stays hidden",
+        "resolver returns public-safe site, page, navigation, content, and lead capture data"
+      ],
+      "auditEvidence": "Read-only public resolver smoke references prior publish or activation audit evidence.",
+      "rollback": "Keep public preview route on fixtures and do not map domains to live resolver.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "crm-lead-capture",
+      "order": 90,
+      "surface": "CRM",
+      "mode": "write",
+      "functions": [
+        "crm.submitLead",
+        "crm.listLeads",
+        "crm.getLeadTimeline"
+      ],
+      "evidence": [
+        "public lead submission creates a site-scoped lead",
+        "tenant admin can list only authorized leads",
+        "lead timeline includes submission event"
+      ],
+      "auditEvidence": "crm.submitLead writes a lead event and tenant/site scoped timeline evidence.",
+      "rollback": "Keep public forms on preview fallback, mark smoke lead as test data, and pause outbound integrations.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "domain-metadata",
+      "order": 100,
+      "surface": "domain metadata",
+      "mode": "write",
+      "functions": [
+        "siteBuilder.upsertDomain",
+        "entitlements.checkEntitlementLimit"
+      ],
+      "evidence": [
+        "custom domain entitlement limit is enforced",
+        "duplicate hostname is rejected",
+        "domain metadata updates without creating DNS or SSL provider records"
+      ],
+      "auditEvidence": "siteBuilder.upsertDomain writes custom domain audit evidence without DNS provider writes.",
+      "rollback": "Remove or deactivate smoke domain metadata and keep DNS/Vercel domain steps blocked.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "site-builder-publish",
+      "order": 110,
+      "surface": "site builder",
+      "mode": "write",
+      "functions": [
+        "siteBuilder.getSiteDraft",
+        "siteBuilder.createPage",
+        "siteBuilder.updatePage",
+        "siteBuilder.upsertNavigationItem",
+        "siteBuilder.createContentBlock",
+        "siteBuilder.updateContentBlock",
+        "siteBuilder.upsertVisibilityRule",
+        "siteBuilder.createAssetRecord",
+        "siteBuilder.publishPage"
+      ],
+      "evidence": [
+        "draft query returns pages, nav, blocks, visibility, assets, and domains",
+        "content edits are site-permission guarded",
+        "publish mutation creates a public-safe published page"
+      ],
+      "auditEvidence": "siteBuilder.publishPage and content mutations write publish/content audit evidence.",
+      "rollback": "Unpublish smoke page, leave audit trail intact, and keep public resolver off live site until review passes.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "tenant-control-plane-mutations",
+      "order": 120,
+      "surface": "tenant control plane",
+      "mode": "write",
+      "functions": [
+        "controlPlane.createTenant",
+        "controlPlane.createSite",
+        "controlPlane.updateSiteStatus",
+        "controlPlane.updateThemeTokens",
+        "controlPlane.grantMembership",
+        "controlPlane.revokeInvitation",
+        "controlPlane.acceptInvitation"
+      ],
+      "evidence": [
+        "tenant and site mutations enforce platform and tenant permissions",
+        "theme and status changes write audit evidence",
+        "membership and invitation lifecycle is reversible in smoke data"
+      ],
+      "auditEvidence": "Every tenant control-plane mutation writes or references a scoped audit event.",
+      "rollback": "Archive smoke tenant/site records, revoke pending invites, and keep client onboarding blocked until cleanup is verified.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "crm-workflow-mutations",
+      "order": 130,
+      "surface": "CRM",
+      "mode": "write",
+      "functions": [
+        "crm.upsertPipelineStage",
+        "crm.updateLead",
+        "crm.assignLead",
+        "crm.createTask"
+      ],
+      "evidence": [
+        "pipeline stage is lead:manage guarded",
+        "lead update and assignment append timeline events",
+        "task creation is scoped to authorized tenant/site lead data"
+      ],
+      "auditEvidence": "CRM workflow mutations append lead event timeline evidence.",
+      "rollback": "Delete or mark smoke pipeline/task data as test-only and keep outbound notification integrations paused.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "id": "billing-entitlement-mutations",
+      "order": 140,
+      "surface": "plans and entitlements",
+      "mode": "write",
+      "functions": [
+        "controlPlane.syncDefaultBillingPlans",
+        "controlPlane.setTenantEntitlementOverride"
+      ],
+      "evidence": [
+        "default billing plans sync without Stripe writes",
+        "manual entitlement override is billing:manage guarded",
+        "override appears in entitlement snapshot"
+      ],
+      "auditEvidence": "Billing plan sync and entitlement override write billing audit evidence without Stripe provider writes.",
+      "rollback": "Remove smoke override, keep Stripe Billing gated, and restore fixture entitlement display if snapshot diverges.",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    }
+  ]
+}

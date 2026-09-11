@@ -8,10 +8,36 @@ import { VolunteerProgressCard } from "@/components/VolunteerProgressCard";
 import { usePersona } from "@/contexts/PersonaContext";
 import type { ContentItem, VolunteerDashboardCardMetadata } from "@shared/schema";
 
+type VolunteerEnrollmentSummary = {
+  enrollments: Array<{
+    enrollment: {
+      id: string;
+      volunteerRole?: string | null;
+      enrollmentStatus?: string | null;
+    };
+    event?: {
+      name?: string | null;
+    };
+    shift: {
+      shiftDate: string | Date;
+      startTime?: string | null;
+      endTime?: string | null;
+      location?: string | null;
+      maxVolunteers?: number | null;
+      currentEnrollments?: number | null;
+    };
+  }>;
+  hours: {
+    totalMinutes: number;
+    sessionCount: number;
+    yearToDate: number;
+  };
+};
+
 export default function VolunteerEngagement() {
   const { persona, funnelStage } = usePersona();
   
-  const { data, isLoading } = useQuery({
+  const { data, isLoading } = useQuery<VolunteerEnrollmentSummary>({
     queryKey: ['/api/volunteer/my-enrollments'],
   });
 
@@ -42,13 +68,13 @@ export default function VolunteerEngagement() {
   const enrollments = data?.enrollments || [];
   const hours = data?.hours || { totalMinutes: 0, sessionCount: 0, yearToDate: 0 };
 
-  const upcomingEnrollments = enrollments.filter((e: any) => {
-    const shiftDate = new Date(e.shift?.shiftDate);
+  const upcomingEnrollments = enrollments.filter((e) => {
+    const shiftDate = new Date(e.shift.shiftDate);
     return shiftDate >= new Date();
   });
 
-  const pastEnrollments = enrollments.filter((e: any) => {
-    const shiftDate = new Date(e.shift?.shiftDate);
+  const pastEnrollments = enrollments.filter((e) => {
+    const shiftDate = new Date(e.shift.shiftDate);
     return shiftDate < new Date();
   });
 
@@ -58,7 +84,7 @@ export default function VolunteerEngagement() {
   const ytdMinutes = hours.yearToDate % 60;
 
   // Calculate active enrollments (upcoming shifts with confirmed status)
-  const activeEnrollments = upcomingEnrollments.filter((e: any) => 
+  const activeEnrollments = upcomingEnrollments.filter((e) =>
     e.enrollment.enrollmentStatus === 'confirmed'
   ).length;
 
@@ -150,7 +176,7 @@ export default function VolunteerEngagement() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {upcomingEnrollments.map((enrollment: any) => (
+              {upcomingEnrollments.map((enrollment) => (
                 <Card key={enrollment.enrollment.id} className="hover-elevate" data-testid={`card-enrollment-${enrollment.enrollment.id}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -226,7 +252,7 @@ export default function VolunteerEngagement() {
             </Card>
           ) : (
             <div className="space-y-4">
-              {pastEnrollments.map((enrollment: any) => (
+              {pastEnrollments.map((enrollment) => (
                 <Card key={enrollment.enrollment.id} data-testid={`card-past-enrollment-${enrollment.enrollment.id}`}>
                   <CardHeader>
                     <div className="flex items-start justify-between gap-4 flex-wrap">

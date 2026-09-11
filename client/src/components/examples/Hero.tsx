@@ -1,5 +1,5 @@
 import Hero from '../Hero';
 
 export default function HeroExample() {
-  return <Hero />;
+  return <Hero onImageLoaded={() => {}} isPersonaLoading={false} />;
 }

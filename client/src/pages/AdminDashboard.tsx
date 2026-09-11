@@ -14,7 +14,7 @@ import {
 import { 
   Users, TrendingUp, Target, Mail, Phone, Calendar,
   BarChart3, Filter, Download, UserPlus, Image as ImageIcon, FileText,
-  Shield, BookOpen, MessageSquare, Kanban, Settings, ChevronDown, Database, GraduationCap, Clock, UserCog
+  Shield, BookOpen, MessageSquare, Kanban, Settings, ChevronDown, Database, GraduationCap, Clock, UserCog, Boxes
 } from "lucide-react";
 import type { Lead } from "@shared/schema";
 import { useLocation } from "wouter";
@@ -222,6 +222,12 @@ export default function AdminDashboard() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start">
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/kinflo-os" className="flex items-center cursor-pointer" data-testid="link-kinflo-os">
+                      <Boxes className="w-4 h-4 mr-2" />
+                      KinFlo OS
+                    </Link>
+                  </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/admin/content" className="flex items-center cursor-pointer">
                       <FileText className="w-4 h-4 mr-2" />

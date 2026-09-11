@@ -36,6 +36,7 @@ export interface ICacLtgpStorage {
   
   // Channel Spend Ledger
   createSpendEntry(entry: InsertChannelSpendLedger): Promise<ChannelSpendLedger>;
+  getAllSpendEntries(): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByChannel(channelId: string): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByCampaign(campaignId: string): Promise<ChannelSpendLedger[]>;
   getSpendEntriesByPeriod(periodKey: string): Promise<ChannelSpendLedger[]>;
@@ -199,13 +200,13 @@ export function createCacLtgpStorage(): ICacLtgpStorage {
     async getAttributionsByChannel(channelId: string): Promise<LeadAttribution[]> {
       return await db.select().from(leadAttribution)
         .where(eq(leadAttribution.channelId, channelId))
-        .orderBy(desc(leadAttribution.attributedAt));
+        .orderBy(desc(leadAttribution.createdAt));
     },
     
     async getAttributionsByCampaign(campaignId: string): Promise<LeadAttribution[]> {
       return await db.select().from(leadAttribution)
         .where(eq(leadAttribution.campaignId, campaignId))
-        .orderBy(desc(leadAttribution.attributedAt));
+        .orderBy(desc(leadAttribution.createdAt));
     },
     
     async updateLeadAttribution(leadId: string, updates: Partial<InsertLeadAttribution>): Promise<LeadAttribution | undefined> {
@@ -305,7 +306,7 @@ export function createCacLtgpStorage(): ICacLtgpStorage {
           firstName: leads.firstName,
           lastName: leads.lastName,
           phone: leads.phone,
-          leadStatus: leads.status,
+          leadStatus: leads.leadStatus,
           
           // Lifecycle fields
           currentStage: donorLifecycleStages.currentStage,

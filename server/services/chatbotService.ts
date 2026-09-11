@@ -90,11 +90,15 @@ interface ChatMessage {
 
 interface ToolCall {
   id: string;
-  type: string;
+  type: 'function';
   function: {
     name: string;
     arguments: string;
   };
+}
+
+function isFunctionToolCall(toolCall: OpenAI.Chat.ChatCompletionMessageToolCall): toolCall is OpenAI.Chat.ChatCompletionMessageFunctionToolCall {
+  return toolCall.type === 'function';
 }
 
 async function getRecentLogs(): Promise<string> {
@@ -305,9 +309,10 @@ export async function processChatMessage(
     }
 
     if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      const functionToolCalls = assistantMessage.tool_calls.filter(isFunctionToolCall);
       const toolResults = await Promise.all(
-        assistantMessage.tool_calls.map(async (toolCall) => {
-          const result = await executeTool(toolCall as ToolCall);
+        functionToolCalls.map(async (toolCall) => {
+          const result = await executeTool(toolCall);
           return {
             tool_call_id: toolCall.id,
             name: toolCall.function.name,
@@ -316,7 +321,7 @@ export async function processChatMessage(
         })
       );
 
-      const escalationCall = assistantMessage.tool_calls.find(
+      const escalationCall = functionToolCalls.find(
         tc => tc.function.name === 'escalate_issue'
       );
       

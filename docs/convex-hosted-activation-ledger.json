@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "phase": 53,
+  "name": "KinFlo hosted activation evidence ledger",
+  "status": "prepare_only_evidence_ledger",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "providerApisTouched": false,
+    "secretsReadOrPrinted": false,
+    "notes": "This ledger records the evidence expected after approval. It does not provision Convex, run codegen, import generated API, execute hosted Convex functions, touch provider APIs, or read/print secrets."
+  },
+  "sourceOfTruth": {
+    "activationPacket": "docs/convex-hosted-activation-packet.json",
+    "liveSmokeManifest": "docs/convex-live-smoke-manifest.json",
+    "adapterSwitchPlan": "docs/convex-adapter-switch-plan.json",
+    "adminShell": "client/src/pages/AdminKinfloShell.tsx",
+    "shellData": "client/src/lib/kinfloShellData.ts"
+  },
+  "evidenceSteps": [
+    {
+      "order": 10,
+      "id": "repo-sharing-risk",
+      "label": "Repo sharing risk posture",
+      "owner": "Vambah",
+      "requiredBefore": "external review",
+      "commandOrAction": "Approve history purge or private-repo residual-risk posture before public/client sharing.",
+      "evidenceTarget": "Secret-history audit result plus explicit sharing decision.",
+      "rollback": "Keep repository private and pause external/client review until history posture is approved.",
+      "status": "pending_approval",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 20,
+      "id": "hosted-convex-project",
+      "label": "Hosted Convex ownership",
+      "owner": "Vambah",
+      "requiredBefore": "convex codegen",
+      "commandOrAction": "Create or select hosted Convex project with ownership, billing, backup, auth, and env policy approved.",
+      "evidenceTarget": "Convex dashboard project URL and owner/billing/backup notes captured outside committed source.",
+      "rollback": "Keep all shell surfaces on fixtures and do not run hosted Convex commands.",
+      "status": "blocked_provider_gate",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 30,
+      "id": "env-and-codegen-approval",
+      "label": "Env and codegen approval",
+      "owner": "Vambah",
+      "requiredBefore": "generated API import",
+      "commandOrAction": "Configure Convex/auth env values outside committed source, then approve npm run convex:codegen.",
+      "evidenceTarget": "Generated bindings reviewed against KINFLO_GENERATED_API_BINDINGS without committing secrets.",
+      "rollback": "Delete generated files from the working tree and keep generatedApiAvailable false.",
+      "status": "blocked_provider_gate",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 40,
+      "id": "read-only-smoke-window",
+      "label": "Read-only hosted smokes",
+      "owner": "Vambah",
+      "requiredBefore": "mutation smoke",
+      "commandOrAction": "Run activation.readiness, viewer, role/access, tenant/site, public renderer, and launch readiness reads first.",
+      "evidenceTarget": "Read-only smoke outputs prove tenant/site scope and launchReadiness.getSiteLaunchReadiness parity.",
+      "rollback": "Stop activation and keep fixtureKinfloShellAdapter selected if any read leaks scope or mismatches fixture expectations.",
+      "status": "ready_after_approval",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 50,
+      "id": "mutation-smoke-window",
+      "label": "Mutation smoke order",
+      "owner": "Vambah",
+      "requiredBefore": "adapter switch",
+      "commandOrAction": "Run mutation smokes in docs/convex-live-smoke-manifest.json order after read-only smokes pass.",
+      "evidenceTarget": "Audit events, rollback notes, and smoke record ids captured for tenant, site, invite, publish, and lead flows.",
+      "rollback": "Archive smoke data and pause all mutation/provider steps on any permission, audit, or cleanup failure.",
+      "status": "ready_after_approval",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 60,
+      "id": "adapter-switch-review",
+      "label": "Fixture-to-live adapter switch",
+      "owner": "Vambah",
+      "requiredBefore": "live shell data",
+      "commandOrAction": "Switch adapters one surface at a time only after its smoke evidence passes.",
+      "evidenceTarget": "Surface-level switch evidence from Adapter Switch Readiness with rollback confirmed.",
+      "rollback": "Return the affected surface to fixture data and keep every other surface blocked until reviewed.",
+      "status": "pending_approval",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    },
+    {
+      "order": 70,
+      "id": "provider-write-approvals",
+      "label": "Provider write approvals",
+      "owner": "Vambah",
+      "requiredBefore": "DNS, billing, communications, storage, or AI writes",
+      "commandOrAction": "Approve each non-Convex provider separately: DNS, SSL, Vercel domain, Stripe, SendGrid, Twilio, storage, and AI.",
+      "evidenceTarget": "Separate provider smoke packet with consent, unsubscribe, usage cap, source-safety, and rollback proof.",
+      "rollback": "Keep provider metadata local and leave sends/uploads/domain attachment/AI generation disabled.",
+      "status": "blocked_provider_gate",
+      "providerWrites": false,
+      "liveConvexExecution": false
+    }
+  ],
+  "completionRules": [
+    "No hosted Convex deployment is created by this phase.",
+    "No generated API is imported.",
+    "No live Convex query, mutation, or action is executed.",
+    "No provider API is touched.",
+    "Every step remains review-only until Vambah approves the matching hosted gate."
+  ],
+  "evidenceTargets": [
+    "activation.readiness hosted output",
+    "launchReadiness.getSiteLaunchReadiness hosted output for Julie and one new client site",
+    "publicSite.resolvePublishedSite hosted output for a published smoke page",
+    "crm.submitLead smoke lead id plus crm.listLeads scoped proof",
+    "controlPlane.listAuditEvents audit entries for identity, activation, site creation, invitation, publish, and lead capture",
+    "cross-tenant deny proof for client admin role"
+  ]
+}

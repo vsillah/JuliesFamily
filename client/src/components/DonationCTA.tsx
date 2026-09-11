@@ -27,10 +27,10 @@ export default function DonationCTA() {
   
   // Track CTA visibility - trackOnce will queue until test & variant are ready
   // No guards needed here - trackOnce handles queueing and replay automatically
-  const { ref: ctaRef, isVisible, dwellTime, hasEngaged } = useViewportTracking({
+  useViewportTracking<HTMLElement>({
+    ref: sectionRef,
     threshold: 0.5,
-    dwellThreshold: METRIC_THRESHOLDS.CTA_DWELL_TIME,
-    onEnterViewport: () => {
+    onView: () => {
       // Call unconditionally - trackOnce queues if test/variant not ready yet
       tracking.cta.view('donation-section');
     },
@@ -139,10 +139,7 @@ export default function DonationCTA() {
   return (
     <section 
       id="donation" 
-      ref={(node) => {
-        sectionRef.current = node;
-        ctaRef.current = node;
-      }}
+      ref={sectionRef}
       className="relative py-16 sm:py-20 overflow-hidden"
       data-testid="section-donation-cta"
     >

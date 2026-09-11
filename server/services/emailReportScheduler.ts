@@ -11,6 +11,15 @@ const TIMEZONE = 'America/New_York';
 let intervalHandle: NodeJS.Timeout | null = null;
 let isRunning = false;
 
+interface CampaignReportPerformance {
+  totalSent: number;
+  totalOpens: number;
+  totalClicks: number;
+  openRate: number;
+  clickRate: number;
+  lastSentAt?: Date | string | null;
+}
+
 // Initialize SendGrid
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -184,7 +193,7 @@ async function generateReportData(reportType: string, frequency: string): Promis
   // Get campaign performance data
   const campaignStats = await Promise.all(
     campaigns.map(async (campaign) => {
-      const performance = await storage.getEmailCampaignPerformance(campaign.id);
+      const performance = await getCampaignReportPerformance(campaign.id);
       return {
         name: campaign.name,
         ...performance,
@@ -230,7 +239,7 @@ async function generateReportData(reportType: string, frequency: string): Promis
         summary: {
           totalLeadsEmailed: uniqueLeads.size,
           totalEmailsSent: recentLogs.length,
-          engagedLeads: recentLogs.filter(log => log.openedAt || log.clickedAt).length,
+          engagedLeads: await countEngagedRecentLogs(recentLogs.map(log => log.id)),
         },
       };
     
@@ -263,6 +272,48 @@ async function generateReportData(reportType: string, frequency: string): Promis
     default:
       throw new Error(`Unknown report type: ${reportType}`);
   }
+}
+
+async function getCampaignReportPerformance(campaignId: string): Promise<CampaignReportPerformance> {
+  const [logs, opens, clicks] = await Promise.all([
+    storage.getEmailLogsByCampaign(campaignId),
+    storage.getEmailOpensByCampaign(campaignId),
+    storage.getEmailClicksByCampaign(campaignId),
+  ]);
+
+  const totalSent = logs.length;
+  const uniqueOpenLogIds = new Set(opens.map(open => open.emailLogId).filter(Boolean));
+  const uniqueClickLogIds = new Set(clicks.map(click => click.emailLogId).filter(Boolean));
+  const sentTimes = logs
+    .map(log => log.sentAt || log.createdAt)
+    .filter((value): value is Date => value instanceof Date);
+
+  return {
+    totalSent,
+    totalOpens: uniqueOpenLogIds.size,
+    totalClicks: uniqueClickLogIds.size,
+    openRate: totalSent > 0 ? uniqueOpenLogIds.size / totalSent : 0,
+    clickRate: totalSent > 0 ? uniqueClickLogIds.size / totalSent : 0,
+    lastSentAt: sentTimes.length > 0
+      ? new Date(Math.max(...sentTimes.map(date => date.getTime())))
+      : null,
+  };
+}
+
+async function countEngagedRecentLogs(emailLogIds: string[]): Promise<number> {
+  const engaged = await Promise.all(
+    emailLogIds.map(async (emailLogId) => {
+      const log = await storage.getEmailLog(emailLogId);
+      if (!log?.campaignId) return false;
+      const [opens, clicks] = await Promise.all([
+        storage.getEmailOpensByCampaign(log.campaignId),
+        storage.getEmailClicksByCampaign(log.campaignId),
+      ]);
+      return opens.some(open => open.emailLogId === emailLogId) || clicks.some(click => click.emailLogId === emailLogId);
+    })
+  );
+
+  return engaged.filter(Boolean).length;
 }
 
 /**

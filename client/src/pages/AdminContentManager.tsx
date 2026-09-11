@@ -54,6 +54,18 @@ const PASSION_OPTIONS = [
   { id: 'community', label: 'Community Building' },
 ];
 
+type NewContentItemDraft = {
+  type: string;
+  title: string;
+  description: string;
+  imageName: string;
+  imageUrl?: string;
+  metadata: any;
+  passionTags?: string[];
+};
+
+type ContentImageSource = Pick<ContentItem, "imageName" | "imageUrl"> | NewContentItemDraft;
+
 // URL Validation Badge Component
 function UrlValidationBadge({ url, persona, funnelStage }: { 
   url: string | undefined | null;
@@ -376,7 +388,7 @@ export default function AdminContentManager() {
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newItem, setNewItem] = useState({
+  const [newItem, setNewItem] = useState<NewContentItemDraft>({
     type: "service",
     title: "",
     description: "",
@@ -566,7 +578,7 @@ export default function AdminContentManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (item: typeof newItem) => {
+    mutationFn: async (item: NewContentItemDraft) => {
       return apiRequest("POST", "/api/content", item);
     },
     onSuccess: () => {
@@ -1217,7 +1229,7 @@ export default function AdminContentManager() {
     });
   };
 
-  const getImageUrl = (item: ContentItem | null) => {
+  const getImageUrl = (item: ContentImageSource | null) => {
     if (!item) return null;
     
     // Prefer Object Storage URL (new AI naming system)

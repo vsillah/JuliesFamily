@@ -1,0 +1,428 @@
+import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+
+const checks = [];
+const runtimePath = "client/src/lib/kinfloConvexRuntime.ts";
+const generatedContractPath = "client/src/lib/kinfloGeneratedApiContract.ts";
+const convexPath = "convex/siteFactory.ts";
+const switchPlanPath = "docs/convex-adapter-switch-plan.json";
+const evidenceMatrixPath = "docs/convex-adapter-switch-evidence-matrix.json";
+const shellDataPath = "client/src/lib/kinfloShellData.ts";
+const shellPath = "client/src/pages/AdminKinfloShell.tsx";
+
+function pass(label) {
+  checks.push({ label, ok: true });
+}
+
+function fail(label, detail) {
+  checks.push({ label, ok: false, detail });
+}
+
+function read(path) {
+  return readFileSync(path, "utf8");
+}
+
+function requireFile(path) {
+  if (existsSync(path)) {
+    pass(`${path} exists`);
+    return true;
+  }
+  fail(`${path} exists`, "Expected configuration profile generated API coverage artifact was not found.");
+  return false;
+}
+
+function requireIncludes(path, patterns) {
+  if (!requireFile(path)) {
+    return;
+  }
+  const contents = read(path);
+  for (const pattern of patterns) {
+    if (contents.includes(pattern)) {
+      pass(`${path} includes ${pattern}`);
+    } else {
+      fail(`${path} includes ${pattern}`, "Expected configuration profile generated API coverage text was not found.");
+    }
+  }
+}
+
+function parseJson(path) {
+  try {
+    const parsed = JSON.parse(read(path));
+    pass(`${path} parses as JSON`);
+    return parsed;
+  } catch (error) {
+    fail(`${path} parses as JSON`, error instanceof Error ? error.message : String(error));
+    return undefined;
+  }
+}
+
+function siteFactorySurfaceFromPlan(plan) {
+  return (plan?.switchBatches ?? [])
+    .flatMap((batch) => batch.surfaces ?? [])
+    .find((surface) => surface.id === "site-factory");
+}
+
+function siteFactorySurfaceFromMatrix(matrix) {
+  return (matrix?.surfaceEvidenceMatrix ?? []).find((surface) => surface.id === "site-factory");
+}
+
+const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" })
+  .split("\n")
+  .filter(Boolean);
+const trackedGenerated = tracked.filter((file) => file.startsWith("convex/_generated/"));
+const trackedSecretFiles = tracked.filter((file) => [".env", ".env.local"].includes(file) || file.endsWith(".local"));
+
+if (trackedGenerated.length > 0) {
+  fail("generated Convex API files remain untracked", `Tracked generated files: ${trackedGenerated.join(", ")}`);
+} else {
+  pass("generated Convex API files remain untracked");
+}
+
+if (trackedSecretFiles.length > 0) {
+  fail("secret env files remain untracked", `Tracked secret-like files: ${trackedSecretFiles.join(", ")}`);
+} else {
+  pass("secret env files remain untracked");
+}
+
+for (const path of [
+  "docs/phase98-configuration-profile-generated-api-coverage.md",
+  runtimePath,
+  generatedContractPath,
+  convexPath,
+  shellDataPath,
+  shellPath,
+  switchPlanPath,
+  evidenceMatrixPath,
+  "docs/phase88-generated-api-review-board.md",
+  "scripts/validate-kinflo-configuration-profile-generated-api-coverage.mjs",
+  "package.json",
+]) {
+  requireFile(path);
+}
+
+requireIncludes("docs/phase98-configuration-profile-generated-api-coverage.md", [
+  "Phase 98: Configuration Profile Generated API Coverage",
+  "npm run kinflo:validate-configuration-profile-generated-api-coverage",
+  "siteFactoryListClientWebsiteConfigurationApprovalMatrices",
+  "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+  "siteFactoryListClientWebsiteConfigurationAuditTimelines",
+  "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+  "siteFactoryListClientWebsiteConfigurationChangeSets",
+  "siteFactory.listClientWebsiteConfigurationChangeSets",
+  "siteFactoryListClientWebsiteConfigurationReviewPackets",
+  "siteFactory.listClientWebsiteConfigurationReviewPackets",
+  "siteFactoryListClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationProfiles",
+  "siteFactoryListClientWebsiteConfigurationPublishReadiness",
+  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+  "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
+  "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests",
+  "siteFactory.listClientWebsiteConfigurationSaveRequests",
+  "siteFactoryListClientWebsiteDomainReadinessPackets",
+  "siteFactory.listClientWebsiteDomainReadinessPackets",
+  "siteFactoryListClientWebsiteAdminInvitationReadinessPackets",
+  "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "siteFactoryListClientWebsiteLaunchComposer",
+  "siteFactory.listClientWebsiteLaunchComposer",
+  "configuration profile read",
+  "configuration audit timeline read",
+  "configuration publish readiness read",
+  "configuration rollback checkpoint read",
+  "configuration save request read",
+  "client website domain readiness read",
+  "client website admin invitation readiness read",
+  "experience configuration preset read",
+  "No generated Convex API files are committed or imported.",
+  "No live Convex query, mutation, or action is executed.",
+]);
+
+requireIncludes(runtimePath, [
+  "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
+  "siteFactoryListClientWebsiteConfigurationApprovalMatrices: \"siteFactory.listClientWebsiteConfigurationApprovalMatrices\"",
+  "siteFactoryListClientWebsiteConfigurationAuditTimelines: \"siteFactory.listClientWebsiteConfigurationAuditTimelines\"",
+  "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
+  "siteFactoryListClientWebsiteConfigurationProfiles: \"siteFactory.listClientWebsiteConfigurationProfiles\"",
+  "siteFactoryListClientWebsiteConfigurationPublishReadiness: \"siteFactory.listClientWebsiteConfigurationPublishReadiness\"",
+  "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints: \"siteFactory.listClientWebsiteConfigurationRollbackCheckpoints\"",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests: \"siteFactory.listClientWebsiteConfigurationSaveRequests\"",
+  "siteFactoryListClientWebsiteDomainReadinessPackets: \"siteFactory.listClientWebsiteDomainReadinessPackets\"",
+  "siteFactoryListClientWebsiteAdminInvitationReadinessPackets: \"siteFactory.listClientWebsiteAdminInvitationReadinessPackets\"",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets: \"siteFactory.listClientWebsiteExperienceConfigurationPresets\"",
+  "siteFactoryListClientWebsiteLaunchComposer: \"siteFactory.listClientWebsiteLaunchComposer\"",
+]);
+
+requireIncludes(generatedContractPath, [
+  "siteFactoryListClientWebsiteConfigurationApprovalMatrices",
+  "client website configuration approval matrices include approver roles, evidence, save blockers, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationAuditTimelines",
+  "client website configuration audit timelines include evidence events, actor labels, rollback notes, blocked actions, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationChangeSets",
+  "client website configuration change sets include draft changes, save blockers, approval evidence, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationReviewPackets",
+  "client website configuration review packets include selected-site surfaces, save blockers, required evidence, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationProfiles",
+  "client website configuration profiles include template, brand, navigation, CRM, editable surfaces, locked surfaces, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationPublishReadiness",
+  "client website configuration publish readiness includes publish criteria, blockers, rollback requirements, blocked actions, and provider boundaries",
+  "siteFactoryListClientWebsiteDomainReadinessPackets",
+  "client website domain readiness packets include hostname posture, DNS checklist, SSL posture, provider state, rollback plan, and provider boundaries",
+  "siteFactoryListClientWebsiteAdminInvitationReadinessPackets",
+  "client website admin invitation readiness packets include invite role, scope, evidence, copy blocks, rollback plan, and provider boundaries",
+  "siteFactoryListClientWebsiteExperienceConfigurationPresets",
+  "client website experience configuration presets include audience, journey, layout density, tone, navigation mode, admin preset, personalization rules, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationRollbackCheckpoints",
+  "client website configuration rollback checkpoints include fixture baselines, rollback owners, rehearsal steps, blocked actions, and provider boundaries",
+  "siteFactoryListClientWebsiteConfigurationSaveRequests",
+  "client website configuration save requests include selected payloads, approval evidence, blockers, rollback posture, and provider boundaries",
+  "siteFactoryListClientWebsiteLaunchComposer",
+  "client website launch composer includes tenant, template, admin preset, approval evidence, execution steps, blocked live switches, and provider boundaries",
+]);
+
+requireIncludes(convexPath, [
+  "export const listClientWebsiteConfigurationApprovalMatrices",
+  "export const listClientWebsiteConfigurationAuditTimelines",
+  "export const listClientWebsiteConfigurationChangeSets",
+  "export const listClientWebsiteConfigurationReviewPackets",
+  "export const listClientWebsiteConfigurationProfiles",
+  "export const listClientWebsiteConfigurationPublishReadiness",
+  "export const listClientWebsiteConfigurationRollbackCheckpoints",
+  "export const listClientWebsiteConfigurationSaveRequests",
+  "export const listClientWebsiteDomainReadinessPackets",
+  "export const listClientWebsiteAdminInvitationReadinessPackets",
+  "export const listClientWebsiteExperienceConfigurationPresets",
+  "export const listClientWebsiteLaunchComposer",
+]);
+
+requireIncludes("docs/phase88-generated-api-review-board.md", [
+  "Generated API bindings: 86",
+  "Query bindings: 48",
+  "Smoke-manifest review gaps: 41",
+]);
+
+requireIncludes(shellDataPath, [
+  "requiredFunctions?: string[]",
+  "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
+  "siteFactory.listClientWebsiteConfigurationAuditTimelines",
+  "siteFactory.listClientWebsiteConfigurationChangeSets",
+  "siteFactory.listClientWebsiteConfigurationReviewPackets",
+  "siteFactory.listClientWebsiteConfigurationProfiles",
+  "siteFactory.listClientWebsiteConfigurationPublishReadiness",
+  "siteFactory.listClientWebsiteConfigurationRollbackCheckpoints",
+  "siteFactory.listClientWebsiteConfigurationSaveRequests",
+  "siteFactory.listClientWebsiteDomainReadinessPackets",
+  "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
+  "siteFactory.listClientWebsiteExperienceConfigurationPresets",
+  "siteFactory.listClientWebsiteLaunchComposer",
+]);
+
+requireIncludes(shellPath, [
+  "surface.requiredFunctions",
+  "required generated API functions",
+]);
+
+requireIncludes("package.json", [
+  "\"kinflo:validate-configuration-profile-generated-api-coverage\"",
+]);
+
+const switchPlan = parseJson(switchPlanPath);
+const evidenceMatrix = parseJson(evidenceMatrixPath);
+const planSurface = siteFactorySurfaceFromPlan(switchPlan);
+const matrixSurface = siteFactorySurfaceFromMatrix(evidenceMatrix);
+
+for (const [label, surface] of [
+  ["switch plan site-factory surface", planSurface],
+  ["evidence matrix site-factory surface", matrixSurface],
+]) {
+  if (surface) {
+    pass(`${label} exists`);
+  } else {
+    fail(`${label} exists`, "Missing site-factory surface.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationProfiles")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationProfiles")) {
+    pass(`${label} includes configuration profile function`);
+  } else {
+    fail(`${label} includes configuration profile function`, "Configuration profile read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration profile read")
+    || surface?.smokeEvidenceRequired?.includes("configuration profile read")) {
+    pass(`${label} includes configuration profile smoke evidence`);
+  } else {
+    fail(`${label} includes configuration profile smoke evidence`, "Configuration profile read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationReviewPackets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationReviewPackets")) {
+    pass(`${label} includes configuration review packet function`);
+  } else {
+    fail(`${label} includes configuration review packet function`, "Configuration review packet read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration review packet read")
+    || surface?.smokeEvidenceRequired?.includes("configuration review packet read")) {
+    pass(`${label} includes configuration review packet smoke evidence`);
+  } else {
+    fail(`${label} includes configuration review packet smoke evidence`, "Configuration review packet read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationChangeSets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationChangeSets")) {
+    pass(`${label} includes configuration change set function`);
+  } else {
+    fail(`${label} includes configuration change set function`, "Configuration change set read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration change set read")
+    || surface?.smokeEvidenceRequired?.includes("configuration change set read")) {
+    pass(`${label} includes configuration change set smoke evidence`);
+  } else {
+    fail(`${label} includes configuration change set smoke evidence`, "Configuration change set read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationPublishReadiness")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationPublishReadiness")) {
+    pass(`${label} includes configuration publish readiness function`);
+  } else {
+    fail(`${label} includes configuration publish readiness function`, "Configuration publish readiness read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration publish readiness read")
+    || surface?.smokeEvidenceRequired?.includes("configuration publish readiness read")) {
+    pass(`${label} includes configuration publish readiness smoke evidence`);
+  } else {
+    fail(`${label} includes configuration publish readiness smoke evidence`, "Configuration publish readiness read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteDomainReadinessPackets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteDomainReadinessPackets")) {
+    pass(`${label} includes client website domain readiness function`);
+  } else {
+    fail(`${label} includes client website domain readiness function`, "Client website domain readiness read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("client website domain readiness read")
+    || surface?.smokeEvidenceRequired?.includes("client website domain readiness read")) {
+    pass(`${label} includes client website domain readiness smoke evidence`);
+  } else {
+    fail(`${label} includes client website domain readiness smoke evidence`, "Client website domain readiness read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteAdminInvitationReadinessPackets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteAdminInvitationReadinessPackets")) {
+    pass(`${label} includes client website admin invitation readiness function`);
+  } else {
+    fail(`${label} includes client website admin invitation readiness function`, "Client website admin invitation readiness read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("client website admin invitation readiness read")
+    || surface?.smokeEvidenceRequired?.includes("client website admin invitation readiness read")) {
+    pass(`${label} includes client website admin invitation readiness smoke evidence`);
+  } else {
+    fail(`${label} includes client website admin invitation readiness smoke evidence`, "Client website admin invitation readiness read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteExperienceConfigurationPresets")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteExperienceConfigurationPresets")) {
+    pass(`${label} includes experience configuration preset function`);
+  } else {
+    fail(`${label} includes experience configuration preset function`, "Experience configuration preset read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("experience configuration preset read")
+    || surface?.smokeEvidenceRequired?.includes("experience configuration preset read")) {
+    pass(`${label} includes experience configuration preset smoke evidence`);
+  } else {
+    fail(`${label} includes experience configuration preset smoke evidence`, "Experience configuration preset read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteConfigurationRollbackCheckpoints")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteConfigurationRollbackCheckpoints")) {
+    pass(`${label} includes configuration rollback checkpoint function`);
+  } else {
+    fail(`${label} includes configuration rollback checkpoint function`, "Configuration rollback checkpoint read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("configuration rollback checkpoint read")
+    || surface?.smokeEvidenceRequired?.includes("configuration rollback checkpoint read")) {
+    pass(`${label} includes configuration rollback checkpoint smoke evidence`);
+  } else {
+    fail(`${label} includes configuration rollback checkpoint smoke evidence`, "Configuration rollback checkpoint read evidence must be required before adapter switch.");
+  }
+
+  if (surface?.convexFunctions?.includes("siteFactory.listClientWebsiteLaunchComposer")
+    || surface?.generatedApiCoverage?.includes("siteFactory.listClientWebsiteLaunchComposer")) {
+    pass(`${label} includes client website launch composer function`);
+  } else {
+    fail(`${label} includes client website launch composer function`, "Client website launch composer read must be part of the site factory switch contract.");
+  }
+
+  if (surface?.requiredSmokeEvidence?.includes("client website launch composer read")
+    || surface?.smokeEvidenceRequired?.includes("client website launch composer read")) {
+    pass(`${label} includes client website launch composer smoke evidence`);
+  } else {
+    fail(`${label} includes client website launch composer smoke evidence`, "Client website launch composer read evidence must be required before adapter switch.");
+  }
+}
+
+for (const path of [
+  runtimePath,
+  generatedContractPath,
+  shellDataPath,
+  shellPath,
+  switchPlanPath,
+  evidenceMatrixPath,
+  "docs/phase98-configuration-profile-generated-api-coverage.md",
+]) {
+  const contents = read(path);
+  const importsGeneratedApi =
+    contents.includes("from \"convex/_generated/api\"") ||
+    contents.includes("from 'convex/_generated/api'") ||
+    contents.includes("import(\"convex/_generated/api\")") ||
+    contents.includes("import('convex/_generated/api')");
+  if (importsGeneratedApi) {
+    fail(`${path} does not import generated API`, "Generated API imports remain gated until hosted activation approval.");
+  } else {
+    pass(`${path} does not import generated API`);
+  }
+}
+
+const failed = checks.filter((check) => !check.ok);
+
+for (const check of checks) {
+  if (check.ok) {
+    console.log(`✓ ${check.label}`);
+  } else {
+    console.error(`✗ ${check.label}`);
+    console.error(`  ${check.detail}`);
+  }
+}
+
+console.log("\nKinFlo configuration profile generated API coverage validation");
+console.log("Runtime key: siteFactoryListClientWebsiteConfigurationChangeSets");
+console.log("Runtime key: siteFactoryListClientWebsiteConfigurationReviewPackets");
+console.log("Runtime key: siteFactoryListClientWebsiteConfigurationProfiles");
+console.log("Runtime key: siteFactoryListClientWebsiteConfigurationRollbackCheckpoints");
+console.log("Convex function: siteFactory.listClientWebsiteConfigurationChangeSets");
+console.log("Convex function: siteFactory.listClientWebsiteConfigurationReviewPackets");
+console.log("Convex function: siteFactory.listClientWebsiteConfigurationProfiles");
+console.log("Convex function: siteFactory.listClientWebsiteConfigurationRollbackCheckpoints");
+console.log("Adapter surface: site-factory");
+console.log("External writes: 0");
+console.log("Hosted deployment touched: no");
+console.log("Convex codegen run: no");
+console.log("Generated API imported: no");
+console.log("Live Convex execution: no");
+console.log("Provider APIs touched: no");
+console.log("Secrets read or printed: no");
+
+if (failed.length > 0) {
+  console.error(`\nKinFlo configuration profile generated API coverage validation failed: ${failed.length} check(s) failed.`);
+  process.exit(1);
+}
+
+console.log(`\nKinFlo configuration profile generated API coverage validation passed: ${checks.length} checks.`);

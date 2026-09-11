@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Link } from "wouter";
 import CloudinaryImage from "@/components/CloudinaryImage";
-import { useContentAvailability } from "@/hooks/useContentAvailability";
+import { useContentAvailability, type VisibleSections } from "@/hooks/useContentAvailability";
 import { useQuery } from "@tanstack/react-query";
 
 interface NavigationProps {
@@ -63,14 +63,16 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
     : null;
   
   // Default to showing all sections while loading to avoid flickering nav
-  const sections = visibleSections || {
+  const sections: VisibleSections = visibleSections || {
+    "campaign-impact": false,
     services: true,
     events: true,
     testimonials: true,
     impact: true,
     donation: true,
     "lead-magnet": true,
-    "student-dashboard": false
+    "student-dashboard": false,
+    "volunteer-dashboard": false
   };
   
   const currentPersonaConfig = personaConfigs.find(p => p.id === persona);

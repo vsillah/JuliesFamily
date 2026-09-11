@@ -1032,26 +1032,22 @@ function AttendanceTab() {
                     </div>
                   </TableCell>
                   <TableCell>{log.enrollment.shift.event.name}</TableCell>
-                  <TableCell>{format(new Date(log.sessionDate), "MMM d, yyyy")}</TableCell>
+                  <TableCell>
+                    {format(new Date(log.checkInTime || log.createdAt || new Date()), "MMM d, yyyy")}
+                  </TableCell>
                   <TableCell>{(log.minutesServed / 60).toFixed(1)}h</TableCell>
                   <TableCell>
-                    {log.attendanceStatus === "present" && (
+                    {log.attended ? (
                       <Badge className="bg-green-500/10 text-green-700 dark:text-green-400">
                         Present
                       </Badge>
-                    )}
-                    {log.attendanceStatus === "absent" && (
+                    ) : (
                       <Badge className="bg-red-500/10 text-red-700 dark:text-red-400">
                         Absent
                       </Badge>
                     )}
-                    {log.attendanceStatus === "excused" && (
-                      <Badge className="bg-yellow-500/10 text-yellow-700 dark:text-yellow-400">
-                        Excused
-                      </Badge>
-                    )}
                   </TableCell>
-                  <TableCell className="max-w-xs truncate">{log.notes || "-"}</TableCell>
+                  <TableCell className="max-w-xs truncate">{log.sessionNotes || "-"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -1079,7 +1075,13 @@ function AttendanceLogDialog({
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: any) => apiRequest("POST", "/api/admin/volunteer/session-logs", data),
+    mutationFn: (data: typeof formData) =>
+      apiRequest("POST", "/api/admin/volunteer/sessions", {
+        enrollmentId: data.enrollmentId,
+        attended: data.attendanceStatus === "present",
+        minutesServed: data.attendanceStatus === "present" ? data.minutesServed : 0,
+        sessionNotes: data.notes || null,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/volunteer/session-logs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/volunteer/enrollments"] });

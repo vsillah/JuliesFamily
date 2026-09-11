@@ -63,7 +63,7 @@ export async function generateValueEquationCopy(
       ],
     });
 
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     
     // Parse the response
     const variants = parseVariantResponse(responseText);
@@ -263,7 +263,7 @@ Return ONLY valid JSON:
       ],
     });
 
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     
     // Clean the response
     let cleanedResponse = responseText.trim();
@@ -371,7 +371,7 @@ Return ONLY valid JSON with exactly 3 variants:
       ],
     });
 
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     const variants = parseVariantResponse(responseText);
     
     return { variants };
@@ -454,7 +454,7 @@ Return ONLY the text itself, with no JSON formatting, no quotes, no markdown, an
       ],
     });
 
-    const responseText = (result.response?.text() || result.text || "").trim();
+    const responseText = (result.text || "").trim();
     
     // Remove any quotes or markdown if present
     let cleaned = responseText;

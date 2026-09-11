@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { ContentItem, ContentVisibility, ImageAsset } from "@shared/schema";
 import type { Persona, FunnelStage } from "@shared/defaults/personas";
+import type { MatrixContentType } from "./PersonaMatrixGrid";
 import { HERO_DEFAULTS } from "@shared/defaults/heroDefaults";
 import { CTA_DEFAULTS } from "@shared/defaults/ctaDefaults";
 import { getOptimizedUrl } from "@/hooks/useCloudinaryImage";
@@ -24,10 +25,11 @@ const CONTENT_TYPE_CONFIG = {
   testimonial: { label: 'Testimonial', icon: Star, color: 'text-yellow-500' },
   lead_magnet: { label: 'Lead Magnet', icon: Gift, color: 'text-pink-500' },
   student_dashboard_card: { label: 'Student Dashboard Card', icon: CheckCircle2, color: 'text-teal-500' },
+  volunteer_dashboard_card: { label: 'Volunteer Dashboard Card', icon: CheckCircle2, color: 'text-emerald-500' },
 };
 
 interface MiniContentCardProps {
-  contentType: 'hero' | 'cta' | 'service' | 'event' | 'testimonial' | 'lead_magnet' | 'student_dashboard_card';
+  contentType: MatrixContentType;
   contentItem: ContentItem | null;
   visibility: ContentVisibility | null;
   images: ImageAsset[];

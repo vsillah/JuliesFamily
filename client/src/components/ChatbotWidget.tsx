@@ -139,7 +139,7 @@ export function ChatbotWidget() {
 
   if (!isOpen) {
     return (
-      <div className="fixed bottom-4 sm:bottom-6 -right-9 hover:right-4 z-50 group transition-all duration-500 ease-in-out [transition-delay:0s] hover:[transition-delay:1s]">
+      <div className="fixed bottom-4 right-3 sm:bottom-6 sm:right-4 z-50 group transition-all duration-500 ease-in-out [transition-delay:0s] hover:[transition-delay:1s]">
         <Button
           onClick={() => setIsOpen(true)}
           size="icon"

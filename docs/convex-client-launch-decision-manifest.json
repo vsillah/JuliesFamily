@@ -1,0 +1,103 @@
+{
+  "phase": 69,
+  "status": "provider-light-launch-decision",
+  "convexFunction": "siteFactory.listClientWebsiteLaunchDecisionPackets",
+  "providerBoundary": {
+    "externalWrites": false,
+    "hostedDeploymentTouched": false,
+    "generatedApiImported": false,
+    "liveConvexExecution": false,
+    "tenantCreated": false,
+    "sitePublished": false,
+    "adminInviteSent": false,
+    "leadWritten": false,
+    "campaignSent": false,
+    "providersCalled": false,
+    "launchDecisionExecuted": false
+  },
+  "targetGate": "Launch decision packets roll QA evidence into explicit go, review, or no-go posture before any hosted launch, tenant handoff, publish, lead, invite, campaign, or provider action is executed.",
+  "blockedUntil": [
+    "Hosted Convex project ownership, billing, backup, auth, and env setup are approved",
+    "Generated Convex API files are produced and reviewed outside this provider-light branch",
+    "Hosted screenshot, accessibility, performance, and regression evidence is accepted",
+    "Client owner, approval owner, rollback owner, and launch decision owner are confirmed",
+    "Tenant creation, admin invite, public publish, lead write, campaign send, domain, storage, and provider smoke order is approved",
+    "Integration captain approves merge/deploy sequencing and rollback plan"
+  ],
+  "decisionPackets": [
+    {
+      "siteKey": "julies-family-public",
+      "label": "Julie Family launch decision packet",
+      "launchDecision": "review",
+      "decisionCriteriaCount": 4,
+      "readyCriteriaCount": 1,
+      "reviewCriteriaCount": 1,
+      "blockedCriteriaCount": 2,
+      "rollbackStepCount": 3,
+      "requiredSignoffCount": 3,
+      "blockedLaunchActionCount": 4,
+      "blockedLaunchActions": ["publish public site", "attach production domain", "enable public lead write", "accept hosted QA evidence"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "siteFactory.listClientWebsiteVisualQaBudgets",
+        "publicSite.resolvePublishedSite",
+        "siteBuilder.publishPage",
+        "launchReadiness.getSiteLaunchReadiness"
+      ]
+    },
+    {
+      "siteKey": "advisor-client-site",
+      "label": "Advisor client launch decision packet",
+      "launchDecision": "review",
+      "decisionCriteriaCount": 4,
+      "readyCriteriaCount": 1,
+      "reviewCriteriaCount": 1,
+      "blockedCriteriaCount": 2,
+      "rollbackStepCount": 3,
+      "requiredSignoffCount": 3,
+      "blockedLaunchActionCount": 4,
+      "blockedLaunchActions": ["create tenant", "send tenant admin invite", "attach custom domain", "enable public intake writes"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "controlPlane.createTenant",
+        "controlPlane.createInvitation",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite"
+      ]
+    },
+    {
+      "siteKey": "campaign-microsite",
+      "label": "Campaign microsite launch decision packet",
+      "launchDecision": "no_go",
+      "decisionCriteriaCount": 4,
+      "readyCriteriaCount": 1,
+      "reviewCriteriaCount": 0,
+      "blockedCriteriaCount": 3,
+      "rollbackStepCount": 3,
+      "requiredSignoffCount": 3,
+      "blockedLaunchActionCount": 4,
+      "blockedLaunchActions": ["send campaign", "write public form lead", "run provider-send trace", "approve mobile screenshot"],
+      "convexFunctions": [
+        "siteFactory.listClientWebsiteLaunchDecisionPackets",
+        "siteFactory.listClientWebsiteVisualQaEvidencePackets",
+        "campaigns.requestCampaignApproval",
+        "crm.submitLead",
+        "publicSite.resolvePublishedSite"
+      ]
+    }
+  ],
+  "totals": {
+    "decisionPackets": 3,
+    "reviewDecisions": 2,
+    "noGoDecisions": 1,
+    "decisionCriteria": 12,
+    "readyCriteria": 3,
+    "reviewCriteria": 2,
+    "blockedCriteria": 7,
+    "rollbackSteps": 9,
+    "requiredSignoffs": 9,
+    "blockedLaunchActions": 12
+  }
+}

@@ -65,8 +65,10 @@ import AdminAutomationRules from "@/pages/AdminAutomationRules";
 import AdminAutomationRuns from "@/pages/AdminAutomationRuns";
 import AdminAutomationConfig from "@/pages/AdminAutomationConfig";
 import AdminRoleProvisioning from "@/pages/AdminRoleProvisioning";
+import AdminKinfloShell from "@/pages/AdminKinfloShell";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
+import KinfloPublicSitePreview from "@/pages/KinfloPublicSitePreview";
 import ImageComparison from "@/pages/ImageComparison";
 import TechGoesHomeLanding from "@/pages/TechGoesHomeLanding";
 import TechGoesHomeStudentDashboard from "@/pages/TechGoesHomeStudentDashboard";
@@ -121,10 +123,12 @@ function Router() {
       <Route path="/admin/automation-runs" component={AdminAutomationRuns} />
       <Route path="/admin/automation-config" component={AdminAutomationConfig} />
       <Route path="/admin/role-provisioning" component={AdminRoleProvisioning} />
+      <Route path="/admin/kinflo-os" component={AdminKinfloShell} />
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />
       <Route path="/kinflo" component={ProductLanding} />
+      <Route path="/kinflo-sites/:siteSlug" component={KinfloPublicSitePreview} />
       <Route path="/comparison" component={ImageComparison} />
       <Route path="/programs/tech-goes-home" component={TechGoesHomeLanding} />
       <Route path="/student/tech-goes-home" component={TechGoesHomeStudentDashboard} />

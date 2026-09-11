@@ -79,6 +79,11 @@ const emailReportFormSchema = insertEmailReportScheduleSchema.omit({ recipients:
 
 type EmailReportFormValues = z.infer<typeof emailReportFormSchema>;
 
+function normalizeRecipients(recipients: unknown): string[] {
+  if (!Array.isArray(recipients)) return [];
+  return recipients.filter((recipient): recipient is string => typeof recipient === "string");
+}
+
 // Inner component with all data fetching - only mounts after TierGate allows access
 function EmailReportsContent() {
   const { toast } = useToast();
@@ -235,9 +240,11 @@ function EmailReportsContent() {
   });
 
   const openEditDialog = (schedule: EmailReportSchedule) => {
+    const recipients = normalizeRecipients(schedule.recipients);
+
     editForm.reset({
       name: schedule.name,
-      recipientsText: schedule.recipients.join(', '),
+      recipientsText: recipients.join(', '),
       frequency: schedule.frequency as 'daily' | 'weekly' | 'monthly',
       reportType: schedule.reportType as 'campaign_summary' | 'engagement_summary' | 'full_analytics',
       isActive: schedule.isActive,
@@ -341,117 +348,121 @@ function EmailReportsContent() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {schedules.map((schedule) => (
-                      <TableRow key={schedule.id}>
-                        <TableCell>
-                          <div className="font-medium" data-testid={`text-schedule-name-${schedule.id}`}>
-                            {schedule.name}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" data-testid={`badge-report-type-${schedule.id}`}>
-                            {formatReportType(schedule.reportType)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell data-testid={`text-frequency-${schedule.id}`}>
-                          {formatFrequency(schedule.frequency)}
-                        </TableCell>
-                        <TableCell>
-                          <div 
-                            className="text-sm text-muted-foreground max-w-xs truncate" 
-                            title={schedule.recipients.join(', ')}
-                            data-testid={`text-recipients-${schedule.id}`}
-                          >
-                            {formatRecipients(schedule.recipients)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {schedule.isActive ? (
-                            <Badge variant="default" data-testid={`badge-status-active-${schedule.id}`}>
-                              <Play className="w-3 h-3 mr-1" />
-                              Active
+                    {schedules.map((schedule) => {
+                      const recipients = normalizeRecipients(schedule.recipients);
+
+                      return (
+                        <TableRow key={schedule.id}>
+                          <TableCell>
+                            <div className="font-medium" data-testid={`text-schedule-name-${schedule.id}`}>
+                              {schedule.name}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" data-testid={`badge-report-type-${schedule.id}`}>
+                              {formatReportType(schedule.reportType)}
                             </Badge>
-                          ) : (
-                            <Badge variant="secondary" data-testid={`badge-status-inactive-${schedule.id}`}>
-                              <Pause className="w-3 h-3 mr-1" />
-                              Paused
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground" data-testid={`text-next-run-${schedule.id}`}>
-                            <Clock className="w-3 h-3" />
-                            {formatDate(schedule.nextRunAt)}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm text-muted-foreground" data-testid={`text-last-run-${schedule.id}`}>
-                            {formatDate(schedule.lastRunAt)}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => sendNowMutation.mutate(schedule.id)}
-                              disabled={sendNowMutation.isPending}
-                              data-testid={`button-send-now-${schedule.id}`}
-                              title="Send report now"
+                          </TableCell>
+                          <TableCell data-testid={`text-frequency-${schedule.id}`}>
+                            {formatFrequency(schedule.frequency)}
+                          </TableCell>
+                          <TableCell>
+                            <div
+                              className="text-sm text-muted-foreground max-w-xs truncate"
+                              title={recipients.join(', ')}
+                              data-testid={`text-recipients-${schedule.id}`}
                             >
-                              <Send className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                // Simple partial update for toggle - only updates isActive field
-                                apiRequest("PATCH", `/api/email-report-schedules/${schedule.id}`, {
-                                  isActive: !schedule.isActive
-                                }).then(() => {
-                                  queryClient.invalidateQueries({ queryKey: ["/api/email-report-schedules"] });
-                                  toast({
-                                    title: "Success",
-                                    description: `Schedule ${!schedule.isActive ? 'activated' : 'paused'} successfully`,
+                              {formatRecipients(recipients)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {schedule.isActive ? (
+                              <Badge variant="default" data-testid={`badge-status-active-${schedule.id}`}>
+                                <Play className="w-3 h-3 mr-1" />
+                                Active
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" data-testid={`badge-status-inactive-${schedule.id}`}>
+                                <Pause className="w-3 h-3 mr-1" />
+                                Paused
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1 text-sm text-muted-foreground" data-testid={`text-next-run-${schedule.id}`}>
+                              <Clock className="w-3 h-3" />
+                              {formatDate(schedule.nextRunAt)}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-muted-foreground" data-testid={`text-last-run-${schedule.id}`}>
+                              {formatDate(schedule.lastRunAt)}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => sendNowMutation.mutate(schedule.id)}
+                                disabled={sendNowMutation.isPending}
+                                data-testid={`button-send-now-${schedule.id}`}
+                                title="Send report now"
+                              >
+                                <Send className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  // Simple partial update for toggle - only updates isActive field
+                                  apiRequest("PATCH", `/api/email-report-schedules/${schedule.id}`, {
+                                    isActive: !schedule.isActive
+                                  }).then(() => {
+                                    queryClient.invalidateQueries({ queryKey: ["/api/email-report-schedules"] });
+                                    toast({
+                                      title: "Success",
+                                      description: `Schedule ${!schedule.isActive ? 'activated' : 'paused'} successfully`,
+                                    });
+                                  }).catch((error: any) => {
+                                    toast({
+                                      title: "Error",
+                                      description: error.message || "Failed to toggle schedule",
+                                      variant: "destructive",
+                                    });
                                   });
-                                }).catch((error: any) => {
-                                  toast({
-                                    title: "Error",
-                                    description: error.message || "Failed to toggle schedule",
-                                    variant: "destructive",
-                                  });
-                                });
-                              }}
-                              data-testid={`button-toggle-${schedule.id}`}
-                              title={schedule.isActive ? "Pause schedule" : "Activate schedule"}
-                            >
-                              {schedule.isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openEditDialog(schedule)}
-                              data-testid={`button-edit-${schedule.id}`}
-                              title="Edit schedule"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setDeleteConfirm({ 
-                                scheduleId: schedule.id, 
-                                scheduleName: schedule.name 
-                              })}
-                              data-testid={`button-delete-${schedule.id}`}
-                              title="Delete schedule"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                                }}
+                                data-testid={`button-toggle-${schedule.id}`}
+                                title={schedule.isActive ? "Pause schedule" : "Activate schedule"}
+                              >
+                                {schedule.isActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openEditDialog(schedule)}
+                                data-testid={`button-edit-${schedule.id}`}
+                                title="Edit schedule"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setDeleteConfirm({
+                                  scheduleId: schedule.id,
+                                  scheduleName: schedule.name
+                                })}
+                                data-testid={`button-delete-${schedule.id}`}
+                                title="Delete schedule"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, getQueryFn } from "@/lib/queryClient";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { updateUserProfileSchema } from "@shared/schema";
+import type { User } from "@shared/schema";
 import type { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
@@ -21,6 +22,27 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 type ProfileFormValues = z.infer<typeof updateUserProfileSchema>;
+type Passion = "literacy" | "stem" | "arts" | "nutrition" | "community";
+
+const passionValues = ["literacy", "stem", "arts", "nutrition", "community"] as const;
+
+const passionOptions: Array<{ value: Passion; label: string }> = [
+  { value: "literacy", label: "Literacy & Reading" },
+  { value: "stem", label: "STEM & Technology" },
+  { value: "arts", label: "Arts & Creativity" },
+  { value: "nutrition", label: "Nutrition & Wellness" },
+  { value: "community", label: "Community Building" },
+];
+
+function normalizePassions(value: unknown): Passion[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((passion): passion is Passion =>
+    typeof passion === "string" && (passionValues as readonly string[]).includes(passion)
+  );
+}
 
 interface AdminPreferences {
   // Notification Preferences
@@ -63,8 +85,9 @@ export default function Profile() {
   const [hasAdminChanges, setHasAdminChanges] = useState(false);
 
   // Fetch current user data
-  const { data: user, isLoading } = useQuery({
+  const { data: user, isLoading } = useQuery<User | null>({
     queryKey: ["/api/auth/user"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
   // Fetch admin preferences if user is admin
@@ -92,7 +115,7 @@ export default function Profile() {
           firstName: user.firstName || "",
           lastName: user.lastName || "",
           profileImageUrl: user.profileImageUrl || "",
-          passions: user.passions ?? [],
+          passions: normalizePassions(user.passions),
         },
         { keepDirtyValues: true } // Preserve user edits during refetches
       );
@@ -322,13 +345,6 @@ export default function Profile() {
                   name="passions"
                   render={() => {
                     const passions = form.watch("passions") || [];
-                    const passionOptions = [
-                      { value: "literacy", label: "Literacy & Reading" },
-                      { value: "stem", label: "STEM & Technology" },
-                      { value: "arts", label: "Arts & Creativity" },
-                      { value: "nutrition", label: "Nutrition & Wellness" },
-                      { value: "community", label: "Community Building" },
-                    ];
 
                     return (
                       <FormItem>
@@ -393,7 +409,7 @@ export default function Profile() {
                             firstName: user.firstName || "",
                             lastName: user.lastName || "",
                             profileImageUrl: user.profileImageUrl || "",
-                            passions: user.passions ?? [],
+                            passions: normalizePassions(user.passions),
                           });
                         }
                       }}

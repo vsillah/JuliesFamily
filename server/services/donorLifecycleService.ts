@@ -1,4 +1,4 @@
-import type { IStorage } from "../storage/index";
+import type { IStorage } from "../storage";
 import { db } from "../db";
 import { sql, eq, desc, and, gte, lte } from "drizzle-orm";
 import { donations, donorLifecycleStages, leads, donorEconomics } from "@shared/schema";
@@ -265,7 +265,7 @@ export class DonorLifecycleService {
         continue; // No donations yet, keep as prospect
       }
       
-      const lastDonationDate = new Date(lastDonation[0].createdAt);
+      const lastDonationDate = new Date(lastDonation[0].createdAt || new Date());
       const monthsSince = this.calculateMonthsDifference(lastDonationDate, new Date());
       
       if (monthsSince >= this.LAPSED_MONTHS_THRESHOLD) {
