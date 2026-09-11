@@ -5808,36 +5808,36 @@ export default function AdminKinfloShell() {
             </div>
           </div>
 
-          <div className="rounded-md border border-slate-900 bg-slate-950 p-4 text-white">
+          <div className="rounded-md border border-amber-200 bg-white p-4 text-slate-950 shadow-sm">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <div className="text-sm font-medium text-slate-300">Next gate</div>
+                <div className="text-sm font-medium text-amber-700">Next gate</div>
                 <p className="mt-1 text-lg font-semibold leading-tight">{commandBrief.nextGate?.label}</p>
               </div>
               {commandBrief.nextGate ? hostedActivationStatusBadge(commandBrief.nextGate.status) : null}
             </div>
-            <p className={`${activeTab === "site-studio" ? "hidden" : "mt-3"} text-sm leading-6 text-slate-300`}>{commandBrief.nextGate?.evidenceTarget}</p>
-            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-4 rounded-md border border-white/10 bg-white/5 p-3"}`} data-testid="section-kinflo-active-object-unblock-detail">
-              <div className="text-xs font-medium uppercase tracking-normal text-slate-400">Unblock condition</div>
-              <p className="mt-1 text-sm leading-6 text-slate-300">{snapshot.activeObjectSignal.unblockCondition}</p>
+            <p className={`${activeTab === "site-studio" ? "hidden" : "mt-3"} text-sm leading-6 text-slate-600`}>{commandBrief.nextGate?.evidenceTarget}</p>
+            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-4 rounded-md border border-amber-200 bg-amber-50 p-3"}`} data-testid="section-kinflo-active-object-unblock-detail">
+              <div className="text-xs font-medium uppercase tracking-normal text-amber-700">Unblock condition</div>
+              <p className="mt-1 text-sm leading-6 text-amber-950">{snapshot.activeObjectSignal.unblockCondition}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {snapshot.activeObjectSignal.blockedLiveActions.map((action) => (
-                  <Badge key={action} variant="outline" className="border-slate-700 bg-slate-900 text-slate-200">
+                  <Badge key={action} variant="outline" className="border-amber-200 bg-white text-amber-900">
                     {action}
                   </Badge>
                 ))}
               </div>
             </div>
             <div className={`${activeTab === "site-studio" ? "mt-3 grid-cols-3" : "mt-4 sm:grid-cols-3"} grid gap-2`}>
-              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => selectShellTab("launch-readiness")}>
+              <Button size="sm" variant="outline" className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950" onClick={() => selectShellTab("launch-readiness")}>
                 <Rocket className="mr-2 h-3 w-3" />
                 Launch
               </Button>
-              <Button size="sm" variant="outline" className="border-slate-700 bg-slate-900 text-white hover:bg-slate-800 hover:text-white" onClick={() => selectShellTab("adapter-switch")}>
+              <Button size="sm" variant="outline" className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950" onClick={() => selectShellTab("adapter-switch")}>
                 <Workflow className="mr-2 h-3 w-3" />
                 Switch
               </Button>
-              <Button size="sm" className="bg-white text-slate-950 hover:bg-slate-200" onClick={() => selectShellTab("hosted-activation")}>
+              <Button size="sm" variant="outline" className="border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 hover:text-amber-950" onClick={() => selectShellTab("hosted-activation")}>
                 <KeyRound className="mr-2 h-3 w-3" />
                 Activation
               </Button>
