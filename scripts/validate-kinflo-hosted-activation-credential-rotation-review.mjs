@@ -143,7 +143,7 @@ requireIncludes("package.json", [
 
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const reviewStart = shellData.indexOf("credentialRotationReview: {");
-const reviewEnd = shellData.indexOf("decisionRegister: [", reviewStart);
+const reviewEnd = shellData.indexOf("blockedActions: [", reviewStart);
 const reviewBlock = reviewStart >= 0 && reviewEnd > reviewStart ? shellData.slice(reviewStart, reviewEnd) : "";
 const familyIds = (reviewBlock.match(/id: "/g) ?? []).length;
 
