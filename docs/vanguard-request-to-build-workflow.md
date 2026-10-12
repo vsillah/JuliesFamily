@@ -17,6 +17,8 @@ Source: http://www.vanguardenterprises.com/
 
 The local fixture uses public company facts and service descriptions: Vanguard Enterprises and Associates Inc., Fort Lee, New Jersey, the tagline "Pioneering Innovative Collaboration for Excellence," public contact information, and the public service categories for project management, IT infrastructure, and engineering/CAD/CAM.
 
+The company-header logo is preserved as `attached_assets/vanguard-enterprises-logo.jpg` from `http://www.vanguardenterprises.com/image/80076569.jpg`. The source JPEG is 356 × 138 pixels with SHA-256 `30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02`. The public header and Site Studio evidence view render the local copy with its natural aspect ratio and accessible alt text.
+
 No private source, account data, customer record, uploaded file, or secret was read or copied.
 
 ## ReversR pattern adapted for Vanguard

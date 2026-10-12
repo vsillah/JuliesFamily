@@ -67,6 +67,8 @@ export type KinfloPublicSitePreview = {
     media: {
       heroImage: string;
       treatment: string;
+      logoImage?: string;
+      logoAlt?: string;
     };
   };
   navigationItems: KinfloPublicNavigationItem[];
@@ -293,6 +295,8 @@ const previews: KinfloPublicSitePreview[] = [
       media: {
         heroImage: consultantHero,
         treatment: "engineering-collaboration-and-delivery-proof",
+        logoImage: vanguardWorkflow.company.logo.image,
+        logoAlt: vanguardWorkflow.company.logo.alt,
       },
     },
     navigationItems: [

@@ -363,8 +363,15 @@ export default function KinfloPublicSitePreview() {
     >
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <Link href="/admin/kinflo-os" className="text-sm font-semibold">
-            {preview.site.name}
+          <Link href="/admin/kinflo-os" className="flex min-w-0 items-center text-sm font-semibold">
+            {preview.theme.media.logoImage ? (
+              <img
+                src={preview.theme.media.logoImage}
+                alt={preview.theme.media.logoAlt ?? `${preview.site.name} logo`}
+                className="h-10 w-auto max-w-[150px] object-contain sm:h-12 sm:max-w-[180px]"
+                data-testid="public-preview-brand-logo"
+              />
+            ) : preview.site.name}
           </Link>
           <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
             {headerNav.map((item) => (

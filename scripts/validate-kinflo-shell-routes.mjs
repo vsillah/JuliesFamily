@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const checks = [];
 
@@ -41,6 +41,14 @@ const shellDataPath = "client/src/lib/kinfloShellData.ts";
 const runtimePath = "client/src/lib/kinfloConvexRuntime.ts";
 const leadCapturePath = "client/src/lib/kinfloLeadCapture.ts";
 const publicPreviewDataPath = "client/src/lib/kinfloPublicSitePreview.ts";
+const vanguardWorkflowPath = "client/src/lib/kinfloVanguardWorkflow.ts";
+const vanguardLogoAssetPath = "attached_assets/vanguard-enterprises-logo.jpg";
+
+if (existsSync(vanguardLogoAssetPath)) {
+  pass(`${vanguardLogoAssetPath} exists`);
+} else {
+  fail(`${vanguardLogoAssetPath} exists`, "Expected the public Vanguard logo fixture.");
+}
 
 requireIncludes(appPath, [
   'import AdminKinfloShell from "@/pages/AdminKinfloShell";',
@@ -184,6 +192,20 @@ requireIncludes(publicPreviewPath, [
   "Runtime fallback is `/api/leads`; Convex target is `crm.submitLead`.",
   "resolveKinfloPublicSitePreviewWithContext",
   "public-preview-context",
+  'data-testid="public-preview-brand-logo"',
+]);
+
+requireIncludes(adminShellPath, [
+  'data-testid="section-kinflo-vanguard-brand-asset"',
+  "vanguardWorkflow.company.logo.image",
+  "vanguardWorkflow.company.logo.sourceUrl",
+]);
+
+requireIncludes(vanguardWorkflowPath, [
+  'import vanguardLogo from "@assets/vanguard-enterprises-logo.jpg";',
+  'sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg"',
+  'alt: "Vanguard Enterprises"',
+  'sha256: "30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02"',
 ]);
 
 requireIncludes(shellDataPath, [
@@ -223,6 +245,8 @@ requireIncludes(publicPreviewDataPath, [
   'slug: "advisor-client-site"',
   'slug: "vanguard-enterprises"',
   'slug: "campaign-microsite"',
+  "logoImage: vanguardWorkflow.company.logo.image",
+  "logoAlt: vanguardWorkflow.company.logo.alt",
 ]);
 
 for (const slug of ["julies-family", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {

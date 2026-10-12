@@ -2144,6 +2144,21 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
+      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center" data-testid="section-kinflo-vanguard-brand-asset">
+        <div className="flex shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white p-2">
+          <img
+            src={vanguardWorkflow.company.logo.image}
+            alt={vanguardWorkflow.company.logo.alt}
+            className="h-12 w-auto max-w-[180px] object-contain"
+          />
+        </div>
+        <div className="min-w-0 text-xs leading-5 text-slate-600">
+          <div className="font-semibold text-slate-900">Public brand asset staged locally</div>
+          <div>{vanguardWorkflow.company.logo.dimensions} · aspect ratio preserved · source checksum recorded</div>
+          <a className="text-blue-700 underline underline-offset-2" href={vanguardWorkflow.company.logo.sourceUrl} target="_blank" rel="noreferrer">View Vanguard source image</a>
+        </div>
+      </div>
+
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "Order", value: vanguardWorkflow.sampleOrder.id },

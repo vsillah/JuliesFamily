@@ -1,3 +1,5 @@
+import vanguardLogo from "@assets/vanguard-enterprises-logo.jpg";
+
 export const VANGUARD_SITE_KEY = "vanguard-enterprises";
 
 export type VanguardFulfillmentStage = {
@@ -18,6 +20,14 @@ export const vanguardWorkflow = {
     phone: "(732) 238-2824",
     sourceUrl: "http://www.vanguardenterprises.com/",
     sourcePosture: "Public website facts and service descriptions, adapted into a local KinFlo fixture.",
+    logo: {
+      image: vanguardLogo,
+      alt: "Vanguard Enterprises",
+      sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg",
+      repositoryPath: "attached_assets/vanguard-enterprises-logo.jpg",
+      dimensions: "356 × 138 pixels",
+      sha256: "30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02",
+    },
   },
   requestTypes: [
     "Engineering / CAD / CAM",
