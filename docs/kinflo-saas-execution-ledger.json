@@ -437,6 +437,7 @@
     "npm run kinflo:validate-client-preview-review-contract",
     "npm run kinflo:validate-preview-review-shell-adapter",
     "npm run kinflo:validate-site-studio-launch-dossier-deep-links",
+    "npm run kinflo:validate-browser-safe-auth-aliases",
     "npm run kinflo:validate-claude-frame-ingestion",
     "npm run kinflo:validate-claude-code-frame-response",
     "npm run kinflo:validate-persistent-identity-strip",

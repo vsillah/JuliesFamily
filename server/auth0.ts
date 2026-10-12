@@ -12,14 +12,17 @@ import { storage } from "./storage";
 import { authLimiter } from "./security";
 
 const STRATEGY_NAME = "oidc";
+const BROWSER_SAFE_STRATEGY_NAME = "oidc-browser-safe";
+const LEGACY_CALLBACK_PATH = "/api/callback";
+const BROWSER_SAFE_CALLBACK_PATH = "/auth/callback";
 
-function getCallbackUrl(): string {
+function getCallbackUrl(callbackPath = process.env.OIDC_CALLBACK_PATH || LEGACY_CALLBACK_PATH): string {
   const base = process.env.BASE_URL
     ? process.env.BASE_URL.replace(/\/$/, "")
     : process.env.REPLIT_DOMAINS
       ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim() || "localhost"}`
       : "http://localhost:5000";
-  const path = process.env.OIDC_CALLBACK_PATH || "/api/callback";
+  const path = callbackPath;
   return `${base}${path.startsWith("/") ? path : "/" + path}`;
 }
 
@@ -36,8 +39,10 @@ const getOidcConfig = memoize(
     if (!issuerUrl.startsWith("http://") && !issuerUrl.startsWith("https://")) {
       issuerUrl = "https://" + issuerUrl;
     }
-    const callbackUrl = getCallbackUrl();
-    const metadata: { redirect_uris?: string[] } = { redirect_uris: [callbackUrl] };
+    const callbackUrls = Array.from(
+      new Set([getCallbackUrl(), getCallbackUrl(BROWSER_SAFE_CALLBACK_PATH)]),
+    );
+    const metadata: { redirect_uris?: string[] } = { redirect_uris: callbackUrls };
     const clientAuth = process.env.OIDC_CLIENT_SECRET
       ? client.ClientSecretPost(process.env.OIDC_CLIENT_SECRET)
       : undefined;
@@ -170,6 +175,7 @@ export async function setupAuth(app: Express) {
 
   const config = await getOidcConfig();
   const callbackUrl = getCallbackUrl();
+  const browserSafeCallbackUrl = getCallbackUrl(BROWSER_SAFE_CALLBACK_PATH);
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
@@ -193,6 +199,17 @@ export async function setupAuth(app: Express) {
   );
   passport.use(strategy);
 
+  const browserSafeStrategy = new Strategy(
+    {
+      name: BROWSER_SAFE_STRATEGY_NAME,
+      config,
+      scope: "openid email profile offline_access",
+      callbackURL: browserSafeCallbackUrl,
+    },
+    verify,
+  );
+  passport.use(browserSafeStrategy);
+
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
@@ -211,6 +228,24 @@ export async function setupAuth(app: Express) {
     passport.authenticate(STRATEGY_NAME, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
+    })(req, res, next);
+  });
+
+  app.get("/auth/login", authLimiter, (req, res, next) => {
+    const returnTo = req.query.returnTo as string;
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
+      (req.session as typeof req.session & { returnTo?: string }).returnTo = returnTo;
+    }
+    passport.authenticate(BROWSER_SAFE_STRATEGY_NAME, {
+      prompt: "login consent",
+      scope: ["openid", "email", "profile", "offline_access"],
+    })(req, res, next);
+  });
+
+  app.get("/auth/callback", authLimiter, (req, res, next) => {
+    passport.authenticate(BROWSER_SAFE_STRATEGY_NAME, {
+      successReturnToOrRedirect: "/",
+      failureRedirect: "/auth/login",
     })(req, res, next);
   });
 
