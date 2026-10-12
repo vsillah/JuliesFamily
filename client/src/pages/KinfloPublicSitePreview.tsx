@@ -191,8 +191,9 @@ function BlockSection({
       <section className="relative min-h-[560px] overflow-hidden" data-testid="public-preview-hero">
         <img
           src={preview.theme.media.heroImage}
-          alt={`${preview.site.name} preview`}
+          alt={preview.theme.media.heroAlt ?? `${preview.site.name} preview`}
           className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: preview.theme.media.heroPosition ?? "center" }}
         />
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8">

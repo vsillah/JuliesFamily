@@ -43,11 +43,14 @@ const leadCapturePath = "client/src/lib/kinfloLeadCapture.ts";
 const publicPreviewDataPath = "client/src/lib/kinfloPublicSitePreview.ts";
 const vanguardWorkflowPath = "client/src/lib/kinfloVanguardWorkflow.ts";
 const vanguardLogoAssetPath = "attached_assets/vanguard-enterprises-logo.jpg";
+const vanguardHeroAssetPath = "attached_assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
 
-if (existsSync(vanguardLogoAssetPath)) {
-  pass(`${vanguardLogoAssetPath} exists`);
-} else {
-  fail(`${vanguardLogoAssetPath} exists`, "Expected the public Vanguard logo fixture.");
+for (const assetPath of [vanguardLogoAssetPath, vanguardHeroAssetPath]) {
+  if (existsSync(assetPath)) {
+    pass(`${assetPath} exists`);
+  } else {
+    fail(`${assetPath} exists`, "Expected the Vanguard public-site asset fixture.");
+  }
 }
 
 requireIncludes(appPath, [
@@ -238,6 +241,7 @@ requireIncludes(leadCapturePath, [
 ]);
 
 requireIncludes(publicPreviewDataPath, [
+  'import vanguardIndustrialHero from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";',
   "listKinfloPublicSitePreviews",
   "resolveKinfloPublicSitePreview",
   'source: "fixture-public-renderer"',
@@ -248,6 +252,9 @@ requireIncludes(publicPreviewDataPath, [
   'slug: "campaign-microsite"',
   "logoImage: vanguardWorkflow.company.logo.image",
   "logoAlt: vanguardWorkflow.company.logo.alt",
+  "heroImage: vanguardIndustrialHero",
+  'heroAlt: "Welders fabricating a structural steel assembly in an industrial workshop"',
+  'heroPosition: "68% center"',
 ]);
 
 for (const slug of ["julies-family", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
