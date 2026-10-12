@@ -39,7 +39,7 @@ function requireIncludes(path, patterns) {
 }
 
 function extractSpinUpQueueBlock(contents) {
-  const match = contents.match(/spinUpQueue:\s*\{([\s\S]*?)\n\s*\},\n\s*launchPackets:/);
+  const match = contents.match(/spinUpQueue:\s*\{([\s\S]*?)\n\s*\},\n\s*configurationProfiles:/);
   if (!match) {
     fail("client website spin-up queue block exists", "Could not find clientWebsiteStudio.spinUpQueue.");
     return "";
@@ -85,10 +85,10 @@ requireIncludes("docs/phase95-client-website-spin-up-queue.md", [
   "section-kinflo-client-website-spin-up-summary",
   "section-kinflo-client-website-spin-up-scroll",
   "button-client-website-spin-up-gated",
-  "Total requests: 3",
+  "Total requests: 4",
   "Ready requests: 1",
-  "Blocked requests: 2",
-  "Total steps: 14",
+  "Blocked requests: 3",
+  "Total steps: 20",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -97,10 +97,10 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellClientWebsiteSpinUpQueue",
   "spinUpQueue",
   "provider-light-website-spin-up-queue",
-  "totalRequests: 3",
+  "totalRequests: 4",
   "readyRequests: 1",
-  "blockedRequests: 2",
-  "totalSteps: 14",
+  "blockedRequests: 3",
+  "totalSteps: 20",
   "canCreateTenant: false",
   "canCreateSite: false",
   "canInviteAdmin: false",
@@ -130,7 +130,7 @@ const dataContents = read("client/src/lib/kinfloShellData.ts");
 const pageContents = read("client/src/pages/AdminKinfloShell.tsx");
 const queueBlock = extractSpinUpQueueBlock(dataContents);
 
-for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-microsite"]) {
+for (const siteKey of ["julies-family-public", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
   if (queueBlock.includes(`siteKey: "${siteKey}"`)) {
     pass(`spin-up queue includes ${siteKey}`);
   } else {
@@ -139,14 +139,14 @@ for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-
 }
 
 for (const [label, count] of [
-  ["canCreateTenant false request count is 3", (queueBlock.match(/canCreateTenant: false/g) ?? []).length],
-  ["canCreateSite false request count is 3", (queueBlock.match(/canCreateSite: false/g) ?? []).length],
-  ["canInviteAdmin false request count is 3", (queueBlock.match(/canInviteAdmin: false/g) ?? []).length],
-  ["canPublish false request count is 3", (queueBlock.match(/canPublish: false/g) ?? []).length],
-  ["providerWrites false request count is 3", (queueBlock.match(/providerWrites: false/g) ?? []).length],
-  ["liveConvexExecution false request count is 3", (queueBlock.match(/liveConvexExecution: false/g) ?? []).length],
+  ["canCreateTenant false request count is 4", (queueBlock.match(/canCreateTenant: false/g) ?? []).length],
+  ["canCreateSite false request count is 4", (queueBlock.match(/canCreateSite: false/g) ?? []).length],
+  ["canInviteAdmin false request count is 4", (queueBlock.match(/canInviteAdmin: false/g) ?? []).length],
+  ["canPublish false request count is 4", (queueBlock.match(/canPublish: false/g) ?? []).length],
+  ["providerWrites false request count is 4", (queueBlock.match(/providerWrites: false/g) ?? []).length],
+  ["liveConvexExecution false request count is 4", (queueBlock.match(/liveConvexExecution: false/g) ?? []).length],
 ]) {
-  if (count === 3) {
+  if (count === 4) {
     pass(label);
   } else {
     fail(label, `Received ${count}.`);
@@ -154,10 +154,10 @@ for (const [label, count] of [
 }
 
 const blockedStepCount = (queueBlock.match(/blockedLiveAction:/g) ?? []).length;
-if (blockedStepCount === 14) {
-  pass("spin-up queue has 14 blocked live action steps");
+if (blockedStepCount === 20) {
+  pass("spin-up queue has 20 blocked live action steps");
 } else {
-  fail("spin-up queue has 14 blocked live action steps", `Received ${blockedStepCount}.`);
+  fail("spin-up queue has 20 blocked live action steps", `Received ${blockedStepCount}.`);
 }
 
 for (const marker of [
@@ -216,10 +216,10 @@ for (const check of checks) {
 
 console.log("\nKinFlo client website spin-up queue validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio");
-console.log("Queue requests: 3");
+console.log("Queue requests: 4");
 console.log("Ready requests: 1");
-console.log("Blocked requests: 2");
-console.log("Blocked live action steps: 14");
+console.log("Blocked requests: 3");
+console.log("Blocked live action steps: 20");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");

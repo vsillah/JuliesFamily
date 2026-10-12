@@ -1,6 +1,7 @@
 import educationHero from "@assets/generated_images/Hero_education_classroom_scene_8eef647c.png";
 import consultantHero from "@assets/generated_images/Professional_partnership_collaboration_meeting_f14bd523.png";
 import campaignHero from "@assets/generated_images/Hands_together_showing_community_b0e0e375.png";
+import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 
 export type KinfloPublicBlockType =
   | "hero"
@@ -9,6 +10,8 @@ export type KinfloPublicBlockType =
   | "testimonials"
   | "lead_magnet"
   | "form"
+  | "build_request"
+  | "fulfillment_workflow"
   | "campaign"
   | "custom";
 
@@ -253,6 +256,96 @@ const previews: KinfloPublicSitePreview[] = [
         body: "Collect the context needed to route prospects into the right client journey.",
         metadata: { source: "advisor-public-preview", persona: "provider", journeyStage: "consideration" },
         order: 30,
+        publishedAt,
+      },
+    ],
+    context: {
+      route: "/",
+      source: "fixture-public-renderer",
+      convexFunction: "publicSite.resolvePublishedSite",
+    },
+  },
+  {
+    tenant: {
+      _id: "tenant_vanguard_fixture",
+      name: vanguardWorkflow.company.name,
+      slug: "vanguard-enterprises",
+    },
+    site: {
+      _id: "site_vanguard_fixture",
+      name: vanguardWorkflow.company.shortName,
+      slug: "vanguard-enterprises",
+      templateKey: "engineering-build-request",
+      subdomain: "vanguard-enterprises",
+      primaryDomain: "vanguardenterprises.com",
+      publishedAt,
+    },
+    theme: {
+      palette: {
+        background: "#f7f8fa",
+        foreground: "#172033",
+        accent: "#b7791f",
+        secondary: "#24324a",
+        muted: "#e9edf3",
+      },
+      typography: { heading: "Inter", body: "Inter" },
+      radii: { card: 6, control: 6 },
+      media: {
+        heroImage: consultantHero,
+        treatment: "engineering-collaboration-and-delivery-proof",
+      },
+    },
+    navigationItems: [
+      { _id: "nav_vanguard_services", label: "Services & Solutions", href: "#services", placement: "header", order: 10 },
+      { _id: "nav_vanguard_process", label: "Build Process", href: "#build-process", placement: "header", order: 20 },
+      { _id: "nav_vanguard_request", label: "Request a Build", href: "#build-request", placement: "header", order: 30 },
+      { _id: "nav_vanguard_about", label: "About Us", href: "#about", placement: "header", order: 40 },
+      { _id: "nav_vanguard_contact", label: "Contact Us", href: "#contact", placement: "footer", order: 10 },
+      { _id: "nav_vanguard_location", label: "Fort Lee, NJ", href: "#contact", placement: "footer", order: 20 },
+    ],
+    page: {
+      _id: "page_vanguard_home",
+      title: "Home",
+      route: "/",
+      seo: { title: "Vanguard Enterprises | Engineering and technology build requests" },
+      templateKey: "engineering-build-request",
+      publishedAt,
+    },
+    blocks: [
+      {
+        _id: "block_vanguard_hero",
+        type: "hero",
+        title: "Bring us the build before you have every answer",
+        body: "Start with the outcome, the source package you have, and the constraints you already know. Vanguard associates turn that request into a scoped engineering, CAD/CAM, IT infrastructure, or project delivery path.",
+        metadata: { primaryCta: "Request a build", primaryHref: "#build-request", secondaryCta: "See the build process", secondaryHref: "#build-process" },
+        order: 10,
+        publishedAt,
+      },
+      {
+        _id: "block_vanguard_services",
+        type: "services",
+        title: "Professional services built around the work in front of you",
+        body: "Vanguard supports large and small projects with subject matter expertise, consistent service, and a delivery record clients can inspect.",
+        metadata: { items: vanguardWorkflow.services.map((service) => service.title) },
+        order: 20,
+        publishedAt,
+      },
+      {
+        _id: "block_vanguard_process",
+        type: "fulfillment_workflow",
+        title: "A request moves forward when the evidence does",
+        body: "Every engagement passes through source inventory, technical review, readiness, fulfillment, and delivery receipt gates.",
+        metadata: { source: "vanguard-public-site", persona: "provider", journeyStage: "consideration" },
+        order: 30,
+        publishedAt,
+      },
+      {
+        _id: "block_vanguard_request",
+        type: "build_request",
+        title: "Start the build request",
+        body: "Share enough context for an associate to inventory the work and name what is missing. This local preview prepares a request summary without sending data or uploading files.",
+        metadata: { source: "vanguard-build-request", persona: "provider", journeyStage: "decision" },
+        order: 40,
         publishedAt,
       },
     ],

@@ -87,9 +87,9 @@ requireIncludes("docs/phase97-client-website-configuration-profiles.md", [
   "section-kinflo-client-website-configuration-summary",
   "section-kinflo-client-website-configuration-scroll",
   "button-client-website-configuration-gated",
-  "Total profiles: 3",
+  "Total profiles: 4",
   "Ready profiles: 1",
-  "Blocked profiles: 2",
+  "Blocked profiles: 3",
   "Live configuration saves: 0",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
@@ -99,9 +99,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellClientWebsiteConfigurationProfiles",
   "configurationProfiles",
   "provider-light-configuration-profiles",
-  "totalProfiles: 3",
+  "totalProfiles: 4",
   "readyProfiles: 1",
-  "blockedProfiles: 2",
+  "blockedProfiles: 3",
   "canSaveConfig: false",
   "canPublish: false",
   "providerWrites: false",
@@ -141,7 +141,7 @@ const convexContents = read("convex/siteFactory.ts");
 const profileBlock = extractConfigurationProfilesBlock(dataContents);
 const convexProfileSection = convexContents.match(/const clientWebsiteConfigurationProfiles:[\s\S]*?const clientWebsiteProvisioningOrders:/)?.[0] ?? "";
 
-for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-microsite"]) {
+for (const siteKey of ["julies-family-public", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
   if (profileBlock.includes(`siteKey: "${siteKey}"`)) {
     pass(`configuration profiles include ${siteKey}`);
   } else {
@@ -150,12 +150,12 @@ for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-
 }
 
 for (const [label, count] of [
-  ["canSaveConfig false profile count is 3", (profileBlock.match(/canSaveConfig: false/g) ?? []).length],
-  ["canPublish false profile count is 3", (profileBlock.match(/canPublish: false/g) ?? []).length],
-  ["providerWrites false profile count is 3", (profileBlock.match(/providerWrites: false/g) ?? []).length],
-  ["liveConvexExecution false profile count is 3", (profileBlock.match(/liveConvexExecution: false/g) ?? []).length],
+  ["canSaveConfig false profile count is 4", (profileBlock.match(/canSaveConfig: false/g) ?? []).length],
+  ["canPublish false profile count is 4", (profileBlock.match(/canPublish: false/g) ?? []).length],
+  ["providerWrites false profile count is 4", (profileBlock.match(/providerWrites: false/g) ?? []).length],
+  ["liveConvexExecution false profile count is 4", (profileBlock.match(/liveConvexExecution: false/g) ?? []).length],
 ]) {
-  if (count === 3) {
+  if (count === 4) {
     pass(label);
   } else {
     fail(label, `Received ${count}.`);
@@ -173,10 +173,10 @@ for (const marker of [
   "lockedSurfaces:",
 ]) {
   const count = (profileBlock.match(new RegExp(marker, "g")) ?? []).length;
-  if (count === 3) {
-    pass(`configuration profiles include 3 ${marker} entries`);
+  if (count === 4) {
+    pass(`configuration profiles include 4 ${marker} entries`);
   } else {
-    fail(`configuration profiles include 3 ${marker} entries`, `Received ${count}.`);
+    fail(`configuration profiles include 4 ${marker} entries`, `Received ${count}.`);
   }
 }
 
@@ -227,9 +227,9 @@ for (const check of checks) {
 
 console.log("\nKinFlo client website configuration profile validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio");
-console.log("Configuration profiles: 3");
+console.log("Configuration profiles: 4");
 console.log("Ready profiles: 1");
-console.log("Blocked profiles: 2");
+console.log("Blocked profiles: 3");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");

@@ -21,10 +21,10 @@ npm run kinflo:validate-client-website-configuration-profiles
 
 ## Profile Coverage
 
-- Total profiles: 3
+- Total profiles: 4
 - Ready profiles: 1
-- Blocked profiles: 2
-- Site keys: `julies-family-public`, `advisor-client-site`, `campaign-microsite`
+- Blocked profiles: 3
+- Site keys: `julies-family-public`, `advisor-client-site`, `vanguard-enterprises`, `campaign-microsite`
 - Live configuration saves: 0
 - Live publishes: 0
 - Provider writes: 0

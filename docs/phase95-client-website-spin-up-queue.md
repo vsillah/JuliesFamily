@@ -20,17 +20,19 @@ npm run kinflo:validate-client-website-spin-up-queue
 - Site cards:
   - `card-client-website-spin-up-julies-family-public`
   - `card-client-website-spin-up-advisor-client-site`
+  - `card-client-website-spin-up-vanguard-enterprises`
   - `card-client-website-spin-up-campaign-microsite`
 - Gated action: `button-client-website-spin-up-gated`
 
 ## Queue Contract
 
-- Total requests: 3
+- Total requests: 4
 - Ready requests: 1
-- Blocked requests: 2
-- Total steps: 14
+- Blocked requests: 3
+- Total steps: 20
 - Founding request: Julie Family founding retrofit
 - Client request: Advisor client tenant launch
+- Engineering request: Vanguard request-to-build launch
 - Campaign request: Campaign microsite scoped editor
 
 Each request keeps the live execution switches off:

@@ -101,7 +101,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context",
   "clientWebsitePreviewReviewEvidence = selectedClientWebsitePreviewReviewPacket?.evidenceChecklist.map",
   "clientWebsitePreviewReviewBlockedActions = selectedClientWebsitePreviewReviewPacket?.blockedLiveActions",
-  "href={clientWebsiteStudioPreviewHref}",
+  "desktopHref={clientWebsiteStudioPreviewHref}",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [

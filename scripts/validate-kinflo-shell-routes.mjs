@@ -190,6 +190,7 @@ requireIncludes(shellDataPath, [
   'previewPath: "/kinflo-sites/julies-family"',
   'previewPath: "/kinflo-sites/campaign-microsite"',
   'previewPath: "/kinflo-sites/advisor-client-site"',
+  'previewPath: "/kinflo-sites/vanguard-enterprises"',
   "fixtureKinfloShellAdapter",
   "liveKinfloShellAdapter",
   "selectKinfloShellDataAdapter",
@@ -220,10 +221,11 @@ requireIncludes(publicPreviewDataPath, [
   'convexFunction: "publicSite.resolvePublishedSite"',
   'slug: "julies-family"',
   'slug: "advisor-client-site"',
+  'slug: "vanguard-enterprises"',
   'slug: "campaign-microsite"',
 ]);
 
-for (const slug of ["julies-family", "advisor-client-site", "campaign-microsite"]) {
+for (const slug of ["julies-family", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
   requireMatch(
     publicPreviewDataPath,
     new RegExp(`site:\\s*\\{[\\s\\S]*?slug:\\s*"${slug}"`),
@@ -239,7 +241,7 @@ for (const slug of ["julies-family", "advisor-client-site", "campaign-microsite"
 console.log("KinFlo shell route smoke");
 console.log("Admin shell route: /admin/kinflo-os");
 console.log("Public preview route: /kinflo-sites/:siteSlug");
-console.log("Public preview fixture slugs: julies-family, advisor-client-site, campaign-microsite");
+console.log("Public preview fixture slugs: julies-family, advisor-client-site, vanguard-enterprises, campaign-microsite");
 console.log("Runtime mode: fixture/provider-light");
 console.log("Generated API imported: no");
 console.log("External writes: 0");

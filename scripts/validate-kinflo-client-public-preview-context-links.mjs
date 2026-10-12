@@ -94,7 +94,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "clientWebsiteStudioPreviewHref",
   "clientWebsiteStudioMobilePreviewHref",
   "section-kinflo-client-preview-link-context",
-  "href={clientWebsiteStudioPreviewHref}",
+  "desktopHref={clientWebsiteStudioPreviewHref}",
   "previewPath={clientWebsiteStudioMobilePreviewHref}",
   "site-studio-preview",
 ]);
