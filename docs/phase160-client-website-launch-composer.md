@@ -22,13 +22,14 @@ npm run kinflo:validate-client-website-launch-composer
 
 ## Composer Contract
 
-- Total compositions: 3
+- Total compositions: 4
 - Review ready: 1
-- Blocked compositions: 2
-- Total steps: 12
+- Blocked compositions: 3
+- Total steps: 18
 - Sites:
   - `julies-family-public`
   - `advisor-client-site`
+  - `vanguard-enterprises`
   - `campaign-microsite`
 
 Each composition keeps live execution disabled:

@@ -122,6 +122,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "adminInvitationReadinessPackets: [",
   "julies-family-public",
   "advisor-client-site",
+  "vanguard-enterprises",
   "campaign-microsite",
   "invitationPosture: \"provider-light-admin-invitation\"",
   "inviteRole: \"platform.super_admin\"",
@@ -132,8 +133,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "totalBindings: 86",
   "queryBindings: 48",
   "smokeManifestGaps: 41",
-  "totalBindings: 24",
-  "queryBindings: 23",
+  "totalBindings: 25",
+  "queryBindings: 24",
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
@@ -186,10 +187,10 @@ requireIncludes("package.json", [
 
 const shellDataContents = read("client/src/lib/kinfloShellData.ts");
 const packetCount = (shellDataContents.match(/invitationPosture: "provider-light-admin-invitation",/g) ?? []).length;
-if (packetCount === 3) {
-  pass("shell data includes three admin invitation readiness packets");
+if (packetCount === 4) {
+  pass("shell data includes four admin invitation readiness packets");
 } else {
-  fail("shell data includes three admin invitation readiness packets", `Received ${packetCount}.`);
+  fail("shell data includes four admin invitation readiness packets", `Received ${packetCount}.`);
 }
 
 let generatedApiImportFound = false;
@@ -252,7 +253,7 @@ for (const check of checks) {
 
 console.log("\nKinFlo client admin invitation readiness packet validation");
 console.log("Convex function: siteFactory.listClientWebsiteAdminInvitationReadinessPackets");
-console.log("Admin invitation readiness packets: 3");
+console.log("Admin invitation readiness packets: 4");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Convex codegen run: no");

@@ -77,10 +77,10 @@ requireIncludes("docs/phase161-client-website-launch-composer-query.md", [
   "siteFactoryListClientWebsiteLaunchComposer",
   "ClientWebsiteLaunchComposer",
   "clientWebsiteLaunchComposer",
-  "Total compositions: 3",
+  "Total compositions: 4",
   "Review ready: 1",
-  "Blocked compositions: 2",
-  "Total steps: 12",
+  "Blocked compositions: 3",
+  "Total steps: 18",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed from the shell.",
   "No secret values are read or printed.",
@@ -93,6 +93,7 @@ requireIncludes("convex/siteFactory.ts", [
   "provider-light-client-website-launch-composer",
   "Julie Family founding launch composition",
   "Advisor client launch composition",
+  "Vanguard request-to-build associate composition",
   "Campaign microsite launch composition",
   "canCreateTenant: false",
   "canCreateSite: false",
@@ -183,15 +184,15 @@ if (composerBlock) {
 }
 
 for (const [label, count] of [
-  ["canCreateTenant false composition count is 3", (composerBlock.match(/canCreateTenant: false/g) ?? []).length],
-  ["canCreateSite false composition count is 3", (composerBlock.match(/canCreateSite: false/g) ?? []).length],
-  ["canInviteAdmin false composition count is 3", (composerBlock.match(/canInviteAdmin: false/g) ?? []).length],
-  ["canPublish false composition count is 3", (composerBlock.match(/canPublish: false/g) ?? []).length],
-  ["providerWrites false composition count is 3", (composerBlock.match(/providerWrites: false/g) ?? []).length],
-  ["liveConvexExecution false composition count is 3", (composerBlock.match(/liveConvexExecution: false/g) ?? []).length],
-  ["blocked live action step count is 12", (composerBlock.match(/blockedLiveAction:/g) ?? []).length],
+  ["canCreateTenant false composition count is 4", (composerBlock.match(/canCreateTenant: false/g) ?? []).length],
+  ["canCreateSite false composition count is 4", (composerBlock.match(/canCreateSite: false/g) ?? []).length],
+  ["canInviteAdmin false composition count is 4", (composerBlock.match(/canInviteAdmin: false/g) ?? []).length],
+  ["canPublish false composition count is 4", (composerBlock.match(/canPublish: false/g) ?? []).length],
+  ["providerWrites false composition count is 4", (composerBlock.match(/providerWrites: false/g) ?? []).length],
+  ["liveConvexExecution false composition count is 4", (composerBlock.match(/liveConvexExecution: false/g) ?? []).length],
+  ["blocked live action step count is 18", (composerBlock.match(/blockedLiveAction:/g) ?? []).length],
 ]) {
-  const expected = label === "blocked live action step count is 12" ? 12 : 3;
+  const expected = label === "blocked live action step count is 18" ? 18 : 4;
   if (count === expected) {
     pass(label);
   } else {
@@ -231,8 +232,8 @@ for (const check of checks) {
 
 console.log("\nKinFlo client website launch composer query validation");
 console.log("Convex function: siteFactory.listClientWebsiteLaunchComposer");
-console.log("Compositions: 3");
-console.log("Blocked live action steps: 12");
+console.log("Compositions: 4");
+console.log("Blocked live action steps: 18");
 console.log("Read-only query: yes");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");

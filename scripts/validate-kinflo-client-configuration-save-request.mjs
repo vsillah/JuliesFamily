@@ -119,6 +119,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "configurationSaveRequests: [",
   "julies-family-public",
   "advisor-client-site",
+  "vanguard-enterprises",
   "campaign-microsite",
   "requestPosture: \"provider-light-save-request\"",
   "requestPayload",
@@ -158,10 +159,10 @@ requireIncludes("package.json", [
 
 const shellDataContents = read("client/src/lib/kinfloShellData.ts");
 const saveRequestCount = (shellDataContents.match(/requestPosture: "provider-light-save-request",/g) ?? []).length;
-if (saveRequestCount === 3) {
-  pass("shell data includes three configuration save requests");
+if (saveRequestCount === 4) {
+  pass("shell data includes four configuration save requests");
 } else {
-  fail("shell data includes three configuration save requests", `Received ${saveRequestCount}.`);
+  fail("shell data includes four configuration save requests", `Received ${saveRequestCount}.`);
 }
 
 let generatedApiImportFound = false;
@@ -216,7 +217,7 @@ for (const check of checks) {
 
 console.log("\nKinFlo client configuration save request validation");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationSaveRequests");
-console.log("Save requests: 3");
+console.log("Save requests: 4");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Convex codegen run: no");

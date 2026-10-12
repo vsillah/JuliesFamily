@@ -89,10 +89,10 @@ requireIncludes("docs/phase160-client-website-launch-composer.md", [
   "section-kinflo-client-website-launch-composer-evidence",
   "section-kinflo-client-website-launch-composer-blocked",
   "button-client-website-launch-composer-gated",
-  "Total compositions: 3",
+  "Total compositions: 4",
   "Review ready: 1",
-  "Blocked compositions: 2",
-  "Total steps: 12",
+  "Blocked compositions: 3",
+  "Total steps: 18",
   "platform.super_admin",
   "tenant.admin",
   "site.editor",
@@ -105,10 +105,10 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellClientWebsiteLaunchComposer",
   "launchComposer",
   "provider-light-client-website-launch-composer",
-  "totalCompositions: 3",
+  "totalCompositions: 4",
   "reviewReady: 1",
-  "blockedCompositions: 2",
-  "totalSteps: 12",
+  "blockedCompositions: 3",
+  "totalSteps: 18",
   "canCreateTenant: false",
   "canCreateSite: false",
   "canInviteAdmin: false",
@@ -150,7 +150,7 @@ const dataContents = read("client/src/lib/kinfloShellData.ts");
 const pageContents = read("client/src/pages/AdminKinfloShell.tsx");
 const composerBlock = extractLaunchComposerBlock(dataContents);
 
-for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-microsite"]) {
+for (const siteKey of ["julies-family-public", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
   if (composerBlock.includes(`siteKey: "${siteKey}"`)) {
     pass(`launch composer includes ${siteKey}`);
   } else {
@@ -167,14 +167,14 @@ for (const scope of ["scope: \"platform\"", "scope: \"tenant\"", "scope: \"site\
 }
 
 for (const [label, count] of [
-  ["canCreateTenant false composition count is 3", (composerBlock.match(/canCreateTenant: false/g) ?? []).length],
-  ["canCreateSite false composition count is 3", (composerBlock.match(/canCreateSite: false/g) ?? []).length],
-  ["canInviteAdmin false composition count is 3", (composerBlock.match(/canInviteAdmin: false/g) ?? []).length],
-  ["canPublish false composition count is 3", (composerBlock.match(/canPublish: false/g) ?? []).length],
-  ["providerWrites false composition count is 3", (composerBlock.match(/providerWrites: false/g) ?? []).length],
-  ["liveConvexExecution false composition count is 3", (composerBlock.match(/liveConvexExecution: false/g) ?? []).length],
+  ["canCreateTenant false composition count is 4", (composerBlock.match(/canCreateTenant: false/g) ?? []).length],
+  ["canCreateSite false composition count is 4", (composerBlock.match(/canCreateSite: false/g) ?? []).length],
+  ["canInviteAdmin false composition count is 4", (composerBlock.match(/canInviteAdmin: false/g) ?? []).length],
+  ["canPublish false composition count is 4", (composerBlock.match(/canPublish: false/g) ?? []).length],
+  ["providerWrites false composition count is 4", (composerBlock.match(/providerWrites: false/g) ?? []).length],
+  ["liveConvexExecution false composition count is 4", (composerBlock.match(/liveConvexExecution: false/g) ?? []).length],
 ]) {
-  if (count === 3) {
+  if (count === 4) {
     pass(label);
   } else {
     fail(label, `Received ${count}.`);
@@ -182,10 +182,10 @@ for (const [label, count] of [
 }
 
 const blockedStepCount = (composerBlock.match(/blockedLiveAction:/g) ?? []).length;
-if (blockedStepCount === 12) {
-  pass("launch composer has 12 blocked live action steps");
+if (blockedStepCount === 18) {
+  pass("launch composer has 18 blocked live action steps");
 } else {
-  fail("launch composer has 12 blocked live action steps", `Received ${blockedStepCount}.`);
+  fail("launch composer has 18 blocked live action steps", `Received ${blockedStepCount}.`);
 }
 
 for (const marker of [
@@ -238,8 +238,8 @@ for (const check of checks) {
 
 console.log("\nKinFlo client website launch composer validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio");
-console.log("Compositions: 3");
-console.log("Blocked live action steps: 12");
+console.log("Compositions: 4");
+console.log("Blocked live action steps: 18");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");

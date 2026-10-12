@@ -182,7 +182,7 @@ for (const check of checks) {
 console.log("\nKinFlo configuration admin permission preset validation");
 console.log("Route: /admin/kinflo-os?tab=site-studio&studioLane=configuration");
 console.log("Site param: studioSite");
-console.log("Permission presets: 3");
+console.log("Permission presets: 4");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Convex codegen run: no");

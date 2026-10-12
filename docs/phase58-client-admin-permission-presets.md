@@ -13,7 +13,7 @@ Phase 58 makes the super-admin client website handoff model explicit without ena
 - Admin route: `/admin/kinflo-os?tab=site-studio`.
 - Convex function: `siteFactory.listClientWebsiteAdminPermissionPresets`.
 - Shell data: `clientWebsiteStudio.adminPermissionPresets`.
-- Permission presets: 3.
+- Permission presets: 4, including the Vanguard associate request coordinator.
 - Permission preset surface: `Admin Permission Preset`.
 - Admin handoff action: gated.
 - Provider posture: local state only.

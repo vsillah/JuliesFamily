@@ -73,7 +73,7 @@ requireIncludes("docs/phase60-client-provisioning-orders.md", [
   "npm run kinflo:validate-client-provisioning-orders",
   "siteFactory.listClientWebsiteProvisioningOrders",
   "clientWebsiteStudio.provisioningOrders",
-  "Provisioning orders: 3",
+  "Provisioning orders: 4",
   "Live provisioning action: gated",
   "Read-only query: yes",
   "Local state only: yes",
@@ -153,7 +153,7 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
 }
 
 const siteFactoryContents = read("convex/siteFactory.ts");
-for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-microsite"]) {
+for (const siteKey of ["julies-family-public", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
   if (siteFactoryContents.includes(`siteKey: "${siteKey}"`)) {
     pass(`client provisioning order references ${siteKey}`);
   } else {
@@ -175,7 +175,7 @@ for (const check of checks) {
 console.log("\nKinFlo client provisioning order validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio");
 console.log("Convex function: siteFactory.listClientWebsiteProvisioningOrders");
-console.log("Provisioning orders: 3");
+console.log("Provisioning orders: 4");
 console.log("Live provisioning action: gated");
 console.log("Read-only query: yes");
 console.log("Local state only: yes");
