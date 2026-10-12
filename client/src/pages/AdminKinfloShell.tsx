@@ -2159,6 +2159,36 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
+      <div id="vanguard-source-parity-readiness" className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3" data-testid="section-kinflo-vanguard-source-parity-readiness">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="text-sm font-semibold text-blue-950">Source-site parity readiness</div>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-blue-900">
+              {vanguardWorkflow.sourceSite.provenance} The public request-to-build workflow remains the primary path; source sections add service detail, company proof, careers, and contact context.
+            </p>
+          </div>
+          <Badge variant="outline" className="w-fit border-blue-300 bg-white text-blue-800">Audited {vanguardWorkflow.sourceSite.auditedAt}</Badge>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { label: "Pages inventoried", value: vanguardWorkflow.sourceSite.inventory.length },
+            { label: "Coverage groups", value: vanguardWorkflow.sourceSite.coverage.length },
+            { label: "Public route", value: "Fixture-backed" },
+            { label: "Live submissions", value: "Disabled" },
+          ].map((item) => (
+            <div key={item.label} className="rounded-md border border-blue-200 bg-white px-3 py-2">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-blue-600">{item.label}</div>
+              <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {vanguardWorkflow.sourceSite.coverage.map((item) => (
+            <Badge key={item} variant="outline" className="border-blue-200 bg-white text-[10px] text-blue-800">{item}</Badge>
+          ))}
+        </div>
+      </div>
+
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           { label: "Order", value: vanguardWorkflow.sampleOrder.id },

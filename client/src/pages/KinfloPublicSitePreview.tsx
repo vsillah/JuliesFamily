@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useRoute } from "wouter";
-import { ArrowRight, CheckCircle2, CircleDashed, FileText, Goal, LockKeyhole, Mail, PackageCheck, UsersRound } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -177,6 +177,193 @@ function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
   );
 }
 
+function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
+  const source = vanguardWorkflow.sourceSite;
+
+  return (
+    <section data-testid="public-preview-vanguard-source-parity">
+      <div id="capabilities" className="border-y border-slate-200 bg-white px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <Badge variant="outline">Source-site capabilities</Badge>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{block.title}</h2>
+              <p className="mt-4 text-base leading-7 text-slate-600">{block.body}</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" aria-label="Source parity coverage">
+              {source.coverage.map((item) => (
+                <div key={item} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-10 grid gap-4 lg:grid-cols-3">
+            {source.serviceDetails.map((service) => (
+              <article key={service.key} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
+                  {service.key === "project-management" ? <BriefcaseBusiness className="h-5 w-5" /> : service.key === "it-infrastructure" ? <Network className="h-5 w-5" /> : <Wrench className="h-5 w-5" />}
+                </div>
+                <h3 className="mt-4 text-lg font-semibold text-slate-950">{service.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{service.summary}</p>
+                <ul className="mt-4 space-y-2">
+                  {service.highlights.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm leading-5 text-slate-700">
+                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-10 rounded-xl border border-slate-200 bg-slate-950 p-5 text-white sm:p-7" data-testid="public-preview-vanguard-project-phases">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">Project management method</Badge>
+                <h3 className="mt-3 text-2xl font-semibold">Five phases keep the work accountable</h3>
+              </div>
+              <div className="text-sm text-slate-300">Scope → plan → deliver → measure → learn</div>
+            </div>
+            <div className="mt-6 grid gap-3 md:grid-cols-5">
+              {source.projectPhases.map((phase, index) => (
+                <article key={phase.label} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                  <div className="text-xs font-bold text-amber-300">0{index + 1}</div>
+                  <h4 className="mt-2 font-semibold">{phase.label}</h4>
+                  <p className="mt-2 text-xs leading-5 text-slate-300">{phase.summary}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="about" className="px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(320px,0.28fr)]">
+            <div>
+              <Badge variant="outline">About Vanguard</Badge>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">A distributed team built around technical work</h2>
+              <p className="mt-4 text-base leading-7 text-slate-600">{source.about.summary}</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">{source.about.experience}</div>
+                <div className="rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-700">{source.about.operatingModel}</div>
+              </div>
+            </div>
+            <aside id="location" className="rounded-xl border border-slate-200 bg-white p-5">
+              <div className="flex items-center gap-2 font-semibold text-slate-950"><MapPin className="h-5 w-5 text-amber-700" /> Locations</div>
+              <div className="mt-4 space-y-3">
+                {source.about.locations.map((location) => (
+                  <div key={location.city} className="rounded-lg bg-slate-50 p-3">
+                    <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{location.label}</div>
+                    <div className="mt-1 text-sm font-semibold text-slate-900">{location.city}</div>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-xs leading-5 text-slate-500">{source.contact.locationPosture}</p>
+            </aside>
+          </div>
+
+          <div className="mt-10">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><UsersRound className="h-4 w-4 text-amber-700" /> Public leadership profiles</div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              {source.leadership.map((leader) => (
+                <article key={leader.name} className="rounded-lg border border-slate-200 bg-white p-4">
+                  <h3 className="font-semibold text-slate-950">{leader.name}</h3>
+                  <div className="mt-1 text-xs font-medium text-amber-800">{leader.role}</div>
+                  <p className="mt-3 text-xs leading-5 text-slate-600">{leader.focus}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="proof" className="border-y border-slate-200 bg-slate-900 px-4 py-16 text-white sm:px-6 lg:px-8" data-testid="public-preview-vanguard-customer-proof">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,0.68fr)_minmax(360px,0.32fr)]">
+            <div>
+              <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">Commercial and government sectors</Badge>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Public proof, clearly labeled</h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">{source.proof.customerPosture} These names reflect the source site's published customer list and are presented as source evidence.</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {source.proof.customerExamples.map((customer) => (
+                  <span key={customer} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200">{customer}</span>
+                ))}
+              </div>
+            </div>
+            <aside className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-5">
+              <Landmark className="h-5 w-5 text-amber-300" />
+              <h3 className="mt-3 text-lg font-semibold">Government procurement profile</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-200">{source.proof.gsa}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {source.proof.gsaLinks.map((label) => <Badge key={label} variant="outline" className="border-amber-200/30 text-amber-100">{label} reference</Badge>)}
+              </div>
+              <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                {source.proof.naics.map((item) => (
+                  <div key={item.code} className="rounded-md border border-white/10 bg-slate-950/30 p-3">
+                    <div className="text-xs font-bold text-amber-300">{item.code}</div>
+                    <div className="mt-1 text-xs leading-5 text-slate-300">{item.label}</div>
+                  </div>
+                ))}
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <div id="careers" className="bg-white px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-careers">
+        <div className="mx-auto max-w-7xl">
+          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <Badge variant="outline">Careers</Badge>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Technical roles with clear expectations</h2>
+              <p className="mt-4 text-base leading-7 text-slate-600">{source.careers.equalOpportunity} The listings below summarize the roles published on the source site.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {source.careers.values.map((value) => <Badge key={value} variant="secondary">{value}</Badge>)}
+            </div>
+          </div>
+          <div className="mt-8 grid gap-4 lg:grid-cols-3">
+            {source.careers.roles.map((role) => (
+              <article key={role.title} className="rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <BriefcaseBusiness className="h-5 w-5 text-amber-700" />
+                <h3 className="mt-4 text-lg font-semibold text-slate-950">{role.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{role.summary}</p>
+                <p className="mt-4 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">{role.experience}</p>
+              </article>
+            ))}
+          </div>
+          <div className="mt-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
+            <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>Career information is presented for source parity. This local preview does not accept or transmit applications, resumes, or personal data.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="contact-details" className="border-t border-slate-200 px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-contact-location">
+        <div className="mx-auto grid max-w-7xl gap-6 rounded-2xl bg-slate-950 p-6 text-white sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-amber-300"><Building2 className="h-4 w-4" /> Vanguard Enterprises and Associates Inc.</div>
+            <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">Have a service question or a build to scope?</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">{source.contact.summary}</p>
+            <div className="mt-4 flex flex-col gap-2 text-sm text-slate-200 sm:flex-row sm:gap-5">
+              <span>{vanguardWorkflow.company.email}</span>
+              <span>{vanguardWorkflow.company.phone}</span>
+              <span>{vanguardWorkflow.company.location}</span>
+            </div>
+          </div>
+          <Button size="lg" className="bg-amber-600 text-white hover:bg-amber-700" asChild>
+            <a href="#build-request">Prepare a build request <ArrowRight className="ml-2 h-4 w-4" /></a>
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function BlockSection({
   block,
   preview,
@@ -289,6 +476,10 @@ function BlockSection({
     return <BuildRequestSection block={block} />;
   }
 
+  if (block.type === "source_parity") {
+    return <VanguardSourceParitySection block={block} />;
+  }
+
   if (block.type === "lead_magnet" || block.type === "form") {
     return (
       <section id="intake" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-intake">
@@ -381,13 +572,20 @@ export default function KinfloPublicSitePreview() {
               </a>
             ))}
           </nav>
-          <Badge variant="outline" className="hidden sm:inline-flex">
+          <Badge variant="outline" className="hidden 2xl:inline-flex">
             {preview.context.convexFunction}
           </Badge>
-          <Badge variant="secondary" className="hidden whitespace-nowrap lg:inline-flex" data-testid="public-preview-context">
+          <Badge variant="secondary" className="hidden whitespace-nowrap 2xl:inline-flex" data-testid="public-preview-context">
             {contextPersona} / {contextJourneyStage} / {contextDevice} / {contextReviewSource}
           </Badge>
         </div>
+        <nav className="mx-auto flex max-w-7xl gap-4 overflow-x-auto border-t px-4 py-2 text-xs text-muted-foreground md:hidden" aria-label="Mobile page navigation">
+          {headerNav.map((item) => (
+            <a key={item._id} href={item.href} className="shrink-0 whitespace-nowrap hover:text-foreground">
+              {item.label}
+            </a>
+          ))}
+        </nav>
       </header>
 
       <main>

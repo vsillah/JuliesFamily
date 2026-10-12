@@ -196,11 +196,15 @@ requireIncludes(publicPreviewPath, [
   "resolveKinfloPublicSitePreviewWithContext",
   "public-preview-context",
   'data-testid="public-preview-brand-logo"',
+  'data-testid="public-preview-vanguard-source-parity"',
+  'data-testid="public-preview-vanguard-customer-proof"',
+  'data-testid="public-preview-vanguard-careers"',
   'href={`/kinflo-sites/${preview.site.slug}`}',
 ]);
 
 requireIncludes(adminShellPath, [
   'data-testid="section-kinflo-vanguard-brand-asset"',
+  'data-testid="section-kinflo-vanguard-source-parity-readiness"',
   "vanguardWorkflow.company.logo.image",
   "vanguardWorkflow.company.logo.sourceUrl",
 ]);
@@ -210,6 +214,8 @@ requireIncludes(vanguardWorkflowPath, [
   'sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg"',
   'alt: "Vanguard Enterprises"',
   'sha256: "30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02"',
+  'auditedAt: "2026-10-12"',
+  'gsa: "GSA Contract Schedule 70, Special Item Number 132-51"',
 ]);
 
 requireIncludes(shellDataPath, [
