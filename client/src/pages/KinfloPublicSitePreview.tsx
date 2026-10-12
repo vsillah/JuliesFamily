@@ -191,8 +191,9 @@ function BlockSection({
       <section className="relative min-h-[560px] overflow-hidden" data-testid="public-preview-hero">
         <img
           src={preview.theme.media.heroImage}
-          alt={`${preview.site.name} preview`}
+          alt={preview.theme.media.heroAlt ?? `${preview.site.name} preview`}
           className="absolute inset-0 h-full w-full object-cover"
+          style={{ objectPosition: preview.theme.media.heroPosition ?? "center" }}
         />
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8">
@@ -363,8 +364,15 @@ export default function KinfloPublicSitePreview() {
     >
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <Link href="/admin/kinflo-os" className="text-sm font-semibold">
-            {preview.site.name}
+          <Link href={`/kinflo-sites/${preview.site.slug}`} className="flex min-w-0 items-center text-sm font-semibold">
+            {preview.theme.media.logoImage ? (
+              <img
+                src={preview.theme.media.logoImage}
+                alt={preview.theme.media.logoAlt ?? `${preview.site.name} logo`}
+                className="h-10 w-auto max-w-[150px] object-contain sm:h-12 sm:max-w-[180px]"
+                data-testid="public-preview-brand-logo"
+              />
+            ) : preview.site.name}
           </Link>
           <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
             {headerNav.map((item) => (

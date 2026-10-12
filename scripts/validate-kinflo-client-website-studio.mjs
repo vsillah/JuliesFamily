@@ -108,6 +108,8 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-preview-workbench",
   "section-kinflo-client-preview-canvas",
   "section-kinflo-client-launch-rail",
+  "section-kinflo-vanguard-brand-asset",
+  "vanguardWorkflow.company.logo.image",
   "snapshot.clientWebsiteStudio.researchSources",
   "snapshot.clientWebsiteStudio.convexFunctions",
   "snapshot.clientWebsiteStudio.activationEvidence",

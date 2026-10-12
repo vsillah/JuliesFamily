@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const checks = [];
 
@@ -41,6 +41,17 @@ const shellDataPath = "client/src/lib/kinfloShellData.ts";
 const runtimePath = "client/src/lib/kinfloConvexRuntime.ts";
 const leadCapturePath = "client/src/lib/kinfloLeadCapture.ts";
 const publicPreviewDataPath = "client/src/lib/kinfloPublicSitePreview.ts";
+const vanguardWorkflowPath = "client/src/lib/kinfloVanguardWorkflow.ts";
+const vanguardLogoAssetPath = "attached_assets/vanguard-enterprises-logo.jpg";
+const vanguardHeroAssetPath = "attached_assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
+
+for (const assetPath of [vanguardLogoAssetPath, vanguardHeroAssetPath]) {
+  if (existsSync(assetPath)) {
+    pass(`${assetPath} exists`);
+  } else {
+    fail(`${assetPath} exists`, "Expected the Vanguard public-site asset fixture.");
+  }
+}
 
 requireIncludes(appPath, [
   'import AdminKinfloShell from "@/pages/AdminKinfloShell";',
@@ -184,6 +195,21 @@ requireIncludes(publicPreviewPath, [
   "Runtime fallback is `/api/leads`; Convex target is `crm.submitLead`.",
   "resolveKinfloPublicSitePreviewWithContext",
   "public-preview-context",
+  'data-testid="public-preview-brand-logo"',
+  'href={`/kinflo-sites/${preview.site.slug}`}',
+]);
+
+requireIncludes(adminShellPath, [
+  'data-testid="section-kinflo-vanguard-brand-asset"',
+  "vanguardWorkflow.company.logo.image",
+  "vanguardWorkflow.company.logo.sourceUrl",
+]);
+
+requireIncludes(vanguardWorkflowPath, [
+  'import vanguardLogo from "@assets/vanguard-enterprises-logo.jpg";',
+  'sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg"',
+  'alt: "Vanguard Enterprises"',
+  'sha256: "30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02"',
 ]);
 
 requireIncludes(shellDataPath, [
@@ -215,6 +241,7 @@ requireIncludes(leadCapturePath, [
 ]);
 
 requireIncludes(publicPreviewDataPath, [
+  'import vanguardIndustrialHero from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";',
   "listKinfloPublicSitePreviews",
   "resolveKinfloPublicSitePreview",
   'source: "fixture-public-renderer"',
@@ -223,6 +250,11 @@ requireIncludes(publicPreviewDataPath, [
   'slug: "advisor-client-site"',
   'slug: "vanguard-enterprises"',
   'slug: "campaign-microsite"',
+  "logoImage: vanguardWorkflow.company.logo.image",
+  "logoAlt: vanguardWorkflow.company.logo.alt",
+  "heroImage: vanguardIndustrialHero",
+  'heroAlt: "Welders fabricating a structural steel assembly in an industrial workshop"',
+  'heroPosition: "68% center"',
 ]);
 
 for (const slug of ["julies-family", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {

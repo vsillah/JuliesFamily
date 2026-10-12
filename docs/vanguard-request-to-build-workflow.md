@@ -17,6 +17,10 @@ Source: http://www.vanguardenterprises.com/
 
 The local fixture uses public company facts and service descriptions: Vanguard Enterprises and Associates Inc., Fort Lee, New Jersey, the tagline "Pioneering Innovative Collaboration for Excellence," public contact information, and the public service categories for project management, IT infrastructure, and engineering/CAD/CAM.
 
+The company-header logo is preserved as `attached_assets/vanguard-enterprises-logo.jpg` from `http://www.vanguardenterprises.com/image/80076569.jpg`. The source JPEG is 356 x 138 pixels with SHA-256 `30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02`. The public header and Site Studio evidence view render the local copy with its natural aspect ratio and accessible alt text.
+
+The public hero uses `attached_assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png`, a 1672 x 941 PNG generated with the built-in OpenAI image-generation tool for this local fixture. The prompt requested a photorealistic fabrication shop, protected welders and structural-steel work on the right, and darker negative space on the left for the existing headline and calls to action. It contains no client or customer material, readable text, logo, or watermark. SHA-256: `e519b4eb29d01ed13fd4ca38e7ba7cc9508abbad23ba907e29bc602ebabd2002`.
+
 No private source, account data, customer record, uploaded file, or secret was read or copied.
 
 ## ReversR pattern adapted for Vanguard
