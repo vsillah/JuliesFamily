@@ -13,6 +13,7 @@ export type KinfloPublicBlockType =
   | "form"
   | "build_request"
   | "fulfillment_workflow"
+  | "source_parity"
   | "campaign"
   | "custom";
 
@@ -309,8 +310,10 @@ const previews: KinfloPublicSitePreview[] = [
       { _id: "nav_vanguard_process", label: "Build Process", href: "#build-process", placement: "header", order: 20 },
       { _id: "nav_vanguard_request", label: "Request a Build", href: "#build-request", placement: "header", order: 30 },
       { _id: "nav_vanguard_about", label: "About Us", href: "#about", placement: "header", order: 40 },
-      { _id: "nav_vanguard_contact", label: "Contact Us", href: "#contact", placement: "footer", order: 10 },
-      { _id: "nav_vanguard_location", label: "Fort Lee, NJ", href: "#contact", placement: "footer", order: 20 },
+      { _id: "nav_vanguard_careers", label: "Careers", href: "#careers", placement: "header", order: 50 },
+      { _id: "nav_vanguard_contact", label: "Contact Us", href: "#contact-details", placement: "footer", order: 10 },
+      { _id: "nav_vanguard_location", label: "Locations", href: "#location", placement: "footer", order: 20 },
+      { _id: "nav_vanguard_gsa", label: "Government & GSA", href: "#proof", placement: "footer", order: 30 },
     ],
     page: {
       _id: "page_vanguard_home",
@@ -355,6 +358,15 @@ const previews: KinfloPublicSitePreview[] = [
         body: "Share enough context for an associate to inventory the work and name what is missing. This local preview prepares a request summary without sending data or uploading files.",
         metadata: { source: "vanguard-build-request", persona: "provider", journeyStage: "decision" },
         order: 40,
+        publishedAt,
+      },
+      {
+        _id: "block_vanguard_source_parity",
+        type: "source_parity",
+        title: "The capabilities and people behind the build",
+        body: "Explore Vanguard's public service detail, project method, leadership, customer and government proof, careers, and location posture in one modern operating view.",
+        metadata: { source: "vanguard-public-source-parity", sourcePageCount: vanguardWorkflow.sourceSite.inventory.length },
+        order: 50,
         publishedAt,
       },
     ],
