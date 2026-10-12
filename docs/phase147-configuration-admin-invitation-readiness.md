@@ -16,7 +16,9 @@ Base route:
 
 Selected site:
 
-`studioSite=julies-family-public|advisor-client-site|campaign-microsite`
+`studioSite=julies-family-public|advisor-client-site|vanguard-enterprises|campaign-microsite`
+
+Invitation packets: 4, including the Vanguard associate invitation readiness packet.
 
 Configure workspace:
 
@@ -43,6 +45,7 @@ Existing detail tabs stay preserved by workspace:
 - `section-kinflo-client-configuration-admin-invitation-functions` maps the packet back to provider-light Convex function names.
 - `button-client-configuration-admin-invitation-gated` keeps invitation creation, email send, membership grant, config save, and publish disabled.
 - The panel uses the existing `selectedClientWebsiteAdminInvitationReadinessPacket` derived from `clientWebsiteStudio.adminInvitationReadinessPackets`, so switching the configuration profile also switches the invitation evidence.
+- Vanguard keeps request intake, source inventory, discipline routing, quote/readiness, milestone, and versioned delivery evidence visible while private upload, associate assignment, quote approval, fulfillment update, client notification, and public publish remain blocked.
 
 ## Provider Boundary
 

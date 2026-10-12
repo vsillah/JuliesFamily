@@ -74,7 +74,8 @@ for (const path of [
 requireIncludes("docs/phase147-configuration-admin-invitation-readiness.md", [
   "Phase 147: Configuration Admin Invitation Readiness",
   "npm run kinflo:validate-configuration-admin-invitation-readiness",
-  "studioSite=julies-family-public|advisor-client-site|campaign-microsite",
+  "studioSite=julies-family-public|advisor-client-site|vanguard-enterprises|campaign-microsite",
+  "Invitation packets: 4",
   "studioConfigure=review|change|approval|save",
   "section-kinflo-client-configuration-admin-invitation-readiness",
   "text-kinflo-client-configuration-admin-invitation-readiness",
@@ -118,6 +119,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "adminInvitationReadinessPackets",
   "Julie Family founding admin invitation readiness",
   "Advisor client admin invitation readiness",
+  "Vanguard associate invitation readiness",
   "Campaign editor invitation readiness",
   "invitationStatus: \"super_admin_only\"",
   "invitationStatus: \"tenant_admin_ready_not_sent\"",
@@ -167,6 +169,20 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
   pass("configuration admin invitation readiness does not execute live Convex");
 }
 
+const shellDataContents = read("client/src/lib/kinfloShellData.ts");
+const packetCount = (shellDataContents.match(/invitationPosture: "provider-light-admin-invitation",/g) ?? []).length;
+if (packetCount === 4) {
+  pass("configuration route has four admin invitation readiness packets");
+} else {
+  fail("configuration route has four admin invitation readiness packets", `Received ${packetCount}.`);
+}
+
+if (shellDataContents.includes('siteKey: "vanguard-enterprises"') && shellDataContents.includes("Vanguard associate invitation readiness")) {
+  pass("configuration route includes Vanguard invitation readiness");
+} else {
+  fail("configuration route includes Vanguard invitation readiness", "Vanguard invitation readiness fixture is missing.");
+}
+
 const failed = checks.filter((check) => !check.ok);
 
 for (const check of checks) {
@@ -181,7 +197,7 @@ for (const check of checks) {
 console.log("\nKinFlo configuration admin invitation readiness validation");
 console.log("Route: /admin/kinflo-os?tab=site-studio&studioLane=configuration");
 console.log("Site param: studioSite");
-console.log("Invitation packets: 3");
+console.log("Invitation packets: 4");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Convex codegen run: no");

@@ -2901,7 +2901,8 @@ requireIncludes("docs/phase148-configuration-domain-readiness.md", [
 requireIncludes("docs/phase147-configuration-admin-invitation-readiness.md", [
   "Phase 147: Configuration Admin Invitation Readiness",
   "npm run kinflo:validate-configuration-admin-invitation-readiness",
-  "studioSite=julies-family-public|advisor-client-site|campaign-microsite",
+  "studioSite=julies-family-public|advisor-client-site|vanguard-enterprises|campaign-microsite",
+  "Invitation packets: 4",
   "studioConfigure=review|change|approval|save",
   "section-kinflo-client-configuration-admin-invitation-readiness",
   "text-kinflo-client-configuration-admin-invitation-readiness",
