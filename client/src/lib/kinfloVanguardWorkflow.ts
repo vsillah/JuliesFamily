@@ -25,7 +25,7 @@ export const vanguardWorkflow = {
       alt: "Vanguard Enterprises",
       sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg",
       repositoryPath: "attached_assets/vanguard-enterprises-logo.jpg",
-      dimensions: "356 × 138 pixels",
+      dimensions: "356 x 138 pixels",
       sha256: "30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02",
     },
   },

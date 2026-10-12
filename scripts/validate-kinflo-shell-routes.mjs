@@ -193,6 +193,7 @@ requireIncludes(publicPreviewPath, [
   "resolveKinfloPublicSitePreviewWithContext",
   "public-preview-context",
   'data-testid="public-preview-brand-logo"',
+  'href={`/kinflo-sites/${preview.site.slug}`}',
 ]);
 
 requireIncludes(adminShellPath, [
