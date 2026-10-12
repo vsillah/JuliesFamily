@@ -6,6 +6,7 @@
   "framework": null,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.mjs" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/auth/(.*)", "destination": "/api/index.mjs" },
+    { "source": "/((?!api/|auth/).*)", "destination": "/index.html" }
   ]
 }

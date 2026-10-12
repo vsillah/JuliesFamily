@@ -42,7 +42,7 @@ var init_security = __esm({
     });
     adminLimiter = rateLimit({
       windowMs: 15 * 60 * 1e3,
-      // 15 minutes  
+      // 15 minutes
       max: 100,
       // Limit admin operations
       message: "Too many requests to admin endpoints, please try again later.",
@@ -195,7 +195,7 @@ __export(schema_exports, {
   contentOrderUpdateSchema: () => contentOrderUpdateSchema,
   contentVisibility: () => contentVisibility,
   donationCampaigns: () => donationCampaigns,
-  donations: () => donations2,
+  donations: () => donations,
   donorEconomics: () => donorEconomics,
   donorLifecycleStages: () => donorLifecycleStages,
   economicsSettings: () => economicsSettings,
@@ -316,7 +316,7 @@ __export(schema_exports, {
   segments: () => segments,
   serviceMetadataSchema: () => serviceMetadataSchema,
   sessions: () => sessions,
-  smsBulkCampaigns: () => smsBulkCampaigns2,
+  smsBulkCampaigns: () => smsBulkCampaigns,
   smsLogs: () => smsLogs,
   smsSends: () => smsSends,
   smsTemplates: () => smsTemplates,
@@ -343,7 +343,7 @@ import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, jsonb, index, boolean, integer, uniqueIndex, numeric, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
-var sessions, userRoleEnum, organizationTierEnum, organizations, insertOrganizationSchema, users, updateUserProfileSchema, adminPreferences, insertAdminPreferencesSchema, auditLogs, insertAuditLogSchema, leads, insertLeadSchema, leadStatusEnum, updateLeadSchema, interactions, insertInteractionSchema, pipelineStages, insertPipelineStageSchema, leadAssignments, insertLeadAssignmentSchema, tasks, insertTaskSchema, pipelineHistory, insertPipelineHistorySchema, funnelProgressionRules, insertFunnelProgressionRuleSchema, funnelProgressionHistory, insertFunnelProgressionHistorySchema, leadMagnets, insertLeadMagnetSchema, imageAssets, insertImageAssetSchema, contentItems, insertContentItemSchema, updateContentItemSchema, contentOrderUpdateSchema, batchContentReorderSchema, insertStudentSubmissionSchema, studentDashboardCardMetadataSchema, volunteerDashboardCardMetadataSchema, serviceMetadataSchema, programDetailMetadataSchema, contentVisibility, insertContentVisibilitySchema, metricWeightProfiles, insertMetricWeightProfileSchema, metricWeightProfileMetrics, insertMetricWeightProfileMetricSchema, abTestAutomationRules, insertAbTestAutomationRuleSchema, abTestAutomationRuleMetrics, insertAbTestAutomationRuleMetricSchema, abTestPerformanceBaselines, insertAbTestPerformanceBaselineSchema, abTestVariantAiGenerations, insertAbTestVariantAiGenerationSchema, abTestAutomationRuns, insertAbTestAutomationRunSchema, abTestSafetyLimits, insertAbTestSafetyLimitSchema, abTestSourceEnum, abTests, insertAbTestSchema, abTestTargets, insertAbTestTargetSchema, abTestVariants, insertAbTestVariantSchema, presentationOverrideConfigSchema, cardOrderConfigSchema, layoutConfigSchema, abTestVariantConfigurationSchema, abTestAssignments, insertAbTestAssignmentSchema, abTestEvents, insertAbTestEventSchema, googleReviews, insertGoogleReviewSchema, donations2, insertDonationSchema, wishlistItems, insertWishlistItemSchema, emailTemplates, insertEmailTemplateSchema, aiCopyGenerations, insertAiCopyGenerationSchema, emailCampaigns, insertEmailCampaignSchema, emailSequenceSteps, insertEmailSequenceStepSchema, emailCampaignEnrollments, insertEmailCampaignEnrollmentSchema, smsTemplates, insertSmsTemplateSchema, smsSends, insertSmsSendSchema, smsBulkCampaigns2, insertSmsBulkCampaignSchema, communicationLogs, insertCommunicationLogSchema, emailLogs, insertEmailLogSchema, emailOpens, insertEmailOpenSchema, emailLinks, insertEmailLinkSchema, emailClicks, insertEmailClickSchema, emailSendTimeInsights, insertEmailSendTimeInsightSchema, emailReportSchedules, emailArraySchema, frequencyEnumSchema, reportTypeEnumSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, smsLogs, insertSmsLogSchema, donationCampaigns, insertDonationCampaignSchema, updateDonationCampaignSchema, campaignCommunications, insertCampaignCommunicationSchema, campaignMembers, insertCampaignMemberSchema, campaignTestimonials, insertCampaignTestimonialSchema, outreachEmails, insertOutreachEmailSchema, icpCriteria, insertIcpCriteriaSchema, chatbotConversations, insertChatbotConversationSchema, chatbotIssues, insertChatbotIssueSchema, backupSnapshots, insertBackupSnapshotSchema, backupSchedules, insertBackupScheduleSchema, acquisitionChannels, insertAcquisitionChannelSchema, marketingCampaigns, insertMarketingCampaignSchema, leadAttribution, insertLeadAttributionSchema, donorLifecycleStages, insertDonorLifecycleStageSchema, channelSpendLedger, insertChannelSpendLedgerSchema, donorEconomics, insertDonorEconomicsSchema, economicsSettings, insertEconomicsSettingsSchema, techGoesHomeEnrollments, insertTechGoesHomeEnrollmentSchema, techGoesHomeAttendance, insertTechGoesHomeAttendanceSchema, volunteerEvents, insertVolunteerEventSchema, volunteerShifts, insertVolunteerShiftSchema, volunteerEnrollments, insertVolunteerEnrollmentSchema, volunteerSessionLogs, insertVolunteerSessionLogSchema, segments, segmentFiltersSchema, insertSegmentSchema, updateSegmentSchema, emailUnsubscribes, insertEmailUnsubscribeSchema, programs, insertProgramSchema, adminEntitlements, insertAdminEntitlementSchema, adminImpersonationSessions, insertAdminImpersonationSessionSchema;
+var sessions, userRoleEnum, organizationTierEnum, organizations, insertOrganizationSchema, users, updateUserProfileSchema, adminPreferences, insertAdminPreferencesSchema, auditLogs, insertAuditLogSchema, leads, insertLeadSchema, leadStatusEnum, updateLeadSchema, interactions, insertInteractionSchema, pipelineStages, insertPipelineStageSchema, leadAssignments, insertLeadAssignmentSchema, tasks, insertTaskSchema, pipelineHistory, insertPipelineHistorySchema, funnelProgressionRules, insertFunnelProgressionRuleSchema, funnelProgressionHistory, insertFunnelProgressionHistorySchema, leadMagnets, insertLeadMagnetSchema, imageAssets, insertImageAssetSchema, contentItems, insertContentItemSchema, updateContentItemSchema, contentOrderUpdateSchema, batchContentReorderSchema, insertStudentSubmissionSchema, studentDashboardCardMetadataSchema, volunteerDashboardCardMetadataSchema, serviceMetadataSchema, programDetailMetadataSchema, contentVisibility, insertContentVisibilitySchema, metricWeightProfiles, insertMetricWeightProfileSchema, metricWeightProfileMetrics, insertMetricWeightProfileMetricSchema, abTestAutomationRules, insertAbTestAutomationRuleSchema, abTestAutomationRuleMetrics, insertAbTestAutomationRuleMetricSchema, abTestPerformanceBaselines, insertAbTestPerformanceBaselineSchema, abTestVariantAiGenerations, insertAbTestVariantAiGenerationSchema, abTestAutomationRuns, insertAbTestAutomationRunSchema, abTestSafetyLimits, insertAbTestSafetyLimitSchema, abTestSourceEnum, abTests, insertAbTestSchema, abTestTargets, insertAbTestTargetSchema, abTestVariants, insertAbTestVariantSchema, presentationOverrideConfigSchema, cardOrderConfigSchema, layoutConfigSchema, abTestVariantConfigurationSchema, abTestAssignments, insertAbTestAssignmentSchema, abTestEvents, insertAbTestEventSchema, googleReviews, insertGoogleReviewSchema, donations, insertDonationSchema, wishlistItems, insertWishlistItemSchema, emailTemplates, insertEmailTemplateSchema, aiCopyGenerations, insertAiCopyGenerationSchema, emailCampaigns, insertEmailCampaignSchema, emailSequenceSteps, insertEmailSequenceStepSchema, emailCampaignEnrollments, insertEmailCampaignEnrollmentSchema, smsTemplates, insertSmsTemplateSchema, smsSends, insertSmsSendSchema, smsBulkCampaigns, insertSmsBulkCampaignSchema, communicationLogs, insertCommunicationLogSchema, emailLogs, insertEmailLogSchema, emailOpens, insertEmailOpenSchema, emailLinks, insertEmailLinkSchema, emailClicks, insertEmailClickSchema, emailSendTimeInsights, insertEmailSendTimeInsightSchema, emailReportSchedules, emailArraySchema, frequencyEnumSchema, reportTypeEnumSchema, insertEmailReportScheduleSchema, updateEmailReportScheduleSchema, smsLogs, insertSmsLogSchema, donationCampaigns, insertDonationCampaignSchema, updateDonationCampaignSchema, campaignCommunications, insertCampaignCommunicationSchema, campaignMembers, insertCampaignMemberSchema, campaignTestimonials, insertCampaignTestimonialSchema, outreachEmails, insertOutreachEmailSchema, icpCriteria, insertIcpCriteriaSchema, chatbotConversations, insertChatbotConversationSchema, chatbotIssues, insertChatbotIssueSchema, backupSnapshots, insertBackupSnapshotSchema, backupSchedules, insertBackupScheduleSchema, acquisitionChannels, insertAcquisitionChannelSchema, marketingCampaigns, insertMarketingCampaignSchema, leadAttribution, insertLeadAttributionSchema, donorLifecycleStages, insertDonorLifecycleStageSchema, channelSpendLedger, insertChannelSpendLedgerSchema, donorEconomics, insertDonorEconomicsSchema, economicsSettings, insertEconomicsSettingsSchema, techGoesHomeEnrollments, insertTechGoesHomeEnrollmentSchema, techGoesHomeAttendance, insertTechGoesHomeAttendanceSchema, volunteerEvents, insertVolunteerEventSchema, volunteerShifts, insertVolunteerShiftSchema, volunteerEnrollments, insertVolunteerEnrollmentSchema, volunteerSessionLogs, insertVolunteerSessionLogSchema, segments, segmentFiltersSchema, insertSegmentSchema, updateSegmentSchema, emailUnsubscribes, insertEmailUnsubscribeSchema, programs, insertProgramSchema, adminEntitlements, insertAdminEntitlementSchema, adminImpersonationSessions, insertAdminImpersonationSessionSchema;
 var init_schema = __esm({
   "shared/schema.ts"() {
     "use strict";
@@ -1411,7 +1411,7 @@ var init_schema = __esm({
       createdAt: true,
       updatedAt: true
     });
-    donations2 = pgTable("donations", {
+    donations = pgTable("donations", {
       id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
       leadId: varchar("lead_id").references(() => leads.id),
       // Link to lead/donor
@@ -1446,7 +1446,7 @@ var init_schema = __esm({
       createdAt: timestamp("created_at").defaultNow(),
       updatedAt: timestamp("updated_at").defaultNow()
     });
-    insertDonationSchema = createInsertSchema(donations2).omit({
+    insertDonationSchema = createInsertSchema(donations).omit({
       id: true,
       createdAt: true,
       updatedAt: true
@@ -1662,7 +1662,7 @@ var init_schema = __esm({
       id: true,
       createdAt: true
     });
-    smsBulkCampaigns2 = pgTable("sms_bulk_campaigns", {
+    smsBulkCampaigns = pgTable("sms_bulk_campaigns", {
       id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
       name: varchar("name").notNull(),
       description: text("description"),
@@ -1710,7 +1710,7 @@ var init_schema = __esm({
       index("sms_bulk_campaigns_status_idx").on(table.status),
       index("sms_bulk_campaigns_created_at_idx").on(table.createdAt)
     ]);
-    insertSmsBulkCampaignSchema = createInsertSchema(smsBulkCampaigns2).omit({
+    insertSmsBulkCampaignSchema = createInsertSchema(smsBulkCampaigns).omit({
       id: true,
       createdAt: true
     });
@@ -1812,7 +1812,7 @@ var init_schema = __esm({
       campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
       trackingToken: varchar("tracking_token").notNull(),
       targetUrl: text("target_url").notNull(),
-      // Original URL being linked to  
+      // Original URL being linked to
       ipAddress: varchar("ip_address"),
       userAgent: text("user_agent"),
       metadata: jsonb("metadata"),
@@ -3152,10 +3152,10 @@ function createCacLtgpStorage() {
       return attribution;
     },
     async getAttributionsByChannel(channelId) {
-      return await db.select().from(leadAttribution).where(eq(leadAttribution.channelId, channelId)).orderBy(desc(leadAttribution.attributedAt));
+      return await db.select().from(leadAttribution).where(eq(leadAttribution.channelId, channelId)).orderBy(desc(leadAttribution.createdAt));
     },
     async getAttributionsByCampaign(campaignId) {
-      return await db.select().from(leadAttribution).where(eq(leadAttribution.campaignId, campaignId)).orderBy(desc(leadAttribution.attributedAt));
+      return await db.select().from(leadAttribution).where(eq(leadAttribution.campaignId, campaignId)).orderBy(desc(leadAttribution.createdAt));
     },
     async updateLeadAttribution(leadId, updates) {
       const [updated] = await db.update(leadAttribution).set({ ...updates, updatedAt: /* @__PURE__ */ new Date() }).where(eq(leadAttribution.leadId, leadId)).returning();
@@ -3222,7 +3222,7 @@ function createCacLtgpStorage() {
           firstName: leads.firstName,
           lastName: leads.lastName,
           phone: leads.phone,
-          leadStatus: leads.status,
+          leadStatus: leads.leadStatus,
           // Lifecycle fields
           currentStage: donorLifecycleStages.currentStage,
           totalLifetimeDonations: donorLifecycleStages.totalLifetimeDonations,
@@ -3420,7 +3420,7 @@ function createAdminProvisioningStorage(db2) {
         let enrollmentId;
         let tghEnrollmentId = null;
         let volunteerEnrollmentId = null;
-        if (program.programType === "student_program" || program.programType === "student_tgh") {
+        if (program.programType === "student_program") {
           const autoConfig = program.autoPopulateConfig || {};
           const progressPercent = autoConfig.progressPercent || 50;
           const attendanceCount = autoConfig.attendanceCount || 8;
@@ -3713,7 +3713,7 @@ var init_segmentEvaluation = __esm({
       async getSegmentSize(filters) {
         const conditions = this.buildFilterConditions(filters);
         const whereClause = conditions.length > 0 ? and4(...conditions) : void 0;
-        let query = db.select({ count: sql5`count(*)` }).from(leads);
+        let query = db.select({ count: sql5`count(*)`.as("count") }).from(leads);
         if (whereClause) {
           query = query.where(whereClause);
         }
@@ -3730,7 +3730,7 @@ var init_segmentEvaluation = __esm({
         delete baseFilters.excludeSmsUnsubscribed;
         const baseConditions = this.buildFilterConditions(baseFilters);
         const baseWhereClause = baseConditions.length > 0 ? and4(...baseConditions) : void 0;
-        let totalQuery = db.select({ count: sql5`count(*)` }).from(leads);
+        let totalQuery = db.select({ count: sql5`count(*)`.as("count") }).from(leads);
         if (baseWhereClause) {
           totalQuery = totalQuery.where(baseWhereClause);
         }
@@ -3747,7 +3747,7 @@ var init_segmentEvaluation = __esm({
             AND ${emailUnsubscribes.isActive} = true
         )
       )`);
-          let emailUnsubQuery = db.select({ count: sql5`count(*)` }).from(leads);
+          let emailUnsubQuery = db.select({ count: sql5`count(*)`.as("count") }).from(leads);
           if (emailUnsubConditions.length > 0) {
             emailUnsubQuery = emailUnsubQuery.where(and4(...emailUnsubConditions));
           }
@@ -3765,7 +3765,7 @@ var init_segmentEvaluation = __esm({
             AND ${emailUnsubscribes.isActive} = true
         )
       )`);
-          let smsUnsubQuery = db.select({ count: sql5`count(*)` }).from(leads);
+          let smsUnsubQuery = db.select({ count: sql5`count(*)`.as("count") }).from(leads);
           if (smsUnsubConditions.length > 0) {
             smsUnsubQuery = smsUnsubQuery.where(and4(...smsUnsubConditions));
           }
@@ -3797,7 +3797,7 @@ __export(storage_exports, {
   DatabaseStorage: () => DatabaseStorage,
   storage: () => storage
 });
-import { eq as eq4, desc as desc4, and as and5, or, sql as sql6, inArray } from "drizzle-orm";
+import { eq as eq4, desc as desc4, and as and5, or, sql as sql6, inArray, getTableColumns } from "drizzle-orm";
 var DatabaseStorage, storage;
 var init_storage = __esm({
   "server/storage.ts"() {
@@ -3830,6 +3830,7 @@ var init_storage = __esm({
       updateMarketingCampaign;
       deleteMarketingCampaign;
       createSpendEntry;
+      getAllSpendEntries;
       getSpendEntriesByChannel;
       getSpendEntriesByCampaign;
       getSpendEntriesByPeriod;
@@ -3845,6 +3846,8 @@ var init_storage = __esm({
       getAllDonorLifecycleStages;
       getDonorsByStage;
       updateDonorLifecycleStage;
+      listLifecycleWithLeads;
+      countLifecycleByStage;
       createDonorEconomics;
       getDonorEconomics;
       updateDonorEconomics;
@@ -3900,6 +3903,7 @@ var init_storage = __esm({
         this.updateMarketingCampaign = this.cacLtgpStorage.updateMarketingCampaign.bind(this.cacLtgpStorage);
         this.deleteMarketingCampaign = this.cacLtgpStorage.deleteMarketingCampaign.bind(this.cacLtgpStorage);
         this.createSpendEntry = this.cacLtgpStorage.createSpendEntry.bind(this.cacLtgpStorage);
+        this.getAllSpendEntries = this.cacLtgpStorage.getAllSpendEntries.bind(this.cacLtgpStorage);
         this.getSpendEntriesByChannel = this.cacLtgpStorage.getSpendEntriesByChannel.bind(this.cacLtgpStorage);
         this.getSpendEntriesByCampaign = this.cacLtgpStorage.getSpendEntriesByCampaign.bind(this.cacLtgpStorage);
         this.getSpendEntriesByPeriod = this.cacLtgpStorage.getSpendEntriesByPeriod.bind(this.cacLtgpStorage);
@@ -3915,6 +3919,8 @@ var init_storage = __esm({
         this.getAllDonorLifecycleStages = this.cacLtgpStorage.getAllDonorLifecycleStages.bind(this.cacLtgpStorage);
         this.getDonorsByStage = this.cacLtgpStorage.getDonorsByStage.bind(this.cacLtgpStorage);
         this.updateDonorLifecycleStage = this.cacLtgpStorage.updateDonorLifecycleStage.bind(this.cacLtgpStorage);
+        this.listLifecycleWithLeads = this.cacLtgpStorage.listLifecycleWithLeads.bind(this.cacLtgpStorage);
+        this.countLifecycleByStage = this.cacLtgpStorage.countLifecycleByStage.bind(this.cacLtgpStorage);
         this.createDonorEconomics = this.cacLtgpStorage.createDonorEconomics.bind(this.cacLtgpStorage);
         this.getDonorEconomics = this.cacLtgpStorage.getDonorEconomics.bind(this.cacLtgpStorage);
         this.updateDonorEconomics = this.cacLtgpStorage.updateDonorEconomics.bind(this.cacLtgpStorage);
@@ -3951,6 +3957,21 @@ var init_storage = __esm({
         this.getCurrentlyImpersonatedUser = this.adminProvisioningStorage.getCurrentlyImpersonatedUser.bind(this.adminProvisioningStorage);
         this.hasActiveImpersonation = this.adminProvisioningStorage.hasActiveImpersonation.bind(this.adminProvisioningStorage);
       }
+      async calculateDonorLTGP(leadId) {
+        const economics = await this.getDonorEconomics(leadId);
+        if (!economics) {
+          return 0;
+        }
+        const lifetimeRevenue = economics.lifetimeRevenue || 0;
+        const deliveryCosts = economics.actualDeliveryCosts || economics.estimatedDeliveryCosts || 0;
+        const ltgp = lifetimeRevenue - deliveryCosts;
+        await this.updateDonorEconomics(leadId, {
+          lifetimeGrossProfit: ltgp,
+          grossMarginPercent: lifetimeRevenue > 0 ? Math.round(ltgp / lifetimeRevenue * 100) : 0,
+          ltgpToCacRatio: economics.customerAcquisitionCost ? Math.round(ltgp / economics.customerAcquisitionCost * 100) : 0
+        });
+        return ltgp;
+      }
       // User operations
       async getUser(id) {
         const [user] = await db.select().from(users).where(eq4(users.id, id));
@@ -3966,7 +3987,7 @@ var init_storage = __esm({
       }
       async getAllUsers() {
         const usersWithFunnelStage = await db.select({
-          ...users,
+          ...getTableColumns(users),
           funnelStage: leads.funnelStage
         }).from(users).leftJoin(leads, eq4(users.email, leads.email)).orderBy(desc4(users.createdAt));
         return usersWithFunnelStage;
@@ -4002,9 +4023,6 @@ var init_storage = __esm({
           }
           if (userData.passions !== void 0) {
             updateData.passions = userData.passions;
-          }
-          if (userData.funnelStage !== void 0) {
-            updateData.funnelStage = userData.funnelStage;
           }
           try {
             const [user] = await db.update(users).set(updateData).where(eq4(users.id, existingUser.id)).returning();
@@ -4054,9 +4072,6 @@ var init_storage = __esm({
                 }
                 if (userData.passions !== void 0) {
                   updateData.passions = userData.passions;
-                }
-                if (userData.funnelStage !== void 0) {
-                  updateData.funnelStage = userData.funnelStage;
                 }
                 try {
                   const [user] = await db.update(users).set(updateData).where(eq4(users.id, existingUser.id)).returning();
@@ -4196,6 +4211,10 @@ var init_storage = __esm({
       }
       async getLeadByEmail(email) {
         const [lead] = await db.select().from(leads).where(eq4(leads.email, email));
+        return lead;
+      }
+      async getLeadByPhone(phone) {
+        const [lead] = await db.select().from(leads).where(eq4(leads.phone, phone));
         return lead;
       }
       async getAllLeads() {
@@ -4441,7 +4460,7 @@ var init_storage = __esm({
             )
           );
         }
-        let query = db.selectDistinctOn([contentItems.id], {
+        const query = db.selectDistinctOn([contentItems.id], {
           id: contentItems.id,
           type: contentItems.type,
           title: contentItems.title,
@@ -4464,13 +4483,12 @@ var init_storage = __esm({
             eq4(contentVisibility.isVisible, true)
           )
         );
-        query = query.orderBy(
+        return query.orderBy(
           contentItems.id,
           // For DISTINCT ON
           sql6`COALESCE(${contentVisibility.order}, ${contentItems.order})`,
           contentItems.createdAt
         );
-        return query;
       }
       async getVisibleContentItems(type, persona, funnelStage, userPassions) {
         const results = await this.buildVisibilityQuery(type, persona, funnelStage, userPassions);
@@ -4574,7 +4592,7 @@ var init_storage = __esm({
           }
         }
         const prioritizedTests = /* @__PURE__ */ new Set();
-        for (const [key, testsForTarget] of testsByTarget.entries()) {
+        for (const [, testsForTarget] of Array.from(testsByTarget.entries())) {
           const manualTests = testsForTarget.filter((t) => {
             if (t.source === "manual") return true;
             if (t.source === "automated") return false;
@@ -4590,13 +4608,13 @@ var init_storage = __esm({
             selectedTest = manualTests.sort((a, b) => {
               const dateA = a.startDate || a.createdAt;
               const dateB = b.startDate || b.createdAt;
-              return dateB.getTime() - dateA.getTime();
+              return (dateB?.getTime() || 0) - (dateA?.getTime() || 0);
             })[0];
           } else if (automatedTests.length > 0) {
             selectedTest = automatedTests.sort((a, b) => {
               const dateA = a.startDate || a.createdAt;
               const dateB = b.startDate || b.createdAt;
-              return dateB.getTime() - dateA.getTime();
+              return (dateB?.getTime() || 0) - (dateA?.getTime() || 0);
             })[0];
           }
           if (selectedTest) {
@@ -4638,6 +4656,10 @@ var init_storage = __esm({
       // A/B Test Variant operations
       async createAbTestVariant(variantData) {
         const [variant] = await db.insert(abTestVariants).values(variantData).returning();
+        return variant;
+      }
+      async getAbTestVariant(id) {
+        const [variant] = await db.select().from(abTestVariants).where(eq4(abTestVariants.id, id));
         return variant;
       }
       async getAbTestVariants(testId) {
@@ -4767,6 +4789,7 @@ var init_storage = __esm({
           if (!firstItem) {
             return null;
           }
+          const metadata = firstItem.metadata;
           return {
             kind: "presentation",
             title: firstItem.title || void 0,
@@ -4774,8 +4797,8 @@ var init_storage = __esm({
             imageName: firstItem.imageName || void 0,
             imageUrl: firstItem.imageUrl || void 0,
             // Extract CTA text from metadata if available
-            ctaText: firstItem.metadata?.primaryButton || void 0,
-            secondaryCtaText: firstItem.metadata?.secondaryButton || void 0
+            ctaText: metadata?.primaryButton || void 0,
+            secondaryCtaText: metadata?.secondaryButton || void 0
           };
         }
         if (contentType === "service" || contentType === "event" || contentType === "testimonial") {
@@ -5012,6 +5035,9 @@ var init_storage = __esm({
         const [run] = await db.select().from(abTestAutomationRuns).where(eq4(abTestAutomationRuns.id, id));
         return run;
       }
+      async getAllAbTestAutomationRuns(limit = 50) {
+        return this.getAbTestAutomationRuns({ limit });
+      }
       async getAbTestAutomationRuns(filters) {
         const conditions = [];
         if (filters.ruleId) {
@@ -5205,29 +5231,29 @@ var init_storage = __esm({
       }
       // Donation operations
       async createDonation(donationData) {
-        const [donation] = await db.insert(donations2).values(donationData).returning();
+        const [donation] = await db.insert(donations).values(donationData).returning();
         return donation;
       }
       async getDonationById(id) {
-        const [donation] = await db.select().from(donations2).where(eq4(donations2.id, id));
+        const [donation] = await db.select().from(donations).where(eq4(donations.id, id));
         return donation;
       }
       async getDonationByStripeId(stripePaymentIntentId) {
-        const [donation] = await db.select().from(donations2).where(eq4(donations2.stripePaymentIntentId, stripePaymentIntentId));
+        const [donation] = await db.select().from(donations).where(eq4(donations.stripePaymentIntentId, stripePaymentIntentId));
         return donation;
       }
       async updateDonationByStripeId(stripePaymentIntentId, updates) {
-        const [updated] = await db.update(donations2).set({ ...updates, updatedAt: /* @__PURE__ */ new Date() }).where(eq4(donations2.stripePaymentIntentId, stripePaymentIntentId)).returning();
+        const [updated] = await db.update(donations).set({ ...updates, updatedAt: /* @__PURE__ */ new Date() }).where(eq4(donations.stripePaymentIntentId, stripePaymentIntentId)).returning();
         return updated;
       }
       async getAllDonations() {
-        return await db.select().from(donations2).orderBy(desc4(donations2.createdAt));
+        return await db.select().from(donations).orderBy(desc4(donations.createdAt));
       }
       async getDonationsByLeadId(leadId) {
-        return await db.select().from(donations2).where(eq4(donations2.leadId, leadId)).orderBy(desc4(donations2.createdAt));
+        return await db.select().from(donations).where(eq4(donations.leadId, leadId)).orderBy(desc4(donations.createdAt));
       }
       async getCampaignDonations(campaignId) {
-        return await db.select().from(donations2).where(eq4(donations2.campaignId, campaignId)).orderBy(desc4(donations2.createdAt));
+        return await db.select().from(donations).where(eq4(donations.campaignId, campaignId)).orderBy(desc4(donations.createdAt));
       }
       // Donation Campaign operations
       async createDonationCampaign(campaignData) {
@@ -5350,6 +5376,10 @@ var init_storage = __esm({
         return result.rowCount !== null && result.rowCount > 0;
       }
       // Email Template operations
+      async getEmailTemplate(id) {
+        const [template] = await db.select().from(emailTemplates).where(eq4(emailTemplates.id, id));
+        return template;
+      }
       async getEmailTemplateByName(name) {
         const [template] = await db.select().from(emailTemplates).where(eq4(emailTemplates.name, name));
         return template;
@@ -5450,7 +5480,7 @@ var init_storage = __esm({
       // Lead-level Email Engagement operations
       async getLeadEmailOpens(leadId, limit) {
         const results = await db.execute(sql6`
-      SELECT 
+      SELECT
         eo.id,
         eo.email_log_id as "emailLogId",
         eo.lead_id as "leadId",
@@ -5471,7 +5501,7 @@ var init_storage = __esm({
       }
       async getLeadEmailClicks(leadId, limit) {
         const results = await db.execute(sql6`
-      SELECT 
+      SELECT
         ec.id,
         ec.email_log_id as "emailLogId",
         ec.email_link_id as "emailLinkId",
@@ -5520,7 +5550,7 @@ var init_storage = __esm({
             SELECT * FROM leads ${baseFilterClause}
           ),
           engagement_stats AS (
-            SELECT 
+            SELECT
               fl.id,
               COUNT(DISTINCT eo.id) as open_count,
               COUNT(DISTINCT ec.id) as click_count
@@ -5595,13 +5625,13 @@ var init_storage = __esm({
           FROM filtered_leads fl
           INNER JOIN recent_sends rs ON fl.id = rs.id
           WHERE NOT EXISTS (
-            SELECT 1 FROM email_opens eo 
-            WHERE eo.lead_id = fl.id 
+            SELECT 1 FROM email_opens eo
+            WHERE eo.lead_id = fl.id
               AND eo.opened_at >= CURRENT_TIMESTAMP - INTERVAL '60 days'
           )
           AND NOT EXISTS (
-            SELECT 1 FROM email_clicks ec 
-            WHERE ec.lead_id = fl.id 
+            SELECT 1 FROM email_clicks ec
+            WHERE ec.lead_id = fl.id
               AND ec.clicked_at >= CURRENT_TIMESTAMP - INTERVAL '60 days'
           )
           ORDER BY fl.created_at DESC
@@ -5625,7 +5655,7 @@ var init_storage = __esm({
     `);
         const totalSends = Number(sendCountResult.rows[0]?.count || 0);
         const results = await db.execute(sql6`
-      SELECT 
+      SELECT
         target_url as url,
         COUNT(*) as total_clicks,
         COUNT(DISTINCT email_log_id) as unique_clicks
@@ -5657,17 +5687,18 @@ var init_storage = __esm({
           dateFilter = `AND ${timestampCol} <= '${endDate.toISOString()}'`;
         }
         const statusFilter = metric === "sends" ? `AND status IN ('sent', 'delivered', 'queued')` : "";
+        const escapedCampaignId = campaignId.replace(/'/g, "''");
         const results = await db.execute(sql6.raw(`
-      SELECT 
+      SELECT
         date_trunc('${interval}', ${timestampCol}) as bucket,
         COUNT(*) as count
       FROM ${table}
-      WHERE campaign_id = $1
+      WHERE campaign_id = '${escapedCampaignId}'
         ${statusFilter}
         ${dateFilter}
       GROUP BY bucket
       ORDER BY bucket ASC
-    `, [campaignId]));
+    `));
         return results.rows.map((row) => ({
           timestamp: row.bucket,
           count: Number(row.count)
@@ -5678,17 +5709,15 @@ var init_storage = __esm({
         const minSampleSize = options?.minSampleSize || 10;
         try {
           let scopeFilter = "";
-          const params = [];
-          if (scope === "campaign" && scopeId) {
-            scopeFilter = "AND el.campaign_id = $1";
-            params.push(scopeId);
-          } else if (scope === "persona" && scopeId) {
-            scopeFilter = "AND COALESCE(el.persona, l.persona) = $1";
-            params.push(scopeId);
+          const escapedScopeId = scopeId?.replace(/'/g, "''");
+          if (scope === "campaign" && escapedScopeId) {
+            scopeFilter = `AND el.campaign_id = '${escapedScopeId}'`;
+          } else if (scope === "persona" && escapedScopeId) {
+            scopeFilter = `AND COALESCE(el.persona, l.persona) = '${escapedScopeId}'`;
           }
           const results = await db.execute(sql6.raw(`
         WITH sends AS (
-          SELECT 
+          SELECT
             el.id as log_id,
             el.sent_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York' as sent_at_ny,
             el.lead_id
@@ -5699,7 +5728,7 @@ var init_storage = __esm({
             ${scopeFilter}
         ),
         open_stats AS (
-          SELECT 
+          SELECT
             eo.email_log_id,
             COUNT(*) as open_count_per_send,
             COUNT(DISTINCT eo.lead_id) as unique_openers,
@@ -5709,7 +5738,7 @@ var init_storage = __esm({
           GROUP BY eo.email_log_id
         ),
         click_stats AS (
-          SELECT 
+          SELECT
             ec.email_log_id,
             COUNT(*) as click_count_per_send
           FROM email_clicks ec
@@ -5741,18 +5770,18 @@ var init_storage = __esm({
           GROUP BY day_of_week, hour_of_day
           HAVING COUNT(*) >= ${minSampleSize}
         )
-        SELECT 
+        SELECT
           a.*,
-          CASE 
-            WHEN b.total_sends > 0 
+          CASE
+            WHEN b.total_sends > 0
             THEN ROUND((b.total_unique_opens::numeric / b.total_sends::numeric) * 10000)
-            ELSE 0 
+            ELSE 0
           END as baseline_open_rate,
           b.total_sends as baseline_send_count
         FROM aggregated a
         CROSS JOIN baseline b
         ORDER BY a.day_of_week, a.hour_of_day
-      `, params));
+      `));
           const now = /* @__PURE__ */ new Date();
           const insights = results.rows.map((row) => {
             const sendCount = Number(row.send_count);
@@ -5852,7 +5881,8 @@ var init_storage = __esm({
             insights = await this.computeSendTimeInsights(scope, scopeId);
           }
           const filtered = insights.filter((i) => i.confidenceScore >= minConfidence);
-          const baselineOpenRate = filtered[0]?.metadata?.baselineOpenRate || 0;
+          const baselineMetadata = filtered[0]?.metadata;
+          const baselineOpenRate = baselineMetadata?.baselineOpenRate || 0;
           const topWindows = filtered.sort((a, b) => {
             if (b.confidenceScore !== a.confidenceScore) {
               return b.confidenceScore - a.confidenceScore;
@@ -5892,6 +5922,9 @@ var init_storage = __esm({
       async getSmsTemplateById(id) {
         const [template] = await db.select().from(smsTemplates).where(eq4(smsTemplates.id, id));
         return template;
+      }
+      async getSmsTemplate(id) {
+        return this.getSmsTemplateById(id);
       }
       async getSmsTemplatesByPersona(persona) {
         return await db.select().from(smsTemplates).where(or(eq4(smsTemplates.persona, persona), sql6`${smsTemplates.persona} IS NULL`)).orderBy(desc4(smsTemplates.createdAt));
@@ -6440,10 +6473,10 @@ var init_storage = __esm({
         ] = await Promise.all([
           db.select({ count: sql6`cast(count(*) as int)` }).from(leads).then((r) => r[0]?.count || 0),
           db.select({ count: sql6`cast(count(*) as int)` }).from(users).then((r) => r[0]?.count || 0),
-          db.select({ count: sql6`cast(count(*) as int)` }).from(donations2).then((r) => r[0]?.count || 0),
+          db.select({ count: sql6`cast(count(*) as int)` }).from(donations).then((r) => r[0]?.count || 0),
           db.select({ count: sql6`cast(count(*) as int)` }).from(contentItems).where(eq4(contentItems.isActive, true)).then((r) => r[0]?.count || 0),
           db.select({ count: sql6`cast(count(*) as int)` }).from(leads).where(sql6`${leads.createdAt} >= ${weekAgo}`).then((r) => r[0]?.count || 0),
-          db.select({ count: sql6`cast(count(*) as int)` }).from(donations2).where(sql6`${donations2.createdAt} >= ${weekAgo}`).then((r) => r[0]?.count || 0),
+          db.select({ count: sql6`cast(count(*) as int)` }).from(donations).where(sql6`${donations.createdAt} >= ${weekAgo}`).then((r) => r[0]?.count || 0),
           db.select({ count: sql6`cast(count(*) as int)` }).from(tasks).where(sql6`${tasks.createdAt} >= ${weekAgo}`).then((r) => r[0]?.count || 0)
         ]);
         return {
@@ -6556,22 +6589,22 @@ var init_storage = __esm({
         const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1e3);
         const totals = await db.select({
           count: sql6`cast(count(*) as int)`,
-          sum: sql6`cast(sum(${donations2.amount}) as int)`,
-          avg: sql6`cast(avg(${donations2.amount}) as int)`
-        }).from(donations2).then((r) => r[0] || { count: 0, sum: 0, avg: 0 });
+          sum: sql6`cast(sum(${donations.amount}) as int)`,
+          avg: sql6`cast(avg(${donations.amount}) as int)`
+        }).from(donations).then((r) => r[0] || { count: 0, sum: 0, avg: 0 });
         const byType = await db.select({
-          type: donations2.donationType,
+          type: donations.donationType,
           count: sql6`cast(count(*) as int)`,
-          amount: sql6`cast(sum(${donations2.amount}) as int)`
-        }).from(donations2).groupBy(donations2.donationType);
+          amount: sql6`cast(sum(${donations.amount}) as int)`
+        }).from(donations).groupBy(donations.donationType);
         const byStatus = await db.select({
-          status: donations2.status,
+          status: donations.status,
           count: sql6`cast(count(*) as int)`
-        }).from(donations2).groupBy(donations2.status);
+        }).from(donations).groupBy(donations.status);
         const recentDonations = await db.select({
           count: sql6`cast(count(*) as int)`,
-          amount: sql6`cast(sum(${donations2.amount}) as int)`
-        }).from(donations2).where(sql6`${donations2.createdAt} >= ${cutoffDate}`).then((r) => r[0] || { count: 0, amount: 0 });
+          amount: sql6`cast(sum(${donations.amount}) as int)`
+        }).from(donations).where(sql6`${donations.createdAt} >= ${cutoffDate}`).then((r) => r[0] || { count: 0, amount: 0 });
         const [totalCampaigns, activeCampaigns] = await Promise.all([
           db.select({ count: sql6`cast(count(*) as int)` }).from(donationCampaigns).then((r) => r[0]?.count || 0),
           db.select({ count: sql6`cast(count(*) as int)` }).from(donationCampaigns).where(eq4(donationCampaigns.status, "active")).then((r) => r[0]?.count || 0)
@@ -6657,7 +6690,7 @@ var init_storage = __esm({
           const quotedOriginalTable = this.quoteIdentifier(tableName);
           await db.execute(sql6.raw(`CREATE TABLE ${quotedBackupTable} AS SELECT * FROM ${quotedOriginalTable}`));
           const countResult = await db.execute(sql6.raw(`SELECT COUNT(*) as count FROM ${quotedBackupTable}`));
-          const rowCount = parseInt(countResult.rows[0]?.count || "0");
+          const rowCount = parseInt(String(countResult.rows[0]?.count || "0"));
           const [snapshot] = await db.insert(backupSnapshots).values({
             tableName,
             backupTableName,
@@ -6706,14 +6739,14 @@ var init_storage = __esm({
             await db.execute(sql6.raw(`INSERT INTO ${quotedTable} SELECT * FROM ${quotedBackupTable}`));
           } else {
             await db.execute(sql6.raw(`
-          INSERT INTO ${quotedTable} 
-          SELECT * FROM ${quotedBackupTable} 
+          INSERT INTO ${quotedTable}
+          SELECT * FROM ${quotedBackupTable}
           WHERE id NOT IN (SELECT id FROM ${quotedTable})
           ON CONFLICT (id) DO NOTHING
         `));
           }
           const countResult = await db.execute(sql6.raw(`SELECT COUNT(*) as count FROM ${quotedTable}`));
-          const rowsRestored = parseInt(countResult.rows[0]?.count || "0");
+          const rowsRestored = parseInt(String(countResult.rows[0]?.count || "0"));
           await db.execute(sql6.raw(`COMMIT`));
           return {
             tableName,
@@ -6877,7 +6910,7 @@ var init_storage = __esm({
       async getDatabaseStorageMetrics() {
         const LIMIT_BYTES = 10 * 1024 * 1024 * 1024;
         const tableSizesResult = await db.execute(sql6`
-      SELECT 
+      SELECT
         schemaname,
         tablename,
         pg_total_relation_size(schemaname || '.' || tablename) as size_bytes
@@ -6969,14 +7002,11 @@ var init_storage = __esm({
       }
       async getUpcomingShifts(eventId, limit = 10) {
         const now = /* @__PURE__ */ new Date();
-        let query = db.select().from(volunteerShifts).where(sql6`${volunteerShifts.shiftDate} >= ${now}`);
+        const conditions = [sql6`${volunteerShifts.shiftDate} >= ${now}`];
         if (eventId) {
-          query = query.where(and5(
-            eq4(volunteerShifts.eventId, eventId),
-            sql6`${volunteerShifts.shiftDate} >= ${now}`
-          ));
+          conditions.push(eq4(volunteerShifts.eventId, eventId));
         }
-        return await query.orderBy(volunteerShifts.shiftDate).limit(limit);
+        return await db.select().from(volunteerShifts).where(and5(...conditions)).orderBy(volunteerShifts.shiftDate).limit(limit);
       }
       async updateVolunteerShift(id, updates) {
         const [result] = await db.update(volunteerShifts).set(updates).where(eq4(volunteerShifts.id, id)).returning();
@@ -7115,9 +7145,9 @@ import passport from "passport";
 import session from "express-session";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
-function getCallbackUrl() {
+function getCallbackUrl(callbackPath = process.env.OIDC_CALLBACK_PATH || LEGACY_CALLBACK_PATH) {
   const base = process.env.BASE_URL ? process.env.BASE_URL.replace(/\/$/, "") : process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim() || "localhost"}` : "http://localhost:5000";
-  const path = process.env.OIDC_CALLBACK_PATH || "/api/callback";
+  const path = callbackPath;
   return `${base}${path.startsWith("/") ? path : "/" + path}`;
 }
 function getSession() {
@@ -7214,6 +7244,7 @@ async function setupAuth(app2) {
   }
   const config = await getOidcConfig();
   const callbackUrl = getCallbackUrl();
+  const browserSafeCallbackUrl = getCallbackUrl(BROWSER_SAFE_CALLBACK_PATH);
   const verify = async (tokens, verified) => {
     const user = {};
     updateUserSession(user, tokens);
@@ -7231,6 +7262,16 @@ async function setupAuth(app2) {
     verify
   );
   passport.use(strategy);
+  const browserSafeStrategy = new Strategy(
+    {
+      name: BROWSER_SAFE_STRATEGY_NAME,
+      config,
+      scope: "openid email profile offline_access",
+      callbackURL: browserSafeCallbackUrl
+    },
+    verify
+  );
+  passport.use(browserSafeStrategy);
   passport.serializeUser((user, cb) => cb(null, user));
   passport.deserializeUser((user, cb) => cb(null, user));
   app2.get("/api/login", authLimiter, (req, res, next) => {
@@ -7249,6 +7290,22 @@ async function setupAuth(app2) {
       failureRedirect: "/api/login"
     })(req, res, next);
   });
+  app2.get("/auth/login", authLimiter, (req, res, next) => {
+    const returnTo = req.query.returnTo;
+    if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
+      req.session.returnTo = returnTo;
+    }
+    passport.authenticate(BROWSER_SAFE_STRATEGY_NAME, {
+      prompt: "login consent",
+      scope: ["openid", "email", "profile", "offline_access"]
+    })(req, res, next);
+  });
+  app2.get("/auth/callback", authLimiter, (req, res, next) => {
+    passport.authenticate(BROWSER_SAFE_STRATEGY_NAME, {
+      successReturnToOrRedirect: "/",
+      failureRedirect: "/auth/login"
+    })(req, res, next);
+  });
   const logoutRedirectUri = process.env.BASE_URL?.replace(/\/$/, "") || (process.env.REPLIT_DOMAINS ? `https://${(process.env.REPLIT_DOMAINS || "").split(",")[0]?.trim()}` : null) || "/";
   app2.get("/api/logout", (req, res) => {
     req.logout(() => {
@@ -7264,7 +7321,7 @@ async function setupAuth(app2) {
     });
   });
 }
-var STRATEGY_NAME, getOidcConfig, isAuthenticated;
+var STRATEGY_NAME, BROWSER_SAFE_STRATEGY_NAME, LEGACY_CALLBACK_PATH, BROWSER_SAFE_CALLBACK_PATH, getOidcConfig, isAuthenticated;
 var init_auth0 = __esm({
   "server/auth0.ts"() {
     "use strict";
@@ -7272,6 +7329,9 @@ var init_auth0 = __esm({
     init_storage();
     init_security();
     STRATEGY_NAME = "oidc";
+    BROWSER_SAFE_STRATEGY_NAME = "oidc-browser-safe";
+    LEGACY_CALLBACK_PATH = "/api/callback";
+    BROWSER_SAFE_CALLBACK_PATH = "/auth/callback";
     getOidcConfig = memoize(
       async () => {
         let issuerUrl = (process.env.OIDC_ISSUER_URL || process.env.ISSUER_URL || "").trim();
@@ -7284,8 +7344,10 @@ var init_auth0 = __esm({
         if (!issuerUrl.startsWith("http://") && !issuerUrl.startsWith("https://")) {
           issuerUrl = "https://" + issuerUrl;
         }
-        const callbackUrl = getCallbackUrl();
-        const metadata = { redirect_uris: [callbackUrl] };
+        const callbackUrls = Array.from(
+          /* @__PURE__ */ new Set([getCallbackUrl(), getCallbackUrl(BROWSER_SAFE_CALLBACK_PATH)])
+        );
+        const metadata = { redirect_uris: callbackUrls };
         const clientAuth = process.env.OIDC_CLIENT_SECRET ? client.ClientSecretPost(process.env.OIDC_CLIENT_SECRET) : void 0;
         return await client.discovery(
           new URL(issuerUrl),
@@ -7346,6 +7408,10 @@ async function applyImpersonation(req, res, next) {
       eq5(adminImpersonationSessions.isActive, true)
     )).limit(1);
     if (!session2) {
+      return next();
+    }
+    if (!session2.impersonatedUserId) {
+      console.warn(`[Impersonation] Session ${session2.id} has no impersonated user`);
       return next();
     }
     const [impersonatedUser] = await db.select().from(users).where(eq5(users.id, session2.impersonatedUserId)).limit(1);
@@ -7591,7 +7657,7 @@ var init_cacLtgpAnalytics = __esm({
         const channels = await this.storage.getAllAcquisitionChannels();
         const campaigns = await this.storage.getAllMarketingCampaigns();
         const spendResult = await db.execute(sql7`
-      SELECT 
+      SELECT
         COALESCE(SUM(amount_spent), 0) as total_spend,
         COALESCE(SUM(leads_acquired), 0) as total_leads,
         COALESCE(SUM(donors_acquired), 0) as total_donors
@@ -7601,7 +7667,7 @@ var init_cacLtgpAnalytics = __esm({
         const totalLeads = Number(spendResult.rows[0]?.total_leads || 0);
         const totalDonors = Number(spendResult.rows[0]?.total_donors || 0);
         const ltgpResult = await db.execute(sql7`
-      SELECT 
+      SELECT
         COALESCE(AVG(lifetime_gross_profit), 0) as avg_ltgp,
         COALESCE(AVG(customer_acquisition_cost), 0) as avg_cac,
         COALESCE(AVG(ltgp_to_cac_ratio), 0) as avg_ratio
@@ -7613,7 +7679,7 @@ var init_cacLtgpAnalytics = __esm({
         const avgRatio = Number(ltgpResult.rows[0]?.avg_ratio || 0) / 100;
         const topChannelsResult = await db.execute(sql7`
       WITH channel_spend AS (
-        SELECT 
+        SELECT
           channel_id,
           SUM(amount_spent) as spend,
           SUM(leads_acquired) as leads,
@@ -7622,7 +7688,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY channel_id
       ),
       channel_economics AS (
-        SELECT 
+        SELECT
           la.channel_id,
           AVG(de.lifetime_gross_profit) as ltgp,
           AVG(de.ltgp_to_cac_ratio) as ratio
@@ -7631,16 +7697,16 @@ var init_cacLtgpAnalytics = __esm({
         WHERE de.lifetime_gross_profit > 0
         GROUP BY la.channel_id
       )
-      SELECT 
+      SELECT
         c.id as channel_id,
         c.name as channel_name,
         COALESCE(cs.spend, 0) as spend,
         COALESCE(cs.leads, 0) as leads,
         COALESCE(cs.donors, 0) as donors,
-        CASE 
-          WHEN COALESCE(cs.donors, 0) > 0 
+        CASE
+          WHEN COALESCE(cs.donors, 0) > 0
           THEN COALESCE(cs.spend, 0) / cs.donors
-          ELSE 0 
+          ELSE 0
         END as cac,
         COALESCE(ce.ltgp, 0) as ltgp,
         COALESCE(ce.ratio, 0) as ratio
@@ -7680,7 +7746,7 @@ var init_cacLtgpAnalytics = __esm({
       async getChannelPerformance() {
         const result = await db.execute(sql7`
       WITH channel_spend AS (
-        SELECT 
+        SELECT
           channel_id,
           SUM(amount_spent) as total_spend,
           SUM(leads_acquired) as total_leads,
@@ -7689,7 +7755,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY channel_id
       ),
       channel_economics AS (
-        SELECT 
+        SELECT
           la.channel_id,
           AVG(de.lifetime_gross_profit) as avg_donor_ltgp,
           AVG(de.ltgp_to_cac_ratio) as ltgp_to_cac_ratio
@@ -7703,21 +7769,21 @@ var init_cacLtgpAnalytics = __esm({
         FROM marketing_campaigns
         GROUP BY channel_id
       )
-      SELECT 
+      SELECT
         c.id as channel_id,
         c.name as channel_name,
         COALESCE(cs.total_spend, 0) as total_spend,
         COALESCE(cs.total_leads, 0) as total_leads,
         COALESCE(cs.total_donors, 0) as total_donors,
-        CASE 
-          WHEN COALESCE(cs.total_leads, 0) > 0 
+        CASE
+          WHEN COALESCE(cs.total_leads, 0) > 0
           THEN COALESCE(cs.total_spend, 0) / cs.total_leads
-          ELSE 0 
+          ELSE 0
         END as avg_cost_per_lead,
-        CASE 
-          WHEN COALESCE(cs.total_donors, 0) > 0 
+        CASE
+          WHEN COALESCE(cs.total_donors, 0) > 0
           THEN COALESCE(cs.total_spend, 0) / cs.total_donors
-          ELSE 0 
+          ELSE 0
         END as avg_cost_per_donor,
         COALESCE(ce.avg_donor_ltgp, 0) as avg_donor_ltgp,
         COALESCE(ce.ltgp_to_cac_ratio, 0) as ltgp_to_cac_ratio,
@@ -7748,7 +7814,7 @@ var init_cacLtgpAnalytics = __esm({
       async getCampaignPerformance() {
         const result = await db.execute(sql7`
       WITH campaign_spend AS (
-        SELECT 
+        SELECT
           campaign_id,
           SUM(amount_spent) as spent,
           SUM(leads_acquired) as leads,
@@ -7758,7 +7824,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY campaign_id
       ),
       campaign_economics AS (
-        SELECT 
+        SELECT
           la.campaign_id,
           AVG(de.lifetime_gross_profit) as avg_ltgp,
           AVG(de.ltgp_to_cac_ratio) as avg_ratio
@@ -7767,7 +7833,7 @@ var init_cacLtgpAnalytics = __esm({
         WHERE la.campaign_id IS NOT NULL AND de.lifetime_gross_profit > 0
         GROUP BY la.campaign_id
       )
-      SELECT 
+      SELECT
         mc.id as campaign_id,
         mc.name as campaign_name,
         c.name as channel_name,
@@ -7775,17 +7841,17 @@ var init_cacLtgpAnalytics = __esm({
         COALESCE(cs.spent, 0) as spent,
         COALESCE(cs.leads, 0) as leads,
         COALESCE(cs.donors, 0) as donors,
-        CASE 
-          WHEN COALESCE(cs.donors, 0) > 0 
+        CASE
+          WHEN COALESCE(cs.donors, 0) > 0
           THEN COALESCE(cs.spent, 0) / cs.donors
-          ELSE 0 
+          ELSE 0
         END as cac,
         COALESCE(ce.avg_ltgp, 0) as ltgp,
         COALESCE(ce.avg_ratio, 0) as ratio,
-        CASE 
-          WHEN COALESCE(cs.spent, 0) > 0 
+        CASE
+          WHEN COALESCE(cs.spent, 0) > 0
           THEN ((COALESCE(ce.avg_ltgp, 0) * COALESCE(cs.donors, 0)) - COALESCE(cs.spent, 0)) / cs.spent * 100
-          ELSE 0 
+          ELSE 0
         END as roi
       FROM marketing_campaigns mc
       LEFT JOIN acquisition_channels c ON mc.channel_id = c.id
@@ -7814,7 +7880,7 @@ var init_cacLtgpAnalytics = __esm({
       async getCohortAnalysis(periodType = "month") {
         const result = await db.execute(sql7`
       WITH period_spend AS (
-        SELECT 
+        SELECT
           period_key,
           period_start,
           period_end,
@@ -7826,7 +7892,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY period_key, period_start, period_end
       ),
       period_economics AS (
-        SELECT 
+        SELECT
           ps.period_key,
           AVG(de.lifetime_gross_profit) as current_ltgp,
           AVG(de.ltgp_to_cac_ratio) as current_ratio
@@ -7836,17 +7902,17 @@ var init_cacLtgpAnalytics = __esm({
         WHERE de.lifetime_gross_profit > 0
         GROUP BY ps.period_key
       )
-      SELECT 
+      SELECT
         ps.period_key,
         ps.period_start::text,
         ps.period_end::text,
         COALESCE(ps.spend, 0) as spend,
         COALESCE(ps.leads_acquired, 0) as leads_acquired,
         COALESCE(ps.donors_acquired, 0) as donors_acquired,
-        CASE 
-          WHEN COALESCE(ps.donors_acquired, 0) > 0 
+        CASE
+          WHEN COALESCE(ps.donors_acquired, 0) > 0
           THEN COALESCE(ps.spend, 0) / ps.donors_acquired
-          ELSE 0 
+          ELSE 0
         END as cac,
         COALESCE(pe.current_ltgp, 0) as current_ltgp,
         COALESCE(pe.current_ratio, 0) as current_ratio,
@@ -7880,11 +7946,12 @@ var init_cacLtgpAnalytics = __esm({
         }
         const lifetimeRevenue = economics.lifetimeRevenue || 0;
         const deliveryCosts = economics.actualDeliveryCosts || economics.estimatedDeliveryCosts || 0;
+        const customerAcquisitionCost = economics.customerAcquisitionCost || 0;
         const ltgp = lifetimeRevenue - deliveryCosts;
         await this.storage.updateDonorEconomics(leadId, {
           lifetimeGrossProfit: ltgp,
           grossMarginPercent: lifetimeRevenue > 0 ? Math.round(ltgp / lifetimeRevenue * 100) : 0,
-          ltgpToCacRatio: economics.customerAcquisitionCost > 0 ? Math.round(ltgp / economics.customerAcquisitionCost * 100) : 0
+          ltgpToCacRatio: customerAcquisitionCost > 0 ? Math.round(ltgp / customerAcquisitionCost * 100) : 0
         });
         return ltgp;
       }
@@ -7907,7 +7974,7 @@ var init_adminEntitlementService = __esm({
       /**
        * Deactivates an admin entitlement and cleans up all associated test data
        * Transactional: soft-deletes entitlement + hard-deletes test enrollments/logs
-       * 
+       *
        * @throws Error if entitlement not found or cleanup fails
        */
       async deactivateEntitlement(entitlementId) {
@@ -7964,7 +8031,8 @@ async function evaluateLeadProgression(leadId, triggerEvent, triggeredBy) {
   if (!lead) {
     throw new Error(`Lead ${leadId} not found`);
   }
-  const { funnelStage, persona, engagementScore = 0, lastFunnelUpdateAt } = lead;
+  const { funnelStage, persona, lastFunnelUpdateAt } = lead;
+  const engagementScore = lead.engagementScore ?? 0;
   if (triggerEvent && AUTO_PROGRESS_EVENTS[persona]?.includes(triggerEvent)) {
     const autoProgressRule = await db.select().from(funnelProgressionRules).where(
       and8(
@@ -8020,7 +8088,8 @@ async function evaluateLeadProgression(leadId, triggerEvent, triggeredBy) {
   return { advanced: false };
 }
 async function evaluateRule(lead, rule) {
-  const { engagementScore = 0, lastFunnelUpdateAt } = lead;
+  const { lastFunnelUpdateAt } = lead;
+  const engagementScore = lead.engagementScore ?? 0;
   if (engagementScore < rule.engagementScoreThreshold) {
     return false;
   }
@@ -8103,7 +8172,7 @@ async function getLeadProgressionHistory(leadId) {
     fromStage: funnelProgressionHistory.fromStage,
     toStage: funnelProgressionHistory.toStage,
     reason: funnelProgressionHistory.reason,
-    engagementScore: funnelProgressionHistory.engagementScore,
+    engagementScore: funnelProgressionHistory.engagementScoreAtChange,
     triggeredBy: funnelProgressionHistory.triggeredBy,
     createdAt: funnelProgressionHistory.createdAt,
     lead: {
@@ -8672,7 +8741,7 @@ var init_objectStorageS3 = __esm({
         if (paths.length === 0) {
           throw new Error("PUBLIC_OBJECT_SEARCH_PATHS or S3_PUBLIC_PREFIXES must be set (comma-separated prefixes)");
         }
-        return [...new Set(paths)];
+        return Array.from(new Set(paths));
       }
       getPrivateObjectDir() {
         const dir = process.env.PRIVATE_OBJECT_DIR || process.env.S3_PRIVATE_PREFIX || "";
@@ -8966,7 +9035,7 @@ If you cannot determine a field with confidence, use these defaults:
       }
     ]
   });
-  const responseText = result.response?.text() || result.text || "";
+  const responseText = result.text || "";
   let cleanedResponse = responseText.trim();
   cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
   cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
@@ -9011,7 +9080,7 @@ Analyze the image and provide:
    - Primary activity (reading, playing, learning, speaking)
    - Setting/location if relevant (outdoor, library, classroom)
    - Visual composition (closeup, wide_angle, group)
-   
+
    Examples:
    - "children_reading_circle"
    - "outdoor_playground_activities"
@@ -9059,7 +9128,7 @@ If you cannot determine with confidence, use these defaults:
       }
     ]
   });
-  const responseText = result.response?.text() || result.text || "";
+  const responseText = result.text || "";
   let cleanedResponse = responseText.trim();
   cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
   cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
@@ -9089,7 +9158,7 @@ async function analyzeYouTubeVideoThumbnail(thumbnailUrl, videoTitle, videoDescr
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
   const base64Image = buffer.toString("base64");
-  const prompt = `You are analyzing a thumbnail from a YouTube video${videoTitle ? ` titled "${videoTitle}"` : ""}${videoDescription ? ` with description: "${videoDescription}"` : ""}. 
+  const prompt = `You are analyzing a thumbnail from a YouTube video${videoTitle ? ` titled "${videoTitle}"` : ""}${videoDescription ? ` with description: "${videoDescription}"` : ""}.
 
 Based on the thumbnail image${videoTitle ? ", title," : ""}${videoDescription ? " and description," : ""} extract or suggest the following:
 
@@ -9134,7 +9203,7 @@ If you cannot determine a field with confidence, use these defaults:
       }
     ]
   });
-  const responseText = result.response?.text() || result.text || "";
+  const responseText = result.text || "";
   let cleanedResponse = responseText.trim();
   cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
   cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
@@ -9259,7 +9328,7 @@ function prepareTrackedEmailContent(baseUrl, html, trackingToken) {
   try {
     const hasBody = /<body[^>]*>/i.test(html);
     const wrappedHtml = hasBody ? html : `<body>${html}</body>`;
-    const $ = cheerio.load(wrappedHtml, { decodeEntities: true });
+    const $ = cheerio.load(wrappedHtml);
     const trackingPixel = `<img src="${baseUrl}/track/open/${trackingToken}" width="1" height="1" style="display:none" alt="" />`;
     $("body").append(trackingPixel);
     const linksToTrack = [];
@@ -9319,6 +9388,7 @@ async function sendEmail(storage2, options) {
         recipientEmail: options.to,
         recipientName: options.toName,
         subject: options.subject,
+        trackingToken: nanoid(),
         status: "failed",
         emailProvider: "sendgrid",
         errorMessage: "Recipient has unsubscribed",
@@ -9406,6 +9476,7 @@ async function sendTemplatedEmail(storage2, templateName, recipientEmail, recipi
         recipientEmail,
         recipientName,
         subject: `Template Error: ${templateName}`,
+        trackingToken: nanoid(),
         status: "failed",
         emailProvider: "sendgrid",
         errorMessage: error,
@@ -9420,6 +9491,7 @@ async function sendTemplatedEmail(storage2, templateName, recipientEmail, recipi
         recipientEmail,
         recipientName,
         subject: template.subject,
+        trackingToken: nanoid(),
         status: "failed",
         emailProvider: "sendgrid",
         errorMessage: error,
@@ -9497,6 +9569,51 @@ var init_valueEquation = __esm({
   "shared/valueEquation.ts"() {
     "use strict";
     VALUE_EQUATION_TEMPLATES = {
+      default: {
+        label: "General Audience",
+        description: "Broad appeal for all community members exploring Julie's programs",
+        dreamOutcome: {
+          label: "What transformation will they experience?",
+          placeholder: "e.g., Transform your life through education",
+          examples: [
+            "Build a brighter future for your family",
+            "Achieve your educational goals",
+            "Gain skills that open doors",
+            "Find the right program for your next step"
+          ]
+        },
+        perceivedLikelihood: {
+          label: "Why should they trust you?",
+          placeholder: "e.g., 20+ years serving families, proven results",
+          examples: [
+            "20+ years of proven community impact",
+            "Trusted by thousands of local families",
+            "Free, high-quality programs",
+            "Experienced, caring staff"
+          ]
+        },
+        timeDelay: {
+          label: "How quickly will they see results?",
+          placeholder: "e.g., See progress within weeks",
+          examples: [
+            "Start seeing results quickly",
+            "Immediate access to services",
+            "Progress you can measure",
+            "Fast-track your goals"
+          ]
+        },
+        effortSacrifice: {
+          label: "How easy is it for them?",
+          placeholder: "e.g., Flexible schedules, free programs, welcoming environment",
+          examples: [
+            "Completely free programs",
+            "Flexible scheduling options",
+            "Convenient locations",
+            "Welcoming, supportive environment",
+            "Simple registration support"
+          ]
+        }
+      },
       student: {
         label: "Adult Education Student",
         description: "Someone seeking to improve their education and skills for better opportunities",
@@ -9888,7 +10005,7 @@ async function generateValueEquationCopy(request) {
         }
       ]
     });
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     const variants = parseVariantResponse(responseText);
     return {
       variants
@@ -10037,7 +10154,7 @@ Return ONLY valid JSON:
         }
       ]
     });
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     let cleanedResponse = responseText.trim();
     if (cleanedResponse.startsWith("```json")) {
       cleanedResponse = cleanedResponse.slice(7);
@@ -10126,7 +10243,7 @@ Return ONLY valid JSON with exactly 3 variants:
         }
       ]
     });
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     const variants = parseVariantResponse(responseText);
     return { variants };
   } catch (error) {
@@ -10194,7 +10311,7 @@ Return ONLY the text itself, with no JSON formatting, no quotes, no markdown, an
         }
       ]
     });
-    const responseText = (result.response?.text() || result.text || "").trim();
+    const responseText = (result.text || "").trim();
     let cleaned = responseText;
     if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
       cleaned = cleaned.slice(1, -1);
@@ -10288,14 +10405,14 @@ var init_calendarService = __esm({
           const calendar = await getUncachableGoogleCalendarClient();
           const response = await calendar.events.insert({
             calendarId: this.CALENDAR_ID,
+            sendUpdates: "all",
             requestBody: {
               summary: event.summary,
               description: event.description,
               location: event.location,
               start: event.start,
               end: event.end,
-              attendees: event.attendees,
-              sendUpdates: "all"
+              attendees: event.attendees
             }
           });
           return {
@@ -10546,7 +10663,7 @@ Email: ${lead.email}
 Persona: ${lead.persona}`;
       }
     }
-    const assignee = await storage2.getUserById(task.assignedTo);
+    const assignee = await storage2.getUser(task.assignedTo);
     if (!assignee || !assignee.email) {
       console.log(`Task ${task.id} assignee has no email, cannot send calendar invite`);
       return null;
@@ -11298,6 +11415,9 @@ __export(chatbotService_exports, {
   processChatMessage: () => processChatMessage
 });
 import OpenAI from "openai";
+function isFunctionToolCall(toolCall) {
+  return toolCall.type === "function";
+}
 async function getRecentLogs() {
   return `[Note: Log access would integrate with Replit's logging system. For now, check the workflow logs in the Replit interface.]`;
 }
@@ -11353,8 +11473,9 @@ async function processChatMessage(userId, sessionId, userMessage, conversationHi
       throw new Error("No response from AI");
     }
     if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      const functionToolCalls = assistantMessage.tool_calls.filter(isFunctionToolCall);
       const toolResults = await Promise.all(
-        assistantMessage.tool_calls.map(async (toolCall) => {
+        functionToolCalls.map(async (toolCall) => {
           const result = await executeTool(toolCall);
           return {
             tool_call_id: toolCall.id,
@@ -11363,7 +11484,7 @@ async function processChatMessage(userId, sessionId, userMessage, conversationHi
           };
         })
       );
-      const escalationCall = assistantMessage.tool_calls.find(
+      const escalationCall = functionToolCalls.find(
         (tc) => tc.function.name === "escalate_issue"
       );
       let shouldEscalate = false;
@@ -11866,7 +11987,7 @@ async function sendEmail2(issue) {
         <p>${issue.description.replace(/\n/g, "<br>")}</p>
         ${issue.diagnosticData ? `<p><strong>Diagnostic Data:</strong></p><pre>${JSON.stringify(issue.diagnosticData, null, 2)}</pre>` : ""}
         <p><strong>Issue ID:</strong> ${issue.id}</p>
-        <p><strong>Time:</strong> ${new Date(issue.createdAt).toLocaleString()}</p>
+        <p><strong>Time:</strong> ${new Date(issue.createdAt || /* @__PURE__ */ new Date()).toLocaleString()}</p>
       `
     };
     await sgMail2.send(msg);
@@ -11972,7 +12093,7 @@ Return ONLY valid JSON in this exact format, with no markdown formatting or code
         }
       ]
     });
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
     cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
@@ -12070,7 +12191,7 @@ Return ONLY valid JSON in this exact format, with no markdown formatting or code
         }
       ]
     });
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
     cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
@@ -12226,10 +12347,18 @@ var init_automationScheduler = __esm({
         let updatedCount = 0;
         try {
           const tests = await this.storage.getAllAbTests();
-          const contentTypes = new Set(tests.map((t) => t.contentType));
-          for (const contentType of contentTypes) {
+          const variantsByTest = await Promise.all(
+            tests.map(async (test) => ({
+              test,
+              variants: await this.storage.getAbTestVariants(test.id)
+            }))
+          );
+          const contentTypes = new Set(
+            variantsByTest.flatMap(({ variants }) => variants.map((variant) => variant.contentType))
+          );
+          for (const contentType of Array.from(contentTypes)) {
             const contentItems2 = new Set(
-              tests.filter((t) => t.contentType === contentType).map((t) => t.contentItemId)
+              variantsByTest.flatMap(({ variants }) => variants).filter((variant) => variant.contentType === contentType && variant.contentItemId).map((variant) => variant.contentItemId)
             );
             const count3 = await this.baselineAggregator.batchUpdateBaselines(
               contentType,
@@ -12256,8 +12385,8 @@ var init_automationScheduler = __esm({
           console.warn("[AutomationScheduler] Safety limits not configured, skipping test creation");
           return 0;
         }
-        const maxConcurrentTests = safetyLimits.maxConcurrentTests || 10;
-        const maxDailyGenerations = safetyLimits.maxDailyGenerations || 20;
+        const maxConcurrentTests = safetyLimits.maxConcurrentAutomatedTests || 10;
+        const maxDailyGenerations = safetyLimits.maxTestsPerDay || 20;
         const allTests = await this.storage.getAllAbTests();
         const activeAutomatedTests = allTests.filter((t) => t.status === "active" && t.isAutomated).length;
         if (activeAutomatedTests >= maxConcurrentTests) {
@@ -12297,9 +12426,8 @@ var init_automationScheduler = __esm({
         console.log("[AutomationScheduler] Initializing default safety limits");
         await this.storage.upsertAbTestSafetyLimits({
           scope: "global",
-          maxConcurrentTests: 10,
-          maxDailyGenerations: 20,
-          maxVariantsPerTest: 3
+          maxConcurrentAutomatedTests: 10,
+          maxTestsPerDay: 20
         });
       }
       /**
@@ -12338,6 +12466,1858 @@ var init_automationScheduler = __esm({
   }
 });
 
+// server/services/automationEngine.ts
+var automationEngine_exports = {};
+__export(automationEngine_exports, {
+  AutomationEngineService: () => AutomationEngineService
+});
+var AutomationEngineService;
+var init_automationEngine = __esm({
+  "server/services/automationEngine.ts"() {
+    "use strict";
+    AutomationEngineService = class {
+      constructor(storage2, baselineAggregator, metricEvaluator) {
+        this.storage = storage2;
+        this.baselineAggregator = baselineAggregator;
+        this.metricEvaluator = metricEvaluator;
+      }
+      /**
+       * Evaluate all active automation rules and identify content needing testing
+       */
+      async evaluateAutomationRules() {
+        const startTime = /* @__PURE__ */ new Date();
+        const candidates = [];
+        let runId;
+        try {
+          const safetyLimits = await this.storage.getAbTestSafetyLimits();
+          if (!safetyLimits) {
+            throw new Error("Safety limits not configured");
+          }
+          const activeRules = await this.storage.getActiveAbTestAutomationRules();
+          if (activeRules.length === 0) {
+            return {
+              candidates: [],
+              rulesEvaluated: 0,
+              contentEvaluated: 0,
+              safetyLimitsEnforced: false
+            };
+          }
+          const run = await this.storage.createAbTestAutomationRun({
+            ruleId: activeRules[0].id,
+            status: "running",
+            triggerType: "scheduled",
+            evaluationStart: startTime,
+            opportunitiesDetected: 0,
+            testsCreated: 0,
+            variantsGenerated: 0,
+            executionLog: { startedAt: startTime.toISOString(), rulesEvaluated: activeRules.length }
+          });
+          runId = run.id;
+          const allEvaluatedContent = /* @__PURE__ */ new Set();
+          for (const rule of activeRules) {
+            const ruleCandidates = await this.evaluateRule(rule, allEvaluatedContent);
+            candidates.push(...ruleCandidates);
+          }
+          const limitedCandidates = this.enforceSafetyLimits(candidates, safetyLimits);
+          const safetyLimitsEnforced = limitedCandidates.length < candidates.length;
+          await this.storage.updateAbTestAutomationRun(run.id, {
+            status: "completed",
+            opportunitiesDetected: limitedCandidates.length,
+            evaluationEnd: /* @__PURE__ */ new Date(),
+            executionLog: {
+              startedAt: startTime.toISOString(),
+              completedAt: (/* @__PURE__ */ new Date()).toISOString(),
+              rulesEvaluated: activeRules.length,
+              candidatesFound: candidates.length,
+              candidatesAfterLimits: limitedCandidates.length,
+              safetyLimitsEnforced
+            }
+          });
+          return {
+            candidates: limitedCandidates,
+            rulesEvaluated: activeRules.length,
+            contentEvaluated: allEvaluatedContent.size,
+            safetyLimitsEnforced,
+            runId: run.id
+          };
+        } catch (error) {
+          if (runId) {
+            await this.storage.updateAbTestAutomationRun(runId, {
+              status: "failed",
+              evaluationEnd: /* @__PURE__ */ new Date(),
+              errorMessage: error instanceof Error ? error.message : "Unknown error",
+              executionLog: {
+                startedAt: startTime.toISOString(),
+                error: error instanceof Error ? error.message : "Unknown error"
+              }
+            });
+          }
+          throw error;
+        }
+      }
+      /**
+       * Evaluate a single automation rule
+       */
+      async evaluateRule(rule, allEvaluatedContent) {
+        const candidates = [];
+        const ruleMetrics = await this.storage.getAbTestAutomationRuleMetrics(rule.id);
+        const contentItems2 = await this.getContentItemsForType(rule.contentType);
+        const weightProfiles = await this.storage.getMetricWeightProfilesByContentType(rule.contentType);
+        const profile = weightProfiles.find((p) => p.persona === rule.targetPersona) || weightProfiles[0];
+        if (!profile) {
+          console.warn(`No metric weight profile found for ${rule.contentType}`);
+          return candidates;
+        }
+        for (const contentItem of contentItems2) {
+          const contentKey = `${rule.contentType}:${contentItem.id}`;
+          allEvaluatedContent.add(contentKey);
+          const targetPersonas = rule.targetPersona ? [rule.targetPersona] : ["parent", "educator", "donor", "volunteer", "community_partner", "student"];
+          const targetFunnelStages = rule.targetFunnelStage ? [rule.targetFunnelStage] : ["awareness", "consideration", "conversion", "retention"];
+          for (const persona of targetPersonas) {
+            for (const funnelStage of targetFunnelStages) {
+              const baselines = await this.storage.getAbTestPerformanceBaselines({
+                contentType: rule.contentType,
+                contentItemId: contentItem.id,
+                persona,
+                funnelStage
+              });
+              const baseline = baselines[0];
+              if (!baseline) {
+                continue;
+              }
+              const evaluation = await this.evaluateContentPerformance(
+                baseline,
+                profile.id,
+                ruleMetrics.length > 0 ? ruleMetrics : void 0
+              );
+              if (evaluation.isUnderperforming) {
+                candidates.push({
+                  contentType: rule.contentType,
+                  contentItemId: contentItem.id,
+                  persona,
+                  funnelStage,
+                  ruleId: rule.id,
+                  ruleName: rule.name,
+                  baseline,
+                  triggeredMetrics: evaluation.triggeredMetrics,
+                  reason: evaluation.reason
+                });
+              }
+            }
+          }
+        }
+        return candidates;
+      }
+      /**
+       * Evaluate if content is underperforming based on baseline and thresholds
+       */
+      async evaluateContentPerformance(baseline, profileId, ruleMetrics) {
+        const triggeredMetrics = [];
+        if (baseline.sampleSize < 30) {
+          return {
+            isUnderperforming: false,
+            triggeredMetrics: [],
+            reason: "Insufficient sample size"
+          };
+        }
+        if (ruleMetrics && ruleMetrics.length > 0) {
+          for (const metric of ruleMetrics) {
+            if (baseline.sampleSize < (metric.minimumSample || 30)) {
+              continue;
+            }
+            const metricBreakdown = baseline.metricBreakdown || {};
+            const metricValue = metricBreakdown[metric.metricKey] || 0;
+            const thresholdValue = parseFloat(metric.thresholdValue);
+            const meetsThreshold = this.evaluateMetricThreshold(
+              metricValue,
+              metric.thresholdType,
+              thresholdValue
+            );
+            if (meetsThreshold) {
+              triggeredMetrics.push(metric.metricKey);
+            }
+          }
+          return {
+            isUnderperforming: triggeredMetrics.length > 0,
+            triggeredMetrics,
+            reason: triggeredMetrics.length > 0 ? `Underperforming on: ${triggeredMetrics.join(", ")}` : "All metrics meeting thresholds"
+          };
+        }
+        const compositeScore = baseline.compositeScore || 0;
+        const percentile = this.scoreToPercentile(compositeScore);
+        if (percentile <= 25) {
+          return {
+            isUnderperforming: true,
+            triggeredMetrics: ["composite_score"],
+            reason: `Composite score in bottom ${percentile.toFixed(0)}th percentile`
+          };
+        }
+        return {
+          isUnderperforming: false,
+          triggeredMetrics: [],
+          reason: "Performance acceptable"
+        };
+      }
+      /**
+       * Evaluate if a metric value meets threshold criteria for underperformance
+       */
+      evaluateMetricThreshold(value, thresholdType, thresholdValue) {
+        switch (thresholdType) {
+          case "percentile":
+            const percentile = this.valueToPercentile(value);
+            return percentile <= thresholdValue;
+          case "absolute":
+            return value < thresholdValue;
+          case "change_rate":
+            return false;
+          default:
+            return false;
+        }
+      }
+      /**
+       * Convert composite score to percentile (0-100)
+       */
+      scoreToPercentile(score) {
+        return score / 1e4 * 100;
+      }
+      /**
+       * Convert metric value to percentile
+       */
+      valueToPercentile(value) {
+        return Math.min(value, 100);
+      }
+      /**
+       * Enforce safety limits on candidates
+       */
+      enforceSafetyLimits(candidates, safetyLimits) {
+        const maxConcurrentTests = safetyLimits.maxConcurrentAutomatedTests || 10;
+        const sorted = candidates.sort((a, b) => {
+          const scoreA = a.baseline.compositeScore || 0;
+          const scoreB = b.baseline.compositeScore || 0;
+          return scoreA - scoreB;
+        });
+        return sorted.slice(0, maxConcurrentTests);
+      }
+      /**
+       * Get all content items for a given content type
+       * This is a simplified version - in production, query actual content tables
+       */
+      async getContentItemsForType(contentType) {
+        const tests = await this.storage.getAllAbTests();
+        const contentItems2 = /* @__PURE__ */ new Set();
+        for (const test of tests) {
+          const variants = await this.storage.getAbTestVariants(test.id);
+          for (const variant of variants) {
+            if (variant.contentType === contentType && variant.contentItemId) {
+              contentItems2.add(variant.contentItemId);
+            }
+          }
+        }
+        return Array.from(contentItems2).map((id) => ({ id }));
+      }
+      /**
+       * Check if automation should run based on schedule and last run
+       */
+      async shouldRunAutomation() {
+        const runs = await this.storage.getAbTestAutomationRuns({ limit: 1 });
+        if (runs.length === 0) {
+          return true;
+        }
+        const lastRun = runs[0];
+        const lastRunTime = lastRun.createdAt;
+        if (!lastRunTime) {
+          return true;
+        }
+        const timeSinceLastRun = Date.now() - lastRunTime.getTime();
+        const AUTOMATION_INTERVAL = 24 * 60 * 60 * 1e3;
+        return timeSinceLastRun >= AUTOMATION_INTERVAL;
+      }
+    };
+  }
+});
+
+// server/services/testLifecycleManager.ts
+var testLifecycleManager_exports = {};
+__export(testLifecycleManager_exports, {
+  TestLifecycleManagerService: () => TestLifecycleManagerService
+});
+var TestLifecycleManagerService;
+var init_testLifecycleManager = __esm({
+  "server/services/testLifecycleManager.ts"() {
+    "use strict";
+    TestLifecycleManagerService = class {
+      constructor(storage2, aiGenerator) {
+        this.storage = storage2;
+        this.aiGenerator = aiGenerator;
+      }
+      /**
+       * Create an automated A/B test from an automation candidate
+       */
+      async createAutomatedTest(candidate, variantCount = 2) {
+        const controlData = await this.getCurrentContentData(
+          candidate.contentType,
+          candidate.contentItemId
+        );
+        const test = await this.storage.createAbTest({
+          name: `Auto: ${candidate.ruleName} - ${candidate.persona}/${candidate.funnelStage}`,
+          description: `Automated test triggered by ${candidate.ruleName}. Underperforming metrics: ${candidate.triggeredMetrics.join(", ")}`,
+          type: candidate.contentType,
+          status: "draft",
+          trafficAllocation: 100,
+          // Full traffic allocation for automated tests
+          startDate: /* @__PURE__ */ new Date(),
+          source: "automated",
+          // Explicit source for priority handling
+          isAutomated: true,
+          // DEPRECATED: Use 'source' field instead
+          automationRuleId: candidate.ruleId
+        });
+        const controlVariant = await this.storage.createAbTestVariant({
+          testId: test.id,
+          name: "Control (Original)",
+          contentType: candidate.contentType,
+          contentItemId: candidate.contentItemId,
+          configuration: { kind: "presentation", ...controlData },
+          isControl: true
+        });
+        const aiGenerationResults = [];
+        const generatedVariants = [];
+        for (let i = 0; i < variantCount; i++) {
+          try {
+            const generationRequest = {
+              testId: test.id,
+              contentType: candidate.contentType,
+              contentItemId: candidate.contentItemId,
+              persona: candidate.persona,
+              funnelStage: candidate.funnelStage,
+              controlVariantData: controlData,
+              performanceContext: {
+                underperformingMetrics: candidate.triggeredMetrics,
+                baselineScore: candidate.baseline.compositeScore || 0,
+                currentScore: candidate.baseline.compositeScore || 0
+              }
+            };
+            const result = await this.aiGenerator.generateVariant(generationRequest);
+            const variant = await this.storage.getAbTestVariant(result.variantId);
+            if (variant) {
+              generatedVariants.push(variant);
+              aiGenerationResults.push({
+                variantId: result.variantId,
+                success: true
+              });
+            }
+          } catch (error) {
+            aiGenerationResults.push({
+              variantId: `failed-${i}`,
+              success: false,
+              error: error instanceof Error ? error.message : "Unknown error"
+            });
+          }
+        }
+        return {
+          test,
+          controlVariant,
+          generatedVariants,
+          aiGenerationResults
+        };
+      }
+      /**
+       * Activate an automated test
+       */
+      async activateTest(testId, targetPersonas, targetFunnelStages) {
+        try {
+          const combinations = [];
+          for (const persona of targetPersonas) {
+            for (const funnelStage of targetFunnelStages) {
+              combinations.push(`${persona}:${funnelStage}`);
+            }
+          }
+          await this.storage.createAbTestTargets(testId, combinations);
+          await this.storage.updateAbTest(testId, {
+            status: "active",
+            startDate: /* @__PURE__ */ new Date()
+          });
+          return {
+            testId,
+            activated: true,
+            targetsCreated: combinations.length
+          };
+        } catch (error) {
+          return {
+            testId,
+            activated: false,
+            targetsCreated: 0,
+            error: error instanceof Error ? error.message : "Unknown error"
+          };
+        }
+      }
+      /**
+       * Pause a running test
+       */
+      async pauseTest(testId) {
+        await this.storage.updateAbTest(testId, {
+          status: "paused"
+        });
+      }
+      /**
+       * Stop and conclude a test
+       */
+      async stopTest(testId, winnerId) {
+        await this.storage.updateAbTest(testId, {
+          status: "completed",
+          endDate: /* @__PURE__ */ new Date(),
+          winnerVariantId: winnerId || null
+        });
+      }
+      /**
+       * Get current content data for a content item
+       */
+      async getCurrentContentData(contentType, contentItemId) {
+        const contentItem = await this.storage.getContentItem(contentItemId);
+        if (!contentItem) {
+          throw new Error(`Content item ${contentItemId} not found for type ${contentType}`);
+        }
+        return {
+          title: contentItem.title,
+          description: contentItem.description,
+          imageName: contentItem.imageName,
+          imageUrl: contentItem.imageUrl,
+          type: contentItem.type,
+          order: contentItem.order,
+          passionTags: contentItem.passionTags,
+          metadata: contentItem.metadata
+        };
+      }
+      /**
+       * Batch create tests from multiple candidates
+       */
+      async createBatchTests(candidates, variantCount = 2) {
+        const results = [];
+        for (const candidate of candidates) {
+          try {
+            const result = await this.createAutomatedTest(candidate, variantCount);
+            results.push({
+              candidate,
+              result
+            });
+            await this.activateTest(
+              result.test.id,
+              [candidate.persona],
+              [candidate.funnelStage]
+            );
+          } catch (error) {
+            results.push({
+              candidate,
+              result: null,
+              error: error instanceof Error ? error.message : "Unknown error"
+            });
+          }
+        }
+        return results;
+      }
+      /**
+       * Get all automated tests
+       */
+      async getAutomatedTests(status) {
+        const allTests = await this.storage.getAllAbTests();
+        return allTests.filter((test) => {
+          if (!test.isAutomated) return false;
+          if (status && test.status !== status) return false;
+          return true;
+        });
+      }
+      /**
+       * Clean up old completed tests
+       */
+      async cleanupOldTests(daysOld = 90) {
+        const cutoffDate = /* @__PURE__ */ new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+        const tests = await this.getAutomatedTests("completed");
+        let deletedCount = 0;
+        for (const test of tests) {
+          if (test.endDate && test.endDate < cutoffDate) {
+            await this.storage.deleteAbTest(test.id);
+            deletedCount++;
+          }
+        }
+        return deletedCount;
+      }
+      /**
+       * Get test performance summary
+       */
+      async getTestSummary(testId) {
+        const test = await this.storage.getAbTest(testId);
+        if (!test) {
+          throw new Error(`Test ${testId} not found`);
+        }
+        const variants = await this.storage.getAbTestVariants(testId);
+        const analytics = await this.storage.getTestAnalytics(testId);
+        const duration = test.endDate && test.startDate ? test.endDate.getTime() - test.startDate.getTime() : test.startDate ? Date.now() - test.startDate.getTime() : 0;
+        return {
+          test,
+          variants,
+          analytics,
+          duration: Math.floor(duration / (1e3 * 60 * 60 * 24)),
+          // Days
+          status: test.status
+        };
+      }
+    };
+  }
+});
+
+// server/services/winnerPromotion.ts
+var winnerPromotion_exports = {};
+__export(winnerPromotion_exports, {
+  WinnerPromotionService: () => WinnerPromotionService
+});
+var getVariantConfiguration, WinnerPromotionService;
+var init_winnerPromotion = __esm({
+  "server/services/winnerPromotion.ts"() {
+    "use strict";
+    getVariantConfiguration = (variant) => {
+      if (typeof variant.configuration === "object" && variant.configuration !== null) {
+        return variant.configuration;
+      }
+      return {};
+    };
+    WinnerPromotionService = class {
+      constructor(storage2, statisticalCalculator, metricEvaluator, testLifecycle) {
+        this.storage = storage2;
+        this.statisticalCalculator = statisticalCalculator;
+        this.metricEvaluator = metricEvaluator;
+        this.testLifecycle = testLifecycle;
+      }
+      /**
+       * Evaluate all running automated tests for winners
+       */
+      async evaluateAllTests() {
+        const runningTests = await this.storage.getAllAbTests();
+        const activeTests = runningTests.filter((t) => t.status === "active" && t.isAutomated);
+        const results = [];
+        for (const test of activeTests) {
+          try {
+            const result = await this.evaluateTest(test.id);
+            results.push(result);
+          } catch (error) {
+            console.error(`Failed to evaluate test ${test.id}:`, error);
+            results.push({
+              testId: test.id,
+              hasWinner: false,
+              shouldStop: false
+            });
+          }
+        }
+        return results;
+      }
+      /**
+       * Evaluate a single test for a winner
+       */
+      async evaluateTest(testId) {
+        const test = await this.storage.getAbTest(testId);
+        if (!test) {
+          throw new Error(`Test ${testId} not found`);
+        }
+        const analytics = await this.storage.getTestAnalytics(testId);
+        if (analytics.length < 2) {
+          return {
+            testId,
+            hasWinner: false,
+            shouldStop: false,
+            stopReason: "Insufficient variants"
+          };
+        }
+        const controlAnalytics = analytics.find((a) => {
+          return a.variantName.toLowerCase().includes("control") || a.variantName.toLowerCase().includes("original");
+        }) || analytics[0];
+        const challengers = analytics.filter((a) => a.variantId !== controlAnalytics.variantId);
+        if (challengers.length === 0) {
+          return {
+            testId,
+            hasWinner: false,
+            shouldStop: false,
+            stopReason: "No challengers"
+          };
+        }
+        const bestChallenger = challengers.reduce(
+          (best, current) => current.conversionRate > best.conversionRate ? current : best
+        );
+        const automationRules = await this.storage.getActiveAbTestAutomationRules();
+        const testVariants = await this.storage.getAbTestVariants(testId);
+        const primaryContentType = testVariants[0]?.contentType || test.type;
+        const relevantRule = automationRules.find((r) => r.contentType === primaryContentType);
+        const config = {
+          confidenceThreshold: (relevantRule?.confidenceThreshold || 95) / 100,
+          minimumSampleSize: relevantRule?.minimumTestSample || 100,
+          minimumDetectableEffect: 5
+          // 5% minimum improvement
+        };
+        const controlConversions = controlAnalytics.totalEvents;
+        const controlTrials = controlAnalytics.uniqueViews;
+        const challengerConversions = bestChallenger.totalEvents;
+        const challengerTrials = bestChallenger.uniqueViews;
+        if (controlTrials < config.minimumSampleSize || challengerTrials < config.minimumSampleSize) {
+          return {
+            testId,
+            hasWinner: false,
+            controlId: controlAnalytics.variantId,
+            shouldStop: false,
+            stopReason: `Insufficient sample size (need ${config.minimumSampleSize}, have ${Math.min(controlTrials, challengerTrials)})`,
+            sampleSize: Math.min(controlTrials, challengerTrials)
+          };
+        }
+        const statisticalResult = this.statisticalCalculator.calculateBayesianProbability(
+          controlConversions,
+          controlTrials,
+          challengerConversions,
+          challengerTrials,
+          config
+        );
+        const earlyStop = this.statisticalCalculator.shouldStopEarly(statisticalResult);
+        const hasWinner = statisticalResult.isSignificant && statisticalResult.probabilityBeatControl >= config.confidenceThreshold;
+        return {
+          testId,
+          hasWinner,
+          winnerId: hasWinner ? bestChallenger.variantId : void 0,
+          winnerName: hasWinner ? bestChallenger.variantName : void 0,
+          controlId: controlAnalytics.variantId,
+          probabilityBeatControl: statisticalResult.probabilityBeatControl,
+          expectedLift: statisticalResult.expectedLift,
+          isSignificant: statisticalResult.isSignificant,
+          shouldStop: earlyStop.shouldStop,
+          stopReason: earlyStop.reason,
+          sampleSize: Math.min(controlTrials, challengerTrials)
+        };
+      }
+      /**
+       * Automatically promote winners from evaluation results
+       */
+      async autoPromoteWinners(evaluations) {
+        const results = [];
+        for (const evaluation of evaluations) {
+          try {
+            const result = await this.promoteIfWinner(evaluation);
+            results.push(result);
+          } catch (error) {
+            results.push({
+              testId: evaluation.testId,
+              promoted: false,
+              action: "skipped",
+              reason: error instanceof Error ? error.message : "Unknown error"
+            });
+          }
+        }
+        return results;
+      }
+      /**
+       * Promote winner if evaluation indicates significance
+       */
+      async promoteIfWinner(evaluation) {
+        if (evaluation.hasWinner && evaluation.winnerId) {
+          await this.promoteWinner(
+            evaluation.testId,
+            evaluation.winnerId,
+            `Auto-promoted: ${evaluation.probabilityBeatControl?.toFixed(1)}% probability, ${evaluation.expectedLift?.toFixed(1)}% lift`
+          );
+          return {
+            testId: evaluation.testId,
+            promoted: true,
+            winnerId: evaluation.winnerId,
+            winnerName: evaluation.winnerName,
+            action: "promoted",
+            reason: `Winner found with ${evaluation.probabilityBeatControl?.toFixed(1)}% confidence`
+          };
+        }
+        if (evaluation.shouldStop && evaluation.stopReason === "futility_stopped") {
+          await this.testLifecycle.stopTest(evaluation.testId);
+          return {
+            testId: evaluation.testId,
+            promoted: false,
+            action: "stopped",
+            reason: "Stopped due to futility (no meaningful difference detected)"
+          };
+        }
+        return {
+          testId: evaluation.testId,
+          promoted: false,
+          action: "continue",
+          reason: evaluation.stopReason || "Test continues - no winner yet"
+        };
+      }
+      /**
+       * Promote a winning variant
+       */
+      async promoteWinner(testId, winnerId, reason) {
+        const test = await this.storage.getAbTest(testId);
+        if (!test) {
+          throw new Error(`Test ${testId} not found`);
+        }
+        const winner = await this.storage.getAbTestVariant(winnerId);
+        if (!winner) {
+          throw new Error(`Variant ${winnerId} not found`);
+        }
+        await this.applyWinnerToContent(
+          winner.contentType,
+          winner.contentItemId,
+          getVariantConfiguration(winner)
+        );
+        await this.testLifecycle.stopTest(testId, winnerId);
+        console.log(`[WinnerPromotion] Test ${testId}: Promoted variant ${winnerId} (${winner.name}). Reason: ${reason}`);
+      }
+      /**
+       * Apply winner's content to the actual content item
+       */
+      async applyWinnerToContent(contentType, contentItemId, presentationOverrides) {
+        console.log(`[WinnerPromotion] Would apply content to ${contentType}:${contentItemId}`, presentationOverrides);
+      }
+      /**
+       * Get promotion history
+       */
+      async getPromotionHistory(limit = 50) {
+        const completedTests = await this.storage.getAllAbTests();
+        const promotedTests = completedTests.filter((t) => t.isAutomated && t.winnerVariantId);
+        const history = [];
+        for (const test of promotedTests.slice(0, limit)) {
+          if (!test.winnerVariantId) continue;
+          const winner = await this.storage.getAbTestVariant(test.winnerVariantId);
+          if (!winner) continue;
+          const analytics = await this.storage.getTestAnalytics(test.id);
+          const winnerAnalytics = analytics.find((a) => a.variantId === test.winnerVariantId);
+          history.push({
+            test,
+            winner,
+            promotedAt: test.endDate || /* @__PURE__ */ new Date(),
+            analytics: winnerAnalytics
+          });
+        }
+        return history;
+      }
+      /**
+       * Rollback a promotion (revert to control)
+       */
+      async rollbackPromotion(testId) {
+        const test = await this.storage.getAbTest(testId);
+        if (!test) {
+          throw new Error(`Test ${testId} not found`);
+        }
+        const variants = await this.storage.getAbTestVariants(testId);
+        const control = variants.find((v) => v.isControl);
+        if (!control) {
+          throw new Error("Control variant not found");
+        }
+        await this.applyWinnerToContent(
+          control.contentType,
+          control.contentItemId,
+          getVariantConfiguration(control)
+        );
+        await this.storage.updateAbTest(testId, {
+          winnerVariantId: null
+        });
+        console.log(`[WinnerPromotion] Rolled back test ${testId} to control variant`);
+      }
+    };
+  }
+});
+
+// server/services/baselineAggregator.ts
+var baselineAggregator_exports = {};
+__export(baselineAggregator_exports, {
+  BaselineAggregatorService: () => BaselineAggregatorService
+});
+import { eq as eq8, and as and9, gte, sql as sql10 } from "drizzle-orm";
+var BaselineAggregatorService;
+var init_baselineAggregator = __esm({
+  "server/services/baselineAggregator.ts"() {
+    "use strict";
+    init_db();
+    init_schema();
+    BaselineAggregatorService = class {
+      constructor(storage2) {
+        this.storage = storage2;
+      }
+      /**
+       * Aggregate baseline performance metrics for content
+       * Analyzes A/B test events over a time window to establish performance baselines
+       */
+      async aggregateBaseline(filters) {
+        const windowDays = filters.windowDays || 30;
+        const windowStart = /* @__PURE__ */ new Date();
+        windowStart.setDate(windowStart.getDate() - windowDays);
+        const variantEvents = await db.select({
+          variantId: abTestEvents.variantId
+        }).from(abTestEvents).innerJoin(abTestVariants, eq8(abTestVariants.id, abTestEvents.variantId)).innerJoin(abTests, eq8(abTests.id, abTestVariants.testId)).where(
+          and9(
+            eq8(abTestVariants.contentType, filters.contentType),
+            eq8(abTestVariants.contentItemId, filters.contentItemId),
+            gte(abTestEvents.createdAt, windowStart)
+          )
+        ).groupBy(abTestEvents.variantId);
+        if (variantEvents.length === 0) {
+          return this.createEmptyBaseline(filters, windowStart);
+        }
+        const variantIds = variantEvents.map((v) => v.variantId);
+        const metrics = await this.calculateMetricsFromEvents(
+          variantIds,
+          filters.persona,
+          filters.funnelStage,
+          windowStart
+        );
+        const weightProfiles = await this.storage.getMetricWeightProfilesByContentType(filters.contentType);
+        const defaultProfile = weightProfiles.find((p) => p.persona === filters.persona) || weightProfiles[0];
+        let compositeScore = 0;
+        if (defaultProfile) {
+          const profileMetrics = await this.storage.getMetricWeightProfileMetrics(defaultProfile.id);
+          compositeScore = await this.calculateCompositeScore(metrics, profileMetrics);
+        }
+        return {
+          contentType: filters.contentType,
+          contentItemId: filters.contentItemId,
+          persona: filters.persona || null,
+          funnelStage: filters.funnelStage || null,
+          windowStart,
+          windowEnd: /* @__PURE__ */ new Date(),
+          totalViews: metrics.totalViews,
+          uniqueViews: metrics.uniqueViews,
+          totalEvents: metrics.totalEvents,
+          compositeScore,
+          metricBreakdown: {
+            cta_click: metrics.ctaClickRate,
+            conversion: metrics.conversionRate,
+            dwell_time: metrics.dwellTimeAvg,
+            scroll_depth: metrics.scrollDepthAvg
+          },
+          sampleSize: metrics.uniqueViews,
+          variance: this.calculateVariance(metrics)
+        };
+      }
+      /**
+       * Calculate metrics from A/B test events
+       */
+      async calculateMetricsFromEvents(variantIds, persona, funnelStage, windowStart) {
+        const whereConditions = [];
+        whereConditions.push(sql10`${abTestEvents.variantId} = ANY(${variantIds})`);
+        if (windowStart) {
+          whereConditions.push(gte(abTestEvents.createdAt, windowStart));
+        }
+        let queryBuilder = db.select({
+          totalViews: sql10`COUNT(*) FILTER (WHERE ${abTestEvents.eventType} = 'page_view')`.as("totalViews"),
+          uniqueViews: sql10`COUNT(DISTINCT ${abTestEvents.sessionId}) FILTER (WHERE ${abTestEvents.eventType} = 'page_view')`.as("uniqueViews"),
+          totalEvents: sql10`COUNT(*) FILTER (WHERE ${abTestEvents.eventType} != 'page_view')`.as("totalEvents"),
+          ctaClicks: sql10`COUNT(*) FILTER (WHERE ${abTestEvents.eventType} = 'cta_click')`.as("ctaClicks"),
+          dwellTimeSum: sql10`SUM(CAST(${abTestEvents.metadata}->>'dwellTime' AS INTEGER)) FILTER (WHERE ${abTestEvents.metadata}->>'dwellTime' IS NOT NULL)`.as("dwellTimeSum"),
+          dwellTimeCount: sql10`COUNT(*) FILTER (WHERE ${abTestEvents.metadata}->>'dwellTime' IS NOT NULL)`.as("dwellTimeCount"),
+          scrollDepthSum: sql10`SUM(CAST(${abTestEvents.metadata}->>'scrollDepth' AS INTEGER)) FILTER (WHERE ${abTestEvents.metadata}->>'scrollDepth' IS NOT NULL)`.as("scrollDepthSum"),
+          scrollDepthCount: sql10`COUNT(*) FILTER (WHERE ${abTestEvents.metadata}->>'scrollDepth' IS NOT NULL)`.as("scrollDepthCount")
+        }).from(abTestEvents);
+        if (persona || funnelStage) {
+          queryBuilder = queryBuilder.innerJoin(
+            abTestAssignments,
+            eq8(abTestEvents.assignmentId, abTestAssignments.id)
+          );
+          if (persona) {
+            whereConditions.push(eq8(abTestAssignments.persona, persona));
+          }
+          if (funnelStage) {
+            whereConditions.push(eq8(abTestAssignments.funnelStage, funnelStage));
+          }
+        }
+        const result = await queryBuilder.where(and9(...whereConditions));
+        const row = result[0];
+        const uniqueViews = Number(row.uniqueViews) || 0;
+        const totalViews = Number(row.totalViews) || 0;
+        const totalEvents = Number(row.totalEvents) || 0;
+        const ctaClicks = Number(row.ctaClicks) || 0;
+        const dwellTimeCount = Number(row.dwellTimeCount) || 0;
+        const scrollDepthCount = Number(row.scrollDepthCount) || 0;
+        return {
+          totalViews,
+          uniqueViews,
+          totalEvents,
+          conversionRate: uniqueViews > 0 ? totalEvents / uniqueViews * 100 : 0,
+          ctaClicks,
+          ctaClickRate: totalViews > 0 ? ctaClicks / totalViews * 100 : 0,
+          dwellTimeAvg: dwellTimeCount > 0 ? Number(row.dwellTimeSum) / dwellTimeCount : 0,
+          scrollDepthAvg: scrollDepthCount > 0 ? Number(row.scrollDepthSum) / scrollDepthCount : 0
+        };
+      }
+      /**
+       * Calculate composite score (0-10000 scale) using metric weight profile
+       */
+      async calculateCompositeScore(metrics, profileMetrics) {
+        let totalWeight = 0;
+        let weightedSum = 0;
+        for (const metric of profileMetrics) {
+          const metricValue = this.getMetricValue(metrics, metric.metricKey);
+          const normalizedValue = this.normalizeMetricValue(metric.metricKey, metricValue);
+          weightedSum += normalizedValue * metric.weight;
+          totalWeight += metric.weight;
+        }
+        if (totalWeight === 0) return 0;
+        const score = weightedSum / totalWeight * 1e4;
+        return Math.round(Math.max(0, Math.min(1e4, score)));
+      }
+      /**
+       * Get metric value by key from baseline metrics
+       */
+      getMetricValue(metrics, metricKey) {
+        switch (metricKey) {
+          case "cta_click":
+            return metrics.ctaClickRate;
+          case "conversion":
+            return metrics.conversionRate;
+          case "dwell_time":
+            return metrics.dwellTimeAvg;
+          case "scroll_depth":
+            return metrics.scrollDepthAvg;
+          case "unique_views":
+            return metrics.uniqueViews;
+          case "total_events":
+            return metrics.totalEvents;
+          default:
+            return 0;
+        }
+      }
+      /**
+       * Normalize metric value to 0-1 scale for composite scoring
+       */
+      normalizeMetricValue(metricKey, value) {
+        switch (metricKey) {
+          case "cta_click":
+          case "conversion":
+            return Math.min(value / 100, 1);
+          case "dwell_time":
+            return Math.min(value / 300, 1);
+          case "scroll_depth":
+            return Math.min(value / 100, 1);
+          case "unique_views":
+          case "total_events":
+            return Math.min(Math.log10(value + 1) / 3, 1);
+          default:
+            return 0;
+        }
+      }
+      /**
+       * Calculate statistical variance for the baseline
+       */
+      calculateVariance(metrics) {
+        if (metrics.uniqueViews === 0) return null;
+        const p = metrics.conversionRate / 100;
+        const n = metrics.uniqueViews;
+        return p * (1 - p) / n;
+      }
+      /**
+       * Create empty baseline for content with no test data
+       */
+      createEmptyBaseline(filters, windowStart) {
+        return {
+          contentType: filters.contentType,
+          contentItemId: filters.contentItemId,
+          persona: filters.persona || null,
+          funnelStage: filters.funnelStage || null,
+          windowStart,
+          windowEnd: /* @__PURE__ */ new Date(),
+          totalViews: 0,
+          uniqueViews: 0,
+          totalEvents: 0,
+          compositeScore: 0,
+          metricBreakdown: {
+            cta_click: 0,
+            conversion: 0,
+            dwell_time: 0,
+            scroll_depth: 0
+          },
+          sampleSize: 0,
+          variance: null
+        };
+      }
+      /**
+       * Create empty metrics object
+       */
+      createEmptyMetrics() {
+        return {
+          totalViews: 0,
+          uniqueViews: 0,
+          totalEvents: 0,
+          conversionRate: 0,
+          ctaClicks: 0,
+          ctaClickRate: 0,
+          dwellTimeAvg: 0,
+          scrollDepthAvg: 0
+        };
+      }
+      /**
+       * Batch update baselines for multiple content items
+       * Useful for scheduled background jobs
+       */
+      async batchUpdateBaselines(contentType, contentItemIds, windowDays = 30) {
+        let updatedCount = 0;
+        for (const contentItemId of contentItemIds) {
+          try {
+            const personas = ["parent", "educator", "donor", "volunteer", "community_partner", "student"];
+            const funnelStages = ["awareness", "consideration", "conversion", "retention"];
+            for (const persona of personas) {
+              for (const funnelStage of funnelStages) {
+                const baseline = await this.aggregateBaseline({
+                  contentType,
+                  contentItemId,
+                  persona,
+                  funnelStage,
+                  windowDays
+                });
+                await this.storage.upsertAbTestPerformanceBaseline(baseline);
+                updatedCount++;
+              }
+            }
+            const overallBaseline = await this.aggregateBaseline({
+              contentType,
+              contentItemId,
+              windowDays
+            });
+            await this.storage.upsertAbTestPerformanceBaseline(overallBaseline);
+            updatedCount++;
+          } catch (error) {
+            console.error(`Failed to update baseline for ${contentItemId}:`, error);
+          }
+        }
+        return updatedCount;
+      }
+    };
+  }
+});
+
+// server/services/metricEvaluator.ts
+var metricEvaluator_exports = {};
+__export(metricEvaluator_exports, {
+  MetricEvaluatorService: () => MetricEvaluatorService
+});
+var MetricEvaluatorService;
+var init_metricEvaluator = __esm({
+  "server/services/metricEvaluator.ts"() {
+    "use strict";
+    MetricEvaluatorService = class {
+      constructor(storage2) {
+        this.storage = storage2;
+      }
+      /**
+       * Score a variant using a metric weight profile
+       */
+      async scoreVariant(metrics, profileId) {
+        const profile = await this.storage.getMetricWeightProfile(profileId);
+        if (!profile) {
+          throw new Error(`Metric weight profile ${profileId} not found`);
+        }
+        const profileMetrics = await this.storage.getMetricWeightProfileMetrics(profileId);
+        if (profileMetrics.length === 0) {
+          throw new Error(`Metric weight profile ${profileId} has no metrics configured`);
+        }
+        const metricBreakdown = {};
+        const normalizedScores = {};
+        let totalWeight = 0;
+        let weightedSum = 0;
+        for (const metric of profileMetrics) {
+          const rawValue = this.getMetricValue(metrics, metric.metricKey);
+          const normalizedValue = this.normalizeMetricValue(metric.metricKey, rawValue);
+          metricBreakdown[metric.metricKey] = rawValue;
+          normalizedScores[metric.metricKey] = normalizedValue;
+          weightedSum += normalizedValue * metric.weight;
+          totalWeight += metric.weight;
+        }
+        const compositeScore = totalWeight > 0 ? Math.round(weightedSum / totalWeight * 1e4) : 0;
+        return {
+          variantId: metrics.variantId,
+          compositeScore,
+          metricBreakdown,
+          normalizedScores,
+          sampleSize: metrics.uniqueViews
+        };
+      }
+      /**
+       * Score multiple variants and rank them
+       */
+      async scoreAndRankVariants(variantMetrics, profileId) {
+        const scoredVariants = await Promise.all(
+          variantMetrics.map((metrics) => this.scoreVariant(metrics, profileId))
+        );
+        return scoredVariants.sort((a, b) => b.compositeScore - a.compositeScore);
+      }
+      /**
+       * Compare variant performance against baseline
+       * FIXED: Now uses the same weight profile that created the baseline
+       */
+      async compareToBaseline(variantMetrics, baseline, profileId, thresholdType, thresholdValue) {
+        const baselineScore = baseline.compositeScore || 0;
+        const scoredVariant = await this.scoreVariant(variantMetrics, profileId);
+        const variantScore = scoredVariant.compositeScore;
+        const improvement = baselineScore > 0 ? (variantScore - baselineScore) / baselineScore * 100 : 0;
+        const meetsThreshold = this.evaluateThreshold(
+          improvement,
+          baselineScore,
+          variantScore,
+          thresholdType,
+          thresholdValue
+        );
+        return {
+          baselineScore,
+          variantScore,
+          improvement,
+          meetsThreshold,
+          thresholdType,
+          thresholdValue
+        };
+      }
+      /**
+       * Calculate composite score from raw metric values
+       * Used when we don't have a full profile but have metric breakdown
+       */
+      calculateCompositeScore(metrics, metricBreakdown) {
+        const metricKeys = Object.keys(metricBreakdown);
+        if (metricKeys.length === 0) return 0;
+        let sum2 = 0;
+        for (const key of metricKeys) {
+          const rawValue = this.getMetricValue(metrics, key);
+          const normalizedValue = this.normalizeMetricValue(key, rawValue);
+          sum2 += normalizedValue;
+        }
+        return Math.round(sum2 / metricKeys.length * 1e4);
+      }
+      /**
+       * Evaluate whether a variant meets the configured threshold
+       */
+      evaluateThreshold(improvement, baselineScore, variantScore, thresholdType, thresholdValue) {
+        switch (thresholdType) {
+          case "percentile":
+            const percentile = this.scoreToPercentile(variantScore);
+            return percentile <= thresholdValue;
+          case "absolute":
+            return variantScore < thresholdValue;
+          case "change_rate":
+            return improvement < thresholdValue;
+          default:
+            return false;
+        }
+      }
+      /**
+       * Convert score to percentile (0-100)
+       *
+       * STUB: This is a simplified approximation that maps 0-10000 score to percentile.
+       * In production, this should use actual historical distribution data by:
+       * 1. Querying all historical scores for this content type/persona/funnel stage
+       * 2. Calculating the empirical cumulative distribution function (eCDF)
+       * 3. Finding where the current score falls in that distribution
+       *
+       * For now, using linear mapping as placeholder until we have sufficient historical data.
+       */
+      scoreToPercentile(score) {
+        return score / 1e4 * 100;
+      }
+      /**
+       * Get metric value by key from variant metrics
+       */
+      getMetricValue(metrics, metricKey) {
+        switch (metricKey) {
+          case "cta_click":
+            return metrics.ctaClickRate || 0;
+          case "conversion":
+            return metrics.conversionRate;
+          case "dwell_time":
+            return metrics.dwellTimeAvg || 0;
+          case "scroll_depth":
+            return metrics.scrollDepthAvg || 0;
+          case "unique_views":
+            return metrics.uniqueViews;
+          case "total_events":
+            return metrics.totalEvents;
+          default:
+            return 0;
+        }
+      }
+      /**
+       * Normalize metric value to 0-1 scale
+       * Same normalization as baseline aggregator for consistency
+       */
+      normalizeMetricValue(metricKey, value) {
+        switch (metricKey) {
+          case "cta_click":
+          case "conversion":
+            return Math.min(value / 100, 1);
+          case "dwell_time":
+            return Math.min(value / 300, 1);
+          case "scroll_depth":
+            return Math.min(value / 100, 1);
+          case "unique_views":
+          case "total_events":
+            return Math.min(Math.log10(value + 1) / 3, 1);
+          default:
+            return 0;
+        }
+      }
+      /**
+       * Check if a variant has sufficient sample size for evaluation
+       */
+      isSampleSufficient(sampleSize, minimumSample) {
+        return sampleSize >= minimumSample;
+      }
+      /**
+       * Calculate metric-specific performance comparison
+       * Returns improvement percentage for a specific metric
+       */
+      calculateMetricImprovement(baselineValue, variantValue) {
+        if (baselineValue === 0) return 0;
+        return (variantValue - baselineValue) / baselineValue * 100;
+      }
+      /**
+       * Identify which metrics are underperforming
+       */
+      async identifyUnderperformingMetrics(variantMetrics, baseline, profileId) {
+        const profile = await this.storage.getMetricWeightProfile(profileId);
+        if (!profile) return [];
+        const profileMetrics = await this.storage.getMetricWeightProfileMetrics(profileId);
+        const metricBreakdown = baseline.metricBreakdown || {};
+        const underperforming = [];
+        for (const metric of profileMetrics) {
+          const baselineValue = metricBreakdown[metric.metricKey] || 0;
+          const variantValue = this.getMetricValue(variantMetrics, metric.metricKey);
+          const improvement = this.calculateMetricImprovement(baselineValue, variantValue);
+          const isUnderperforming = metric.direction === "maximize" ? improvement < 0 : improvement > 0;
+          if (isUnderperforming) {
+            underperforming.push({
+              metricKey: metric.metricKey,
+              baseline: baselineValue,
+              variant: variantValue,
+              improvement
+            });
+          }
+        }
+        return underperforming;
+      }
+    };
+  }
+});
+
+// server/services/aiContentGenerator.ts
+var aiContentGenerator_exports = {};
+__export(aiContentGenerator_exports, {
+  AiContentGeneratorService: () => AiContentGeneratorService
+});
+import { GoogleGenAI as GoogleGenAI4 } from "@google/genai";
+var AiContentGeneratorService;
+var init_aiContentGenerator = __esm({
+  "server/services/aiContentGenerator.ts"() {
+    "use strict";
+    AiContentGeneratorService = class {
+      constructor(storage2, apiKey) {
+        this.storage = storage2;
+        const key = apiKey || process.env.GEMINI_API_KEY;
+        if (!key) {
+          throw new Error("GEMINI_API_KEY is required for AI content generation");
+        }
+        this.genai = new GoogleGenAI4({ apiKey: key });
+      }
+      genai;
+      /**
+       * Generate content variant using AI
+       */
+      async generateVariant(request) {
+        const prompt = this.buildPrompt(request);
+        try {
+          const response = await this.genai.models.generateContent({
+            model: "gemini-2.0-flash-exp",
+            contents: prompt
+          });
+          const generatedText = response.text || "";
+          const generatedContent = this.parseGeneratedContent(
+            generatedText,
+            request.contentType
+          );
+          const validation = this.validateGeneratedContent(
+            generatedContent,
+            request.controlVariantData
+          );
+          if (!validation.isValid) {
+            throw new Error(
+              `Generated content validation failed: ${validation.errors.join(", ")}`
+            );
+          }
+          const variant = await this.createVariant(request, generatedContent);
+          const tokensUsed = this.estimateTokens(prompt, generatedText);
+          await this.trackGeneration(
+            variant.id,
+            prompt,
+            generatedContent,
+            tokensUsed,
+            "success"
+          );
+          return {
+            variantId: variant.id,
+            generatedContent,
+            prompt,
+            tokensUsed,
+            generationMetadata: {
+              model: "gemini-2.0-flash-exp",
+              temperature: 0.7,
+              timestamp: (/* @__PURE__ */ new Date()).toISOString()
+            }
+          };
+        } catch (error) {
+          await this.trackGeneration(
+            null,
+            prompt,
+            null,
+            0,
+            "failed",
+            error instanceof Error ? error.message : "Unknown error"
+          );
+          throw new Error(`AI generation failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+      }
+      /**
+       * Build AI prompt based on content type and context
+       */
+      buildPrompt(request) {
+        const {
+          contentType,
+          persona,
+          funnelStage,
+          controlVariantData,
+          performanceContext
+        } = request;
+        let controlDataStr = JSON.stringify(controlVariantData, null, 2);
+        if (controlDataStr.length > 2e3) {
+          controlDataStr = controlDataStr.substring(0, 2e3) + "\n... (truncated)";
+        }
+        let prompt = `You are an expert copywriter for a nonprofit organization (Julie's Family Learning Program) creating personalized content.
+
+PERSONA: ${persona}
+FUNNEL STAGE: ${funnelStage}
+CONTENT TYPE: ${contentType}
+
+CURRENT CONTENT (Control Variant):
+${controlDataStr}
+
+`;
+        if (performanceContext) {
+          prompt += `PERFORMANCE CONTEXT:
+- Current performance score: ${performanceContext.currentScore}/10000
+- Baseline score: ${performanceContext.baselineScore}/10000
+- Underperforming metrics: ${performanceContext.underperformingMetrics.join(", ")}
+
+`;
+        }
+        prompt += this.getContentTypeGuidelines(contentType);
+        prompt += this.getPersonaGuidelines(persona);
+        prompt += this.getFunnelStageGuidelines(funnelStage);
+        prompt += `
+
+IMPORTANT:
+1. Generate content that will improve the underperforming metrics
+2. Keep the same structure as the control variant
+3. Maintain the nonprofit's mission-driven tone
+4. Focus on emotional connection and impact
+5. Return ONLY valid JSON in the same structure as the control variant
+6. Do not include any explanations or markdown formatting
+7. Ensure all required fields are present
+
+Generate the improved content variant now:`;
+        return prompt;
+      }
+      /**
+       * Get content type specific guidelines
+       */
+      getContentTypeGuidelines(contentType) {
+        switch (contentType) {
+          case "hero_section":
+            return `
+HERO SECTION GUIDELINES:
+- Headline: Clear, compelling, emotionally resonant (5-10 words)
+- Subheadline: Expands on headline, shows impact (10-20 words)
+- CTA: Action-oriented, urgent, specific (2-4 words)
+- Focus on transformation and hope
+`;
+          case "testimonial":
+            return `
+TESTIMONIAL GUIDELINES:
+- Quote: Authentic, specific, emotional (20-50 words)
+- Impact: Concrete results and transformation
+- Credibility: Real person, relatable situation
+`;
+          case "program_card":
+            return `
+PROGRAM CARD GUIDELINES:
+- Title: Clear, benefit-focused (3-6 words)
+- Description: Specific outcomes, tangible benefits (15-30 words)
+- Features: 3-5 key highlights
+- CTA: Clear next step
+`;
+          case "impact_stat":
+            return `
+IMPACT STAT GUIDELINES:
+- Number: Bold, impressive, verifiable
+- Label: Context that shows transformation
+- Supporting text: Brief story or context (10-20 words)
+`;
+          default:
+            return `
+GENERAL CONTENT GUIDELINES:
+- Clear, concise, benefit-focused
+- Emotional connection + practical value
+- Authentic nonprofit voice
+`;
+        }
+      }
+      /**
+       * Get persona-specific guidelines
+       */
+      getPersonaGuidelines(persona) {
+        const guidelines = {
+          parent: `
+PARENT PERSONA:
+- Focus on child's future and family transformation
+- Address concerns about safety, quality, affordability
+- Emphasize community and support system
+- Use warm, encouraging language
+`,
+          educator: `
+EDUCATOR PERSONA:
+- Highlight educational outcomes and methodology
+- Reference research and best practices
+- Show respect for their expertise
+- Emphasize collaboration and partnership
+`,
+          donor: `
+DONOR PERSONA:
+- Show clear impact and accountability
+- Quantify results and ROI
+- Demonstrate transparency and effectiveness
+- Make giving feel meaningful and urgent
+`,
+          volunteer: `
+VOLUNTEER PERSONA:
+- Emphasize meaningful contribution and skills
+- Show flexibility and variety of opportunities
+- Highlight community and connection
+- Make involvement feel rewarding
+`,
+          community_partner: `
+COMMUNITY PARTNER PERSONA:
+- Focus on mutual benefit and alignment
+- Emphasize credibility and reach
+- Show proven track record
+- Highlight partnership opportunities
+`,
+          student: `
+STUDENT PERSONA:
+- Use encouraging, empowering language
+- Focus on growth and achievement
+- Show clear path forward
+- Celebrate small wins
+`
+        };
+        return guidelines[persona] || "";
+      }
+      /**
+       * Get funnel stage specific guidelines
+       */
+      getFunnelStageGuidelines(funnelStage) {
+        const guidelines = {
+          awareness: `
+AWARENESS STAGE:
+- Focus on problem/pain point recognition
+- Educate about the issue and solution
+- Build trust and credibility
+- Soft CTAs (learn more, explore)
+`,
+          consideration: `
+CONSIDERATION STAGE:
+- Show why your solution is best
+- Provide proof and social validation
+- Address objections and concerns
+- Medium CTAs (get started, see how)
+`,
+          conversion: `
+CONVERSION STAGE:
+- Create urgency and scarcity
+- Remove friction and risk
+- Make the ask clear and direct
+- Strong CTAs (enroll now, donate today)
+`,
+          retention: `
+RETENTION STAGE:
+- Show appreciation and impact
+- Deepen engagement and commitment
+- Encourage next-level involvement
+- Community-building CTAs
+`
+        };
+        return guidelines[funnelStage] || "";
+      }
+      /**
+       * Parse AI-generated content based on content type
+       */
+      parseGeneratedContent(text2, contentType) {
+        try {
+          const cleaned = text2.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+          return JSON.parse(cleaned);
+        } catch (error) {
+          const jsonMatch = text2.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            try {
+              return JSON.parse(jsonMatch[0]);
+            } catch {
+              throw new Error("Failed to parse AI-generated content as JSON");
+            }
+          }
+          throw new Error("No valid JSON found in AI response");
+        }
+      }
+      /**
+       * Create variant in database
+       */
+      async createVariant(request, generatedContent) {
+        const variant = await this.storage.createAbTestVariant({
+          testId: request.testId,
+          name: `AI Generated ${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}`,
+          contentType: request.contentType,
+          contentItemId: request.contentItemId,
+          configuration: { kind: "presentation", ...generatedContent },
+          isControl: false
+        });
+        return variant;
+      }
+      /**
+       * Track AI generation in database
+       * FIXED: Now accepts null variantId for failed generations that didn't create a variant
+       */
+      async trackGeneration(variantId, prompt, generatedContent, tokensUsed, status, errorMessage) {
+        if (variantId === null && status === "failed") {
+          console.warn("Skipping tracking for failed generation without variant:", errorMessage);
+          return;
+        }
+        const generation = {
+          variantId,
+          aiProvider: "gemini",
+          aiModel: "gemini-2.0-flash-exp",
+          userPrompt: prompt,
+          aiResponse: JSON.stringify(generatedContent),
+          tokensUsed,
+          generationStatus: status,
+          errorMessage
+        };
+        try {
+          await this.storage.createAbTestVariantAiGeneration(generation);
+        } catch (error) {
+          console.error("Failed to track AI generation:", error);
+        }
+      }
+      /**
+       * Estimate token count (rough approximation)
+       */
+      estimateTokens(prompt, response) {
+        const totalChars = prompt.length + response.length;
+        return Math.ceil(totalChars / 4);
+      }
+      /**
+       * Generate multiple variants at once
+       */
+      async generateMultipleVariants(request, count3 = 3) {
+        const results = [];
+        for (let i = 0; i < count3; i++) {
+          try {
+            const variedRequest = {
+              ...request,
+              controlVariantData: {
+                ...request.controlVariantData,
+                _variationNumber: i + 1
+              }
+            };
+            const result = await this.generateVariant(variedRequest);
+            results.push(result);
+          } catch (error) {
+            console.error(`Failed to generate variant ${i + 1}:`, error);
+          }
+        }
+        return results;
+      }
+      /**
+       * Validate generated content structure matches control
+       */
+      validateGeneratedContent(generated, control) {
+        const errors = [];
+        if (typeof generated !== "object" || typeof control !== "object") {
+          errors.push("Generated content must be an object");
+          return { isValid: false, errors };
+        }
+        for (const key of Object.keys(control)) {
+          if (!(key in generated)) {
+            errors.push(`Missing required field: ${key}`);
+          }
+        }
+        for (const key of Object.keys(generated)) {
+          if (!(key in control) && !key.startsWith("_")) {
+            errors.push(`Unexpected field: ${key}`);
+          }
+        }
+        return {
+          isValid: errors.length === 0,
+          errors
+        };
+      }
+      /**
+       * Get generation history for a test
+       */
+      async getGenerationHistory(testId) {
+        const test = await this.storage.getAbTest(testId);
+        if (!test) return [];
+        const variants = await this.storage.getAbTestVariants(testId);
+        const history = [];
+        for (const variant of variants) {
+          const generation = await this.storage.getAbTestVariantAiGeneration(variant.id);
+          if (generation) {
+            history.push({ variant, generation });
+          }
+        }
+        return history;
+      }
+    };
+  }
+});
+
+// server/services/statisticalCalculator.ts
+var statisticalCalculator_exports = {};
+__export(statisticalCalculator_exports, {
+  StatisticalCalculatorService: () => StatisticalCalculatorService
+});
+var StatisticalCalculatorService;
+var init_statisticalCalculator = __esm({
+  "server/services/statisticalCalculator.ts"() {
+    "use strict";
+    StatisticalCalculatorService = class {
+      /**
+       * Calculate Bayesian probability that challenger beats control
+       * Uses Beta distribution for conversion rate testing
+       */
+      calculateBayesianProbability(controlSuccesses, controlTrials, challengerSuccesses, challengerTrials, config) {
+        if (controlTrials < config.minimumSampleSize || challengerTrials < config.minimumSampleSize) {
+          return {
+            controlVariantId: "control",
+            challengerVariantId: "challenger",
+            probabilityBeatControl: 0,
+            isSignificant: false,
+            confidenceThreshold: config.confidenceThreshold,
+            expectedLift: 0,
+            credibleInterval: { lower: 0, upper: 0 }
+          };
+        }
+        const probability = this.monteCarloSimulation(
+          controlSuccesses,
+          controlTrials,
+          challengerSuccesses,
+          challengerTrials
+        );
+        const controlRate = controlSuccesses / controlTrials;
+        const challengerRate = challengerSuccesses / challengerTrials;
+        const expectedLift = controlRate > 0 ? (challengerRate - controlRate) / controlRate * 100 : 0;
+        const credibleInterval = this.calculateCredibleInterval(
+          challengerSuccesses,
+          challengerTrials
+        );
+        const isSignificant = probability >= config.confidenceThreshold && Math.abs(expectedLift) >= config.minimumDetectableEffect;
+        return {
+          controlVariantId: "control",
+          challengerVariantId: "challenger",
+          probabilityBeatControl: probability,
+          isSignificant,
+          confidenceThreshold: config.confidenceThreshold,
+          expectedLift,
+          credibleInterval
+        };
+      }
+      /**
+       * Monte Carlo simulation to estimate probability that challenger beats control
+       * Uses Beta distribution sampling
+       */
+      monteCarloSimulation(controlSuccesses, controlTrials, challengerSuccesses, challengerTrials, iterations = 1e4) {
+        let challengerWins = 0;
+        for (let i = 0; i < iterations; i++) {
+          const controlSample = this.sampleBeta(controlSuccesses + 1, controlTrials - controlSuccesses + 1);
+          const challengerSample = this.sampleBeta(challengerSuccesses + 1, challengerTrials - challengerSuccesses + 1);
+          if (challengerSample > controlSample) {
+            challengerWins++;
+          }
+        }
+        return challengerWins / iterations;
+      }
+      /**
+       * Sample from Beta distribution using Gamma distribution relationship
+       * Beta(α, β) = Gamma(α, 1) / (Gamma(α, 1) + Gamma(β, 1))
+       */
+      sampleBeta(alpha, beta) {
+        const x = this.sampleGamma(alpha);
+        const y = this.sampleGamma(beta);
+        return x / (x + y);
+      }
+      /**
+       * Sample from Gamma distribution using Marsaglia and Tsang method
+       */
+      sampleGamma(shape) {
+        if (shape < 1) {
+          return this.sampleGamma(shape + 1) * Math.pow(Math.random(), 1 / shape);
+        }
+        const d = shape - 1 / 3;
+        const c = 1 / Math.sqrt(9 * d);
+        while (true) {
+          let x;
+          let v;
+          do {
+            x = this.randomNormal();
+            v = 1 + c * x;
+          } while (v <= 0);
+          v = v * v * v;
+          const u = Math.random();
+          const x2 = x * x;
+          if (u < 1 - 0.0331 * x2 * x2) {
+            return d * v;
+          }
+          if (Math.log(u) < 0.5 * x2 + d * (1 - v + Math.log(v))) {
+            return d * v;
+          }
+        }
+      }
+      /**
+       * Generate random number from standard normal distribution
+       * Using Box-Muller transform
+       */
+      randomNormal() {
+        const u1 = Math.random();
+        const u2 = Math.random();
+        return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      }
+      /**
+       * Calculate 95% credible interval for conversion rate
+       * Using Beta distribution quantiles
+       */
+      calculateCredibleInterval(successes, trials, confidence = 0.95) {
+        const alpha = successes + 1;
+        const beta = trials - successes + 1;
+        const mean = alpha / (alpha + beta);
+        const variance = alpha * beta / ((alpha + beta) ** 2 * (alpha + beta + 1));
+        const stdDev = Math.sqrt(variance);
+        const z3 = 1.96;
+        return {
+          lower: Math.max(0, mean - z3 * stdDev),
+          upper: Math.min(1, mean + z3 * stdDev)
+        };
+      }
+      /**
+       * Compare variants using actual conversion metrics for Bayesian testing
+       *
+       * FIXED: This now accepts actual conversion counts (events/views) instead of composite scores.
+       * Composite scores are NOT Bernoulli metrics and should not be used with Bayesian Beta distribution testing.
+       *
+       * @param controlConversions - Number of successful conversions in control group (e.g., clicks, signups)
+       * @param controlTrials - Total number of views/impressions in control group
+       * @param challengerConversions - Number of successful conversions in challenger group
+       * @param challengerTrials - Total number of views/impressions in challenger group
+       * @param config - Statistical configuration (confidence threshold, minimum sample size, etc.)
+       *
+       * @example
+       * // Testing CTA click rates
+       * const result = compareVariants(
+       *   150,  // control clicks
+       *   1000, // control views
+       *   180,  // challenger clicks
+       *   1000, // challenger views
+       *   config
+       * );
+       */
+      compareVariants(controlConversions, controlTrials, challengerConversions, challengerTrials, config) {
+        const result = this.calculateBayesianProbability(
+          controlConversions,
+          controlTrials,
+          challengerConversions,
+          challengerTrials,
+          config
+        );
+        return {
+          ...result,
+          controlVariantId: "control",
+          challengerVariantId: "challenger"
+        };
+      }
+      /**
+       * Determine if test should stop early (either winner or futility)
+       */
+      shouldStopEarly(result, maxSampleSize) {
+        if (result.isSignificant && result.probabilityBeatControl >= result.confidenceThreshold) {
+          return {
+            shouldStop: true,
+            reason: "winner_found"
+          };
+        }
+        if (result.probabilityBeatControl < 0.1 && result.probabilityBeatControl > 0) {
+          return {
+            shouldStop: true,
+            reason: "futility_stopped"
+          };
+        }
+        return {
+          shouldStop: false,
+          reason: "continue_testing"
+        };
+      }
+      /**
+       * Calculate required sample size for desired statistical power
+       * Using standard power analysis formula
+       */
+      calculateRequiredSampleSize(baselineRate, minimumDetectableEffect, confidenceThreshold = 0.95, power = 0.8) {
+        const zAlpha = this.getZScore(1 - (1 - confidenceThreshold) / 2);
+        const zBeta = this.getZScore(power);
+        const expectedRate = baselineRate * (1 + minimumDetectableEffect / 100);
+        const p = (baselineRate + expectedRate) / 2;
+        const numerator = 2 * Math.pow(zAlpha + zBeta, 2) * p * (1 - p);
+        const denominator = Math.pow(expectedRate - baselineRate, 2);
+        return Math.ceil(numerator / denominator);
+      }
+      /**
+       * Get Z-score for given probability
+       * Approximation using rational function
+       */
+      getZScore(p) {
+        if (p >= 1) return 10;
+        if (p <= 0) return -10;
+        const c = [2.515517, 0.802853, 0.010328];
+        const d = [1.432788, 0.189269, 1308e-6];
+        const t = Math.sqrt(-2 * Math.log(Math.min(p, 1 - p)));
+        const numerator = c[0] + c[1] * t + c[2] * t * t;
+        const denominator = 1 + d[0] * t + d[1] * t * t + d[2] * t * t * t;
+        const z3 = t - numerator / denominator;
+        return p < 0.5 ? -z3 : z3;
+      }
+      /**
+       * Calculate statistical power given sample size
+       * Returns probability of detecting effect if it exists
+       */
+      calculatePower(sampleSize, baselineRate, effect, confidenceThreshold = 0.95) {
+        const zAlpha = this.getZScore(1 - (1 - confidenceThreshold) / 2);
+        const expectedRate = baselineRate * (1 + effect / 100);
+        const p = (baselineRate + expectedRate) / 2;
+        const standardError = Math.sqrt(2 * p * (1 - p) / sampleSize);
+        const delta = expectedRate - baselineRate;
+        const zBeta = delta / standardError - zAlpha;
+        return this.normalCDF(zBeta);
+      }
+      /**
+       * Cumulative distribution function for standard normal
+       */
+      normalCDF(z3) {
+        const t = 1 / (1 + 0.2316419 * Math.abs(z3));
+        const d = 0.3989423 * Math.exp(-z3 * z3 / 2);
+        const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+        return z3 > 0 ? 1 - p : p;
+      }
+    };
+  }
+});
+
 // server/services/graduationPathCampaign.ts
 var graduationPathCampaign_exports = {};
 __export(graduationPathCampaign_exports, {
@@ -12345,10 +14325,10 @@ __export(graduationPathCampaign_exports, {
   createGraduationPathCampaign: () => createGraduationPathCampaign,
   enrollInGraduationPath: () => enrollInGraduationPath
 });
-import { eq as eq8, and as and9 } from "drizzle-orm";
+import { eq as eq9, and as and10 } from "drizzle-orm";
 async function createGraduationPathCampaign() {
   console.log("[GraduationPath] Setting up graduation path email campaign...");
-  const existing = await db.select().from(emailCampaigns).where(eq8(emailCampaigns.name, "Graduation Path - New Donor Journey"));
+  const existing = await db.select().from(emailCampaigns).where(eq9(emailCampaigns.name, "Graduation Path - New Donor Journey"));
   if (existing.length > 0) {
     console.log("[GraduationPath] Campaign already exists, skipping setup");
     return existing[0];
@@ -12384,18 +14364,18 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Thank you for your gift, {{firstName}}!</h2>
-          
+
           <p>Your generous donation just made a real difference for families in our community.</p>
-          
+
           <p><strong>What happens next?</strong></p>
           <ul>
             <li>Your gift will directly support families gaining literacy skills</li>
             <li>You'll receive updates on the impact you're making</li>
             <li>We'll share stories from families you're helping</li>
           </ul>
-          
+
           <p>Watch your inbox over the next few months - I'll be sharing exclusive updates about the families you're empowering.</p>
-          
+
           <p>With gratitude,<br/>
           Julie & The Family Learning Team</p>
         </div>
@@ -12415,16 +14395,16 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Your impact in action, {{firstName}}</h2>
-          
+
           <p>Last week, your gift helped Maria and her 6-year-old daughter attend our family literacy program.</p>
-          
+
           <p><strong>Maria's Story:</strong></p>
           <p>"I came to this country with big dreams but couldn't read English. Now my daughter and I are learning together. She reads me bedtime stories in English!"</p>
-          
+
           <p>This is the kind of transformation your gift makes possible.</p>
-          
+
           <p><strong>Coming up:</strong> Next month, I'll share how our program is expanding to serve even more families.</p>
-          
+
           <p>Thank you for being part of this,<br/>
           Julie</p>
         </div>
@@ -12444,20 +14424,20 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>One month of transformation, {{firstName}}</h2>
-          
+
           <p>It's been 30 days since you joined our mission. Here's the impact donors like you made this month:</p>
-          
+
           <ul>
             <li><strong>47 families</strong> participated in our literacy programs</li>
             <li><strong>89 children</strong> improved their reading levels</li>
             <li><strong>23 parents</strong> gained job-ready English skills</li>
           </ul>
-          
+
           <p><strong>Would you consider joining our monthly giving community?</strong></p>
           <p>For just $25/month, you can ensure families receive consistent support throughout their learning journey.</p>
-          
+
           <a href="{{donationUrl}}" style="display: inline-block; background: #4A90E2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 16px 0;">Become a Monthly Partner</a>
-          
+
           <p>With gratitude,<br/>
           Julie</p>
         </div>
@@ -12477,22 +14457,22 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Two months later, {{firstName}}</h2>
-          
+
           <p>Remember Maria from my last email? Her daughter just won a reading competition at her school.</p>
-          
+
           <p>That's the ripple effect of your generosity.</p>
-          
+
           <p><strong>Your 2-month impact report:</strong></p>
           <ul>
             <li>Your gift has touched <strong>6 families</strong> directly</li>
             <li>Those families have shared their new skills with <strong>24 neighbors</strong></li>
             <li>The community is seeing <strong>measurable improvements</strong> in family engagement</li>
           </ul>
-          
+
           <p><strong>What's next?</strong> We're planning a special community celebration in 4 months. I'd love for you to attend and meet the families you're helping.</p>
-          
+
           <p>I'll send you an invitation as we get closer.</p>
-          
+
           <p>With deep appreciation,<br/>
           Julie</p>
         </div>
@@ -12512,26 +14492,26 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Six months of changing lives, {{firstName}}</h2>
-          
+
           <p>Half a year ago, you made your first gift to our family literacy program.</p>
-          
+
           <p><strong>Since then:</strong></p>
           <ul>
             <li>94 families graduated from our program</li>
             <li>67% of participants got better jobs or promotions</li>
             <li>Children's reading levels improved by an average of 2.3 grade levels</li>
           </ul>
-          
+
           <p>You helped make this happen.</p>
-          
+
           <p><strong>SPECIAL INVITATION:</strong> Join us for our "Celebrating Families" graduation ceremony. Meet Maria, hear success stories, and see the impact of your generosity firsthand.</p>
-          
+
           <a href="{{donationUrl}}" style="display: inline-block; background: #4A90E2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 16px 0;">RSVP for Celebration</a>
-          
+
           <p><strong>Looking forward:</strong> Would you consider a year-end gift to help us serve even more families in 2025?</p>
-          
+
           <p>Your partnership means the world to us.</p>
-          
+
           <p>With immense gratitude,<br/>
           Julie & The Entire Family Learning Team</p>
         </div>
@@ -12547,15 +14527,15 @@ async function createGraduationPathCampaign() {
   return createdCampaign;
 }
 async function enrollInGraduationPath(leadId) {
-  const [campaign] = await db.select().from(emailCampaigns).where(eq8(emailCampaigns.name, "Graduation Path - New Donor Journey"));
+  const [campaign] = await db.select().from(emailCampaigns).where(eq9(emailCampaigns.name, "Graduation Path - New Donor Journey"));
   if (!campaign) {
     console.error("[GraduationPath] Campaign not found! Run createGraduationPathCampaign() first.");
     return;
   }
   const [existing] = await db.select().from(emailCampaignEnrollments).where(
-    and9(
-      eq8(emailCampaignEnrollments.leadId, leadId),
-      eq8(emailCampaignEnrollments.campaignId, campaign.id)
+    and10(
+      eq9(emailCampaignEnrollments.leadId, leadId),
+      eq9(emailCampaignEnrollments.campaignId, campaign.id)
     )
   );
   if (existing) {
@@ -12574,8 +14554,8 @@ async function enrollInGraduationPath(leadId) {
 async function backfillGraduationPathEnrollments() {
   console.log("[GraduationPath] Starting backfill of graduation path enrollments...");
   const leadsWithDonations = await db.select({ id: leads.id }).from(leads).innerJoin(
-    donations2,
-    eq8(leads.id, donations2.leadId)
+    donations,
+    eq9(leads.id, donations.leadId)
   ).groupBy(leads.id);
   let enrolled = 0;
   for (const lead of leadsWithDonations) {
@@ -12711,7 +14691,7 @@ async function generateReportData(reportType, frequency) {
   const campaigns = await storage.getAllEmailCampaigns();
   const campaignStats = await Promise.all(
     campaigns.map(async (campaign) => {
-      const performance = await storage.getEmailCampaignPerformance(campaign.id);
+      const performance = await getCampaignReportPerformance(campaign.id);
       return {
         name: campaign.name,
         ...performance
@@ -12745,7 +14725,7 @@ async function generateReportData(reportType, frequency) {
         summary: {
           totalLeadsEmailed: uniqueLeads.size,
           totalEmailsSent: recentLogs.length,
-          engagedLeads: recentLogs.filter((log2) => log2.openedAt || log2.clickedAt).length
+          engagedLeads: await countEngagedRecentLogs(recentLogs.map((log2) => log2.id))
         }
       };
     case "full_analytics":
@@ -12771,6 +14751,39 @@ async function generateReportData(reportType, frequency) {
     default:
       throw new Error(`Unknown report type: ${reportType}`);
   }
+}
+async function getCampaignReportPerformance(campaignId) {
+  const [logs, opens, clicks] = await Promise.all([
+    storage.getEmailLogsByCampaign(campaignId),
+    storage.getEmailOpensByCampaign(campaignId),
+    storage.getEmailClicksByCampaign(campaignId)
+  ]);
+  const totalSent = logs.length;
+  const uniqueOpenLogIds = new Set(opens.map((open) => open.emailLogId).filter(Boolean));
+  const uniqueClickLogIds = new Set(clicks.map((click) => click.emailLogId).filter(Boolean));
+  const sentTimes = logs.map((log2) => log2.sentAt || log2.createdAt).filter((value) => value instanceof Date);
+  return {
+    totalSent,
+    totalOpens: uniqueOpenLogIds.size,
+    totalClicks: uniqueClickLogIds.size,
+    openRate: totalSent > 0 ? uniqueOpenLogIds.size / totalSent : 0,
+    clickRate: totalSent > 0 ? uniqueClickLogIds.size / totalSent : 0,
+    lastSentAt: sentTimes.length > 0 ? new Date(Math.max(...sentTimes.map((date) => date.getTime()))) : null
+  };
+}
+async function countEngagedRecentLogs(emailLogIds) {
+  const engaged = await Promise.all(
+    emailLogIds.map(async (emailLogId) => {
+      const log2 = await storage.getEmailLog(emailLogId);
+      if (!log2?.campaignId) return false;
+      const [opens, clicks] = await Promise.all([
+        storage.getEmailOpensByCampaign(log2.campaignId),
+        storage.getEmailClicksByCampaign(log2.campaignId)
+      ]);
+      return opens.some((open) => open.emailLogId === emailLogId) || clicks.some((click) => click.emailLogId === emailLogId);
+    })
+  );
+  return engaged.filter(Boolean).length;
 }
 function formatReportEmail(schedule, reportData) {
   const { type, dateRange, campaigns, summary } = reportData;
@@ -12841,8 +14854,8 @@ function formatReportEmail(schedule, reportData) {
           <div class="campaign">
             <div class="campaign-name">${campaign.name}</div>
             <div class="campaign-stats">
-              ${campaign.totalSent} sent \u2022 
-              ${campaign.totalOpens} opens (${(campaign.openRate * 100).toFixed(1)}%) \u2022 
+              ${campaign.totalSent} sent \u2022
+              ${campaign.totalOpens} opens (${(campaign.openRate * 100).toFixed(1)}%) \u2022
               ${campaign.totalClicks} clicks (${(campaign.clickRate * 100).toFixed(1)}%)
             </div>
           </div>
@@ -13109,7 +15122,7 @@ var bulkSmsSender_exports = {};
 __export(bulkSmsSender_exports, {
   processBulkSmsCampaign: () => processBulkSmsCampaign
 });
-import { eq as eq9, and as and10, sql as sql10 } from "drizzle-orm";
+import { eq as eq10, and as and11, sql as sql11 } from "drizzle-orm";
 async function processBulkSmsCampaign(campaignId) {
   console.log(`[BulkSmsSender] Starting campaign ${campaignId}`);
   const result = {
@@ -13123,7 +15136,7 @@ async function processBulkSmsCampaign(campaignId) {
   let lastProcessedIndex = 0;
   let campaignAcquired = false;
   try {
-    const [campaign] = await db.select().from(smsBulkCampaigns2).where(eq9(smsBulkCampaigns2.id, campaignId));
+    const [campaign] = await db.select().from(smsBulkCampaigns).where(eq10(smsBulkCampaigns.id, campaignId));
     if (!campaign) {
       throw new Error(`Campaign ${campaignId} not found`);
     }
@@ -13147,11 +15160,11 @@ async function processBulkSmsCampaign(campaignId) {
         errors: []
       };
     }
-    const updateResult = await db.update(smsBulkCampaigns2).set({ status: "processing" }).where(and10(
-      eq9(smsBulkCampaigns2.id, campaignId),
-      eq9(smsBulkCampaigns2.status, "pending")
+    const updateResult = await db.update(smsBulkCampaigns).set({ status: "processing" }).where(and11(
+      eq10(smsBulkCampaigns.id, campaignId),
+      eq10(smsBulkCampaigns.status, "pending")
       // Compare-and-set
-    )).returning({ id: smsBulkCampaigns2.id });
+    )).returning({ id: smsBulkCampaigns.id });
     if (!updateResult || updateResult.length === 0) {
       console.log(`[BulkSmsSender] Campaign ${campaignId} claimed by another worker, skipping`);
       return {
@@ -13166,7 +15179,7 @@ async function processBulkSmsCampaign(campaignId) {
     let messageContent;
     let template;
     if (campaign.templateId) {
-      const [tmpl] = await db.select().from(smsTemplates).where(eq9(smsTemplates.id, campaign.templateId));
+      const [tmpl] = await db.select().from(smsTemplates).where(eq10(smsTemplates.id, campaign.templateId));
       if (!tmpl) {
         throw new Error(`Template ${campaign.templateId} not found`);
       }
@@ -13178,17 +15191,17 @@ async function processBulkSmsCampaign(campaignId) {
       throw new Error("Campaign has no template or custom message");
     }
     const conditions = [];
-    conditions.push(sql10`${leads.phone} IS NOT NULL`);
+    conditions.push(sql11`${leads.phone} IS NOT NULL`);
     if (campaign.personaFilter) {
-      conditions.push(eq9(leads.persona, campaign.personaFilter));
+      conditions.push(eq10(leads.persona, campaign.personaFilter));
     }
     if (campaign.funnelStageFilter) {
-      conditions.push(eq9(leads.funnelStage, campaign.funnelStageFilter));
+      conditions.push(eq10(leads.funnelStage, campaign.funnelStageFilter));
     }
     const eligibleLeads = await db.select().from(leads).where(
-      and10(
+      and11(
         ...conditions,
-        sql10`NOT EXISTS (
+        sql11`NOT EXISTS (
             SELECT 1 FROM ${emailUnsubscribes}
             WHERE ${emailUnsubscribes.phone} = ${leads.phone}
             AND ${emailUnsubscribes.isActive} = true
@@ -13237,17 +15250,17 @@ async function processBulkSmsCampaign(campaignId) {
             });
             await db.insert(communicationLogs).values({
               leadId: lead.id,
-              type: "sms",
+              communicationType: "sms",
               direction: "outbound",
               subject: "Bulk SMS Campaign",
-              body: messageContent,
-              sentAt: null,
-              status: "failed",
+              content: messageContent,
               metadata: {
                 campaignId: campaign.id,
                 templateId: template?.id,
                 error: errorMessage,
-                exception: true
+                exception: true,
+                status: "failed",
+                sentAt: null
               }
             });
           } catch (auditError) {
@@ -13255,7 +15268,7 @@ async function processBulkSmsCampaign(campaignId) {
           }
         }
       }
-      const [currentCampaign] = await db.select({ metadata: smsBulkCampaigns2.metadata }).from(smsBulkCampaigns2).where(eq9(smsBulkCampaigns2.id, campaignId));
+      const [currentCampaign] = await db.select({ metadata: smsBulkCampaigns.metadata }).from(smsBulkCampaigns).where(eq10(smsBulkCampaigns.id, campaignId));
       const existingMetadata = currentCampaign?.metadata || {};
       const updatedMetadata = {
         ...existingMetadata,
@@ -13269,30 +15282,30 @@ async function processBulkSmsCampaign(campaignId) {
           failedCount: result.failedCount
         }
       };
-      await db.update(smsBulkCampaigns2).set({
+      await db.update(smsBulkCampaigns).set({
         sentCount: result.sentCount,
         blockedCount: result.blockedCount,
         failedCount: result.failedCount,
         metadata: updatedMetadata
-      }).where(eq9(smsBulkCampaigns2.id, campaignId));
+      }).where(eq10(smsBulkCampaigns.id, campaignId));
       if (i + BATCH_SIZE < eligibleLeads.length) {
         console.log(`[BulkSmsSender] Waiting ${BATCH_DELAY_MS}ms before next batch...`);
         await delay(BATCH_DELAY_MS);
       }
     }
-    await db.update(smsBulkCampaigns2).set({
+    await db.update(smsBulkCampaigns).set({
       status: "completed",
       sentCount: result.sentCount,
       blockedCount: result.blockedCount,
       failedCount: result.failedCount,
       errorSummary: result.errors.length > 0 ? result.errors.join("; ").slice(0, 500) : null
-    }).where(eq9(smsBulkCampaigns2.id, campaignId));
+    }).where(eq10(smsBulkCampaigns.id, campaignId));
     result.success = true;
     console.log(`[BulkSmsSender] Campaign completed: ${result.sentCount} sent, ${result.blockedCount} blocked, ${result.failedCount} failed`);
   } catch (error) {
     console.error(`[BulkSmsSender] Campaign failed:`, error);
     if (campaignAcquired) {
-      const [currentCampaign] = await db.select({ metadata: smsBulkCampaigns2.metadata }).from(smsBulkCampaigns2).where(eq9(smsBulkCampaigns2.id, campaignId));
+      const [currentCampaign] = await db.select({ metadata: smsBulkCampaigns.metadata }).from(smsBulkCampaigns).where(eq10(smsBulkCampaigns.id, campaignId));
       const existingMetadata = currentCampaign?.metadata || {};
       const failureMetadata = {
         ...existingMetadata,
@@ -13311,14 +15324,14 @@ async function processBulkSmsCampaign(campaignId) {
           resumable: true
         }
       };
-      await db.update(smsBulkCampaigns2).set({
+      await db.update(smsBulkCampaigns).set({
         status: "failed",
         sentCount: result.sentCount,
         blockedCount: result.blockedCount,
         failedCount: result.failedCount,
         errorSummary: error.message.slice(0, 500),
         metadata: failureMetadata
-      }).where(eq9(smsBulkCampaigns2.id, campaignId));
+      }).where(eq10(smsBulkCampaigns.id, campaignId));
     } else {
       console.log(`[BulkSmsSender] Campaign ${campaignId} not acquired by this worker, skipping error update`);
     }
@@ -13366,18 +15379,18 @@ async function sendSmsToLead(lead, messageTemplate, campaign, template) {
   });
   await db.insert(communicationLogs).values({
     leadId: lead.id,
-    type: "sms",
+    communicationType: "sms",
     direction: "outbound",
     subject: "Bulk SMS Campaign",
-    body: finalMessage,
-    sentAt: twilioResult.success ? /* @__PURE__ */ new Date() : null,
-    status: twilioResult.success ? "sent" : twilioResult.blocked ? "blocked" : "failed",
+    content: finalMessage,
     metadata: {
       campaignId: campaign.id,
       templateId: template?.id,
       messageId: twilioResult.messageId,
       blocked: twilioResult.blocked,
-      error: twilioResult.error
+      error: twilioResult.error,
+      status: twilioResult.success ? "sent" : twilioResult.blocked ? "blocked" : "failed",
+      sentAt: twilioResult.success ? (/* @__PURE__ */ new Date()).toISOString() : null
     }
   });
   return {
@@ -13403,7 +15416,7 @@ __export(emailPersonalizer_exports, {
   generateVariablesSuggestions: () => generateVariablesSuggestions,
   personalizeEmailTemplate: () => personalizeEmailTemplate
 });
-import { GoogleGenAI as GoogleGenAI4 } from "@google/genai";
+import { GoogleGenAI as GoogleGenAI5 } from "@google/genai";
 async function personalizeEmailTemplate(context) {
   const { lead, recentInteractions, template } = context;
   if (!genAI4) {
@@ -13421,7 +15434,7 @@ async function personalizeEmailTemplate(context) {
         }
       ]
     });
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
     cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
@@ -13641,7 +15654,7 @@ var init_emailPersonalizer = __esm({
     if (!process.env.GOOGLE_API_KEY) {
       console.warn("GOOGLE_API_KEY not configured - email personalization will fall back to basic variable replacement");
     }
-    genAI4 = process.env.GOOGLE_API_KEY ? new GoogleGenAI4({ apiKey: process.env.GOOGLE_API_KEY }) : null;
+    genAI4 = process.env.GOOGLE_API_KEY ? new GoogleGenAI5({ apiKey: process.env.GOOGLE_API_KEY }) : null;
   }
 });
 
@@ -13651,7 +15664,7 @@ __export(smsPersonalizer_exports, {
   generateVariablesSuggestions: () => generateVariablesSuggestions2,
   personalizeSmsTemplate: () => personalizeSmsTemplate
 });
-import { GoogleGenAI as GoogleGenAI5 } from "@google/genai";
+import { GoogleGenAI as GoogleGenAI6 } from "@google/genai";
 async function personalizeSmsTemplate(context) {
   const { lead, recentInteractions, template } = context;
   if (!genAI5) {
@@ -13669,7 +15682,7 @@ async function personalizeSmsTemplate(context) {
         }
       ]
     });
-    const responseText = result.response?.text() || result.text || "";
+    const responseText = result.text || "";
     let cleanedResponse = responseText.trim();
     cleanedResponse = cleanedResponse.replace(/```json\n?/g, "");
     cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
@@ -13791,7 +15804,7 @@ function buildPersonalizationPrompt2(lead, recentInteractions, template) {
   const interactionSummary = recentInteractions && recentInteractions.length > 0 ? recentInteractions.map((i) => `- ${i.interactionType}: ${i.contentEngaged || "N/A"} (${new Date(i.createdAt).toLocaleDateString()})`).join("\n") : "No recent interactions recorded";
   const lastInteractionDate = lead.lastInteractionDate ? new Date(lead.lastInteractionDate).toLocaleDateString() : "Never";
   const daysSinceLastInteraction = lead.lastInteractionDate ? Math.floor((Date.now() - new Date(lead.lastInteractionDate).getTime()) / (1e3 * 60 * 60 * 24)) : null;
-  const templateVars = template.variables || [];
+  const templateVars = (template.messageTemplate.match(/\{([^}]+)\}/g) || []).map((match) => match.replace(/[{}]/g, ""));
   return `You are an expert SMS copywriter trained in Alex Hormozi's "$100M Leads" communication strategies, optimized for SMS constraints.
 
 **Your Task**: Personalize this SMS template for a specific recipient using their CRM data.
@@ -13899,7 +15912,7 @@ var init_smsPersonalizer = __esm({
     if (!process.env.GOOGLE_API_KEY) {
       console.warn("GOOGLE_API_KEY not configured - SMS personalization will fall back to basic variable replacement");
     }
-    genAI5 = process.env.GOOGLE_API_KEY ? new GoogleGenAI5({ apiKey: process.env.GOOGLE_API_KEY }) : null;
+    genAI5 = process.env.GOOGLE_API_KEY ? new GoogleGenAI6({ apiKey: process.env.GOOGLE_API_KEY }) : null;
   }
 });
 
@@ -13909,7 +15922,7 @@ __export(donorLifecycleService_exports, {
   DonorLifecycleService: () => DonorLifecycleService,
   createDonorLifecycleService: () => createDonorLifecycleService
 });
-import { eq as eq10, desc as desc6, and as and11 } from "drizzle-orm";
+import { eq as eq11, desc as desc6, and as and12 } from "drizzle-orm";
 function createDonorLifecycleService(storage2) {
   return new DonorLifecycleService(storage2);
 }
@@ -13944,10 +15957,10 @@ var init_donorLifecycleService = __esm({
             majorDonorThreshold: this.DEFAULT_MAJOR_DONOR_THRESHOLD
           });
         }
-        const donorDonations = await db.select().from(donations2).where(and11(
-          eq10(donations2.leadId, leadId),
-          eq10(donations2.status, "succeeded")
-        )).orderBy(desc6(donations2.createdAt));
+        const donorDonations = await db.select().from(donations).where(and12(
+          eq11(donations.leadId, leadId),
+          eq11(donations.status, "succeeded")
+        )).orderBy(desc6(donations.createdAt));
         const metrics = await this.calculateEngagementMetrics(leadId, donorDonations);
         const updates = await this.determineStageUpdates(lifecycleStage, donorDonations, metrics, donationDate);
         await this.storage.updateDonorLifecycleStage(leadId, updates);
@@ -14082,14 +16095,14 @@ var init_donorLifecycleService = __esm({
           if (stage.currentStage === "lapsed" || stage.currentStage === "prospect") {
             continue;
           }
-          const lastDonation = await db.select().from(donations2).where(and11(
-            eq10(donations2.leadId, stage.leadId),
-            eq10(donations2.status, "succeeded")
-          )).orderBy(desc6(donations2.createdAt)).limit(1);
+          const lastDonation = await db.select().from(donations).where(and12(
+            eq11(donations.leadId, stage.leadId),
+            eq11(donations.status, "succeeded")
+          )).orderBy(desc6(donations.createdAt)).limit(1);
           if (lastDonation.length === 0) {
             continue;
           }
-          const lastDonationDate = new Date(lastDonation[0].createdAt);
+          const lastDonationDate = new Date(lastDonation[0].createdAt || /* @__PURE__ */ new Date());
           const monthsSince = this.calculateMonthsDifference(lastDonationDate, /* @__PURE__ */ new Date());
           if (monthsSince >= this.LAPSED_MONTHS_THRESHOLD) {
             await this.storage.updateDonorLifecycleStage(stage.leadId, {
@@ -14175,7 +16188,7 @@ var init_donorLifecycleService = __esm({
       async getDonorLifecycleSummary(leadId) {
         const lifecycle = await this.storage.getDonorLifecycleStage(leadId);
         if (!lifecycle) return null;
-        const lead = await db.select().from(leads).where(eq10(leads.id, leadId)).limit(1);
+        const lead = await db.select().from(leads).where(eq11(leads.id, leadId)).limit(1);
         const economics = await this.storage.getDonorEconomics(leadId);
         return {
           lifecycle,
@@ -14465,12 +16478,13 @@ __export(routes_exports, {
   registerRoutes: () => registerRoutes
 });
 import { createServer } from "http";
-import { eq as eq11, sql as sql12, and as and12, isNotNull } from "drizzle-orm";
+import { eq as eq12, sql as sql13, and as and13, isNotNull } from "drizzle-orm";
 import { z as z2 } from "zod";
 import multer from "multer";
 import Stripe from "stripe";
 import * as XLSX from "xlsx";
 import { fromZonedTime as fromZonedTime3 } from "date-fns-tz";
+import { nanoid as nanoid2 } from "nanoid";
 async function registerRoutes(app2) {
   await setupAuth(app2);
   app2.get("/track/open/:token", async (req, res) => {
@@ -14488,6 +16502,7 @@ async function registerRoutes(app2) {
       await storage.createEmailOpen({
         emailLogId: emailLog.id,
         leadId: emailLog.leadId,
+        trackingToken: emailLog.trackingToken,
         userAgent: req.get("user-agent") || null,
         ipAddress: req.ip || null
       });
@@ -14545,37 +16560,44 @@ async function registerRoutes(app2) {
       res.status(500).send("Internal server error");
     }
   });
-  app2.get("/api/auth/user", ...authWithImpersonation, async (req, res) => {
-    try {
-      const oidcSub = req.user.claims.sub;
-      const user = await storage.getUserByOidcSub(oidcSub);
-      const realUser = req.adminUser || req.user;
-      const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
-      const isAdminSession = realUserData && (realUserData.role === "admin" || realUserData.role === "super_admin");
-      let funnelStage = "awareness";
-      let persona = user?.persona || "default";
-      if (user?.email) {
-        const lead = await storage.getLeadByEmail(user.email);
-        if (lead) {
-          if (lead.funnelStage) {
-            funnelStage = lead.funnelStage;
-          }
-          if (lead.persona) {
-            persona = lead.persona;
+  if (isKinfloLocalAdminFixtureEnabled()) {
+    app2.get("/api/auth/user", (_req, res) => {
+      res.set("X-KinFlo-Local-Admin-Fixture", "true");
+      res.json(kinfloLocalAdminFixtureUser);
+    });
+  } else {
+    app2.get("/api/auth/user", ...authWithImpersonation, async (req, res) => {
+      try {
+        const oidcSub = req.user.claims.sub;
+        const user = await storage.getUserByOidcSub(oidcSub);
+        const realUser = req.adminUser || req.user;
+        const realUserData = realUser.claims ? await storage.getUserByOidcSub(realUser.claims.sub) : null;
+        const isAdminSession = realUserData && (realUserData.role === "admin" || realUserData.role === "super_admin");
+        let funnelStage = "awareness";
+        let persona = user?.persona || "default";
+        if (user?.email) {
+          const lead = await storage.getLeadByEmail(user.email);
+          if (lead) {
+            if (lead.funnelStage) {
+              funnelStage = lead.funnelStage;
+            }
+            if (lead.persona) {
+              persona = lead.persona;
+            }
           }
         }
+        res.json({
+          ...user,
+          isAdminSession: isAdminSession || false,
+          persona,
+          funnelStage
+        });
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
       }
-      res.json({
-        ...user,
-        isAdminSession: isAdminSession || false,
-        persona,
-        funnelStage
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+    });
+  }
   if (process.env.NODE_ENV === "development") {
     app2.post("/api/test/set-user-role", ...authWithImpersonation, async (req, res) => {
       try {
@@ -14590,6 +16612,9 @@ async function registerRoutes(app2) {
           return res.status(404).json({ message: "User not found" });
         }
         const updated = await storage.updateUser(user.id, { role }, user.id);
+        if (!updated) {
+          return res.status(404).json({ message: "User not found" });
+        }
         console.log(`[Test Helper] Successfully updated user role to ${updated.role}`);
         res.json({ success: true, user: updated });
       } catch (error) {
@@ -14998,12 +17023,18 @@ async function registerRoutes(app2) {
         return res.status(400).json({ message: "Message and sessionId are required" });
       }
       const conversationHistory = await storage.getChatbotConversationsBySession(sessionId);
+      const chatbotHistory = conversationHistory.filter((entry) => entry.role === "user" || entry.role === "assistant").map((entry) => ({
+        role: entry.role,
+        content: entry.content,
+        toolCalls: Array.isArray(entry.toolCalls) ? entry.toolCalls : void 0,
+        toolResults: Array.isArray(entry.toolResults) ? entry.toolResults : void 0
+      }));
       const { processChatMessage: processChatMessage2 } = await Promise.resolve().then(() => (init_chatbotService(), chatbotService_exports));
       const result = await processChatMessage2(
         currentUser.id,
         sessionId,
         message,
-        conversationHistory
+        chatbotHistory
       );
       await storage.createChatbotConversation({
         userId: currentUser.id,
@@ -15139,8 +17170,8 @@ async function registerRoutes(app2) {
       const result = await storage.createTableBackup(
         tableName,
         currentUser.id,
-        backupName,
-        description
+        backupName ?? void 0,
+        description ?? void 0
       );
       res.status(201).json(result);
     } catch (error) {
@@ -15800,7 +17831,7 @@ async function registerRoutes(app2) {
       const result = await evaluateLeadProgression(
         leadId,
         triggerEvent,
-        req.user.id
+        getAuthUserId(req)
       );
       res.json(result);
     } catch (error) {
@@ -15869,7 +17900,7 @@ async function registerRoutes(app2) {
     try {
       const { id } = req.params;
       const validatedData = insertFunnelProgressionRuleSchema.partial().parse(req.body);
-      const [updated] = await db.update(funnelProgressionRules).set({ ...validatedData, updatedAt: /* @__PURE__ */ new Date() }).where(eq11(funnelProgressionRules.id, id)).returning();
+      const [updated] = await db.update(funnelProgressionRules).set({ ...validatedData, updatedAt: /* @__PURE__ */ new Date() }).where(eq12(funnelProgressionRules.id, id)).returning();
       if (!updated) {
         return res.status(404).json({ message: "Rule not found" });
       }
@@ -15885,7 +17916,7 @@ async function registerRoutes(app2) {
   app2.delete("/api/admin/funnel/rules/:id", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const { id } = req.params;
-      const [deleted] = await db.delete(funnelProgressionRules).where(eq11(funnelProgressionRules.id, id)).returning();
+      const [deleted] = await db.delete(funnelProgressionRules).where(eq12(funnelProgressionRules.id, id)).returning();
       if (!deleted) {
         return res.status(404).json({ message: "Rule not found" });
       }
@@ -15899,15 +17930,15 @@ async function registerRoutes(app2) {
     try {
       const { persona } = req.query;
       console.log("[funnel-stats] Starting query, persona filter:", persona);
-      const totalWhereCondition = persona && persona !== "all" ? and12(isNotNull(leads.persona), eq11(leads.persona, persona)) : isNotNull(leads.persona);
+      const totalWhereCondition = persona && persona !== "all" ? and13(isNotNull(leads.persona), eq12(leads.persona, persona)) : isNotNull(leads.persona);
       console.log("[funnel-stats] About to execute total count query");
-      const [{ count: totalProgressions }] = await db.select({ count: sql12`count(*)` }).from(funnelProgressionHistory).innerJoin(leads, eq11(funnelProgressionHistory.leadId, leads.id)).where(totalWhereCondition);
+      const [{ count: totalProgressions }] = await db.select({ count: sql13`count(*)` }).from(funnelProgressionHistory).innerJoin(leads, eq12(funnelProgressionHistory.leadId, leads.id)).where(totalWhereCondition);
       console.log("[funnel-stats] Total count query completed:", totalProgressions);
-      const historyWhereCondition = persona && persona !== "all" ? and12(isNotNull(leads.persona), eq11(leads.persona, persona)) : isNotNull(leads.persona);
+      const historyWhereCondition = persona && persona !== "all" ? and13(isNotNull(leads.persona), eq12(leads.persona, persona)) : isNotNull(leads.persona);
       console.log("[funnel-stats] About to execute recent history query");
-      const personaSQLFilter = persona && persona !== "all" ? sql12`AND l.persona = ${persona}` : sql12``;
-      const recentHistory = await db.execute(sql12`
-        SELECT 
+      const personaSQLFilter = persona && persona !== "all" ? sql13`AND l.persona = ${persona}` : sql13``;
+      const recentHistory = await db.execute(sql13`
+        SELECT
           fph.id,
           fph.lead_id as "leadId",
           fph.from_stage as "fromStage",
@@ -15943,7 +17974,7 @@ async function registerRoutes(app2) {
           persona: h.leadPersona
         }
       }));
-      const stageWhereCondition = persona && persona !== "all" ? eq11(leads.persona, persona) : void 0;
+      const stageWhereCondition = persona && persona !== "all" ? eq12(leads.persona, persona) : void 0;
       console.log("[funnel-stats] About to execute stage distribution query");
       const allLeads = stageWhereCondition ? await db.select({ funnelStage: leads.funnelStage }).from(leads).where(stageWhereCondition) : await db.select({ funnelStage: leads.funnelStage }).from(leads);
       console.log("[funnel-stats] Stage distribution query completed:", allLeads.length, "rows");
@@ -15953,12 +17984,12 @@ async function registerRoutes(app2) {
           progressionsByStage[lead.funnelStage] = (progressionsByStage[lead.funnelStage] || 0) + 1;
         }
       });
-      const personaHistoryWhereCondition = persona && persona !== "all" ? and12(isNotNull(leads.persona), eq11(leads.persona, persona)) : isNotNull(leads.persona);
+      const personaHistoryWhereCondition = persona && persona !== "all" ? and13(isNotNull(leads.persona), eq12(leads.persona, persona)) : isNotNull(leads.persona);
       console.log("[funnel-stats] About to execute persona breakdown query");
       const allHistory = await db.select({
         persona: leads.persona,
-        count: sql12`count(*)`
-      }).from(funnelProgressionHistory).innerJoin(leads, eq11(funnelProgressionHistory.leadId, leads.id)).where(personaHistoryWhereCondition).groupBy(leads.persona);
+        count: sql13`count(*)`
+      }).from(funnelProgressionHistory).innerJoin(leads, eq12(funnelProgressionHistory.leadId, leads.id)).where(personaHistoryWhereCondition).groupBy(leads.persona);
       console.log("[funnel-stats] Persona breakdown query completed:", allHistory.length, "rows");
       const progressionsByPersona = {};
       allHistory.forEach((row) => {
@@ -15966,10 +17997,10 @@ async function registerRoutes(app2) {
           progressionsByPersona[row.persona] = Number(row.count);
         }
       });
-      const personaFilter = persona && persona !== "all" ? sql12`AND l.persona = ${persona}` : sql12``;
-      const velocityQuery = await db.execute(sql12`
+      const personaFilter = persona && persona !== "all" ? sql13`AND l.persona = ${persona}` : sql13``;
+      const velocityQuery = await db.execute(sql13`
         WITH stage_transitions AS (
-          SELECT 
+          SELECT
             l.persona,
             h.lead_id,
             h.to_stage,
@@ -15979,7 +18010,7 @@ async function registerRoutes(app2) {
           INNER JOIN leads l ON h.lead_id = l.id
           WHERE l.persona IS NOT NULL ${personaFilter}
         )
-        SELECT 
+        SELECT
           persona,
           ROUND(AVG(EXTRACT(EPOCH FROM (created_at - prev_created_at)) / 86400)::numeric, 1) as avg_days
         FROM stage_transitions
@@ -16349,7 +18380,7 @@ async function registerRoutes(app2) {
       const { batchQualifyLeads: batchQualifyLeads2 } = await Promise.resolve().then(() => (init_leadQualifier(), leadQualifier_exports));
       const results = await batchQualifyLeads2(validLeads, icp);
       const updatedLeads = [];
-      for (const [leadId, result] of results.entries()) {
+      for (const [leadId, result] of Array.from(results.entries())) {
         const updated = await storage.updateLead(leadId, {
           qualificationScore: result.score,
           qualificationStatus: result.status,
@@ -16475,7 +18506,7 @@ async function registerRoutes(app2) {
         toName: `${lead.firstName} ${lead.lastName}`,
         subject: outreachEmail.subject,
         html: outreachEmail.bodyHtml,
-        text: outreachEmail.bodyText,
+        text: outreachEmail.bodyText ?? void 0,
         metadata: {
           leadId: lead.id,
           outreachEmailId: outreachEmail.id,
@@ -17509,7 +19540,7 @@ async function registerRoutes(app2) {
       const updatedItem = await storage.updateContentItem(id, {
         isActive: status === "approved",
         metadata: {
-          ...item.metadata,
+          ...typeof item.metadata === "object" && item.metadata !== null ? item.metadata : {},
           status,
           reviewedBy: currentUser.id,
           reviewedAt: (/* @__PURE__ */ new Date()).toISOString(),
@@ -17658,7 +19689,7 @@ async function registerRoutes(app2) {
         const currentUser = await storage.getUserByOidcSub(req.user.claims.sub);
         userId = currentUser?.id || null;
       }
-      let assignment = await storage.getAssignmentPersistent(testId, userId, visitorId, sessionId);
+      let assignment = await storage.getAssignmentPersistent(testId, userId ?? void 0, visitorId, sessionId);
       if (!assignment) {
         const test = await storage.getAbTest(testId);
         if (!test || test.status !== "active") {
@@ -17829,7 +19860,21 @@ async function registerRoutes(app2) {
   app2.post("/api/automation/run", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const { AutomationSchedulerService: AutomationSchedulerService2 } = await Promise.resolve().then(() => (init_automationScheduler(), automationScheduler_exports));
-      const scheduler = new AutomationSchedulerService2(storage);
+      const { AutomationEngineService: AutomationEngineService2 } = await Promise.resolve().then(() => (init_automationEngine(), automationEngine_exports));
+      const { TestLifecycleManagerService: TestLifecycleManagerService2 } = await Promise.resolve().then(() => (init_testLifecycleManager(), testLifecycleManager_exports));
+      const { WinnerPromotionService: WinnerPromotionService2 } = await Promise.resolve().then(() => (init_winnerPromotion(), winnerPromotion_exports));
+      const { BaselineAggregatorService: BaselineAggregatorService2 } = await Promise.resolve().then(() => (init_baselineAggregator(), baselineAggregator_exports));
+      const { MetricEvaluatorService: MetricEvaluatorService2 } = await Promise.resolve().then(() => (init_metricEvaluator(), metricEvaluator_exports));
+      const { AiContentGeneratorService: AiContentGeneratorService2 } = await Promise.resolve().then(() => (init_aiContentGenerator(), aiContentGenerator_exports));
+      const { StatisticalCalculatorService: StatisticalCalculatorService2 } = await Promise.resolve().then(() => (init_statisticalCalculator(), statisticalCalculator_exports));
+      const baselineAggregator = new BaselineAggregatorService2(storage);
+      const metricEvaluator = new MetricEvaluatorService2(storage);
+      const aiGenerator = new AiContentGeneratorService2(storage);
+      const testLifecycle = new TestLifecycleManagerService2(storage, aiGenerator);
+      const statisticalCalculator = new StatisticalCalculatorService2();
+      const automationEngine = new AutomationEngineService2(storage, baselineAggregator, metricEvaluator);
+      const winnerPromotion = new WinnerPromotionService2(storage, statisticalCalculator, metricEvaluator, testLifecycle);
+      const scheduler = new AutomationSchedulerService2(storage, automationEngine, testLifecycle, winnerPromotion, baselineAggregator);
       const result = await scheduler.runAutomationCycle();
       res.json(result);
     } catch (error) {
@@ -18354,7 +20399,7 @@ async function registerRoutes(app2) {
           return res.status(400).json({ message: "Next run time must be in the future" });
         }
       }
-      validatedData.createdBy = req.user.id;
+      validatedData.createdBy = getAuthUserId(req);
       const schedule = await storage.createEmailReportSchedule(validatedData);
       res.json(schedule);
     } catch (error) {
@@ -18435,7 +20480,7 @@ async function registerRoutes(app2) {
     try {
       const { id } = req.params;
       const { executeScheduleNow: executeScheduleNow2 } = await Promise.resolve().then(() => (init_emailReportScheduler(), emailReportScheduler_exports));
-      await executeScheduleNow2(id, req.user.id);
+      await executeScheduleNow2(id, getAuthUserId(req));
       res.json({ success: true, message: "Report sent successfully" });
     } catch (error) {
       console.error("Error sending report manually:", error);
@@ -18450,10 +20495,14 @@ async function registerRoutes(app2) {
   });
   app2.post("/api/segments", ...authWithImpersonation, requireSuperAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
+      const createdBy = getAuthUserId(req);
+      if (!createdBy) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       const validatedData = insertSegmentSchema.parse(req.body);
       const segment = await storage.createSegment({
         ...validatedData,
-        createdBy: req.user.id
+        createdBy
       });
       res.status(201).json(segment);
     } catch (error) {
@@ -18905,7 +20954,7 @@ async function registerRoutes(app2) {
       const uniqueOpens = uniqueOpenLogIds.size;
       const uniqueClickLogIds = new Set(emailClicks2.map((click) => click.emailLogId));
       const uniqueClicks = uniqueClickLogIds.size;
-      const uniqueEngagedLogIds = /* @__PURE__ */ new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      const uniqueEngagedLogIds = /* @__PURE__ */ new Set([...Array.from(uniqueOpenLogIds), ...Array.from(uniqueClickLogIds)]);
       const uniqueEngaged = uniqueEngagedLogIds.size;
       const openRate = totalSent > 0 ? uniqueOpens / totalSent * 100 : 0;
       const clickRate = totalSent > 0 ? uniqueClicks / totalSent * 100 : 0;
@@ -18986,7 +21035,7 @@ async function registerRoutes(app2) {
       const uniqueOpens = uniqueOpenLogIds.size;
       const uniqueClickLogIds = new Set(emailClicks2.map((click) => click.emailLogId));
       const uniqueClicks = uniqueClickLogIds.size;
-      const uniqueEngagedLogIds = /* @__PURE__ */ new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      const uniqueEngagedLogIds = /* @__PURE__ */ new Set([...Array.from(uniqueOpenLogIds), ...Array.from(uniqueClickLogIds)]);
       const openRate = totalSent > 0 ? uniqueOpens / totalSent * 100 : 0;
       const clickRate = totalSent > 0 ? uniqueClicks / totalSent * 100 : 0;
       const clickToOpenRate = uniqueOpens > 0 ? uniqueClicks / uniqueOpens * 100 : 0;
@@ -18997,7 +21046,7 @@ async function registerRoutes(app2) {
         const firstOpen = logOpens.length > 0 ? logOpens[0].openedAt : null;
         const firstClick = logClicks.length > 0 ? logClicks[0].clickedAt : null;
         return {
-          "Recipient Email": log2.leadEmail || "N/A",
+          "Recipient Email": log2.recipientEmail || "N/A",
           "Status": log2.status,
           "Sent At": log2.sentAt ? new Date(log2.sentAt).toISOString() : "Not sent",
           "Total Opens": logOpens.length,
@@ -19009,7 +21058,7 @@ async function registerRoutes(app2) {
       });
       const summaryRow = {
         "Recipient Email": `CAMPAIGN SUMMARY: ${campaign.name}`,
-        "Status": campaign.status,
+        "Status": campaign.isActive ? "active" : "inactive",
         "Sent At": `Total Sent: ${totalSent}`,
         "Total Opens": `Open Rate: ${openRate.toFixed(1)}%`,
         "First Opened": `Unique Opens: ${uniqueOpens}`,
@@ -19045,15 +21094,15 @@ async function registerRoutes(app2) {
       const uniqueOpens = uniqueOpenLogIds.size;
       const uniqueClickLogIds = new Set(emailClicks2.map((click) => click.emailLogId));
       const uniqueClicks = uniqueClickLogIds.size;
-      const uniqueEngagedLogIds = /* @__PURE__ */ new Set([...uniqueOpenLogIds, ...uniqueClickLogIds]);
+      const uniqueEngagedLogIds = /* @__PURE__ */ new Set([...Array.from(uniqueOpenLogIds), ...Array.from(uniqueClickLogIds)]);
       const openRate = totalSent > 0 ? uniqueOpens / totalSent * 100 : 0;
       const clickRate = totalSent > 0 ? uniqueClicks / totalSent * 100 : 0;
       const clickToOpenRate = uniqueOpens > 0 ? uniqueClicks / uniqueOpens * 100 : 0;
       const uniqueEngagementRate = totalSent > 0 ? uniqueEngagedLogIds.size / totalSent * 100 : 0;
       const summaryData = [
         { Metric: "Campaign Name", Value: campaign.name },
-        { Metric: "Status", Value: campaign.status },
-        { Metric: "Subject Line", Value: campaign.subject || "N/A" },
+        { Metric: "Status", Value: campaign.isActive ? "active" : "inactive" },
+        { Metric: "Subject Line", Value: "N/A" },
         { Metric: "Created At", Value: campaign.createdAt ? new Date(campaign.createdAt) : "N/A" },
         { Metric: "", Value: "" },
         // Spacer
@@ -19077,7 +21126,7 @@ async function registerRoutes(app2) {
         const firstClick = logClicks.length > 0 ? logClicks[0].clickedAt : null;
         const lastOpen = logOpens.length > 0 ? logOpens[logOpens.length - 1].openedAt : null;
         return {
-          "Recipient Email": log2.leadEmail || "N/A",
+          "Recipient Email": log2.recipientEmail || "N/A",
           "Status": log2.status,
           "Sent At": log2.sentAt ? new Date(log2.sentAt) : "Not sent",
           "Total Opens": logOpens.length,
@@ -19093,9 +21142,9 @@ async function registerRoutes(app2) {
         "Link URL": link.url,
         "Total Clicks": link.totalClicks,
         "Unique Clicks": link.uniqueClicks,
-        "Click-Through Rate": link.clickThroughRate / 100,
+        "Click-Through Rate": link.ctr / 100,
         // Store as decimal for percentage format
-        "Unique Recipients": link.uniqueRecipients
+        "Unique Recipients": link.uniqueClicks
       }));
       const applySheetFormatting = (sheet, config) => {
         if (!sheet["!ref"]) return;
@@ -19245,7 +21294,7 @@ async function registerRoutes(app2) {
       const insights = await storage.getSendTimeInsights(
         scope,
         scopeId,
-        shouldForceRecalculate
+        { forceRecompute: shouldForceRecalculate }
       );
       res.json(insights);
     } catch (error) {
@@ -19564,13 +21613,15 @@ async function registerRoutes(app2) {
       if (!lead.email) {
         return res.status(400).json({ message: "Lead does not have an email address" });
       }
-      await sendTemplatedEmail({
+      const { sendEmail: sendEmail3 } = await Promise.resolve().then(() => (init_email(), email_exports));
+      await sendEmail3(storage, {
         to: lead.email,
+        toName: getPersonName(lead),
         subject,
         html: htmlBody,
         text: textBody || void 0,
-        templateName: "hormozi_personalized",
-        variables: {}
+        metadata: { leadId: lead.id, source: "hormozi_personalized" },
+        leadId: lead.id
       });
       await storage.createInteraction({
         leadId,
@@ -19894,7 +21945,10 @@ async function registerRoutes(app2) {
     try {
       const { leadId } = req.params;
       const { assignedTo, assignmentType, notes } = req.body;
-      const userId = req.user.id;
+      const userId = getAuthUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       if (!assignedTo) {
         return res.status(400).json({ message: "assignedTo is required" });
       }
@@ -19945,7 +21999,10 @@ async function registerRoutes(app2) {
   app2.post("/api/tasks", ...authWithImpersonation, isAdmin, requireTier(TIERS.PREMIUM), async (req, res) => {
     try {
       const taskData = req.body;
-      const userId = req.user.id;
+      const userId = getAuthUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       taskData.createdBy = userId;
       if (!taskData.leadId || !taskData.assignedTo || !taskData.title || !taskData.taskType) {
         return res.status(400).json({ message: "Missing required fields: leadId, assignedTo, title, taskType" });
@@ -20014,7 +22071,10 @@ async function registerRoutes(app2) {
     try {
       const { leadId } = req.params;
       const { pipelineStage, reason } = req.body;
-      const userId = req.user.id;
+      const userId = getAuthUserId(req);
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
       if (!pipelineStage) {
         return res.status(400).json({ message: "pipelineStage is required" });
       }
@@ -20095,10 +22155,10 @@ async function registerRoutes(app2) {
         const stageTimesMs = [];
         entriesIntoStage.forEach((entry) => {
           const exitEntry = allHistory.find(
-            (h) => h.leadId === entry.leadId && h.fromStage === stageSlug && new Date(h.createdAt).getTime() > new Date(entry.createdAt).getTime()
+            (h) => h.leadId === entry.leadId && h.fromStage === stageSlug && (h.createdAt ? new Date(h.createdAt).getTime() : 0) > (entry.createdAt ? new Date(entry.createdAt).getTime() : 0)
           );
           if (exitEntry) {
-            const timeInStage = new Date(exitEntry.createdAt).getTime() - new Date(entry.createdAt).getTime();
+            const timeInStage = (exitEntry.createdAt ? new Date(exitEntry.createdAt).getTime() : 0) - (entry.createdAt ? new Date(entry.createdAt).getTime() : 0);
             stageTimesMs.push(timeInStage);
           }
         });
@@ -20175,7 +22235,7 @@ async function registerRoutes(app2) {
         return res.status(401).json({ message: "Authentication required" });
       }
       const customerId = await getOrCreateStripeCustomer(userId);
-      const paymentIntent = await stripe.paymentIntents.create({
+      const paymentIntent = await getStripeClient().paymentIntents.create({
         amount: amountInCents,
         currency: "usd",
         customer: customerId,
@@ -20233,7 +22293,7 @@ async function registerRoutes(app2) {
         console.error("Raw body not available - check middleware configuration");
         throw new Error("Raw body not available for signature verification");
       }
-      event = stripe.webhooks.constructEvent(
+      event = getStripeClient().webhooks.constructEvent(
         rawBody,
         sig,
         process.env.STRIPE_WEBHOOK_SECRET
@@ -20357,11 +22417,12 @@ async function registerRoutes(app2) {
                   const amountDollars = (updatedDonation.amount / 100).toFixed(2);
                   if (channels.includes("email")) {
                     const emailSubject = `New donation to ${campaign.name}!`;
+                    const raisedAmount = campaign.raisedAmount || 0;
                     const emailBody = `Great News!
 
 ${donorDisplayName} just donated $${amountDollars} to ${campaign.name}!
 
-Campaign Progress: $${((campaign.raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised
+Campaign Progress: $${((raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised
 
 You're receiving this notification because you're a member of this campaign. You can manage your notification preferences from your campaign dashboard.`;
                     const emailHtml = `
@@ -20375,11 +22436,11 @@ You're receiving this notification because you're a member of this campaign. You
                             Campaign Progress
                           </p>
                           <p style="margin: 10px 0 0 0; color: #666;">
-                            $${((campaign.raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised
+	                            $${((raisedAmount + updatedDonation.amount) / 100).toFixed(2)} of $${(campaign.goalAmount / 100).toFixed(2)} raised
                           </p>
                         </div>
                         <p style="color: #666; font-size: 14px;">
-                          You're receiving this notification because you're a member of this campaign. 
+                          You're receiving this notification because you're a member of this campaign.
                           You can manage your notification preferences from your campaign dashboard.
                         </p>
                       </div>
@@ -20388,7 +22449,7 @@ You're receiving this notification because you're a member of this campaign. You
                       await storage.createEmailLog({
                         recipientEmail: user.email,
                         subject: emailSubject,
-                        htmlBody: emailHtml,
+                        trackingToken: `campaign-donation-${campaign.id}-${updatedDonation.id}-${member.id}`,
                         status: "pending",
                         emailProvider: "sendgrid",
                         metadata: {
@@ -20437,7 +22498,7 @@ You're receiving this notification because you're a member of this campaign. You
                         status: emailStatus,
                         errorMessage: emailError,
                         sentAt: emailStatus === "sent" ? /* @__PURE__ */ new Date() : null
-                      }).where(eq11(emailLogs.id, pendingLog.id));
+                      }).where(eq12(emailLogs.id, pendingLog.id));
                     }
                   }
                 }
@@ -20464,10 +22525,10 @@ You're receiving this notification because you're a member of this campaign. You
           }
           if (updatedDonation.leadId) {
             try {
-              const donationCount = await db.select({ count: sql12`cast(count(*) as integer)` }).from(donations).where(
-                and12(
-                  eq11(donations.leadId, updatedDonation.leadId),
-                  eq11(donations.status, "succeeded")
+              const donationCount = await db.select({ count: sql13`cast(count(*) as integer)` }).from(donations).where(
+                and13(
+                  eq12(donations.leadId, updatedDonation.leadId),
+                  eq12(donations.status, "succeeded")
                 )
               );
               const isFirstDonation = donationCount[0]?.count === 1;
@@ -20511,8 +22572,8 @@ You're receiving this notification because you're a member of this campaign. You
   });
   app2.get("/api/donations", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
-      const donations3 = await storage.getAllDonations();
-      res.json(donations3);
+      const donations2 = await storage.getAllDonations();
+      res.json(donations2);
     } catch (error) {
       console.error("Error fetching donations:", error);
       res.status(500).json({ message: "Failed to fetch donations" });
@@ -20581,8 +22642,8 @@ You're receiving this notification because you're a member of this campaign. You
   app2.get("/api/donation-campaigns/:id/donations", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { id } = req.params;
-      const donations3 = await storage.getCampaignDonations(id);
-      res.json(donations3);
+      const donations2 = await storage.getCampaignDonations(id);
+      res.json(donations2);
     } catch (error) {
       console.error("Error fetching campaign donations:", error);
       res.status(500).json({ message: "Failed to fetch campaign donations" });
@@ -20630,18 +22691,16 @@ You're receiving this notification because you're a member of this campaign. You
         return res.status(400).json({ message: "Campaign must have at least one communication channel" });
       }
       const allLeads = await storage.getAllLeads();
+      const campaignPassions = Array.isArray(campaign.passionTags) ? campaign.passionTags : [];
       const matchedLeads = allLeads.filter((lead) => {
-        if (!lead.passions || lead.passions.length === 0) return false;
-        if (!campaign.passionTags || campaign.passionTags.length === 0) return true;
-        return lead.passions.some(
-          (passion) => campaign.passionTags.includes(passion)
-        );
+        const leadPassions = Array.isArray(lead.passions) ? lead.passions : [];
+        if (leadPassions.length === 0) return false;
+        if (campaignPassions.length === 0) return true;
+        return leadPassions.some((passion) => campaignPassions.includes(passion));
       });
       if (matchedLeads.length === 0) {
         return res.status(400).json({ message: "No leads match the campaign's target passions" });
       }
-      const { personalizeEmailTemplate: personalizeEmailTemplate2 } = await Promise.resolve().then(() => (init_emailPersonalizer(), emailPersonalizer_exports));
-      const { personalizeSmsTemplate: personalizeSmsTemplate2 } = await Promise.resolve().then(() => (init_smsPersonalizer(), smsPersonalizer_exports));
       const { sendEmail: sendEmail3 } = await Promise.resolve().then(() => (init_email(), email_exports));
       const { sendSMS: sendSMS3 } = await Promise.resolve().then(() => (init_twilio(), twilio_exports));
       const results = {
@@ -20656,22 +22715,21 @@ You're receiving this notification because you're a member of this campaign. You
           try {
             const emailTemplate = await storage.getEmailTemplate(campaign.emailTemplateId);
             if (emailTemplate) {
-              const personalized = await personalizeEmailTemplate2({
-                lead,
-                recentInteractions: [],
-                template: emailTemplate,
-                campaignContext: {
-                  campaignName: campaign.name,
-                  campaignDescription: campaign.description,
-                  campaignStory: campaign.story,
-                  goalAmount: campaign.goalAmount / 100
-                }
-              });
+              const variables = {
+                firstName: lead.firstName || "",
+                lastName: lead.lastName || "",
+                email: lead.email,
+                campaignName: campaign.name,
+                campaignDescription: campaign.description || "",
+                campaignStory: campaign.story || "",
+                goalAmount: (campaign.goalAmount / 100).toFixed(2)
+              };
               const result = await sendEmail3(storage, {
                 to: lead.email,
-                toName: lead.name,
-                subject: personalized.subject,
-                html: personalized.body,
+                toName: getPersonName(lead),
+                subject: renderTemplate(emailTemplate.subject, variables),
+                html: renderTemplate(emailTemplate.htmlBody, variables),
+                text: emailTemplate.textBody ? renderTemplate(emailTemplate.textBody, variables) : void 0,
                 templateId: emailTemplate.id,
                 metadata: { campaignId: campaign.id, leadId: lead.id }
               });
@@ -20690,18 +22748,16 @@ You're receiving this notification because you're a member of this campaign. You
           try {
             const smsTemplate = await storage.getSmsTemplate(campaign.smsTemplateId);
             if (smsTemplate) {
-              const personalized = await personalizeSmsTemplate2({
-                lead,
-                recentInteractions: [],
-                template: smsTemplate,
-                campaignContext: {
-                  campaignName: campaign.name,
-                  campaignDescription: campaign.description
-                }
-              });
+              const variables = {
+                firstName: lead.firstName || "",
+                lastName: lead.lastName || "",
+                campaignName: campaign.name,
+                campaignDescription: campaign.description || ""
+              };
+              const messageContent = renderTemplate(smsTemplate.messageTemplate, variables);
               const result = await sendSMS3(
                 lead.phone,
-                personalized.message,
+                messageContent,
                 { campaignId: campaign.id, leadId: lead.id, templateId: smsTemplate.id }
               );
               if (result.success) {
@@ -20710,8 +22766,8 @@ You're receiving this notification because you're a member of this campaign. You
                   templateId: smsTemplate.id,
                   leadId: lead.id,
                   recipientPhone: lead.phone,
-                  recipientName: lead.name,
-                  messageContent: personalized.message,
+                  recipientName: getPersonName(lead),
+                  messageContent,
                   status: "sent",
                   smsProvider: "twilio",
                   providerMessageId: result.messageId,
@@ -20744,13 +22800,14 @@ You're receiving this notification because you're a member of this campaign. You
     const user = await storage.getUserByOidcSub(oidcSubId);
     if (!user) throw new Error("User not found");
     if (user.stripeCustomerId) return user.stripeCustomerId;
-    const existing = await stripe.customers.list({ email: user.email, limit: 1 });
+    const stripeClient = getStripeClient();
+    const existing = await stripeClient.customers.list({ email: user.email || void 0, limit: 1 });
     if (existing.data.length > 0) {
       const customerId = existing.data[0].id;
       await storage.updateUser(user.id, { stripeCustomerId: customerId });
       return customerId;
     }
-    const customer = await stripe.customers.create({
+    const customer = await stripeClient.customers.create({
       email: user.email,
       name: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
       metadata: { oidcSubId }
@@ -20762,7 +22819,7 @@ You're receiving this notification because you're a member of this campaign. You
     try {
       const userId = req.user.claims.sub;
       const customerId = await getOrCreateStripeCustomer(userId);
-      const paymentMethods = await stripe.paymentMethods.list({
+      const paymentMethods = await getStripeClient().paymentMethods.list({
         customer: customerId,
         type: "card"
       });
@@ -20786,7 +22843,7 @@ You're receiving this notification because you're a member of this campaign. You
     try {
       const userId = req.user.claims.sub;
       const customerId = await getOrCreateStripeCustomer(userId);
-      const setupIntent = await stripe.setupIntents.create({
+      const setupIntent = await getStripeClient().setupIntents.create({
         customer: customerId,
         payment_method_types: ["card"]
       });
@@ -20835,8 +22892,8 @@ You're receiving this notification because you're a member of this campaign. You
       if (!isMember) {
         return res.status(403).json({ message: "Not authorized to view this campaign" });
       }
-      const donations3 = await storage.getCampaignDonations(campaignId);
-      res.json(donations3);
+      const donations2 = await storage.getCampaignDonations(campaignId);
+      res.json(donations2);
     } catch (error) {
       console.error("Error fetching campaign donations:", error);
       res.status(500).json({ message: "Failed to fetch donations" });
@@ -20985,14 +23042,14 @@ You're receiving this notification because you're a member of this campaign. You
       if (!campaign) {
         return res.status(404).json({ message: "Campaign not found" });
       }
-      const donations3 = await storage.getCampaignDonations(testimonial.campaignId);
-      const donors = donations3.filter((d) => d.status === "succeeded" && d.amount && d.amount > 0);
+      const donations2 = await storage.getCampaignDonations(testimonial.campaignId);
+      const donors = donations2.filter((d) => d.status === "succeeded" && d.amount && d.amount > 0);
       const uniqueDonorEmails = /* @__PURE__ */ new Set();
       donors.forEach((d) => {
         if (d.donorEmail) uniqueDonorEmails.add(d.donorEmail);
       });
       let sentCount = 0;
-      for (const donorEmail of uniqueDonorEmails) {
+      for (const donorEmail of Array.from(uniqueDonorEmails)) {
         try {
           const emailSubject = `Thank you from ${testimonial.authorName} - ${campaign.name}`;
           const emailHtml = `
@@ -21008,7 +23065,7 @@ You're receiving this notification because you're a member of this campaign. You
           await storage.createEmailLog({
             recipientEmail: donorEmail,
             subject: emailSubject,
-            htmlBody: emailHtml,
+            trackingToken: nanoid2(),
             status: "sent",
             emailProvider: "sendgrid",
             metadata: {
@@ -21530,7 +23587,7 @@ You're receiving this notification because you're a member of this campaign. You
             ...enrollment,
             user: user ? {
               id: user.id,
-              name: user.name,
+              name: getPersonName(user),
               email: user.email
             } : null,
             classesCompleted: progress?.classesCompleted || 0,
@@ -21559,7 +23616,7 @@ You're receiving this notification because you're a member of this campaign. You
         attendance,
         user: user ? {
           id: user.id,
-          name: user.name,
+          name: getPersonName(user),
           email: user.email
         } : null,
         progress
@@ -21818,7 +23875,7 @@ You're receiving this notification because you're a member of this campaign. You
   app2.get("/api/admin/volunteer/enrollments", ...authWithImpersonation, isAdmin, requireTier(TIERS.PRO), async (req, res) => {
     try {
       const { shiftId } = req.query;
-      let enrollments;
+      let enrollments = [];
       if (shiftId) {
         enrollments = await storage.getShiftEnrollments(shiftId);
       } else {
@@ -21940,7 +23997,7 @@ You're receiving this notification because you're a member of this campaign. You
   const httpServer = createServer(app2);
   return httpServer;
 }
-var stripe, requireRole, requireAdmin, requireSuperAdmin, isAdmin, authWithImpersonation;
+var getPersonName, getAuthUserId, stripe, getStripeClient, requireRole, requireAdmin, requireSuperAdmin, isAdmin, authWithImpersonation, isKinfloLocalAdminFixtureEnabled, kinfloLocalAdminFixtureUser;
 var init_routes = __esm({
   "server/routes.ts"() {
     "use strict";
@@ -21966,7 +24023,21 @@ var init_routes = __esm({
     init_calendarService();
     init_demo_data();
     init_googleSheets();
+    getPersonName = (person) => {
+      if (!person) return "";
+      return [person.firstName, person.lastName].filter(Boolean).join(" ").trim() || person.email || person.id;
+    };
+    getAuthUserId = (req) => {
+      const user = req.user;
+      return user?.id || user?.claims?.sub;
+    };
     stripe = process.env.STRIPE_SECRET_KEY && !process.env.STRIPE_SECRET_KEY.startsWith("sk_test_...") ? new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2025-10-29.clover" }) : null;
+    getStripeClient = () => {
+      if (!stripe) {
+        throw new Error("Stripe is not configured");
+      }
+      return stripe;
+    };
     requireRole = (...allowedRoles) => {
       return async (req, res, next) => {
         try {
@@ -21999,6 +24070,19 @@ var init_routes = __esm({
     requireSuperAdmin = requireRole("super_admin");
     isAdmin = requireAdmin;
     authWithImpersonation = [isAuthenticated, applyImpersonation];
+    isKinfloLocalAdminFixtureEnabled = () => process.env.NODE_ENV === "development" && process.env.KINFLO_ENABLE_LOCAL_ADMIN_FIXTURE === "true";
+    kinfloLocalAdminFixtureUser = {
+      id: "kinflo-local-admin-fixture",
+      oidcSub: "local|kinflo-admin-fixture",
+      email: "kinflo-admin@example.invalid",
+      firstName: "KinFlo",
+      lastName: "Admin Fixture",
+      role: "super_admin",
+      isAdminSession: true,
+      persona: "provider",
+      funnelStage: "decision",
+      source: "kinflo-local-admin-fixture"
+    };
   }
 });
 

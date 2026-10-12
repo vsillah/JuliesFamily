@@ -126,6 +126,7 @@ npm run kinflo:validate-client-preview-review-packet
 npm run kinflo:validate-client-preview-review-contract
 npm run kinflo:validate-preview-review-shell-adapter
 npm run kinflo:validate-site-studio-launch-dossier-deep-links
+npm run kinflo:validate-browser-safe-auth-aliases
 npm run kinflo:validate-adapter-switch-runway
 npm run kinflo:validate-generated-api-review-board
 npm run kinflo:validate-adapter-switch-acceptance-matrix
