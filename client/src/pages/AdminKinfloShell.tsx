@@ -16,6 +16,7 @@ import {
   KeyRound,
   LayoutDashboard,
   ListChecks,
+  LockKeyhole,
   MailPlus,
   MailX,
   FileText,
@@ -92,6 +93,7 @@ import {
   type ShellLaunchReadinessSite,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
+import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -2113,6 +2115,99 @@ function ClientWebsiteConfigurationCommandSurface({
   );
 }
 
+function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) {
+  const statusTone = {
+    ready: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    active: "border-blue-200 bg-blue-50 text-blue-700",
+    pending: "border-slate-200 bg-slate-50 text-slate-600",
+    blocked: "border-amber-200 bg-amber-50 text-amber-700",
+  } as const;
+
+  return (
+    <section className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4" data-testid="section-kinflo-vanguard-fulfillment-workspace">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div className="min-w-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge className="bg-slate-950 hover:bg-slate-950">Vanguard associate workspace</Badge>
+            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Provider-light</Badge>
+          </div>
+          <h3 className="mt-3 text-lg font-semibold text-slate-950">Request-to-delivery control room</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            Associates can review the request package, missing inputs, readiness gate, assignment, progress, and delivery evidence without enabling a live provider or backend write.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link href={previewHref}><ExternalLink className="mr-2 h-4 w-4" /> Open Vanguard preview</Link>
+          </Button>
+          <Button disabled><LockKeyhole className="mr-2 h-4 w-4" /> Live fulfillment gated</Button>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          { label: "Order", value: vanguardWorkflow.sampleOrder.id },
+          { label: "Request", value: vanguardWorkflow.sampleOrder.requestType },
+          { label: "Associate", value: vanguardWorkflow.sampleOrder.assignedAssociate },
+          { label: "Progress", value: `${vanguardWorkflow.sampleOrder.progress}%` },
+        ].map((item) => (
+          <div key={item.label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+            <div className="mt-1 truncate text-sm font-semibold text-slate-950" title={item.value}>{item.value}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.34fr)]">
+        <div className="rounded-lg border border-slate-200 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div className="text-sm font-semibold text-slate-950">Fulfillment stages</div>
+            <Badge variant="outline">Evidence gated</Badge>
+          </div>
+          <div className="mt-3 grid gap-2 md:grid-cols-2">
+            {vanguardWorkflow.stages.map((stage, index) => (
+              <div key={stage.key} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="text-sm font-semibold text-slate-900">{index + 1}. {stage.label}</div>
+                  <Badge variant="outline" className={statusTone[stage.status]}>{stage.status}</Badge>
+                </div>
+                <div className="mt-1 text-xs text-slate-500">{stage.owner}</div>
+                <p className="mt-2 text-xs leading-5 text-slate-600">{stage.evidence}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+            <div className="text-sm font-semibold text-amber-950">Missing inputs</div>
+            <div className="mt-2 space-y-2">
+              {vanguardWorkflow.sampleOrder.missingInputs.map((item) => (
+                <div key={item} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
+                  <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {item}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+            <div className="text-sm font-semibold text-emerald-950">Delivery receipt evidence</div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {vanguardWorkflow.sampleOrder.deliveryEvidence.map((item) => (
+                <Badge key={item} variant="outline" className="border-emerald-200 bg-white text-emerald-700">{item}</Badge>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+        <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">{vanguardWorkflow.providerBoundary}</p>
+        <p className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs leading-5 text-violet-900"><span className="font-semibold">Configuration tooling gap:</span> {vanguardWorkflow.toolingGap}</p>
+      </div>
+    </section>
+  );
+}
+
 function ClientWebsiteConfigurationProfiles({
   profiles,
   selectedReviewPacket,
@@ -4129,6 +4224,7 @@ export default function AdminKinfloShell() {
       ?? snapshot.clientWebsiteStudio.sites[0],
     [clientWebsiteStudioSiteKey, snapshot.clientWebsiteStudio.sites],
   );
+  const isVanguardWebsite = selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY;
   const clientWebsiteStudioReadiness = [
     { label: "Mobile public preview", done: selectedClientWebsiteStudioSite?.mobileReadiness === "ready" },
     { label: "Visitor navigation path", done: selectedClientWebsiteStudioSite?.navReadiness === "ready" },
@@ -4223,7 +4319,7 @@ export default function AdminKinfloShell() {
   );
   const selectedClientWebsiteStarterContentPack = useMemo(
     () => snapshot.clientWebsiteStudio.starterContentPacks.find((pack) => pack.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.starterContentPacks[0],
+      ?? (selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY ? undefined : snapshot.clientWebsiteStudio.starterContentPacks[0]),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.starterContentPacks],
   );
   const clientWebsiteStudioPreviewRoute = selectedClientWebsiteStarterContentPack?.pages[0]?.route ?? "/";
@@ -4272,12 +4368,12 @@ export default function AdminKinfloShell() {
   );
   const selectedClientWebsiteLaunchDecisionPacket = useMemo(
     () => snapshot.clientWebsiteStudio.launchDecisionPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.launchDecisionPackets[0],
+      ?? (selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY ? undefined : snapshot.clientWebsiteStudio.launchDecisionPackets[0]),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchDecisionPackets],
   );
   const selectedClientWebsitePreviewReviewPacket = useMemo(
     () => snapshot.clientWebsiteStudio.previewReviewPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.previewReviewPackets[0],
+      ?? (selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY ? undefined : snapshot.clientWebsiteStudio.previewReviewPackets[0]),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.previewReviewPackets],
   );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
@@ -4307,7 +4403,7 @@ export default function AdminKinfloShell() {
     owner: snapshot.activeObjectSignal.owner,
   };
   const isClientWebsiteLaunchWorkbench =
-    clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch";
+    clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && !isVanguardWebsite;
   const shouldShowClientWebsiteStudioContext =
     clientWebsiteStudioLane === "workbench" && !isClientWebsiteLaunchWorkbench;
   const clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context ?? [];
@@ -10684,17 +10780,25 @@ export default function AdminKinfloShell() {
               </div>
 
               <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
-                <ClientWebsiteConfigurationCommandSurface
-                  site={selectedClientWebsiteStudioSite}
-                  profile={selectedClientWebsiteConfigurationProfile}
-                  launchBlueprint={selectedClientWebsiteLaunchBlueprint}
-                  permissionPreset={selectedClientWebsiteAdminPermissionPreset}
-                />
-                <ClientWebsiteLaunchComposer
-                  composer={snapshot.clientWebsiteStudio.launchComposer}
-                  selectedSiteKey={clientWebsiteStudioSiteKey}
-                  testIds={clientWebsiteLaunchComposerTestIds}
-                />
+                {isVanguardWebsite ? (
+                  <div className="xl:col-span-2">
+                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                  </div>
+                ) : (
+                  <>
+                    <ClientWebsiteConfigurationCommandSurface
+                      site={selectedClientWebsiteStudioSite}
+                      profile={selectedClientWebsiteConfigurationProfile}
+                      launchBlueprint={selectedClientWebsiteLaunchBlueprint}
+                      permissionPreset={selectedClientWebsiteAdminPermissionPreset}
+                    />
+                    <ClientWebsiteLaunchComposer
+                      composer={snapshot.clientWebsiteStudio.launchComposer}
+                      selectedSiteKey={clientWebsiteStudioSiteKey}
+                      testIds={clientWebsiteLaunchComposerTestIds}
+                    />
+                  </>
+                )}
               </div>
 
               <div
@@ -10729,7 +10833,9 @@ export default function AdminKinfloShell() {
                   className={`${clientWebsiteStudioLane === "configuration" ? "block" : "hidden"} mt-2 max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1`}
                   data-testid="section-kinflo-client-studio-lane-configuration"
                 >
-                  <ClientWebsiteConfigurationProfiles
+                  {isVanguardWebsite ? (
+                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                  ) : <ClientWebsiteConfigurationProfiles
                     profiles={snapshot.clientWebsiteStudio.configurationProfiles}
                     selectedReviewPacket={selectedClientWebsiteConfigurationReviewPacket}
                     selectedChangeSet={selectedClientWebsiteConfigurationChangeSet}
@@ -10755,14 +10861,16 @@ export default function AdminKinfloShell() {
                     saveDetail={clientConfigurationSaveDetail}
                     onSaveDetailChange={selectClientConfigurationSaveDetail}
                     testIds={clientWebsiteConfigurationProfileTestIds}
-                  />
+                  />}
                 </div>
 
                 <div
                   className={`${clientWebsiteStudioLane === "handoff" ? "block" : "hidden"} mt-2 max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1`}
                   data-testid="section-kinflo-client-studio-lane-handoff"
                 >
-                  <Tabs
+                  {isVanguardWebsite ? (
+                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                  ) : <Tabs
                     value={clientWebsiteHandoffWorkspace}
                     onValueChange={(value) => selectClientWebsiteHandoffWorkspace(value as ClientWebsiteHandoffWorkspace)}
                     className="min-w-0"
@@ -10806,7 +10914,7 @@ export default function AdminKinfloShell() {
                         testIds={clientAdminHandoffMatrixTestIds}
                       />
                     </TabsContent>
-                  </Tabs>
+                  </Tabs>}
                 </div>
 
                 <div
@@ -10821,7 +10929,7 @@ export default function AdminKinfloShell() {
                     className="min-w-0 rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3"
                     data-testid="section-kinflo-client-workbench-grid"
                   >
-                    <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
+                    <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className={isVanguardWebsite ? "hidden" : "min-w-0"} data-testid="tabs-kinflo-client-workbench-stage">
                       <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
                         <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
                         <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>

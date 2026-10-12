@@ -12,7 +12,7 @@ Phase 55 turns the public website design research into an inspectable KinFlo OS 
 
 - Admin route: `/admin/kinflo-os`.
 - Shell data: `clientWebsiteStudio`.
-- Client sites: 3.
+- Client sites: 4.
 - Design patterns: 4.
 - First surface: `Client Website Design Studio`.
 - Provider posture: local fixture review only.
@@ -24,6 +24,7 @@ Phase 55 turns the public website design research into an inspectable KinFlo OS 
 - https://www.stripedhorse.com/blog/school-website-design-ideas
 - https://www.weweb.io/blog/client-portals-buying-guide
 - Prior KinFlo OS design direction: `docs/phase54-kinflo-os-design-direction.md`.
+- Vanguard Enterprises public website: http://www.vanguardenterprises.com/ (public facts and service descriptions only).
 
 ## Design Rules Captured
 

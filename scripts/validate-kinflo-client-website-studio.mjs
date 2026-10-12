@@ -70,7 +70,7 @@ requireIncludes("docs/phase55-client-website-design-studio.md", [
   "npm run kinflo:validate-client-website-studio",
   "Client Website Design Studio",
   "clientWebsiteStudio",
-  "Client sites: 3",
+  "Client sites: 4",
   "Design patterns: 4",
   "Local state only: yes",
   "No generated API is imported",
@@ -152,7 +152,7 @@ for (const check of checks) {
 console.log("\nKinFlo client website studio validation");
 console.log("Admin route: /admin/kinflo-os");
 console.log("Design surface: Client Website Design Studio");
-console.log("Client sites: 3");
+console.log("Client sites: 4");
 console.log("Design patterns: 4");
 console.log("Research sources: 4");
 console.log("Local state only: yes");

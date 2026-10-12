@@ -39,7 +39,7 @@ function requireIncludes(path, patterns) {
 }
 
 function extractPortfolioRegistryBlock(contents) {
-  const match = contents.match(/portfolioRegistry:\s*\{([\s\S]*?)\n\s*\},\n\s*launchBlueprints:/);
+  const match = contents.match(/portfolioRegistry:\s*\{([\s\S]*?)\n\s*\},\n\s*launchComposer:/);
   if (!match) {
     fail("client website portfolio registry block exists", "Could not find clientWebsiteStudio.portfolioRegistry.");
     return "";
@@ -88,9 +88,9 @@ requireIncludes("docs/phase159-client-website-portfolio-registry.md", [
   "section-kinflo-client-website-portfolio-table",
   "section-kinflo-client-website-portfolio-blocked",
   "button-client-website-portfolio-gated",
-  "Total sites: 3",
+  "Total sites: 4",
   "Ready for review: 1",
-  "Blocked sites: 1",
+  "Blocked sites: 2",
   "Draft sites: 1",
   "platform.super_admin",
   "tenant.admin",
@@ -104,9 +104,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellClientWebsitePortfolioRegistry",
   "portfolioRegistry",
   "provider-light-client-website-portfolio-registry",
-  "totalSites: 3",
+  "totalSites: 4",
   "readyForReview: 1",
-  "blockedSites: 1",
+  "blockedSites: 2",
   "draftSites: 1",
   "canCreateTenant: false",
   "canCreateSite: false",
@@ -148,7 +148,7 @@ const dataContents = read("client/src/lib/kinfloShellData.ts");
 const pageContents = read("client/src/pages/AdminKinfloShell.tsx");
 const registryBlock = extractPortfolioRegistryBlock(dataContents);
 
-for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-microsite"]) {
+for (const siteKey of ["julies-family-public", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
   if (registryBlock.includes(`siteKey: "${siteKey}"`)) {
     pass(`portfolio registry includes ${siteKey}`);
   } else {
@@ -165,14 +165,14 @@ for (const scope of ["scope: \"platform\"", "scope: \"tenant\"", "scope: \"site\
 }
 
 for (const [label, count] of [
-  ["canCreateTenant false row count is 3", (registryBlock.match(/canCreateTenant: false/g) ?? []).length],
-  ["canCreateSite false row count is 3", (registryBlock.match(/canCreateSite: false/g) ?? []).length],
-  ["canInviteAdmin false row count is 3", (registryBlock.match(/canInviteAdmin: false/g) ?? []).length],
-  ["canPublish false row count is 3", (registryBlock.match(/canPublish: false/g) ?? []).length],
-  ["providerWrites false row count is 3", (registryBlock.match(/providerWrites: false/g) ?? []).length],
-  ["liveConvexExecution false row count is 3", (registryBlock.match(/liveConvexExecution: false/g) ?? []).length],
+  ["canCreateTenant false row count is 4", (registryBlock.match(/canCreateTenant: false/g) ?? []).length],
+  ["canCreateSite false row count is 4", (registryBlock.match(/canCreateSite: false/g) ?? []).length],
+  ["canInviteAdmin false row count is 4", (registryBlock.match(/canInviteAdmin: false/g) ?? []).length],
+  ["canPublish false row count is 4", (registryBlock.match(/canPublish: false/g) ?? []).length],
+  ["providerWrites false row count is 4", (registryBlock.match(/providerWrites: false/g) ?? []).length],
+  ["liveConvexExecution false row count is 4", (registryBlock.match(/liveConvexExecution: false/g) ?? []).length],
 ]) {
-  if (count === 3) {
+  if (count === 4) {
     pass(label);
   } else {
     fail(label, `Received ${count}.`);
@@ -229,7 +229,7 @@ for (const check of checks) {
 
 console.log("\nKinFlo client website portfolio registry validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio");
-console.log("Registry sites: 3");
+console.log("Registry sites: 4");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");

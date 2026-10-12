@@ -21,13 +21,14 @@ npm run kinflo:validate-client-website-portfolio-registry
 
 ## Registry Rows
 
-- Total sites: 3
+- Total sites: 4
 - Ready for review: 1
-- Blocked sites: 1
+- Blocked sites: 2
 - Draft sites: 1
 - Site keys:
   - `julies-family-public`
   - `advisor-client-site`
+  - `vanguard-enterprises`
   - `campaign-microsite`
 
 The registry covers platform, tenant, and site-scoped permission models:
