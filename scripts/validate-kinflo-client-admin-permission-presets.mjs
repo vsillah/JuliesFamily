@@ -73,7 +73,7 @@ requireIncludes("docs/phase58-client-admin-permission-presets.md", [
   "npm run kinflo:validate-client-admin-permission-presets",
   "siteFactory.listClientWebsiteAdminPermissionPresets",
   "clientWebsiteStudio.adminPermissionPresets",
-  "Permission presets: 3",
+  "Permission presets: 4",
   "Admin Permission Preset",
   "Admin handoff action: gated",
   "Local state only: yes",
@@ -141,7 +141,7 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
 }
 
 const dataContents = read("client/src/lib/kinfloShellData.ts");
-for (const siteKey of ["julies-family-public", "advisor-client-site", "campaign-microsite"]) {
+for (const siteKey of ["julies-family-public", "advisor-client-site", "vanguard-enterprises", "campaign-microsite"]) {
   if (dataContents.includes(`siteKey: "${siteKey}"`)) {
     pass(`client admin permission preset references ${siteKey}`);
   } else {
@@ -163,7 +163,7 @@ for (const check of checks) {
 console.log("\nKinFlo client admin permission preset validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio");
 console.log("Convex function: siteFactory.listClientWebsiteAdminPermissionPresets");
-console.log("Permission presets: 3");
+console.log("Permission presets: 4");
 console.log("Admin handoff action: gated");
 console.log("Local state only: yes");
 console.log("External writes: 0");

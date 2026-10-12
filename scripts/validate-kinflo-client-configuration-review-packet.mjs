@@ -119,6 +119,7 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "configurationReviewPackets: [",
   "julies-family-public",
   "advisor-client-site",
+  "vanguard-enterprises",
   "campaign-microsite",
   "reviewPosture: \"provider-light-configuration-review\"",
   "saveBlockers",
@@ -160,10 +161,10 @@ requireIncludes("package.json", [
 
 const shellDataContents = read("client/src/lib/kinfloShellData.ts");
 const packetCount = (shellDataContents.match(/reviewPosture: "provider-light-configuration-review",/g) ?? []).length;
-if (packetCount === 3) {
-  pass("shell data includes three configuration review packets");
+if (packetCount === 4) {
+  pass("shell data includes four configuration review packets");
 } else {
-  fail("shell data includes three configuration review packets", `Received ${packetCount}.`);
+  fail("shell data includes four configuration review packets", `Received ${packetCount}.`);
 }
 
 let generatedApiImportFound = false;
@@ -218,7 +219,7 @@ for (const check of checks) {
 
 console.log("\nKinFlo client configuration review packet validation");
 console.log("Convex function: siteFactory.listClientWebsiteConfigurationReviewPackets");
-console.log("Review packets: 3");
+console.log("Review packets: 4");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Convex codegen run: no");

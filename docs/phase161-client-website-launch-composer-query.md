@@ -20,11 +20,11 @@ npm run kinflo:validate-client-website-launch-composer-query
 
 The query returns the provider-light launch composer used by Site Studio:
 
-- Total compositions: 3
+- Total compositions: 4
 - Review ready: 1
-- Blocked compositions: 2
-- Total steps: 12
-- Sites: `julies-family-public`, `advisor-client-site`, `campaign-microsite`
+- Blocked compositions: 3
+- Total steps: 18
+- Sites: `julies-family-public`, `advisor-client-site`, `vanguard-enterprises`, `campaign-microsite`
 - Scopes: `platform`, `tenant`, `site`
 
 Each composition keeps these live switches off:

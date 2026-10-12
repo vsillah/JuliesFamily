@@ -13,8 +13,8 @@ Phase 60 turns the Client Website Studio into a concrete provisioning queue with
 - Admin route: `/admin/kinflo-os?tab=site-studio`.
 - Convex query contract: `siteFactory.listClientWebsiteProvisioningOrders`.
 - Shell data mirror: `clientWebsiteStudio.provisioningOrders`.
-- Provisioning orders: 3.
-- Sites covered: Julie Family public site, Advisor Client Site, Campaign Microsite.
+- Provisioning orders: 4.
+- Sites covered: Julie Family public site, Advisor Client Site, Vanguard Enterprises, Campaign Microsite.
 - Live provisioning action: gated.
 
 Each order assembles:
