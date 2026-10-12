@@ -184,4 +184,3 @@ if (failed.length > 0) {
 }
 
 console.log(`\nVanguard source-site parity validation passed: ${checks.length} checks.`);
-

@@ -100,4 +100,3 @@ try {
 } finally {
   chrome.kill("SIGTERM");
 }
-

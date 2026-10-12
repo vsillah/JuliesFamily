@@ -77,4 +77,3 @@ Use `npm run kinflo:capture-vanguard-source-parity-qa` while the fixture server 
 - Provider API called: no
 - Production admin or associate action: no
 - Production activation: no
-

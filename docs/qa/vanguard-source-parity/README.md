@@ -37,4 +37,3 @@ MP4 SHA-256: `26ea1fffe29ad55629aaf36967c924170b514fd928b1fb46a0a4aa8cee9a32f0`
 ## Privacy and execution boundary
 
 The artifacts contain public Vanguard source facts and local fixture content only. No private files, application data, customer account data, credentials, hosted Convex calls, provider writes, email sends, tenant creation, production admin actions, or live submissions were used.
-
