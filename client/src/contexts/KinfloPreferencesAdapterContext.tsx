@@ -97,6 +97,16 @@ function normalizePreferences(result: PreferenceQueryResult): PreferenceValues {
   };
 }
 
+function preferencesMatch(left: PreferenceValues, right: PreferenceValues) {
+  return left.defaultLandingPage === right.defaultLandingPage
+    && left.theme === right.theme
+    && left.dataDensity === right.dataDensity
+    && left.itemsPerPage === right.itemsPerPage
+    && left.defaultContentFilter === right.defaultContentFilter
+    && left.notificationChannels.length === right.notificationChannels.length
+    && left.notificationChannels.every((channel, index) => channel === right.notificationChannels[index]);
+}
+
 export function DisabledKinfloPreferencesAdapterProvider({ children }: { children: ReactNode }) {
   return (
     <KinfloPreferencesAdapterContext.Provider value={blockedValue}>
@@ -155,8 +165,7 @@ export function LiveKinfloPreferencesAdapterProvider({ children }: { children: R
         notificationPreferences: { notificationChannels: input.notificationChannels },
       });
       const verified = normalizePreferences(await convex.query(getMyPreferencesQuery, {}));
-      const exactMatch = JSON.stringify(verified) === JSON.stringify(input);
-      if (!exactMatch) {
+      if (!preferencesMatch(verified, input)) {
         throw new Error("Saved preferences did not match the verified read-back.");
       }
       setPreferences(verified);
