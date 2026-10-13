@@ -12,6 +12,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUserRole } from "@/hooks/useUserRole";
 import { createKinfloConvexReactClient } from "@/lib/kinfloConvexRuntime";
 import { getKinfloIdentityRuntime } from "@/lib/kinfloIdentityRuntime";
+import {
+  FixtureKinfloShellSnapshotProvider,
+  ReadOnlyLiveKinfloShellSnapshotProvider,
+} from "@/contexts/KinfloShellSnapshotContext";
 
 type ConvexViewer = {
   _id: string;
@@ -75,7 +79,11 @@ function LocalFixtureIdentityGate({ children }: { children: ReactNode }) {
     source: "local_fixture",
   };
 
-  return <KinfloAdminIdentityProvider value={value}>{children}</KinfloAdminIdentityProvider>;
+  return (
+    <KinfloAdminIdentityProvider value={value}>
+      <FixtureKinfloShellSnapshotProvider>{children}</FixtureKinfloShellSnapshotProvider>
+    </KinfloAdminIdentityProvider>
+  );
 }
 
 function ConvexIdentityGate({ children }: { children: ReactNode }) {
@@ -178,7 +186,7 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
     <KinfloAdminIdentityProvider
       value={{ isLoading: false, isAdmin: true, source: "convex_auth" }}
     >
-      {children}
+      <ReadOnlyLiveKinfloShellSnapshotProvider>{children}</ReadOnlyLiveKinfloShellSnapshotProvider>
     </KinfloAdminIdentityProvider>
   );
 }

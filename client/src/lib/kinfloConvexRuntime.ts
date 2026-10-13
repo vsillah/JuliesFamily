@@ -95,6 +95,8 @@ export type KinfloConvexFunctionName =
 export type KinfloConvexRuntimeMode =
   | "fixture_only"
   | "env_configured_codegen_pending"
+  | "generated_api_ready_smoke_pending"
+  | "read_only_live_ready"
   | "live_ready";
 
 export type KinfloConvexRuntimeSnapshot = {
@@ -103,12 +105,29 @@ export type KinfloConvexRuntimeSnapshot = {
   publicUrl?: string;
   urlConfigured: boolean;
   generatedApiAvailable: boolean;
+  readOnlyAdapterSelected: boolean;
+  readOnlySmokeVerified: boolean;
+  canUseReadOnlyLiveData: boolean;
   canUseLiveData: boolean;
   activationGate: string;
   functionNames: KinfloConvexFunctionName[];
 };
 
+// The full shell adapter remains blocked. Only the separately gated read-only
+// adapter can be selected by this cutover.
 const generatedApiAvailable = false;
+
+function readBooleanEnv(value: unknown) {
+  return typeof value === "string" && value.trim().toLowerCase() === "true";
+}
+
+function readReadOnlyRuntimeGate() {
+  return {
+    readOnlyGeneratedApiAvailable: readBooleanEnv(import.meta.env.VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE),
+    readOnlyAdapterSelected: import.meta.env.VITE_KINFLO_READ_ONLY_ADAPTER_MODE === "live_verified",
+    readOnlySmokeVerified: readBooleanEnv(import.meta.env.VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED),
+  };
+}
 
 function readPublicConvexUrl() {
   const value = import.meta.env.VITE_CONVEX_URL;
@@ -118,6 +137,17 @@ function readPublicConvexUrl() {
 export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
   const publicUrl = readPublicConvexUrl();
   const urlConfigured = Boolean(publicUrl);
+  const {
+    readOnlyGeneratedApiAvailable,
+    readOnlyAdapterSelected,
+    readOnlySmokeVerified,
+  } = readReadOnlyRuntimeGate();
+  const canUseReadOnlyLiveData = Boolean(
+    publicUrl
+      && readOnlyGeneratedApiAvailable
+      && readOnlyAdapterSelected
+      && readOnlySmokeVerified,
+  );
 
   if (!urlConfigured) {
     return {
@@ -125,33 +155,74 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       label: "Fixture only",
       urlConfigured,
       generatedApiAvailable,
+      readOnlyAdapterSelected,
+      readOnlySmokeVerified,
+      canUseReadOnlyLiveData: false,
       canUseLiveData: false,
-      activationGate: "Set VITE_CONVEX_URL, run approved Convex codegen, then pass activation smoke before switching adapters.",
+      activationGate: "Set VITE_CONVEX_URL through the approved environment path before reviewing the read-only adapter gate.",
       functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
     };
   }
 
-  if (!generatedApiAvailable) {
+  if (!readOnlyGeneratedApiAvailable) {
     return {
       mode: "env_configured_codegen_pending",
       label: "Convex env ready, codegen pending",
       publicUrl,
       urlConfigured,
       generatedApiAvailable,
+      readOnlyAdapterSelected,
+      readOnlySmokeVerified,
+      canUseReadOnlyLiveData: false,
       canUseLiveData: false,
-      activationGate: "Generated Convex API bindings and live activation smoke are still required before shell data can move off fixtures.",
+      activationGate: "Set VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true only after the ignored generated bindings and read-only function contract are reviewed.",
+      functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
+    };
+  }
+
+  if (!readOnlySmokeVerified || !readOnlyAdapterSelected) {
+    return {
+      mode: "generated_api_ready_smoke_pending",
+      label: "Read-only bindings ready, smoke pending",
+      publicUrl,
+      urlConfigured,
+      generatedApiAvailable: readOnlyGeneratedApiAvailable,
+      readOnlyAdapterSelected,
+      readOnlySmokeVerified,
+      canUseReadOnlyLiveData: false,
+      canUseLiveData: false,
+      activationGate: "Keep fixtures selected until the read-only hosted smoke is verified and VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified is explicitly set.",
+      functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
+    };
+  }
+
+  if (canUseReadOnlyLiveData) {
+    return {
+      mode: "read_only_live_ready",
+      label: "Convex read-only live",
+      publicUrl,
+      urlConfigured,
+      generatedApiAvailable: readOnlyGeneratedApiAvailable,
+      readOnlyAdapterSelected,
+      readOnlySmokeVerified,
+      canUseReadOnlyLiveData,
+      canUseLiveData: false,
+      activationGate: "The verified read-only core batch is live. Mutation and provider-write surfaces remain fixture-backed and blocked.",
       functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
     };
   }
 
   return {
     mode: "live_ready",
-    label: "Convex live ready",
+    label: "Convex full adapter blocked",
     publicUrl,
     urlConfigured,
     generatedApiAvailable,
-    canUseLiveData: true,
-    activationGate: "Live Convex runtime is available. Keep tenant/site permission guards active for every adapter call.",
+    readOnlyAdapterSelected,
+    readOnlySmokeVerified,
+    canUseReadOnlyLiveData: false,
+    canUseLiveData: false,
+    activationGate: "The full live adapter remains blocked; no mutation or provider-write cutover is authorized.",
     functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
   };
 }

@@ -56,7 +56,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  getKinfloShellSnapshot,
   type ExperienceIconKey,
   type ShellLiveAdapterStatus,
   type KinfloShellStatus,
@@ -94,6 +93,7 @@ import {
   type ShellLaunchReadinessSite,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
+import { useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import {
   VANGUARD_ORDER_PORTAL_PATH,
@@ -616,6 +616,9 @@ function statusBadge(status: KinfloShellStatus) {
 }
 
 function liveAdapterStatusBadge(status: ShellLiveAdapterStatus) {
+  if (status === "live_read_only") {
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Live read-only</Badge>;
+  }
   if (status === "live_smoke_pending") {
     return <Badge className="bg-amber-600 hover:bg-amber-600">Smoke pending</Badge>;
   }
@@ -4338,7 +4341,7 @@ function MobileInspectionMode({
 export default function AdminKinfloShell() {
   const { isLoading, isAdmin } = useKinfloAdminIdentity();
   const [location, navigate] = useLocation();
-  const snapshot = getKinfloShellSnapshot();
+  const snapshot = useKinfloShellSnapshot();
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
