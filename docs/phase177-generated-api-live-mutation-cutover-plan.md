@@ -21,7 +21,7 @@ Production is currently on the Phase 176 read-only Convex adapter. This plan def
 | `kinflo:validate-generated-api`, `kinflo:validate-live-smoke`, and `kinflo:dry-run-live-smoke` | Validate contracts and print the historical sequence only; the dry run never authorizes execution. |
 | Phase 91 sequencer, Phase 92 evidence ledger, Phase 93 cutover checklist, and Phase 173 rollback matrix | Reuse batch ids, evidence slots, owner labels, and fixture fallback language. |
 
-## Small implementation gap before a smoke can be requested
+## Source gap identified before this implementation lane
 
 The first product-mutation candidate remains `preferences.upsertMyPreferences`, because it is current-user scoped and has no provider side effect. It is not ready for a production smoke yet:
 
@@ -42,6 +42,19 @@ The next implementation lane should add a dedicated server-side preference smoke
 - expose no persistent product save control and leave `canUseLiveData` false.
 
 Until that source and its validators are merged and deployed with the server gate off, a mutation-smoke request is premature.
+
+## Batches 1-2 source implementation status
+
+The source-only implementation lane now provides the reviewable capability without opening either gate:
+
+- `client/src/lib/kinfloGeneratedApiSeam.ts` resolves reviewed generated handles without importing ignored codegen output. General mutation handles fail closed unless an exact path is allowlisted, and the preference-smoke handle has a separate explicit client gate.
+- `client/src/lib/kinfloConvexRuntime.ts` records `preferenceMutationSmokeClientAvailable: false` and `canRequestPreferenceMutationSmoke: false`; no component or provider mounts the smoke mutation.
+- `convex/preferences.ts` exports `runPreferenceSmoke` with fixed `dataDensity` field/value validators and three server bindings: enabled flag, approval id, and exact expiry.
+- `convex/preferenceSmokeCore.ts` enforces platform-super-admin authorization, expiry, approval matching, SHA-256 nonce replay protection, exact restore/delete cleanup, read-back, and redacted receipt creation.
+- `preferenceSmokeReceipts` stores the sanitized receipt and indexed nonce hash. It stores no raw nonce, sentinel value, secret, or raw preference payload.
+- `scripts/test-kinflo-preference-smoke.ts` runs the eight focused behavioral cases locally, while `scripts/validate-kinflo-preference-smoke-source.mjs` proves the source boundary remains fail closed.
+
+This closes the source gap only. Batch 3 deployment, server environment configuration, and any Batch 4-5 smoke request or execution remain separate captain/user gates.
 
 ## Ordered cutover batches
 
@@ -124,6 +137,8 @@ npm run convex:check
 npm run kinflo:validate-generated-api
 npm run kinflo:validate-live-adapter
 npm run kinflo:validate-read-only-live-adapter
+npm run kinflo:test-preference-smoke
+npm run kinflo:validate-preference-smoke-source
 npm run kinflo:validate-live-smoke
 npm run kinflo:dry-run-live-smoke
 npm run kinflo:validate-adapter-switch-cutover-checklist
@@ -136,4 +151,4 @@ These commands are local contract checks. None opens a smoke window, imports pro
 
 ## Captain decision needed next
 
-Approve or reject a dedicated source-only implementation lane for Batches 1 and 2. Approval should authorize the generated-binding seam, smoke-only preference transaction, replay/expiry guards, redacted receipt, and automated rollback tests; it must keep deployment, environment changes, production mutation execution, provider writes, full-adapter activation, merge, and release outside that lane.
+Review the Batches 1-2 source implementation and either approve it for merge or return it for revision. Merge approval still must keep deployment, environment changes, production mutation execution, provider writes, full-adapter activation, and release outside this lane; Batch 3 requires a separate captain decision.
