@@ -77,6 +77,75 @@
       "access_expired"
     ]
   },
+  "phase4Operations": {
+    "status": "provider_light_fixture",
+    "adminOnly": true,
+    "humanQaRequiredForThisSlice": false,
+    "queueStates": [
+      "unassigned",
+      "intake_review",
+      "waiting_on_client",
+      "quote_ready",
+      "accepted_unplanned",
+      "in_progress",
+      "blocked",
+      "quality_review",
+      "ready_for_delivery",
+      "overdue"
+    ],
+    "assignmentStates": ["unassigned", "proposed", "assigned", "reassignment_review"],
+    "capacityBands": ["available", "balanced", "near_limit", "at_limit"],
+    "riskStates": ["on_track", "watch", "at_risk", "breached"],
+    "routingInputs": [
+      "discipline",
+      "required_capability",
+      "location",
+      "security_handling",
+      "due_window",
+      "current_work_in_progress",
+      "continuity_owner"
+    ],
+    "assignmentRules": {
+      "humanLeadConfirms": true,
+      "reasonRequired": true,
+      "immutableAssignmentEventRequired": true,
+      "boundedContributors": true,
+      "automaticReassignmentAllowed": false
+    },
+    "capacityRules": {
+      "declaredAvailability": true,
+      "workInProgressLimits": true,
+      "transparentCandidateInputs": true,
+      "protectedAttributesAllowed": false,
+      "hiddenEmployeeScoreAllowed": false
+    },
+    "slaAndRiskInputs": [
+      "intake_response_due",
+      "quote_target",
+      "committed_delivery_date",
+      "blocker_age",
+      "dependency_risk",
+      "escalation_owner"
+    ],
+    "escalationTriggers": [
+      "stale_blocker",
+      "missed_response",
+      "at_risk_due_date",
+      "missing_owner",
+      "incomplete_delivery_evidence"
+    ],
+    "escalationCreatesReviewItemOnly": true,
+    "transitionRules": [
+      { "from": "unassigned", "to": "intake_review", "requires": ["primary_owner", "assignment_reason", "capacity_check", "assignment_event"] },
+      { "from": "intake_review", "to": "waiting_on_client", "requires": ["client_safe_question", "response_due_date", "status_event"] },
+      { "from": "intake_review", "to": "quote_ready", "requires": ["scope_summary", "acceptance_criteria", "risk_review", "status_event"] },
+      { "from": "accepted_unplanned", "to": "in_progress", "requires": ["work_plan", "committed_due_date", "primary_owner", "status_event"] },
+      { "from": "in_progress", "to": "blocked", "requires": ["blocker_reason", "blocker_owner", "next_review_date", "status_event"] },
+      { "from": "blocked", "to": "prior_state", "requires": ["resolution_note", "evidence_reference", "resume_audit_event"] }
+    ],
+    "runtimeActionsEnabled": false,
+    "clientStatusChanged": false
+  },
   "tables": [
     "buildOrders",
     "orderDraftSections",
