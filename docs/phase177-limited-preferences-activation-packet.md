@@ -33,15 +33,38 @@ The limited preferences adapter may run only when its three frontend build-time 
 
 Missing or misspelled values fail closed.
 
-Gate A also needs the base Convex/Auth0 browser path in the preview deployment. A fresh preview branch does not currently have these values globally; prior `VITE_CONVEX_URL`, identity, and read-only adapter flags are branch-scoped to older preview branches. The Gate A executor must either use an existing preview branch with the approved base flags already present, or create a new branch-scoped preview deployment with:
+Gate A also needs the base Convex/Auth0 browser path in the preview deployment. A fresh preview branch does not currently have these values globally; prior `VITE_CONVEX_URL`, identity, and read-only adapter flags are branch-scoped to older preview branches.
+
+The retry model is now:
+
+1. Preferred: set the five base browser-public KinFlo values in Vercel Preview without a branch override, then deploy Gate A previews without interactive 1Password access.
+2. Acceptable temporary path: set the five base browser-public values on the exact Gate A preview branch and report the branch binding.
+3. Recovery path only: use 1Password or a scoped 1Password service account to populate Vercel, not as a routine per-smoke terminal dependency.
+
+The base values are:
 
 - `VITE_KINFLO_IDENTITY_MODE=convex_auth`
-- `VITE_CONVEX_URL=<approved KinFlo Convex URL from the 1Password-backed env contract or existing approved Vercel env source>`
+- `VITE_CONVEX_URL=<approved KinFlo Convex URL from Vercel Preview config or a one-time approved secret source>`
 - `VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true`
 - `VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED=true`
 - `VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified`
 
-The `VITE_CONVEX_URL` value must not be printed in command output or written to `.env.local`.
+The `VITE_CONVEX_URL` value is browser-public but must still not be printed in command output, copied into docs, or written to `.env.local`.
+
+## Gate A stop-condition record
+
+Gate A stopped safely on October 13, 2026 before any authenticated preference read or write:
+
+- Approved source commit: `ca5fe3c983bd33de54f26dc72253ad517b6bc464`
+- Production deployment before and after: `dpl_6aEe4VE1Xp4Gja5bJGze3NqpqQW2`
+- Preview deployment: `dpl_4stjDJ7PwJf9gXpyxqZkMfqBSxAL`
+- Stop reason: the built preview did not contain the base Convex/Auth0 browser flags and rendered `KinFlo identity unavailable`.
+- `preferences.getMyPreferences`: not run
+- `preferences.upsertMyPreferences`: not run
+- Provider writes: `0`
+- Production env changes: `0`
+- Production redeploys: `0`
+- `.env.local`: absent
 
 ## Required smoke order
 
@@ -54,7 +77,7 @@ Required evidence:
 - preview deployment id and URL,
 - exact source commit,
 - preview-only flag names and non-secret values,
-- secret-backed or browser-public base Convex URL present without printing the value,
+- browser-public base Convex/Auth0 config present in the built preview without printing values,
 - authenticated admin route load,
 - `preferences.getMyPreferences` read succeeds for the signed-in actor,
 - save button enables only after a local edit,
@@ -118,7 +141,8 @@ Bindings:
 - Runtime source commit must include PR #29 or later; captain must refresh and report the exact origin/main commit before deployment
 - Production deployment must be refreshed immediately before Gate A and must remain unchanged during Gate A
 - Preview only: no production env changes and no production redeploy
-- Base preview flags: VITE_KINFLO_IDENTITY_MODE=convex_auth, VITE_CONVEX_URL present from the approved env contract, VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true, VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED=true, VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified
+- Base preview flags: VITE_KINFLO_IDENTITY_MODE=convex_auth, VITE_CONVEX_URL present from Vercel Preview config or a one-time approved secret source, VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true, VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED=true, VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified
+- Base preview config source: Vercel Preview environment preferred; 1Password is only a one-time setup or recovery source, not a routine per-smoke terminal dependency
 - Preferences preview flags: VITE_KINFLO_PREFERENCES_GENERATED_API_AVAILABLE=true, VITE_KINFLO_PREFERENCES_SMOKE_VERIFIED=true, VITE_KINFLO_PREFERENCES_ADAPTER_MODE=live_verified
 - Route: /admin/kinflo-os?tab=experience
 - Actor: my currently signed-in KinFlo/Auth0 admin identity
