@@ -87,10 +87,33 @@ if (adminShell.includes('from "@/hooks/useAuth"') || adminShell.includes('from "
 
 requireIncludes("client/src/App.tsx", [
   'import KinfloAdminRoute from "@/components/KinfloAdminRoute"',
+  "function LegacyApplication()",
+  "function RoutedApplication()",
   "function LegacyGlobalExperience()",
   'location === "/admin/kinflo-os"',
+  "return <Router />;",
+  "return <LegacyApplication />;",
+  "<PersonaProvider>",
   "<KinfloAdminRoute>",
   "<AdminKinfloShell />",
+]);
+
+const appSource = read("client/src/App.tsx");
+const appFunctionStart = appSource.indexOf("function App()");
+const appFunction = appSource.slice(appFunctionStart);
+if (appFunction.includes("<PersonaProvider>")) {
+  fail("App root does not mount PersonaProvider globally", "PersonaProvider remains above RoutedApplication.");
+} else {
+  pass("App root does not mount PersonaProvider globally");
+}
+
+requireIncludes("scripts/serve-kinflo-identity-cutover-smoke.mjs", [
+  'process.env.VITE_KINFLO_IDENTITY_MODE = "disabled"',
+  'delete process.env.VITE_CONVEX_URL',
+  'path === "/api/auth/user"',
+  "legacyAuthUserRequests += 1",
+  'path === "/__kinflo-identity-smoke/requests"',
+  "Expected after route load: legacyAuthUserRequests = 0",
 ]);
 
 requireIncludes("scripts/serve-kinflo-local-admin-smoke.mjs", [
@@ -114,6 +137,7 @@ requireIncludes(".env.example", [
 
 requireIncludes("package.json", [
   '"kinflo:validate-convex-identity-cutover"',
+  '"kinflo:serve-convex-identity-cutover-smoke"',
 ]);
 
 for (const path of ["server/auth0.ts", "client/src/hooks/useAuth.ts", "client/src/main.tsx"]) {

@@ -42,6 +42,7 @@
     "kinflo:validate-vanguard-admin-workflow-records": "node scripts/validate-kinflo-vanguard-admin-workflow-records.mjs",
     "kinflo:validate-browser-safe-auth-aliases": "node scripts/validate-kinflo-browser-safe-auth-aliases.mjs",
     "kinflo:validate-convex-identity-cutover": "node scripts/validate-kinflo-convex-identity-cutover.mjs",
+    "kinflo:serve-convex-identity-cutover-smoke": "node scripts/serve-kinflo-identity-cutover-smoke.mjs",
     "kinflo:capture-vanguard-source-parity-qa": "node scripts/capture-vanguard-source-parity-qa.mjs",
     "kinflo:validate-client-website-blueprints": "node scripts/validate-kinflo-client-website-blueprints.mjs",
     "kinflo:validate-convex-launch-blueprint-query": "node scripts/validate-kinflo-convex-launch-blueprint-query.mjs",

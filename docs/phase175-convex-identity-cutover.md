@@ -4,6 +4,7 @@ Command:
 
 ```bash
 npm run kinflo:validate-convex-identity-cutover
+npm run kinflo:serve-convex-identity-cutover-smoke
 ```
 
 ## Decision
@@ -22,7 +23,15 @@ The `/admin/kinflo-os` route now chooses one of three explicit states:
 
 The default is `disabled`. A production build cannot enable `local_fixture`.
 
-The global Julie persona modal and chatbot are not mounted on the KinFlo admin route. This prevents those legacy consumers from issuing `/api/auth/user` requests above the isolated KinFlo boundary.
+The entire Julie `PersonaProvider`, persona modal, and chatbot tree is not mounted on the KinFlo admin route. This prevents the provider itself and its children from issuing `/api/auth/user` requests above the isolated KinFlo boundary.
+
+The focused smoke server forces the route into fail-closed mode and counts any request that reaches `/api/auth/user`. After loading `http://127.0.0.1:5178/admin/kinflo-os`, `http://127.0.0.1:5178/__kinflo-identity-smoke/requests` must return:
+
+```json
+{"legacyAuthUserRequests":0}
+```
+
+Any nonzero count fails the isolation gate.
 
 ## Authorization Boundary
 

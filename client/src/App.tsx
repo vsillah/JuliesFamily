@@ -26,17 +26,30 @@ function LoginUnconfiguredNotice() {
 }
 
 function LegacyGlobalExperience() {
-  const [location] = useLocation();
-  if (location === "/admin/kinflo-os") {
-    return null;
-  }
-
   return (
     <>
       <PersonaSelectionModal />
       <ChatbotWidget />
     </>
   );
+}
+
+function LegacyApplication() {
+  return (
+    <PersonaProvider>
+      <LegacyGlobalExperience />
+      <Router />
+    </PersonaProvider>
+  );
+}
+
+function RoutedApplication() {
+  const [location] = useLocation();
+  if (location === "/admin/kinflo-os") {
+    return <Router />;
+  }
+
+  return <LegacyApplication />;
 }
 import Home from "@/pages/Home";
 import HowItWorks from "@/pages/HowItWorks";
@@ -163,12 +176,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <PersonaProvider>
-          <Toaster />
-          <LoginUnconfiguredNotice />
-          <LegacyGlobalExperience />
-          <Router />
-        </PersonaProvider>
+        <Toaster />
+        <LoginUnconfiguredNotice />
+        <RoutedApplication />
       </TooltipProvider>
     </QueryClientProvider>
   );
