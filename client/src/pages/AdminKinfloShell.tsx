@@ -2134,27 +2134,27 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <Badge className="bg-slate-950 hover:bg-slate-950">Vanguard associate workspace</Badge>
-            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Provider-light</Badge>
+            <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Order operations preview</Badge>
           </div>
           <h3 className="mt-3 text-lg font-semibold text-slate-950">ReversR intake to Vanguard fulfillment</h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-            The public site prepares a ReversR Rebuild request package. This workspace shows the associate-side continuation: source review, quote and scope, assignment, progress, quality evidence, and delivery receipt.
+            The public site prepares a ReversR Rebuild request package. This workspace shows the associate-side continuation: materials review, quote and scope, assignment, progress, quality evidence, and delivery receipt.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
             <Link href={`${previewHref}#build-request`}><ExternalLink className="mr-2 h-4 w-4" /> Open embedded intake</Link>
           </Button>
-          <Button disabled><LockKeyhole className="mr-2 h-4 w-4" /> Live fulfillment gated</Button>
+          <Button disabled><LockKeyhole className="mr-2 h-4 w-4" /> Order actions unavailable</Button>
         </div>
       </div>
 
       <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-vanguard-reversr-handoff">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-amber-950">Public intake handoff</div>
+            <div className="text-sm font-semibold text-amber-950">Build request overview</div>
             <p className="mt-1 max-w-3xl text-xs leading-5 text-amber-900">
-              The embedded app captures source categories, the build goal, one starting discipline, constraints, missing inputs, and a local receipt. No private file or contact data is transmitted.
+              The build request records available materials, the desired result, a starting discipline, constraints, and missing inputs. Private files and contact details are not collected here.
             </p>
           </div>
           <Badge variant="outline" className="w-fit border-amber-300 bg-white text-amber-800">VE-RRB-PREVIEW</Badge>
@@ -2174,11 +2174,11 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <div className="text-sm font-semibold text-violet-950">Authenticated order portal foundation</div>
-              <Badge variant="outline" className="border-violet-300 bg-white text-violet-800">Convex-first · fail closed</Badge>
+              <div className="text-sm font-semibold text-violet-950">Client order portal</div>
+              <Badge variant="outline" className="border-violet-300 bg-white text-violet-800">Preview</Badge>
             </div>
             <p className="mt-1 max-w-3xl text-xs leading-5 text-violet-900">
-              The public receipt now has a secure portal path and a typed promotion contract. Identity, generated bindings, live draft creation, private upload, and provider writes remain gated; the visible order is synthetic tracking evidence only.
+              Clients can review a completed request and see how order tracking will work. Request saving, client sign-in, and private uploads are not available in this release.
             </p>
           </div>
           <Button asChild variant="outline" className="w-fit border-violet-300 bg-white text-violet-900 hover:bg-violet-100 hover:text-violet-950">
@@ -2187,10 +2187,10 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Portal state", value: "Local fixture" },
-            { label: "System of record", value: vanguardOrderPortalContract.systemOfRecord },
-            { label: "Tracking evidence", value: vanguardPortalOrderFixture.orderNumber },
-            { label: "External writes", value: "0" },
+            { label: "Portal access", value: "Preview" },
+            { label: "Request saving", value: "Not available" },
+            { label: "Order preview", value: vanguardPortalOrderFixture.orderNumber },
+            { label: "Client orders", value: "None created" },
           ].map((item) => (
             <div key={item.label} className="rounded-md border border-violet-200 bg-white px-3 py-2">
               <div className="text-[10px] font-semibold uppercase tracking-wide text-violet-600">{item.label}</div>
@@ -2199,7 +2199,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
           ))}
         </div>
         <div className="mt-3 rounded-md border border-violet-200 bg-white p-3 text-xs leading-5 text-slate-700" data-testid="section-kinflo-vanguard-order-portal-gate">
-          <span className="font-semibold">Runtime gate:</span> {vanguardOrderPortalContract.blockedReason} Private file handling stays disabled until retention, access, and attachment-manifest rules are approved.
+          <span className="font-semibold">Next release:</span> {vanguardOrderPortalContract.blockedReason} Private file uploads are not available in this release.
         </div>
       </div>
 
@@ -2212,28 +2212,27 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
           />
         </div>
         <div className="min-w-0 text-xs leading-5 text-slate-600">
-          <div className="font-semibold text-slate-900">Public brand asset staged locally</div>
-          <div>{vanguardWorkflow.company.logo.dimensions} · aspect ratio preserved · source checksum recorded</div>
-          <a className="text-blue-700 underline underline-offset-2" href={vanguardWorkflow.company.logo.sourceUrl} target="_blank" rel="noreferrer">View Vanguard source image</a>
+          <div className="font-semibold text-slate-900">Vanguard brand</div>
+          <div>The company logo appears across the public website, build request, and client order portal.</div>
         </div>
       </div>
 
       <div id="vanguard-source-parity-readiness" className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3" data-testid="section-kinflo-vanguard-source-parity-readiness">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <div className="text-sm font-semibold text-blue-950">Source-site parity readiness</div>
+            <div className="text-sm font-semibold text-blue-950">Public website coverage</div>
             <p className="mt-1 max-w-3xl text-xs leading-5 text-blue-900">
-              {vanguardWorkflow.sourceSite.provenance} The public request-to-build workflow remains the primary path; source sections add service detail, company proof, careers, and contact context.
+              The website brings Vanguard services, company information, careers, contact details, and the build request into one client journey.
             </p>
           </div>
-          <Badge variant="outline" className="w-fit border-blue-300 bg-white text-blue-800">Audited {vanguardWorkflow.sourceSite.auditedAt}</Badge>
+          <Badge variant="outline" className="w-fit border-blue-300 bg-white text-blue-800">Website preview</Badge>
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { label: "Pages inventoried", value: vanguardWorkflow.sourceSite.inventory.length },
-            { label: "Coverage groups", value: vanguardWorkflow.sourceSite.coverage.length },
-            { label: "Public route", value: "Fixture-backed" },
-            { label: "Live submissions", value: "Disabled" },
+            { label: "Website sections", value: vanguardWorkflow.sourceSite.coverage.length },
+            { label: "Service areas", value: vanguardWorkflow.services.length },
+            { label: "Public website", value: "Available" },
+            { label: "Request saving", value: "Not available" },
           ].map((item) => (
             <div key={item.label} className="rounded-md border border-blue-200 bg-white px-3 py-2">
               <div className="text-[10px] font-medium uppercase tracking-normal text-blue-600">{item.label}</div>
@@ -2266,7 +2265,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         <div className="rounded-lg border border-slate-200 p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="text-sm font-semibold text-slate-950">Fulfillment stages</div>
-            <Badge variant="outline">Evidence gated</Badge>
+            <Badge variant="outline">Review required</Badge>
           </div>
           <div className="mt-3 grid gap-2 md:grid-cols-2">
             {vanguardWorkflow.stages.map((stage, index) => (
@@ -2277,7 +2276,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
                 </div>
                 <div className="mt-1 text-xs text-slate-500">{stage.owner}</div>
                 <p className="mt-2 text-xs leading-5 text-slate-600">{stage.evidence}</p>
-                <div className="mt-2 border-t border-slate-200 pt-2 text-[11px] font-medium text-slate-500">{stage.artifact}</div>
+                <div className="mt-2 border-t border-slate-200 pt-2 text-[11px] font-medium text-slate-500">Required record: {stage.artifact}</div>
               </div>
             ))}
           </div>
@@ -2295,7 +2294,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
             </div>
           </div>
           <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-            <div className="text-sm font-semibold text-emerald-950">Delivery receipt evidence</div>
+            <div className="text-sm font-semibold text-emerald-950">Delivery receipt</div>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {vanguardWorkflow.sampleOrder.deliveryEvidence.map((item) => (
                 <Badge key={item} variant="outline" className="border-emerald-200 bg-white text-emerald-700">{item}</Badge>
@@ -2306,8 +2305,8 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
       </div>
 
       <div className="mt-3 grid gap-3 lg:grid-cols-2">
-        <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">{vanguardWorkflow.providerBoundary}</p>
-        <p className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs leading-5 text-violet-900"><span className="font-semibold">Configuration tooling gap:</span> {vanguardWorkflow.toolingGap}</p>
+        <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600"><span className="font-semibold">Order actions:</span> Request saving and status changes are not available in this release.</p>
+        <p className="rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs leading-5 text-violet-900"><span className="font-semibold">Private files:</span> Uploads are not available. Associates can review the material categories listed by the client.</p>
       </div>
     </section>
   );

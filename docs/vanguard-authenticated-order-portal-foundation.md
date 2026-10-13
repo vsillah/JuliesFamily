@@ -8,6 +8,8 @@ Public path: `/kinflo-sites/vanguard-enterprises/orders`
 
 Admin evidence path: `/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises&studioLane=workbench&studioStage=sites`
 
+Runtime copy rule: `docs/kinflo-runtime-copy-guidelines.md`
+
 ## What this slice proves
 
 The Phase 1 ReversR receipt now has a direct path into the future authenticated client order portal. When a client prepares `VE-RRB-PREVIEW` and chooses **Continue to secure order portal**, the safe receipt fields move through `sessionStorage` into a review screen. The transfer stays inside the current browser session and includes source-package categories, build goal, discipline, and constraints. It contains no private files or contact data.
@@ -19,6 +21,8 @@ The portal renders three distinct states:
 3. A synthetic client-safe tracking example with status, next action, and five order milestones.
 
 The KinFlo admin Site Studio workspace carries the corresponding handoff record. Associates can open the portal, inspect the provider boundary, and see the same synthetic order number without mistaking it for a live customer record.
+
+The runtime UI describes these states in ordinary product language. Technical provenance, fixture status, implementation gates, and validation details remain in this document and the QA record.
 
 ## Convex-first boundary
 

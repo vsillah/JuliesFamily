@@ -37,7 +37,7 @@ export const vanguardWorkflow = {
     "Technical professional services",
   ],
   intakeStages: [
-    { key: "source-package", label: "Source package", summary: "Inventory what already exists" },
+    { key: "source-package", label: "Available materials", summary: "List what already exists" },
     { key: "request-goal", label: "Request goal", summary: "Name the result the build must produce" },
     { key: "discipline", label: "Discipline", summary: "Route the first technical review" },
     { key: "constraints", label: "Constraints", summary: "Record what the build cannot ignore" },
@@ -49,7 +49,7 @@ export const vanguardWorkflow = {
     { label: "Measurements or photos", description: "Field measurements, reference photos, or an existing physical part can guide review." },
     { label: "System or process notes", description: "Requirements, diagrams, environment details, or operating notes are available." },
     { label: "Sample or failed part", description: "A physical example could be inspected after a safe handoff is arranged." },
-    { label: "Concept only", description: "The outcome is known, but the source package still needs to be created." },
+    { label: "Concept only", description: "The outcome is known, but supporting materials still need to be created." },
   ],
   disciplines: [
     { label: "Rebuild engineering", description: "Reverse engineering, part reconstruction, fit, tolerances, and manufacturing handoff." },
@@ -76,7 +76,7 @@ export const vanguardWorkflow = {
     },
     {
       title: "Project management",
-      description: "Give the request an owner, milestones, decision gates, and a clear delivery record.",
+      description: "Give the request an owner, milestones, decision points, and a clear delivery record.",
     },
     {
       title: "Professional services",
@@ -108,8 +108,8 @@ export const vanguardWorkflow = {
       "Contact posture",
     ],
     about: {
-      summary: "Vanguard provides information technology and engineering professional services through engineers, designers, and IT specialists. Its public source emphasizes technically strong, cost-conscious work and a distributed network of vendors and contractors.",
-      experience: "The public source states that Vanguard's principals bring more than 100 years of combined experience.",
+      summary: "Vanguard provides information technology and engineering professional services through engineers, designers, and IT specialists. The company emphasizes technically strong, cost-conscious work and a distributed network of vendors and contractors.",
+      experience: "Vanguard's principals bring more than 100 years of combined experience.",
       operatingModel: "Virtual workspace and telecommuting tools connect Vanguard's team with vendors and contractors across projects.",
       locations: [
         { label: "Headquarters", city: "Fort Lee, New Jersey" },
@@ -152,7 +152,7 @@ export const vanguardWorkflow = {
       { name: "Gary Foster", role: "Director of Systems and Network Services", focus: "Project and program management, analytics, application delivery, systems, and network services." },
     ],
     proof: {
-      customerPosture: "The public source lists work across commercial and government sectors.",
+      customerPosture: "Vanguard serves commercial and government sectors.",
       customerExamples: [
         "American Software Resources", "Cambrex", "Center for Social Innovation", "Elementis", "Gillette", "JDC Global", "Kumon", "Lonza", "MissBrenner", "Motorola", "National Center on Family Homelessness", "Procter & Gamble", "Rutherford Chemicals", "Safer Textiles", "SipCOMM", "Vantage Systems",
       ],
@@ -172,7 +172,7 @@ export const vanguardWorkflow = {
     },
     careers: {
       values: ["Integrity", "Respect", "Diversity", "Excellence", "Innovation"],
-      equalOpportunity: "Vanguard's public source describes the company as an equal opportunity employer.",
+      equalOpportunity: "Vanguard is an equal opportunity employer.",
       roles: [
         {
           title: "Datacenter Engineer",
@@ -192,8 +192,8 @@ export const vanguardWorkflow = {
       ],
     },
     contact: {
-      summary: "Use the published email or phone to ask about services or the careers listings. This KinFlo preview does not submit a contact form or resume.",
-      locationPosture: "The source site describes Vanguard as convenient to major freeways and metro areas. This preview keeps the location summary provider-light and does not load a live map.",
+      summary: "Use the email or phone below to ask about services or career opportunities. Online contact and resume submission are not available here.",
+      locationPosture: "Vanguard is located near major freeways and metro areas. An interactive map is not available here.",
     },
   },
   intakeChecklist: [
@@ -208,15 +208,15 @@ export const vanguardWorkflow = {
       label: "Enter the ReversR Rebuild intake",
       owner: "Requester",
       status: "ready",
-      evidence: "The requester inventories the source package, goal, discipline, and constraints in the embedded local app.",
-      artifact: "Local intake summary",
+      evidence: "The requester lists the available materials, goal, discipline, and constraints in the request form.",
+      artifact: "Request summary",
     },
     {
       key: "source-readiness",
-      label: "Check source inventory and readiness",
-      owner: "ReversR readiness gate",
+      label: "Check materials and readiness",
+      owner: "Request readiness",
       status: "active",
-      evidence: "The app identifies missing inputs and prepares a local receipt when the minimum request fields are complete.",
+      evidence: "The form identifies missing inputs and prepares a request receipt when the minimum fields are complete.",
       artifact: "Readiness result and missing-input list",
     },
     {
@@ -224,7 +224,7 @@ export const vanguardWorkflow = {
       label: "Vanguard associate review",
       owner: "Vanguard intake associate",
       status: "pending",
-      evidence: "An associate verifies the source package, chooses the technical owner, and records risks and questions.",
+      evidence: "An associate verifies the available materials, chooses the technical owner, and records risks and questions.",
       artifact: "Associate review record",
     },
     {
@@ -263,10 +263,10 @@ export const vanguardWorkflow = {
   sampleOrder: {
     id: "VE-BUILD-001",
     requestType: "Engineering / CAD / CAM",
-    summary: "Convert a source package into a reviewable engineering build with manufacturing handoff evidence.",
+    summary: "Convert the available materials into a reviewable engineering build with a clear manufacturing handoff.",
     assignedAssociate: "Unassigned pending scope review",
     progress: 24,
-    missingInputs: ["Source file inventory", "Critical measurements", "Target process and material", "Acceptance criteria"],
+    missingInputs: ["Available file list", "Critical measurements", "Target process and material", "Acceptance criteria"],
     deliveryEvidence: ["Versioned deliverables", "Readiness decisions", "Quality checks", "Client receipt"],
   },
   providerBoundary: "This workflow is a local provider-light fixture. It does not submit a live lead, upload private files, create a tenant, run Convex, send email, publish a site, or call a provider.",

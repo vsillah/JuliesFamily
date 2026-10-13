@@ -9,7 +9,7 @@ The walkthrough demonstrates:
 - a complete local `VE-RRB-PREVIEW` receipt and its secure portal action;
 - the exact session-local fields queued for authenticated promotion review;
 - the fail-closed identity and Convex mutation gate;
-- the fictional `VE-DEMO-1042` client-safe tracking state;
+- the `VE-DEMO-1042` order-tracking preview, clearly marked as an inactive sample;
 - desktop and 390px mobile layouts;
 - the corresponding KinFlo associate handoff record.
 

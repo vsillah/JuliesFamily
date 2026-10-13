@@ -124,12 +124,28 @@ try {
     await new Promise((resolveWait) => setTimeout(resolveWait, 120));
   }
 
-  async function capture({ name, selector, selectorBlock = "start" }) {
+  async function capture({ name, selector, selectorBlock = "start", clipSelector }) {
     if (selector) {
       await evaluate(`document.querySelector(${JSON.stringify(selector)})?.scrollIntoView({block: ${JSON.stringify(selectorBlock)}})`);
       await new Promise((resolveWait) => setTimeout(resolveWait, 220));
     }
-    const result = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false, fromSurface: true });
+    let clip;
+    if (clipSelector) {
+      const box = await evaluate(`(() => {
+        const element = document.querySelector(${JSON.stringify(clipSelector)});
+        if (!(element instanceof HTMLElement)) return null;
+        const rect = element.getBoundingClientRect();
+        return { x: rect.left + window.scrollX, y: rect.top + window.scrollY, width: rect.width, height: rect.height, scale: 1 };
+      })()`);
+      clip = box.result?.value;
+      if (!clip) throw new Error(`Clip element not found: ${clipSelector}`);
+    }
+    const result = await send("Page.captureScreenshot", {
+      format: "png",
+      captureBeyondViewport: Boolean(clip),
+      fromSurface: true,
+      ...(clip ? { clip } : {}),
+    });
     await writeFile(join(outputDir, name), Buffer.from(result.data, "base64"));
     console.log(`Captured ${name}`);
   }
@@ -185,7 +201,12 @@ try {
   await evaluate('window.sessionStorage.setItem("julies-persona-modal-shown", "true")');
   await navigate(`${baseUrl}/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises&studioLane=workbench&studioStage=sites`);
   await waitForSelector('[data-testid="section-kinflo-vanguard-order-portal-handoff"]');
-  await capture({ name: "04-admin-order-portal-handoff.png", selector: '[data-testid="section-kinflo-vanguard-order-portal-handoff"]', selectorBlock: "center" });
+  await capture({
+    name: "04-admin-order-portal-handoff.png",
+    selector: '[data-testid="section-kinflo-vanguard-order-portal-handoff"]',
+    selectorBlock: "center",
+    clipSelector: '[data-testid="section-kinflo-vanguard-order-portal-handoff"]',
+  });
   await send("Fetch.disable");
   syntheticAdminAuthEnabled = false;
 

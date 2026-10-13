@@ -38,14 +38,14 @@ export const vanguardOrderPortalContract = {
   providerWritesEnabled: false,
   generatedApiImportApproved: false,
   privateUploadsEnabled: false,
-  blockedReason: "KinFlo identity and generated Convex bindings remain gated in PR #15.",
+  blockedReason: "Client sign-in is required before a request can be saved or added to order history.",
   promotionRequirements: [
-    "Authenticated KinFlo client identity",
-    "Explicit field-transfer review and consent",
-    "Server-issued idempotency key",
-    "Convex order ID and revision response",
+    "Verified client account",
+    "Review of the request details",
+    "Confirmation before sharing with Vanguard",
+    "Saved order number and latest status",
   ],
-  sourceManifestBoundary: "Metadata categories only. Private files remain disabled until retention, access, and attachment-manifest rules are approved.",
+  sourceManifestBoundary: "You can list the materials you have. Private file uploads are not available in this release.",
 };
 
 export const vanguardPortalOrderFixture: VanguardPortalOrderFixture = {
@@ -54,18 +54,18 @@ export const vanguardPortalOrderFixture: VanguardPortalOrderFixture = {
   status: "intake_review",
   clientStatusLabel: "Vanguard is reviewing your request",
   dataMode: "synthetic_preview",
-  lastUpdatedLabel: "Synthetic preview · no live timestamp",
-  nextAction: "Vanguard confirms the source inventory and records any missing inputs.",
+  lastUpdatedLabel: "Preview only · no live updates",
+  nextAction: "Vanguard confirms the available materials and records any missing inputs.",
   milestones: [
     {
       key: "request-received",
       label: "Request received",
       state: "complete",
-      clientDetail: "The order draft passed the submission boundary in this synthetic example.",
+      clientDetail: "The request has been received and is ready for an initial review.",
     },
     {
       key: "source-review",
-      label: "Source inventory review",
+      label: "Materials review",
       state: "current",
       clientDetail: "An associate checks which drawings, measurements, models, or samples are available.",
     },
@@ -79,7 +79,7 @@ export const vanguardPortalOrderFixture: VanguardPortalOrderFixture = {
       key: "build-quality",
       label: "Build and quality evidence",
       state: "upcoming",
-      clientDetail: "Fulfillment progress and named quality gates appear here after the order is accepted.",
+      clientDetail: "Fulfillment progress and named quality checks appear here after the order is accepted.",
     },
     {
       key: "delivery",

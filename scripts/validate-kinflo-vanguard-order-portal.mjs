@@ -19,13 +19,22 @@ function requireIncludes(path, patterns) {
   return contents;
 }
 
+function sliceBetween(contents, startMarker, endMarker) {
+  const start = contents.indexOf(startMarker);
+  const end = contents.indexOf(endMarker, start + startMarker.length);
+  if (start < 0 || end < 0) return "";
+  return contents.slice(start, end);
+}
+
 const files = {
   portal: "client/src/pages/VanguardOrderPortal.tsx",
   contract: "client/src/lib/kinfloVanguardOrderPortal.ts",
   intake: "client/src/components/VanguardReversRIntake.tsx",
+  publicPage: "client/src/pages/KinfloPublicSitePreview.tsx",
   app: "client/src/App.tsx",
   admin: "client/src/pages/AdminKinfloShell.tsx",
   docs: "docs/vanguard-authenticated-order-portal-foundation.md",
+  copyGuidelines: "docs/kinflo-runtime-copy-guidelines.md",
   architecture: "docs/vanguard-order-operations-architecture.md",
   qaReadme: "docs/qa/vanguard-order-portal/README.md",
   qaVideo: "docs/qa/vanguard-order-portal/vanguard-order-portal-walkthrough.mp4",
@@ -41,9 +50,9 @@ const portal = requireIncludes(files.portal, [
   'data-testid="vanguard-order-promote-gated"',
   'data-testid="vanguard-order-tracking-preview"',
   'data-testid="vanguard-order-promotion-contract"',
-  "Synthetic tracking example",
-  "Your local receipt has not become an order",
-  "Private upload",
+  "Order tracking preview",
+  "Sign in before saving this request",
+  "Private uploads",
 ]);
 
 const contract = requireIncludes(files.contract, [
@@ -68,6 +77,13 @@ const intake = requireIncludes(files.intake, [
   "Continue to secure order portal",
 ]);
 
+const publicPage = requireIncludes(files.publicPage, [
+  "A request receipt confirms that the required details are complete.",
+  'aria-label="Website coverage"',
+  "Customer and procurement experience",
+  "Online applications are not available here.",
+]);
+
 const app = requireIncludes(files.app, [
   'import VanguardOrderPortal from "@/pages/VanguardOrderPortal";',
   '<Route path="/kinflo-sites/vanguard-enterprises/orders" component={VanguardOrderPortal} />',
@@ -76,9 +92,9 @@ const app = requireIncludes(files.app, [
 const admin = requireIncludes(files.admin, [
   'data-testid="section-kinflo-vanguard-order-portal-handoff"',
   'data-testid="section-kinflo-vanguard-order-portal-gate"',
-  "Authenticated order portal foundation",
+  "Client order portal",
   "Open order portal",
-  "External writes",
+  "Request saving",
 ]);
 
 requireIncludes(files.docs, [
@@ -87,6 +103,13 @@ requireIncludes(files.docs, [
   "External writes: 0",
   "Private file upload: disabled",
   "PR #15 owns the identity cutover and remains separate",
+]);
+
+requireIncludes(files.copyGuidelines, [
+  "KinFlo product screens should explain what a person can do",
+  "Client and associate screens use normal product language",
+  "Keep implementation history, prompt provenance, source mapping, validator results, branch and pull-request details, deployment gates, and test-fixture terminology in documentation and QA records.",
+  "Search changed runtime UI files for the avoided terms above.",
 ]);
 
 requireIncludes(files.architecture, [
@@ -137,6 +160,37 @@ for (const marker of ['from "convex/_generated/api"', "useMutation(", "useAction
   check(!combined.includes(marker), `runtime source excludes ${marker}`, "This provider-light foundation cannot perform live reads, mutations, uploads, or provider writes.");
 }
 check(!portal.includes("type=\"file\""), "portal exposes no file input", "Private upload remains disabled.");
+
+const adminPortalSlice = sliceBetween(
+  admin,
+  "function VanguardFulfillmentWorkspace",
+  "function ClientWebsiteConfigurationProfiles",
+);
+check(adminPortalSlice.length > 0, "Vanguard associate workspace copy block can be isolated", "Expected Vanguard workspace component markers were not found in order.");
+
+const runtimeCopy = [portal, intake, publicPage, adminPortalSlice].join("\n");
+const forbiddenRuntimeCopy = [
+  /\bfixture\b/i,
+  /\bsynthetic\b/i,
+  /source-backed/i,
+  /provider-light/i,
+  /fail-closed/i,
+  /\bprovenance\b/i,
+  /\bvalidator\b/i,
+  /generated api/i,
+  /\bcodegen\b/i,
+  /\bPR\s*#/i,
+  /local receipt/i,
+  /local package/i,
+  /local preview/i,
+  /readiness gate/i,
+  /source-site/i,
+  /public source/i,
+  /\bConvex\b/i,
+];
+for (const pattern of forbiddenRuntimeCopy) {
+  check(!pattern.test(runtimeCopy), `runtime product copy excludes ${pattern}`, "Implementation or provenance language leaked into client or associate UI copy.");
+}
 
 for (const item of checks) {
   if (item.ok) console.log(`✓ ${item.label}`);
