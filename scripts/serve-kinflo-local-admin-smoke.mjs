@@ -1,5 +1,7 @@
 import { createServer } from "vite";
 
+process.env.VITE_KINFLO_IDENTITY_MODE = "local_fixture";
+
 const port = Number(process.env.PORT ?? 5177);
 const host = "127.0.0.1";
 
