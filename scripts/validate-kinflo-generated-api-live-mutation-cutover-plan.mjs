@@ -29,11 +29,14 @@ const requiredMarkers = [
   "Batch 6 — limited preferences adapter review",
   "Batch 7 — later full-adapter sequence",
   "Batches 1-2 source implementation status",
+  "Batches 4-5 production smoke result",
   "preferenceMutationSmokeClientAvailable: false",
   "scripts/test-kinflo-preference-smoke.ts",
   "A failed or unknown result stops the window; it does not authorize a retry.",
   "zero provider actions",
-  "Review the Batches 1-2 source implementation",
+  "Receipt id: `q573m3wengmf6a8e9hdh29w5658g7hfc`",
+  "Gate-off proof: `0` remaining `KINFLO_PREFERENCE_SMOKE_*` environment names",
+  "Batch 6 is the next reviewable phase",
 ];
 
 for (const marker of requiredMarkers) {

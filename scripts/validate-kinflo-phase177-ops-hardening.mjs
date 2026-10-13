@@ -54,8 +54,15 @@ check(
 );
 check(
   "ops hardening document captures deploy-command mismatch",
-  doc.includes("does not accept `npx convex deploy --deployment`"),
+  doc.includes("Convex deploy-command reconciliation") && doc.includes("temporary symlinked workspace"),
   "The hardening artifact should record the Convex deploy command mismatch before another production attempt.",
+);
+check(
+  "ops hardening document captures closed smoke receipt",
+  doc.includes("Receipt id: `q573m3wengmf6a8e9hdh29w5658g7hfc`") &&
+    doc.includes("Gate-off proof: `0` remaining `KINFLO_PREFERENCE_SMOKE_*` environment names") &&
+    doc.includes("Provider-write zero proof"),
+  "The hardening artifact should preserve the sanitized completed-smoke evidence.",
 );
 check(
   "package script exposes validator",

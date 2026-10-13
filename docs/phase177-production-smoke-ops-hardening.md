@@ -52,10 +52,25 @@ This hardening does not authorize:
 
 ## Next execution checkpoint
 
-After this runner fix is merged, the captain can reopen Phase 177 Batch 4-5 by running:
+The runner fix was merged in PR #27, then Phase 177 Batch 4-5 completed on October 13, 2026.
 
-```bash
-OP_KINFLO_CONVEX_ITEM=uyq6zixp3i4p5iek463hd255qq npm run kinflo:1password-env-check
-```
+Execution notes:
 
-If that passes, the next step is Convex deploy-command reconciliation. The local Convex CLI accepts `npx convex deploy` without `--deployment`; it does not accept `npx convex deploy --deployment`. The production smoke runbook must account for that before opening the smoke gate.
+- The approved 1Password-backed environment check passed without printing secrets or writing `.env.local`.
+- Convex deploy-command reconciliation used `npx convex dev --once --typecheck disable --tail-logs disable` from a temporary symlinked workspace so any Convex CLI `.env.local` write stayed outside the repository and was discarded.
+- The temporary `phase177Ops` grant helper was removed from the deployed function spec before the smoke gate opened.
+- The approved actor was verified as `platformRole=super_admin` before `preferences.runPreferenceSmoke` executed.
+- The server gate was opened only for the approved Batch 4-5 window, then removed immediately after the one bounded execution and replay-denial proof.
+
+Closed-window evidence:
+
+- Receipt id: `q573m3wengmf6a8e9hdh29w5658g7hfc`
+- Approval id: `phase177-batch4-preference-smoke-2026-10-13`
+- Sentinel: `dataDensity = spacious`
+- Cleanup result: `deleted_new`
+- Before state: `dataDensity=null`, `exists=false`, `updatedAt=null`
+- After state: `dataDensity=null`, `exists=false`, `updatedAt=null`
+- Gate-off proof: `0` remaining `KINFLO_PREFERENCE_SMOKE_*` environment names
+- Provider-write zero proof: no publish, billing, invitation, email/SMS, CRM lead, site creation, domain/DNS, storage, provider, full-adapter, or broad mutation actions were invoked
+
+The next execution checkpoint is Phase 177 Batch 6 limited preferences adapter review. Batch 6 requires a separate implementation lane and does not inherit approval from the completed smoke.
