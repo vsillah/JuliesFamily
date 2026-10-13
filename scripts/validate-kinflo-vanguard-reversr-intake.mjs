@@ -43,7 +43,7 @@ requireIncludes(files.component, [
   'data-testid="vanguard-generate-local-receipt"',
   'data-testid="vanguard-build-request-receipt"',
   "VE-RRB-PREVIEW",
-  "Local fixture · nothing leaves this page",
+  "This request stays in your browser",
   "Private upload is intentionally unavailable",
 ]);
 

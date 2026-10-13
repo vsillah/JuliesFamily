@@ -21,6 +21,11 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
+import {
+  VANGUARD_LOCAL_RECEIPT_STORAGE_KEY,
+  VANGUARD_ORDER_PORTAL_PATH,
+  createVanguardLocalReceipt,
+} from "@/lib/kinfloVanguardOrderPortal";
 
 const stepIcons = [FileStack, Target, Wrench, SlidersHorizontal, ClipboardCheck];
 
@@ -35,7 +40,7 @@ export default function VanguardReversRIntake() {
 
   const missingInputs = useMemo(() => {
     const missing: string[] = [];
-    if (sourcePackage.length === 0) missing.push("Select at least one source-package item");
+    if (sourcePackage.length === 0) missing.push("Select at least one available material");
     if (goal.trim().length < 20) missing.push("Describe the build goal in at least 20 characters");
     if (!discipline) missing.push("Choose the discipline that should review the request");
     if (constraints.length === 0 && constraintNotes.trim().length === 0) missing.push("Name a constraint or record that none are known yet");
@@ -54,6 +59,17 @@ export default function VanguardReversRIntake() {
     setStep(Math.max(0, Math.min(vanguardWorkflow.intakeStages.length - 1, next)));
   }
 
+  function continueToOrderPortal() {
+    const receipt = createVanguardLocalReceipt({
+      sourcePackage,
+      goal: goal.trim(),
+      discipline,
+      constraints: [...constraints, constraintNotes.trim()].filter(Boolean),
+    });
+    window.sessionStorage.setItem(VANGUARD_LOCAL_RECEIPT_STORAGE_KEY, JSON.stringify(receipt));
+    window.location.assign(`${VANGUARD_ORDER_PORTAL_PATH}?source=local-receipt`);
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-950/5" data-testid="vanguard-reversr-intake-app">
       <div className="border-b border-slate-200 bg-slate-950 px-4 py-4 text-white sm:px-6">
@@ -67,7 +83,7 @@ export default function VanguardReversRIntake() {
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-300">
             <LockKeyhole className="h-4 w-4 text-amber-300" />
-            Local fixture · nothing leaves this page
+            This request stays in your browser
           </div>
         </div>
         <Progress value={progress} className="mt-4 h-1.5 bg-white/15" />
@@ -106,9 +122,9 @@ export default function VanguardReversRIntake() {
         <div className="min-w-0 p-4 sm:p-6">
           {step === 0 ? (
             <div data-testid="vanguard-intake-source-package">
-              <Badge variant="outline">Source package</Badge>
+              <Badge variant="outline">Available materials</Badge>
               <h3 className="mt-3 text-2xl font-semibold text-slate-950">What do you have today?</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Select the materials an associate would inventory. This preview records categories only; it does not accept file uploads.</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Select the materials you have. File uploads are not available yet.</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {vanguardWorkflow.sourcePackageOptions.map((item) => {
                   const selected = sourcePackage.includes(item.label);
@@ -158,7 +174,7 @@ export default function VanguardReversRIntake() {
             <div data-testid="vanguard-intake-discipline">
               <Badge variant="outline">Discipline and type</Badge>
               <h3 className="mt-3 text-2xl font-semibold text-slate-950">Who should review this request?</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Choose one starting discipline. A Vanguard associate can adjust the route after the source inventory.</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Choose one starting discipline. A Vanguard associate can adjust the route after reviewing the available materials.</p>
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {vanguardWorkflow.disciplines.map((item) => (
                   <button
@@ -209,14 +225,14 @@ export default function VanguardReversRIntake() {
 
           {step === 4 ? (
             <div data-testid="vanguard-intake-readiness">
-              <Badge variant="outline">Readiness and quote gate</Badge>
+              <Badge variant="outline">Readiness and quote</Badge>
               <h3 className="mt-3 text-2xl font-semibold text-slate-950">Review the package before handoff</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">ReversR checks whether the request is ready for Vanguard associate review. A complete local package still does not approve a quote or start fulfillment.</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">ReversR checks whether the request is ready for Vanguard associate review. A complete request still needs scope and quote approval before work begins.</p>
 
               <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
                 <div className="space-y-3">
                   {[
-                    ["Source package", sourcePackage.join(", ") || "Missing"],
+                    ["Available materials", sourcePackage.join(", ") || "Missing"],
                     ["Request goal", goal.trim() || "Missing"],
                     ["Discipline", discipline || "Missing"],
                     ["Constraints", [...constraints, constraintNotes.trim()].filter(Boolean).join(", ") || "Missing"],
@@ -229,9 +245,9 @@ export default function VanguardReversRIntake() {
                 </div>
                 <aside className={`h-fit rounded-xl border p-4 ${readyForQuoteReview ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
                   {readyForQuoteReview ? <ShieldCheck className="h-6 w-6 text-emerald-700" /> : <LockKeyhole className="h-6 w-6 text-amber-700" />}
-                  <h4 className="mt-3 font-semibold text-slate-950">{readyForQuoteReview ? "Ready for associate review" : "Readiness gate is locked"}</h4>
+                  <h4 className="mt-3 font-semibold text-slate-950">{readyForQuoteReview ? "Ready for associate review" : "More details needed"}</h4>
                   <p className="mt-2 text-xs leading-5 text-slate-700">
-                    {readyForQuoteReview ? "The local package has the minimum fields for a Vanguard associate to inventory and scope." : "Complete the missing inputs before preparing a local receipt."}
+                    {readyForQuoteReview ? "The request has the minimum details a Vanguard associate needs to begin review." : "Complete the missing inputs before preparing a request receipt."}
                   </p>
                   {!readyForQuoteReview ? (
                     <ul className="mt-3 space-y-2">
@@ -248,23 +264,32 @@ export default function VanguardReversRIntake() {
                 className="mt-5 h-auto w-full whitespace-normal bg-amber-700 py-2.5 text-white hover:bg-amber-800"
                 data-testid="vanguard-generate-local-receipt"
               >
-                <PackageCheck className="mr-2 h-4 w-4" /> Prepare local request receipt
+                <PackageCheck className="mr-2 h-4 w-4" /> Prepare request receipt
               </Button>
 
               {receiptReady ? (
                 <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5" role="status" data-testid="vanguard-build-request-receipt">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <div className="flex items-center gap-2 font-semibold text-emerald-950"><PackageCheck className="h-5 w-5" /> Local request receipt ready</div>
-                      <p className="mt-2 text-sm leading-6 text-emerald-900">A Vanguard associate would receive this package for source inventory, missing-input review, and a quote/scope decision.</p>
+                      <div className="flex items-center gap-2 font-semibold text-emerald-950"><PackageCheck className="h-5 w-5" /> Request receipt ready</div>
+                      <p className="mt-2 text-sm leading-6 text-emerald-900">A Vanguard associate would review the available materials, identify missing inputs, and prepare a quote and scope decision.</p>
                     </div>
                     <Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">VE-RRB-PREVIEW</Badge>
                   </div>
                   <div className="mt-4 grid gap-2 text-xs sm:grid-cols-3">
                     <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Discipline</span><span className="mt-1 block font-semibold text-emerald-950">{discipline}</span></div>
                     <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Next owner</span><span className="mt-1 block font-semibold text-emerald-950">Vanguard intake associate</span></div>
-                    <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Transmission</span><span className="mt-1 block font-semibold text-emerald-950">None · local receipt</span></div>
+                    <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Saved as an order</span><span className="mt-1 block font-semibold text-emerald-950">No · sign-in required</span></div>
                   </div>
+                  <Button
+                    type="button"
+                    onClick={continueToOrderPortal}
+                    className="mt-4 h-auto w-full whitespace-normal bg-slate-950 py-2.5 text-white hover:bg-slate-800"
+                    data-testid="vanguard-continue-to-order-portal"
+                  >
+                    <LockKeyhole className="mr-2 h-4 w-4" /> Continue to secure order portal
+                  </Button>
+                  <p className="mt-2 text-xs leading-5 text-emerald-800">Review the request in the order portal. Nothing is sent to Vanguard until account access and request saving are available.</p>
                 </div>
               ) : null}
             </div>
