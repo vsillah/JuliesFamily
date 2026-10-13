@@ -37,6 +37,46 @@
     "submit_for_client",
     "takeover_session"
   ],
+  "phase3Assist": {
+    "status": "provider_light_fixture",
+    "draftVisibilityStates": [
+      "private",
+      "share_requested",
+      "shared",
+      "expired",
+      "revoked"
+    ],
+    "consentStates": [
+      "not_granted",
+      "pending",
+      "active",
+      "expired",
+      "revoked"
+    ],
+    "modes": {
+      "assist": ["view_draft", "comment"],
+      "co_edit": ["view_draft", "comment", "edit_draft"],
+      "takeover": ["view_draft", "comment", "edit_draft", "submit_for_client", "takeover_session"]
+    },
+    "clientInitiated": true,
+    "fieldLevelSharing": true,
+    "expires": true,
+    "revocable": true,
+    "revokeEndsAccessImmediately": true,
+    "resumeAfterExpiryOrRevokeRequiresNewConsent": true,
+    "clientFinalConfirmationRequired": true,
+    "auditEventsRequired": [
+      "assist_requested",
+      "consent_granted",
+      "assignment_accepted",
+      "draft_viewed",
+      "comment_added",
+      "section_edited",
+      "handoff_returned",
+      "access_revoked",
+      "access_expired"
+    ]
+  },
   "tables": [
     "buildOrders",
     "orderDraftSections",

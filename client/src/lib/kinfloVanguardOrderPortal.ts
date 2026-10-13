@@ -30,6 +30,129 @@ export type VanguardPortalOrderFixture = {
   milestones: VanguardPortalMilestone[];
 };
 
+export type VanguardAssistMode = "assist" | "co_edit" | "takeover";
+export type VanguardDraftVisibility = "private" | "share_requested" | "shared" | "expired" | "revoked";
+export type VanguardAssistConsentStatus = "not_granted" | "pending" | "active" | "expired" | "revoked";
+
+export type VanguardAssistActivity = {
+  id: string;
+  actor: "client" | "associate" | "system";
+  label: string;
+  detail: string;
+  occurredAtLabel: string;
+};
+
+export type VanguardAssistQueueItem = {
+  requestNumber: string;
+  orderNumber: string;
+  title: string;
+  visibility: VanguardDraftVisibility;
+  visibilityLabel: string;
+  consentStatus: VanguardAssistConsentStatus;
+  consentLabel: string;
+  mode: VanguardAssistMode;
+  modeLabel: string;
+  currentSection: string;
+  sharedFields: string[];
+  excludedFields: string[];
+  expiresAtLabel: string;
+  nextStep: string;
+  activity: VanguardAssistActivity[];
+};
+
+export const vanguardAssociateAssistContract = {
+  systemOfRecord: "convex" as const,
+  identityMode: "required_unavailable" as const,
+  dataMode: "sample_queue" as const,
+  liveAssistEnabled: false,
+  providerWritesEnabled: false,
+  generatedApiImportApproved: false,
+  privateUploadsEnabled: false,
+  visibilityStates: ["private", "share_requested", "shared", "expired", "revoked"] as const,
+  consentStates: ["not_granted", "pending", "active", "expired", "revoked"] as const,
+  modes: [
+    {
+      key: "assist",
+      clientLabel: "Get guidance",
+      associateLabel: "Assist",
+      summary: "An associate can review the fields you share and leave comments.",
+      scopes: ["view_draft", "comment"],
+    },
+    {
+      key: "co_edit",
+      clientLabel: "Work together",
+      associateLabel: "Co-edit",
+      summary: "An associate can comment and edit the fields you choose to share.",
+      scopes: ["view_draft", "comment", "edit_draft"],
+    },
+    {
+      key: "takeover",
+      clientLabel: "Prepare it for me",
+      associateLabel: "Prepare for client",
+      summary: "An associate can complete the shared draft, then return it for your confirmation.",
+      scopes: ["view_draft", "comment", "edit_draft", "submit_for_client", "takeover_session"],
+    },
+  ] as const,
+  consentRules: [
+    "The client chooses which draft fields an associate can see.",
+    "Access expires at the stated time and can be revoked sooner.",
+    "Every view, comment, edit, handoff, and revoke action is recorded.",
+    "Submission still requires the client's final confirmation.",
+  ],
+  privacyBoundary: "Associates can only see fields the client chooses to share. Private files and uploads stay excluded.",
+  blockedReason: "Client sign-in and an active sharing grant are required before an associate can open or change a draft.",
+  recoveryStep: "Sign in, review the shared fields, choose an assistance level, and confirm the access end time.",
+  handoffRules: {
+    clientStartsSharing: true,
+    associateAcceptsAssignment: true,
+    revisionAwareEdits: true,
+    clientOwnsSessionByDefault: true,
+    revokeEndsAccessImmediately: true,
+    expiredOrRevokedResumeRequiresNewConsent: true,
+    takeoverReturnsToClientForConfirmation: true,
+  },
+};
+
+export const vanguardAssistQueueFixture: VanguardAssistQueueItem = {
+  requestNumber: "VA-DEMO-07",
+  orderNumber: "VE-DEMO-1042",
+  title: "Stainless mounting bracket rebuild",
+  visibility: "shared",
+  visibilityLabel: "Shared fields only",
+  consentStatus: "active",
+  consentLabel: "Active for this review",
+  mode: "co_edit",
+  modeLabel: "Co-edit",
+  currentSection: "Build goal and constraints",
+  sharedFields: ["Build goal", "Discipline", "Constraints", "Source-package categories"],
+  excludedFields: ["Private files", "Billing details", "Other orders"],
+  expiresAtLabel: "October 14 at 3:00 PM ET",
+  nextStep: "Review the shared build goal and leave a comment for the client.",
+  activity: [
+    {
+      id: "assist-activity-1",
+      actor: "client",
+      label: "Sharing approved",
+      detail: "The client shared four draft fields for co-editing.",
+      occurredAtLabel: "Today · 9:12 AM",
+    },
+    {
+      id: "assist-activity-2",
+      actor: "system",
+      label: "Access window set",
+      detail: "Access ends October 14 at 3:00 PM ET unless the client revokes it sooner.",
+      occurredAtLabel: "Today · 9:12 AM",
+    },
+    {
+      id: "assist-activity-3",
+      actor: "associate",
+      label: "Associate assigned",
+      detail: "The request is ready for an associate to accept after sign-in is available.",
+      occurredAtLabel: "Today · 9:18 AM",
+    },
+  ],
+};
+
 export const vanguardOrderPortalContract = {
   systemOfRecord: "convex" as const,
   identityMode: "required_unavailable" as const,
