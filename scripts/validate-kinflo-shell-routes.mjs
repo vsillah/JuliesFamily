@@ -37,6 +37,7 @@ function requireMatch(path, regex, label) {
 const appPath = "client/src/App.tsx";
 const adminShellPath = "client/src/pages/AdminKinfloShell.tsx";
 const publicPreviewPath = "client/src/pages/KinfloPublicSitePreview.tsx";
+const vanguardReversrIntakePath = "client/src/components/VanguardReversRIntake.tsx";
 const shellDataPath = "client/src/lib/kinfloShellData.ts";
 const runtimePath = "client/src/lib/kinfloConvexRuntime.ts";
 const leadCapturePath = "client/src/lib/kinfloLeadCapture.ts";
@@ -199,7 +200,16 @@ requireIncludes(publicPreviewPath, [
   'data-testid="public-preview-vanguard-source-parity"',
   'data-testid="public-preview-vanguard-customer-proof"',
   'data-testid="public-preview-vanguard-careers"',
+  'data-testid="vanguard-request-to-delivery-lifecycle"',
+  "<VanguardReversRIntake />",
   'href={`/kinflo-sites/${preview.site.slug}`}',
+]);
+
+requireIncludes(vanguardReversrIntakePath, [
+  'data-testid="vanguard-reversr-intake-app"',
+  'data-testid="vanguard-intake-readiness"',
+  'data-testid="vanguard-build-request-receipt"',
+  "VE-RRB-PREVIEW",
 ]);
 
 requireIncludes(adminShellPath, [
@@ -207,6 +217,8 @@ requireIncludes(adminShellPath, [
   'data-testid="section-kinflo-vanguard-source-parity-readiness"',
   "vanguardWorkflow.company.logo.image",
   "vanguardWorkflow.company.logo.sourceUrl",
+  'data-testid="section-kinflo-vanguard-reversr-handoff"',
+  "ReversR intake to Vanguard fulfillment",
 ]);
 
 requireIncludes(vanguardWorkflowPath, [

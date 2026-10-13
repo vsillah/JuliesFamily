@@ -120,7 +120,7 @@ requireIncludes(files.qaReadme, [
   "# Vanguard source-site parity QA",
   "clientWidth=390",
   "scrollWidth=390",
-  "VE-BUILD-PREVIEW",
+  "VE-RRB-PREVIEW",
   "live submissions disabled",
 ]);
 

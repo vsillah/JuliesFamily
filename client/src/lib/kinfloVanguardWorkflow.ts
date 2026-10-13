@@ -8,6 +8,7 @@ export type VanguardFulfillmentStage = {
   owner: string;
   status: "ready" | "active" | "blocked" | "pending";
   evidence: string;
+  artifact: string;
 };
 
 export const vanguardWorkflow = {
@@ -34,6 +35,35 @@ export const vanguardWorkflow = {
     "IT infrastructure",
     "Project management",
     "Technical professional services",
+  ],
+  intakeStages: [
+    { key: "source-package", label: "Source package", summary: "Inventory what already exists" },
+    { key: "request-goal", label: "Request goal", summary: "Name the result the build must produce" },
+    { key: "discipline", label: "Discipline", summary: "Route the first technical review" },
+    { key: "constraints", label: "Constraints", summary: "Record what the build cannot ignore" },
+    { key: "readiness", label: "Readiness", summary: "Check missing inputs and prepare a receipt" },
+  ],
+  sourcePackageOptions: [
+    { label: "CAD or 3D model", description: "A model, assembly, mesh, or other digital geometry is available." },
+    { label: "Drawing or specification", description: "A dimensioned drawing, PDF, standard, or written requirement exists." },
+    { label: "Measurements or photos", description: "Field measurements, reference photos, or an existing physical part can guide review." },
+    { label: "System or process notes", description: "Requirements, diagrams, environment details, or operating notes are available." },
+    { label: "Sample or failed part", description: "A physical example could be inspected after a safe handoff is arranged." },
+    { label: "Concept only", description: "The outcome is known, but the source package still needs to be created." },
+  ],
+  disciplines: [
+    { label: "Rebuild engineering", description: "Reverse engineering, part reconstruction, fit, tolerances, and manufacturing handoff." },
+    { label: "CAD / CAM", description: "3D modeling, drawings, toolpaths, prototypes, and series-zero preparation." },
+    { label: "IT infrastructure", description: "Systems, networks, environments, integrations, resilience, and operating requirements." },
+    { label: "Project delivery", description: "Scope, schedule, vendor coordination, risk, acceptance, and delivery ownership." },
+  ],
+  constraintOptions: [
+    "Material or manufacturing process",
+    "Fit, tolerance, or critical dimensions",
+    "Budget or quote threshold",
+    "Target date or operating window",
+    "Security, access, or data handling",
+    "Acceptance or quality standard",
   ],
   services: [
     {
@@ -174,46 +204,60 @@ export const vanguardWorkflow = {
   ],
   stages: [
     {
-      key: "request-received",
-      label: "Request received",
-      owner: "Vanguard intake",
+      key: "reversr-intake",
+      label: "Enter the ReversR Rebuild intake",
+      owner: "Requester",
       status: "ready",
-      evidence: "Request summary and contact path are visible in the local fixture.",
+      evidence: "The requester inventories the source package, goal, discipline, and constraints in the embedded local app.",
+      artifact: "Local intake summary",
     },
     {
-      key: "source-inventory",
-      label: "Source package inventory",
-      owner: "Assigned associate",
+      key: "source-readiness",
+      label: "Check source inventory and readiness",
+      owner: "ReversR readiness gate",
       status: "active",
-      evidence: "Drawings, models, measurements, requirements, and missing inputs are reviewed together.",
+      evidence: "The app identifies missing inputs and prepares a local receipt when the minimum request fields are complete.",
+      artifact: "Readiness result and missing-input list",
     },
     {
-      key: "technical-review",
-      label: "Technical review",
-      owner: "Engineering or IT lead",
+      key: "associate-review",
+      label: "Vanguard associate review",
+      owner: "Vanguard intake associate",
       status: "pending",
-      evidence: "Discipline-specific review records risks, assumptions, and feasibility notes.",
+      evidence: "An associate verifies the source package, chooses the technical owner, and records risks and questions.",
+      artifact: "Associate review record",
     },
     {
-      key: "quote-readiness",
-      label: "Quote and readiness gate",
-      owner: "Vanguard engagement lead",
+      key: "quote-scope",
+      label: "Quote and scope decision",
+      owner: "Engagement lead and requester",
       status: "blocked",
-      evidence: "Scope, missing inputs, acceptance criteria, and owner approval must pass before build starts.",
+      evidence: "Scope, assumptions, cost, acceptance criteria, and open inputs must be agreed before work begins.",
+      artifact: "Quote and accepted scope",
     },
     {
       key: "fulfillment",
-      label: "Associate fulfillment",
+      label: "Track associate fulfillment",
       owner: "Assigned associate",
       status: "blocked",
-      evidence: "Milestones, progress notes, and review decisions remain locked until readiness passes.",
+      evidence: "Milestones, decisions, progress notes, and change requests continue in the Vanguard workspace.",
+      artifact: "Milestone progress record",
+    },
+    {
+      key: "quality-delivery",
+      label: "Record quality and delivery evidence",
+      owner: "Vanguard quality owner",
+      status: "blocked",
+      evidence: "Version checks, inspection results, delivered files, and unresolved exceptions form the handoff record.",
+      artifact: "Quality and delivery evidence manifest",
     },
     {
       key: "delivery-receipt",
-      label: "Delivery receipt",
-      owner: "Vanguard delivery owner",
+      label: "Receive and acknowledge delivery",
+      owner: "Requester and delivery owner",
       status: "blocked",
-      evidence: "Delivered files, checks, client acceptance, and follow-up actions form the final receipt.",
+      evidence: "The requester receives the delivery record, acknowledges receipt, and records any follow-up action.",
+      artifact: "Versioned delivery receipt",
     },
   ] satisfies VanguardFulfillmentStage[],
   sampleOrder: {

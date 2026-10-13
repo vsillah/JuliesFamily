@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Vanguard Enterprises is available as a provider-light client site in KinFlo Site Studio. The public experience begins with a build request instead of a brochure contact form. The KinFlo OS view gives Vanguard associates a local workflow for source inventory, technical review, quote readiness, fulfillment progress, and delivery evidence.
+Vanguard Enterprises is available as a provider-light client site in KinFlo Site Studio. The public site embeds a five-step ReversR Rebuild intake instead of sending people to a brochure form. The KinFlo OS view continues the same request on the associate side through source review, quote and scope, fulfillment progress, quality evidence, and delivery receipt.
 
 ## Routes
 
@@ -27,16 +27,22 @@ No private source, account data, customer record, uploaded file, or secret was r
 
 ## ReversR pattern adapted for Vanguard
 
-The request-to-build path is:
+The public intake path is:
 
-1. Build request
-2. Source package inventory
-3. Scope and requirements inventory
-4. Engineering/CAD/CAM or IT infrastructure review
-5. Quote and readiness gate
-6. Assigned-associate fulfillment
-7. Progress record
-8. Delivery receipt and evidence
+1. Select the source-package categories without uploading private files.
+2. Describe the build goal and target environment.
+3. Choose the starting discipline or request type.
+4. Record material, tolerance, budget, date, security, or quality constraints.
+5. Review missing inputs and prepare a local receipt.
+
+The associate-side continuation is:
+
+1. Vanguard associate source review
+2. Quote and scope decision
+3. Assigned-associate fulfillment
+4. Milestone progress record
+5. Quality and delivery evidence
+6. Requester delivery receipt
 
 Build readiness stays locked until the source inventory, missing inputs, scope, acceptance criteria, and owner decision are recorded.
 
@@ -51,11 +57,13 @@ Build readiness stays locked until the source inventory, missing inputs, scope, 
 
 ## Small provider-light extension
 
-`client/src/lib/kinfloVanguardWorkflow.ts` carries the request fields, intake checklist, associate fulfillment stages, missing-input register, sample order, delivery evidence, public-source provenance, and provider boundary. The public preview and Site Studio associate workspace read the same contract.
+`client/src/lib/kinfloVanguardWorkflow.ts` carries the intake stages, source-package categories, disciplines, constraints, associate fulfillment stages, missing-input register, sample order, delivery evidence, public-source provenance, and provider boundary. The public preview and Site Studio associate workspace read the same contract.
+
+`client/src/components/VanguardReversRIntake.tsx` is the embedded local app. It provides a responsive step rail, readiness logic, and receipt generation entirely in browser state. The receipt ID `VE-RRB-PREVIEW` is a fixture label, not a server record.
 
 The same module now carries `sourceSite`, an 11-page public-source inventory and the adapted content used by the source-parity renderer and the Site Studio readiness card.
 
-The public form prepares a local request receipt. It does not transmit entries, upload files, or call a provider.
+The public app prepares a local request receipt. It does not transmit entries, upload files, or call a provider.
 
 ## Configuration tooling gap
 
@@ -70,7 +78,7 @@ The current Site Studio model can configure sites, public content, previews, lau
 - versioned delivery receipts
 - client acceptance evidence
 
-A future implementation should add those records to the configuration schema and read contracts before connecting a live CRM or private file store. That work remains separate from this local fixture.
+A future implementation should add those records to the configuration schema and read contracts before connecting a live CRM or private file store. Site Studio also needs a configuration control that maps intake steps and discipline options to an associate fulfillment pipeline. This lane records that gap instead of adding backend writes or schema changes.
 
 ## Provider boundary
 
