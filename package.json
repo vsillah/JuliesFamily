@@ -53,6 +53,8 @@
     "kinflo:validate-vanguard-metrics-optimization": "node scripts/validate-kinflo-vanguard-metrics-optimization.mjs",
     "kinflo:capture-vanguard-metrics-optimization-qa": "node scripts/capture-vanguard-metrics-optimization-qa.mjs",
     "kinflo:validate-browser-safe-auth-aliases": "node scripts/validate-kinflo-browser-safe-auth-aliases.mjs",
+    "kinflo:validate-convex-identity-cutover": "node scripts/validate-kinflo-convex-identity-cutover.mjs",
+    "kinflo:serve-convex-identity-cutover-smoke": "node scripts/serve-kinflo-identity-cutover-smoke.mjs",
     "kinflo:capture-vanguard-source-parity-qa": "node scripts/capture-vanguard-source-parity-qa.mjs",
     "kinflo:validate-client-website-blueprints": "node scripts/validate-kinflo-client-website-blueprints.mjs",
     "kinflo:validate-convex-launch-blueprint-query": "node scripts/validate-kinflo-convex-launch-blueprint-query.mjs",
@@ -201,7 +203,7 @@
     "kinflo:validate-local-admin-fixture": "node scripts/validate-kinflo-local-admin-fixture.mjs",
     "kinflo:serve-local-admin-smoke": "node scripts/serve-kinflo-local-admin-smoke.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
-    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts convex/preferences.ts convex/integrations.ts convex/campaigns.ts convex/aiReview.ts convex/launchReadiness.ts",
+    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/auth.ts convex/auth.config.ts convex/http.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts convex/preferences.ts convex/integrations.ts convex/campaigns.ts convex/aiReview.ts convex/launchReadiness.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

@@ -37,8 +37,7 @@ import {
   Workflow,
 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -4337,8 +4336,7 @@ function MobileInspectionMode({
 }
 
 export default function AdminKinfloShell() {
-  const { isLoading } = useAuth();
-  const { isAdmin } = useUserRole();
+  const { isLoading, isAdmin } = useKinfloAdminIdentity();
   const [location, navigate] = useLocation();
   const snapshot = getKinfloShellSnapshot();
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);

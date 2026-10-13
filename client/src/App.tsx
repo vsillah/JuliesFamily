@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -23,6 +23,33 @@ function LoginUnconfiguredNotice() {
     }
   }, [toast]);
   return null;
+}
+
+function LegacyGlobalExperience() {
+  return (
+    <>
+      <PersonaSelectionModal />
+      <ChatbotWidget />
+    </>
+  );
+}
+
+function LegacyApplication() {
+  return (
+    <PersonaProvider>
+      <LegacyGlobalExperience />
+      <Router />
+    </PersonaProvider>
+  );
+}
+
+function RoutedApplication() {
+  const [location] = useLocation();
+  if (location === "/admin/kinflo-os") {
+    return <Router />;
+  }
+
+  return <LegacyApplication />;
 }
 import Home from "@/pages/Home";
 import HowItWorks from "@/pages/HowItWorks";
@@ -66,6 +93,7 @@ import AdminAutomationRuns from "@/pages/AdminAutomationRuns";
 import AdminAutomationConfig from "@/pages/AdminAutomationConfig";
 import AdminRoleProvisioning from "@/pages/AdminRoleProvisioning";
 import AdminKinfloShell from "@/pages/AdminKinfloShell";
+import KinfloAdminRoute from "@/components/KinfloAdminRoute";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import KinfloPublicSitePreview from "@/pages/KinfloPublicSitePreview";
@@ -124,7 +152,11 @@ function Router() {
       <Route path="/admin/automation-runs" component={AdminAutomationRuns} />
       <Route path="/admin/automation-config" component={AdminAutomationConfig} />
       <Route path="/admin/role-provisioning" component={AdminRoleProvisioning} />
-      <Route path="/admin/kinflo-os" component={AdminKinfloShell} />
+      <Route path="/admin/kinflo-os">
+        <KinfloAdminRoute>
+          <AdminKinfloShell />
+        </KinfloAdminRoute>
+      </Route>
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />
@@ -146,13 +178,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <PersonaProvider>
-          <Toaster />
-          <LoginUnconfiguredNotice />
-          <PersonaSelectionModal />
-          <ChatbotWidget />
-          <Router />
-        </PersonaProvider>
+        <Toaster />
+        <LoginUnconfiguredNotice />
+        <RoutedApplication />
       </TooltipProvider>
     </QueryClientProvider>
   );
