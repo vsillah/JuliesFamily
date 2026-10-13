@@ -31,7 +31,8 @@ export type ShellDataMode = {
 export type ShellLiveAdapterStatus =
   | "fixture_fallback"
   | "generated_api_pending"
-  | "live_smoke_pending";
+  | "live_smoke_pending"
+  | "live_read_only";
 
 export type ShellLiveAdapterBinding = {
   surface: string;
