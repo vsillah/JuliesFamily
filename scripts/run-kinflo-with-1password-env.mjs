@@ -32,18 +32,17 @@ The runner injects values into the child process only. It never prints secret va
 }
 
 function readOp(args, options = {}) {
-  return execFileSync("op", args, {
-    encoding: "utf8",
-    stdio: ["ignore", "pipe", "pipe"],
-    ...options,
-  }).trim();
-}
-
-function requireSignedIn() {
   try {
-    readOp(["whoami"]);
-  } catch {
-    throw new Error("1Password CLI is not signed in in this terminal. Run `op signin` from the terminal that will execute this script.");
+    return execFileSync("op", args, {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      ...options,
+    }).trim();
+  } catch (error) {
+    const command = args.slice(0, 2).join(" ");
+    throw new Error(
+      `1Password CLI could not complete \`op ${command}\` through the current desktop/terminal session. Unlock 1Password, approve CLI access, then rerun this script.`,
+    );
   }
 }
 
@@ -113,7 +112,6 @@ function readItem() {
 }
 
 function collectValues() {
-  requireSignedIn();
   return {
     ...readItem(),
     ...readRefs(),
