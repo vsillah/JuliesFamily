@@ -84,20 +84,56 @@ async function findPreference(
 ) {
   const preferences = await ctx.db
     .query("adminPreferences")
-    .withIndex("by_user", (q) => q.eq("userId", args.userId))
-    .collect();
+    .withIndex("by_user_and_tenant_and_site", (q: any) => q
+      .eq("userId", args.userId)
+      .eq("tenantId", args.tenantId)
+      .eq("siteId", args.siteId))
+    .unique();
 
-  return preferences.find((preference) => (
-    preference.tenantId === args.tenantId
-    && preference.siteId === args.siteId
-  ));
+  return preferences;
 }
+
+const preferenceDocumentValidator = v.object({
+  _id: v.id("adminPreferences"),
+  _creationTime: v.number(),
+  userId: v.id("users"),
+  tenantId: v.optional(v.id("tenants")),
+  siteId: v.optional(v.id("sites")),
+  notificationPreferences: v.optional(v.any()),
+  workflowPreferences: v.optional(v.any()),
+  interfacePreferences: v.optional(v.any()),
+  communicationPreferences: v.optional(v.any()),
+  defaultLandingPage: v.optional(v.string()),
+  theme: v.optional(v.union(v.literal("light"), v.literal("dark"), v.literal("system"))),
+  itemsPerPage: v.optional(v.number()),
+  dataDensity: v.optional(v.union(v.literal("compact"), v.literal("comfortable"), v.literal("spacious"))),
+  defaultContentFilter: v.optional(v.string()),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+});
 
 export const getMyPreferences = query({
   args: {
     tenantId: v.optional(v.id("tenants")),
     siteId: v.optional(v.id("sites")),
   },
+  returns: v.object({
+    userId: v.id("users"),
+    tenantId: v.optional(v.id("tenants")),
+    siteId: v.optional(v.id("sites")),
+    preferences: v.union(v.null(), preferenceDocumentValidator),
+    defaults: v.object({
+      defaultLandingPage: v.string(),
+      theme: v.literal("system"),
+      itemsPerPage: v.number(),
+      dataDensity: v.literal("comfortable"),
+      defaultContentFilter: v.string(),
+      notificationPreferences: v.any(),
+      workflowPreferences: v.any(),
+      communicationPreferences: v.any(),
+    }),
+    providerBoundary: v.string(),
+  }),
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     const scope = await requirePreferenceScope(ctx, args);
@@ -114,9 +150,9 @@ export const getMyPreferences = query({
       preferences,
       defaults: {
         defaultLandingPage: "/admin/kinflo-os",
-        theme: "system",
+        theme: "system" as const,
         itemsPerPage: 25,
-        dataDensity: "comfortable",
+        dataDensity: "comfortable" as const,
         defaultContentFilter: "all",
         notificationPreferences: {
           newLeadAlerts: true,
@@ -158,6 +194,7 @@ export const upsertMyPreferences = mutation({
     dataDensity: v.optional(v.union(v.literal("compact"), v.literal("comfortable"), v.literal("spacious"))),
     defaultContentFilter: v.optional(v.string()),
   },
+  returns: v.id("adminPreferences"),
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
     const scope = await requirePreferenceScope(ctx, args);

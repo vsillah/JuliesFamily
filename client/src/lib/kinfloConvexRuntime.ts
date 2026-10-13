@@ -109,6 +109,9 @@ export type KinfloConvexRuntimeSnapshot = {
   readOnlySmokeVerified: boolean;
   canUseReadOnlyLiveData: boolean;
   canUseLiveData: boolean;
+  preferencesAdapterSelected: boolean;
+  preferencesSmokeVerified: boolean;
+  canUseLivePreferences: boolean;
   preferenceMutationSmokeClientAvailable: boolean;
   canRequestPreferenceMutationSmoke: boolean;
   activationGate: string;
@@ -135,6 +138,14 @@ function readReadOnlyRuntimeGate() {
   };
 }
 
+function readPreferencesRuntimeGate() {
+  return {
+    preferencesGeneratedApiAvailable: readBooleanEnv(import.meta.env.VITE_KINFLO_PREFERENCES_GENERATED_API_AVAILABLE),
+    preferencesAdapterSelected: import.meta.env.VITE_KINFLO_PREFERENCES_ADAPTER_MODE === "live_verified",
+    preferencesSmokeVerified: readBooleanEnv(import.meta.env.VITE_KINFLO_PREFERENCES_SMOKE_VERIFIED),
+  };
+}
+
 function readPublicConvexUrl() {
   const value = import.meta.env.VITE_CONVEX_URL;
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
@@ -154,10 +165,27 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       && readOnlyAdapterSelected
       && readOnlySmokeVerified,
   );
+  const {
+    preferencesGeneratedApiAvailable,
+    preferencesAdapterSelected,
+    preferencesSmokeVerified,
+  } = readPreferencesRuntimeGate();
+  const canUseLivePreferences = Boolean(
+    publicUrl
+      && preferencesGeneratedApiAvailable
+      && preferencesAdapterSelected
+      && preferencesSmokeVerified,
+  );
+  const preferencesRuntime = {
+    preferencesAdapterSelected,
+    preferencesSmokeVerified,
+    canUseLivePreferences,
+  };
 
   if (!urlConfigured) {
     return {
       ...preferenceMutationSmokeClientGate,
+      ...preferencesRuntime,
       mode: "fixture_only",
       label: "Fixture only",
       urlConfigured,
@@ -174,6 +202,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
   if (!readOnlyGeneratedApiAvailable) {
     return {
       ...preferenceMutationSmokeClientGate,
+      ...preferencesRuntime,
       mode: "env_configured_codegen_pending",
       label: "Convex env ready, codegen pending",
       publicUrl,
@@ -191,6 +220,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
   if (!readOnlySmokeVerified || !readOnlyAdapterSelected) {
     return {
       ...preferenceMutationSmokeClientGate,
+      ...preferencesRuntime,
       mode: "generated_api_ready_smoke_pending",
       label: "Read-only bindings ready, smoke pending",
       publicUrl,
@@ -208,6 +238,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
   if (canUseReadOnlyLiveData) {
     return {
       ...preferenceMutationSmokeClientGate,
+      ...preferencesRuntime,
       mode: "read_only_live_ready",
       label: "Convex read-only live",
       publicUrl,
@@ -224,6 +255,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
 
   return {
     ...preferenceMutationSmokeClientGate,
+    ...preferencesRuntime,
     mode: "live_ready",
     label: "Convex full adapter blocked",
     publicUrl,
