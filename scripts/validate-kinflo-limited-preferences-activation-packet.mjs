@@ -12,10 +12,17 @@ const packet = existsSync(packetPath) ? readFileSync(packetPath, "utf8") : "";
 
 for (const marker of [
   "5600a89f97c8e4c7ef118de9f11cbe19b57f33a1",
-  "dpl_DPGypCtZSfYCR7Mx2et5bjraVc3c",
+  "56c7086ba7b490dd0a529bbd9a188473e05c0c72",
+  "dpl_AFYRpFLeaiD5TGv5TbeNko3uK8ad",
+  "refresh the exact `origin/main` commit and production deployment id immediately before Gate A",
   "preferences.getMyPreferences",
   "preferences.upsertMyPreferences",
   "canUseLiveData=false",
+  "VITE_KINFLO_IDENTITY_MODE=convex_auth",
+  "VITE_CONVEX_URL=<approved KinFlo Convex URL from the 1Password-backed env contract or existing approved Vercel env source>",
+  "VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true",
+  "VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED=true",
+  "VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified",
   "VITE_KINFLO_PREFERENCES_GENERATED_API_AVAILABLE=true",
   "VITE_KINFLO_PREFERENCES_SMOKE_VERIFIED=true",
   "VITE_KINFLO_PREFERENCES_ADAPTER_MODE=live_verified",
@@ -23,6 +30,7 @@ for (const marker of [
   "Gate B: production activation",
   "Production activation is not authorized by this packet.",
   "restore the actor preference state exactly or delete the newly created row",
+  "must not be printed in command output or written to `.env.local`",
   "MP4 and desktop/mobile images",
   "Stop condition",
 ]) {
@@ -44,6 +52,7 @@ for (const exclusion of [
   "provider calls",
   "broad mutation smoke",
   "retries",
+  "printing secret values",
   ".env.local",
 ]) {
   check(`packet excludes ${exclusion}`, packet.includes(exclusion), "A hard exclusion is missing.");
@@ -51,7 +60,7 @@ for (const exclusion of [
 
 check(
   "packet keeps production deployment unchanged during Gate A",
-  packet.includes("Production deployment remains unchanged: dpl_DPGypCtZSfYCR7Mx2et5bjraVc3c") &&
+  packet.includes("Production deployment must be refreshed immediately before Gate A and must remain unchanged during Gate A") &&
     packet.includes("Preview only: no production env changes and no production redeploy"),
   "Gate A must not authorize production environment changes.",
 );
