@@ -170,6 +170,39 @@ export type VanguardFulfillmentEvidenceRecord = {
   auditEventCount: number;
 };
 
+export type VanguardMetricPosture = "on_track" | "watch" | "action_needed";
+
+export type VanguardOperationsMetric = {
+  key:
+    | "throughput"
+    | "cycle_time"
+    | "blocked_order_aging"
+    | "work_in_progress"
+    | "load_balance"
+    | "inventory_readiness"
+    | "paperwork_completeness"
+    | "quality_rework"
+    | "on_time_delivery_readiness"
+    | "associate_capacity";
+  label: string;
+  value: string;
+  windowLabel: string;
+  posture: VanguardMetricPosture;
+  postureLabel: string;
+  interpretation: string;
+  calculation: string;
+};
+
+export type VanguardOptimizationReview = {
+  id: string;
+  title: string;
+  posture: Exclude<VanguardMetricPosture, "on_track">;
+  postureLabel: string;
+  evidence: string;
+  recommendedReview: string;
+  decisionOwner: string;
+};
+
 export const vanguardAssociateAssistContract = {
   systemOfRecord: "convex" as const,
   identityMode: "required_unavailable" as const,
@@ -629,6 +662,162 @@ export const vanguardFulfillmentEvidenceFixture: VanguardFulfillmentEvidenceReco
   recoveryStep: "Resolve material availability, approve current paperwork, then complete the remaining quality checks in order.",
   auditEventCount: 19,
 };
+
+export const vanguardMetricsContract = {
+  systemOfRecord: "convex" as const,
+  dataMode: "sample_operations_snapshot" as const,
+  adminOnly: true,
+  extendsOperationsAndFulfillment: true,
+  liveMetricsEnabled: false,
+  optimizationActionsEnabled: false,
+  providerWritesEnabled: false,
+  generatedApiImportApproved: false,
+  privateUploadsEnabled: false,
+  hiddenEmployeeScoringAllowed: false,
+  individualRankingAllowed: false,
+  capacityBasis: "declared availability and work-in-progress limits" as const,
+  comparisonRules: [
+    "Show the time window and calculation beside each measure.",
+    "Separate order-flow signals from associate coaching and performance review.",
+    "Use team capacity and declared availability without ranking individuals.",
+    "Present optimization items as human review prompts, never automatic decisions.",
+  ],
+  blockedReason: "Live measures and optimization actions need approved order-event reads, bounded reporting windows, and authorized operations roles.",
+  recoveryStep: "Activate authorized order reporting, verify calculation windows, and review each recommendation before changing assignments or delivery plans.",
+};
+
+export const vanguardOperationsMetricsFixture: VanguardOperationsMetric[] = [
+  {
+    key: "throughput",
+    label: "Throughput",
+    value: "7 orders",
+    windowLabel: "Completed in 14 days",
+    posture: "watch",
+    postureLabel: "Watch",
+    interpretation: "One order below the current planning target.",
+    calculation: "Orders moved to delivered or client accepted during the window.",
+  },
+  {
+    key: "cycle_time",
+    label: "Cycle time",
+    value: "6.4 days",
+    windowLabel: "Median · last 14 days",
+    posture: "on_track",
+    postureLabel: "On track",
+    interpretation: "Within the seven-day planning range.",
+    calculation: "Median elapsed time from accepted to ready for delivery.",
+  },
+  {
+    key: "blocked_order_aging",
+    label: "Blocked-order aging",
+    value: "18 hours",
+    windowLabel: "Oldest active blocker",
+    posture: "action_needed",
+    postureLabel: "Action needed",
+    interpretation: "The oldest blocker has crossed the twelve-hour review point.",
+    calculation: "Elapsed time since the oldest unresolved blocker event.",
+  },
+  {
+    key: "work_in_progress",
+    label: "Work in progress",
+    value: "12 of 16",
+    windowLabel: "Across three disciplines",
+    posture: "watch",
+    postureLabel: "Watch",
+    interpretation: "Three quarters of the declared team limit is in use.",
+    calculation: "Active assigned orders compared with declared team limits.",
+  },
+  {
+    key: "load_balance",
+    label: "Load-balance posture",
+    value: "1 at limit",
+    windowLabel: "Three discipline queues",
+    posture: "action_needed",
+    postureLabel: "Action needed",
+    interpretation: "Datacenter work needs a lead priority decision.",
+    calculation: "Discipline capacity bands derived from active work and declared limits.",
+  },
+  {
+    key: "inventory_readiness",
+    label: "Inventory readiness",
+    value: "1 of 3 ready",
+    windowLabel: "Selected fulfillment order",
+    posture: "action_needed",
+    postureLabel: "Action needed",
+    interpretation: "Two material requirements are not fully reserved.",
+    calculation: "Fully reserved requirements divided by required material lines.",
+  },
+  {
+    key: "paperwork_completeness",
+    label: "Paperwork completeness",
+    value: "0 of 2 issued",
+    windowLabel: "Required current documents",
+    posture: "action_needed",
+    postureLabel: "Action needed",
+    interpretation: "The routing sheet and inspection plan still need approval.",
+    calculation: "Issued current documents divided by required current documents.",
+  },
+  {
+    key: "quality_rework",
+    label: "Quality and rework",
+    value: "1 passed · 2 open",
+    windowLabel: "Selected fulfillment order",
+    posture: "watch",
+    postureLabel: "Watch",
+    interpretation: "One hold and one not-ready check remain; no rework event is recorded.",
+    calculation: "Latest check results plus rework events tied to the order.",
+  },
+  {
+    key: "on_time_delivery_readiness",
+    label: "On-time delivery readiness",
+    value: "2 of 4 on track",
+    windowLabel: "Active queue orders",
+    posture: "watch",
+    postureLabel: "Watch",
+    interpretation: "One order is at risk and one needs a timing review.",
+    calculation: "Active orders without an at-risk, breached, or blocked delivery signal.",
+  },
+  {
+    key: "associate_capacity",
+    label: "Associate capacity",
+    value: "4 open slots",
+    windowLabel: "Declared team availability",
+    posture: "watch",
+    postureLabel: "Watch",
+    interpretation: "Open capacity is concentrated outside the at-limit discipline.",
+    calculation: "Sum of declared team slots; no individual score or ranking.",
+  },
+];
+
+export const vanguardOptimizationReviewsFixture: VanguardOptimizationReview[] = [
+  {
+    id: "optimization-material-readiness",
+    title: "Resolve material readiness before releasing downstream work",
+    posture: "action_needed",
+    postureLabel: "Action needed",
+    evidence: "Two of three material requirements are not fully reserved, and the oldest blocker is 18 hours old.",
+    recommendedReview: "Confirm the fastener quantity and passivation window, then record whether the delivery plan needs revision.",
+    decisionOwner: "Operations lead with inventory and quality owners",
+  },
+  {
+    id: "optimization-datacenter-load",
+    title: "Review the at-limit datacenter queue",
+    posture: "action_needed",
+    postureLabel: "Lead review",
+    evidence: "Datacenter has four active orders against a declared limit of four.",
+    recommendedReview: "Choose whether to change priority, adjust timing, or keep the current plan; record the reason.",
+    decisionOwner: "Vanguard operations lead",
+  },
+  {
+    id: "optimization-paperwork-quality",
+    title: "Sequence paperwork and quality reviews",
+    posture: "watch",
+    postureLabel: "Watch",
+    evidence: "No required current document is issued, while two quality checks remain open.",
+    recommendedReview: "Approve the routing sheet first, then release the dimensional and finish checks in dependency order.",
+    decisionOwner: "Engineering quality lead",
+  },
+];
 
 export const vanguardOrderPortalContract = {
   systemOfRecord: "convex" as const,

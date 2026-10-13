@@ -102,6 +102,9 @@ import {
   vanguardAssistQueueFixture,
   vanguardFulfillmentContract,
   vanguardFulfillmentEvidenceFixture,
+  vanguardMetricsContract,
+  vanguardOperationsMetricsFixture,
+  vanguardOptimizationReviewsFixture,
   vanguardOperationsCapacityFixture,
   vanguardOperationsContract,
   vanguardOperationsQueueFixtures,
@@ -2178,6 +2181,11 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
     { label: "Paperwork versions", value: vanguardFulfillmentEvidenceFixture.documents.length },
     { label: "Checks complete", value: vanguardFulfillmentEvidenceFixture.qualityChecks.filter((item) => item.status === "passed").length },
   ];
+  const metricPostureTone = {
+    on_track: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    watch: "border-blue-200 bg-blue-50 text-blue-700",
+    action_needed: "border-amber-200 bg-amber-50 text-amber-800",
+  } as const;
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4" data-testid="section-kinflo-vanguard-fulfillment-workspace">
@@ -2605,6 +2613,74 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
           <div className="text-sm font-semibold text-amber-950">Fulfillment actions are off</div>
           <p className="mt-1 text-xs leading-5 text-amber-900">{vanguardFulfillmentContract.blockedReason}</p>
           <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">Next: {vanguardFulfillmentContract.recoveryStep}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-vanguard-metrics-optimization">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-sm font-semibold text-slate-950">Order operations measures</div>
+              <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">Decision support</Badge>
+              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">Read only</Badge>
+            </div>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-600">
+              Review order flow, readiness, delivery risk, and team capacity with visible windows and calculation notes. Team availability is never an individual performance score.
+            </p>
+          </div>
+          <Button disabled className="w-fit" data-testid="kinflo-vanguard-apply-optimization-gated"><LockKeyhole className="mr-2 h-4 w-4" /> Changes unavailable</Button>
+        </div>
+
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5" data-testid="section-kinflo-vanguard-metric-cards">
+          {vanguardOperationsMetricsFixture.map((metric) => (
+            <article key={metric.key} className="rounded-md border border-slate-200 bg-white p-3" data-testid={`kinflo-vanguard-metric-${metric.key}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="text-xs font-semibold text-slate-950">{metric.label}</div>
+                <Badge variant="outline" className={metricPostureTone[metric.posture]}>{metric.postureLabel}</Badge>
+              </div>
+              <div className="mt-2 text-lg font-semibold text-slate-950">{metric.value}</div>
+              <div className="mt-1 text-[11px] font-medium text-slate-500">{metric.windowLabel}</div>
+              <p className="mt-2 text-xs leading-5 text-slate-600">{metric.interpretation}</p>
+              <p className="mt-2 border-t border-slate-100 pt-2 text-[11px] leading-4 text-slate-500">{metric.calculation}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,0.75fr)]">
+          <section className="rounded-md border border-slate-200 bg-white p-3" data-testid="section-kinflo-vanguard-optimization-reviews">
+            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-slate-950">Optimization review queue</div>
+                <p className="mt-1 text-xs leading-5 text-slate-600">Each item explains the evidence and leaves the operating decision with a named owner.</p>
+              </div>
+              <div className="text-[11px] text-slate-500">{vanguardOptimizationReviewsFixture.length} reviews</div>
+            </div>
+            <div className="mt-3 space-y-2">
+              {vanguardOptimizationReviewsFixture.map((review) => (
+                <article key={review.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="text-xs font-semibold text-slate-950">{review.title}</div>
+                    <Badge variant="outline" className={metricPostureTone[review.posture]}>{review.postureLabel}</Badge>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-600"><span className="font-semibold text-slate-700">Evidence:</span> {review.evidence}</p>
+                  <p className="mt-1 text-xs leading-5 text-slate-600"><span className="font-semibold text-slate-700">Review:</span> {review.recommendedReview}</p>
+                  <div className="mt-2 text-[11px] font-semibold text-slate-700">Decision owner: {review.decisionOwner}</div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <div className="space-y-3" data-testid="section-kinflo-vanguard-metrics-guardrails">
+            <section className="rounded-md border border-blue-200 bg-blue-50 p-3" data-testid="section-kinflo-vanguard-capacity-guardrail">
+              <div className="text-sm font-semibold text-blue-950">Capacity guardrail</div>
+              <p className="mt-1 text-xs leading-5 text-blue-900">Capacity uses declared availability and work-in-progress limits. It does not rank associates, infer effort, or feed an employee score.</p>
+            </section>
+            <section className="rounded-md border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-vanguard-metrics-gate">
+              <div className="text-sm font-semibold text-amber-950">Metrics actions are off</div>
+              <p className="mt-1 text-xs leading-5 text-amber-900">{vanguardMetricsContract.blockedReason}</p>
+              <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">Next: {vanguardMetricsContract.recoveryStep}</p>
+            </section>
+          </div>
         </div>
       </div>
 
