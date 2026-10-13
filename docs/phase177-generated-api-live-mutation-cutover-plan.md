@@ -56,6 +56,42 @@ The source-only implementation lane now provides the reviewable capability witho
 
 This closes the source gap only. Batch 3 deployment, server environment configuration, and any Batch 4-5 smoke request or execution remain separate captain/user gates.
 
+## Batches 4-5 production smoke result
+
+Status: complete on October 13, 2026.
+
+Approved execution binding:
+
+- Target deployment: `dpl_Ef8huNAEDBEwMBBx6Cr3Q2iwc41x`
+- Target source commit: `b1ac03f8ad037908d3e307dab22e4adcb465f0ce`
+- Convex deployment: `hallowed-manatee-765`
+- Approval id: `phase177-batch4-preference-smoke-2026-10-13`
+- Mutation executed: `preferences.runPreferenceSmoke`
+- Sentinel: `dataDensity = spacious`
+- Actor user id: `q175437qr42jajgpqvwapcn4ys8g69w9`
+
+Sanitized receipt:
+
+- Receipt id: `q573m3wengmf6a8e9hdh29w5658g7hfc`
+- Function: `preferences.runPreferenceSmoke`
+- Cleanup result: `deleted_new`
+- Prior row existed: `false`
+- Read-back verified: `true`
+- Redaction version: `preference-smoke-v1`
+
+Evidence:
+
+- Before read-only state: `dataDensity=null`, `exists=false`, `updatedAt=null`
+- After read-only state: `dataDensity=null`, `exists=false`, `updatedAt=null`
+- Replay denial: nonce reuse rejected with `Preference smoke nonce has already been used`
+- Gate-off proof: `0` remaining `KINFLO_PREFERENCE_SMOKE_*` environment names
+- Temporary grant helper: `phase177Ops` absent from deployed function spec after cleanup
+- Deployed smoke function: `preferences.runPreferenceSmoke` present
+- Provider-write zero proof: no publish, billing, invitation, email/SMS, CRM lead, site creation, domain/DNS, storage, provider, full-adapter, or broad mutation actions were invoked
+- `.env.local`: absent after execution
+
+This evidence closes only the bounded preference-smoke window. It does not authorize the limited preferences adapter, full live adapter, provider writes, public publish, billing, invitations, email/SMS, CRM lead writes, site creation, domain/DNS, or storage actions.
+
 ## Ordered cutover batches
 
 ### Batch 0 — freeze and bind the read-only baseline
@@ -151,4 +187,16 @@ These commands are local contract checks. None opens a smoke window, imports pro
 
 ## Captain decision needed next
 
-Review the Batches 1-2 source implementation and either approve it for merge or return it for revision. Merge approval still must keep deployment, environment changes, production mutation execution, provider writes, full-adapter activation, and release outside this lane; Batch 3 requires a separate captain decision.
+Batch 6 is the next reviewable phase: limited preferences adapter review. The bounded Batch 4-5 mutation smoke passed and the server gate is closed, but mutation-smoke approval alone does not authorize a client adapter cutover.
+
+Before Batch 6 can open, the captain should create or route a dedicated implementation lane for the limited preferences adapter and require:
+
+- default-off feature gating,
+- fixture fallback preservation,
+- desktop and mobile UI behavior review,
+- blocked/error/recovery states,
+- cross-user and cross-tenant denial,
+- exact persisted preference behavior,
+- post-change MP4 and image evidence before any client-facing Human QA request.
+
+Provider writes, invitations, publish, billing, storage, email/SMS, DNS, and the full live adapter remain separate no-go gates.
