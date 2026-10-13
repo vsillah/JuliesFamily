@@ -53,6 +53,53 @@ check(
   "The hardening artifact must preserve the approved Phase 177 exclusions.",
 );
 check(
+  "ops hardening document moves browser-public config to Vercel",
+  [
+    "Browser-public KinFlo runtime configuration belongs in Vercel Preview/Production environment configuration",
+    "VITE_CONVEX_URL",
+    "VITE_KINFLO_IDENTITY_MODE=convex_auth",
+    "VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true",
+    "VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED=true",
+    "VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified",
+    "captain may verify Vercel metadata and deploy a preview without opening 1Password",
+  ].every((marker) => doc.includes(marker)),
+  "The hardening artifact must prevent routine preview smoke from depending on interactive 1Password access.",
+);
+check(
+  "ops hardening document keeps preferences flags preview scoped",
+  [
+    "VITE_KINFLO_PREFERENCES_GENERATED_API_AVAILABLE=true",
+    "VITE_KINFLO_PREFERENCES_SMOKE_VERIFIED=true",
+    "VITE_KINFLO_PREFERENCES_ADAPTER_MODE=live_verified",
+    "no production environment values changed",
+  ].every((marker) => doc.includes(marker)),
+  "The hardening artifact must keep the limited preferences activation scoped to preview until a later production gate.",
+);
+check(
+  "ops hardening document defines true secret automation boundary",
+  [
+    "Auth0 client secrets",
+    "1Password service account",
+    "OP_SERVICE_ACCOUNT_TOKEN",
+    "least-privilege access to the KinFlo env item only",
+    "separate protected gate",
+  ].every((marker) => doc.includes(marker)),
+  "The hardening artifact should describe a non-interactive secret path without storing or authorizing one here.",
+);
+check(
+  "ops hardening document records Gate A stop condition",
+  [
+    "Gate A preview-only limited preferences activation smoke stopped safely",
+    "dpl_4stjDJ7PwJf9gXpyxqZkMfqBSxAL",
+    "KinFlo identity unavailable",
+    "preferences.getMyPreferences`: not run",
+    "preferences.upsertMyPreferences`: not run",
+    "Production env changes: zero",
+    "Production redeploys: zero",
+  ].every((marker) => doc.includes(marker)),
+  "The hardening artifact should preserve the failed Gate A evidence without treating it as a smoke pass.",
+);
+check(
   "ops hardening document captures deploy-command mismatch",
   doc.includes("Convex deploy-command reconciliation") && doc.includes("temporary symlinked workspace"),
   "The hardening artifact should record the Convex deploy command mismatch before another production attempt.",
