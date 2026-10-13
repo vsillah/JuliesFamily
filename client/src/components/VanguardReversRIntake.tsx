@@ -21,6 +21,11 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
+import {
+  VANGUARD_LOCAL_RECEIPT_STORAGE_KEY,
+  VANGUARD_ORDER_PORTAL_PATH,
+  createVanguardLocalReceipt,
+} from "@/lib/kinfloVanguardOrderPortal";
 
 const stepIcons = [FileStack, Target, Wrench, SlidersHorizontal, ClipboardCheck];
 
@@ -52,6 +57,17 @@ export default function VanguardReversRIntake() {
 
   function goToStep(next: number) {
     setStep(Math.max(0, Math.min(vanguardWorkflow.intakeStages.length - 1, next)));
+  }
+
+  function continueToOrderPortal() {
+    const receipt = createVanguardLocalReceipt({
+      sourcePackage,
+      goal: goal.trim(),
+      discipline,
+      constraints: [...constraints, constraintNotes.trim()].filter(Boolean),
+    });
+    window.sessionStorage.setItem(VANGUARD_LOCAL_RECEIPT_STORAGE_KEY, JSON.stringify(receipt));
+    window.location.assign(`${VANGUARD_ORDER_PORTAL_PATH}?source=local-receipt`);
   }
 
   return (
@@ -265,6 +281,15 @@ export default function VanguardReversRIntake() {
                     <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Next owner</span><span className="mt-1 block font-semibold text-emerald-950">Vanguard intake associate</span></div>
                     <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Transmission</span><span className="mt-1 block font-semibold text-emerald-950">None · local receipt</span></div>
                   </div>
+                  <Button
+                    type="button"
+                    onClick={continueToOrderPortal}
+                    className="mt-4 h-auto w-full whitespace-normal bg-slate-950 py-2.5 text-white hover:bg-slate-800"
+                    data-testid="vanguard-continue-to-order-portal"
+                  >
+                    <LockKeyhole className="mr-2 h-4 w-4" /> Continue to secure order portal
+                  </Button>
+                  <p className="mt-2 text-xs leading-5 text-emerald-800">Transfers the safe receipt fields within this browser session only. Authentication and Convex draft creation remain gated.</p>
                 </div>
               ) : null}
             </div>

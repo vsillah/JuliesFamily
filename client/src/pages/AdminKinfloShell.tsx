@@ -94,6 +94,11 @@ import {
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
+import {
+  VANGUARD_ORDER_PORTAL_PATH,
+  vanguardOrderPortalContract,
+  vanguardPortalOrderFixture,
+} from "@/lib/kinfloVanguardOrderPortal";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -2162,6 +2167,39 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
               <div className="mt-1 text-[11px] leading-4 text-slate-600">{stage.summary}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-violet-200 bg-violet-50 p-3" data-testid="section-kinflo-vanguard-order-portal-handoff">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-sm font-semibold text-violet-950">Authenticated order portal foundation</div>
+              <Badge variant="outline" className="border-violet-300 bg-white text-violet-800">Convex-first · fail closed</Badge>
+            </div>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-violet-900">
+              The public receipt now has a secure portal path and a typed promotion contract. Identity, generated bindings, live draft creation, private upload, and provider writes remain gated; the visible order is synthetic tracking evidence only.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="w-fit border-violet-300 bg-white text-violet-900 hover:bg-violet-100 hover:text-violet-950">
+            <Link href={VANGUARD_ORDER_PORTAL_PATH}><ExternalLink className="mr-2 h-4 w-4" /> Open order portal</Link>
+          </Button>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { label: "Portal state", value: "Local fixture" },
+            { label: "System of record", value: vanguardOrderPortalContract.systemOfRecord },
+            { label: "Tracking evidence", value: vanguardPortalOrderFixture.orderNumber },
+            { label: "External writes", value: "0" },
+          ].map((item) => (
+            <div key={item.label} className="rounded-md border border-violet-200 bg-white px-3 py-2">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-violet-600">{item.label}</div>
+              <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 rounded-md border border-violet-200 bg-white p-3 text-xs leading-5 text-slate-700" data-testid="section-kinflo-vanguard-order-portal-gate">
+          <span className="font-semibold">Runtime gate:</span> {vanguardOrderPortalContract.blockedReason} Private file handling stays disabled until retention, access, and attachment-manifest rules are approved.
         </div>
       </div>
 
