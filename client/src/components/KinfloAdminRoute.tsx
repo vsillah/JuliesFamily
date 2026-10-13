@@ -38,15 +38,26 @@ function IdentityGateCard({
   action?: ReactNode;
   busy?: boolean;
 }) {
-  const Icon = busy ? Loader2 : title === "KinFlo identity unavailable" ? AlertTriangle : ShieldCheck;
+  const isWarning = title === "KinFlo identity unavailable"
+    || title === "KinFlo identity sync failed"
+    || title === "KinFlo admin access required";
+  const Icon = busy ? Loader2 : isWarning ? AlertTriangle : ShieldCheck;
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12">
-      <section className="w-full max-w-lg rounded-2xl border border-slate-700 bg-slate-900 p-6 text-slate-50 shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
+      <section
+        className="w-full max-w-lg rounded-lg border border-slate-200 bg-white p-5 text-slate-950 shadow-sm sm:p-6"
+        data-testid="section-kinflo-identity-gate"
+      >
         <div className="flex items-start gap-3">
-          <Icon className={`mt-0.5 h-6 w-6 text-amber-300 ${busy ? "animate-spin" : ""}`} aria-hidden="true" />
-          <div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-slate-200 bg-slate-50">
+            <Icon
+              className={`h-5 w-5 ${isWarning ? "text-amber-600" : "text-slate-600"} ${busy ? "animate-spin" : ""}`}
+              aria-hidden="true"
+            />
+          </div>
+          <div className="min-w-0 pt-0.5">
             <h1 className="text-xl font-semibold">{title}</h1>
-            <p className="mt-2 text-sm leading-6 text-slate-300">{detail}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{detail}</p>
           </div>
         </div>
         {action ? <div className="mt-6">{action}</div> : null}

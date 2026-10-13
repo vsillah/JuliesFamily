@@ -33,6 +33,8 @@ The focused smoke server forces the route into fail-closed mode and counts any r
 
 Any nonzero count fails the isolation gate.
 
+The fail-closed, loading, sign-in, sync-failed, and access-denied states share the KinFlo OS light operational treatment: slate-50 page background, white card, restrained slate border and shadow, compact 8px-radius card, and readable slate text. The identity boundary does not introduce a dark-mode takeover surface.
+
 ## Authorization Boundary
 
 An Auth0 sign-in is identity proof, not KinFlo admin authority. After authentication, the route resolves the Convex user projection. Only a user whose Convex `platformRole` is `super_admin` may render the KinFlo admin shell. Missing configuration, missing projection, sync failure, and non-admin users remain blocked.

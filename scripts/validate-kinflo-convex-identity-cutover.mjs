@@ -70,8 +70,21 @@ requireIncludes("client/src/components/KinfloAdminRoute.tsx", [
   '"controlPlane:upsertCurrentUser"',
   'signIn("auth0"',
   'viewer.platformRole !== "super_admin"',
+  'data-testid="section-kinflo-identity-gate"',
+  'rounded-lg border border-slate-200 bg-white',
+  'bg-slate-50 px-4 py-12',
+  'text-slate-600',
   "This route is fail-closed and will not fall back to the legacy Postgres session.",
 ]);
+
+const identityRoute = read("client/src/components/KinfloAdminRoute.tsx");
+for (const forbiddenClass of ["bg-slate-950", "bg-slate-900", "text-slate-50", "shadow-2xl"]) {
+  if (identityRoute.includes(forbiddenClass)) {
+    fail(`identity gate excludes ${forbiddenClass}`, "Dark identity-gate styling remains.");
+  } else {
+    pass(`identity gate excludes ${forbiddenClass}`);
+  }
+}
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "useKinfloAdminIdentity",
