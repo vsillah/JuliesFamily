@@ -146,6 +146,90 @@
     "runtimeActionsEnabled": false,
     "clientStatusChanged": false
   },
+  "phase5Fulfillment": {
+    "status": "provider_light_fixture",
+    "adminOnly": true,
+    "humanQaRequiredForThisSlice": false,
+    "extendsPhase4QueueAndCapacity": true,
+    "inventoryReservationStates": [
+      "not_reserved",
+      "partially_reserved",
+      "reserved",
+      "unavailable"
+    ],
+    "manufacturingDocumentStates": [
+      "draft",
+      "in_review",
+      "issued",
+      "superseded"
+    ],
+    "qualityCheckStates": [
+      "not_ready",
+      "ready",
+      "passed",
+      "hold",
+      "failed"
+    ],
+    "deliveryReadinessStates": [
+      "blocked",
+      "assembling",
+      "review",
+      "ready"
+    ],
+    "reservationRules": {
+      "orderRequirementRequired": true,
+      "inventoryItemRequired": true,
+      "quantityAndUnitRequired": true,
+      "availabilityEvidenceRequired": true,
+      "partialReservationAllowed": true,
+      "serverAuthorizationRequired": true,
+      "immutableReservationEventRequired": true
+    },
+    "documentVersionRules": {
+      "appendOnlyVersions": true,
+      "storageIdsNotUrls": true,
+      "supersessionEventRequired": true,
+      "issueRequiresNamedReviewer": true,
+      "issuedVersionMutable": false
+    },
+    "qualityRules": {
+      "namedRequirementRequired": true,
+      "namedOwnerRequired": true,
+      "resultAndEvidenceRequired": true,
+      "holdAndFailureBlockDelivery": true,
+      "completedResultMutable": false
+    },
+    "receiptPrerequisites": [
+      "approved_delivery_manifest",
+      "issued_manufacturing_paperwork",
+      "completed_quality_checks",
+      "versioned_delivery_evidence",
+      "named_recipient",
+      "acceptance_method"
+    ],
+    "deliveryEvidence": [
+      "deliverable_manifest_version",
+      "manufacturing_document_versions",
+      "quality_result_records",
+      "delivery_actor_and_timestamp",
+      "recipient_and_delivery_method",
+      "client_acceptance_or_rework_event"
+    ],
+    "auditEventsRequired": [
+      "material_requirement_recorded",
+      "inventory_reservation_requested",
+      "inventory_reservation_changed",
+      "manufacturing_document_version_added",
+      "manufacturing_document_issued",
+      "quality_check_recorded",
+      "delivery_package_prepared",
+      "delivery_recorded",
+      "receipt_acknowledged"
+    ],
+    "runtimeActionsEnabled": false,
+    "privateUploadsEnabled": false,
+    "clientStatusChanged": false
+  },
   "tables": [
     "buildOrders",
     "orderDraftSections",

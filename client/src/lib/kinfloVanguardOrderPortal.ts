@@ -107,6 +107,69 @@ export type VanguardCapacitySnapshot = {
   routingNote: string;
 };
 
+export type VanguardInventoryReservationStatus = "not_reserved" | "partially_reserved" | "reserved" | "unavailable";
+export type VanguardManufacturingDocumentStatus = "draft" | "in_review" | "issued" | "superseded";
+export type VanguardQualityCheckStatus = "not_ready" | "ready" | "passed" | "hold" | "failed";
+export type VanguardDeliveryReadiness = "blocked" | "assembling" | "review" | "ready";
+
+export type VanguardMaterialRequirement = {
+  id: string;
+  itemName: string;
+  requiredQuantity: string;
+  availableQuantity: string;
+  reservationStatus: VanguardInventoryReservationStatus;
+  reservationLabel: string;
+  needByLabel: string;
+  evidenceLabel: string;
+  blocker: string | null;
+};
+
+export type VanguardManufacturingDocumentVersion = {
+  id: string;
+  documentName: string;
+  versionLabel: string;
+  status: VanguardManufacturingDocumentStatus;
+  statusLabel: string;
+  preparedBy: string;
+  reviewedAtLabel: string;
+  evidenceLabel: string;
+};
+
+export type VanguardQualityCheck = {
+  id: string;
+  label: string;
+  owner: string;
+  status: VanguardQualityCheckStatus;
+  statusLabel: string;
+  requirement: string;
+  evidenceLabel: string;
+};
+
+export type VanguardReceiptPrerequisite = {
+  id: string;
+  label: string;
+  state: "complete" | "pending" | "blocked";
+  stateLabel: string;
+  detail: string;
+};
+
+export type VanguardFulfillmentEvidenceRecord = {
+  orderNumber: string;
+  title: string;
+  queueState: Extract<VanguardOperationsQueueState, "in_progress" | "blocked" | "quality_review" | "ready_for_delivery">;
+  queueLabel: string;
+  deliveryReadiness: VanguardDeliveryReadiness;
+  deliveryReadinessLabel: string;
+  materials: VanguardMaterialRequirement[];
+  documents: VanguardManufacturingDocumentVersion[];
+  qualityChecks: VanguardQualityCheck[];
+  receiptPrerequisites: VanguardReceiptPrerequisite[];
+  deliveryEvidence: string[];
+  blockedNextAction: string;
+  recoveryStep: string;
+  auditEventCount: number;
+};
+
 export const vanguardAssociateAssistContract = {
   systemOfRecord: "convex" as const,
   identityMode: "required_unavailable" as const,
@@ -384,6 +447,188 @@ export const vanguardOperationsQueueFixtures: VanguardOperationsQueueItem[] = [
     auditEventCount: 15,
   },
 ];
+
+export const vanguardFulfillmentContract = {
+  systemOfRecord: "convex" as const,
+  dataMode: "sample_fulfillment_record" as const,
+  adminOnly: true,
+  inventoryReservationEnabled: false,
+  manufacturingDocumentIssueEnabled: false,
+  qualityCheckExecutionEnabled: false,
+  deliveryEnabled: false,
+  privateUploadsEnabled: false,
+  providerWritesEnabled: false,
+  generatedApiImportApproved: false,
+  reservationStates: ["not_reserved", "partially_reserved", "reserved", "unavailable"] as const,
+  documentStates: ["draft", "in_review", "issued", "superseded"] as const,
+  qualityStates: ["not_ready", "ready", "passed", "hold", "failed"] as const,
+  deliveryStates: ["blocked", "assembling", "review", "ready"] as const,
+  receiptRequirements: [
+    "approved delivery manifest",
+    "issued manufacturing paperwork",
+    "completed quality checks",
+    "versioned delivery evidence",
+    "named recipient and acceptance method",
+  ],
+  auditHooks: [
+    "material_requirement_recorded",
+    "inventory_reservation_requested",
+    "inventory_reservation_changed",
+    "manufacturing_document_version_added",
+    "manufacturing_document_issued",
+    "quality_check_recorded",
+    "delivery_package_prepared",
+    "delivery_recorded",
+    "receipt_acknowledged",
+  ],
+  blockedReason: "Inventory, paperwork, quality, and delivery actions need an active associate identity and authorized order access.",
+  recoveryStep: "Complete account activation, connect approved order services, and verify role checks before recording fulfillment work.",
+};
+
+export const vanguardFulfillmentEvidenceFixture: VanguardFulfillmentEvidenceRecord = {
+  orderNumber: "VE-DEMO-1042",
+  title: "Stainless mounting bracket rebuild",
+  queueState: "blocked",
+  queueLabel: "Fulfillment blocked",
+  deliveryReadiness: "blocked",
+  deliveryReadinessLabel: "Delivery package blocked",
+  materials: [
+    {
+      id: "material-plate-304",
+      itemName: "304 stainless plate · 3/16 in",
+      requiredQuantity: "2 blanks",
+      availableQuantity: "2 available",
+      reservationStatus: "reserved",
+      reservationLabel: "Reserved",
+      needByLabel: "Needed before cutting",
+      evidenceLabel: "Stock count review",
+      blocker: null,
+    },
+    {
+      id: "material-fastener-kit",
+      itemName: "M8 stainless fastener kit",
+      requiredQuantity: "4 sets",
+      availableQuantity: "2 available",
+      reservationStatus: "partially_reserved",
+      reservationLabel: "Partially reserved",
+      needByLabel: "Needed before fit check",
+      evidenceLabel: "Bin count review",
+      blocker: "Two sets remain unavailable for the planned fit check.",
+    },
+    {
+      id: "material-finish",
+      itemName: "Passivation service lot",
+      requiredQuantity: "1 lot",
+      availableQuantity: "No slot confirmed",
+      reservationStatus: "unavailable",
+      reservationLabel: "Unavailable",
+      needByLabel: "Needed before final inspection",
+      evidenceLabel: "Supplier availability review",
+      blocker: "A service window and handling owner still need confirmation.",
+    },
+  ],
+  documents: [
+    {
+      id: "document-routing-sheet",
+      documentName: "Manufacturing routing sheet",
+      versionLabel: "Version 3",
+      status: "in_review",
+      statusLabel: "In review",
+      preparedBy: "CAD / CAM queue",
+      reviewedAtLabel: "Review due today · 2:00 PM ET",
+      evidenceLabel: "Revision comparison + reviewer note",
+    },
+    {
+      id: "document-inspection-plan",
+      documentName: "Dimensional inspection plan",
+      versionLabel: "Version 2",
+      status: "draft",
+      statusLabel: "Draft",
+      preparedBy: "Engineering quality queue",
+      reviewedAtLabel: "Waiting on drawing approval",
+      evidenceLabel: "Characteristic list + tolerance review",
+    },
+    {
+      id: "document-traveler",
+      documentName: "Shop traveler",
+      versionLabel: "Version 1",
+      status: "superseded",
+      statusLabel: "Superseded",
+      preparedBy: "Operations planning",
+      reviewedAtLabel: "Replaced by routing sheet version 3",
+      evidenceLabel: "Supersession event",
+    },
+  ],
+  qualityChecks: [
+    {
+      id: "quality-material-cert",
+      label: "Material identity check",
+      owner: "Receiving quality",
+      status: "passed",
+      statusLabel: "Passed",
+      requirement: "Match grade and thickness to the approved material requirement.",
+      evidenceLabel: "Receiving inspection record",
+    },
+    {
+      id: "quality-dimensional",
+      label: "Dimensional inspection",
+      owner: "Engineering quality",
+      status: "not_ready",
+      statusLabel: "Not ready",
+      requirement: "Inspect named characteristics after the routing sheet is issued.",
+      evidenceLabel: "Inspection result pending",
+    },
+    {
+      id: "quality-finish",
+      label: "Finish and handling check",
+      owner: "Quality lead",
+      status: "hold",
+      statusLabel: "On hold",
+      requirement: "Confirm passivation lot, handling instructions, and final visual review.",
+      evidenceLabel: "Hold reason + owner review",
+    },
+  ],
+  receiptPrerequisites: [
+    {
+      id: "receipt-manifest",
+      label: "Delivery manifest",
+      state: "pending",
+      stateLabel: "Pending",
+      detail: "List each deliverable and its approved version.",
+    },
+    {
+      id: "receipt-paperwork",
+      label: "Issued paperwork",
+      state: "blocked",
+      stateLabel: "Blocked",
+      detail: "Issue the routing sheet and inspection plan after review.",
+    },
+    {
+      id: "receipt-quality",
+      label: "Quality evidence",
+      state: "blocked",
+      stateLabel: "Blocked",
+      detail: "Complete dimensional and finish checks with named results.",
+    },
+    {
+      id: "receipt-recipient",
+      label: "Recipient confirmation",
+      state: "complete",
+      stateLabel: "Complete",
+      detail: "Named recipient and acceptance method are recorded.",
+    },
+  ],
+  deliveryEvidence: [
+    "Versioned deliverable manifest",
+    "Issued manufacturing paperwork",
+    "Quality result records",
+    "Delivery event and recipient",
+    "Client acceptance or rework request",
+  ],
+  blockedNextAction: "Confirm the missing fastener sets and passivation window before releasing paperwork or quality work.",
+  recoveryStep: "Resolve material availability, approve current paperwork, then complete the remaining quality checks in order.",
+  auditEventCount: 19,
+};
 
 export const vanguardOrderPortalContract = {
   systemOfRecord: "convex" as const,
