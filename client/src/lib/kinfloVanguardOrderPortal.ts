@@ -60,6 +60,53 @@ export type VanguardAssistQueueItem = {
   activity: VanguardAssistActivity[];
 };
 
+export type VanguardOperationsQueueState =
+  | "unassigned"
+  | "intake_review"
+  | "waiting_on_client"
+  | "quote_ready"
+  | "accepted_unplanned"
+  | "in_progress"
+  | "blocked"
+  | "quality_review"
+  | "ready_for_delivery"
+  | "overdue";
+
+export type VanguardAssignmentState = "unassigned" | "proposed" | "assigned" | "reassignment_review";
+export type VanguardCapacityBand = "available" | "balanced" | "near_limit" | "at_limit";
+export type VanguardOperationsRisk = "on_track" | "watch" | "at_risk" | "breached";
+
+export type VanguardOperationsQueueItem = {
+  orderNumber: string;
+  title: string;
+  queueState: VanguardOperationsQueueState;
+  queueLabel: string;
+  assignmentState: VanguardAssignmentState;
+  assignmentLabel: string;
+  discipline: string;
+  requiredRole: string;
+  dueLabel: string;
+  ageLabel: string;
+  risk: VanguardOperationsRisk;
+  riskLabel: string;
+  primaryOwner: string;
+  blocker: string | null;
+  escalationOwner: string;
+  nextAction: string;
+  evidenceLabel: string;
+  auditEventCount: number;
+};
+
+export type VanguardCapacitySnapshot = {
+  discipline: string;
+  band: VanguardCapacityBand;
+  bandLabel: string;
+  activeWork: number;
+  workLimit: number;
+  availableSlots: number;
+  routingNote: string;
+};
+
 export const vanguardAssociateAssistContract = {
   systemOfRecord: "convex" as const,
   identityMode: "required_unavailable" as const,
@@ -152,6 +199,191 @@ export const vanguardAssistQueueFixture: VanguardAssistQueueItem = {
     },
   ],
 };
+
+export const vanguardOperationsContract = {
+  systemOfRecord: "convex" as const,
+  dataMode: "sample_operations_queue" as const,
+  liveAssignmentEnabled: false,
+  liveEscalationEnabled: false,
+  providerNotificationsEnabled: false,
+  generatedApiImportApproved: false,
+  queueStates: [
+    "unassigned",
+    "intake_review",
+    "waiting_on_client",
+    "quote_ready",
+    "accepted_unplanned",
+    "in_progress",
+    "blocked",
+    "quality_review",
+    "ready_for_delivery",
+    "overdue",
+  ] as const,
+  assignmentStates: ["unassigned", "proposed", "assigned", "reassignment_review"] as const,
+  capacityBands: ["available", "balanced", "near_limit", "at_limit"] as const,
+  transitionRules: [
+    {
+      from: "unassigned",
+      to: "intake_review",
+      requires: ["named primary owner", "assignment reason", "capacity check", "assignment audit event"],
+    },
+    {
+      from: "intake_review",
+      to: "waiting_on_client",
+      requires: ["client-safe question", "response due date", "status event"],
+    },
+    {
+      from: "intake_review",
+      to: "quote_ready",
+      requires: ["scope summary", "acceptance criteria", "risk review", "status event"],
+    },
+    {
+      from: "accepted_unplanned",
+      to: "in_progress",
+      requires: ["work plan", "committed due date", "primary owner", "status event"],
+    },
+    {
+      from: "in_progress",
+      to: "blocked",
+      requires: ["blocker reason", "blocker owner", "next review date", "status event"],
+    },
+    {
+      from: "blocked",
+      to: "prior_state",
+      requires: ["resolution note", "evidence reference", "resume audit event"],
+    },
+  ] as const,
+  routingInputs: [
+    "discipline",
+    "required capability",
+    "location",
+    "security handling",
+    "due window",
+    "current work in progress",
+    "continuity owner",
+  ] as const,
+  loadBalancingRules: [
+    "Show the routing inputs behind every candidate suggestion.",
+    "A lead confirms assignments and records the reason for an override.",
+    "Protected personal attributes are never routing inputs.",
+    "Team capacity is separate from individual coaching or performance review.",
+  ] as const,
+  blockedReason: "Live assignment, reassignment, escalation, and provider notifications need active identity, approved generated bindings, and server-side authorization.",
+  recoveryStep: "Review the queue and capacity preview now. Activate identity, generated bindings, and role checks before enabling an operations action.",
+};
+
+export const vanguardOperationsCapacityFixture: VanguardCapacitySnapshot[] = [
+  {
+    discipline: "CAD / CAM",
+    band: "near_limit",
+    bandLabel: "Near limit",
+    activeWork: 5,
+    workLimit: 6,
+    availableSlots: 1,
+    routingNote: "One new intake slot remains. Keep continuity work with the current owner when possible.",
+  },
+  {
+    discipline: "Systems & network",
+    band: "balanced",
+    bandLabel: "Balanced",
+    activeWork: 3,
+    workLimit: 6,
+    availableSlots: 3,
+    routingNote: "Capacity is available for intake review and short discovery work.",
+  },
+  {
+    discipline: "Datacenter",
+    band: "at_limit",
+    bandLabel: "At limit",
+    activeWork: 4,
+    workLimit: 4,
+    availableSlots: 0,
+    routingNote: "Route urgent work to an operations lead for a documented priority decision.",
+  },
+];
+
+export const vanguardOperationsQueueFixtures: VanguardOperationsQueueItem[] = [
+  {
+    orderNumber: "VE-DEMO-1042",
+    title: "Stainless mounting bracket rebuild",
+    queueState: "intake_review",
+    queueLabel: "Intake review",
+    assignmentState: "proposed",
+    assignmentLabel: "Owner proposed",
+    discipline: "CAD / CAM",
+    requiredRole: "CAD technician",
+    dueLabel: "Review due today · 3:00 PM ET",
+    ageLabel: "In queue 3h 18m",
+    risk: "watch",
+    riskLabel: "Watch",
+    primaryOwner: "Proposed: CAD intake rotation",
+    blocker: null,
+    escalationOwner: "Vanguard operations lead",
+    nextAction: "Confirm the source-material categories and record missing measurements.",
+    evidenceLabel: "Intake receipt + readiness record",
+    auditEventCount: 4,
+  },
+  {
+    orderNumber: "VE-DEMO-1038",
+    title: "Network room migration plan",
+    queueState: "waiting_on_client",
+    queueLabel: "Waiting on client",
+    assignmentState: "assigned",
+    assignmentLabel: "Assigned",
+    discipline: "Systems & network",
+    requiredRole: "Network & systems engineer",
+    dueLabel: "Client response due Oct 14",
+    ageLabel: "Waiting 1d 4h",
+    risk: "on_track",
+    riskLabel: "On track",
+    primaryOwner: "Systems continuity queue",
+    blocker: "Rack diagram and maintenance window are still needed.",
+    escalationOwner: "Engagement lead",
+    nextAction: "Review the client-safe question list before the response window closes.",
+    evidenceLabel: "Discovery notes + client question record",
+    auditEventCount: 8,
+  },
+  {
+    orderNumber: "VE-DEMO-1033",
+    title: "Datacenter storage readiness review",
+    queueState: "blocked",
+    queueLabel: "Blocked",
+    assignmentState: "reassignment_review",
+    assignmentLabel: "Lead review needed",
+    discipline: "Datacenter",
+    requiredRole: "Datacenter engineer",
+    dueLabel: "Milestone due Oct 14",
+    ageLabel: "Blocked 18h",
+    risk: "at_risk",
+    riskLabel: "At risk",
+    primaryOwner: "Datacenter delivery queue",
+    blocker: "The discipline is at its work limit and the security-handling review is incomplete.",
+    escalationOwner: "VP Operations",
+    nextAction: "Choose whether to move the due date or pause lower-priority work, then record the reason.",
+    evidenceLabel: "Capacity snapshot + blocker review",
+    auditEventCount: 11,
+  },
+  {
+    orderNumber: "VE-DEMO-1027",
+    title: "Tooling drawing quality review",
+    queueState: "quality_review",
+    queueLabel: "Quality review",
+    assignmentState: "assigned",
+    assignmentLabel: "Assigned",
+    discipline: "CAD / CAM",
+    requiredRole: "Engineering quality owner",
+    dueLabel: "Delivery target Oct 15",
+    ageLabel: "In quality review 6h",
+    risk: "on_track",
+    riskLabel: "On track",
+    primaryOwner: "Engineering quality queue",
+    blocker: null,
+    escalationOwner: "Engineering lead",
+    nextAction: "Verify the drawing revision and attach the planned inspection result.",
+    evidenceLabel: "Revision manifest + quality checklist",
+    auditEventCount: 15,
+  },
+];
 
 export const vanguardOrderPortalContract = {
   systemOfRecord: "convex" as const,
