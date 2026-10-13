@@ -78,7 +78,8 @@ requireIncludes(files.workflow, [
   'title: "Datacenter Engineer"',
   'title: "Network & Systems Engineer"',
   'title: "CAD Technician"',
-  "This KinFlo preview does not submit a contact form or resume.",
+  "Online contact and resume submission are not available here.",
+  "Vanguard is located near major freeways and metro areas.",
 ]);
 
 requireIncludes(files.fixture, [
@@ -97,16 +98,16 @@ requireIncludes(files.publicPage, [
   'data-testid="public-preview-vanguard-customer-proof"',
   'data-testid="public-preview-vanguard-careers"',
   'data-testid="public-preview-vanguard-contact-location"',
-  "Career information is presented for source parity.",
+  "Online applications are not available here.",
+  "Leadership team",
   'aria-label="Mobile page navigation"',
 ]);
 
 requireIncludes(files.adminPage, [
   'data-testid="section-kinflo-vanguard-source-parity-readiness"',
-  "vanguardWorkflow.sourceSite.inventory.length",
   "vanguardWorkflow.sourceSite.coverage.length",
-  'value: "Fixture-backed"',
-  'value: "Disabled"',
+  'label: "Public website", value: "Available"',
+  'label: "Request saving", value: "Not available"',
 ]);
 
 requireIncludes(files.docs, [

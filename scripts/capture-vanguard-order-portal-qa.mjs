@@ -192,6 +192,34 @@ try {
   await send("Page.enable");
   await send("Runtime.enable");
 
+  await setViewport(1280, 900);
+  await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises`);
+  await waitForSelector('[data-testid="public-preview-vanguard-source-parity"]');
+  await capture({
+    name: "08-desktop-about-locations.png",
+    selector: "#about",
+    clipSelector: "#about > div > div:first-child",
+  });
+  await capture({
+    name: "09-desktop-proof.png",
+    selector: "#proof",
+    clipSelector: "#proof > div > div",
+  });
+  await capture({
+    name: "10-desktop-careers.png",
+    selector: "#careers",
+    clipSelector: "#careers > div",
+  });
+  await capture({
+    name: "11-desktop-contact.png",
+    selector: "#contact-details",
+    clipSelector: "#contact-details > div",
+  });
+  await capture({
+    name: "12-desktop-build-process.png",
+    selector: "#build-process",
+  });
+
   await prepareReceiptAndOpenPortal(1280, 820);
   await capture({ name: "02-desktop-transfer-review.png", selector: '[data-testid="vanguard-order-transfer-review"]' });
   await capture({ name: "03-desktop-tracking.png", selector: '[data-testid="vanguard-order-tracking-preview"]' });
@@ -217,6 +245,11 @@ try {
 
   const videoPath = join(outputDir, "vanguard-order-portal-walkthrough.mp4");
   const videoFrames = [
+    "08-desktop-about-locations.png",
+    "09-desktop-proof.png",
+    "10-desktop-careers.png",
+    "11-desktop-contact.png",
+    "12-desktop-build-process.png",
     "01-desktop-local-receipt.png",
     "02-desktop-transfer-review.png",
     "03-desktop-tracking.png",
@@ -226,7 +259,7 @@ try {
     "07-mobile-tracking.png",
   ];
   const ffmpegArgs = ["-y"];
-  for (const frame of videoFrames) ffmpegArgs.push("-loop", "1", "-t", "2.75", "-i", join(outputDir, frame));
+  for (const frame of videoFrames) ffmpegArgs.push("-loop", "1", "-t", "2.5", "-i", join(outputDir, frame));
   const streams = videoFrames.map((_, index) => `[${index}:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=white,setsar=1[v${index}]`).join(";");
   const inputs = videoFrames.map((_, index) => `[v${index}]`).join("");
   ffmpegArgs.push(

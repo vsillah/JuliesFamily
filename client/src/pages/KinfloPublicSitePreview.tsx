@@ -198,7 +198,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           </div>
 
           <div className="mt-10">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><UsersRound className="h-4 w-4 text-amber-700" /> Public leadership profiles</div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><UsersRound className="h-4 w-4 text-amber-700" /> Leadership team</div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               {source.leadership.map((leader) => (
                 <article key={leader.name} className="rounded-lg border border-slate-200 bg-white p-4">

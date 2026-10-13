@@ -6,6 +6,7 @@ Admin route: `/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises&s
 
 The walkthrough demonstrates:
 
+- the public About, Locations, customer proof, Careers, Contact, and Build Process copy reviewed as product language;
 - a complete local `VE-RRB-PREVIEW` receipt and its secure portal action;
 - the exact session-local fields queued for authenticated promotion review;
 - the fail-closed identity and Convex mutation gate;

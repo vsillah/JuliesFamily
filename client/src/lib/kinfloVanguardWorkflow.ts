@@ -102,10 +102,10 @@ export const vanguardWorkflow = {
     coverage: [
       "Company overview and locations",
       "Leadership",
-      "Commercial and government proof",
+      "Commercial and government experience",
       "Service detail and project method",
       "Career listings",
-      "Contact posture",
+      "Contact information",
     ],
     about: {
       summary: "Vanguard provides information technology and engineering professional services through engineers, designers, and IT specialists. The company emphasizes technically strong, cost-conscious work and a distributed network of vendors and contractors.",
@@ -177,17 +177,17 @@ export const vanguardWorkflow = {
         {
           title: "Datacenter Engineer",
           summary: "Resolve datacenter, network, system, server, storage, virtualization, and support-queue issues.",
-          experience: "Public listing: 10 years; BS in Computer Science or Engineering.",
+          experience: "Experience: 10 years; BS in Computer Science or Engineering.",
         },
         {
           title: "Network & Systems Engineer",
           summary: "Design, deploy, monitor, maintain, and support Windows, Unix/Linux, VMware, security, asset, and performance systems.",
-          experience: "Public listing: 10 years; BS in Computer Science or Engineering.",
+          experience: "Experience: 10 years; BS in Computer Science or Engineering.",
         },
         {
           title: "CAD Technician",
           summary: "Create and revise 3D models, drawings, engineering-change documents, layouts, bills of materials, and tolerance work.",
-          experience: "Public listing: 5 years with AutoCAD and/or SolidWorks; associate degree or accredited CAD certificate path.",
+          experience: "Experience: 5 years with AutoCAD and/or SolidWorks; associate degree or accredited CAD certificate path.",
         },
       ],
     },

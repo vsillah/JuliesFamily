@@ -31,6 +31,8 @@ const files = {
   contract: "client/src/lib/kinfloVanguardOrderPortal.ts",
   intake: "client/src/components/VanguardReversRIntake.tsx",
   publicPage: "client/src/pages/KinfloPublicSitePreview.tsx",
+  publicData: "client/src/lib/kinfloPublicSitePreview.ts",
+  workflow: "client/src/lib/kinfloVanguardWorkflow.ts",
   app: "client/src/App.tsx",
   admin: "client/src/pages/AdminKinfloShell.tsx",
   docs: "docs/vanguard-authenticated-order-portal-foundation.md",
@@ -82,6 +84,20 @@ const publicPage = requireIncludes(files.publicPage, [
   'aria-label="Website coverage"',
   "Customer and procurement experience",
   "Online applications are not available here.",
+  "Leadership team",
+]);
+
+const publicData = requireIncludes(files.publicData, [
+  "prepare a request receipt for Vanguard review",
+  "customer and government experience, careers, and locations in one place",
+]);
+
+const workflow = requireIncludes(files.workflow, [
+  "Vanguard is located near major freeways and metro areas.",
+  "An interactive map is not available here.",
+  'experience: "Experience: 10 years; BS in Computer Science or Engineering."',
+  '"Commercial and government experience"',
+  '"Contact information"',
 ]);
 
 const app = requireIncludes(files.app, [
@@ -168,24 +184,71 @@ const adminPortalSlice = sliceBetween(
 );
 check(adminPortalSlice.length > 0, "Vanguard associate workspace copy block can be isolated", "Expected Vanguard workspace component markers were not found in order.");
 
-const runtimeCopy = [portal, intake, publicPage, adminPortalSlice].join("\n");
+const vanguardPublicModelSlice = sliceBetween(
+  publicData,
+  '_id: "tenant_vanguard_fixture"',
+  '_id: "tenant_campaign_fixture"',
+);
+check(vanguardPublicModelSlice.length > 0, "Vanguard public content model can be isolated", "Expected Vanguard public content model markers were not found in order.");
+
+const visibleVanguardPublicModelCopy = vanguardPublicModelSlice
+  .split("\n")
+  .filter((line) => !/^\s*(?:_id|type|metadata|context|source|convexFunction|templateKey|subdomain|primaryDomain|publishedAt|order):/.test(line))
+  .join("\n");
+
+const portalContractCopy = sliceBetween(contract, "  blockedReason:", "\n};");
+const portalTrackingCopy = sliceBetween(contract, '  lastUpdatedLabel: "Preview only', "\nexport function createVanguardLocalReceipt");
+const workflowIntakeAndServicesCopy = sliceBetween(workflow, "  requestTypes:", "  sourceSite:");
+const workflowPublicAndOrderCopy = sliceBetween(workflow, "    coverage:", "  providerBoundary:");
+for (const [label, segment] of [
+  ["portal contract copy", portalContractCopy],
+  ["portal tracking copy", portalTrackingCopy],
+  ["Vanguard intake and service copy", workflowIntakeAndServicesCopy],
+  ["Vanguard public and order copy", workflowPublicAndOrderCopy],
+]) {
+  check(segment.length > 0, `${label} can be isolated`, `Expected ${label} markers were not found in order.`);
+}
+
+const permittedCustomerLanguage = [
+  "Special Die and Tool, Die Set, Jig and Fixture Manufacturing",
+  "Branch office",
+];
+let runtimeCopy = [
+  portal,
+  portalContractCopy,
+  portalTrackingCopy,
+  intake,
+  publicPage,
+  visibleVanguardPublicModelCopy,
+  workflowIntakeAndServicesCopy,
+  workflowPublicAndOrderCopy,
+  adminPortalSlice,
+].join("\n");
+for (const allowed of permittedCustomerLanguage) runtimeCopy = runtimeCopy.replaceAll(allowed, "");
+
 const forbiddenRuntimeCopy = [
   /\bfixture\b/i,
   /\bsynthetic\b/i,
-  /source-backed/i,
-  /provider-light/i,
-  /fail-closed/i,
+  /\bsource[\s-]+backed\b/i,
+  /\bsource[\s-]+site\b/i,
+  /\bpublic\s+source\b/i,
+  /\bsource\s+data\b/i,
+  /\bsource\s+evidence\b/i,
+  /\bprovider[\s-]+light\b/i,
+  /\bpreview\s+keeps\b/i,
+  /\blive\s+map\b/i,
+  /\bfail[\s-]+closed\b/i,
   /\bprovenance\b/i,
   /\bvalidator\b/i,
-  /generated api/i,
+  /\bgenerated[\s-]+api\b/i,
   /\bcodegen\b/i,
   /\bPR\s*#/i,
+  /\bbranch\b/i,
+  /\bcommit\b/i,
   /local receipt/i,
   /local package/i,
   /local preview/i,
   /readiness gate/i,
-  /source-site/i,
-  /public source/i,
   /\bConvex\b/i,
 ];
 for (const pattern of forbiddenRuntimeCopy) {

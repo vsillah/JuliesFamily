@@ -19,9 +19,9 @@ When a capability is unavailable, name the operational state:
 
 Avoid runtime labels such as:
 
-- source-backed, fixture, synthetic, provenance, or evidence packet;
+- source-backed, source site, public source, source data, source evidence, fixture, synthetic, provenance, or evidence packet;
 - validator, generated API, codegen, branch, commit, or PR number;
-- prompt, source data, implementation boundary, or provider-light;
+- prompt, implementation boundary, provider-light, local preview, preview-keeps language, or live-map implementation notes;
 - database or framework names when the user only needs the product state.
 
 Technical terms can appear when the product user needs them to complete a technical task. They should not appear merely to document how the screen was built.
