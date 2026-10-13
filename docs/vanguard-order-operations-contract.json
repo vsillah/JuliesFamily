@@ -230,6 +230,51 @@
     "privateUploadsEnabled": false,
     "clientStatusChanged": false
   },
+  "phase6MetricsOptimization": {
+    "status": "provider_light_fixture",
+    "adminOnly": true,
+    "humanQaRequiredForThisSlice": false,
+    "extendsPhase4OperationsAndPhase5Fulfillment": true,
+    "metricKeys": [
+      "throughput",
+      "cycle_time",
+      "blocked_order_aging",
+      "work_in_progress",
+      "load_balance",
+      "inventory_readiness",
+      "paperwork_completeness",
+      "quality_rework",
+      "on_time_delivery_readiness",
+      "associate_capacity"
+    ],
+    "calculationRules": {
+      "boundedWindowsRequired": true,
+      "calculationShownToOperator": true,
+      "eventDerivedMeasures": true,
+      "latestEvidenceStateUsedForReadiness": true,
+      "missingEvidenceCannotCountAsComplete": true
+    },
+    "optimizationRules": {
+      "humanDecisionRequired": true,
+      "evidenceExplanationRequired": true,
+      "decisionOwnerRequired": true,
+      "automaticAssignmentAllowed": false,
+      "automaticPriorityChangeAllowed": false,
+      "automaticDeliveryCommitmentAllowed": false
+    },
+    "associateCapacityRules": {
+      "teamLevelOnly": true,
+      "declaredAvailabilityOnly": true,
+      "workInProgressLimitsOnly": true,
+      "protectedAttributesAllowed": false,
+      "hiddenEmployeeScoreAllowed": false,
+      "individualRankingAllowed": false
+    },
+    "runtimeActionsEnabled": false,
+    "liveAnalyticsReadsEnabled": false,
+    "providerWritesEnabled": false,
+    "clientStatusChanged": false
+  },
   "tables": [
     "buildOrders",
     "orderDraftSections",
