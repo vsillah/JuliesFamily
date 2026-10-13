@@ -1,14 +1,11 @@
-import { useState } from "react";
 import { Link, useRoute } from "wouter";
-import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, UsersRound, Wrench } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, Landmark, LockKeyhole, Mail, MapPin, Network, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import VanguardReversRIntake from "@/components/VanguardReversRIntake";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
@@ -17,6 +14,8 @@ import {
   type KinfloPublicBlock,
   type KinfloPublicSitePreview as KinfloPublicSitePreviewPayload,
 } from "@/lib/kinfloPublicSitePreview";
+
+const VANGUARD_SITE_KEY = "vanguard-enterprises";
 
 function getString(metadata: Record<string, unknown> | undefined, key: string, fallback: string) {
   const value = metadata?.[key];
@@ -49,32 +48,33 @@ function getFunnelStage(metadata: Record<string, unknown> | undefined): FunnelSt
 
 function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
   return (
-    <section id="build-process" className="border-y border-slate-200 bg-slate-950 px-4 py-16 text-white sm:px-6 lg:px-8" data-testid="public-preview-vanguard-workflow">
+    <section id="build-process" className="border-y border-slate-200 bg-slate-100 px-4 py-16 text-slate-950 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-workflow">
       <div className="mx-auto max-w-7xl">
-        <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">Request-to-delivery workflow</Badge>
-        <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(320px,0.28fr)]">
+        <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-900">ReversR-to-Vanguard build process</Badge>
+        <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.76fr)_minmax(300px,0.24fr)]">
           <div>
             <h2 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">{block.body}</p>
-            <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">{block.body}</p>
+            <div className="mt-8 grid gap-3 md:grid-cols-2" data-testid="vanguard-request-to-delivery-lifecycle">
               {vanguardWorkflow.stages.map((stage, index) => (
-                <div key={stage.key} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                <article key={stage.key} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-slate-950">{index + 1}</span>
-                    <Badge variant="outline" className="border-white/15 text-slate-200">{stage.status}</Badge>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">{index + 1}</span>
+                    <Badge variant="outline" className={stage.status === "ready" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : stage.status === "active" ? "border-blue-200 bg-blue-50 text-blue-800" : "border-slate-200 bg-slate-50 text-slate-600"}>{stage.status}</Badge>
                   </div>
-                  <div className="mt-4 font-semibold">{stage.label}</div>
-                  <div className="mt-1 text-xs text-slate-400">Owner: {stage.owner}</div>
-                  <p className="mt-3 text-sm leading-6 text-slate-300">{stage.evidence}</p>
-                </div>
+                  <div className="mt-4 font-semibold text-slate-950">{stage.label}</div>
+                  <div className="mt-1 text-xs text-amber-800">Owner: {stage.owner}</div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{stage.evidence}</p>
+                  <div className="mt-3 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">Required record: {stage.artifact}</div>
+                </article>
               ))}
             </div>
           </div>
-          <aside className="h-fit rounded-lg border border-amber-400/30 bg-amber-400/10 p-5">
+          <aside className="h-fit rounded-xl border border-slate-800 bg-slate-950 p-5 text-white shadow-lg">
             <LockKeyhole className="h-5 w-5 text-amber-300" />
-            <h3 className="mt-4 font-semibold">Build readiness stays locked</h3>
+            <h3 className="mt-4 font-semibold">Before Vanguard reviews the request</h3>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              Work does not move into fulfillment until the scope, source inventory, missing inputs, quote, and acceptance criteria are clear.
+              A request receipt confirms that the required details are complete. Vanguard still reviews the available materials, prepares the quote and scope, assigns the work, checks quality, and records delivery.
             </p>
             <div className="mt-4 space-y-2">
               {vanguardWorkflow.sampleOrder.missingInputs.map((item) => (
@@ -92,86 +92,17 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
 }
 
 function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
-  const [requestType, setRequestType] = useState<string>(vanguardWorkflow.requestTypes[0]);
-  const [outcome, setOutcome] = useState("");
-  const [sourceInventory, setSourceInventory] = useState("");
-  const [receiptReady, setReceiptReady] = useState(false);
-
   return (
-    <section id="build-request" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.82fr)_minmax(380px,0.48fr)]">
-        <div>
-          <Badge variant="outline">Build request intake</Badge>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{block.body}</p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            {vanguardWorkflow.intakeChecklist.map((item) => (
-              <div key={item} className="flex items-start gap-3 rounded-lg border bg-white p-4 text-sm leading-6">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-          <div id="about" className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
-            <div className="text-sm font-semibold">{vanguardWorkflow.company.name}</div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {vanguardWorkflow.company.tagline}. Vanguard is headquartered in {vanguardWorkflow.company.location} and provides professional services for large and small projects.
-            </p>
-          </div>
+    <section id="build-request" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl">
+          <Badge variant="outline">Embedded ReversR Rebuild intake</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-slate-600">{block.body}</p>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Prepare request summary</CardTitle>
-            <p className="text-sm text-muted-foreground">Local preview only. Nothing is submitted or uploaded.</p>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                setReceiptReady(Boolean(outcome.trim() && sourceInventory.trim()));
-              }}
-            >
-              <div className="space-y-2">
-                <Label htmlFor="vanguard-request-type">Request type</Label>
-                <select
-                  id="vanguard-request-type"
-                  value={requestType}
-                  onChange={(event) => setRequestType(event.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  {vanguardWorkflow.requestTypes.map((type) => <option key={type}>{type}</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="vanguard-outcome">What needs to be built or improved?</Label>
-                <Textarea id="vanguard-outcome" value={outcome} onChange={(event) => setOutcome(event.target.value)} placeholder="Describe the outcome, constraint, and target environment." rows={4} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="vanguard-source-inventory">Source package inventory</Label>
-                <Textarea id="vanguard-source-inventory" value={sourceInventory} onChange={(event) => setSourceInventory(event.target.value)} placeholder="List drawings, CAD files, measurements, diagrams, requirements, or system details already available." rows={4} required />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="vanguard-target-date">Target date</Label>
-                  <Input id="vanguard-target-date" type="date" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vanguard-contact">Delivery contact</Label>
-                  <Input id="vanguard-contact" type="email" placeholder="name@company.com" />
-                </div>
-              </div>
-              <Button type="submit" className="w-full bg-amber-700 hover:bg-amber-800">Prepare request receipt</Button>
-            </form>
-            {receiptReady ? (
-              <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4" role="status" data-testid="vanguard-build-request-receipt">
-                <div className="flex items-center gap-2 font-semibold text-emerald-900"><PackageCheck className="h-4 w-4" /> Request summary ready</div>
-                <div className="mt-2 text-sm text-emerald-800">{requestType} · local receipt VE-BUILD-PREVIEW</div>
-                <p className="mt-2 text-xs leading-5 text-emerald-700">An associate would next inventory the source package and identify missing inputs. This preview did not transmit your entries.</p>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+        <div className="mt-8">
+          <VanguardReversRIntake />
+        </div>
       </div>
     </section>
   );
@@ -186,11 +117,11 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
-              <Badge variant="outline">Source-site capabilities</Badge>
+              <Badge variant="outline">Capabilities</Badge>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{block.title}</h2>
               <p className="mt-4 text-base leading-7 text-slate-600">{block.body}</p>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" aria-label="Source parity coverage">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3" aria-label="Website coverage">
               {source.coverage.map((item) => (
                 <div key={item} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700">
                   {item}
@@ -267,7 +198,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           </div>
 
           <div className="mt-10">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><UsersRound className="h-4 w-4 text-amber-700" /> Public leadership profiles</div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><UsersRound className="h-4 w-4 text-amber-700" /> Leadership team</div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               {source.leadership.map((leader) => (
                 <article key={leader.name} className="rounded-lg border border-slate-200 bg-white p-4">
@@ -286,8 +217,8 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           <div className="grid gap-8 lg:grid-cols-[minmax(0,0.68fr)_minmax(360px,0.32fr)]">
             <div>
               <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">Commercial and government sectors</Badge>
-              <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Public proof, clearly labeled</h2>
-              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">{source.proof.customerPosture} These names reflect the source site's published customer list and are presented as source evidence.</p>
+              <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Customer and procurement experience</h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">{source.proof.customerPosture}</p>
               <div className="mt-6 flex flex-wrap gap-2">
                 {source.proof.customerExamples.map((customer) => (
                   <span key={customer} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200">{customer}</span>
@@ -320,7 +251,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
             <div className="max-w-3xl">
               <Badge variant="outline">Careers</Badge>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">Technical roles with clear expectations</h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">{source.careers.equalOpportunity} The listings below summarize the roles published on the source site.</p>
+              <p className="mt-4 text-base leading-7 text-slate-600">{source.careers.equalOpportunity} Review the role summaries and experience expectations below.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {source.careers.values.map((value) => <Badge key={value} variant="secondary">{value}</Badge>)}
@@ -338,7 +269,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           </div>
           <div className="mt-6 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950">
             <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>Career information is presented for source parity. This local preview does not accept or transmit applications, resumes, or personal data.</span>
+            <span>Online applications are not available here. Contact Vanguard directly before sending a resume or personal information.</span>
           </div>
         </div>
       </div>
@@ -496,9 +427,9 @@ function BlockSection({
           </div>
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Public intake preview</CardTitle>
+              <CardTitle className="text-base">Contact form</CardTitle>
               <p className="text-sm text-muted-foreground">
-                Runtime fallback is `/api/leads`; Convex target is `crm.submitLead`.
+                Share your details and the team will follow up with you.
               </p>
             </CardHeader>
             <CardContent>
@@ -572,12 +503,16 @@ export default function KinfloPublicSitePreview() {
               </a>
             ))}
           </nav>
-          <Badge variant="outline" className="hidden 2xl:inline-flex">
-            {preview.context.convexFunction}
-          </Badge>
-          <Badge variant="secondary" className="hidden whitespace-nowrap 2xl:inline-flex" data-testid="public-preview-context">
-            {contextPersona} / {contextJourneyStage} / {contextDevice} / {contextReviewSource}
-          </Badge>
+          {preview.site.slug !== VANGUARD_SITE_KEY ? (
+            <>
+              <Badge variant="outline" className="hidden 2xl:inline-flex">
+                {preview.context.convexFunction}
+              </Badge>
+              <Badge variant="secondary" className="hidden whitespace-nowrap 2xl:inline-flex" data-testid="public-preview-context">
+                {contextPersona} / {contextJourneyStage} / {contextDevice} / {contextReviewSource}
+              </Badge>
+            </>
+          ) : null}
         </div>
         <nav className="mx-auto flex max-w-7xl gap-4 overflow-x-auto border-t px-4 py-2 text-xs text-muted-foreground md:hidden" aria-label="Mobile page navigation">
           {headerNav.map((item) => (
@@ -601,10 +536,11 @@ export default function KinfloPublicSitePreview() {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <div>
             <div className="font-medium text-foreground">{preview.tenant.name}</div>
-            <div>{preview.site.subdomain}.kinflo.preview · {preview.site.templateKey}</div>
-            {preview.site.slug === "vanguard-enterprises" ? (
-              <div className="mt-2">{vanguardWorkflow.company.email} · {vanguardWorkflow.company.phone}</div>
-            ) : null}
+            {preview.site.slug === VANGUARD_SITE_KEY ? (
+              <div className="mt-2">{vanguardWorkflow.company.location} · {vanguardWorkflow.company.email} · {vanguardWorkflow.company.phone}</div>
+            ) : (
+              <div>{preview.site.subdomain}.kinflo.preview · {preview.site.templateKey}</div>
+            )}
           </div>
           <div className="flex flex-wrap gap-4">
             {footerNav.map((item) => (
