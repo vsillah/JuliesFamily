@@ -109,6 +109,8 @@ export type KinfloConvexRuntimeSnapshot = {
   readOnlySmokeVerified: boolean;
   canUseReadOnlyLiveData: boolean;
   canUseLiveData: boolean;
+  preferenceMutationSmokeClientAvailable: boolean;
+  canRequestPreferenceMutationSmoke: boolean;
   activationGate: string;
   functionNames: KinfloConvexFunctionName[];
 };
@@ -116,6 +118,10 @@ export type KinfloConvexRuntimeSnapshot = {
 // The full shell adapter remains blocked. Only the separately gated read-only
 // adapter can be selected by this cutover.
 const generatedApiAvailable = false;
+const preferenceMutationSmokeClientGate = {
+  preferenceMutationSmokeClientAvailable: false,
+  canRequestPreferenceMutationSmoke: false,
+} as const;
 
 function readBooleanEnv(value: unknown) {
   return typeof value === "string" && value.trim().toLowerCase() === "true";
@@ -151,6 +157,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
 
   if (!urlConfigured) {
     return {
+      ...preferenceMutationSmokeClientGate,
       mode: "fixture_only",
       label: "Fixture only",
       urlConfigured,
@@ -166,6 +173,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
 
   if (!readOnlyGeneratedApiAvailable) {
     return {
+      ...preferenceMutationSmokeClientGate,
       mode: "env_configured_codegen_pending",
       label: "Convex env ready, codegen pending",
       publicUrl,
@@ -182,6 +190,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
 
   if (!readOnlySmokeVerified || !readOnlyAdapterSelected) {
     return {
+      ...preferenceMutationSmokeClientGate,
       mode: "generated_api_ready_smoke_pending",
       label: "Read-only bindings ready, smoke pending",
       publicUrl,
@@ -198,6 +207,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
 
   if (canUseReadOnlyLiveData) {
     return {
+      ...preferenceMutationSmokeClientGate,
       mode: "read_only_live_ready",
       label: "Convex read-only live",
       publicUrl,
@@ -213,6 +223,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
   }
 
   return {
+    ...preferenceMutationSmokeClientGate,
     mode: "live_ready",
     label: "Convex full adapter blocked",
     publicUrl,

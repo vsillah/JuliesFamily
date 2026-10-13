@@ -193,6 +193,8 @@
     "kinflo:live-handoff": "node scripts/validate-convex-live-handoff.mjs",
     "kinflo:validate-live-adapter": "node scripts/validate-kinflo-live-adapter.mjs",
     "kinflo:validate-read-only-live-adapter": "node scripts/validate-kinflo-read-only-live-adapter.mjs",
+    "kinflo:test-preference-smoke": "node --experimental-strip-types scripts/test-kinflo-preference-smoke.ts",
+    "kinflo:validate-preference-smoke-source": "node scripts/validate-kinflo-preference-smoke-source.mjs",
     "kinflo:validate-generated-api-live-mutation-cutover-plan": "node scripts/validate-kinflo-generated-api-live-mutation-cutover-plan.mjs",
     "kinflo:validate-generated-api": "node scripts/validate-kinflo-generated-api-contract.mjs",
     "kinflo:validate-live-smoke": "node scripts/validate-kinflo-live-smoke-manifest.mjs",
@@ -205,7 +207,7 @@
     "kinflo:validate-local-admin-fixture": "node scripts/validate-kinflo-local-admin-fixture.mjs",
     "kinflo:serve-local-admin-smoke": "node scripts/serve-kinflo-local-admin-smoke.mjs",
     "convex:codegen": "convex codegen --typecheck enable",
-    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/auth.ts convex/auth.config.ts convex/http.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts convex/preferences.ts convex/integrations.ts convex/campaigns.ts convex/aiReview.ts convex/launchReadiness.ts",
+    "convex:check": "tsc --noEmit --skipLibCheck --module ESNext --moduleResolution bundler --target ES2022 --lib esnext,dom --strict convex/schema.ts convex/auth.ts convex/auth.config.ts convex/http.ts convex/controlPlane.ts convex/siteBuilder.ts convex/siteFactory.ts convex/publicSite.ts convex/activation.ts convex/roleCatalog.ts convex/accessPolicy.ts convex/entitlements.ts convex/crm.ts convex/preferences.ts convex/preferenceSmokeCore.ts convex/integrations.ts convex/campaigns.ts convex/aiReview.ts convex/launchReadiness.ts",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {

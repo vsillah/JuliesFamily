@@ -28,9 +28,12 @@ const requiredMarkers = [
   "Batch 5 — execute once, clean up, and close the window",
   "Batch 6 — limited preferences adapter review",
   "Batch 7 — later full-adapter sequence",
+  "Batches 1-2 source implementation status",
+  "preferenceMutationSmokeClientAvailable: false",
+  "scripts/test-kinflo-preference-smoke.ts",
   "A failed or unknown result stops the window; it does not authorize a retry.",
   "zero provider actions",
-  "Approve or reject a dedicated source-only implementation lane for Batches 1 and 2.",
+  "Review the Batches 1-2 source implementation",
 ];
 
 for (const marker of requiredMarkers) {
@@ -73,8 +76,9 @@ check("full live adapter remains disabled", runtime.includes("const generatedApi
 check("read-only provider has no mutation hook", !snapshotProvider.includes("useMutation"), "The Phase 176 snapshot provider unexpectedly mounts a mutation hook.");
 check("identity projection mutation is identified", identityRoute.includes("controlPlane:upsertCurrentUser") && identityRoute.includes("useMutation(upsertCurrentUserMutation)"), "The identity-only mutation boundary changed.");
 check("preference mutation exists", preferences.includes("export const upsertMyPreferences = mutation"), "The proposed first product mutation no longer exists.");
-check("preference cleanup operation is still absent", !/export const (?:delete|restore|run).*Preference.*= mutation/i.test(preferences), "A cleanup or smoke mutation now exists; re-review the stated implementation gap.");
-check("preference smoke receipt is still absent", !preferences.includes("approvalId") && !preferences.includes("nonceHash"), "A smoke receipt contract now exists; re-review the Phase 177 plan.");
+check("preference smoke operation is source present", preferences.includes("export const runPreferenceSmoke = mutation"), "The approved Batches 1-2 source operation is missing.");
+check("preference smoke server gate is source present", preferences.includes("KINFLO_PREFERENCE_SMOKE_ENABLED") && preferences.includes("KINFLO_PREFERENCE_SMOKE_APPROVAL_ID") && preferences.includes("KINFLO_PREFERENCE_SMOKE_EXPIRES_AT"), "The server-side approval window is incomplete.");
+check("preference smoke receipt is source present", preferences.includes("approvalId") && preferences.includes("nonceHash"), "The sanitized receipt contract is missing.");
 
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" })
   .split("\n")

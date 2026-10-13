@@ -6,6 +6,11 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { requirePermission } from "./accessPolicy";
+import {
+  executePreferenceSmoke,
+  type PreferenceDocument,
+  type PreferenceSmokeReceipt,
+} from "./preferenceSmokeCore";
 
 type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
@@ -188,5 +193,75 @@ export const upsertMyPreferences = mutation({
       createdAt: timestamp,
       updatedAt: timestamp,
     });
+  },
+});
+
+const preferenceSmokeReceiptValidator = v.object({
+  receiptId: v.id("preferenceSmokeReceipts"),
+  functionName: v.literal("preferences.runPreferenceSmoke"),
+  actorUserId: v.id("users"),
+  approvalId: v.string(),
+  nonceHash: v.string(),
+  requestedAt: v.number(),
+  expiresAt: v.number(),
+  completedAt: v.number(),
+  sentinelField: v.literal("dataDensity"),
+  cleanupResult: v.union(v.literal("restored_existing"), v.literal("deleted_new")),
+  priorRowExisted: v.boolean(),
+  readBackVerified: v.literal(true),
+  redactionVersion: v.literal("preference-smoke-v1"),
+});
+
+export const runPreferenceSmoke = mutation({
+  args: {
+    approvalId: v.string(),
+    expiresAt: v.number(),
+    nonce: v.string(),
+    field: v.literal("dataDensity"),
+    value: v.union(v.literal("compact"), v.literal("comfortable"), v.literal("spacious")),
+  },
+  returns: preferenceSmokeReceiptValidator,
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    const configuredExpiry = Number(process.env.KINFLO_PREFERENCE_SMOKE_EXPIRES_AT);
+
+    return await executePreferenceSmoke(
+      {
+        findReceiptByNonceHash: async (nonceHash) => await ctx.db
+          .query("preferenceSmokeReceipts")
+          .withIndex("by_nonce_hash", (q) => q.eq("nonceHash", nonceHash))
+          .unique(),
+        findUnscopedPreference: async (userId) => await ctx.db
+          .query("adminPreferences")
+          .withIndex("by_user_and_tenant_and_site", (q: any) => q
+            .eq("userId", userId as any)
+            .eq("tenantId", undefined)
+            .eq("siteId", undefined))
+          .unique() as PreferenceDocument | null,
+        patchPreference: async (id, fields) => {
+          await ctx.db.patch(id as any, fields);
+        },
+        insertPreference: async (fields) => await ctx.db.insert("adminPreferences", fields as any),
+        getPreference: async (id) => await ctx.db.get(id as any) as PreferenceDocument | null,
+        replacePreference: async (id, fields) => {
+          await ctx.db.replace(id as any, fields as any);
+        },
+        deletePreference: async (id) => {
+          await ctx.db.delete(id as any);
+        },
+        insertReceipt: async (receipt: PreferenceSmokeReceipt) => await ctx.db.insert(
+          "preferenceSmokeReceipts",
+          receipt as any,
+        ),
+      },
+      { userId: user._id, platformRole: user.platformRole },
+      args,
+      {
+        enabled: process.env.KINFLO_PREFERENCE_SMOKE_ENABLED === "true",
+        approvalId: process.env.KINFLO_PREFERENCE_SMOKE_APPROVAL_ID,
+        expiresAt: Number.isFinite(configuredExpiry) ? configuredExpiry : undefined,
+      },
+      now(),
+    ) as any;
   },
 });

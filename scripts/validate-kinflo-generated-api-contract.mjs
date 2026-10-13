@@ -110,6 +110,7 @@ for (const path of [
   "docs/phase26-generated-api-contract.md",
   "client/src/lib/kinfloConvexRuntime.ts",
   "client/src/lib/kinfloGeneratedApiContract.ts",
+  "client/src/lib/kinfloGeneratedApiSeam.ts",
   "client/src/lib/kinfloShellData.ts",
   "scripts/validate-kinflo-generated-api-contract.mjs",
   "package.json",
@@ -145,6 +146,13 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "crmCreateTask",
 ]);
 
+requireIncludes("client/src/lib/kinfloGeneratedApiSeam.ts", [
+  "resolveKinfloGeneratedApiHandle",
+  "resolvePreferenceSmokeGeneratedApiHandle",
+  "PREFERENCE_SMOKE_GENERATED_API_PATH",
+  "clientGateOpen",
+]);
+
 requireIncludes("client/src/lib/kinfloConvexRuntime.ts", [
   "siteFactoryListClientWebsiteConfigurationChangeSets: \"siteFactory.listClientWebsiteConfigurationChangeSets\"",
   "siteFactoryListClientWebsiteConfigurationReviewPackets: \"siteFactory.listClientWebsiteConfigurationReviewPackets\"",
@@ -160,6 +168,13 @@ if (contractContents.includes("convex/_generated/api")) {
   fail("generated API contract does not import generated API", "Remove generated API imports until codegen approval.");
 } else {
   pass("generated API contract does not import generated API");
+}
+
+const seamContents = read("client/src/lib/kinfloGeneratedApiSeam.ts");
+if (seamContents.includes("convex/_generated/api")) {
+  fail("generated API seam does not import generated API", "Keep the seam source-only until approved codegen output is supplied by the deployment lane.");
+} else {
+  pass("generated API seam does not import generated API");
 }
 
 const runtimeKeyMap = extractRuntimeKeyMap();

@@ -269,8 +269,26 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_user", ["userId"])
+    .index("by_user_and_tenant_and_site", ["userId", "tenantId", "siteId"])
     .index("by_tenant", ["tenantId"])
     .index("by_site", ["siteId"]),
+
+  preferenceSmokeReceipts: defineTable({
+    functionName: v.literal("preferences.runPreferenceSmoke"),
+    actorUserId: v.id("users"),
+    approvalId: v.string(),
+    nonceHash: v.string(),
+    requestedAt: v.number(),
+    expiresAt: v.number(),
+    completedAt: v.number(),
+    sentinelField: v.literal("dataDensity"),
+    cleanupResult: v.union(v.literal("restored_existing"), v.literal("deleted_new")),
+    priorRowExisted: v.boolean(),
+    readBackVerified: v.literal(true),
+    redactionVersion: v.literal("preference-smoke-v1"),
+  })
+    .index("by_nonce_hash", ["nonceHash"])
+    .index("by_actor_and_completed_at", ["actorUserId", "completedAt"]),
 
   roles: defineTable({
     key: v.string(),
