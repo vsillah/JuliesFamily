@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Bell,
+  AlertTriangle,
   Boxes,
   CheckCircle2,
   Clock3,
@@ -16,6 +17,7 @@ import {
   ImageIcon,
   KeyRound,
   LayoutDashboard,
+  Loader2,
   ListChecks,
   LockKeyhole,
   MailPlus,
@@ -94,6 +96,7 @@ import {
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
 import { useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
+import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import {
   VANGUARD_ORDER_PORTAL_PATH,
@@ -4342,6 +4345,18 @@ export default function AdminKinfloShell() {
   const { isLoading, isAdmin } = useKinfloAdminIdentity();
   const [location, navigate] = useLocation();
   const snapshot = useKinfloShellSnapshot();
+  const preferencesAdapter = useKinfloPreferencesAdapter();
+  const activeExperiencePreferences = preferencesAdapter.preferences
+    ? {
+        ...snapshot.experiencePreferences,
+        ...preferencesAdapter.preferences,
+        scopeLabel: "my KinFlo admin profile",
+        scopeKind: "user" as const,
+        tenant: "Current authenticated user",
+        site: "All authorized KinFlo surfaces",
+        providerBoundary: "Only the verified preferences adapter is live. Every non-preferences mutation and provider write remains blocked.",
+      }
+    : snapshot.experiencePreferences;
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
@@ -4422,6 +4437,17 @@ export default function AdminKinfloShell() {
   const [experienceNotificationChannels, setExperienceNotificationChannels] = useState(
     snapshot.experiencePreferences.notificationChannels,
   );
+  useEffect(() => {
+    if (!preferencesAdapter.preferences) {
+      return;
+    }
+    setExperienceTheme(preferencesAdapter.preferences.theme);
+    setExperienceDensity(preferencesAdapter.preferences.dataDensity);
+    setExperienceLandingPage(preferencesAdapter.preferences.defaultLandingPage);
+    setExperienceContentFilter(preferencesAdapter.preferences.defaultContentFilter);
+    setExperienceItemsPerPage(preferencesAdapter.preferences.itemsPerPage);
+    setExperienceNotificationChannels(preferencesAdapter.preferences.notificationChannels);
+  }, [preferencesAdapter.preferences]);
   const [accessInviteEmail, setAccessInviteEmail] = useState(snapshot.accessDelegation.defaultEmail);
   const [accessTenantSlug, setAccessTenantSlug] = useState(snapshot.accessDelegation.defaultTenantSlug);
   const [accessSiteKey, setAccessSiteKey] = useState(snapshot.accessDelegation.defaultSiteKey);
@@ -4639,12 +4665,12 @@ export default function AdminKinfloShell() {
   );
   const requiredPagesSelected = requiredPageKeys.every((pageKey) => wizardPageKeys.includes(pageKey));
   const experiencePreferencesDirty = (
-    experienceTheme !== snapshot.experiencePreferences.theme
-    || experienceDensity !== snapshot.experiencePreferences.dataDensity
-    || experienceLandingPage !== snapshot.experiencePreferences.defaultLandingPage
-    || experienceContentFilter !== snapshot.experiencePreferences.defaultContentFilter
-    || experienceItemsPerPage !== snapshot.experiencePreferences.itemsPerPage
-    || experienceNotificationChannels.join("|") !== snapshot.experiencePreferences.notificationChannels.join("|")
+    experienceTheme !== activeExperiencePreferences.theme
+    || experienceDensity !== activeExperiencePreferences.dataDensity
+    || experienceLandingPage !== activeExperiencePreferences.defaultLandingPage
+    || experienceContentFilter !== activeExperiencePreferences.defaultContentFilter
+    || experienceItemsPerPage !== activeExperiencePreferences.itemsPerPage
+    || experienceNotificationChannels.join("|") !== activeExperiencePreferences.notificationChannels.join("|")
   );
   const selectedNotificationSummary = experienceNotificationChannels.length > 0
     ? experienceNotificationChannels.join(", ")
@@ -5208,6 +5234,27 @@ export default function AdminKinfloShell() {
       }
       return current.filter((item) => item !== channel);
     });
+  };
+
+  const saveExperiencePreferences = async () => {
+    await preferencesAdapter.save({
+      theme: experienceTheme,
+      dataDensity: experienceDensity,
+      defaultLandingPage: experienceLandingPage,
+      defaultContentFilter: experienceContentFilter,
+      itemsPerPage: experienceItemsPerPage,
+      notificationChannels: experienceNotificationChannels,
+    });
+  };
+
+  const restoreFixturePreferences = () => {
+    preferencesAdapter.restoreFixtures();
+    setExperienceTheme(snapshot.experiencePreferences.theme);
+    setExperienceDensity(snapshot.experiencePreferences.dataDensity);
+    setExperienceLandingPage(snapshot.experiencePreferences.defaultLandingPage);
+    setExperienceContentFilter(snapshot.experiencePreferences.defaultContentFilter);
+    setExperienceItemsPerPage(snapshot.experiencePreferences.itemsPerPage);
+    setExperienceNotificationChannels(snapshot.experiencePreferences.notificationChannels);
   };
 
   const handleAccessTenantChange = (tenantSlug: string) => {
@@ -14764,11 +14811,11 @@ export default function AdminKinfloShell() {
                 <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <h2 className="text-xl font-semibold">Experience Preferences</h2>
-                    <p className="text-sm text-muted-foreground">Scoped shell defaults for {snapshot.experiencePreferences.scopeLabel}.</p>
+                    <p className="text-sm text-muted-foreground">Scoped shell defaults for {activeExperiencePreferences.scopeLabel}.</p>
                   </div>
                   <Badge variant="outline" className="w-fit">
                     <SlidersHorizontal className="mr-1 h-3 w-3" />
-                    {snapshot.experiencePreferences.scopeKind} scope
+                    {activeExperiencePreferences.scopeKind} scope
                   </Badge>
                 </div>
 
@@ -14777,11 +14824,15 @@ export default function AdminKinfloShell() {
                     <div>
                       <CardTitle className="text-base">Shell Defaults</CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {snapshot.experiencePreferences.tenant} · {snapshot.experiencePreferences.site}
+                        {activeExperiencePreferences.tenant} · {activeExperiencePreferences.site}
                       </p>
                     </div>
                     <Badge variant={experiencePreferencesDirty ? "default" : "secondary"}>
-                      {experiencePreferencesDirty ? "Local changes" : "Fixture defaults"}
+                      {experiencePreferencesDirty
+                        ? "Unsaved changes"
+                        : preferencesAdapter.enabled
+                          ? "Verified preferences"
+                          : "Fixture defaults"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
@@ -14887,13 +14938,56 @@ export default function AdminKinfloShell() {
 
                     <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="text-sm text-muted-foreground">
-                        {snapshot.experiencePreferences.providerBoundary}
+                        {activeExperiencePreferences.providerBoundary}
                       </div>
-                      <Button disabled data-testid="button-save-experience-preferences">
-                        <Save className="mr-2 h-4 w-4" />
-                        Live preference save gated
+                      <Button
+                        disabled={
+                          !preferencesAdapter.enabled
+                          || !experiencePreferencesDirty
+                          || preferencesAdapter.status === "loading"
+                          || preferencesAdapter.status === "saving"
+                          || preferencesAdapter.status === "error"
+                        }
+                        onClick={() => void saveExperiencePreferences()}
+                        data-testid="button-save-experience-preferences"
+                      >
+                        {preferencesAdapter.status === "saving" || preferencesAdapter.status === "loading"
+                          ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          : <Save className="mr-2 h-4 w-4" />}
+                        {!preferencesAdapter.enabled
+                          ? "Live preference save gated"
+                          : preferencesAdapter.status === "loading"
+                            ? "Loading preferences"
+                            : preferencesAdapter.status === "saving"
+                              ? "Saving preferences"
+                              : preferencesAdapter.status === "saved" && !experiencePreferencesDirty
+                                ? "Preferences saved"
+                                : "Save preferences"}
                       </Button>
                     </div>
+
+                    {preferencesAdapter.status === "error" ? (
+                      <div
+                        className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900"
+                        data-testid="kinflo-preferences-error"
+                      >
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                          <div>
+                            <div className="font-medium">Preferences could not be verified</div>
+                            <div className="mt-1 text-rose-800">{preferencesAdapter.error}</div>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <Button size="sm" variant="outline" onClick={preferencesAdapter.retry}>
+                            Retry verified read
+                          </Button>
+                          <Button size="sm" variant="secondary" onClick={restoreFixturePreferences}>
+                            Restore fixture defaults
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
                   </CardContent>
                 </Card>
 
@@ -14929,7 +15023,7 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {[...snapshot.experiencePreferences.workflowDefaults, ...snapshot.experiencePreferences.communicationDefaults].map((item) => (
+                    {[...activeExperiencePreferences.workflowDefaults, ...activeExperiencePreferences.communicationDefaults].map((item) => (
                       <div key={item.label} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
                         <span>{item.label}</span>
                         <span className="font-medium">{item.value}</span>
@@ -14944,14 +15038,14 @@ export default function AdminKinfloShell() {
                     <p className="text-sm text-muted-foreground">Preference reads and writes stay scoped to the current synced user.</p>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {snapshot.experiencePreferences.convexFunctions.map((functionName) => (
+                    {activeExperiencePreferences.convexFunctions.map((functionName) => (
                       <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
                         <span>{functionName}</span>
                         <Badge variant="outline">current user</Badge>
                       </div>
                     ))}
                     <div className="space-y-2">
-                      {snapshot.experiencePreferences.activationEvidence.map((item) => (
+                      {activeExperiencePreferences.activationEvidence.map((item) => (
                         <div key={item} className="flex gap-2 text-sm text-muted-foreground">
                           <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
                           <span>{item}</span>

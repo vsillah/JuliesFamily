@@ -87,8 +87,8 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "checkbox-notification-${channel.key}",
   "button-save-experience-preferences",
   "Live preference save gated",
-  "snapshot.experiencePreferences.convexFunctions",
-  "snapshot.experiencePreferences.activationEvidence",
+  "activeExperiencePreferences.convexFunctions",
+  "activeExperiencePreferences.activationEvidence",
 ]);
 
 requireIncludes("client/src/lib/kinfloShellData.ts", [
@@ -142,11 +142,12 @@ console.log("\nKinFlo experience preferences shell validation");
 console.log("Experience shell route: /admin/kinflo-os");
 console.log("Preference controls: 6");
 console.log("Convex functions: 2");
-console.log("Local state only: yes");
+console.log("Fixture fallback: yes");
+console.log("Limited live preferences: default-off");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Generated API imported: no");
-console.log("Live Convex execution: no");
+console.log("Live Convex execution: preferences-only when all Batch 6 gates are explicitly enabled");
 
 if (failed.length > 0) {
   console.error(`\nKinFlo experience preferences shell validation failed: ${failed.length} check(s) failed.`);
