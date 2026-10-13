@@ -2131,16 +2131,37 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
             <Badge className="bg-slate-950 hover:bg-slate-950">Vanguard associate workspace</Badge>
             <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">Provider-light</Badge>
           </div>
-          <h3 className="mt-3 text-lg font-semibold text-slate-950">Request-to-delivery control room</h3>
+          <h3 className="mt-3 text-lg font-semibold text-slate-950">ReversR intake to Vanguard fulfillment</h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-            Associates can review the request package, missing inputs, readiness gate, assignment, progress, and delivery evidence without enabling a live provider or backend write.
+            The public site prepares a ReversR Rebuild request package. This workspace shows the associate-side continuation: source review, quote and scope, assignment, progress, quality evidence, and delivery receipt.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button asChild variant="outline">
-            <Link href={previewHref}><ExternalLink className="mr-2 h-4 w-4" /> Open Vanguard preview</Link>
+            <Link href={`${previewHref}#build-request`}><ExternalLink className="mr-2 h-4 w-4" /> Open embedded intake</Link>
           </Button>
           <Button disabled><LockKeyhole className="mr-2 h-4 w-4" /> Live fulfillment gated</Button>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-vanguard-reversr-handoff">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="text-sm font-semibold text-amber-950">Public intake handoff</div>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-amber-900">
+              The embedded app captures source categories, the build goal, one starting discipline, constraints, missing inputs, and a local receipt. No private file or contact data is transmitted.
+            </p>
+          </div>
+          <Badge variant="outline" className="w-fit border-amber-300 bg-white text-amber-800">VE-RRB-PREVIEW</Badge>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
+          {vanguardWorkflow.intakeStages.map((stage, index) => (
+            <div key={stage.key} className="rounded-md border border-amber-200 bg-white p-3">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-amber-700">Step {index + 1}</div>
+              <div className="mt-1 text-xs font-semibold text-slate-950">{stage.label}</div>
+              <div className="mt-1 text-[11px] leading-4 text-slate-600">{stage.summary}</div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -2218,6 +2239,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
                 </div>
                 <div className="mt-1 text-xs text-slate-500">{stage.owner}</div>
                 <p className="mt-2 text-xs leading-5 text-slate-600">{stage.evidence}</p>
+                <div className="mt-2 border-t border-slate-200 pt-2 text-[11px] font-medium text-slate-500">{stage.artifact}</div>
               </div>
             ))}
           </div>

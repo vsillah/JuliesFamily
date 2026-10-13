@@ -1,14 +1,11 @@
-import { useState } from "react";
 import { Link, useRoute } from "wouter";
-import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, UsersRound, Wrench } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, Landmark, LockKeyhole, Mail, MapPin, Network, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import VanguardReversRIntake from "@/components/VanguardReversRIntake";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Textarea } from "@/components/ui/textarea";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
@@ -49,32 +46,33 @@ function getFunnelStage(metadata: Record<string, unknown> | undefined): FunnelSt
 
 function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
   return (
-    <section id="build-process" className="border-y border-slate-200 bg-slate-950 px-4 py-16 text-white sm:px-6 lg:px-8" data-testid="public-preview-vanguard-workflow">
+    <section id="build-process" className="border-y border-slate-200 bg-slate-100 px-4 py-16 text-slate-950 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-workflow">
       <div className="mx-auto max-w-7xl">
-        <Badge className="border-white/15 bg-white/10 text-white hover:bg-white/10">Request-to-delivery workflow</Badge>
-        <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(320px,0.28fr)]">
+        <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-900">ReversR-to-Vanguard build process</Badge>
+        <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.76fr)_minmax(300px,0.24fr)]">
           <div>
             <h2 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
-            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">{block.body}</p>
-            <div className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600">{block.body}</p>
+            <div className="mt-8 grid gap-3 md:grid-cols-2" data-testid="vanguard-request-to-delivery-lifecycle">
               {vanguardWorkflow.stages.map((stage, index) => (
-                <div key={stage.key} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                <article key={stage.key} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-slate-950">{index + 1}</span>
-                    <Badge variant="outline" className="border-white/15 text-slate-200">{stage.status}</Badge>
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">{index + 1}</span>
+                    <Badge variant="outline" className={stage.status === "ready" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : stage.status === "active" ? "border-blue-200 bg-blue-50 text-blue-800" : "border-slate-200 bg-slate-50 text-slate-600"}>{stage.status}</Badge>
                   </div>
-                  <div className="mt-4 font-semibold">{stage.label}</div>
-                  <div className="mt-1 text-xs text-slate-400">Owner: {stage.owner}</div>
-                  <p className="mt-3 text-sm leading-6 text-slate-300">{stage.evidence}</p>
-                </div>
+                  <div className="mt-4 font-semibold text-slate-950">{stage.label}</div>
+                  <div className="mt-1 text-xs text-amber-800">Owner: {stage.owner}</div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{stage.evidence}</p>
+                  <div className="mt-3 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500">Evidence: {stage.artifact}</div>
+                </article>
               ))}
             </div>
           </div>
-          <aside className="h-fit rounded-lg border border-amber-400/30 bg-amber-400/10 p-5">
+          <aside className="h-fit rounded-xl border border-slate-800 bg-slate-950 p-5 text-white shadow-lg">
             <LockKeyhole className="h-5 w-5 text-amber-300" />
-            <h3 className="mt-4 font-semibold">Build readiness stays locked</h3>
+            <h3 className="mt-4 font-semibold">The handoff has a real gate</h3>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              Work does not move into fulfillment until the scope, source inventory, missing inputs, quote, and acceptance criteria are clear.
+              A local receipt proves only that the intake fields are complete. Vanguard still owns source review, quote and scope, assignment, quality checks, and delivery evidence.
             </p>
             <div className="mt-4 space-y-2">
               {vanguardWorkflow.sampleOrder.missingInputs.map((item) => (
@@ -92,86 +90,17 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
 }
 
 function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
-  const [requestType, setRequestType] = useState<string>(vanguardWorkflow.requestTypes[0]);
-  const [outcome, setOutcome] = useState("");
-  const [sourceInventory, setSourceInventory] = useState("");
-  const [receiptReady, setReceiptReady] = useState(false);
-
   return (
-    <section id="build-request" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
-      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.82fr)_minmax(380px,0.48fr)]">
-        <div>
-          <Badge variant="outline">Build request intake</Badge>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{block.body}</p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            {vanguardWorkflow.intakeChecklist.map((item) => (
-              <div key={item} className="flex items-start gap-3 rounded-lg border bg-white p-4 text-sm leading-6">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" />
-                <span>{item}</span>
-              </div>
-            ))}
-          </div>
-          <div id="about" className="mt-8 rounded-lg border border-slate-200 bg-slate-50 p-5">
-            <div className="text-sm font-semibold">{vanguardWorkflow.company.name}</div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">
-              {vanguardWorkflow.company.tagline}. Vanguard is headquartered in {vanguardWorkflow.company.location} and provides professional services for large and small projects.
-            </p>
-          </div>
+    <section id="build-request" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl">
+          <Badge variant="outline">Embedded ReversR Rebuild intake</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-slate-600">{block.body}</p>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Prepare request summary</CardTitle>
-            <p className="text-sm text-muted-foreground">Local preview only. Nothing is submitted or uploaded.</p>
-          </CardHeader>
-          <CardContent>
-            <form
-              className="space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                setReceiptReady(Boolean(outcome.trim() && sourceInventory.trim()));
-              }}
-            >
-              <div className="space-y-2">
-                <Label htmlFor="vanguard-request-type">Request type</Label>
-                <select
-                  id="vanguard-request-type"
-                  value={requestType}
-                  onChange={(event) => setRequestType(event.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                >
-                  {vanguardWorkflow.requestTypes.map((type) => <option key={type}>{type}</option>)}
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="vanguard-outcome">What needs to be built or improved?</Label>
-                <Textarea id="vanguard-outcome" value={outcome} onChange={(event) => setOutcome(event.target.value)} placeholder="Describe the outcome, constraint, and target environment." rows={4} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="vanguard-source-inventory">Source package inventory</Label>
-                <Textarea id="vanguard-source-inventory" value={sourceInventory} onChange={(event) => setSourceInventory(event.target.value)} placeholder="List drawings, CAD files, measurements, diagrams, requirements, or system details already available." rows={4} required />
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="vanguard-target-date">Target date</Label>
-                  <Input id="vanguard-target-date" type="date" />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="vanguard-contact">Delivery contact</Label>
-                  <Input id="vanguard-contact" type="email" placeholder="name@company.com" />
-                </div>
-              </div>
-              <Button type="submit" className="w-full bg-amber-700 hover:bg-amber-800">Prepare request receipt</Button>
-            </form>
-            {receiptReady ? (
-              <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-4" role="status" data-testid="vanguard-build-request-receipt">
-                <div className="flex items-center gap-2 font-semibold text-emerald-900"><PackageCheck className="h-4 w-4" /> Request summary ready</div>
-                <div className="mt-2 text-sm text-emerald-800">{requestType} · local receipt VE-BUILD-PREVIEW</div>
-                <p className="mt-2 text-xs leading-5 text-emerald-700">An associate would next inventory the source package and identify missing inputs. This preview did not transmit your entries.</p>
-              </div>
-            ) : null}
-          </CardContent>
-        </Card>
+        <div className="mt-8">
+          <VanguardReversRIntake />
+        </div>
       </div>
     </section>
   );
