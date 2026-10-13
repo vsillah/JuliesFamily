@@ -100,6 +100,8 @@ import {
   VANGUARD_ORDER_PORTAL_PATH,
   vanguardAssociateAssistContract,
   vanguardAssistQueueFixture,
+  vanguardFulfillmentContract,
+  vanguardFulfillmentEvidenceFixture,
   vanguardOperationsCapacityFixture,
   vanguardOperationsContract,
   vanguardOperationsQueueFixtures,
@@ -2152,6 +2154,30 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
     { label: "Blocked", value: vanguardOperationsQueueFixtures.filter((item) => item.blocker).length },
     { label: "At risk", value: vanguardOperationsQueueFixtures.filter((item) => item.risk === "at_risk" || item.risk === "breached").length },
   ];
+  const fulfillmentStateTone = {
+    complete: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    pending: "border-blue-200 bg-blue-50 text-blue-700",
+    blocked: "border-amber-200 bg-amber-50 text-amber-800",
+    not_reserved: "border-slate-200 bg-slate-50 text-slate-700",
+    partially_reserved: "border-amber-200 bg-amber-50 text-amber-800",
+    reserved: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    unavailable: "border-rose-200 bg-rose-50 text-rose-700",
+    draft: "border-slate-200 bg-slate-50 text-slate-700",
+    in_review: "border-blue-200 bg-blue-50 text-blue-700",
+    issued: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    superseded: "border-slate-200 bg-slate-50 text-slate-500",
+    not_ready: "border-slate-200 bg-slate-50 text-slate-700",
+    ready: "border-blue-200 bg-blue-50 text-blue-700",
+    passed: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    hold: "border-amber-200 bg-amber-50 text-amber-800",
+    failed: "border-rose-200 bg-rose-50 text-rose-700",
+  } as const;
+  const fulfillmentSummary = [
+    { label: "Materials", value: vanguardFulfillmentEvidenceFixture.materials.length },
+    { label: "Fully reserved", value: vanguardFulfillmentEvidenceFixture.materials.filter((item) => item.reservationStatus === "reserved").length },
+    { label: "Paperwork versions", value: vanguardFulfillmentEvidenceFixture.documents.length },
+    { label: "Checks complete", value: vanguardFulfillmentEvidenceFixture.qualityChecks.filter((item) => item.status === "passed").length },
+  ];
 
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4" data-testid="section-kinflo-vanguard-fulfillment-workspace">
@@ -2425,6 +2451,160 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
             <p className="mt-1 text-xs leading-5 text-amber-900">{vanguardOperationsContract.blockedReason}</p>
             <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">Next: {vanguardOperationsContract.recoveryStep}</p>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-vanguard-fulfillment-evidence">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-sm font-semibold text-slate-950">Fulfillment and delivery evidence</div>
+              <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">Sample order</Badge>
+              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">{vanguardFulfillmentEvidenceFixture.queueLabel}</Badge>
+            </div>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-600">
+              Keep material readiness, manufacturing paperwork, quality checks, and the delivery receipt tied to the existing order record.
+            </p>
+          </div>
+          <Button disabled className="w-fit" data-testid="kinflo-vanguard-reserve-inventory-gated"><LockKeyhole className="mr-2 h-4 w-4" /> Reservation unavailable</Button>
+        </div>
+
+        <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid="section-kinflo-vanguard-fulfillment-summary">
+          {fulfillmentSummary.map((item) => (
+            <div key={item.label} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+              <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
+              <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 grid gap-3 xl:grid-cols-2">
+          <section className="rounded-md border border-slate-200 bg-white p-3" data-testid="section-kinflo-vanguard-material-requirements">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><Boxes className="h-4 w-4 text-blue-700" /> Materials and inventory</div>
+                <p className="mt-1 text-xs leading-5 text-slate-600">Availability and reservation posture appear together before work is released.</p>
+              </div>
+              <Button disabled size="sm" variant="outline" data-testid="kinflo-vanguard-material-update-gated"><LockKeyhole className="mr-2 h-3.5 w-3.5" /> Update gated</Button>
+            </div>
+            <div className="mt-3 space-y-2">
+              {vanguardFulfillmentEvidenceFixture.materials.map((item) => (
+                <article key={item.id} className="rounded-md border border-slate-200 bg-slate-50 p-3" data-testid={`kinflo-vanguard-material-${item.id}`}>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="text-xs font-semibold text-slate-950">{item.itemName}</div>
+                      <div className="mt-1 text-[11px] text-slate-500">Required: {item.requiredQuantity} · {item.availableQuantity}</div>
+                    </div>
+                    <Badge variant="outline" className={fulfillmentStateTone[item.reservationStatus]}>{item.reservationLabel}</Badge>
+                  </div>
+                  <div className="mt-2 grid gap-1 text-xs leading-5 text-slate-600 sm:grid-cols-2">
+                    <div><span className="font-semibold text-slate-700">Timing:</span> {item.needByLabel}</div>
+                    <div><span className="font-semibold text-slate-700">Evidence:</span> {item.evidenceLabel}</div>
+                  </div>
+                  {item.blocker ? <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 p-2 text-xs leading-5 text-amber-900"><span className="font-semibold">Blocker:</span> {item.blocker}</p> : null}
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-md border border-slate-200 bg-white p-3" data-testid="section-kinflo-vanguard-manufacturing-paperwork">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><FileText className="h-4 w-4 text-violet-700" /> Manufacturing paperwork</div>
+                <p className="mt-1 text-xs leading-5 text-slate-600">Each revision keeps its status, reviewer timing, and evidence reference.</p>
+              </div>
+              <Button disabled size="sm" variant="outline" data-testid="kinflo-vanguard-issue-paperwork-gated"><LockKeyhole className="mr-2 h-3.5 w-3.5" /> Issue gated</Button>
+            </div>
+            <div className="mt-3 space-y-2">
+              {vanguardFulfillmentEvidenceFixture.documents.map((item) => (
+                <article key={item.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="text-xs font-semibold text-slate-950">{item.documentName}</div>
+                      <div className="mt-1 text-[11px] text-slate-500">{item.versionLabel} · {item.preparedBy}</div>
+                    </div>
+                    <Badge variant="outline" className={fulfillmentStateTone[item.status]}>{item.statusLabel}</Badge>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-600">{item.reviewedAtLabel}</p>
+                  <p className="mt-1 text-[11px] text-slate-500">Evidence: {item.evidenceLabel}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+          <section className="rounded-md border border-slate-200 bg-white p-3" data-testid="section-kinflo-vanguard-quality-checks">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><ShieldCheck className="h-4 w-4 text-emerald-700" /> Quality checks</div>
+                <p className="mt-1 text-xs leading-5 text-slate-600">A named owner records each result against the approved requirement.</p>
+              </div>
+              <Button disabled size="sm" variant="outline" data-testid="kinflo-vanguard-record-quality-gated"><LockKeyhole className="mr-2 h-3.5 w-3.5" /> Record gated</Button>
+            </div>
+            <div className="mt-3 space-y-2">
+              {vanguardFulfillmentEvidenceFixture.qualityChecks.map((item) => (
+                <article key={item.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <div className="text-xs font-semibold text-slate-950">{item.label}</div>
+                      <div className="mt-1 text-[11px] text-slate-500">Owner: {item.owner}</div>
+                    </div>
+                    <Badge variant="outline" className={fulfillmentStateTone[item.status]}>{item.statusLabel}</Badge>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-600">{item.requirement}</p>
+                  <p className="mt-1 text-[11px] text-slate-500">Evidence: {item.evidenceLabel}</p>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="rounded-md border border-slate-200 bg-white p-3" data-testid="section-kinflo-vanguard-delivery-readiness">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><CheckCircle2 className="h-4 w-4 text-blue-700" /> Delivery package</div>
+                <p className="mt-1 text-xs leading-5 text-slate-600">Receipt readiness requires approved documents, quality results, and a versioned delivery manifest.</p>
+              </div>
+              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-800">{vanguardFulfillmentEvidenceFixture.deliveryReadinessLabel}</Badge>
+            </div>
+            <div className="mt-3 space-y-2">
+              {vanguardFulfillmentEvidenceFixture.receiptPrerequisites.map((item) => (
+                <div key={item.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="text-xs font-semibold text-slate-950">{item.label}</div>
+                    <Badge variant="outline" className={fulfillmentStateTone[item.state]}>{item.stateLabel}</Badge>
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">{item.detail}</p>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 p-3">
+              <div className="text-xs font-semibold text-blue-950">Delivery evidence</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {vanguardFulfillmentEvidenceFixture.deliveryEvidence.map((item) => <Badge key={item} variant="outline" className="border-blue-200 bg-white text-blue-800">{item}</Badge>)}
+              </div>
+            </div>
+            <Button disabled className="mt-3 w-full" data-testid="kinflo-vanguard-deliver-files-gated"><LockKeyhole className="mr-2 h-4 w-4" /> Delivery unavailable</Button>
+          </section>
+        </div>
+
+        <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-vanguard-fulfillment-blocker">
+            <div className="text-sm font-semibold text-amber-950">Blocked next action</div>
+            <p className="mt-1 text-xs leading-5 text-amber-900">{vanguardFulfillmentEvidenceFixture.blockedNextAction}</p>
+            <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">Recovery: {vanguardFulfillmentEvidenceFixture.recoveryStep}</p>
+          </div>
+          <div className="rounded-md border border-slate-200 bg-white p-3" data-testid="section-kinflo-vanguard-fulfillment-audit">
+            <div className="text-sm font-semibold text-slate-950">Evidence and audit hooks</div>
+            <p className="mt-1 text-xs leading-5 text-slate-600">{vanguardFulfillmentEvidenceFixture.auditEventCount} order events are represented. Material, document, check, delivery, and receipt changes each add a dated record.</p>
+            <div className="mt-2 text-[11px] font-semibold text-slate-700">{vanguardFulfillmentContract.auditHooks.length} required event types</div>
+          </div>
+        </div>
+
+        <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-vanguard-fulfillment-gate">
+          <div className="text-sm font-semibold text-amber-950">Fulfillment actions are off</div>
+          <p className="mt-1 text-xs leading-5 text-amber-900">{vanguardFulfillmentContract.blockedReason}</p>
+          <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">Next: {vanguardFulfillmentContract.recoveryStep}</p>
         </div>
       </div>
 
