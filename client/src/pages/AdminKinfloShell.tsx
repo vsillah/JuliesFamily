@@ -4,6 +4,7 @@ import {
   Bell,
   Boxes,
   CheckCircle2,
+  Clock3,
   CircleDashed,
   Command,
   CreditCard,
@@ -32,6 +33,7 @@ import {
   SlidersHorizontal,
   UserRoundCheck,
   UserRoundCog,
+  UsersRound,
   Workflow,
 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -96,6 +98,8 @@ import {
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import {
   VANGUARD_ORDER_PORTAL_PATH,
+  vanguardAssociateAssistContract,
+  vanguardAssistQueueFixture,
   vanguardOrderPortalContract,
   vanguardPortalOrderFixture,
 } from "@/lib/kinfloVanguardOrderPortal";
@@ -2200,6 +2204,86 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
         <div className="mt-3 rounded-md border border-violet-200 bg-white p-3 text-xs leading-5 text-slate-700" data-testid="section-kinflo-vanguard-order-portal-gate">
           <span className="font-semibold">Next release:</span> {vanguardOrderPortalContract.blockedReason} Private file uploads are not available in this release.
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-teal-200 bg-teal-50 p-3" data-testid="section-kinflo-vanguard-assist-queue">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="text-sm font-semibold text-teal-950">Associate assist queue</div>
+              <Badge variant="outline" className="border-teal-300 bg-white text-teal-800">Sample request</Badge>
+              <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-800">{vanguardAssistQueueFixture.modeLabel}</Badge>
+            </div>
+            <p className="mt-1 max-w-3xl text-xs leading-5 text-teal-900">
+              Review the client-approved fields, consent window, and next action before accepting support work.
+            </p>
+          </div>
+          <Button disabled className="w-fit" data-testid="kinflo-vanguard-accept-assist-gated"><LockKeyhole className="mr-2 h-4 w-4" /> Sign in to accept</Button>
+        </div>
+
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5" data-testid="section-kinflo-vanguard-assist-context">
+          {[
+            { label: "Support request", value: vanguardAssistQueueFixture.requestNumber },
+            { label: "Order", value: vanguardAssistQueueFixture.orderNumber },
+            { label: "Draft access", value: vanguardAssistQueueFixture.visibilityLabel },
+            { label: "Consent", value: vanguardAssistQueueFixture.consentLabel },
+            { label: "Current section", value: vanguardAssistQueueFixture.currentSection },
+          ].map((item) => (
+            <div key={item.label} className="rounded-md border border-teal-200 bg-white px-3 py-2">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-teal-700">{item.label}</div>
+              <div className="mt-1 text-xs font-semibold text-slate-950">{item.value}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+          <div className="space-y-3">
+            <div className="rounded-md border border-teal-200 bg-white p-3" data-testid="section-kinflo-vanguard-assist-consent">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><ShieldCheck className="h-4 w-4 text-teal-700" /> Consent and access</div>
+                <Badge variant="outline" className="border-teal-200 bg-teal-50 text-teal-800">{vanguardAssistQueueFixture.consentLabel}</Badge>
+              </div>
+              <div className="mt-3 text-xs font-semibold text-slate-700">Shared with the associate</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {vanguardAssistQueueFixture.sharedFields.map((field) => <Badge key={field} variant="outline" className="border-teal-200 bg-white text-teal-800">{field}</Badge>)}
+              </div>
+              <div className="mt-3 text-xs font-semibold text-slate-700">Kept private</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {vanguardAssistQueueFixture.excludedFields.map((field) => <Badge key={field} variant="outline" className="border-slate-200 bg-slate-50 text-slate-600">{field}</Badge>)}
+              </div>
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-slate-200 bg-slate-50 p-2 text-xs leading-5 text-slate-700">
+                <Clock3 className="mt-0.5 h-3.5 w-3.5 shrink-0" /> Access ends {vanguardAssistQueueFixture.expiresAtLabel}.
+              </div>
+            </div>
+
+            <div className="rounded-md border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-vanguard-assist-blocked-recovery">
+              <div className="text-sm font-semibold text-amber-950">Action blocked</div>
+              <p className="mt-1 text-xs leading-5 text-amber-900">{vanguardAssociateAssistContract.blockedReason}</p>
+              <p className="mt-2 text-xs font-semibold leading-5 text-amber-950">Next: {vanguardAssociateAssistContract.recoveryStep}</p>
+            </div>
+          </div>
+
+          <div className="rounded-md border border-teal-200 bg-white p-3" data-testid="section-kinflo-vanguard-assist-activity">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-sm font-semibold text-slate-950"><UsersRound className="h-4 w-4 text-teal-700" /> Activity log</div>
+                <p className="mt-1 text-xs leading-5 text-slate-600">{vanguardAssistQueueFixture.nextStep}</p>
+              </div>
+              <Badge variant="outline" className="w-fit border-slate-200 bg-slate-50 text-slate-700">{vanguardAssistQueueFixture.activity.length} events</Badge>
+            </div>
+            <ol className="mt-3 space-y-2">
+              {vanguardAssistQueueFixture.activity.map((event) => (
+                <li key={event.id} className="rounded-md border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-xs font-semibold text-slate-950">{event.label}</div>
+                    <div className="text-[11px] text-slate-500">{event.occurredAtLabel}</div>
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">{event.detail}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
         </div>
       </div>
 

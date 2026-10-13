@@ -5,17 +5,21 @@ import {
   Check,
   CheckCircle2,
   CircleDashed,
+  Clock3,
   Database,
   FileStack,
+  HandHelping,
   LockKeyhole,
   PackageCheck,
   ShieldCheck,
+  UsersRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   VANGUARD_LOCAL_RECEIPT_STORAGE_KEY,
   parseVanguardLocalReceipt,
+  vanguardAssociateAssistContract,
   vanguardOrderPortalContract,
   vanguardPortalOrderFixture,
 } from "@/lib/kinfloVanguardOrderPortal";
@@ -121,6 +125,47 @@ export default function VanguardOrderPortal() {
             No request receipt is attached to this session. Return to the build request, complete the required details, and choose <strong>Continue to secure order portal</strong>.
           </section>
         ) : null}
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" data-testid="vanguard-order-assist-request">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="max-w-3xl">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="border-teal-200 bg-teal-50 text-teal-800">Associate support</Badge>
+                <Badge variant="outline" className="border-slate-300">Sign in required</Badge>
+              </div>
+              <div className="mt-4 flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-teal-100 text-teal-800"><HandHelping className="h-5 w-5" /></span>
+                <div>
+                  <h2 className="text-2xl font-semibold">Need help finishing your request?</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Choose what a Vanguard associate can see and how they can help. You set the access end time, and you can revoke access sooner.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Button type="button" disabled data-testid="vanguard-order-request-assistance-gated"><UsersRound className="mr-2 h-4 w-4" /> Sign in to request support</Button>
+          </div>
+
+          <div className="mt-5 grid gap-3 lg:grid-cols-3" data-testid="vanguard-order-assist-modes">
+            {vanguardAssociateAssistContract.modes.map((mode) => (
+              <article key={mode.key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div className="text-sm font-semibold text-slate-950">{mode.clientLabel}</div>
+                <p className="mt-2 text-xs leading-5 text-slate-600">{mode.summary}</p>
+              </article>
+            ))}
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="rounded-xl border border-teal-200 bg-teal-50 p-4" data-testid="vanguard-order-assist-consent-boundary">
+              <div className="flex items-center gap-2 text-sm font-semibold text-teal-950"><ShieldCheck className="h-4 w-4" /> You control what is shared</div>
+              <p className="mt-2 text-xs leading-5 text-teal-900">{vanguardAssociateAssistContract.privacyBoundary}</p>
+            </div>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4" data-testid="vanguard-order-assist-auth-recovery">
+              <div className="flex items-center gap-2 text-sm font-semibold text-amber-950"><Clock3 className="h-4 w-4" /> Support is not active yet</div>
+              <p className="mt-2 text-xs leading-5 text-amber-900">{vanguardAssociateAssistContract.recoveryStep}</p>
+            </div>
+          </div>
+        </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" data-testid="vanguard-order-tracking-preview">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
