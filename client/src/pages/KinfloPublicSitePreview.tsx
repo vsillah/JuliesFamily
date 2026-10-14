@@ -1,5 +1,5 @@
 import { Link, useRoute } from "wouter";
-import type { CSSProperties } from "react";
+import { useEffect, type CSSProperties } from "react";
 import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import VanguardReversRIntake from "@/components/VanguardReversRIntake";
@@ -11,7 +11,8 @@ import { Progress } from "@/components/ui/progress";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
-import { useVanguardTheme } from "@/hooks/useVanguardTheme";
+import { useTenantTheme } from "@/hooks/useTenantTheme";
+import { getPaletteCssVariables, resolveKinfloPalette } from "@/lib/kinfloPaletteRegistry";
 import {
   resolveKinfloPublicSitePreviewWithContext,
   type KinfloPublicBlock,
@@ -19,12 +20,6 @@ import {
 } from "@/lib/kinfloPublicSitePreview";
 
 const VANGUARD_SITE_KEY = "vanguard-enterprises";
-const VANGUARD_BRAND_STYLE = {
-  "--primary": "221 83% 53%",
-  "--primary-foreground": "0 0% 100%",
-  "--primary-border": "hsl(221 83% 43%)",
-  "--ring": "221 83% 53%",
-} as CSSProperties;
 
 function getString(metadata: Record<string, unknown> | undefined, key: string, fallback: string) {
   const value = metadata?.[key];
@@ -74,7 +69,7 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
   return (
     <section id="build-process" className="border-y border-slate-200 bg-slate-100 px-4 py-16 text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-workflow">
       <div className="mx-auto max-w-7xl">
-        <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200">After you prepare the request</Badge>
+        <Badge variant="outline" className="kinflo-accent-soft">After you prepare the request</Badge>
         <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.7fr)_minmax(320px,0.3fr)]">
           <div>
             <h2 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
@@ -82,7 +77,7 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
             <div className="mt-8 grid gap-3 md:grid-cols-3" data-testid="vanguard-operational-checks">
               {operationalChecks.map((check) => (
                 <article key={check.title} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  <CheckCircle2 className="kinflo-accent-text h-5 w-5" />
                   <h3 className="mt-4 font-semibold text-slate-950 dark:text-white">{check.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{check.detail}</p>
                 </article>
@@ -90,7 +85,7 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
             </div>
           </div>
           <aside className="h-fit rounded-xl border border-slate-200 bg-white p-5 text-slate-950 shadow-lg dark:border-slate-800 dark:bg-slate-950 dark:text-white">
-            <LockKeyhole className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <LockKeyhole className="kinflo-accent-text h-5 w-5" />
             <h3 className="mt-4 font-semibold">A prepared request starts the review</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
               The receipt confirms that Vanguard has enough context to begin. It does not approve scope, price, assignment, or production.
@@ -98,7 +93,7 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
             <div className="mt-4 space-y-2">
               {vanguardWorkflow.sampleOrder.missingInputs.map((item) => (
                 <div key={item} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-300">
-                  <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
+                  <CircleDashed className="kinflo-accent-text mt-0.5 h-4 w-4 shrink-0" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -158,14 +153,14 @@ function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
   return (
     <section id="order-journey" className="scroll-mt-24 border-y border-slate-200 bg-slate-100 px-4 py-16 text-slate-950 dark:border-slate-800 dark:bg-slate-950 dark:text-white sm:px-6 lg:px-8" data-testid="public-preview-vanguard-order-backbone">
       <div className="mx-auto max-w-7xl">
-        <Badge className="border border-blue-200 bg-blue-50 text-blue-800 hover:bg-blue-50 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200 dark:hover:bg-blue-950/40">ReversR order journey</Badge>
+        <Badge className="kinflo-accent-soft border">ReversR order journey</Badge>
         <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(320px,0.28fr)]">
           <div>
             <h2 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300">{block.body}</p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">Order promise</div>
+            <div className="kinflo-accent-text text-xs font-semibold uppercase tracking-[0.18em]">Order promise</div>
             <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">You will always be able to see the current owner, the next decision, the evidence attached to the work, and what Vanguard needs from you.</p>
           </div>
         </div>
@@ -176,12 +171,12 @@ function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
             return (
               <article key={action.label} className="rounded-xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/[0.06]">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-white dark:bg-blue-500"><Icon className="h-5 w-5" /></span>
+                  <span className="kinflo-accent-solid flex h-10 w-10 items-center justify-center rounded-lg"><Icon className="h-5 w-5" /></span>
                   <Badge variant="outline" className="border-slate-300 text-slate-700 dark:border-white/15 dark:text-slate-200">{action.state}</Badge>
                 </div>
                 <h3 className="mt-4 text-lg font-semibold">{action.label}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{action.detail}</p>
-                <Button asChild variant="ghost" className="mt-3 h-auto justify-start p-0 text-blue-700 hover:bg-transparent hover:text-blue-600 dark:text-blue-300 dark:hover:text-blue-200">
+                <Button asChild variant="ghost" className="kinflo-accent-text mt-3 h-auto justify-start p-0 hover:bg-transparent">
                   <a href={action.href}>{action.cta}<ArrowRight className="ml-2 h-4 w-4" /></a>
                 </Button>
               </article>
@@ -193,7 +188,7 @@ function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
           {vanguardWorkflow.clientOrderStages.map((stage, index) => (
             <li key={stage.key} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-slate-900">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">{String(index + 1).padStart(2, "0")}</span>
+                <span className="kinflo-accent-text text-xs font-bold">{String(index + 1).padStart(2, "0")}</span>
                 <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">{stage.access}</span>
               </div>
               <div className="mt-3 text-sm font-semibold">{stage.label}</div>
@@ -231,7 +226,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           <div className="mt-10 grid gap-4 lg:grid-cols-3">
             {source.serviceDetails.map((service) => (
               <article key={service.key} className="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-slate-700 dark:bg-slate-900">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                <div className="kinflo-accent-soft flex h-10 w-10 items-center justify-center rounded-lg">
                   {service.key === "project-management" ? <BriefcaseBusiness className="h-5 w-5" /> : service.key === "it-infrastructure" ? <Network className="h-5 w-5" /> : <Wrench className="h-5 w-5" />}
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">{service.title}</h3>
@@ -239,7 +234,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
                 <ul className="mt-4 space-y-2">
                   {service.highlights.map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm leading-5 text-slate-700 dark:text-slate-300">
-                      <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                      <CheckCircle2 className="kinflo-accent-text mt-0.5 h-4 w-4 shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -258,7 +253,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
               <ol className="flex flex-wrap gap-2" aria-label="Vanguard service method phases">
                 {source.projectPhases.map((phase, index) => (
                   <li key={phase.label} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium dark:border-slate-700 dark:bg-slate-900">
-                    <span className="text-blue-700 dark:text-blue-300">{String(index + 1).padStart(2, "0")}</span>
+                    <span className="kinflo-accent-text">{String(index + 1).padStart(2, "0")}</span>
                     <span>{phase.label}</span>
                   </li>
                 ))}
@@ -281,7 +276,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
               </div>
             </div>
             <aside id="location" className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-950">
-              <div className="flex items-center gap-2 font-semibold text-slate-950 dark:text-white"><MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" /> Locations</div>
+              <div className="flex items-center gap-2 font-semibold text-slate-950 dark:text-white"><MapPin className="kinflo-accent-text h-5 w-5" /> Locations</div>
               <div className="mt-4 space-y-3">
                 {source.about.locations.map((location) => (
                   <div key={location.city} className="rounded-lg bg-slate-50 p-3 dark:bg-slate-900">
@@ -295,12 +290,12 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           </div>
 
           <div className="mt-10">
-            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-white"><UsersRound className="h-4 w-4 text-blue-600 dark:text-blue-400" /> Leadership team</div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-950 dark:text-white"><UsersRound className="kinflo-accent-text h-4 w-4" /> Leadership team</div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               {source.leadership.map((leader) => (
                 <article key={leader.name} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950">
                   <h3 className="font-semibold text-slate-950 dark:text-white">{leader.name}</h3>
-                  <div className="mt-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{leader.role}</div>
+                  <div className="kinflo-accent-text mt-1 text-xs font-medium">{leader.role}</div>
                   <p className="mt-3 text-xs leading-5 text-slate-600 dark:text-slate-300">{leader.focus}</p>
                 </article>
               ))}
@@ -322,17 +317,17 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
                 ))}
               </div>
             </div>
-            <aside className="rounded-xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950/30">
-              <Landmark className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <aside className="kinflo-accent-soft rounded-xl border p-5">
+              <Landmark className="kinflo-accent-text h-5 w-5" />
               <h3 className="mt-3 text-lg font-semibold">Government procurement profile</h3>
               <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">{source.proof.gsa}</p>
               <div className="mt-3 flex flex-wrap gap-2">
-                {source.proof.gsaLinks.map((label) => <Badge key={label} variant="outline" className="border-blue-300 text-blue-800 dark:border-blue-700 dark:text-blue-200">{label} reference</Badge>)}
+                {source.proof.gsaLinks.map((label) => <Badge key={label} variant="outline" className="kinflo-accent-soft">{label} reference</Badge>)}
               </div>
               <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {source.proof.naics.map((item) => (
-                  <div key={item.code} className="rounded-md border border-blue-200 bg-white p-3 dark:border-blue-800 dark:bg-slate-950/30">
-                    <div className="text-xs font-bold text-emerald-700 dark:text-emerald-300">{item.code}</div>
+                  <div key={item.code} className="kinflo-palette-surface rounded-md border p-3">
+                    <div className="kinflo-accent-text text-xs font-bold">{item.code}</div>
                     <div className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{item.label}</div>
                   </div>
                 ))}
@@ -357,14 +352,14 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           <div className="mt-8 grid gap-4 lg:grid-cols-3">
             {source.careers.roles.map((role) => (
               <article key={role.title} className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-700 dark:bg-slate-950">
-                <BriefcaseBusiness className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <BriefcaseBusiness className="kinflo-accent-text h-5 w-5" />
                 <h3 className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">{role.title}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{role.summary}</p>
                 <p className="mt-4 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500 dark:border-slate-800 dark:text-slate-400">{role.experience}</p>
               </article>
             ))}
           </div>
-          <div className="mt-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-950 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-100">
+          <div className="kinflo-accent-soft mt-6 flex items-start gap-3 rounded-lg border p-4 text-sm leading-6">
             <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
             <span>Online applications are not available here. Contact Vanguard directly before sending a resume or personal information.</span>
           </div>
@@ -374,7 +369,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
       <div id="contact-details" className="border-t border-slate-200 bg-white px-4 py-16 dark:border-slate-800 dark:bg-slate-950 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-contact-location">
         <div className="mx-auto grid max-w-7xl gap-6 rounded-2xl border border-slate-200 bg-slate-100 p-6 text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
-            <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300"><Building2 className="h-4 w-4" /> Vanguard Enterprises and Associates Inc.</div>
+            <div className="kinflo-accent-text flex items-center gap-2 text-sm font-semibold"><Building2 className="h-4 w-4" /> Vanguard Enterprises and Associates Inc.</div>
             <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">Have a service question or a build to scope?</h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">{source.contact.summary}</p>
             <div className="mt-4 flex flex-col gap-2 text-sm text-slate-700 dark:text-slate-200 sm:flex-row sm:gap-5">
@@ -383,7 +378,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
               <span>{vanguardWorkflow.company.location}</span>
             </div>
           </div>
-          <Button size="lg" className="bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400" asChild>
+          <Button size="lg" className="kinflo-accent-solid" asChild>
             <a href="#build-request">Prepare a build request <ArrowRight className="ml-2 h-4 w-4" /></a>
           </Button>
         </div>
@@ -399,7 +394,7 @@ function BlockSection({
   block: KinfloPublicBlock;
   preview: KinfloPublicSitePreviewPayload;
 }) {
-  const accent = preview.theme.palette.accent;
+  const accent = "var(--kinflo-accent)";
 
   if (block.type === "hero") {
     return (
@@ -577,16 +572,34 @@ export default function KinfloPublicSitePreview() {
   const contextDevice = preview.context.device ?? "responsive";
   const contextReviewSource = preview.context.reviewSource ?? preview.context.source;
   const isVanguard = preview.site.slug === VANGUARD_SITE_KEY;
-  const { mode: vanguardThemeMode, setMode: setVanguardThemeMode } = useVanguardTheme(isVanguard);
+  const { mode: tenantThemeMode, resolvedMode, setMode: setTenantThemeMode } = useTenantTheme(preview.tenant.slug);
+  const tenantPalette = resolveKinfloPalette(preview.theme.paletteId);
+  const paletteVariables = getPaletteCssVariables(tenantPalette, resolvedMode);
+
+  useEffect(() => {
+    const rootStyle = document.documentElement.style;
+    const previousValues = Object.fromEntries(
+      Object.keys(paletteVariables).map((key) => [key, rootStyle.getPropertyValue(key)]),
+    );
+
+    for (const [key, value] of Object.entries(paletteVariables)) {
+      rootStyle.setProperty(key, value);
+    }
+
+    return () => {
+      for (const [key, value] of Object.entries(previousValues)) {
+        if (value) rootStyle.setProperty(key, value);
+        else rootStyle.removeProperty(key);
+      }
+    };
+  }, [paletteVariables]);
 
   return (
     <div
-      className={isVanguard ? "min-h-screen bg-[#f4f6fb] text-slate-950 dark:bg-[#08090c] dark:text-slate-50" : "min-h-screen"}
-      data-vanguard-brand-palette={isVanguard ? "reversr-compatible" : undefined}
-      style={isVanguard ? VANGUARD_BRAND_STYLE : {
-        backgroundColor: preview.theme.palette.background,
-        color: preview.theme.palette.foreground,
-      }}
+      className="kinflo-public-surface min-h-screen"
+      data-kinflo-palette={tenantPalette.id}
+      data-kinflo-theme={resolvedMode}
+      style={paletteVariables as CSSProperties}
     >
       <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
@@ -608,7 +621,7 @@ export default function KinfloPublicSitePreview() {
             ))}
           </nav>
           {isVanguard ? (
-            <VanguardThemeControl mode={vanguardThemeMode} onChange={setVanguardThemeMode} />
+            <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} />
           ) : (
             <>
               <Badge variant="outline" className="hidden 2xl:inline-flex">

@@ -2,6 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .kinflo-public-surface {
+    background: var(--kinflo-background);
+    color: var(--kinflo-foreground);
+  }
+
+  .kinflo-accent-text {
+    color: var(--kinflo-accent) !important;
+  }
+
+  .kinflo-accent-soft {
+    border-color: var(--kinflo-accent) !important;
+    background: var(--kinflo-accent-soft) !important;
+    color: var(--kinflo-accent-soft-foreground) !important;
+  }
+
+  .kinflo-accent-solid {
+    background: var(--kinflo-accent) !important;
+    color: var(--kinflo-accent-foreground) !important;
+  }
+
+  .kinflo-accent-solid:hover {
+    background: color-mix(in srgb, var(--kinflo-accent) 86%, black) !important;
+    color: var(--kinflo-accent-foreground) !important;
+  }
+
+  .kinflo-palette-surface {
+    border-color: var(--kinflo-border) !important;
+    background: var(--kinflo-surface) !important;
+    color: var(--kinflo-foreground) !important;
+  }
+
+  .kinflo-palette-surface-muted {
+    border-color: var(--kinflo-border) !important;
+    background: var(--kinflo-surface-muted) !important;
+    color: var(--kinflo-foreground) !important;
+  }
+}
+
 /* LIGHT MODE */
 :root {
   --nav-height: 0px; /* Dynamically set by Navigation component */

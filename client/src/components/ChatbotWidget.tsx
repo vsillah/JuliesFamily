@@ -29,6 +29,7 @@ export function ChatbotWidget() {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random().toString(36).substring(2)}`);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isKinfloPublicSite = typeof window !== 'undefined' && window.location.pathname.startsWith('/kinflo-sites/');
 
   const { data: user } = useQuery<User>({ 
     queryKey: ['/api/auth/user'] 
@@ -143,7 +144,7 @@ export function ChatbotWidget() {
         <Button
           onClick={() => setIsOpen(true)}
           size="icon"
-          className="h-10 w-10 group-hover:h-14 group-hover:w-14 rounded-full shadow-lg transition-all duration-500 ease-in-out [transition-delay:0s] group-hover:[transition-delay:1s]"
+          className={`h-10 w-10 group-hover:h-14 group-hover:w-14 rounded-full shadow-lg transition-all duration-500 ease-in-out [transition-delay:0s] group-hover:[transition-delay:1s] ${isKinfloPublicSite ? 'kinflo-accent-solid' : ''}`}
           data-testid="button-open-chatbot"
         >
           <MessageSquare className="h-5 w-5 group-hover:h-6 group-hover:w-6 transition-all duration-500 ease-in-out [transition-delay:0s] group-hover:[transition-delay:1s]" />
