@@ -3,6 +3,11 @@ import consultantHero from "@assets/generated_images/Professional_partnership_co
 import campaignHero from "@assets/generated_images/Hands_together_showing_community_b0e0e375.png";
 import vanguardIndustrialHero from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
+import {
+  resolveTenantPalette,
+  resolveTenantPaletteId,
+  type KinfloPaletteId,
+} from "@/lib/kinfloPaletteRegistry";
 
 export type KinfloPublicBlockType =
   | "hero"
@@ -52,6 +57,7 @@ export type KinfloPublicSitePreview = {
     publishedAt: number;
   };
   theme: {
+    paletteId: KinfloPaletteId;
     palette: {
       background: string;
       foreground: string;
@@ -126,13 +132,8 @@ const previews: KinfloPublicSitePreview[] = [
       publishedAt,
     },
     theme: {
-      palette: {
-        background: "#fffaf4",
-        foreground: "#201713",
-        accent: "#b45309",
-        secondary: "#556b2f",
-        muted: "#f2e7da",
-      },
+      paletteId: resolveTenantPaletteId("julies-family"),
+      palette: resolveTenantPalette("julies-family").light,
       typography: { heading: "Playfair Display", body: "Inter" },
       radii: { card: 8, control: 6 },
       media: {
@@ -207,13 +208,8 @@ const previews: KinfloPublicSitePreview[] = [
       publishedAt,
     },
     theme: {
-      palette: {
-        background: "#f8fafc",
-        foreground: "#0f172a",
-        accent: "#0f766e",
-        secondary: "#334155",
-        muted: "#e2e8f0",
-      },
+      paletteId: resolveTenantPaletteId("advisor-client-starter"),
+      palette: resolveTenantPalette("advisor-client-starter").light,
       typography: { heading: "Inter", body: "Inter" },
       radii: { card: 6, control: 6 },
       media: {
@@ -288,13 +284,8 @@ const previews: KinfloPublicSitePreview[] = [
       publishedAt,
     },
     theme: {
-      palette: {
-        background: "#f4f6fb",
-        foreground: "#0f172a",
-        accent: "#2563eb",
-        secondary: "#007a55",
-        muted: "#e8edf5",
-      },
+      paletteId: resolveTenantPaletteId("vanguard-enterprises"),
+      palette: resolveTenantPalette("vanguard-enterprises").light,
       typography: { heading: "Inter", body: "Inter" },
       radii: { card: 6, control: 6 },
       media: {
@@ -402,13 +393,8 @@ const previews: KinfloPublicSitePreview[] = [
       publishedAt,
     },
     theme: {
-      palette: {
-        background: "#ffffff",
-        foreground: "#111827",
-        accent: "#1d4ed8",
-        secondary: "#4b5563",
-        muted: "#eff6ff",
-      },
+      paletteId: resolveTenantPaletteId("campaign-microsite-lab"),
+      palette: resolveTenantPalette("campaign-microsite-lab").light,
       typography: { heading: "Inter", body: "Inter" },
       radii: { card: 8, control: 6 },
       media: {

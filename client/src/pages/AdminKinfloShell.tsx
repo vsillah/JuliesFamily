@@ -754,6 +754,7 @@ function ConfigurationAffordanceStrip({
   disabledActionLabel,
   readinessPercent,
   testId,
+  notesLabel = "Provenance notes",
 }: {
   surface: string;
   objectLabel: string;
@@ -764,6 +765,7 @@ function ConfigurationAffordanceStrip({
   disabledActionLabel: string;
   readinessPercent: number;
   testId: string;
+  notesLabel?: string;
 }) {
   return (
     <section
@@ -789,7 +791,7 @@ function ConfigurationAffordanceStrip({
       </div>
 
       <div className="min-w-0 rounded-lg border border-white bg-white p-3">
-        <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Provenance notes</div>
+        <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">{notesLabel}</div>
         <div className="mt-3 space-y-2">
           {provenanceNotes.slice(0, 3).map((note) => (
             <div key={note} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
@@ -10684,12 +10686,20 @@ export default function AdminKinfloShell() {
                       disabledActionLabel="Live theme save gated"
                       readinessPercent={brandReadinessPercent}
                       testId="section-kinflo-configuration-affordance-brand"
+                      notesLabel="Theme draft summary"
                     />
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                       <div className="space-y-2">
                         <Label>Site</Label>
-                        <Select value={brandSiteKey} onValueChange={setBrandSiteKey}>
+                        <Select
+                          value={brandSiteKey}
+                          onValueChange={(value) => {
+                            setBrandSiteKey(value);
+                            const site = snapshot.brandTheme.siteOptions.find((option) => option.key === value);
+                            if (site) setBrandPaletteKey(site.paletteId);
+                          }}
+                        >
                           <SelectTrigger data-testid="select-kinflo-brand-site">
                             <SelectValue placeholder="Select site" />
                           </SelectTrigger>
@@ -10716,6 +10726,9 @@ export default function AdminKinfloShell() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <p className="text-xs text-muted-foreground" data-testid="kinflo-tenant-palette-assignment">
+                          Assigned to {selectedBrandSite?.tenantSlug}; staged locally until live theme saves are approved.
+                        </p>
                       </div>
                       <div className="space-y-2">
                         <Label>Typography</Label>

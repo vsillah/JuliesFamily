@@ -2,6 +2,11 @@ import {
   getKinfloConvexRuntime,
   type KinfloConvexRuntimeMode,
 } from "./kinfloConvexRuntime";
+import {
+  kinfloPaletteOptions,
+  resolveTenantPaletteId,
+  type KinfloPaletteId,
+} from "./kinfloPaletteRegistry";
 
 export type KinfloShellStatus =
   | "active"
@@ -1133,7 +1138,7 @@ export type ShellBrandThemeDraft = {
   defaultTypographyKey: string;
   defaultButtonKey: string;
   defaultMediaKey: string;
-  siteOptions: { key: string; label: string; previewPath: string }[];
+  siteOptions: { key: string; label: string; previewPath: string; tenantSlug: string; paletteId: KinfloPaletteId }[];
   paletteOptions: ShellBrandPaletteOption[];
   typographyOptions: ShellBrandTypographyOption[];
   buttonOptions: ShellBrandButtonOption[];
@@ -2619,41 +2624,24 @@ const fixtureContentDraft: ShellContentDraft = {
 
 const fixtureBrandTheme: ShellBrandThemeDraft = {
   defaultSiteKey: "advisor-client-site",
-  defaultPaletteKey: "trust-minimal",
+  defaultPaletteKey: resolveTenantPaletteId("advisor-client-starter"),
   defaultTypographyKey: "editorial-system",
   defaultButtonKey: "grounded-actions",
   defaultMediaKey: "documentary-proof",
   siteOptions: [
-    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
-    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
-    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
+    { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family", tenantSlug: "julies-family", paletteId: resolveTenantPaletteId("julies-family") },
+    { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site", tenantSlug: "advisor-client-starter", paletteId: resolveTenantPaletteId("advisor-client-starter") },
+    { key: "vanguard-enterprises", label: "Vanguard Enterprises", previewPath: "/kinflo-sites/vanguard-enterprises", tenantSlug: "vanguard-enterprises", paletteId: resolveTenantPaletteId("vanguard-enterprises") },
+    { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite", tenantSlug: "campaign-microsite-lab", paletteId: resolveTenantPaletteId("campaign-microsite-lab") },
   ],
-  paletteOptions: [
-    {
-      key: "trust-minimal",
-      label: "Trust Minimal",
-      background: "#ffffff",
-      foreground: "#111827",
-      accent: "#0f766e",
-      description: "Quiet operational shell for advisory and client-services sites.",
-    },
-    {
-      key: "learning-warm",
-      label: "Learning Warmth",
-      background: "#fffaf3",
-      foreground: "#1f2937",
-      accent: "#b45309",
-      description: "Human learning programs with warm proof and family-facing calls to action.",
-    },
-    {
-      key: "campaign-clarity",
-      label: "Campaign Clarity",
-      background: "#f8fafc",
-      foreground: "#172554",
-      accent: "#dc2626",
-      description: "High-contrast microsites for urgency, launches, and conversion campaigns.",
-    },
-  ],
+  paletteOptions: kinfloPaletteOptions.map((palette) => ({
+    key: palette.id,
+    label: palette.label,
+    background: palette.light.background,
+    foreground: palette.light.foreground,
+    accent: palette.light.accent,
+    description: palette.description,
+  })),
   typographyOptions: [
     { key: "editorial-system", label: "Editorial System", heading: "Fraunces", body: "Inter", scale: "Measured" },
     { key: "operational-sans", label: "Operational Sans", heading: "Inter", body: "Inter", scale: "Compact" },

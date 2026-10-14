@@ -53,6 +53,7 @@ for (const path of [
   "docs/phase40-brand-theme-shell.md",
   "client/src/pages/AdminKinfloShell.tsx",
   "client/src/lib/kinfloShellData.ts",
+  "client/src/lib/kinfloPaletteRegistry.ts",
   "convex/controlPlane.ts",
   "client/src/lib/kinfloConvexRuntime.ts",
   "client/src/lib/kinfloGeneratedApiContract.ts",
@@ -97,15 +98,22 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "ShellBrandPaletteOption",
   "fixtureBrandTheme",
   "defaultSiteKey: \"advisor-client-site\"",
-  "defaultPaletteKey: \"trust-minimal\"",
-  "Trust Minimal",
-  "Learning Warmth",
-  "Campaign Clarity",
+  "defaultPaletteKey: resolveTenantPaletteId(\"advisor-client-starter\")",
+  "kinfloPaletteOptions.map",
+  "resolveTenantPaletteId(\"vanguard-enterprises\")",
   "Live theme save is gated until hosted Convex auth, generated API bindings, visual QA, and public renderer smoke are approved.",
   "controlPlane.updateThemeTokens",
   "siteBuilder.getSiteDraft",
   "publicSite.resolvePublishedSite",
   "Brand theme shell",
+]);
+
+requireIncludes("client/src/lib/kinfloPaletteRegistry.ts", [
+  "KinFlo Grounded",
+  "ReversR Industrial",
+  "Professional Neutral",
+  '"vanguard-enterprises": "reversr-vanguard"',
+  "KINFLO_DEFAULT_PALETTE_ID",
 ]);
 
 requireIncludes("convex/controlPlane.ts", [
