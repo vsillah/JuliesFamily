@@ -10,13 +10,17 @@ Route: `/kinflo-sites/vanguard-enterprises#build-request`
 
 ## Captured surfaces
 
-- `00-desktop-order-entry.png` — the Vanguard header, shared order-lifecycle rail, and ReversR-first hero action.
+- `00-desktop-vanguard-first.png` — the Vanguard-first hero and company framing before the order flow.
+- `00-desktop-vanguard-services.png` — Vanguard's service overview before the ReversR request section.
+- `00-desktop-vanguard-company.png` — Vanguard company, leadership, and location context before order entry.
+- `vanguard-mobile-vanguard-first.png` — the mobile Vanguard-first hero and site navigation.
+- `00-desktop-order-entry.png` — the build-request section where the ReversR lifecycle rail begins.
 - `vanguard-reversr-desktop-workspace.png` — 1440 x 1000, initial materials workspace with desktop rail, canvas, and request inspector.
 - `01-desktop-materials-selected.png` through `05-desktop-request-handoff.png` — the meaningful request assembly states and completed browser receipt.
 - `06-desktop-order-receipt.png` — the expanded browser receipt at the top of the order portal after handoff.
 - `07-desktop-order-tracking.png` — the order portal's owner, next-action, and milestone view after the browser receipt handoff.
 - `vanguard-reversr-tablet-workspace.png` — 768 x 900 responsive mid-width workspace with no document-level horizontal overflow.
-- `vanguard-reversr-mobile-order-entry.png` — the mobile order-lifecycle entry rail and ReversR-first public journey.
+- `vanguard-reversr-mobile-order-entry.png` — the mobile build-request section where the ReversR lifecycle rail begins.
 - `vanguard-reversr-mobile-workspace.png` — 390 x 844 responsive order workspace with no document-level horizontal overflow.
 - `vanguard-reversr-desktop-embed-walkthrough.mp4` — privacy-safe H.264 walkthrough assembled from the captured states.
 - `network-evidence.json` — observed network classification.

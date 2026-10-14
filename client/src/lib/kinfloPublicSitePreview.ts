@@ -322,7 +322,7 @@ const previews: KinfloPublicSitePreview[] = [
         type: "hero",
         title: "Engineering and technology services with a clear path to delivery",
         body: "Vanguard supports engineering, CAD and CAM, IT infrastructure, project management, and professional service work. When a project is ready, ReversR keeps the request and delivery record together.",
-        metadata: { primaryCta: "Start a ReversR order", primaryHref: "#build-request", secondaryCta: "Explore Vanguard", secondaryHref: "#services" },
+        metadata: { primaryCta: "Explore capabilities", primaryHref: "#services", secondaryCta: "Start a ReversR order", secondaryHref: "#build-request" },
         order: 10,
         publishedAt,
       },
@@ -332,7 +332,7 @@ const previews: KinfloPublicSitePreview[] = [
         title: "Professional services built around the work in front of you",
         body: "Vanguard supports large and small projects with subject matter expertise, consistent service, and a delivery record clients can inspect.",
         metadata: { items: vanguardWorkflow.services.map((service) => service.title) },
-        order: 40,
+        order: 20,
         publishedAt,
       },
       {
@@ -341,7 +341,7 @@ const previews: KinfloPublicSitePreview[] = [
         title: "The capabilities and people behind the build",
         body: "Explore Vanguard's technical services, service method, leadership, customer and government experience, careers, and locations.",
         metadata: { source: "vanguard-public-source-parity", sourcePageCount: vanguardWorkflow.sourceSite.inventory.length },
-        order: 50,
+        order: 30,
         publishedAt,
       },
       {
@@ -350,7 +350,7 @@ const previews: KinfloPublicSitePreview[] = [
         title: "One order keeps the work and the decisions together",
         body: "Begin with what you know. The same order will carry the request, associate support, quote, progress, quality record, delivery, and your final acceptance.",
         metadata: { source: "vanguard-reversr-order-journey", persona: "provider", journeyStage: "consideration" },
-        order: 20,
+        order: 40,
         publishedAt,
       },
       {
@@ -359,7 +359,7 @@ const previews: KinfloPublicSitePreview[] = [
         title: "What Vanguard confirms before work begins",
         body: "A prepared request gives Vanguard a useful starting point. The team still checks feasibility, documents the quote and scope, and sets the controls that carry the work through delivery.",
         metadata: { source: "vanguard-reversr-handoff", persona: "provider", journeyStage: "consideration" },
-        order: 30,
+        order: 45,
         publishedAt,
       },
       {
@@ -368,7 +368,7 @@ const previews: KinfloPublicSitePreview[] = [
         title: "Start your ReversR order",
         body: "List the materials you have, name the result you need, record the constraints, and prepare the request for Vanguard review. Your entries remain on this device until account-based saving is available.",
         metadata: { source: "vanguard-reversr-embedded-intake", persona: "provider", journeyStage: "decision" },
-        order: 25,
+        order: 50,
         publishedAt,
       },
     ],

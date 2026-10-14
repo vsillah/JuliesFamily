@@ -121,6 +121,13 @@ function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
             <a href="/kinflo-sites/vanguard-enterprises/orders#order-tracking">Track an existing order <ArrowRight className="ml-2 h-4 w-4" /></a>
           </Button>
         </div>
+        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-800 shadow-xl shadow-slate-950/10" data-testid="vanguard-build-order-navigation">
+          <OrderLifecycleNavigation
+            activeKey="prepare"
+            eyebrow="ReversR is your Vanguard order workspace"
+            items={[...vanguardOrderLifecycleNavigation]}
+          />
+        </div>
         <div className="mt-8">
           <VanguardReversRIntake />
         </div>
@@ -648,14 +655,6 @@ export default function KinfloPublicSitePreview() {
           ))}
         </nav>
       </header>
-
-      {isVanguard ? (
-        <OrderLifecycleNavigation
-          activeKey="prepare"
-          eyebrow="ReversR is your Vanguard order workspace"
-          items={[...vanguardOrderLifecycleNavigation]}
-        />
-      ) : null}
 
       <main>
         {preview.blocks

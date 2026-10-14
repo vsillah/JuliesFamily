@@ -33,8 +33,8 @@ const publicData = requireIncludes(files.publicData, [
   'label: "Start an Order"',
   'label: "Track Orders"',
   'label: "How It Works"',
-  'primaryCta: "Start a ReversR order"',
-  'secondaryCta: "Explore Vanguard"',
+  'primaryCta: "Explore capabilities"',
+  'secondaryCta: "Start a ReversR order"',
   'type: "order_backbone"',
   'title: "Start your ReversR order"',
 ]);
@@ -49,7 +49,17 @@ const publicPage = requireIncludes(files.publicPage, [
   "Account access required",
   'activeKey="prepare"',
   "ReversR is your Vanguard order workspace",
+  'data-testid="vanguard-build-order-navigation"',
 ]);
+
+const buildRequestStart = publicPage.indexOf("function BuildRequestSection");
+const orderBackboneStart = publicPage.indexOf("function OrderBackboneSection");
+const lifecycleNavigationStart = publicPage.indexOf("<OrderLifecycleNavigation");
+check(
+  buildRequestStart >= 0 && lifecycleNavigationStart > buildRequestStart && lifecycleNavigationStart < orderBackboneStart,
+  "public lifecycle navigation is scoped to the build-request section",
+  "The ReversR lifecycle rail must not replace the Vanguard-first public header and company narrative.",
+);
 
 const lifecycleNav = requireIncludes(files.lifecycleNav, [
   'aria-label="Order lifecycle"',
@@ -100,7 +110,7 @@ check(packageJson.scripts["kinflo:capture-vanguard-order-backbone-qa"] === "node
 
 const vanguardSlice = publicData.slice(publicData.indexOf('_id: "tenant_vanguard_fixture"'), publicData.indexOf('_id: "tenant_campaign_fixture"'));
 const runtimeCopy = [publicPage, lifecycleNav, intake, portal].join("\n");
-for (const pattern of [/\bprompt\b/i, /\bprovenance\b/i, /\bbranch\b/i, /\bpull request\b/i, /\bvalidator\b/i]) {
+for (const pattern of [/\bprompt\b/i, /\bprovenance\b/i, /\bbranch\b/i, /\bpull request\b/i, /\bvalidator\b/i, /\bIGS\b/i, /\.igs\b/i]) {
   check(!pattern.test(runtimeCopy), `runtime copy excludes ${pattern}`, "Technical provenance belongs in documentation and QA only.");
 }
 
