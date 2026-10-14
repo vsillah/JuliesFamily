@@ -52,7 +52,7 @@ const portal = requireIncludes(files.portal, [
   'data-testid="vanguard-order-promote-gated"',
   'data-testid="vanguard-order-tracking-preview"',
   'data-testid="vanguard-order-promotion-contract"',
-  "Order tracking preview",
+  "Saved order path",
   "Sign in before saving this request",
   "Private uploads",
 ]);
@@ -88,7 +88,7 @@ const publicPage = requireIncludes(files.publicPage, [
 ]);
 
 const publicData = requireIncludes(files.publicData, [
-  "prepare a request receipt for Vanguard review",
+  "prepare the request for Vanguard review",
   "customer and government experience, careers, and locations in one place",
 ]);
 
@@ -137,7 +137,6 @@ requireIncludes(files.architecture, [
 requireIncludes(files.qaReadme, [
   "vanguard-order-portal-walkthrough.mp4",
   "390px",
-  "VE-DEMO-1042",
   "External writes: 0",
 ]);
 
@@ -197,7 +196,7 @@ const visibleVanguardPublicModelCopy = vanguardPublicModelSlice
   .join("\n");
 
 const portalContractCopy = sliceBetween(contract, "  blockedReason:", "\n};");
-const portalTrackingCopy = sliceBetween(contract, '  lastUpdatedLabel: "Preview only', "\nexport function createVanguardLocalReceipt");
+const portalTrackingCopy = sliceBetween(contract, '  lastUpdatedLabel: "Saved-order timeline', "\nexport function createVanguardLocalReceipt");
 const workflowIntakeAndServicesCopy = sliceBetween(workflow, "  requestTypes:", "  sourceSite:");
 const workflowPublicAndOrderCopy = sliceBetween(workflow, "    coverage:", "  providerBoundary:");
 for (const [label, segment] of [
@@ -250,6 +249,8 @@ const forbiddenRuntimeCopy = [
   /local preview/i,
   /readiness gate/i,
   /\bConvex\b/i,
+  /VE-RRB-PREVIEW/i,
+  /VE-DEMO-1042/i,
 ];
 for (const pattern of forbiddenRuntimeCopy) {
   check(!pattern.test(runtimeCopy), `runtime product copy excludes ${pattern}`, "Implementation or provenance language leaked into client or associate UI copy.");

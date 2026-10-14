@@ -1,5 +1,5 @@
 import { Link, useRoute } from "wouter";
-import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, Landmark, LockKeyhole, Mail, MapPin, Network, UsersRound, Wrench } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import VanguardReversRIntake from "@/components/VanguardReversRIntake";
 import { Badge } from "@/components/ui/badge";
@@ -96,13 +96,92 @@ function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
     <section id="build-request" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
       <div className="mx-auto max-w-7xl">
         <div className="max-w-3xl">
-          <Badge variant="outline">Embedded ReversR Rebuild intake</Badge>
+          <Badge variant="outline">ReversR order request</Badge>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{block.title}</h2>
           <p className="mt-4 text-base leading-7 text-slate-600">{block.body}</p>
         </div>
         <div className="mt-8">
           <VanguardReversRIntake />
         </div>
+      </div>
+    </section>
+  );
+}
+
+function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
+  const actions = [
+    {
+      icon: PackageCheck,
+      label: "Start the request",
+      detail: "Build the draft from the materials and constraints you already know.",
+      state: "Available now",
+      href: "#build-request",
+      cta: "Start an order",
+    },
+    {
+      icon: Save,
+      label: "Save and return",
+      detail: "Account-based drafts will carry the request across sessions and devices.",
+      state: "Account access required",
+      href: "/kinflo-sites/vanguard-enterprises/orders",
+      cta: "Review save status",
+    },
+    {
+      icon: HandHelping,
+      label: "Bring in an associate",
+      detail: "Choose the fields an associate can review, edit, or prepare for your confirmation.",
+      state: "Account access required",
+      href: "/kinflo-sites/vanguard-enterprises/orders#associate-support",
+      cta: "See support options",
+    },
+  ];
+
+  return (
+    <section id="order-journey" className="scroll-mt-24 border-y border-slate-200 bg-slate-950 px-4 py-16 text-white sm:px-6 lg:px-8" data-testid="public-preview-vanguard-order-backbone">
+      <div className="mx-auto max-w-7xl">
+        <Badge className="border border-amber-300/30 bg-amber-300/10 text-amber-200 hover:bg-amber-300/10">ReversR order journey</Badge>
+        <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(320px,0.28fr)]">
+          <div>
+            <h2 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 max-w-3xl text-base leading-7 text-slate-300">{block.body}</p>
+          </div>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-5">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-300">Order promise</div>
+            <p className="mt-3 text-sm leading-6 text-slate-200">You will always be able to see the current owner, the next decision, the evidence attached to the work, and what Vanguard needs from you.</p>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-3 lg:grid-cols-3" data-testid="vanguard-order-entry-states">
+          {actions.map((action) => {
+            const Icon = action.icon;
+            return (
+              <article key={action.label} className="rounded-xl border border-white/10 bg-white/[0.06] p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400 text-slate-950"><Icon className="h-5 w-5" /></span>
+                  <Badge variant="outline" className="border-white/15 text-slate-200">{action.state}</Badge>
+                </div>
+                <h3 className="mt-4 text-lg font-semibold">{action.label}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-300">{action.detail}</p>
+                <Button asChild variant="ghost" className="mt-3 h-auto justify-start p-0 text-amber-300 hover:bg-transparent hover:text-amber-200">
+                  <a href={action.href}>{action.cta}<ArrowRight className="ml-2 h-4 w-4" /></a>
+                </Button>
+              </article>
+            );
+          })}
+        </div>
+
+        <ol className="mt-8 grid gap-2 sm:grid-cols-2 lg:grid-cols-7" aria-label="ReversR order stages" data-testid="vanguard-order-backed-journey-map">
+          {vanguardWorkflow.clientOrderStages.map((stage, index) => (
+            <li key={stage.key} className="rounded-lg border border-white/10 bg-slate-900 p-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-bold text-amber-300">{String(index + 1).padStart(2, "0")}</span>
+                <span className="text-[10px] font-medium text-slate-400">{stage.access}</span>
+              </div>
+              <div className="mt-3 text-sm font-semibold">{stage.label}</div>
+              <p className="mt-2 text-xs leading-5 text-slate-400">{stage.detail}</p>
+            </li>
+          ))}
+        </ol>
       </div>
     </section>
   );
@@ -316,7 +395,7 @@ function BlockSection({
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8">
           <Badge className="w-fit bg-white/90 text-slate-950 hover:bg-white">
-            {preview.site.templateKey}
+            {preview.site.slug === VANGUARD_SITE_KEY ? "ReversR order backbone" : preview.site.templateKey}
           </Badge>
           <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
             {block.title}
@@ -405,6 +484,10 @@ function BlockSection({
 
   if (block.type === "build_request") {
     return <BuildRequestSection block={block} />;
+  }
+
+  if (block.type === "order_backbone") {
+    return <OrderBackboneSection block={block} />;
   }
 
   if (block.type === "source_parity") {

@@ -843,7 +843,7 @@ export const vanguardPortalOrderFixture: VanguardPortalOrderFixture = {
   status: "intake_review",
   clientStatusLabel: "Vanguard is reviewing your request",
   dataMode: "synthetic_preview",
-  lastUpdatedLabel: "Preview only · no live updates",
+  lastUpdatedLabel: "Saved-order timeline is not live yet",
   nextAction: "Vanguard confirms the available materials and records any missing inputs.",
   milestones: [
     {
