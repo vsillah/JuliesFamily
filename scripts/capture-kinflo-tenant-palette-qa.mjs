@@ -182,7 +182,14 @@ try {
     || !adminState.result?.value?.paletteText?.includes("ReversR Industrial")
     || !adminState.result?.value?.assignmentText?.includes("vanguard-enterprises")
   ) throw new Error(`Admin palette gate failed: ${JSON.stringify(adminState.result?.value)}`);
+  await evaluate(`document.querySelector('[data-testid="text-kinflo-theme-write-gate"]')?.scrollIntoView({ block: 'center' })`);
+  await new Promise((resolveWait) => setTimeout(resolveWait, 250));
   await capture("05-admin-brand-theme-studio.png");
+
+  await setViewport(390, 844);
+  await evaluate(`document.querySelector('[data-testid="text-kinflo-theme-write-gate"]')?.scrollIntoView({ block: 'center' })`);
+  await new Promise((resolveWait) => setTimeout(resolveWait, 250));
+  await capture("06-admin-brand-theme-studio-mobile.png");
 
   if (externalApplicationRequests.length) throw new Error(`Unexpected non-loopback application requests: ${JSON.stringify(externalApplicationRequests)}`);
   await writeFile(join(outputDir, "network-evidence.json"), `${JSON.stringify({ externalApplicationRequests: 0, externalWrites: 0 }, null, 2)}\n`);
@@ -193,6 +200,7 @@ try {
     "03-reversr-vanguard-light-desktop.png",
     "04-reversr-vanguard-dark-mobile.png",
     "05-admin-brand-theme-studio.png",
+    "06-admin-brand-theme-studio-mobile.png",
   ];
   const videoPath = join(outputDir, "kinflo-tenant-palette-walkthrough.mp4");
   const args = ["-y"];

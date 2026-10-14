@@ -97,7 +97,9 @@ import {
 } from "@/lib/kinfloShellData";
 import { useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
+import { useKinfloThemeWriteAdapter } from "@/contexts/KinfloThemeWriteAdapterContext";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
+import { isKinfloPaletteId } from "@/lib/kinfloPaletteRegistry";
 import {
   VANGUARD_ORDER_PORTAL_PATH,
   vanguardAssociateAssistContract,
@@ -4348,6 +4350,7 @@ export default function AdminKinfloShell() {
   const [location, navigate] = useLocation();
   const snapshot = useKinfloShellSnapshot();
   const preferencesAdapter = useKinfloPreferencesAdapter();
+  const themeWriteAdapter = useKinfloThemeWriteAdapter();
   const activeExperiencePreferences = preferencesAdapter.preferences
     ? {
         ...snapshot.experiencePreferences,
@@ -5246,6 +5249,32 @@ export default function AdminKinfloShell() {
       defaultContentFilter: experienceContentFilter,
       itemsPerPage: experienceItemsPerPage,
       notificationChannels: experienceNotificationChannels,
+    });
+  };
+
+  const saveBrandTheme = async () => {
+    if (!selectedBrandSite || !selectedBrandPalette || !selectedBrandTypography || !selectedBrandButton || !selectedBrandMedia || !isKinfloPaletteId(brandPaletteKey)) {
+      return;
+    }
+    await themeWriteAdapter.save({
+      siteId: selectedBrandSite.key,
+      paletteId: brandPaletteKey,
+      typography: {
+        key: selectedBrandTypography.key,
+        heading: selectedBrandTypography.heading,
+        body: selectedBrandTypography.body,
+        scale: selectedBrandTypography.scale,
+      },
+      buttons: {
+        key: selectedBrandButton.key,
+        style: selectedBrandButton.style,
+        radius: selectedBrandButton.radius,
+      },
+      media: {
+        key: selectedBrandMedia.key,
+        treatment: selectedBrandMedia.treatment,
+        ratio: selectedBrandMedia.ratio,
+      },
     });
   };
 
@@ -10851,12 +10880,40 @@ export default function AdminKinfloShell() {
                     </div>
 
                     <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="text-sm text-muted-foreground">{snapshot.brandTheme.providerBoundary}</div>
-                      <Button disabled data-testid="button-save-brand-theme">
-                        <Save className="mr-2 h-4 w-4" />
-                        Live theme save gated
+                      <div className="text-sm text-muted-foreground" data-testid="text-kinflo-theme-write-gate">
+                        {themeWriteAdapter.activationGate}
+                      </div>
+                      <Button
+                        disabled={!themeWriteAdapter.enabled || !brandThemeDirty || themeWriteAdapter.status === "saving" || themeWriteAdapter.status === "error"}
+                        onClick={() => void saveBrandTheme()}
+                        data-testid="button-save-brand-theme"
+                      >
+                        {themeWriteAdapter.status === "saving"
+                          ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          : <Save className="mr-2 h-4 w-4" />}
+                        {!themeWriteAdapter.enabled
+                          ? "Live theme save gated"
+                          : themeWriteAdapter.status === "saving"
+                            ? "Saving theme"
+                            : themeWriteAdapter.status === "saved" && !brandThemeDirty
+                              ? "Theme saved"
+                              : "Save theme"}
                       </Button>
                     </div>
+                    {themeWriteAdapter.status === "error" ? (
+                      <div className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900" data-testid="kinflo-theme-write-error">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                          <div>
+                            <div className="font-medium">Theme save could not be verified</div>
+                            <div className="mt-1 text-rose-800">{themeWriteAdapter.error}</div>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline" className="mt-3" onClick={themeWriteAdapter.clearError}>
+                          Return to gated theme draft
+                        </Button>
+                      </div>
+                    ) : null}
                   </CardContent>
                 </Card>
               </div>

@@ -9,6 +9,7 @@ import {
   type ShellBillingPlan,
   type ShellLaunchReadinessStage,
 } from "@/lib/kinfloShellData";
+import { resolveTenantPaletteId } from "@/lib/kinfloPaletteRegistry";
 
 type TenantRow = {
   _id: string;
@@ -346,6 +347,19 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
       sites: liveSites,
       billingPlans: livePlans,
       tenantEntitlements: liveEntitlements,
+      brandTheme: {
+        ...fallback.brandTheme,
+        defaultSiteKey: primarySite._id,
+        defaultPaletteKey: resolveTenantPaletteId(primaryTenant.slug),
+        siteOptions: sites.map((site) => ({
+          key: site._id,
+          label: site.name,
+          previewPath: `/kinflo-sites/${site.slug}`,
+          tenantSlug: primaryTenant.slug,
+          paletteId: resolveTenantPaletteId(primaryTenant.slug),
+        })),
+        providerBoundary: runtime.themeWriteActivationGate,
+      },
       launchReadiness: {
         ...fallback.launchReadiness,
         defaultSiteKey: liveReadinessSite.key,
@@ -372,6 +386,7 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
     runtime.activationGate,
     runtime.label,
     runtime.mode,
+    runtime.themeWriteActivationGate,
     siteLimit,
     sites,
     tenants,
