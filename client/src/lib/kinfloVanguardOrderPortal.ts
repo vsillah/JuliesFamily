@@ -1,3 +1,5 @@
+import { KINFLO_IGES_LIMITS, type KinfloEngineeringReview } from "@/lib/kinfloIges";
+
 export const VANGUARD_ORDER_PORTAL_PATH = "/kinflo-sites/vanguard-enterprises/orders";
 export const VANGUARD_LOCAL_RECEIPT_STORAGE_KEY = "kinflo:vanguard:local-receipt:v1";
 
@@ -41,6 +43,7 @@ export type VanguardLocalReceipt = {
   goal: string;
   discipline: string;
   constraints: string[];
+  engineeringReview: KinfloEngineeringReview | null;
 };
 
 export type VanguardPortalMilestone = {
@@ -922,6 +925,57 @@ export function createVanguardLocalReceipt(input: Omit<VanguardLocalReceipt, "sc
   };
 }
 
+function parseEngineeringReview(value: unknown): KinfloEngineeringReview | null {
+  if (value == null) return null;
+  if (typeof value !== "object" || Array.isArray(value)) return null;
+  const candidate = value as Partial<KinfloEngineeringReview>;
+  const keys = Object.keys(candidate).sort().join(",");
+  const expectedKeys = "boundingBoxMm,digestSha256,fileName,meshCount,receiptId,schemaVersion,sourceBytes,status,triangleCount,vertexCount";
+  if (
+    keys !== expectedKeys
+    || candidate.schemaVersion !== 1
+    || candidate.status !== "engineering_review_only"
+    || typeof candidate.fileName !== "string"
+    || candidate.fileName.length > 120
+    || !/^[A-Za-z0-9][A-Za-z0-9 _().-]*\.(igs|iges)$/i.test(candidate.fileName)
+    || candidate.fileName.includes("..")
+    || typeof candidate.sourceBytes !== "number"
+    || !Number.isSafeInteger(candidate.sourceBytes)
+    || candidate.sourceBytes <= 0
+    || candidate.sourceBytes > KINFLO_IGES_LIMITS.sourceBytes
+    || typeof candidate.meshCount !== "number"
+    || !Number.isSafeInteger(candidate.meshCount)
+    || candidate.meshCount <= 0
+    || candidate.meshCount > KINFLO_IGES_LIMITS.meshes
+    || typeof candidate.vertexCount !== "number"
+    || !Number.isSafeInteger(candidate.vertexCount)
+    || candidate.vertexCount <= 0
+    || candidate.vertexCount > KINFLO_IGES_LIMITS.vertices
+    || typeof candidate.triangleCount !== "number"
+    || !Number.isSafeInteger(candidate.triangleCount)
+    || candidate.triangleCount <= 0
+    || candidate.triangleCount > KINFLO_IGES_LIMITS.triangles
+    || !Array.isArray(candidate.boundingBoxMm)
+    || candidate.boundingBoxMm.length !== 3
+    || !candidate.boundingBoxMm.every((dimension) => typeof dimension === "number" && Number.isFinite(dimension) && dimension > 0)
+    || typeof candidate.digestSha256 !== "string"
+    || !/^[a-f0-9]{64}$/.test(candidate.digestSha256)
+    || candidate.receiptId !== `VE-IGES-${candidate.digestSha256.slice(0, 12).toUpperCase()}`
+  ) return null;
+  return {
+    schemaVersion: 1,
+    status: "engineering_review_only",
+    fileName: candidate.fileName,
+    sourceBytes: candidate.sourceBytes,
+    meshCount: candidate.meshCount,
+    vertexCount: candidate.vertexCount,
+    triangleCount: candidate.triangleCount,
+    boundingBoxMm: [...candidate.boundingBoxMm] as [number, number, number],
+    digestSha256: candidate.digestSha256,
+    receiptId: candidate.receiptId,
+  };
+}
+
 export function parseVanguardLocalReceipt(value: string | null): VanguardLocalReceipt | null {
   if (!value) return null;
   try {
@@ -936,7 +990,19 @@ export function parseVanguardLocalReceipt(value: string | null): VanguardLocalRe
       typeof candidate.discipline !== "string" ||
       !Array.isArray(candidate.constraints)
     ) return null;
-    return candidate as VanguardLocalReceipt;
+    const engineeringReview = parseEngineeringReview(candidate.engineeringReview);
+    if (candidate.engineeringReview != null && !engineeringReview) return null;
+    return {
+      schemaVersion: 1,
+      receiptId: "VE-RRB-PREVIEW",
+      source: "vanguard-reversr-embedded-intake",
+      persistence: "session_local",
+      sourcePackage: candidate.sourcePackage.filter((item): item is string => typeof item === "string"),
+      goal: candidate.goal,
+      discipline: candidate.discipline,
+      constraints: candidate.constraints.filter((item): item is string => typeof item === "string"),
+      engineeringReview,
+    };
   } catch {
     return null;
   }

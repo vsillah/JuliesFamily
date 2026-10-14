@@ -116,6 +116,26 @@ export default function VanguardOrderPortal() {
                 </div>
               ))}
             </div>
+            {localReceipt.engineeringReview ? (
+              <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30" data-testid="vanguard-order-engineering-review-summary">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="font-semibold text-emerald-950 dark:text-emerald-100">IGES engineering-review summary</div>
+                  <Badge variant="outline" className="border-emerald-300 bg-white text-emerald-900">{localReceipt.engineeringReview.receiptId}</Badge>
+                </div>
+                <dl className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {[
+                    ["Filename", localReceipt.engineeringReview.fileName],
+                    ["Source size", `${(localReceipt.engineeringReview.sourceBytes / 1024).toFixed(1)} KiB`],
+                    ["Meshes", String(localReceipt.engineeringReview.meshCount)],
+                    ["Vertices", localReceipt.engineeringReview.vertexCount.toLocaleString()],
+                    ["Triangles", localReceipt.engineeringReview.triangleCount.toLocaleString()],
+                    ["Bounding box", localReceipt.engineeringReview.boundingBoxMm.map((value) => `${value.toFixed(2)} mm`).join(" × ")],
+                  ].map(([label, value]) => <div key={label} className="rounded-lg border border-emerald-200 bg-white p-3"><dt className="text-[10px] font-semibold uppercase tracking-wide text-emerald-800">{label}</dt><dd className="mt-1 break-words text-xs text-slate-900">{value}</dd></div>)}
+                </dl>
+                <div className="mt-3 break-all rounded-lg border border-emerald-200 bg-white p-3 font-mono text-[10px] text-slate-700">SHA-256 {localReceipt.engineeringReview.digestSha256}</div>
+                <p className="mt-3 text-xs leading-5 text-emerald-950 dark:text-emerald-100">This sanitized browser-local summary is for engineering review only. It is not a quote, dimensional inspection, certification, or manufacturing guarantee. The source file and geometry are not attached.</p>
+              </div>
+            ) : null}
             <Button type="button" disabled className="mt-4 bg-blue-600 text-white" data-testid="vanguard-order-promote-gated"><PackageCheck className="mr-2 h-4 w-4" /> Save as draft · sign-in required</Button>
           </section>
         ) : null}

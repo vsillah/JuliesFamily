@@ -21,6 +21,7 @@ function requireIncludes(path, patterns) {
 
 const files = {
   component: "client/src/components/VanguardReversRIntake.tsx",
+  igesComponent: "client/src/components/VanguardIgesIntake.tsx",
   publicPage: "client/src/pages/KinfloPublicSitePreview.tsx",
   publicFixture: "client/src/lib/kinfloPublicSitePreview.ts",
   workflow: "client/src/lib/kinfloVanguardWorkflow.ts",
@@ -44,7 +45,12 @@ requireIncludes(files.component, [
   'data-testid="vanguard-build-request-receipt"',
   "Browser draft",
   "Draft stays on this device",
-  "Private upload is intentionally unavailable",
+  "<VanguardIgesIntake",
+]);
+
+requireIncludes(files.igesComponent, [
+  "Browser-local IGES",
+  "Engineering review only",
 ]);
 
 requireIncludes(files.workflow, [
@@ -127,7 +133,7 @@ forbidden.length === 0
   ? pass("secret env and generated Convex files remain untracked")
   : fail("secret env and generated Convex files remain untracked", forbidden.join(", "));
 
-const combined = [files.component, files.publicPage, files.workflow, files.adminPage].map((path) => readFileSync(path, "utf8")).join("\n");
+const combined = [files.component, files.igesComponent, files.publicPage, files.workflow, files.adminPage].map((path) => readFileSync(path, "utf8")).join("\n");
 const liveMarkers = ['from "convex/_generated/api"', "useMutation(", "useAction(", "fetch(\"/api/"];
 const liveMarker = liveMarkers.find((marker) => combined.includes(marker));
 liveMarker

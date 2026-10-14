@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { reversrLogoDataUrl } from "@/assets/reversrLogo";
+import VanguardIgesIntake from "@/components/VanguardIgesIntake";
+import type { KinfloEngineeringReview } from "@/lib/kinfloIges";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import {
   VANGUARD_LOCAL_RECEIPT_STORAGE_KEY,
@@ -40,6 +42,7 @@ export default function VanguardReversRIntake() {
   const [constraints, setConstraints] = useState<string[]>([]);
   const [constraintNotes, setConstraintNotes] = useState("");
   const [receiptReady, setReceiptReady] = useState(false);
+  const [engineeringReview, setEngineeringReview] = useState<KinfloEngineeringReview | null>(null);
 
   const missingInputs = useMemo(() => {
     const missing: string[] = [];
@@ -69,6 +72,7 @@ export default function VanguardReversRIntake() {
       goal: goal.trim(),
       discipline,
       constraints: [...constraints, constraintNotes.trim()].filter(Boolean),
+      engineeringReview,
     });
     window.sessionStorage.setItem(VANGUARD_LOCAL_RECEIPT_STORAGE_KEY, JSON.stringify(receipt));
     window.location.assign(`${VANGUARD_ORDER_PORTAL_PATH}?source=local-receipt`);
@@ -194,7 +198,11 @@ export default function VanguardReversRIntake() {
                     );
                   })}
                 </div>
-                <div className="mt-4 flex items-start gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-xs leading-5 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"><LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-slate-500 dark:text-slate-400" /><span><strong>Private upload is intentionally unavailable.</strong> File transfer becomes available after account access, retention rules, and sharing controls are in place. For now, name what you have without attaching it.</span></div>
+                <VanguardIgesIntake onReviewChange={(review) => {
+                  setEngineeringReview(review);
+                  setReceiptReady(false);
+                  if (review) setSourcePackage((current) => current.includes("CAD or 3D model") ? current : [...current, "CAD or 3D model"]);
+                }} />
               </div>
             ) : null}
 
@@ -237,7 +245,7 @@ export default function VanguardReversRIntake() {
                 <Badge variant="outline">Request review</Badge>
                 <h4 className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white">Check the package before handoff</h4>
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">A complete request gives Vanguard enough context to begin an associate review. Scope, price, assignment, and production still require later decisions.</p>
-                <div className="mt-6 grid gap-3 sm:grid-cols-2">{[["Available materials", sourcePackage.join(", ") || "Missing"], ["Build goal", goal.trim() || "Missing"], ["Starting discipline", discipline || "Missing"], ["Constraints", [...constraints, constraintNotes.trim()].filter(Boolean).join(", ") || "Missing"]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900"><div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div><div className="mt-2 break-words text-sm leading-6 text-slate-800 dark:text-slate-200">{value}</div></div>)}</div>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">{[["Available materials", sourcePackage.join(", ") || "Missing"], ["Build goal", goal.trim() || "Missing"], ["Starting discipline", discipline || "Missing"], ["Constraints", [...constraints, constraintNotes.trim()].filter(Boolean).join(", ") || "Missing"], ["IGES engineering review", engineeringReview ? `${engineeringReview.fileName} · ${engineeringReview.receiptId}` : "No local model attached"]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900"><div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div><div className="mt-2 break-words text-sm leading-6 text-slate-800 dark:text-slate-200">{value}</div></div>)}</div>
                 <Button type="button" disabled={!readyForQuoteReview} onClick={() => setReceiptReady(true)} className="mt-5 h-auto w-full whitespace-normal bg-blue-600 py-2.5 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400" data-testid="vanguard-generate-local-receipt"><PackageCheck className="mr-2 h-4 w-4" /> Prepare request receipt</Button>
                 {receiptReady ? <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-800 dark:bg-emerald-950/40" role="status" data-testid="vanguard-build-request-receipt"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2 font-semibold text-emerald-950 dark:text-emerald-100"><PackageCheck className="h-5 w-5" /> Request receipt ready</div><p className="mt-2 text-sm leading-6 text-emerald-900 dark:text-emerald-200">Continue to review this package beside the Vanguard order path. Nothing has been sent.</p></div><Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">Browser draft</Badge></div><Button type="button" onClick={continueToOrderPortal} className="mt-4 h-auto w-full whitespace-normal bg-slate-950 py-2.5 text-white hover:bg-slate-800" data-testid="vanguard-continue-to-order-portal"><LockKeyhole className="mr-2 h-4 w-4" /> Continue to secure order portal</Button></div> : null}
               </div>
