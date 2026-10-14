@@ -38,6 +38,21 @@
       "type": "Script"
     },
     {
+      "url": "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+      "method": "GET",
+      "type": "Stylesheet"
+    },
+    {
+      "url": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2",
+      "method": "GET",
+      "type": "Font"
+    },
+    {
+      "url": "https://js.stripe.com/clover/stripe.js",
+      "method": "GET",
+      "type": "Script"
+    },
+    {
       "url": "https://js.stripe.com/v3/m-outer-3437aaddcdf6922d623e172c2d6f9278.html",
       "method": "GET",
       "type": "Document"

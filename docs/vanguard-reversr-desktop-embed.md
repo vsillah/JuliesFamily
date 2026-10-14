@@ -17,6 +17,24 @@ The five existing request stages remain intact: available materials, build requi
 
 Request state stays in React memory while the workspace is open. Only the explicit continue action places the existing receipt shape into browser session storage for the order portal. The interface identifies current capabilities and account-gated capabilities in customer language.
 
+## Website integration slice
+
+The Vanguard website now carries the same desktop wayfinding used by ReversR:
+Home, Projects, New Reconstruction, Tour, and More. The embedded workspace also
+shows the product's four phases: Input, Inventory, Design, and Build. The public
+request stays inside Input. Later product phases remain locked until account
+access and an approved saved-order path exist.
+
+The five request fields are an Input checklist rather than a second set of
+ReversR phases. A compact status panel names the current owner, the next
+decision, and the point where a Vanguard associate can join after the client
+chooses what to share. The public hero now opens the embedded request directly.
+
+The order portal carries the same ownership language into its tracking view.
+This is a presentation and browser-session continuity slice. It does not create
+an order, upload a file, assign an associate, send a notification, or enable a
+provider write.
+
 ## Shared-package extraction boundary
 
 The implementation borrows the verified desktop information architecture from ReversR Rebuild: a bounded navigation rail, horizontal phase rail, flexible canvas, and context inspector. Direct component reuse was intentionally deferred because the ReversR implementation is React Native/Expo while KinFlo is a Vite web application with its own UI primitives and Tailwind system.

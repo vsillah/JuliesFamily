@@ -157,6 +157,9 @@ try {
   await click('[data-testid="vanguard-generate-local-receipt"]');
   await waitForSelector('[data-testid="vanguard-build-request-receipt"]');
   await capture("05-desktop-request-handoff.png", '[data-testid="vanguard-reversr-intake-app"]');
+  await click('[data-testid="vanguard-continue-to-order-portal"]');
+  await waitForSelector('[data-testid="vanguard-order-tracking-preview"]');
+  await capture("06-desktop-order-tracking.png", '[data-testid="vanguard-order-tracking-preview"]');
 
   await setViewport(768, 900);
   await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=tablet#build-request`);
@@ -181,6 +184,7 @@ try {
     "03-desktop-work-routing.png",
     "04-desktop-constraints.png",
     "05-desktop-request-handoff.png",
+    "06-desktop-order-tracking.png",
     "vanguard-reversr-tablet-workspace.png",
     "vanguard-reversr-mobile-workspace.png",
   ];

@@ -72,7 +72,7 @@ requireIncludes(files.publicPage, [
 
 requireIncludes(files.publicFixture, [
   'primaryHref: "#services"',
-  'secondaryHref: "#order-journey"',
+  'secondaryHref: "#build-request"',
   'href: "/kinflo-sites/vanguard-enterprises/orders"',
   'href: "#build-request"',
   'type: "build_request"',

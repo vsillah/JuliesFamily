@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import {
   ArrowLeft, ArrowRight, Boxes, Check, CheckCircle2, CircleDashed, ClipboardCheck,
-  FileStack, FolderKanban, HelpCircle, LayoutDashboard, LockKeyhole, PackageCheck,
-  PanelRight, Settings, ShieldCheck, SlidersHorizontal, Target, UserRound, Wrench,
+  Compass, FileStack, FolderKanban, Hammer, HelpCircle, History, Home, LockKeyhole,
+  PackageCheck, PanelRight, Plus, Search, Settings, ShieldCheck, SlidersHorizontal,
+  Target, UserRound, Wrench,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,16 @@ import {
 } from "@/lib/kinfloVanguardOrderPortal";
 
 const stepIcons = [FileStack, Target, Wrench, SlidersHorizontal, ClipboardCheck];
+const reversrProductPhases = [
+  { label: "Input", detail: "Describe the machine or part", icon: Search },
+  { label: "Inventory", detail: "Confirm the best match", icon: Boxes },
+  { label: "Design", detail: "Review specifications", icon: Wrench },
+  { label: "Build", detail: "Prepare the handoff", icon: Hammer },
+];
 const workspaceTools = [
-  { label: "Workspace", icon: LayoutDashboard, active: true },
-  { label: "Builds", icon: FolderKanban, active: false },
-  { label: "Materials", icon: Boxes, active: false },
+  { label: "New reconstruction", icon: Plus, active: true },
+  { label: "Projects", icon: FolderKanban, active: false },
+  { label: "History", icon: History, active: false },
 ];
 
 export default function VanguardReversRIntake() {
@@ -86,8 +93,45 @@ export default function VanguardReversRIntake() {
             <Button type="button" variant="outline" size="sm" disabled className="bg-white dark:bg-slate-900"><UserRound className="mr-2 h-4 w-4" /> Sign in to save</Button>
           </div>
         </div>
-        <div className="border-t border-slate-100 px-4 py-2 dark:border-slate-800 sm:px-5" data-testid="vanguard-reversr-phase-rail">
-          <ol className="flex gap-2 overflow-x-auto pb-1" aria-label="ReversR order phases">
+        <nav className="flex items-center gap-2 overflow-x-auto border-t border-slate-100 px-4 py-2 dark:border-slate-800 sm:px-5" aria-label="ReversR desktop navigation" data-testid="vanguard-reversr-desktop-navigation">
+          <span className="hidden shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 sm:flex"><Home className="h-4 w-4" /> Home</span>
+          <span className="hidden shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 sm:flex"><FolderKanban className="h-4 w-4" /> Projects</span>
+          <span className="flex shrink-0 items-center gap-2 rounded-lg bg-slate-950 px-3 py-2 text-xs font-semibold text-white dark:bg-amber-500 dark:text-slate-950"><Plus className="h-4 w-4" /> New Reconstruction</span>
+          <span className="ml-auto hidden shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 sm:flex"><Compass className="h-4 w-4" /> Tour</span>
+          <span className="hidden shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-slate-500 dark:text-slate-400 sm:flex"><Settings className="h-4 w-4" /> More</span>
+        </nav>
+        <div className="overflow-x-auto border-t border-slate-100 px-4 py-3 dark:border-slate-800 sm:px-5" data-testid="vanguard-reversr-phase-rail">
+          <div className="flex min-w-max items-center gap-2" aria-label="ReversR product phases">
+            {reversrProductPhases.map((phase, index) => {
+              const Icon = phase.icon;
+              const isInput = index === 0;
+              return (
+                <div key={phase.label} className="flex items-center gap-2">
+                  <div className={`min-w-[150px] rounded-lg border px-3 py-2 ${isInput ? "border-amber-400 bg-amber-50 text-slate-950 dark:bg-amber-950/40 dark:text-amber-100" : "border-slate-200 bg-slate-50 text-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-500"}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`flex h-7 w-7 items-center justify-center rounded-full ${isInput ? "bg-amber-500 text-slate-950" : "bg-slate-200 text-slate-400 dark:bg-slate-800"}`}><Icon className="h-4 w-4" /></span>
+                      <span><span className="block text-[10px] font-semibold uppercase tracking-wide">Phase {index + 1}</span><span className="block text-xs font-semibold">{phase.label}</span></span>
+                      {!isInput ? <LockKeyhole className="ml-auto h-3.5 w-3.5" /> : null}
+                    </div>
+                    <p className="mt-1 text-[10px] leading-4">{phase.detail}</p>
+                  </div>
+                  {index < reversrProductPhases.length - 1 ? <ArrowRight className="h-4 w-4 shrink-0 text-slate-300 dark:text-slate-700" /> : null}
+                </div>
+              );
+            })}
+            <ArrowRight className="h-4 w-4 shrink-0 text-amber-500" />
+            <div className="min-w-[190px] rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-950 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-100">
+              <div className="flex items-center gap-2 text-xs font-semibold"><UserRound className="h-4 w-4" /> Vanguard fulfillment</div>
+              <p className="mt-1 text-[10px] leading-4 text-blue-800 dark:text-blue-200">An associate confirms scope, ownership, quality, and delivery.</p>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-slate-100 px-4 py-2 dark:border-slate-800 sm:px-5" data-testid="vanguard-reversr-input-checklist">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Input checklist</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">Complete this before Vanguard can review the request</span>
+          </div>
+          <ol className="flex gap-2 overflow-x-auto pb-1" aria-label="ReversR request checklist">
             {vanguardWorkflow.intakeStages.map((stage, index) => {
               const Icon = stepIcons[index];
               const isActive = step === index;
@@ -96,7 +140,7 @@ export default function VanguardReversRIntake() {
                 <li key={stage.key} className="min-w-[150px] flex-1">
                   <button type="button" onClick={() => goToStep(index)} className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left transition ${isActive ? "border-amber-400 bg-amber-50 text-slate-950 dark:bg-amber-950/40 dark:text-amber-100" : "border-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-50 dark:text-slate-400 dark:hover:border-slate-700 dark:hover:bg-slate-900"}`} aria-current={isActive ? "step" : undefined} data-testid={`vanguard-intake-step-${stage.key}`}>
                     <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isComplete ? "bg-emerald-600 text-white" : isActive ? "bg-amber-500 text-slate-950" : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"}`}>{isComplete ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}</span>
-                    <span className="min-w-0"><span className="block text-[10px] font-semibold uppercase tracking-wide">Phase {index + 1}</span><span className="block truncate text-xs font-semibold">{stage.label}</span></span>
+                    <span className="min-w-0"><span className="block text-[10px] font-semibold uppercase tracking-wide">Item {index + 1}</span><span className="block truncate text-xs font-semibold">{stage.label}</span></span>
                   </button>
                 </li>
               );
@@ -111,7 +155,7 @@ export default function VanguardReversRIntake() {
           <div className="space-y-1">
             {workspaceTools.map((item) => {
               const Icon = item.icon;
-              return <button key={item.label} type="button" disabled={!item.active} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${item.active ? "bg-slate-950 text-white" : "text-slate-400"}`}><Icon className="h-4 w-4" /> {item.label}</button>;
+              return <div key={item.label} aria-current={item.active ? "page" : undefined} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${item.active ? "bg-slate-950 text-white" : "text-slate-400"}`}><Icon className="h-4 w-4" /> {item.label}</div>;
             })}
           </div>
           <div className="mt-5 border-t border-slate-200 pt-4 dark:border-slate-800">
@@ -119,8 +163,8 @@ export default function VanguardReversRIntake() {
             <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/40"><div className="text-xs font-semibold text-slate-950 dark:text-amber-100">Untitled request</div><div className="mt-1 text-[11px] leading-4 text-slate-600 dark:text-amber-200">Details remain here until you continue to the order portal.</div></div>
           </div>
           <div className="mt-auto space-y-1 border-t border-slate-200 pt-3 dark:border-slate-800">
-            <button type="button" disabled className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400"><HelpCircle className="h-4 w-4" /> Support</button>
-            <button type="button" disabled className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400"><Settings className="h-4 w-4" /> Settings</button>
+            <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400"><HelpCircle className="h-4 w-4" /> Support after sign-in</div>
+            <div className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400"><Settings className="h-4 w-4" /> Settings after sign-in</div>
           </div>
         </nav>
 
@@ -197,11 +241,19 @@ export default function VanguardReversRIntake() {
             ) : null}
           </section>
 
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-950"><Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button><div className="text-center text-xs text-slate-500 dark:text-slate-400">Phase {step + 1} of {vanguardWorkflow.intakeStages.length}</div><Button type="button" onClick={() => goToStep(step + 1)} disabled={step === vanguardWorkflow.intakeStages.length - 1} className="bg-slate-950 hover:bg-slate-800">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button></div>
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-950"><Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button><div className="text-center text-xs text-slate-500 dark:text-slate-400">Item {step + 1} of {vanguardWorkflow.intakeStages.length}</div><Button type="button" onClick={() => goToStep(step + 1)} disabled={step === vanguardWorkflow.intakeStages.length - 1} className="bg-slate-950 hover:bg-slate-800">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button></div>
         </main>
 
         <aside className="border-t border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-950 xl:min-h-[660px] xl:border-l xl:border-t-0" data-testid="vanguard-reversr-workspace-inspector">
           <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2 font-semibold text-slate-950 dark:text-white"><PanelRight className="h-4 w-4" /> Request package</div><Badge variant="outline">{readyForQuoteReview ? "Complete" : `${missingInputs.length} open`}</Badge></div>
+          <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/40" data-testid="vanguard-reversr-order-status">
+            <div className="flex items-center justify-between gap-2"><span className="text-xs font-semibold uppercase tracking-[0.12em] text-blue-700 dark:text-blue-300">Order status</span><Badge variant="outline" className="border-blue-300 bg-white text-blue-800 dark:border-blue-700 dark:bg-slate-900 dark:text-blue-200">Browser draft</Badge></div>
+            <dl className="mt-3 space-y-3 text-xs">
+              <div><dt className="text-blue-700 dark:text-blue-300">Current owner</dt><dd className="mt-1 font-semibold text-slate-950 dark:text-white">You, until the request is saved</dd></div>
+              <div><dt className="text-blue-700 dark:text-blue-300">Next decision</dt><dd className="mt-1 leading-5 text-slate-700 dark:text-slate-200">Finish the open input items, then review the receipt before sign-in.</dd></div>
+              <div><dt className="text-blue-700 dark:text-blue-300">Vanguard handoff</dt><dd className="mt-1 leading-5 text-slate-700 dark:text-slate-200">An associate reviews only the fields you choose to share after account access opens.</dd></div>
+            </dl>
+          </div>
           <div className="mt-4 space-y-2">
             {[["Materials", sourcePackage.length ? `${sourcePackage.length} selected` : "Not started", sourcePackage.length > 0], ["Build goal", goal.trim().length >= 20 ? "Recorded" : "Needs detail", goal.trim().length >= 20], ["Discipline", discipline || "Not selected", Boolean(discipline)], ["Constraints", constraints.length || constraintNotes.trim() ? "Recorded" : "Not recorded", Boolean(constraints.length || constraintNotes.trim())]].map(([label, value, complete]) => (
               <button key={String(label)} type="button" onClick={() => goToStep(["Materials", "Build goal", "Discipline", "Constraints"].indexOf(String(label)))} className="flex w-full items-start justify-between gap-3 rounded-lg border border-slate-200 p-3 text-left hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900"><span><span className="block text-xs font-semibold text-slate-900 dark:text-slate-100">{label}</span><span className="mt-1 block text-[11px] leading-4 text-slate-500 dark:text-slate-400">{String(value)}</span></span>{complete ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" /> : <CircleDashed className="h-4 w-4 shrink-0 text-amber-600" />}</button>

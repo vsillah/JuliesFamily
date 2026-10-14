@@ -331,7 +331,7 @@ const previews: KinfloPublicSitePreview[] = [
         type: "hero",
         title: "Engineering and technology services with a clear path to delivery",
         body: "Vanguard supports engineering, CAD and CAM, IT infrastructure, project management, and professional service work. When a project is ready, ReversR keeps the request and delivery record together.",
-        metadata: { primaryCta: "Explore capabilities", primaryHref: "#services", secondaryCta: "Start a ReversR order", secondaryHref: "#order-journey" },
+        metadata: { primaryCta: "Explore capabilities", primaryHref: "#services", secondaryCta: "Start a ReversR order", secondaryHref: "#build-request" },
         order: 10,
         publishedAt,
       },
