@@ -94,7 +94,8 @@ requireIncludes(files.fixture, [
 requireIncludes(files.publicPage, [
   "function VanguardSourceParitySection",
   'data-testid="public-preview-vanguard-source-parity"',
-  'data-testid="public-preview-vanguard-project-phases"',
+  'data-testid="public-preview-vanguard-service-method"',
+  'aria-label="Vanguard service method phases"',
   'data-testid="public-preview-vanguard-customer-proof"',
   'data-testid="public-preview-vanguard-careers"',
   'data-testid="public-preview-vanguard-contact-location"',

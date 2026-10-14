@@ -66,17 +66,19 @@ requireIncludes(files.publicPage, [
   "<VanguardReversRIntake />",
   'id="build-request"',
   'id="build-process"',
-  'data-testid="vanguard-request-to-delivery-lifecycle"',
-  "ReversR-to-Vanguard build process",
+  'data-testid="vanguard-operational-checks"',
+  "After you prepare the request",
 ]);
 
 requireIncludes(files.publicFixture, [
-  'primaryHref: "#build-request"',
-  'secondaryHref: "/kinflo-sites/vanguard-enterprises/orders"',
+  'primaryHref: "#services"',
+  'secondaryHref: "#order-journey"',
+  'href: "/kinflo-sites/vanguard-enterprises/orders"',
   'href: "#build-request"',
   'type: "build_request"',
   'type: "fulfillment_workflow"',
   'source: "vanguard-reversr-embedded-intake"',
+  "What Vanguard confirms before work begins",
 ]);
 
 requireIncludes(files.adminPage, [

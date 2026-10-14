@@ -58,6 +58,8 @@
     "kinflo:capture-vanguard-order-backbone-qa": "node scripts/capture-vanguard-order-backbone-qa.mjs",
     "kinflo:validate-vanguard-reversr-desktop-embed": "node scripts/validate-kinflo-vanguard-reversr-desktop-embed.mjs",
     "kinflo:capture-vanguard-reversr-desktop-embed-qa": "node scripts/capture-vanguard-reversr-desktop-embed-qa.mjs",
+    "kinflo:validate-vanguard-theme-contrast": "node scripts/validate-kinflo-vanguard-theme-contrast.mjs",
+    "kinflo:capture-vanguard-theme-contrast-qa": "node scripts/capture-vanguard-theme-contrast-qa.mjs",
     "kinflo:validate-browser-safe-auth-aliases": "node scripts/validate-kinflo-browser-safe-auth-aliases.mjs",
     "kinflo:validate-convex-identity-cutover": "node scripts/validate-kinflo-convex-identity-cutover.mjs",
     "kinflo:serve-convex-identity-cutover-smoke": "node scripts/serve-kinflo-identity-cutover-smoke.mjs",

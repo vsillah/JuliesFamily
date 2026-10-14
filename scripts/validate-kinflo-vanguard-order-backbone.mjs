@@ -32,8 +32,8 @@ const publicData = requireIncludes(files.publicData, [
   'label: "Start an Order"',
   'label: "Track Orders"',
   'label: "How It Works"',
-  'primaryCta: "Start a ReversR order"',
-  'secondaryCta: "Track an order"',
+  'primaryCta: "Explore capabilities"',
+  'secondaryCta: "Start a ReversR order"',
   'type: "order_backbone"',
   'title: "Start your ReversR order"',
 ]);
