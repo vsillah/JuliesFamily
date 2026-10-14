@@ -151,7 +151,7 @@ try {
     { name: "04-mobile-intake-source.png", url: `${baseUrl}/kinflo-sites/vanguard-enterprises#build-request`, width: 390, height: 844, selector: "#build-request" },
     { name: "05-admin-associate-handoff.png", url: `${baseUrl}/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises&studioLane=workbench&studioStage=sites`, width: 1280, height: 820, selector: '[data-testid="section-kinflo-vanguard-reversr-handoff"]', selectorBlock: "center" },
     { name: "08-mobile-build-process.png", url: `${baseUrl}/kinflo-sites/vanguard-enterprises#build-process`, width: 390, height: 844, selector: "#build-process" },
-    { name: "09-desktop-delivery-stages.png", url: `${baseUrl}/kinflo-sites/vanguard-enterprises#build-process`, width: 1280, height: 820, selector: '[data-testid="vanguard-request-to-delivery-lifecycle"] article:last-child', selectorBlock: "center" },
+    { name: "09-desktop-delivery-stages.png", url: `${baseUrl}/kinflo-sites/vanguard-enterprises#build-process`, width: 1280, height: 820, selector: '[data-testid="vanguard-operational-checks"] article:last-child', selectorBlock: "center" },
     { name: "02-desktop-capabilities.png", url: `${baseUrl}/kinflo-sites/vanguard-enterprises`, width: 1280, height: 720, selector: "#capabilities" },
     { name: "03-desktop-proof.png", url: `${baseUrl}/kinflo-sites/vanguard-enterprises`, width: 1280, height: 720, selector: "#proof" },
     { name: "06-admin-parity-readiness.png", url: `${baseUrl}/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises&studioLane=workbench&studioStage=sites`, width: 1280, height: 720, selector: "#vanguard-source-parity-readiness", selectorBlock: "center" },

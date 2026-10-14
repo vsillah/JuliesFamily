@@ -80,7 +80,7 @@ const intake = requireIncludes(files.intake, [
 ]);
 
 const publicPage = requireIncludes(files.publicPage, [
-  "A request receipt confirms that the required details are complete.",
+  "The receipt confirms that Vanguard has enough context to begin.",
   'aria-label="Website coverage"',
   "Customer and procurement experience",
   "Online applications are not available here.",
@@ -89,7 +89,7 @@ const publicPage = requireIncludes(files.publicPage, [
 
 const publicData = requireIncludes(files.publicData, [
   "prepare the request for Vanguard review",
-  "customer and government experience, careers, and locations in one place",
+  "customer and government experience, careers, and locations",
 ]);
 
 const workflow = requireIncludes(files.workflow, [

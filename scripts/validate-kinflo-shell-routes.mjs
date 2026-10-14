@@ -200,7 +200,7 @@ requireIncludes(publicPreviewPath, [
   'data-testid="public-preview-vanguard-source-parity"',
   'data-testid="public-preview-vanguard-customer-proof"',
   'data-testid="public-preview-vanguard-careers"',
-  'data-testid="vanguard-request-to-delivery-lifecycle"',
+  'data-testid="vanguard-operational-checks"',
   "<VanguardReversRIntake />",
   'href={`/kinflo-sites/${preview.site.slug}`}',
 ]);

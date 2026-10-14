@@ -49,34 +49,44 @@ function getFunnelStage(metadata: Record<string, unknown> | undefined): FunnelSt
 }
 
 function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
+  const operationalChecks = [
+    {
+      title: "Feasibility review",
+      detail: "An associate checks the drawings, measurements, materials, constraints, and open questions before estimating the work.",
+    },
+    {
+      title: "Quote and scope",
+      detail: "Vanguard records assumptions, timing, cost, and acceptance criteria for client review before assignment.",
+    },
+    {
+      title: "Controlled delivery",
+      detail: "The assigned owner keeps decisions, approved changes, quality checks, and delivery evidence with the order.",
+    },
+  ];
+
   return (
     <section id="build-process" className="border-y border-slate-200 bg-slate-100 px-4 py-16 text-slate-950 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-50 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-workflow">
       <div className="mx-auto max-w-7xl">
-        <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-900">ReversR-to-Vanguard build process</Badge>
-        <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.76fr)_minmax(300px,0.24fr)]">
+        <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200">After you prepare the request</Badge>
+        <div className="mt-4 grid gap-8 lg:grid-cols-[minmax(0,0.7fr)_minmax(320px,0.3fr)]">
           <div>
             <h2 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
             <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 dark:text-slate-300">{block.body}</p>
-            <div className="mt-8 grid gap-3 md:grid-cols-2" data-testid="vanguard-request-to-delivery-lifecycle">
-              {vanguardWorkflow.stages.map((stage, index) => (
-                <article key={stage.key} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white">{index + 1}</span>
-                    <Badge variant="outline" className={stage.status === "ready" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : stage.status === "active" ? "border-blue-200 bg-blue-50 text-blue-800" : "border-slate-200 bg-slate-50 text-slate-600"}>{stage.status}</Badge>
-                  </div>
-                  <div className="mt-4 font-semibold text-slate-950 dark:text-white">{stage.label}</div>
-                  <div className="mt-1 text-xs text-amber-800 dark:text-amber-300">Owner: {stage.owner}</div>
-                  <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{stage.evidence}</p>
-                  <div className="mt-3 border-t border-slate-100 pt-3 text-xs font-medium text-slate-500 dark:border-slate-800 dark:text-slate-400">Required record: {stage.artifact}</div>
+            <div className="mt-8 grid gap-3 md:grid-cols-3" data-testid="vanguard-operational-checks">
+              {operationalChecks.map((check) => (
+                <article key={check.title} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-950">
+                  <CheckCircle2 className="h-5 w-5 text-amber-700 dark:text-amber-300" />
+                  <h3 className="mt-4 font-semibold text-slate-950 dark:text-white">{check.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{check.detail}</p>
                 </article>
               ))}
             </div>
           </div>
           <aside className="h-fit rounded-xl border border-slate-200 bg-white p-5 text-slate-950 shadow-lg dark:border-slate-800 dark:bg-slate-950 dark:text-white">
             <LockKeyhole className="h-5 w-5 text-amber-700 dark:text-amber-300" />
-            <h3 className="mt-4 font-semibold">Before Vanguard reviews the request</h3>
+            <h3 className="mt-4 font-semibold">A prepared request starts the review</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              A request receipt confirms that the required details are complete. Vanguard still reviews the available materials, prepares the quote and scope, assigns the work, checks quality, and records delivery.
+              The receipt confirms that Vanguard has enough context to begin. It does not approve scope, price, assignment, or production.
             </p>
             <div className="mt-4 space-y-2">
               {vanguardWorkflow.sampleOrder.missingInputs.map((item) => (
@@ -231,22 +241,21 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
             ))}
           </div>
 
-          <div className="mt-10 rounded-xl border border-slate-200 bg-slate-100 p-5 text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white sm:p-7" data-testid="public-preview-vanguard-project-phases">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mt-8 rounded-xl border border-slate-200 bg-slate-100 p-5 text-slate-950 dark:border-slate-700 dark:bg-slate-950 dark:text-white sm:p-6" data-testid="public-preview-vanguard-service-method">
+            <div className="grid gap-5 lg:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] lg:items-center">
               <div>
-                <Badge className="border-slate-300 bg-white text-slate-800 hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/10">Project management method</Badge>
-                <h3 className="mt-3 text-2xl font-semibold">Five phases keep the work accountable</h3>
+                <Badge className="border-slate-300 bg-white text-slate-800 hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/10">Service method</Badge>
+                <h3 className="mt-3 text-xl font-semibold">A clear method for complex service work</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">For consulting and project work beyond an individual ReversR order, Vanguard uses a five-phase management method to keep scope, risk, delivery, and acceptance visible.</p>
               </div>
-              <div className="text-sm text-slate-600 dark:text-slate-300">Scope → plan → deliver → measure → learn</div>
-            </div>
-            <div className="mt-6 grid gap-3 md:grid-cols-5">
-              {source.projectPhases.map((phase, index) => (
-                <article key={phase.label} className="rounded-lg border border-slate-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
-                  <div className="text-xs font-bold text-amber-800 dark:text-amber-300">0{index + 1}</div>
-                  <h4 className="mt-2 font-semibold">{phase.label}</h4>
-                  <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{phase.summary}</p>
-                </article>
-              ))}
+              <ol className="flex flex-wrap gap-2" aria-label="Vanguard service method phases">
+                {source.projectPhases.map((phase, index) => (
+                  <li key={phase.label} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium dark:border-slate-700 dark:bg-slate-900">
+                    <span className="text-amber-800 dark:text-amber-300">{String(index + 1).padStart(2, "0")}</span>
+                    <span>{phase.label}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
         </div>

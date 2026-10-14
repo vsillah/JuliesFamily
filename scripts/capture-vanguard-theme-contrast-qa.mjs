@@ -122,13 +122,15 @@ try {
 
   const shots = [
     { name: "01-light-desktop-order-journey.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#order-journey" },
-    { name: "02-light-desktop-proof.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#proof" },
-    { name: "03-light-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "light", selector: "#build-request" },
-    { name: "04-dark-desktop-order-journey.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#order-journey" },
-    { name: "05-dark-desktop-proof.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#proof" },
-    { name: "06-dark-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "dark", selector: "#build-request" },
-    { name: "07-light-desktop-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 1440, height: 900, mode: "light", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
-    { name: "08-dark-mobile-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 390, height: 844, mode: "dark", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
+    { name: "02-light-desktop-operational-checks.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#build-process" },
+    { name: "03-light-desktop-service-method.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "[data-testid=\"public-preview-vanguard-service-method\"]" },
+    { name: "04-light-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "light", selector: "#build-request" },
+    { name: "05-dark-desktop-order-journey.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#order-journey" },
+    { name: "06-dark-desktop-operational-checks.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#build-process" },
+    { name: "07-dark-desktop-service-method.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "[data-testid=\"public-preview-vanguard-service-method\"]" },
+    { name: "08-dark-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "dark", selector: "#build-request" },
+    { name: "09-light-desktop-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 1440, height: 900, mode: "light", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
+    { name: "10-dark-mobile-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 390, height: 844, mode: "dark", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
   ];
   for (const shot of shots) await capture(shot);
 

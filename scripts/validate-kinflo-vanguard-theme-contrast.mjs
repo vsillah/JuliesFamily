@@ -42,10 +42,13 @@ for (const path of [files.publicPage, files.intake, files.portal]) {
 
 if (existsSync(files.publicPage)) {
   const source = read(files.publicPage);
-  for (const testId of ["public-preview-vanguard-order-backbone", "public-preview-vanguard-project-phases", "public-preview-vanguard-customer-proof", "public-preview-vanguard-contact-location"]) {
+  for (const testId of ["public-preview-vanguard-order-backbone", "public-preview-vanguard-service-method", "public-preview-vanguard-customer-proof", "public-preview-vanguard-contact-location"]) {
     const start = source.indexOf(`data-testid="${testId}"`);
     check(start >= 0, `${testId} remains present`, "Existing Vanguard public surface marker was removed.");
   }
+  check(source.includes('data-testid="vanguard-operational-checks"'), "concise operational checks remain present", "The post-request review boundary is missing.");
+  check(!source.includes('data-testid="vanguard-request-to-delivery-lifecycle"'), "duplicate build lifecycle is removed", "The public page still repeats the customer order journey.");
+  check(!source.includes('data-testid="public-preview-vanguard-project-phases"'), "duplicate project lifecycle cards are removed", "The public page still presents a third competing lifecycle.");
   check(source.includes("<VanguardReversRIntake />"), "ReversR desktop embed remains mounted", "Theme changes must preserve the ReversR embed.");
 }
 
