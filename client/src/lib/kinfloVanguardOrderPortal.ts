@@ -1,6 +1,37 @@
 export const VANGUARD_ORDER_PORTAL_PATH = "/kinflo-sites/vanguard-enterprises/orders";
 export const VANGUARD_LOCAL_RECEIPT_STORAGE_KEY = "kinflo:vanguard:local-receipt:v1";
 
+export const vanguardOrderLifecycleNavigation = [
+  {
+    key: "prepare",
+    label: "Prepare request",
+    detail: "Describe the part, outcome, and constraints.",
+    href: "/kinflo-sites/vanguard-enterprises#build-request",
+    availability: "available",
+  },
+  {
+    key: "review",
+    label: "Review receipt",
+    detail: "Confirm the browser draft before saving.",
+    href: `${VANGUARD_ORDER_PORTAL_PATH}?source=order-navigation#request-receipt`,
+    availability: "available",
+  },
+  {
+    key: "track",
+    label: "Track order",
+    detail: "See ownership, decisions, and fulfillment.",
+    href: `${VANGUARD_ORDER_PORTAL_PATH}#order-tracking`,
+    availability: "account_required",
+  },
+  {
+    key: "assist",
+    label: "Associate help",
+    detail: "Choose what Vanguard can review with you.",
+    href: `${VANGUARD_ORDER_PORTAL_PATH}#associate-support`,
+    availability: "account_required",
+  },
+] as const;
+
 export type VanguardLocalReceipt = {
   schemaVersion: 1;
   receiptId: "VE-RRB-PREVIEW";

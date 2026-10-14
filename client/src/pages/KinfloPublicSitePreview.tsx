@@ -2,6 +2,7 @@ import { Link, useRoute } from "wouter";
 import { useEffect, type CSSProperties } from "react";
 import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
+import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
 import VanguardReversRIntake from "@/components/VanguardReversRIntake";
 import VanguardThemeControl from "@/components/VanguardThemeControl";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
+import { vanguardOrderLifecycleNavigation } from "@/lib/kinfloVanguardOrderPortal";
 import { useTenantTheme } from "@/hooks/useTenantTheme";
 import { getPaletteCssVariables, resolveKinfloPalette } from "@/lib/kinfloPaletteRegistry";
 import {
@@ -109,10 +111,22 @@ function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
   return (
     <section id="build-request" className="scroll-mt-24 bg-white px-4 py-16 dark:bg-slate-950 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
       <div className="mx-auto max-w-[1500px]">
-        <div className="max-w-3xl">
-          <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">ReversR order request</Badge>
-          <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">{block.title}</h2>
-          <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">{block.body}</p>
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">Vanguard order workspace</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">{block.body}</p>
+          </div>
+          <Button asChild variant="outline" className="w-fit border-slate-300 bg-white text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+            <a href="/kinflo-sites/vanguard-enterprises/orders#order-tracking">Track an existing order <ArrowRight className="ml-2 h-4 w-4" /></a>
+          </Button>
+        </div>
+        <div className="mt-8 overflow-hidden rounded-2xl border border-slate-800 shadow-xl shadow-slate-950/10" data-testid="vanguard-build-order-navigation">
+          <OrderLifecycleNavigation
+            activeKey="prepare"
+            eyebrow="ReversR is your Vanguard order workspace"
+            items={[...vanguardOrderLifecycleNavigation]}
+          />
         </div>
         <div className="mt-8">
           <VanguardReversRIntake />

@@ -6,6 +6,14 @@ The Vanguard order entry at `/kinflo-sites/vanguard-enterprises#build-request` n
 
 The five existing request stages remain intact: available materials, build requirement, work routing, constraints, and request review. The final receipt continues into the existing Vanguard order portal. The visual change therefore strengthens the same order record rather than creating a separate intake product.
 
+## Integrated order entry
+
+The public site introduces Vanguard first: its services, capabilities, company, leadership, customer and government experience, careers, and locations. The ReversR order journey follows that company context and becomes the working experience when a visitor is ready to start a build request.
+
+A shared order-lifecycle rail begins inside the build-request section and continues into the order portal, with direct paths for preparing a request, reviewing its receipt, tracking the eventual order, and understanding associate support. It does not replace Vanguard's site navigation or company identity.
+
+When a client completes the five input items, the portal opens with the prepared receipt expanded. The client can edit the request, confirm each field, see the account-save boundary, inspect the future tracking path, or review the associate-help model without losing the browser draft.
+
 ## Capability boundary
 
 - External writes: 0

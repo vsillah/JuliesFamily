@@ -17,6 +17,7 @@ function requireIncludes(path, patterns) {
 const files = {
   publicData: "client/src/lib/kinfloPublicSitePreview.ts",
   publicPage: "client/src/pages/KinfloPublicSitePreview.tsx",
+  lifecycleNav: "client/src/components/OrderLifecycleNavigation.tsx",
   workflow: "client/src/lib/kinfloVanguardWorkflow.ts",
   intake: "client/src/components/VanguardReversRIntake.tsx",
   portal: "client/src/pages/VanguardOrderPortal.tsx",
@@ -46,6 +47,24 @@ const publicPage = requireIncludes(files.publicPage, [
   'data-testid="vanguard-order-backed-journey-map"',
   "Available now",
   "Account access required",
+  'activeKey="prepare"',
+  "ReversR is your Vanguard order workspace",
+  'data-testid="vanguard-build-order-navigation"',
+]);
+
+const buildRequestStart = publicPage.indexOf("function BuildRequestSection");
+const orderBackboneStart = publicPage.indexOf("function OrderBackboneSection");
+const lifecycleNavigationStart = publicPage.indexOf("<OrderLifecycleNavigation");
+check(
+  buildRequestStart >= 0 && lifecycleNavigationStart > buildRequestStart && lifecycleNavigationStart < orderBackboneStart,
+  "public lifecycle navigation is scoped to the build-request section",
+  "The ReversR lifecycle rail must not replace the Vanguard-first public header and company narrative.",
+);
+
+const lifecycleNav = requireIncludes(files.lifecycleNav, [
+  'aria-label="Order lifecycle"',
+  'data-testid="order-lifecycle-navigation"',
+  'data-testid={`order-lifecycle-${item.key}`}',
 ]);
 
 const workflow = requireIncludes(files.workflow, [
@@ -65,6 +84,9 @@ const portal = requireIncludes(files.portal, [
   "Saved order path",
   "Your browser draft has not been sent to Vanguard.",
   "Browser draft",
+  'data-testid="vanguard-order-receipt-continuity"',
+  'id="order-tracking"',
+  'activeKey={localReceipt ? "review" : "track"}',
 ]);
 
 requireIncludes(files.docs, [
@@ -87,8 +109,8 @@ check(packageJson.scripts["kinflo:validate-vanguard-order-backbone"] === "node s
 check(packageJson.scripts["kinflo:capture-vanguard-order-backbone-qa"] === "node scripts/capture-vanguard-order-backbone-qa.mjs", "package registers order-backbone capture", "Missing capture command.");
 
 const vanguardSlice = publicData.slice(publicData.indexOf('_id: "tenant_vanguard_fixture"'), publicData.indexOf('_id: "tenant_campaign_fixture"'));
-const runtimeCopy = [publicPage, intake, portal].join("\n");
-for (const pattern of [/\bprompt\b/i, /\bprovenance\b/i, /\bbranch\b/i, /\bpull request\b/i, /\bvalidator\b/i]) {
+const runtimeCopy = [publicPage, lifecycleNav, intake, portal].join("\n");
+for (const pattern of [/\bprompt\b/i, /\bprovenance\b/i, /\bbranch\b/i, /\bpull request\b/i, /\bvalidator\b/i, /\bIGS\b/i, /\.igs\b/i]) {
   check(!pattern.test(runtimeCopy), `runtime copy excludes ${pattern}`, "Technical provenance belongs in documentation and QA only.");
 }
 

@@ -16,12 +16,14 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
 import VanguardThemeControl from "@/components/VanguardThemeControl";
 import { useVanguardTheme } from "@/hooks/useVanguardTheme";
 import {
   VANGUARD_LOCAL_RECEIPT_STORAGE_KEY,
   parseVanguardLocalReceipt,
   vanguardAssociateAssistContract,
+  vanguardOrderLifecycleNavigation,
   vanguardOrderPortalContract,
   vanguardPortalOrderFixture,
 } from "@/lib/kinfloVanguardOrderPortal";
@@ -35,11 +37,11 @@ const milestoneTone = {
 
 export default function VanguardOrderPortal() {
   const { mode: themeMode, setMode: setThemeMode } = useVanguardTheme();
-  const [showTransferReview, setShowTransferReview] = useState(false);
   const [localReceipt] = useState(() => {
     if (typeof window === "undefined") return null;
     return parseVanguardLocalReceipt(window.sessionStorage.getItem(VANGUARD_LOCAL_RECEIPT_STORAGE_KEY));
   });
+  const [showTransferReview, setShowTransferReview] = useState(() => Boolean(localReceipt));
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50" data-testid="vanguard-order-portal">
@@ -50,7 +52,7 @@ export default function VanguardOrderPortal() {
               <img src={vanguardWorkflow.company.logo.image} alt={vanguardWorkflow.company.logo.alt} className="max-h-full w-auto object-contain" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-800 dark:text-amber-300">Secure client workspace</div>
+              <div className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-300">Secure client workspace</div>
               <h1 className="mt-1 text-xl font-semibold sm:text-2xl">Vanguard order portal</h1>
             </div>
           </div>
@@ -63,40 +65,32 @@ export default function VanguardOrderPortal() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:px-8" data-testid="vanguard-order-portal-foundation">
-        <section className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-7" data-testid="vanguard-order-auth-gate">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-amber-500 text-slate-950 hover:bg-amber-500">Sign in required</Badge>
-              <Badge variant="outline" className="border-slate-300 dark:border-slate-600">Order portal</Badge>
-            </div>
-            <div className="mt-5 flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-amber-300 dark:bg-slate-800"><LockKeyhole className="h-5 w-5" /></span>
-              <div>
-                <h2 className="text-2xl font-semibold">Sign in before saving this request</h2>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  This request is still stored in your browser. Sign-in is required before Vanguard can save it as a draft or add it to your order history. Account-based draft saving is not available yet.
-                </p>
-              </div>
-            </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <Button type="button" disabled data-testid="vanguard-order-sign-in-gated"><ShieldCheck className="mr-2 h-4 w-4" /> Sign in to save request</Button>
-              <Button type="button" variant="outline" disabled={!localReceipt} onClick={() => setShowTransferReview((value) => !value)} data-testid="vanguard-order-review-transfer">
-                <FileStack className="mr-2 h-4 w-4" /> {showTransferReview ? "Hide request details" : "Review request details"}
-              </Button>
-            </div>
-            <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{vanguardOrderPortalContract.blockedReason}</p>
-          </div>
+      <OrderLifecycleNavigation
+        activeKey={localReceipt ? "review" : "track"}
+        eyebrow="ReversR and Vanguard share one order"
+        items={[...vanguardOrderLifecycleNavigation]}
+      />
 
-          <aside className="rounded-2xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-800 dark:bg-amber-950/40" data-testid="vanguard-order-data-boundary">
-            <div className="flex items-center gap-2 font-semibold text-amber-950 dark:text-amber-100"><Database className="h-5 w-5" /> Request status</div>
-            <dl className="mt-4 space-y-3 text-sm">
-              <div className="rounded-lg border border-amber-200 bg-white/80 p-3 dark:border-amber-800 dark:bg-slate-900/80"><dt className="text-xs text-amber-700 dark:text-amber-300">Request storage</dt><dd className="mt-1 font-semibold">This browser session</dd></div>
-              <div className="rounded-lg border border-amber-200 bg-white/80 p-3 dark:border-amber-800 dark:bg-slate-900/80"><dt className="text-xs text-amber-700 dark:text-amber-300">Saved order</dt><dd className="mt-1 font-semibold">Not created</dd></div>
-              <div className="rounded-lg border border-amber-200 bg-white/80 p-3 dark:border-amber-800 dark:bg-slate-900/80"><dt className="text-xs text-amber-700 dark:text-amber-300">Private uploads</dt><dd className="mt-1 font-semibold">Not available</dd></div>
-              <div className="rounded-lg border border-amber-200 bg-white/80 p-3 dark:border-amber-800 dark:bg-slate-900/80"><dt className="text-xs text-amber-700 dark:text-amber-300">Next step</dt><dd className="mt-1 font-semibold">Sign in when account access opens</dd></div>
-            </dl>
-          </aside>
+      <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:px-8" data-testid="vanguard-order-portal-foundation">
+        <section id="request-receipt" className="scroll-mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-800 dark:bg-emerald-950/30 sm:p-6" data-testid="vanguard-order-receipt-continuity">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge className="bg-emerald-700 text-white hover:bg-emerald-700">{localReceipt ? "Browser draft ready" : "No draft attached"}</Badge>
+                <Badge variant="outline" className="border-emerald-300 bg-white text-emerald-800 dark:border-emerald-700 dark:bg-slate-900 dark:text-emerald-200">ReversR request receipt</Badge>
+              </div>
+              <h2 className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white">{localReceipt ? "Your request arrived with you" : "Start with a ReversR request"}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-700 dark:text-slate-200">
+                {localReceipt ? "Review the details below. They remain in this browser until account-based saving is available." : "Prepare the request first, then return here to review the receipt and follow the order path."}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button asChild variant="outline" className="border-emerald-300 bg-white text-emerald-900 dark:border-emerald-700 dark:bg-slate-900 dark:text-emerald-100">
+                <Link href="/kinflo-sites/vanguard-enterprises#build-request">{localReceipt ? "Edit request" : "Start request"}</Link>
+              </Button>
+              {localReceipt ? <Button type="button" onClick={() => setShowTransferReview((value) => !value)} className="bg-blue-600 text-white hover:bg-blue-700" data-testid="vanguard-order-receipt-details">{showTransferReview ? "Hide receipt" : "Review receipt"}</Button> : null}
+            </div>
+          </div>
         </section>
 
         {showTransferReview && localReceipt ? (
@@ -122,9 +116,44 @@ export default function VanguardOrderPortal() {
                 </div>
               ))}
             </div>
-            <Button type="button" disabled className="mt-4" data-testid="vanguard-order-promote-gated"><PackageCheck className="mr-2 h-4 w-4" /> Save as draft · sign-in required</Button>
+            <Button type="button" disabled className="mt-4 bg-blue-600 text-white" data-testid="vanguard-order-promote-gated"><PackageCheck className="mr-2 h-4 w-4" /> Save as draft · sign-in required</Button>
           </section>
         ) : null}
+
+        <section className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-7" data-testid="vanguard-order-auth-gate">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-blue-600 text-white hover:bg-blue-600">Sign in required</Badge>
+              <Badge variant="outline" className="border-slate-300 dark:border-slate-600">Order portal</Badge>
+            </div>
+            <div className="mt-5 flex items-start gap-4">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-emerald-300 dark:bg-slate-800"><LockKeyhole className="h-5 w-5" /></span>
+              <div>
+                <h2 className="text-2xl font-semibold">Sign in before saving this request</h2>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  This request is still stored in your browser. Sign-in is required before Vanguard can save it as a draft or add it to your order history. Account-based draft saving is not available yet.
+                </p>
+              </div>
+            </div>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <Button type="button" disabled className="bg-blue-600 text-white" data-testid="vanguard-order-sign-in-gated"><ShieldCheck className="mr-2 h-4 w-4" /> Sign in to save request</Button>
+              <Button type="button" variant="outline" disabled={!localReceipt} onClick={() => setShowTransferReview((value) => !value)} data-testid="vanguard-order-review-transfer">
+                <FileStack className="mr-2 h-4 w-4" /> {showTransferReview ? "Hide request details" : "Review request details"}
+              </Button>
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{vanguardOrderPortalContract.blockedReason}</p>
+          </div>
+
+          <aside className="rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950/40" data-testid="vanguard-order-data-boundary">
+            <div className="flex items-center gap-2 font-semibold text-blue-950 dark:text-blue-100"><Database className="h-5 w-5" /> Request status</div>
+            <dl className="mt-4 space-y-3 text-sm">
+              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Request storage</dt><dd className="mt-1 font-semibold">This browser session</dd></div>
+              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Saved order</dt><dd className="mt-1 font-semibold">Not created</dd></div>
+              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Private uploads</dt><dd className="mt-1 font-semibold">Not available</dd></div>
+              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Next step</dt><dd className="mt-1 font-semibold">Sign in when account access opens</dd></div>
+            </dl>
+          </aside>
+        </section>
 
         {!localReceipt ? (
           <section className="rounded-xl border border-dashed border-slate-300 bg-white p-5 text-sm leading-6 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300" data-testid="vanguard-order-empty-receipt">
@@ -166,14 +195,14 @@ export default function VanguardOrderPortal() {
               <div className="flex items-center gap-2 text-sm font-semibold text-teal-950 dark:text-teal-100"><ShieldCheck className="h-4 w-4" /> You control what is shared</div>
               <p className="mt-2 text-xs leading-5 text-teal-900 dark:text-teal-200">{vanguardAssociateAssistContract.privacyBoundary}</p>
             </div>
-            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/40" data-testid="vanguard-order-assist-auth-recovery">
-              <div className="flex items-center gap-2 text-sm font-semibold text-amber-950 dark:text-amber-100"><Clock3 className="h-4 w-4" /> Support is not active yet</div>
-              <p className="mt-2 text-xs leading-5 text-amber-900 dark:text-amber-200">{vanguardAssociateAssistContract.recoveryStep}</p>
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950/40" data-testid="vanguard-order-assist-auth-recovery">
+              <div className="flex items-center gap-2 text-sm font-semibold text-blue-950 dark:text-blue-100"><Clock3 className="h-4 w-4" /> Support is not active yet</div>
+              <p className="mt-2 text-xs leading-5 text-blue-900 dark:text-blue-200">{vanguardAssociateAssistContract.recoveryStep}</p>
             </div>
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-7" data-testid="vanguard-order-tracking-preview">
+        <section id="order-tracking" className="scroll-mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-7" data-testid="vanguard-order-tracking-preview">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -213,7 +242,7 @@ export default function VanguardOrderPortal() {
         </section>
 
         <section className="rounded-2xl border border-slate-200 bg-white p-5 text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:p-7" data-testid="vanguard-order-promotion-contract">
-          <div className="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-300"><ShieldCheck className="h-4 w-4" /> Before you save</div>
+          <div className="flex items-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300"><ShieldCheck className="h-4 w-4" /> Before you save</div>
           <h2 className="mt-2 text-xl font-semibold">What the order portal will confirm</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {vanguardOrderPortalContract.promotionRequirements.map((requirement) => (

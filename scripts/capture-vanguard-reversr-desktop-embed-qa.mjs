@@ -116,8 +116,8 @@ try {
     await new Promise((resolveWait) => setTimeout(resolveWait, 350));
   }
 
-  async function capture(name, selector, block = "start") {
-    await evaluate(`(() => { document.querySelector(${JSON.stringify(selector)})?.scrollIntoView({ block: ${JSON.stringify(block)} }); window.scrollBy(0, window.innerWidth < 600 ? -112 : -76); })()`);
+  async function capture(name, selector, block = "start", includeStickyHeaderOffset = true) {
+    await evaluate(`(() => { document.querySelector(${JSON.stringify(selector)})?.scrollIntoView({ block: ${JSON.stringify(block)} }); window.scrollBy(0, ${includeStickyHeaderOffset ? "window.innerWidth < 600 ? -112 : -76" : "0"}); })()`);
     await new Promise((resolveWait) => setTimeout(resolveWait, 250));
     const result = await send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false, fromSurface: true });
     await writeFile(join(outputDir, name), Buffer.from(result.data, "base64"));
@@ -135,8 +135,16 @@ try {
   await send("Network.enable");
 
   await setViewport(1440, 1000);
+  await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=desktop`);
+  await waitForSelector('[data-testid="public-preview-hero"]');
+  await capture("00-desktop-vanguard-first.png", '[data-testid="public-preview-hero"]');
+  await capture("00-desktop-vanguard-services.png", '#services');
+  await capture("00-desktop-vanguard-company.png", '#about');
+  await assertNoOverflow("desktop Vanguard public site");
+
   await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=desktop#build-request`);
   await waitForSelector('[data-testid="vanguard-reversr-desktop-workspace"]');
+  await capture("00-desktop-order-entry.png", '#build-request', "start", false);
   await capture("vanguard-reversr-desktop-workspace.png", '[data-testid="vanguard-reversr-intake-app"]');
   await clickByText('[data-testid="vanguard-intake-source-package"] button', "Drawing or specification");
   await capture("01-desktop-materials-selected.png", '[data-testid="vanguard-reversr-intake-app"]');
@@ -158,8 +166,10 @@ try {
   await waitForSelector('[data-testid="vanguard-build-request-receipt"]');
   await capture("05-desktop-request-handoff.png", '[data-testid="vanguard-reversr-intake-app"]');
   await click('[data-testid="vanguard-continue-to-order-portal"]');
+  await waitForSelector('[data-testid="vanguard-order-receipt-continuity"]');
+  await capture("06-desktop-order-receipt.png", '[data-testid="vanguard-order-receipt-continuity"]');
   await waitForSelector('[data-testid="vanguard-order-tracking-preview"]');
-  await capture("06-desktop-order-tracking.png", '[data-testid="vanguard-order-tracking-preview"]');
+  await capture("07-desktop-order-tracking.png", '[data-testid="vanguard-order-tracking-preview"]');
 
   await setViewport(768, 900);
   await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=tablet#build-request`);
@@ -168,9 +178,15 @@ try {
   await capture("vanguard-reversr-tablet-workspace.png", '[data-testid="vanguard-reversr-intake-app"]');
 
   await setViewport(390, 844);
+  await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=mobile`);
+  await waitForSelector('[data-testid="public-preview-hero"]');
+  await assertNoOverflow("mobile Vanguard public site");
+  await capture("vanguard-mobile-vanguard-first.png", '[data-testid="public-preview-hero"]');
+
   await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=mobile#build-request`);
   await waitForSelector('[data-testid="vanguard-reversr-desktop-workspace"]');
   await assertNoOverflow("mobile ReversR workspace");
+  await capture("vanguard-reversr-mobile-order-entry.png", '#build-request', "start", false);
   await capture("vanguard-reversr-mobile-workspace.png", '[data-testid="vanguard-reversr-intake-app"]');
 
   if (externalApplicationRequests.length) throw new Error(`Unexpected non-loopback application requests: ${JSON.stringify(externalApplicationRequests)}`);
@@ -178,14 +194,21 @@ try {
 
   const videoPath = join(outputDir, "vanguard-reversr-desktop-embed-walkthrough.mp4");
   const frames = [
+    "00-desktop-vanguard-first.png",
+    "00-desktop-vanguard-services.png",
+    "00-desktop-vanguard-company.png",
+    "vanguard-mobile-vanguard-first.png",
+    "00-desktop-order-entry.png",
     "vanguard-reversr-desktop-workspace.png",
     "01-desktop-materials-selected.png",
     "02-desktop-build-requirement.png",
     "03-desktop-work-routing.png",
     "04-desktop-constraints.png",
     "05-desktop-request-handoff.png",
-    "06-desktop-order-tracking.png",
+    "06-desktop-order-receipt.png",
+    "07-desktop-order-tracking.png",
     "vanguard-reversr-tablet-workspace.png",
+    "vanguard-reversr-mobile-order-entry.png",
     "vanguard-reversr-mobile-workspace.png",
   ];
   const args = ["-y"];
