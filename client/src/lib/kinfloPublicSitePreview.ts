@@ -289,11 +289,11 @@ const previews: KinfloPublicSitePreview[] = [
     },
     theme: {
       palette: {
-        background: "#f7f8fa",
-        foreground: "#172033",
-        accent: "#b7791f",
-        secondary: "#24324a",
-        muted: "#e9edf3",
+        background: "#f4f6fb",
+        foreground: "#0f172a",
+        accent: "#2563eb",
+        secondary: "#007a55",
+        muted: "#e8edf5",
       },
       typography: { heading: "Inter", body: "Inter" },
       radii: { card: 6, control: 6 },

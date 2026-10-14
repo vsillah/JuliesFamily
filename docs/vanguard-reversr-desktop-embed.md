@@ -37,12 +37,18 @@ provider write.
 
 ## ReversR brand rule
 
-Embedded ReversR website surfaces must use ReversR-compatible branding inside
-the app region. The dark palette follows the product's near-black panels with
-blue primary actions and green/teal active states; the light palette uses the
-same blue and green roles on white and cool-gray panels. Vanguard-only amber,
-burnt-orange, or burgundy accents must not be used as the active color inside
-the ReversR workspace.
+The full Vanguard public page and embedded ReversR surfaces must use a shared,
+ReversR-compatible palette. The dark palette follows the product's near-black
+and navy panels with blue primary actions and green/teal active or success
+states. The light palette uses those same blue and green roles on white and
+cool-gray panels. Amber, burnt-orange, burgundy, and rose accents must not be
+used across the Vanguard public shell, theme control, or ReversR workspace.
+
+Vanguard keeps its identity through its logo, industrial photography, company
+copy, and fulfillment role. ReversR supplies the interaction color system so
+the order journey reads as one coherent product. In light mode, page sections
+remain white or cool gray; the embedded ReversR workspace is the intentional
+exception where its product framing may use a darker app surface.
 
 The embedded header uses a web-sized derivative of the existing ReversR asset:
 
