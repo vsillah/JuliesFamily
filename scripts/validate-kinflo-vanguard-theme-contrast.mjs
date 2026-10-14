@@ -11,6 +11,7 @@ const files = {
   publicPage: "client/src/pages/KinfloPublicSitePreview.tsx",
   intake: "client/src/components/VanguardReversRIntake.tsx",
   portal: "client/src/pages/VanguardOrderPortal.tsx",
+  publicData: "client/src/lib/kinfloPublicSitePreview.ts",
   capture: "scripts/capture-vanguard-theme-contrast-qa.mjs",
   readme: "docs/qa/vanguard-theme-contrast/README.md",
   video: "docs/qa/vanguard-theme-contrast/vanguard-theme-contrast-walkthrough.mp4",
@@ -50,6 +51,25 @@ if (existsSync(files.publicPage)) {
   check(!source.includes('data-testid="vanguard-request-to-delivery-lifecycle"'), "duplicate build lifecycle is removed", "The public page still repeats the customer order journey.");
   check(!source.includes('data-testid="public-preview-vanguard-project-phases"'), "duplicate project lifecycle cards are removed", "The public page still presents a third competing lifecycle.");
   check(source.includes("<VanguardReversRIntake />"), "ReversR desktop embed remains mounted", "Theme changes must preserve the ReversR embed.");
+}
+
+if (existsSync(files.publicData)) {
+  const source = read(files.publicData);
+  const vanguardStart = source.indexOf('_id: "tenant_vanguard_fixture"');
+  const vanguardEnd = source.indexOf('_id: "tenant_campaign_fixture"');
+  const vanguard = source.slice(vanguardStart, vanguardEnd);
+  const orderedBlocks = [
+    'block_vanguard_hero',
+    'block_vanguard_services',
+    'block_vanguard_source_parity',
+    'block_vanguard_order_backbone',
+    'block_vanguard_process',
+    'block_vanguard_request',
+  ];
+  const positions = orderedBlocks.map((id) => vanguard.indexOf(`_id: "${id}"`));
+  check(positions.every((position) => position >= 0), "Vanguard public IA includes every required block", "A required Vanguard public block is missing.");
+  check(positions.every((position, index) => index === 0 || position > positions[index - 1]), "Vanguard public IA puts information before conversion", "The ReversR conversion flow appears before Vanguard's informational content.");
+  check(vanguard.includes('primaryCta: "Explore capabilities"'), "Vanguard hero leads to capabilities", "The hero still leads with the embedded order application.");
 }
 
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\n");

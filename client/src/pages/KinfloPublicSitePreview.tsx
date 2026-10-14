@@ -406,7 +406,7 @@ function BlockSection({
         <div className="absolute inset-0 bg-black/55" />
         <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8">
           <Badge className="w-fit bg-white/90 text-slate-950 hover:bg-white">
-            {preview.site.slug === VANGUARD_SITE_KEY ? "ReversR order backbone" : preview.site.templateKey}
+            {preview.site.slug === VANGUARD_SITE_KEY ? "Engineering and technology services" : preview.site.templateKey}
           </Badge>
           <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
             {block.title}
@@ -436,7 +436,7 @@ function BlockSection({
       <section id="services" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-services">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <Badge variant="outline">Reusable content block</Badge>
+            <Badge variant="outline">{preview.site.slug === VANGUARD_SITE_KEY ? "Services overview" : "Reusable content block"}</Badge>
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
           </div>

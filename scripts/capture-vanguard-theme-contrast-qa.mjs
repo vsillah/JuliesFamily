@@ -120,17 +120,45 @@ try {
   await send("Runtime.enable");
   await send("Network.enable");
 
+  await setViewport(1440, 900);
+  await navigate("/kinflo-sites/vanguard-enterprises");
+  const iaOrder = await evaluate(`(() => {
+    const selectors = [
+      '[data-testid="public-preview-hero"]',
+      '#services',
+      '[data-testid="public-preview-vanguard-source-parity"]',
+      '#order-journey',
+      '#build-process',
+      '#build-request'
+    ];
+    const positions = selectors.map((selector) => {
+      const element = document.querySelector(selector);
+      return element ? element.getBoundingClientRect().top + window.scrollY : -1;
+    });
+    return { selectors, positions };
+  })()`);
+  const ia = iaOrder.result?.value;
+  if (!ia || ia.positions.some((position) => position < 0) || ia.positions.some((position, index) => index > 0 && position <= ia.positions[index - 1])) {
+    throw new Error(`Vanguard public IA order is incorrect: ${JSON.stringify(ia)}`);
+  }
+  console.log("Verified public IA: hero → services → company context → order journey → operational checks → ReversR request");
+
   const shots = [
-    { name: "01-light-desktop-order-journey.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#order-journey" },
-    { name: "02-light-desktop-operational-checks.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#build-process" },
+    { name: "01-light-desktop-hero.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light" },
+    { name: "02-light-desktop-services.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#services" },
     { name: "03-light-desktop-service-method.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "[data-testid=\"public-preview-vanguard-service-method\"]" },
-    { name: "04-light-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "light", selector: "#build-request" },
-    { name: "05-dark-desktop-order-journey.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#order-journey" },
-    { name: "06-dark-desktop-operational-checks.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#build-process" },
-    { name: "07-dark-desktop-service-method.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "[data-testid=\"public-preview-vanguard-service-method\"]" },
-    { name: "08-dark-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "dark", selector: "#build-request" },
-    { name: "09-light-desktop-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 1440, height: 900, mode: "light", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
-    { name: "10-dark-mobile-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 390, height: 844, mode: "dark", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
+    { name: "04-light-desktop-contact-context.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#contact-details" },
+    { name: "05-light-desktop-order-journey.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#order-journey" },
+    { name: "06-light-desktop-operational-checks.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "light", selector: "#build-process" },
+    { name: "07-light-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "light", selector: "#build-request" },
+    { name: "08-dark-desktop-hero.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark" },
+    { name: "09-dark-desktop-service-method.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "[data-testid=\"public-preview-vanguard-service-method\"]" },
+    { name: "10-dark-desktop-contact-context.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#contact-details" },
+    { name: "11-dark-desktop-order-journey.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#order-journey" },
+    { name: "12-dark-desktop-operational-checks.png", path: "/kinflo-sites/vanguard-enterprises", width: 1440, height: 900, mode: "dark", selector: "#build-process" },
+    { name: "13-dark-mobile-reversr.png", path: "/kinflo-sites/vanguard-enterprises", width: 390, height: 844, mode: "dark", selector: "#build-request" },
+    { name: "14-light-desktop-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 1440, height: 900, mode: "light", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
+    { name: "15-dark-mobile-order-portal.png", path: "/kinflo-sites/vanguard-enterprises/orders", width: 390, height: 844, mode: "dark", selector: "[data-testid=\"vanguard-order-portal-foundation\"]" },
   ];
   for (const shot of shots) await capture(shot);
 
@@ -139,7 +167,7 @@ try {
 
   const videoPath = join(outputDir, "vanguard-theme-contrast-walkthrough.mp4");
   const args = ["-y"];
-  for (const shot of shots) args.push("-loop", "1", "-t", "2.8", "-i", join(outputDir, shot.name));
+  for (const shot of shots) args.push("-loop", "1", "-t", "2.2", "-i", join(outputDir, shot.name));
   const streams = shots.map((_, index) => `[${index}:v]scale=1440:900:force_original_aspect_ratio=decrease,pad=1440:900:(ow-iw)/2:(oh-ih)/2:color=white,setsar=1[v${index}]`).join(";");
   const inputs = shots.map((_, index) => `[v${index}]`).join("");
   args.push("-filter_complex", `${streams};${inputs}concat=n=${shots.length}:v=1:a=0[outv]`, "-map", "[outv]", "-r", "30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", videoPath);

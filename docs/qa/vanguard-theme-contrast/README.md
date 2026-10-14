@@ -1,6 +1,6 @@
 # Vanguard theme contrast QA
 
-This packet covers the streamlined Vanguard public site, ReversR request workspace, and order portal in explicit light and dark modes.
+This packet covers the Vanguard public website, ReversR request workspace, and order portal in explicit light and dark modes.
 
 - Desktop viewport: 1440 x 900
 - Mobile viewport: 390 x 844
@@ -10,10 +10,12 @@ This packet covers the streamlined Vanguard public site, ReversR request workspa
 - Live persistence: disabled
 - Private file transfer: disabled
 
-The walkthrough keeps one customer-facing ReversR order journey from intake through acceptance. It separately checks the three operational review points that follow a prepared request and the compact service method used for broader consulting and project work. The sequence then verifies the embedded ReversR request and order portal at desktop and mobile widths.
+The walkthrough follows the public website in reading order. Visitors first see Vanguard's services, capabilities, company context, customer proof, careers, and contact information. The ReversR order journey, operational checks, and embedded request workspace follow as the conversion path. The order portal remains a separate destination.
 
 The public-page information architecture is intentionally distinct:
 
+- **Website information:** services, capabilities, service method, company background, leadership, proof, careers, and contact details.
 - **Order journey:** the customer's ReversR order from intake through delivery and acceptance.
 - **Operational checks:** feasibility, quote and scope, and controlled delivery after the request is prepared.
 - **Service method:** a compact five-phase method for broader service engagements, not another order lifecycle.
+- **Embedded request:** the local-only ReversR workspace appears after the informational website and order explanation.
