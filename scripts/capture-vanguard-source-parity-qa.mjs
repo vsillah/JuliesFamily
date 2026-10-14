@@ -121,8 +121,8 @@ try {
     })`);
     if (gate.result?.value?.disabled) throw new Error(`Local receipt gate remained disabled: ${gate.result.value.text}`);
     await click('[data-testid="vanguard-generate-local-receipt"]');
-    const receipt = await evaluate('document.body.innerText.includes("VE-RRB-PREVIEW")');
-    if (!receipt.result?.value) throw new Error("VE-RRB-PREVIEW receipt was not rendered.");
+    const receipt = await evaluate('document.querySelector(\'[data-testid="vanguard-build-request-receipt"]\') !== null');
+    if (!receipt.result?.value) throw new Error("Browser draft receipt was not rendered.");
     if (width < 600) {
       const layout = await evaluate(`(() => {
         const app = document.querySelector('[data-testid="vanguard-reversr-intake-app"]');

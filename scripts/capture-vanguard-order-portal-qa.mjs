@@ -171,8 +171,8 @@ try {
     await setTextarea("#vanguard-reversr-constraint-notes", "Target material is stainless steel; no other constraints are known yet.");
     await click('[data-testid="vanguard-intake-step-readiness"]');
     await click('[data-testid="vanguard-generate-local-receipt"]');
-    const receipt = await evaluate('document.body.innerText.includes("VE-RRB-PREVIEW")');
-    if (!receipt.result?.value) throw new Error("VE-RRB-PREVIEW receipt was not rendered.");
+    const receipt = await evaluate('document.querySelector(\'[data-testid="vanguard-build-request-receipt"]\') !== null');
+    if (!receipt.result?.value) throw new Error("Browser draft receipt was not rendered.");
     await capture({ name: width < 600 ? "05-mobile-local-receipt.png" : "01-desktop-local-receipt.png", selector: '[data-testid="vanguard-build-request-receipt"]', selectorBlock: "center" });
     await click('[data-testid="vanguard-continue-to-order-portal"]', 850);
     const portal = await evaluate('document.querySelector(\'[data-testid="vanguard-order-portal"]\') !== null');

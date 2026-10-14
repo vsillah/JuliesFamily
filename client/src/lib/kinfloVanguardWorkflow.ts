@@ -65,6 +65,15 @@ export const vanguardWorkflow = {
     "Security, access, or data handling",
     "Acceptance or quality standard",
   ],
+  clientOrderStages: [
+    { key: "draft", label: "Draft", detail: "Describe the build, available materials, and constraints.", access: "Available on this site" },
+    { key: "associate-review", label: "Associate review", detail: "Choose what to share and get help closing request gaps.", access: "Account required" },
+    { key: "quote-scope", label: "Quote & scope", detail: "Review assumptions, cost, timing, and acceptance criteria.", access: "Saved order required" },
+    { key: "build", label: "Build", detail: "Follow ownership, milestones, blockers, and approved changes.", access: "Saved order required" },
+    { key: "quality", label: "Quality", detail: "See inspection results, version checks, and open exceptions.", access: "Saved order required" },
+    { key: "delivery", label: "Delivery", detail: "Receive the approved files and supporting evidence.", access: "Saved order required" },
+    { key: "acceptance", label: "Acceptance", detail: "Confirm receipt or return a specific issue for resolution.", access: "Saved order required" },
+  ],
   services: [
     {
       title: "Engineering, CAD, and CAM",

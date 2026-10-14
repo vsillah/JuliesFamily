@@ -69,7 +69,7 @@ export default function VanguardOrderPortal() {
               <div>
                 <h2 className="text-2xl font-semibold">Sign in before saving this request</h2>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                  This request is still stored in your browser. Sign-in is required before Vanguard can save it as a draft or add it to your order history. Draft saving is not available in this preview.
+                  This request is still stored in your browser. Sign-in is required before Vanguard can save it as a draft or add it to your order history. Account-based draft saving is not available yet.
                 </p>
               </div>
             </div>
@@ -126,7 +126,7 @@ export default function VanguardOrderPortal() {
           </section>
         ) : null}
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" data-testid="vanguard-order-assist-request">
+        <section id="associate-support" className="scroll-mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7" data-testid="vanguard-order-assist-request">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="max-w-3xl">
               <div className="flex flex-wrap items-center gap-2">
@@ -171,10 +171,10 @@ export default function VanguardOrderPortal() {
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-violet-300 bg-violet-50 text-violet-800">Order tracking preview</Badge>
+                <Badge variant="outline" className="border-violet-300 bg-violet-50 text-violet-800">Example order path</Badge>
                 <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-800">{vanguardPortalOrderFixture.clientStatusLabel}</Badge>
               </div>
-              <h2 className="mt-3 text-2xl font-semibold">{vanguardPortalOrderFixture.title}</h2>
+              <h2 className="mt-3 text-2xl font-semibold">{localReceipt ? "Your request will follow this path after it is saved" : "See how a Vanguard order moves"}</h2>
               <p className="mt-1 text-sm text-slate-500">{vanguardPortalOrderFixture.orderNumber} · {vanguardPortalOrderFixture.lastUpdatedLabel}</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm md:max-w-sm">
@@ -196,7 +196,7 @@ export default function VanguardOrderPortal() {
             ))}
           </ol>
           <p className="mt-4 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs leading-5 text-violet-900">
-            This sample shows how clients will follow an order. It is not an active Vanguard order.
+            The order shown here is an example. {localReceipt ? "Your browser draft has not been saved or sent to Vanguard." : "Start a request to prepare your own browser draft."}
           </p>
         </section>
 

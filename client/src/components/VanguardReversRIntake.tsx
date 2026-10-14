@@ -76,14 +76,14 @@ export default function VanguardReversRIntake() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-amber-500 text-slate-950 hover:bg-amber-500">ReversR Rebuild</Badge>
-              <Badge variant="outline" className="border-white/20 text-slate-200">Embedded Vanguard intake</Badge>
+              <Badge className="bg-amber-500 text-slate-950 hover:bg-amber-500">ReversR order request</Badge>
+              <Badge variant="outline" className="border-white/20 text-slate-200">Vanguard client journey</Badge>
             </div>
             <p className="mt-2 text-xs leading-5 text-slate-300">Build a reviewable request package before an associate scopes the work.</p>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-300">
             <LockKeyhole className="h-4 w-4 text-amber-300" />
-            This request stays in your browser
+            Draft stays on this device
           </div>
         </div>
         <Progress value={progress} className="mt-4 h-1.5 bg-white/15" />
@@ -274,7 +274,7 @@ export default function VanguardReversRIntake() {
                       <div className="flex items-center gap-2 font-semibold text-emerald-950"><PackageCheck className="h-5 w-5" /> Request receipt ready</div>
                       <p className="mt-2 text-sm leading-6 text-emerald-900">A Vanguard associate would review the available materials, identify missing inputs, and prepare a quote and scope decision.</p>
                     </div>
-                    <Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">VE-RRB-PREVIEW</Badge>
+                    <Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">Browser draft</Badge>
                   </div>
                   <div className="mt-4 grid gap-2 text-xs sm:grid-cols-3">
                     <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Discipline</span><span className="mt-1 block font-semibold text-emerald-950">{discipline}</span></div>

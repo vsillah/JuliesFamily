@@ -52,7 +52,7 @@ const portal = requireIncludes(files.portal, [
   'data-testid="vanguard-order-promote-gated"',
   'data-testid="vanguard-order-tracking-preview"',
   'data-testid="vanguard-order-promotion-contract"',
-  "Order tracking preview",
+  "Example order path",
   "Sign in before saving this request",
   "Private uploads",
 ]);
@@ -88,7 +88,7 @@ const publicPage = requireIncludes(files.publicPage, [
 ]);
 
 const publicData = requireIncludes(files.publicData, [
-  "prepare a request receipt for Vanguard review",
+  "prepare the request for Vanguard review",
   "customer and government experience, careers, and locations in one place",
 ]);
 
@@ -197,7 +197,7 @@ const visibleVanguardPublicModelCopy = vanguardPublicModelSlice
   .join("\n");
 
 const portalContractCopy = sliceBetween(contract, "  blockedReason:", "\n};");
-const portalTrackingCopy = sliceBetween(contract, '  lastUpdatedLabel: "Preview only', "\nexport function createVanguardLocalReceipt");
+const portalTrackingCopy = sliceBetween(contract, '  lastUpdatedLabel: "Example timeline', "\nexport function createVanguardLocalReceipt");
 const workflowIntakeAndServicesCopy = sliceBetween(workflow, "  requestTypes:", "  sourceSite:");
 const workflowPublicAndOrderCopy = sliceBetween(workflow, "    coverage:", "  providerBoundary:");
 for (const [label, segment] of [

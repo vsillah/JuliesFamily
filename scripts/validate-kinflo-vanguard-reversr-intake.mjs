@@ -42,8 +42,8 @@ requireIncludes(files.component, [
   'data-testid="vanguard-intake-readiness"',
   'data-testid="vanguard-generate-local-receipt"',
   'data-testid="vanguard-build-request-receipt"',
-  "VE-RRB-PREVIEW",
-  "This request stays in your browser",
+  "Browser draft",
+  "Draft stays on this device",
   "Private upload is intentionally unavailable",
 ]);
 
@@ -72,7 +72,7 @@ requireIncludes(files.publicPage, [
 
 requireIncludes(files.publicFixture, [
   'primaryHref: "#build-request"',
-  'secondaryHref: "#build-process"',
+  'secondaryHref: "/kinflo-sites/vanguard-enterprises/orders"',
   'href: "#build-request"',
   'type: "build_request"',
   'type: "fulfillment_workflow"',
@@ -112,7 +112,7 @@ else fail(`${files.qaVideo} exists`, "Expected a playable Human QA walkthrough a
 requireIncludes(files.capture, [
   'selector: "#build-request"',
   'selector: "#build-process"',
-  "VE-RRB-PREVIEW",
+  "Browser draft receipt",
 ]);
 
 requireIncludes(files.package, [

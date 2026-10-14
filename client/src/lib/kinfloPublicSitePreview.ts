@@ -12,6 +12,7 @@ export type KinfloPublicBlockType =
   | "lead_magnet"
   | "form"
   | "build_request"
+  | "order_backbone"
   | "fulfillment_workflow"
   | "source_parity"
   | "campaign"
@@ -306,14 +307,15 @@ const previews: KinfloPublicSitePreview[] = [
       },
     },
     navigationItems: [
-      { _id: "nav_vanguard_services", label: "Services & Solutions", href: "#services", placement: "header", order: 10 },
-      { _id: "nav_vanguard_process", label: "Build Process", href: "#build-process", placement: "header", order: 20 },
-      { _id: "nav_vanguard_request", label: "Request a Build", href: "#build-request", placement: "header", order: 30 },
-      { _id: "nav_vanguard_about", label: "About Us", href: "#about", placement: "header", order: 40 },
-      { _id: "nav_vanguard_careers", label: "Careers", href: "#careers", placement: "header", order: 50 },
+      { _id: "nav_vanguard_request", label: "Start an Order", href: "#build-request", placement: "header", order: 10 },
+      { _id: "nav_vanguard_orders", label: "Track Orders", href: "/kinflo-sites/vanguard-enterprises/orders", placement: "header", order: 20 },
+      { _id: "nav_vanguard_process", label: "How It Works", href: "#order-journey", placement: "header", order: 30 },
+      { _id: "nav_vanguard_services", label: "Capabilities", href: "#services", placement: "header", order: 40 },
+      { _id: "nav_vanguard_about", label: "About Us", href: "#about", placement: "header", order: 50 },
       { _id: "nav_vanguard_contact", label: "Contact Us", href: "#contact-details", placement: "footer", order: 10 },
       { _id: "nav_vanguard_location", label: "Locations", href: "#location", placement: "footer", order: 20 },
       { _id: "nav_vanguard_gsa", label: "Government & GSA", href: "#proof", placement: "footer", order: 30 },
+      { _id: "nav_vanguard_careers", label: "Careers", href: "#careers", placement: "footer", order: 40 },
     ],
     page: {
       _id: "page_vanguard_home",
@@ -327,10 +329,19 @@ const previews: KinfloPublicSitePreview[] = [
       {
         _id: "block_vanguard_hero",
         type: "hero",
-        title: "Bring us the build before you have every answer",
-        body: "Start with the outcome, the source package you have, and the constraints you already know. Vanguard associates turn that request into a scoped engineering, CAD/CAM, IT infrastructure, or project delivery path.",
-        metadata: { primaryCta: "Request a build", primaryHref: "#build-request", secondaryCta: "See the build process", secondaryHref: "#build-process" },
+        title: "Start with the part. Stay with the order through delivery.",
+        body: "ReversR gives every Vanguard build one path from first request through associate review, scope, production, quality evidence, delivery, and client acceptance.",
+        metadata: { primaryCta: "Start a ReversR order", primaryHref: "#build-request", secondaryCta: "Track an order", secondaryHref: "/kinflo-sites/vanguard-enterprises/orders" },
         order: 10,
+        publishedAt,
+      },
+      {
+        _id: "block_vanguard_order_backbone",
+        type: "order_backbone",
+        title: "One order keeps the work and the decisions together",
+        body: "Begin with what you know. The same order will carry the request, associate support, quote, progress, quality record, delivery, and your final acceptance.",
+        metadata: { source: "vanguard-reversr-order-journey", persona: "provider", journeyStage: "consideration" },
+        order: 20,
         publishedAt,
       },
       {
@@ -339,14 +350,14 @@ const previews: KinfloPublicSitePreview[] = [
         title: "Professional services built around the work in front of you",
         body: "Vanguard supports large and small projects with subject matter expertise, consistent service, and a delivery record clients can inspect.",
         metadata: { items: vanguardWorkflow.services.map((service) => service.title) },
-        order: 20,
+        order: 40,
         publishedAt,
       },
       {
         _id: "block_vanguard_request",
         type: "build_request",
-        title: "Build the request before the work begins",
-        body: "Use the embedded ReversR Rebuild intake to list the materials you have, name the goal and discipline, record constraints, check missing inputs, and prepare a request receipt for Vanguard review.",
+        title: "Start your ReversR order",
+        body: "List the materials you have, name the result you need, record the constraints, and prepare the request for Vanguard review. Your entries remain on this device until account-based saving is available.",
         metadata: { source: "vanguard-reversr-embedded-intake", persona: "provider", journeyStage: "decision" },
         order: 30,
         publishedAt,
@@ -357,7 +368,7 @@ const previews: KinfloPublicSitePreview[] = [
         title: "See the request travel from intake to delivery receipt",
         body: "ReversR prepares the request package. Vanguard then owns technical review, quote and scope, associate fulfillment, quality evidence, and the final delivery receipt. Every stage names its owner and the record needed to move forward.",
         metadata: { source: "vanguard-reversr-handoff", persona: "provider", journeyStage: "consideration" },
-        order: 40,
+        order: 35,
         publishedAt,
       },
       {
