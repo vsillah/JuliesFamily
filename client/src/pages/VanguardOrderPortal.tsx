@@ -10,8 +10,11 @@ import {
   FileStack,
   HandHelping,
   LockKeyhole,
+  LoaderCircle,
+  LogIn,
   PackageCheck,
   ShieldCheck,
+  UploadCloud,
   UsersRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +31,10 @@ import {
   vanguardPortalOrderFixture,
 } from "@/lib/kinfloVanguardOrderPortal";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
+import {
+  VanguardOrderWorkspaceProvider,
+} from "@/contexts/VanguardOrderWorkspaceContext";
+import { useVanguardOrderWorkspace } from "@/contexts/VanguardOrderWorkspace";
 
 const milestoneTone = {
   complete: "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200",
@@ -35,13 +42,44 @@ const milestoneTone = {
   upcoming: "border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300",
 } as const;
 
-export default function VanguardOrderPortal() {
+function VanguardOrderPortalContent() {
   const { mode: themeMode, setMode: setThemeMode } = useVanguardTheme();
+  const workspace = useVanguardOrderWorkspace();
   const [localReceipt] = useState(() => {
     if (typeof window === "undefined") return null;
     return parseVanguardLocalReceipt(window.sessionStorage.getItem(VANGUARD_LOCAL_RECEIPT_STORAGE_KEY));
   });
   const [showTransferReview, setShowTransferReview] = useState(() => Boolean(localReceipt));
+  const [actionState, setActionState] = useState<"idle" | "saving" | "uploading" | "success" | "error">("idle");
+  const [actionMessage, setActionMessage] = useState("");
+
+  async function saveBrowserReceipt() {
+    if (!localReceipt) return;
+    setActionState("saving");
+    setActionMessage("Saving the reviewed request to your private workspace…");
+    try {
+      const order = await workspace.saveReceipt(localReceipt);
+      setActionState("success");
+      setActionMessage(`Draft ${order.orderNumber} is saved. Your browser receipt remains available as a recovery copy.`);
+    } catch (error) {
+      setActionState("error");
+      setActionMessage(error instanceof Error ? error.message : "The request could not be saved. Your browser draft is unchanged.");
+    }
+  }
+
+  async function uploadPrivateSource(file: File | undefined) {
+    if (!file) return;
+    setActionState("uploading");
+    setActionMessage("Checking the IGES source on this device before private upload…");
+    try {
+      const stored = await workspace.uploadPrivateSource(file, localReceipt?.engineeringReview ?? null);
+      setActionState("success");
+      setActionMessage(`${stored.fileName} is attached privately to ${workspace.savedOrder?.orderNumber ?? "the saved draft"}.`);
+    } catch (error) {
+      setActionState("error");
+      setActionMessage(error instanceof Error ? error.message : "The private source could not be attached.");
+    }
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950 dark:bg-slate-950 dark:text-slate-50" data-testid="vanguard-order-portal">
@@ -99,7 +137,7 @@ export default function VanguardOrderPortal() {
               <div>
                 <Badge className="bg-blue-700 hover:bg-blue-700">Review before saving</Badge>
                 <h2 className="mt-3 text-xl font-semibold text-blue-950 dark:text-blue-100">Confirm the request details</h2>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-blue-900 dark:text-blue-200">These details stay in this browser until sign-in is available. Nothing has been sent to Vanguard.</p>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-blue-900 dark:text-blue-200">{workspace.isAuthenticated ? "Confirm this browser receipt before saving. Nothing has been sent to Vanguard." : "These details stay in this browser until sign-in is available. Nothing has been sent to Vanguard."}</p>
               </div>
               <Badge variant="outline" className="w-fit border-blue-300 bg-white text-blue-800 dark:border-blue-700 dark:bg-slate-900 dark:text-blue-200">Browser draft</Badge>
             </div>
@@ -136,41 +174,102 @@ export default function VanguardOrderPortal() {
                 <p className="mt-3 text-xs leading-5 text-emerald-950 dark:text-emerald-100">This sanitized browser-local summary is for engineering review only. It is not a quote, dimensional inspection, certification, or manufacturing guarantee. The source file and geometry are not attached.</p>
               </div>
             ) : null}
-            <Button type="button" disabled className="mt-4 bg-blue-600 text-white" data-testid="vanguard-order-promote-gated"><PackageCheck className="mr-2 h-4 w-4" /> Save as draft · sign-in required</Button>
+            {workspace.savedOrder ? (
+              <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="vanguard-order-promote-confirmed">
+                <Badge className="bg-emerald-700 text-white hover:bg-emerald-700"><PackageCheck className="mr-1 h-3.5 w-3.5" /> Draft saved</Badge>
+                <span className="text-sm font-semibold text-blue-950 dark:text-blue-100">{workspace.savedOrder.orderNumber}</span>
+              </div>
+            ) : workspace.isAuthenticated ? (
+              <Button type="button" onClick={() => void saveBrowserReceipt()} disabled={actionState === "saving"} className="mt-4 bg-blue-600 text-white hover:bg-blue-700" data-testid="vanguard-order-promote">
+                {actionState === "saving" ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <PackageCheck className="mr-2 h-4 w-4" />}
+                Save reviewed request
+              </Button>
+            ) : workspace.mode === "convex_auth" ? (
+              <Button type="button" onClick={() => void workspace.signIn()} className="mt-4 bg-blue-600 text-white hover:bg-blue-700" data-testid="vanguard-order-sign-in"><LogIn className="mr-2 h-4 w-4" /> Sign in to save</Button>
+            ) : (
+              <Button type="button" disabled className="mt-4 bg-blue-600 text-white" data-testid="vanguard-order-promote-gated"><PackageCheck className="mr-2 h-4 w-4" /> Save as draft · sign-in required</Button>
+            )}
           </section>
         ) : null}
 
         <section className="grid gap-5 lg:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:p-7" data-testid="vanguard-order-auth-gate">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-blue-600 text-white hover:bg-blue-600">Sign in required</Badge>
+              <Badge className="bg-blue-600 text-white hover:bg-blue-600">{workspace.isAuthenticated ? workspace.savedOrder ? "Private draft saved" : "Ready to save" : "Sign in required"}</Badge>
               <Badge variant="outline" className="border-slate-300 dark:border-slate-600">Order portal</Badge>
+              {workspace.mode === "local_fixture" ? <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-900">Device-only review</Badge> : null}
             </div>
             <div className="mt-5 flex items-start gap-4">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-950 text-emerald-300 dark:bg-slate-800"><LockKeyhole className="h-5 w-5" /></span>
               <div>
-                <h2 className="text-2xl font-semibold">Sign in before saving this request</h2>
+                <h2 className="text-2xl font-semibold">{workspace.savedOrder ? "Your private draft is ready" : workspace.isAuthenticated ? "Save this request to your private workspace" : "Sign in before saving this request"}</h2>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  This request is still stored in your browser. Sign-in is required before Vanguard can save it as a draft or add it to your order history. Account-based draft saving is not available yet.
+                  {workspace.savedOrder
+                    ? "The browser receipt stays in this session as a recovery copy. Private source files remain visible only through your authorized order workspace."
+                    : workspace.isAuthenticated
+                      ? "Confirm the reviewed fields before saving. A saved draft is private to your account until you choose to share or submit it."
+                      : "This request is still stored in your browser. Sign-in is required before Vanguard can save it as a draft or add it to your order history."}
                 </p>
               </div>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <Button type="button" disabled className="bg-blue-600 text-white" data-testid="vanguard-order-sign-in-gated"><ShieldCheck className="mr-2 h-4 w-4" /> Sign in to save request</Button>
+              {workspace.savedOrder ? (
+                <Button type="button" disabled className="bg-emerald-700 text-white" data-testid="vanguard-order-draft-saved"><PackageCheck className="mr-2 h-4 w-4" /> {workspace.savedOrder.orderNumber}</Button>
+              ) : workspace.isAuthenticated ? (
+                <Button type="button" onClick={() => void saveBrowserReceipt()} disabled={!localReceipt || actionState === "saving"} className="bg-blue-600 text-white hover:bg-blue-700" data-testid="vanguard-order-save-private">
+                  {actionState === "saving" ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />} Save private draft
+                </Button>
+              ) : workspace.mode === "convex_auth" ? (
+                <Button type="button" onClick={() => void workspace.signIn()} disabled={workspace.isLoading} className="bg-blue-600 text-white hover:bg-blue-700" data-testid="vanguard-order-sign-in"><LogIn className="mr-2 h-4 w-4" /> Sign in to save request</Button>
+              ) : (
+                <Button type="button" disabled className="bg-blue-600 text-white" data-testid="vanguard-order-sign-in-gated"><ShieldCheck className="mr-2 h-4 w-4" /> Sign in to save request</Button>
+              )}
               <Button type="button" variant="outline" disabled={!localReceipt} onClick={() => setShowTransferReview((value) => !value)} data-testid="vanguard-order-review-transfer">
                 <FileStack className="mr-2 h-4 w-4" /> {showTransferReview ? "Hide request details" : "Review request details"}
               </Button>
             </div>
-            <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{vanguardOrderPortalContract.blockedReason}</p>
+            <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{workspace.gate}</p>
+            {workspace.savedOrder ? (
+              <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-950/30" data-testid="vanguard-order-private-upload">
+                <div className="flex items-start gap-3">
+                  <UploadCloud className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+                  <div>
+                    <div className="font-semibold text-emerald-950 dark:text-emerald-100">Attach the reviewed IGES source</div>
+                    <p className="mt-1 text-xs leading-5 text-emerald-900 dark:text-emerald-200">Choose the source again. It is rechecked on this device, must match the reviewed digest, and is stored by private reference rather than a permanent public link.</p>
+                  </div>
+                </div>
+                {workspace.storedSource ? (
+                  <div className="mt-3 rounded-lg border border-emerald-300 bg-white p-3 text-sm text-emerald-950" data-testid="vanguard-order-private-upload-stored">
+                    <div className="font-semibold">{workspace.storedSource.fileName}</div>
+                    <div className="mt-1 text-xs text-emerald-800">{(workspace.storedSource.byteSize / 1024).toFixed(1)} KiB · Private source attached</div>
+                  </div>
+                ) : (
+                  <label className="mt-3 flex min-h-11 cursor-pointer items-center justify-center rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">
+                    <UploadCloud className="mr-2 h-4 w-4" /> {actionState === "uploading" ? "Checking and attaching…" : "Choose IGES source"}
+                    <input
+                      type="file"
+                      accept=".igs,.iges"
+                      className="sr-only"
+                      disabled={actionState === "uploading"}
+                      data-testid="vanguard-order-private-upload-input"
+                      onChange={(event) => void uploadPrivateSource(event.currentTarget.files?.[0])}
+                    />
+                  </label>
+                )}
+              </div>
+            ) : null}
+            {actionMessage ? (
+              <p className={`mt-3 rounded-lg border p-3 text-xs leading-5 ${actionState === "error" ? "border-red-200 bg-red-50 text-red-900" : "border-blue-200 bg-blue-50 text-blue-900"}`} role={actionState === "error" ? "alert" : "status"} data-testid="vanguard-order-action-status">{actionMessage}</p>
+            ) : null}
           </div>
 
           <aside className="rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-950/40" data-testid="vanguard-order-data-boundary">
             <div className="flex items-center gap-2 font-semibold text-blue-950 dark:text-blue-100"><Database className="h-5 w-5" /> Request status</div>
             <dl className="mt-4 space-y-3 text-sm">
               <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Request storage</dt><dd className="mt-1 font-semibold">This browser session</dd></div>
-              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Saved order</dt><dd className="mt-1 font-semibold">Not created</dd></div>
-              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Private uploads</dt><dd className="mt-1 font-semibold">Not available</dd></div>
-              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Next step</dt><dd className="mt-1 font-semibold">Sign in when account access opens</dd></div>
+              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Saved order</dt><dd className="mt-1 font-semibold">{workspace.savedOrder?.orderNumber ?? "Not created"}</dd></div>
+              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Private uploads</dt><dd className="mt-1 font-semibold">{workspace.storedSource ? "One source attached" : workspace.savedOrder ? "Ready for source" : "Available after saving"}</dd></div>
+              <div className="rounded-lg border border-blue-200 bg-white/80 p-3 dark:border-blue-800 dark:bg-slate-900/80"><dt className="text-xs text-blue-700 dark:text-blue-300">Next step</dt><dd className="mt-1 font-semibold">{workspace.storedSource ? "Review and complete the draft" : workspace.savedOrder ? "Attach the reviewed source" : workspace.isAuthenticated ? "Save the reviewed request" : "Sign in when account access opens"}</dd></div>
             </dl>
           </aside>
         </section>
@@ -273,5 +372,13 @@ export default function VanguardOrderPortal() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function VanguardOrderPortal() {
+  return (
+    <VanguardOrderWorkspaceProvider>
+      <VanguardOrderPortalContent />
+    </VanguardOrderWorkspaceProvider>
   );
 }

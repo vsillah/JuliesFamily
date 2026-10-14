@@ -14,8 +14,13 @@ import {
   orderParticipantStatus,
   orderQuoteStatus,
   orderSourceItemKind,
+  orderSourceStorageStatus,
   orderStatusEventType,
 } from "./schema";
+import {
+  validateVanguardPrivateIgesMetadata,
+  validateVanguardStoredSource,
+} from "./orderUploadPolicy";
 
 type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
@@ -65,6 +70,8 @@ const orderSourceItemValidator = v.object({
   mediaType: v.union(v.null(), v.string()),
   byteSize: v.union(v.null(), v.number()),
   checksumSha256: v.union(v.null(), v.string()),
+  storageStatus: v.union(v.null(), orderSourceStorageStatus),
+  storedAt: v.union(v.null(), v.number()),
   createdAt: v.number(),
 });
 
@@ -183,6 +190,10 @@ function sourceKey(index: number, label: string) {
     .replace(/^-+|-+$/g, "")
     .slice(0, 48) || "item";
   return `local-${index + 1}-${slug}`;
+}
+
+function privateSourceKey(checksumSha256: string) {
+  return `private-${checksumSha256.slice(0, 32)}`;
 }
 
 function orderNumberFor(orderId: unknown, timestamp: number) {
@@ -663,6 +674,480 @@ export const saveDraftSection = mutation({
   },
 });
 
+export const prepareUpload = mutation({
+  args: {
+    orderId: v.id("buildOrders"),
+    expectedRevision: v.number(),
+    idempotencyKey: v.string(),
+    fileName: v.string(),
+    mediaType: v.string(),
+    byteSize: v.number(),
+    checksumSha256: v.string(),
+  },
+  returns: v.object({
+    orderId: v.id("buildOrders"),
+    sourceItemId: v.id("orderSourceItems"),
+    revision: v.number(),
+    uploadUrl: v.union(v.null(), v.string()),
+    uploadState: v.union(v.literal("upload_required"), v.literal("already_stored")),
+    deduplicated: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const scope = await requireVanguardScope(ctx);
+    const order = await requireOwnedOrder(ctx, args.orderId, user._id, scope);
+    const expectedRevision = requireRevision(args.expectedRevision);
+    const idempotencyKey = requireIdempotencyKey(args.idempotencyKey);
+    const metadata = validateVanguardPrivateIgesMetadata({
+      fileName: args.fileName,
+      mediaType: args.mediaType,
+      byteSize: args.byteSize,
+      checksumSha256: args.checksumSha256,
+    });
+    const fingerprint = requestFingerprint({
+      orderId: String(order._id),
+      ...metadata,
+    });
+    const replay = await ctx.db
+      .query("orderSourceItems")
+      .withIndex("by_order_and_upload_key", (q: any) =>
+        q.eq("orderId", order._id).eq("uploadIdempotencyKey", idempotencyKey),
+      )
+      .unique();
+    if (replay) {
+      if (
+        replay.uploadRequestFingerprint !== fingerprint
+        || replay.declaredByUserId !== user._id
+        || replay.tenantId !== scope.tenant._id
+        || replay.siteId !== scope.site._id
+      ) {
+        throw new Error("Idempotency key was already used for a different request");
+      }
+      return {
+        orderId: order._id,
+        sourceItemId: replay._id,
+        revision: order.revision,
+        uploadUrl: replay.storageStatus === "stored_private"
+          ? null
+          : await ctx.storage.generateUploadUrl(),
+        uploadState: replay.storageStatus === "stored_private"
+          ? "already_stored" as const
+          : "upload_required" as const,
+        deduplicated: true,
+      };
+    }
+    if (order.status !== "draft") {
+      throw new Error("Private source files can only be added to draft orders");
+    }
+    if (order.revision !== expectedRevision) {
+      throw new Error(`Revision conflict: expected ${expectedRevision}, current ${order.revision}`);
+    }
+    const sourceRows = await ctx.db
+      .query("orderSourceItems")
+      .withIndex("by_order_and_created_at", (q) => q.eq("orderId", order._id))
+      .take(MAX_SOURCE_ITEMS + 1);
+    if (sourceRows.length >= MAX_SOURCE_ITEMS) {
+      throw new Error(`Order source manifest cannot exceed ${MAX_SOURCE_ITEMS} items`);
+    }
+    const sourceKeyValue = privateSourceKey(metadata.checksumSha256);
+    const duplicateSource = await ctx.db
+      .query("orderSourceItems")
+      .withIndex("by_order_and_source_key", (q: any) =>
+        q.eq("orderId", order._id).eq("sourceKey", sourceKeyValue),
+      )
+      .unique();
+    if (duplicateSource) {
+      throw new Error("This private source is already present in the order manifest");
+    }
+    const timestamp = Date.now();
+    const nextRevision = order.revision + 1;
+    const sourceItemId = await ctx.db.insert("orderSourceItems", {
+      tenantId: scope.tenant._id,
+      siteId: scope.site._id,
+      orderId: order._id,
+      sourceKey: sourceKeyValue,
+      kind: "model",
+      label: metadata.fileName,
+      mediaType: metadata.mediaType,
+      byteSize: metadata.byteSize,
+      checksumSha256: metadata.checksumSha256,
+      storageStatus: "upload_prepared",
+      uploadIdempotencyKey: idempotencyKey,
+      uploadRequestFingerprint: fingerprint,
+      declaredByUserId: user._id,
+      updatedByUserId: user._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+    await ctx.db.patch(order._id, { revision: nextRevision, updatedAt: timestamp });
+    await ctx.db.insert("orderAuditEvents", {
+      tenantId: scope.tenant._id,
+      siteId: scope.site._id,
+      orderId: order._id,
+      operation: "prepare_source_upload",
+      actorUserId: user._id,
+      idempotencyKey,
+      requestFingerprint: fingerprint,
+      orderRevision: nextRevision,
+      metadata: { sourceItemId, kind: "model", byteSize: metadata.byteSize },
+      createdAt: timestamp,
+    });
+    return {
+      orderId: order._id,
+      sourceItemId,
+      revision: nextRevision,
+      uploadUrl: await ctx.storage.generateUploadUrl(),
+      uploadState: "upload_required" as const,
+      deduplicated: false,
+    };
+  },
+});
+
+export const attachStoredSource = mutation({
+  args: {
+    orderId: v.id("buildOrders"),
+    sourceItemId: v.id("orderSourceItems"),
+    storageId: v.id("_storage"),
+    expectedRevision: v.number(),
+    idempotencyKey: v.string(),
+  },
+  returns: v.object({
+    orderId: v.id("buildOrders"),
+    sourceItemId: v.id("orderSourceItems"),
+    revision: v.number(),
+    attachmentState: v.union(v.literal("stored"), v.literal("rejected")),
+    rejectionCode: v.union(
+      v.null(),
+      v.literal("stored_size_mismatch"),
+      v.literal("stored_type_mismatch"),
+      v.literal("stored_checksum_mismatch"),
+    ),
+    deduplicated: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const scope = await requireVanguardScope(ctx);
+    const order = await requireOwnedOrder(ctx, args.orderId, user._id, scope);
+    const expectedRevision = requireRevision(args.expectedRevision);
+    const idempotencyKey = requireIdempotencyKey(args.idempotencyKey);
+    const fingerprint = requestFingerprint({
+      orderId: String(order._id),
+      sourceItemId: String(args.sourceItemId),
+      storageId: String(args.storageId),
+      expectedRevision,
+    });
+    const replay = await findAuditReplay(ctx, order._id, user._id, idempotencyKey);
+    if (replay) {
+      requireMatchingReplay(replay, "attach_stored_source", fingerprint);
+      const rejected = replay.metadata?.outcome === "rejected";
+      return {
+        orderId: order._id,
+        sourceItemId: args.sourceItemId,
+        revision: replay.orderRevision,
+        attachmentState: rejected ? "rejected" as const : "stored" as const,
+        rejectionCode: rejected
+          ? replay.metadata?.code === "stored_size_mismatch"
+            ? "stored_size_mismatch" as const
+            : replay.metadata?.code === "stored_checksum_mismatch"
+              ? "stored_checksum_mismatch" as const
+              : "stored_type_mismatch" as const
+          : null,
+        deduplicated: true,
+      };
+    }
+    const sourceItem = await ctx.db.get(args.sourceItemId);
+    if (
+      !sourceItem
+      || sourceItem.orderId !== order._id
+      || sourceItem.tenantId !== scope.tenant._id
+      || sourceItem.siteId !== scope.site._id
+      || sourceItem.declaredByUserId !== user._id
+    ) {
+      throw new Error("Private source not found or unavailable");
+    }
+    if (order.status !== "draft") {
+      throw new Error("Private source files can only be attached to draft orders");
+    }
+    if (order.revision !== expectedRevision) {
+      throw new Error(`Revision conflict: expected ${expectedRevision}, current ${order.revision}`);
+    }
+    if (sourceItem.storageStatus !== "upload_prepared" || sourceItem.storageId) {
+      throw new Error("Private source upload is not awaiting attachment");
+    }
+    const declared = validateVanguardPrivateIgesMetadata({
+      fileName: sourceItem.label,
+      mediaType: sourceItem.mediaType ?? "application/octet-stream",
+      byteSize: sourceItem.byteSize ?? 0,
+      checksumSha256: sourceItem.checksumSha256 ?? "",
+    });
+    const stored = await ctx.db.system.get(args.storageId);
+    if (!stored) {
+      throw new Error("Uploaded private source was not found");
+    }
+    const validation = validateVanguardStoredSource(declared, {
+      contentType: stored.contentType,
+      size: stored.size,
+      sha256: stored.sha256,
+    });
+    const timestamp = Date.now();
+    const nextRevision = order.revision + 1;
+    if (!validation.ok) {
+      await ctx.storage.delete(args.storageId);
+      await ctx.db.delete(sourceItem._id);
+      await ctx.db.patch(order._id, { revision: nextRevision, updatedAt: timestamp });
+      await ctx.db.insert("orderAuditEvents", {
+        tenantId: scope.tenant._id,
+        siteId: scope.site._id,
+        orderId: order._id,
+        operation: "attach_stored_source",
+        actorUserId: user._id,
+        idempotencyKey,
+        requestFingerprint: fingerprint,
+        orderRevision: nextRevision,
+        metadata: { outcome: "rejected", code: validation.code },
+        createdAt: timestamp,
+      });
+      return {
+        orderId: order._id,
+        sourceItemId: sourceItem._id,
+        revision: nextRevision,
+        attachmentState: "rejected" as const,
+        rejectionCode: validation.code,
+        deduplicated: false,
+      };
+    }
+    await ctx.db.patch(sourceItem._id, {
+      storageId: args.storageId,
+      storageStatus: "stored_private",
+      updatedByUserId: user._id,
+      updatedAt: timestamp,
+      storedAt: timestamp,
+    });
+    await ctx.db.patch(order._id, { revision: nextRevision, updatedAt: timestamp });
+    await ctx.db.insert("orderAuditEvents", {
+      tenantId: scope.tenant._id,
+      siteId: scope.site._id,
+      orderId: order._id,
+      operation: "attach_stored_source",
+      actorUserId: user._id,
+      idempotencyKey,
+      requestFingerprint: fingerprint,
+      orderRevision: nextRevision,
+      metadata: { outcome: "stored", sourceItemId: sourceItem._id },
+      createdAt: timestamp,
+    });
+    return {
+      orderId: order._id,
+      sourceItemId: sourceItem._id,
+      revision: nextRevision,
+      attachmentState: "stored" as const,
+      rejectionCode: null,
+      deduplicated: false,
+    };
+  },
+});
+
+export const cancelPreparedUpload = mutation({
+  args: {
+    orderId: v.id("buildOrders"),
+    sourceItemId: v.id("orderSourceItems"),
+    expectedRevision: v.number(),
+    idempotencyKey: v.string(),
+  },
+  returns: v.object({
+    orderId: v.id("buildOrders"),
+    revision: v.number(),
+    cancelled: v.boolean(),
+    deduplicated: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const scope = await requireVanguardScope(ctx);
+    const order = await requireOwnedOrder(ctx, args.orderId, user._id, scope);
+    const expectedRevision = requireRevision(args.expectedRevision);
+    const idempotencyKey = requireIdempotencyKey(args.idempotencyKey);
+    const fingerprint = requestFingerprint({
+      orderId: String(order._id),
+      sourceItemId: String(args.sourceItemId),
+      expectedRevision,
+    });
+    const replay = await findAuditReplay(ctx, order._id, user._id, idempotencyKey);
+    if (replay) {
+      requireMatchingReplay(replay, "cancel_source_upload", fingerprint);
+      return {
+        orderId: order._id,
+        revision: replay.orderRevision,
+        cancelled: true,
+        deduplicated: true,
+      };
+    }
+    if (order.status !== "draft") {
+      throw new Error("Prepared uploads can only be cancelled on draft orders");
+    }
+    if (order.revision !== expectedRevision) {
+      throw new Error(`Revision conflict: expected ${expectedRevision}, current ${order.revision}`);
+    }
+    const sourceItem = await ctx.db.get(args.sourceItemId);
+    if (
+      !sourceItem
+      || sourceItem.orderId !== order._id
+      || sourceItem.tenantId !== scope.tenant._id
+      || sourceItem.siteId !== scope.site._id
+      || sourceItem.declaredByUserId !== user._id
+      || sourceItem.storageStatus !== "upload_prepared"
+      || sourceItem.storageId
+    ) {
+      throw new Error("Prepared private source not found or unavailable");
+    }
+    const timestamp = Date.now();
+    const nextRevision = order.revision + 1;
+    await ctx.db.delete(sourceItem._id);
+    await ctx.db.patch(order._id, { revision: nextRevision, updatedAt: timestamp });
+    await ctx.db.insert("orderAuditEvents", {
+      tenantId: scope.tenant._id,
+      siteId: scope.site._id,
+      orderId: order._id,
+      operation: "cancel_source_upload",
+      actorUserId: user._id,
+      idempotencyKey,
+      requestFingerprint: fingerprint,
+      orderRevision: nextRevision,
+      metadata: { outcome: "cancelled_before_storage" },
+      createdAt: timestamp,
+    });
+    return {
+      orderId: order._id,
+      revision: nextRevision,
+      cancelled: true,
+      deduplicated: false,
+    };
+  },
+});
+
+export const removeStoredSource = mutation({
+  args: {
+    orderId: v.id("buildOrders"),
+    sourceItemId: v.id("orderSourceItems"),
+    expectedRevision: v.number(),
+    idempotencyKey: v.string(),
+  },
+  returns: v.object({
+    orderId: v.id("buildOrders"),
+    revision: v.number(),
+    removed: v.boolean(),
+    deduplicated: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const scope = await requireVanguardScope(ctx);
+    const order = await requireOwnedOrder(ctx, args.orderId, user._id, scope);
+    const expectedRevision = requireRevision(args.expectedRevision);
+    const idempotencyKey = requireIdempotencyKey(args.idempotencyKey);
+    const fingerprint = requestFingerprint({
+      orderId: String(order._id),
+      sourceItemId: String(args.sourceItemId),
+      expectedRevision,
+    });
+    const replay = await findAuditReplay(ctx, order._id, user._id, idempotencyKey);
+    if (replay) {
+      requireMatchingReplay(replay, "remove_stored_source", fingerprint);
+      return {
+        orderId: order._id,
+        revision: replay.orderRevision,
+        removed: true,
+        deduplicated: true,
+      };
+    }
+    if (order.status !== "draft") {
+      throw new Error("Private source files can only be removed from draft orders");
+    }
+    if (order.revision !== expectedRevision) {
+      throw new Error(`Revision conflict: expected ${expectedRevision}, current ${order.revision}`);
+    }
+    const sourceItem = await ctx.db.get(args.sourceItemId);
+    if (
+      !sourceItem
+      || sourceItem.orderId !== order._id
+      || sourceItem.tenantId !== scope.tenant._id
+      || sourceItem.siteId !== scope.site._id
+      || sourceItem.declaredByUserId !== user._id
+      || sourceItem.storageStatus !== "stored_private"
+      || !sourceItem.storageId
+    ) {
+      throw new Error("Private source not found or unavailable");
+    }
+    const timestamp = Date.now();
+    const nextRevision = order.revision + 1;
+    await ctx.storage.delete(sourceItem.storageId);
+    await ctx.db.delete(sourceItem._id);
+    await ctx.db.patch(order._id, { revision: nextRevision, updatedAt: timestamp });
+    await ctx.db.insert("orderAuditEvents", {
+      tenantId: scope.tenant._id,
+      siteId: scope.site._id,
+      orderId: order._id,
+      operation: "remove_stored_source",
+      actorUserId: user._id,
+      idempotencyKey,
+      requestFingerprint: fingerprint,
+      orderRevision: nextRevision,
+      metadata: { outcome: "removed" },
+      createdAt: timestamp,
+    });
+    return {
+      orderId: order._id,
+      revision: nextRevision,
+      removed: true,
+      deduplicated: false,
+    };
+  },
+});
+
+export const getStoredSourceDownloadUrl = query({
+  args: {
+    orderId: v.id("buildOrders"),
+    sourceItemId: v.id("orderSourceItems"),
+  },
+  returns: v.union(
+    v.null(),
+    v.object({
+      sourceItemId: v.id("orderSourceItems"),
+      fileName: v.string(),
+      mediaType: v.string(),
+      byteSize: v.number(),
+      url: v.string(),
+    }),
+  ),
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const scope = await requireVanguardScope(ctx);
+    const order = await requireOwnedOrder(ctx, args.orderId, user._id, scope);
+    const sourceItem = await ctx.db.get(args.sourceItemId);
+    if (
+      !sourceItem
+      || sourceItem.orderId !== order._id
+      || sourceItem.tenantId !== scope.tenant._id
+      || sourceItem.siteId !== scope.site._id
+      || sourceItem.storageStatus !== "stored_private"
+      || !sourceItem.storageId
+      || !sourceItem.mediaType
+      || !sourceItem.byteSize
+    ) {
+      return null;
+    }
+    const url = await ctx.storage.getUrl(sourceItem.storageId);
+    if (!url) {
+      return null;
+    }
+    return {
+      sourceItemId: sourceItem._id,
+      fileName: sourceItem.label,
+      mediaType: sourceItem.mediaType,
+      byteSize: sourceItem.byteSize,
+      url,
+    };
+  },
+});
+
 export const getMyOrder = query({
   args: { orderId: v.id("buildOrders") },
   returns: v.object({
@@ -728,6 +1213,8 @@ export const getMyOrder = query({
         mediaType: item.mediaType ?? null,
         byteSize: item.byteSize ?? null,
         checksumSha256: item.checksumSha256 ?? null,
+        storageStatus: item.storageStatus ?? null,
+        storedAt: item.storedAt ?? null,
         createdAt: item.createdAt,
       })),
       participants: participantRows.slice(0, 25).map((participant) => ({
