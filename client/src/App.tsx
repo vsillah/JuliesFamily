@@ -45,7 +45,10 @@ function LegacyApplication() {
 
 function RoutedApplication() {
   const [location] = useLocation();
-  if (location === "/admin/kinflo-os") {
+  if (
+    location === "/admin/kinflo-os"
+    || location === "/kinflo-sites/vanguard-enterprises/orders"
+  ) {
     return <Router />;
   }
 

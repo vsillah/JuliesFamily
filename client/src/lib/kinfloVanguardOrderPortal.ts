@@ -869,7 +869,7 @@ export const vanguardOrderPortalContract = {
     "Confirmation before sharing with Vanguard",
     "Saved order number and latest status",
   ],
-  sourceManifestBoundary: "You can list the materials you have. Private file uploads are not available in this release.",
+  sourceManifestBoundary: "You can list the materials you have. Private source files can be attached only after an authenticated draft is saved.",
 };
 
 export const vanguardPortalOrderFixture: VanguardPortalOrderFixture = {

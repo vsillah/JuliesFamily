@@ -181,6 +181,11 @@ export const orderSourceItemKind = v.union(
   v.literal("other"),
 );
 
+export const orderSourceStorageStatus = v.union(
+  v.literal("upload_prepared"),
+  v.literal("stored_private"),
+);
+
 export const orderParticipantRole = v.union(
   v.literal("client_owner"),
   v.literal("operations_reviewer"),
@@ -210,6 +215,10 @@ export const orderAuditOperation = v.union(
   v.literal("promote_local_intake"),
   v.literal("save_draft_section"),
   v.literal("submit_order"),
+  v.literal("prepare_source_upload"),
+  v.literal("cancel_source_upload"),
+  v.literal("attach_stored_source"),
+  v.literal("remove_stored_source"),
 );
 
 export default defineSchema({
@@ -874,10 +883,18 @@ export default defineSchema({
     mediaType: v.optional(v.string()),
     byteSize: v.optional(v.number()),
     checksumSha256: v.optional(v.string()),
+    storageId: v.optional(v.id("_storage")),
+    storageStatus: v.optional(orderSourceStorageStatus),
+    uploadIdempotencyKey: v.optional(v.string()),
+    uploadRequestFingerprint: v.optional(v.string()),
     declaredByUserId: v.id("users"),
+    updatedByUserId: v.optional(v.id("users")),
     createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+    storedAt: v.optional(v.number()),
   })
     .index("by_order_and_source_key", ["orderId", "sourceKey"])
+    .index("by_order_and_upload_key", ["orderId", "uploadIdempotencyKey"])
     .index("by_order_and_created_at", ["orderId", "createdAt"]),
 
   orderParticipants: defineTable({

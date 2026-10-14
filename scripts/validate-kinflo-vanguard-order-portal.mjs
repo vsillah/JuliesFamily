@@ -174,7 +174,12 @@ const combined = [portal, contract, intake, admin].join("\n");
 for (const marker of ['from "convex/_generated/api"', "useMutation(", "useAction(", "fetch(\"/api/", "prepareUpload(", "attachStoredSource("]) {
   check(!combined.includes(marker), `runtime source excludes ${marker}`, "This provider-light foundation cannot perform live reads, mutations, uploads, or provider writes.");
 }
-check(!portal.includes("type=\"file\""), "portal exposes no file input", "Private upload remains disabled.");
+check(
+  portal.includes('data-testid="vanguard-order-private-upload-input"')
+    && portal.includes("workspace.savedOrder ?"),
+  "portal exposes the private source picker only after a saved draft",
+  "The Phase 2B picker must remain behind authenticated draft creation.",
+);
 
 const adminPortalSlice = sliceBetween(
   admin,
@@ -270,7 +275,7 @@ console.log("Public route: /kinflo-sites/vanguard-enterprises/orders");
 console.log("Data mode: source-backed local fixture");
 console.log("System of record target: Convex");
 console.log("External writes: 0");
-console.log("Private uploads: disabled");
+console.log("Private uploads: default-off authenticated source path");
 console.log("Convex codegen run: no");
 console.log("Generated API import: no");
 console.log("Live provider execution: no");
