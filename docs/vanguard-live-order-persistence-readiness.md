@@ -1,8 +1,8 @@
 # Vanguard live order persistence readiness
 
-Status: source-only draft for captain review
+Status: Batch 1 source implementation for captain review
 
-Date: October 14, 2026
+Date: October 13, 2026
 
 Machine-readable contract: `docs/vanguard-live-order-persistence-contract.json`
 
@@ -10,9 +10,9 @@ Dormant client seam: `client/src/lib/kinfloVanguardOrderPersistence.ts`
 
 ## Decision
 
-The repository is ready for a reviewed implementation sequence, but it is not ready for live order persistence. The current Vanguard experience correctly keeps the build request in the browser, blocks account-based saving, and presents operations, inventory, paperwork, quality, and metrics as inactive workbench states.
+Batch 1 source implementation is complete for captain review, but the repository is not ready for live order persistence. The current Vanguard experience still keeps the build request in the browser, blocks account-based saving, and presents operations, inventory, paperwork, quality, and metrics as inactive workbench states.
 
-The next code change would require new Convex tables, server functions, permissions, generated bindings, and bounded hosted smoke. Those are explicit captain gates. This lane therefore stops before schema or runtime activation and contributes a typed client contract, a migration plan, rollback rules, and a validator that proves the live path remains absent.
+This lane adds the seven Batch 1 table definitions and the seven core `orders` functions behind the repository's source-only generic Convex function pattern. Convex codegen was not run, generated bindings were not imported, no hosted function was executed, and no adapter was mounted. The browser-local path remains the active adapter.
 
 ## Current surface inventory
 
@@ -22,8 +22,8 @@ The next code change would require new Convex tables, server functions, permissi
 | Embedded ReversR workspace | Builds a request receipt from materials, goal, discipline, and constraints | `sessionStorage` only |
 | Client order portal | Reviews the browser receipt, explains sign-in, assistance, tracking, and delivery states | Save, assist, submission, upload, and tracking reads remain inactive |
 | KinFlo OS Vanguard workspace | Shows associate assist, queue, capacity, inventory, paperwork, quality, delivery, and metrics states | In-repository records only; actions remain inactive |
-| Convex schema | Covers identity, tenants, sites, content, CRM, campaigns, preferences, and audit events | No order-domain tables |
-| Convex functions | Covers the existing KinFlo control plane and product domains | No `orders`, `orderOps`, `orderMessages`, `orderEvidence`, or `orderMetrics` modules |
+| Convex schema | Includes additive source definitions for the seven Batch 1 order tables | Definitions have not been code-generated, pushed, or verified against a hosted deployment |
+| Convex functions | Includes source-only `orders.createDraft`, `orders.promoteLocalIntake`, `orders.saveDraftSection`, `orders.getMyOrder`, `orders.listMyOrders`, `orders.submit`, and `orders.getSubmissionReceipt` | No generated binding, hosted execution, client import, or UI activation |
 | Generated API registry | Enumerates reviewed KinFlo query and mutation bindings | No order binding is registered or approved |
 
 The existing `docs/vanguard-order-operations-architecture.md` remains the broad domain design. This readiness packet converts that design into an implementation order against the merged Vanguard site and desktop embed.
@@ -59,7 +59,7 @@ The current portal and intake do not import the seam. This prevents a source-onl
 
 ## Migration batches
 
-### Batch 1: Core draft and tracking
+### Batch 1: Core draft and tracking — source implemented, runtime blocked
 
 Add these tables first:
 
@@ -71,13 +71,15 @@ Add these tables first:
 - `orderStatusEvents` for immutable lifecycle facts;
 - `orderAuditEvents` for immutable security and change records.
 
-The first server slice should implement only:
+The source-only server slice implements only:
 
 - `orders.createDraft`;
 - `orders.promoteLocalIntake`;
 - `orders.saveDraftSection`;
 - `orders.getMyOrder`;
-- `orders.listMyOrders`.
+- `orders.listMyOrders`;
+- `orders.submit`;
+- `orders.getSubmissionReceipt`.
 
 Each registered function needs object-form syntax plus explicit `args` and `returns` validators. List reads must use named indexes and pagination. No order query may use an unbounded `.collect()` or a `.filter()` in place of an index.
 
@@ -92,6 +94,17 @@ Each registered function needs object-form syntax plus explicit `args` and `retu
 7. a return value containing `orderId`, `orderNumber`, `revision`, `createdAt`, and `deduplicated`.
 
 The browser receipt stays intact until a follow-up `orders.getMyOrder` read confirms the server record. Failed promotion returns the portal to browser-local mode without losing the request.
+
+The Batch 1 source enforces the following boundaries:
+
+- authentication resolves to an already-synced KinFlo user;
+- the Vanguard tenant and site are resolved from fixed server-side slugs and must remain available;
+- client reads and writes require exact order ownership in that resolved tenant/site scope;
+- create, promotion, section-save, and submission requests are idempotent, with request-fingerprint mismatch rejection;
+- existing-order writes carry `expectedRevision`, and stale section saves return bounded changed-section keys;
+- status and audit events are append-only in the Batch 1 module;
+- order lists use Convex pagination, and detail collections use named indexes plus explicit limits;
+- submission requires build goal, discipline, constraints, acceptance, and an explicit versioned confirmation.
 
 ### Batch 2: Associate assist and co-edit
 
@@ -185,11 +198,11 @@ Dual writes are not allowed during cutover. A single approved adapter owns each 
 
 ## Activation gates
 
-The captain should authorize these in order:
+The captain should authorize these in order. The first two contract reviews were incorporated into PR #38; the third is now the current review gate:
 
-1. schema and index review;
-2. permission and data-classification review;
-3. additive schema and server-function implementation;
+1. schema and index contract review — incorporated into the merged readiness packet;
+2. permission and data-classification contract review — incorporated without changing grants;
+3. additive schema and server-function source review — current Batch 1 gate;
 4. explicit codegen approval and generated-binding review;
 5. authenticated read-only hosted smoke;
 6. bounded draft mutation smoke with idempotency and cleanup evidence;
@@ -203,5 +216,14 @@ If any gate fails, stop at that gate. Do not advance on build success or selecto
 ## Validation boundary for this lane
 
 This source-only lane may run static validators, TypeScript, build checks, and Git diff checks. It must not run codegen, Convex deployment commands, hosted functions, provider writes, private upload tests, production smoke, or environment mutation.
+
+The captain-review packet is source evidence only:
+
+- Convex codegen was not run;
+- generated order bindings remain absent and unapproved;
+- hosted read-only and mutation smoke were not run;
+- no role, membership, environment, provider, storage, or deployment setting changed;
+- the browser-local path remains the active adapter;
+- rollback still means leaving or returning the adapter to browser-local without deleting order or audit history.
 
 No rendered UI changed in this lane, so this packet does not create a Human QA request. Human QA becomes mandatory when a later lane wires the live adapter or changes the client/associate experience.

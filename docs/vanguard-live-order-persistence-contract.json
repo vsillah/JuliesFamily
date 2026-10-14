@@ -14,6 +14,19 @@
     "liveOrderFunctionsPresent": false,
     "generatedOrderBindingsPresent": false
   },
+  "batch1SourceImplementation": {
+    "status": "captain_review_required",
+    "baseCommit": "3c52f79ab9baf24416a6d7fecf93c78c855162df",
+    "tables": 7,
+    "functions": 7,
+    "schemaSourcePresent": true,
+    "serverFunctionSourcePresent": true,
+    "codegenRun": false,
+    "generatedOrderBindingsPresent": false,
+    "hostedExecutionRun": false,
+    "activeClientAdapterMounted": false,
+    "renderedBehaviorChanged": false
+  },
   "preservedBoundaries": {
     "browserLocalFallbackEnabled": true,
     "liveReadsEnabled": false,
@@ -49,6 +62,7 @@
         "orders.submit",
         "orders.getSubmissionReceipt"
       ],
+      "sourceStatus": "implemented_pending_captain_review",
       "activation": "blocked"
     },
     {
@@ -65,6 +79,7 @@
         "orderOps.acceptAssistRequest",
         "orderOps.saveAssistedSection"
       ],
+      "sourceStatus": "planned",
       "activation": "blocked"
     },
     {
@@ -83,6 +98,7 @@
         "orderOps.reassign",
         "orderOps.transitionStatus"
       ],
+      "sourceStatus": "planned",
       "activation": "blocked"
     },
     {
@@ -104,6 +120,7 @@
         "orderOps.prepareDelivery",
         "orderOps.recordDelivery"
       ],
+      "sourceStatus": "planned",
       "activation": "blocked"
     },
     {
@@ -115,6 +132,7 @@
         "orderMetrics.getCycleTimeSeries",
         "orderMetrics.getThroughputSeries"
       ],
+      "sourceStatus": "planned",
       "activation": "blocked"
     }
   ],
