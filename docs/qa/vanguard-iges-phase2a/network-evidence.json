@@ -4,12 +4,12 @@
   "canvasEvidence": {
     "width": 778,
     "height": 420,
-    "distinctColors": 62,
-    "dataUrlLength": 68570
+    "distinctColors": 111,
+    "dataUrlLength": 62118
   },
   "orbitEvidence": {
     "changed": true,
     "before": "17.2655,12.2122,17.2655",
-    "after": "-8.2339,23.7253,10.7074"
+    "after": "-8.3721,23.8970,10.2066"
   }
 }

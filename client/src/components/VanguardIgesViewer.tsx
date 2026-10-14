@@ -74,6 +74,7 @@ export default function VanguardIgesViewer({ geometry }: { geometry: KinfloIgesG
         }
         scene.add(group);
 
+        group.rotation.x = -Math.PI / 2;
         const bounds = new THREE.Box3().setFromObject(group);
         const center = bounds.getCenter(new THREE.Vector3());
         const size = bounds.getSize(new THREE.Vector3());
@@ -91,7 +92,7 @@ export default function VanguardIgesViewer({ geometry }: { geometry: KinfloIgesG
 
         const gridSize = Math.max(largest * 2.8, 10);
         const grid = new THREE.GridHelper(gridSize, 18, 0x8394a3, 0xc5d0da);
-        grid.position.y = -size.y / 2 - largest * 0.08;
+        grid.position.y = -size.y / 2 - Math.max(largest * 0.22, 0.5);
         scene.add(grid);
 
         const fitModel = () => {
@@ -117,7 +118,6 @@ export default function VanguardIgesViewer({ geometry }: { geometry: KinfloIgesG
           fitModel();
         };
 
-        group.rotation.x = -Math.PI / 2;
         fitModel();
         actionsRef.current = { fit: fitModel, reset: resetView };
 
