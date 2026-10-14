@@ -1,19 +1,20 @@
 # Phase 177: limited preferences production activation packet
 
-This packet is the Gate B planning record after PR #33 fixed the limited preferences adapter read-back verifier and Gate A passed in preview.
+This packet is the Gate B completion record after PR #33 fixed the limited preferences adapter read-back verifier, Gate A passed in preview, and Gate B passed in production.
 
-## Current observed state
+## Gate B observed state
 
 - Limited preferences adapter PR: `#29`
 - Read-back verifier fix PR: `#33`
-- Current `origin/main` commit verified after PR `#33`: `00ac071173dc8a0cc22eae6c47a0f578335141e0`
-- Current production deployment after PR `#33`: `dpl_3cUvmAXs6sfjm96UCZLmS5iUukTb`
+- Gate B activation packet PR: `#34`
+- Gate B `origin/main` commit verified after PR `#34`: `4e25339966f20dda6f96b33740c7a3cca0638be4`
+- Gate B production deployment after the bounded smoke: `dpl_4zQZToyEHj14iqpf7ribTzsgyg2y`
 - Production URL: `https://kinflo-website.vercel.app`
-- Deployment URL: `https://kinflo-website-acjrom213-vsillahs-projects.vercel.app`
-- Production route checked: `/admin/kinflo-os`
-- Current production behavior: route returns `200`; production limited-preferences activation is still gated by production env flags.
+- Deployment URL: `https://kinflo-website-8lkai7hbf-vsillahs-projects.vercel.app`
+- Production route checked: `/admin/kinflo-os?tab=experience&gateB=4e25339`
+- Gate B observed production behavior: route returned `200`; limited preferences were live-verified in production, while every non-preferences mutation and provider-write surface remained blocked.
 
-This section is observational, not an execution binding. Vercel can redeploy `main`, so the captain must refresh the exact `origin/main` commit and production deployment id immediately before Gate B.
+This section is observational, not an execution binding. Vercel can redeploy `main`, so the captain must refresh the exact `origin/main` commit and production deployment id before any later production activation.
 
 ## What is now proven
 
@@ -77,26 +78,36 @@ Limited-preferences production flags:
 
 The `VITE_CONVEX_URL` value is browser-public but must still not be printed in command output, copied into docs, or written to `.env.local`.
 
-## Gate B production activation
+## Gate B production activation passed
 
-Production activation is not authorized by this packet. It requires a separate explicit approval after this packet is reviewed.
+Gate B production limited-preferences activation passed on October 13, 2026.
 
-Required execution order:
+Execution record:
 
-1. Refresh `origin/main`, active production deployment id, and current Vercel Production env key presence without printing secret values.
-2. Confirm the target source commit is `00ac071173dc8a0cc22eae6c47a0f578335141e0` or a later approved commit containing PR `#33`.
+1. Refreshed `origin/main`, active production deployment id, and current Vercel Production env key presence without printing secret values.
+2. Confirmed target source commit `4e25339966f20dda6f96b33740c7a3cca0638be4`, containing PR `#33` and PR `#34`.
 3. Set only the eight approved browser-public KinFlo Production env flags.
-4. Redeploy the same approved `main` source to production.
-5. Verify production route `/admin/kinflo-os?tab=experience`.
-6. Confirm the signed-in actor has a valid KinFlo/Auth0 identity and grant temporary `platform.super_admin` only for the production smoke if needed.
-7. Capture before-state for the actor preference row.
-8. Run one production preferences smoke with `dataDensity=spacious`.
-9. Verify UI read-back and database read-back.
-10. Restore the exact prior actor preference state, or delete the newly created row if none existed before the smoke; the production cleanup proof must explicitly state `restore the exact prior actor preference state`.
-11. Revoke temporary admin access.
-12. Prove provider writes remain `0`.
-13. Capture MP4 plus desktop and mobile images.
-14. Report rollback status and remaining activation gates.
+4. Redeployed the same approved `main` source to production.
+5. Verified production route `/admin/kinflo-os?tab=experience&gateB=4e25339`.
+6. Confirmed the signed-in production KinFlo/Auth0 actor through the production admin UI and Convex read-back.
+7. Captured before-state: no unscoped preference row existed for the production smoke actor.
+8. Ran one production preferences smoke with `dataDensity=spacious`.
+9. Verified UI read-back: `Verified preferences`, `Data density: Spacious`, `Preferences saved`, and `25 · spacious`.
+10. Verified database read-back: one newly created unscoped preference row with `dataDensity=spacious`.
+11. Deleted the newly created row because no row existed before the smoke.
+12. Revoked the temporary admin grant applied during actor verification; the actual smoke actor kept its pre-existing `super_admin` role.
+13. Proved provider-like audit events remained `0`.
+14. Removed Temporary Convex ops functions from the deployment.
+15. Verified Convex `SITE_URL` stayed `https://kinflo-website.vercel.app`.
+16. Verified `.env.local` stayed absent.
+
+Evidence:
+
+- MP4: `evidence/phase177-gate-b-production/gate-b-production-smoke-cleanup.mp4`
+- Desktop before image: `evidence/phase177-gate-b-production/gate-b-before-desktop.png`
+- Desktop write image: `evidence/phase177-gate-b-production/gate-b-after-write-desktop.png`
+- Mobile write image: `evidence/phase177-gate-b-production/gate-b-after-write-mobile.png`
+- Desktop cleanup image: `evidence/phase177-gate-b-production/gate-b-after-cleanup-desktop.png`
 
 ## Hard exclusions
 
@@ -118,9 +129,9 @@ Gate B does not authorize:
 - printing secret values,
 - `.env.local`.
 
-## Stop conditions
+## Gate B stop conditions used
 
-Stop without running the production write if any of these fail:
+The captain was required to stop without running the production write if any of these failed:
 
 - current `origin/main` commit cannot be verified,
 - target production deployment cannot be verified,
@@ -134,29 +145,14 @@ Stop without running the production write if any of these fail:
 - any command writes `.env.local`,
 - any write result is failed or unknown.
 
-## Exact next approval language
-
-To authorize Gate B production activation, Vambah can send:
-
-```text
-I approve KinFlo Phase 177 Gate B production limited-preferences activation smoke.
-
-Scope: verify current origin/main and production deployment, set only the approved eight browser-public KinFlo Production env flags, redeploy the same approved main source, run one authenticated production admin smoke for preferences.getMyPreferences and preferences.upsertMyPreferences with dataDensity=spacious, capture MP4 plus desktop and mobile images, restore the actor preference state exactly or delete the newly created row if no row existed, revoke temporary admin access, and verify cleanup.
-
-Bindings:
-- Source commit must include PR #33, currently 00ac071173dc8a0cc22eae6c47a0f578335141e0 unless captain refreshes and reports a later approved main commit
-- Current production deployment before Gate B must be refreshed and reported
-- Production flags: VITE_KINFLO_IDENTITY_MODE=convex_auth, VITE_CONVEX_URL present without printing value, VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true, VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED=true, VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified, VITE_KINFLO_PREFERENCES_GENERATED_API_AVAILABLE=true, VITE_KINFLO_PREFERENCES_SMOKE_VERIFIED=true, VITE_KINFLO_PREFERENCES_ADAPTER_MODE=live_verified
-- Route: /admin/kinflo-os?tab=experience
-- Actor: my currently signed-in production KinFlo/Auth0 identity
-- Sentinel field/value: dataDensity=spacious
-- Rollback owner: Codex integration captain
-
-Hard exclusions: no Convex server smoke gate, no full live adapter, no publish, billing, invitations, email/SMS, CRM lead writes, site creation, domain/DNS, storage, provider calls, broad mutation smoke, retries after a failed or unknown write, printing secret values, or .env.local.
-
-Stop condition: if actor authorization, before-state capture, exact cleanup capability, production deployment binding, env key presence, route readiness, provider-write proof, or cleanup verification cannot be verified, stop and report without retrying the write.
-```
-
 ## Captain recommendation
 
-Gate B is ready for approval wording review. Do not execute production env changes or production mutation smoke until Vambah approves the Gate B language with current deployment bindings refreshed in the same work round.
+Gate B is complete. Treat limited preferences as production-live for the signed-in admin preferences surface only. The next KinFlo OS activation lane should be selected separately, with the same pattern: source review, preview smoke, MP4 and image evidence, explicit production binding, one bounded production smoke if a write is involved, exact cleanup, and provider-write proof.
+
+The strongest next candidates are:
+
+1. `accessPolicy.viewerPermissionSnapshot`: read-only, confirms permission posture for future tenant/admin workflows.
+2. `controlPlane.listTenants` and `controlPlane.listSitesForTenant`: read-only expansion of live admin data coverage.
+3. `siteFactory` read-only launch packets: broader product surface but higher information-architecture blast radius.
+
+Do not activate another mutation surface, full live adapter, provider workflow, public publish path, billing path, invitation path, email/SMS path, CRM lead write, site creation, domain/DNS, or storage path without a new bounded approval.
