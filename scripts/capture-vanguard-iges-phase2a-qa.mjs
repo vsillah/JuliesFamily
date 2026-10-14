@@ -232,7 +232,12 @@ try {
   const videoPath = join(outputDir, "vanguard-iges-phase2a-walkthrough.mp4");
   const args = ["-y"];
   for (const frame of availableFrames) args.push("-loop", "1", "-t", "2.8", "-i", join(outputDir, frame));
-  const streams = availableFrames.map((_, index) => `[${index}:v]scale=1440:1000:force_original_aspect_ratio=decrease,pad=1440:1000:(ow-iw)/2:(oh-ih)/2:color=white,setsar=1[v${index}]`).join(";");
+  const streams = availableFrames.map((_, index) => [
+    `[${index}:v]split=2[bg${index}][fg${index}]`,
+    `[bg${index}]scale=1440:1000:force_original_aspect_ratio=increase,crop=1440:1000,boxblur=20:10[bgf${index}]`,
+    `[fg${index}]scale=1440:1000:force_original_aspect_ratio=decrease[fgf${index}]`,
+    `[bgf${index}][fgf${index}]overlay=(W-w)/2:(H-h)/2,setsar=1[v${index}]`,
+  ].join(";")).join(";");
   const inputs = availableFrames.map((_, index) => `[v${index}]`).join("");
   args.push("-filter_complex", `${streams};${inputs}concat=n=${availableFrames.length}:v=1:a=0[outv]`, "-map", "[outv]", "-r", "30", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart", videoPath);
   const rendered = spawnSync("ffmpeg", args, { encoding: "utf8" });
