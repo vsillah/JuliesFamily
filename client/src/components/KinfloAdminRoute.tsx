@@ -20,6 +20,10 @@ import {
   DisabledKinfloPreferencesAdapterProvider,
   LiveKinfloPreferencesAdapterProvider,
 } from "@/contexts/KinfloPreferencesAdapterContext";
+import {
+  DisabledKinfloThemeWriteAdapterProvider,
+  LiveKinfloThemeWriteAdapterProvider,
+} from "@/contexts/KinfloThemeWriteAdapterContext";
 
 type ConvexViewer = {
   _id: string;
@@ -86,7 +90,9 @@ function LocalFixtureIdentityGate({ children }: { children: ReactNode }) {
   return (
     <KinfloAdminIdentityProvider value={value}>
       <FixtureKinfloShellSnapshotProvider>
-        <DisabledKinfloPreferencesAdapterProvider>{children}</DisabledKinfloPreferencesAdapterProvider>
+        <DisabledKinfloPreferencesAdapterProvider>
+          <DisabledKinfloThemeWriteAdapterProvider>{children}</DisabledKinfloThemeWriteAdapterProvider>
+        </DisabledKinfloPreferencesAdapterProvider>
       </FixtureKinfloShellSnapshotProvider>
     </KinfloAdminIdentityProvider>
   );
@@ -193,7 +199,9 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
       value={{ isLoading: false, isAdmin: true, source: "convex_auth" }}
     >
       <ReadOnlyLiveKinfloShellSnapshotProvider>
-        <LiveKinfloPreferencesAdapterProvider>{children}</LiveKinfloPreferencesAdapterProvider>
+        <LiveKinfloPreferencesAdapterProvider>
+          <LiveKinfloThemeWriteAdapterProvider>{children}</LiveKinfloThemeWriteAdapterProvider>
+        </LiveKinfloPreferencesAdapterProvider>
       </ReadOnlyLiveKinfloShellSnapshotProvider>
     </KinfloAdminIdentityProvider>
   );

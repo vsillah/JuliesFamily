@@ -114,6 +114,13 @@ export type KinfloConvexRuntimeSnapshot = {
   canUseLivePreferences: boolean;
   preferenceMutationSmokeClientAvailable: boolean;
   canRequestPreferenceMutationSmoke: boolean;
+  themeWriteGeneratedApiAvailable: boolean;
+  themeWriteAdapterSelected: boolean;
+  themeWriteSmokeVerified: boolean;
+  themeWriteReadbackVerified: boolean;
+  themeWriteVisualQaApproved: boolean;
+  canUseLiveThemeWrites: boolean;
+  themeWriteActivationGate: string;
   activationGate: string;
   functionNames: KinfloConvexFunctionName[];
 };
@@ -143,6 +150,22 @@ function readPreferencesRuntimeGate() {
     preferencesGeneratedApiAvailable: readBooleanEnv(import.meta.env.VITE_KINFLO_PREFERENCES_GENERATED_API_AVAILABLE),
     preferencesAdapterSelected: import.meta.env.VITE_KINFLO_PREFERENCES_ADAPTER_MODE === "live_verified",
     preferencesSmokeVerified: readBooleanEnv(import.meta.env.VITE_KINFLO_PREFERENCES_SMOKE_VERIFIED),
+  };
+}
+
+function readThemeWriteRuntimeGate() {
+  const themeWriteGeneratedApiAvailable = readBooleanEnv(import.meta.env.VITE_KINFLO_THEME_WRITE_GENERATED_API_AVAILABLE);
+  const themeWriteAdapterSelected = import.meta.env.VITE_KINFLO_THEME_WRITE_ADAPTER_MODE === "live_verified";
+  const themeWriteSmokeVerified = readBooleanEnv(import.meta.env.VITE_KINFLO_THEME_WRITE_SMOKE_VERIFIED);
+  const themeWriteReadbackVerified = readBooleanEnv(import.meta.env.VITE_KINFLO_THEME_WRITE_READBACK_VERIFIED);
+  const themeWriteVisualQaApproved = readBooleanEnv(import.meta.env.VITE_KINFLO_THEME_WRITE_VISUAL_QA_APPROVED);
+
+  return {
+    themeWriteGeneratedApiAvailable,
+    themeWriteAdapterSelected,
+    themeWriteSmokeVerified,
+    themeWriteReadbackVerified,
+    themeWriteVisualQaApproved,
   };
 }
 
@@ -181,11 +204,28 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
     preferencesSmokeVerified,
     canUseLivePreferences,
   };
+  const themeWriteRuntime = readThemeWriteRuntimeGate();
+  const canUseLiveThemeWrites = Boolean(
+    canUseReadOnlyLiveData
+      && themeWriteRuntime.themeWriteGeneratedApiAvailable
+      && themeWriteRuntime.themeWriteAdapterSelected
+      && themeWriteRuntime.themeWriteSmokeVerified
+      && themeWriteRuntime.themeWriteReadbackVerified
+      && themeWriteRuntime.themeWriteVisualQaApproved,
+  );
+  const themeWriteGate = {
+    ...themeWriteRuntime,
+    canUseLiveThemeWrites,
+    themeWriteActivationGate: canUseLiveThemeWrites
+      ? "Theme writes are enabled for verified site-scoped saves with read-back confirmation."
+      : "Live theme save requires the verified read-only adapter, reviewed generated bindings, hosted mutation smoke, read-back proof, visual QA approval, and an explicit live_verified adapter selection.",
+  };
 
   if (!urlConfigured) {
     return {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
+      ...themeWriteGate,
       mode: "fixture_only",
       label: "Fixture only",
       urlConfigured,
@@ -203,6 +243,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
     return {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
+      ...themeWriteGate,
       mode: "env_configured_codegen_pending",
       label: "Convex env ready, codegen pending",
       publicUrl,
@@ -221,6 +262,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
     return {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
+      ...themeWriteGate,
       mode: "generated_api_ready_smoke_pending",
       label: "Read-only bindings ready, smoke pending",
       publicUrl,
@@ -239,6 +281,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
     return {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
+      ...themeWriteGate,
       mode: "read_only_live_ready",
       label: "Convex read-only live",
       publicUrl,
@@ -256,6 +299,7 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
   return {
     ...preferenceMutationSmokeClientGate,
     ...preferencesRuntime,
+    ...themeWriteGate,
     mode: "live_ready",
     label: "Convex full adapter blocked",
     publicUrl,

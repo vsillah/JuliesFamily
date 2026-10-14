@@ -7,6 +7,7 @@ This packet verifies the three approved palettes through the shared public rende
 - `03-reversr-vanguard-light-desktop.png`: ReversR Industrial on Vanguard in light mode.
 - `04-reversr-vanguard-dark-mobile.png`: ReversR Industrial on Vanguard at 390×844 in dark mode.
 - `05-admin-brand-theme-studio.png`: gated admin palette selection surface.
+- `06-admin-brand-theme-studio-mobile.png`: narrow-screen Brand Theme Studio save gate and activation disclosure.
 - `kinflo-tenant-palette-walkthrough.mp4`: playable visual walkthrough of the exact reviewed states.
 - `network-evidence.json`: no non-loopback application requests and no external writes.
 
