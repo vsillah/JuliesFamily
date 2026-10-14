@@ -24,7 +24,9 @@ const files = {
   qaDesktop: "docs/qa/vanguard-reversr-desktop-embed/vanguard-reversr-desktop-workspace.png",
   qaTablet: "docs/qa/vanguard-reversr-desktop-embed/vanguard-reversr-tablet-workspace.png",
   qaMobile: "docs/qa/vanguard-reversr-desktop-embed/vanguard-reversr-mobile-workspace.png",
-  qaTracking: "docs/qa/vanguard-reversr-desktop-embed/06-desktop-order-tracking.png",
+  qaOrderEntry: "docs/qa/vanguard-reversr-desktop-embed/00-desktop-order-entry.png",
+  qaReceipt: "docs/qa/vanguard-reversr-desktop-embed/06-desktop-order-receipt.png",
+  qaTracking: "docs/qa/vanguard-reversr-desktop-embed/07-desktop-order-tracking.png",
   qaNetwork: "docs/qa/vanguard-reversr-desktop-embed/network-evidence.json",
   package: "package.json",
 };
@@ -91,7 +93,7 @@ requireIncludes(files.capture, [
   "Network.requestWillBeSent",
 ]);
 requireIncludes(files.qaReadme, ["1440 x 1000", "768 x 900", "390 x 844", "External application requests: 0", "External writes: 0"]);
-for (const path of [files.qaVideo, files.qaDesktop, files.qaTablet, files.qaMobile, files.qaTracking]) check(existsSync(path), `${path} exists`, "Expected privacy-safe QA media is missing.");
+for (const path of [files.qaVideo, files.qaDesktop, files.qaTablet, files.qaMobile, files.qaOrderEntry, files.qaReceipt, files.qaTracking]) check(existsSync(path), `${path} exists`, "Expected privacy-safe QA media is missing.");
 const networkEvidence = existsSync(files.qaNetwork) ? JSON.parse(readFileSync(files.qaNetwork, "utf8")) : null;
 check(networkEvidence?.externalApplicationRequests === 0, "QA records zero external application requests", "Network evidence is missing or includes application traffic.");
 check(networkEvidence?.externalWrites === 0, "QA records zero external writes", "Network evidence is missing or includes external writes.");

@@ -135,6 +135,13 @@ try {
   await send("Network.enable");
 
   await setViewport(1440, 1000);
+  await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=desktop`);
+  await waitForSelector('[data-testid="order-lifecycle-navigation"]');
+  await capture("00-desktop-order-entry.png", '[data-testid="order-lifecycle-navigation"]');
+  await click('[data-testid="order-lifecycle-prepare"]');
+  await waitForSelector('[data-testid="vanguard-reversr-desktop-workspace"]');
+  await assertNoOverflow("desktop ReversR order entry");
+
   await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=desktop#build-request`);
   await waitForSelector('[data-testid="vanguard-reversr-desktop-workspace"]');
   await capture("vanguard-reversr-desktop-workspace.png", '[data-testid="vanguard-reversr-intake-app"]');
@@ -158,8 +165,10 @@ try {
   await waitForSelector('[data-testid="vanguard-build-request-receipt"]');
   await capture("05-desktop-request-handoff.png", '[data-testid="vanguard-reversr-intake-app"]');
   await click('[data-testid="vanguard-continue-to-order-portal"]');
+  await waitForSelector('[data-testid="vanguard-order-receipt-continuity"]');
+  await capture("06-desktop-order-receipt.png", '[data-testid="vanguard-order-receipt-continuity"]');
   await waitForSelector('[data-testid="vanguard-order-tracking-preview"]');
-  await capture("06-desktop-order-tracking.png", '[data-testid="vanguard-order-tracking-preview"]');
+  await capture("07-desktop-order-tracking.png", '[data-testid="vanguard-order-tracking-preview"]');
 
   await setViewport(768, 900);
   await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=tablet#build-request`);
@@ -168,6 +177,11 @@ try {
   await capture("vanguard-reversr-tablet-workspace.png", '[data-testid="vanguard-reversr-intake-app"]');
 
   await setViewport(390, 844);
+  await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=mobile`);
+  await waitForSelector('[data-testid="order-lifecycle-navigation"]');
+  await assertNoOverflow("mobile order lifecycle entry");
+  await capture("vanguard-reversr-mobile-order-entry.png", '[data-testid="order-lifecycle-navigation"]');
+
   await navigate(`${baseUrl}/kinflo-sites/vanguard-enterprises?qa=mobile#build-request`);
   await waitForSelector('[data-testid="vanguard-reversr-desktop-workspace"]');
   await assertNoOverflow("mobile ReversR workspace");
@@ -178,14 +192,17 @@ try {
 
   const videoPath = join(outputDir, "vanguard-reversr-desktop-embed-walkthrough.mp4");
   const frames = [
+    "00-desktop-order-entry.png",
     "vanguard-reversr-desktop-workspace.png",
     "01-desktop-materials-selected.png",
     "02-desktop-build-requirement.png",
     "03-desktop-work-routing.png",
     "04-desktop-constraints.png",
     "05-desktop-request-handoff.png",
-    "06-desktop-order-tracking.png",
+    "06-desktop-order-receipt.png",
+    "07-desktop-order-tracking.png",
     "vanguard-reversr-tablet-workspace.png",
+    "vanguard-reversr-mobile-order-entry.png",
     "vanguard-reversr-mobile-workspace.png",
   ];
   const args = ["-y"];
