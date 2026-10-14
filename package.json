@@ -41,6 +41,7 @@
     "kinflo:validate-vanguard-source-parity": "node scripts/validate-kinflo-vanguard-source-parity.mjs",
     "kinflo:validate-vanguard-admin-workflow-records": "node scripts/validate-kinflo-vanguard-admin-workflow-records.mjs",
     "kinflo:validate-vanguard-order-operations-architecture": "node scripts/validate-kinflo-vanguard-order-operations-architecture.mjs",
+    "kinflo:validate-vanguard-live-order-persistence": "node scripts/validate-kinflo-vanguard-live-order-persistence.mjs",
     "kinflo:validate-vanguard-reversr-intake": "node scripts/validate-kinflo-vanguard-reversr-intake.mjs",
     "kinflo:validate-vanguard-order-portal": "node scripts/validate-kinflo-vanguard-order-portal.mjs",
     "kinflo:capture-vanguard-order-portal-qa": "node scripts/capture-vanguard-order-portal-qa.mjs",
