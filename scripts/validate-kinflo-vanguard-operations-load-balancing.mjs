@@ -72,7 +72,7 @@ const runtimeContract = requireIncludes(files.runtimeContract, [
 const architectureContract = JSON.parse(requireIncludes(files.architectureContract, [
   '"phase4Operations"',
   '"status": "provider_light_fixture"',
-  '"humanQaRequiredForThisSlice": false',
+  '"humanQaRequiredForThisSlice": true',
   '"automaticReassignmentAllowed": false',
   '"clientStatusChanged": false',
 ]));
@@ -80,6 +80,7 @@ const architectureContract = JSON.parse(requireIncludes(files.architectureContra
 const phase4 = architectureContract.phase4Operations;
 check(architectureContract.systemOfRecord === "convex", "Convex remains the system of record", "Operations work cannot introduce another data plane.");
 check(phase4?.adminOnly === true, "Phase 4 slice is admin-only", "Client status must remain unchanged in this provider-light slice.");
+check(phase4?.humanQaRequiredForThisSlice === true, "interactive Phase 4 requires Human QA", "The associate-facing controls need Human QA before closeout.");
 check(phase4?.queueStates?.length === 10, "ten queue states are defined", "Expected all Phase 4 queue views.");
 check(phase4?.assignmentStates?.length === 4, "four assignment states are defined", "Expected unassigned-through-review assignment coverage.");
 check(phase4?.capacityBands?.length === 4, "four capacity bands are defined", "Expected available-through-limit capacity coverage.");
@@ -95,7 +96,7 @@ requireIncludes(files.docs, [
   "This remains one KinFlo/Vanguard order system.",
   "Load balancing can suggest candidates. It cannot assign or reassign work by itself.",
   "Why this slice is admin-only",
-  "Human QA is not required for this slice.",
+  "The interactive triage follow-on now requires Human QA",
   "PR #15",
   "External writes: 0.",
   "Production deployment: not performed.",
@@ -106,7 +107,7 @@ requireIncludes(files.qaReadme, [
   "1280px",
   "768px",
   "390px",
-  "Human QA is not requested",
+  "Human QA is requested",
   "External writes: 0.",
 ]);
 
@@ -182,7 +183,7 @@ const failed = checks.filter((item) => !item.ok);
 console.log("\nKinFlo Vanguard operations and load balancing validation");
 console.log("Admin route: /admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises&studioLane=workbench&studioStage=sites");
 console.log("Client portal changed: no");
-console.log("Human QA requested: no");
+console.log("Human QA requested: yes");
 console.log("External writes: 0");
 console.log("Private uploads: disabled");
 console.log("Convex codegen run: no");

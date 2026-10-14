@@ -63,7 +63,7 @@ Blocked work resumes to its recorded prior state only after a resolution note, e
 
 The current client portal already says its order status is a preview with no live updates. Adding assignment or routing details there would suggest that Vanguard has accepted, assigned, or started real work. That is not true yet.
 
-Phase 4 therefore changes only the associate/admin workspace. Human QA is not required for this slice. The integration captain receives desktop, tablet, and mobile evidence for product review. Client-facing Human QA returns when an approved live status source can support honest portal updates.
+Phase 4 changes only the associate/admin workspace. The original static foundation used captain review as its closeout gate. The interactive triage follow-on now requires Human QA because operators can search, combine filters, clear the queue view, and select an order review. Client-facing Human QA remains separate and returns when an approved live status source can support honest portal updates.
 
 ## Runtime gate
 

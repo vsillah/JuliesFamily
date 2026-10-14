@@ -50,6 +50,7 @@
     "kinflo:capture-vanguard-associate-assist-qa": "node scripts/capture-vanguard-associate-assist-qa.mjs",
     "kinflo:validate-vanguard-operations-load-balancing": "node scripts/validate-kinflo-vanguard-operations-load-balancing.mjs",
     "kinflo:capture-vanguard-operations-load-balancing-qa": "node scripts/capture-vanguard-operations-load-balancing-qa.mjs",
+    "kinflo:validate-vanguard-operations-triage": "node scripts/validate-kinflo-vanguard-operations-triage.mjs",
     "kinflo:validate-vanguard-fulfillment-evidence": "node scripts/validate-kinflo-vanguard-fulfillment-evidence.mjs",
     "kinflo:capture-vanguard-fulfillment-evidence-qa": "node scripts/capture-vanguard-fulfillment-evidence-qa.mjs",
     "kinflo:validate-vanguard-metrics-optimization": "node scripts/validate-kinflo-vanguard-metrics-optimization.mjs",

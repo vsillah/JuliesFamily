@@ -115,6 +115,11 @@ import {
   vanguardOrderPortalContract,
   vanguardPortalOrderFixture,
 } from "@/lib/kinfloVanguardOrderPortal";
+import {
+  filterTenantOrderQueue,
+  getTenantOrderQueueOptions,
+  summarizeTenantOrderQueue,
+} from "@/lib/kinfloOrderOperationsWorkbench";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -2142,6 +2147,10 @@ function ClientWebsiteConfigurationCommandSurface({
 }
 
 function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) {
+  const [operationsSearch, setOperationsSearch] = useState("");
+  const [operationsRisk, setOperationsRisk] = useState("all");
+  const [operationsState, setOperationsState] = useState("all");
+  const [selectedOperationsOrder, setSelectedOperationsOrder] = useState("");
   const statusTone = {
     ready: "border-emerald-200 bg-emerald-50 text-emerald-700",
     active: "border-blue-200 bg-blue-50 text-blue-700",
@@ -2160,12 +2169,22 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
     near_limit: "border-amber-200 bg-amber-50 text-amber-800",
     at_limit: "border-rose-200 bg-rose-50 text-rose-700",
   } as const;
+  const operationsQueueSummary = summarizeTenantOrderQueue(vanguardOperationsQueueFixtures);
   const operationsSummary = [
-    { label: "Queue items", value: vanguardOperationsQueueFixtures.length },
-    { label: "Need lead review", value: vanguardOperationsQueueFixtures.filter((item) => item.assignmentState === "reassignment_review").length },
-    { label: "Blocked", value: vanguardOperationsQueueFixtures.filter((item) => item.blocker).length },
-    { label: "At risk", value: vanguardOperationsQueueFixtures.filter((item) => item.risk === "at_risk" || item.risk === "breached").length },
+    { label: "Queue items", value: operationsQueueSummary.total },
+    { label: "Need lead review", value: operationsQueueSummary.leadReview },
+    { label: "Blocked", value: operationsQueueSummary.blocked },
+    { label: "At risk", value: operationsQueueSummary.atRisk },
   ];
+  const operationsRiskOptions = getTenantOrderQueueOptions(vanguardOperationsQueueFixtures, "risk", "riskLabel");
+  const operationsStateOptions = getTenantOrderQueueOptions(vanguardOperationsQueueFixtures, "queueState", "queueLabel");
+  const filteredOperationsQueue = filterTenantOrderQueue(vanguardOperationsQueueFixtures, {
+    search: operationsSearch,
+    risk: operationsRisk,
+    state: operationsState,
+  });
+  const selectedOperationsQueueItem = filteredOperationsQueue.find((item) => item.orderNumber === selectedOperationsOrder) ?? null;
+  const operationsFiltersActive = Boolean(operationsSearch.trim()) || operationsRisk !== "all" || operationsState !== "all";
   const fulfillmentStateTone = {
     complete: "border-emerald-200 bg-emerald-50 text-emerald-700",
     pending: "border-blue-200 bg-blue-50 text-blue-700",
@@ -2405,13 +2424,67 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
           <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-sm font-semibold text-slate-950">Order queue</div>
-              <p className="mt-1 text-xs leading-5 text-slate-600">Every row keeps routing, risk, next action, and evidence together.</p>
+              <p className="mt-1 text-xs leading-5 text-slate-600">Find the orders that need attention, then review the routing context before anyone changes the plan.</p>
             </div>
-            <div className="text-[11px] text-slate-500">{vanguardOperationsQueueFixtures.length} sample orders</div>
+            <div className="text-[11px] text-slate-500" aria-live="polite">{filteredOperationsQueue.length} of {vanguardOperationsQueueFixtures.length} planning orders</div>
           </div>
+
+          <div className="mt-3 grid gap-2 rounded-md border border-slate-200 bg-white p-3 md:grid-cols-[minmax(0,1fr)_180px_190px_auto]" data-testid="section-kinflo-vanguard-operations-filters">
+            <div className="min-w-0">
+              <Label htmlFor="vanguard-operations-search" className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Search queue</Label>
+              <Input
+                id="vanguard-operations-search"
+                value={operationsSearch}
+                onChange={(event) => setOperationsSearch(event.target.value)}
+                placeholder="Order, discipline, owner, or next action"
+                className="mt-1 h-9"
+                data-testid="kinflo-vanguard-operations-search"
+              />
+            </div>
+            <div className="min-w-0">
+              <Label className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Risk</Label>
+              <Select value={operationsRisk} onValueChange={setOperationsRisk}>
+                <SelectTrigger className="mt-1 h-9" data-testid="kinflo-vanguard-operations-risk-filter"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All risk levels</SelectItem>
+                  {operationsRiskOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="min-w-0">
+              <Label className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Queue state</Label>
+              <Select value={operationsState} onValueChange={setOperationsState}>
+                <SelectTrigger className="mt-1 h-9" data-testid="kinflo-vanguard-operations-state-filter"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All queue states</SelectItem>
+                  {operationsStateOptions.map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="self-end"
+              disabled={!operationsFiltersActive}
+              onClick={() => {
+                setOperationsSearch("");
+                setOperationsRisk("all");
+                setOperationsState("all");
+              }}
+              data-testid="kinflo-vanguard-operations-clear-filters"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" /> Clear
+            </Button>
+          </div>
+
           <div className="mt-2 grid gap-2 xl:grid-cols-2">
-            {vanguardOperationsQueueFixtures.map((item) => (
-              <article key={item.orderNumber} className="rounded-md border border-slate-200 bg-white p-3" data-testid={`kinflo-vanguard-operations-order-${item.orderNumber.toLowerCase()}`}>
+            {filteredOperationsQueue.map((item) => (
+              <article
+                key={item.orderNumber}
+                className={`rounded-md border bg-white p-3 ${selectedOperationsQueueItem?.orderNumber === item.orderNumber ? "border-blue-300 ring-1 ring-blue-100" : "border-slate-200"}`}
+                data-queue-card="true"
+                data-testid={`kinflo-vanguard-operations-order-${item.orderNumber.toLowerCase()}`}
+              >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5">
@@ -2450,9 +2523,72 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
                   <span>Evidence: {item.evidenceLabel}</span>
                   <span>{item.auditEventCount} audit events · Escalation: {item.escalationOwner}</span>
                 </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="mt-3 w-full sm:w-auto"
+                  aria-pressed={selectedOperationsQueueItem?.orderNumber === item.orderNumber}
+                  onClick={() => setSelectedOperationsOrder(item.orderNumber)}
+                  data-testid={`kinflo-vanguard-review-order-${item.orderNumber.toLowerCase()}`}
+                >
+                  {selectedOperationsQueueItem?.orderNumber === item.orderNumber ? "Reviewing order" : "Review order"}
+                </Button>
               </article>
             ))}
           </div>
+
+          {filteredOperationsQueue.length === 0 ? (
+            <div className="mt-2 rounded-md border border-dashed border-slate-300 bg-white p-5 text-center" data-testid="section-kinflo-vanguard-operations-empty">
+              <div className="text-sm font-semibold text-slate-950">No orders match these filters</div>
+              <p className="mt-1 text-xs leading-5 text-slate-600">Clear the filters to return to the full operations queue.</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={() => {
+                  setOperationsSearch("");
+                  setOperationsRisk("all");
+                  setOperationsState("all");
+                }}
+              >
+                <RotateCcw className="mr-2 h-4 w-4" /> Show all orders
+              </Button>
+            </div>
+          ) : null}
+
+          {selectedOperationsQueueItem ? (
+            <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 p-3" data-testid="section-kinflo-vanguard-selected-order-review">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="text-sm font-semibold text-blue-950">Order review</div>
+                    <Badge variant="outline" className="border-blue-200 bg-white text-blue-800">{selectedOperationsQueueItem.orderNumber}</Badge>
+                    <Badge variant="outline" className={operationsRiskTone[selectedOperationsQueueItem.risk]}>{selectedOperationsQueueItem.riskLabel}</Badge>
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-blue-900">{selectedOperationsQueueItem.title}</p>
+                </div>
+                <Badge variant="outline" className="w-fit border-blue-200 bg-white text-blue-800">{selectedOperationsQueueItem.queueLabel}</Badge>
+              </div>
+              <div className="mt-3 grid gap-2 md:grid-cols-3">
+                <div className="rounded-md border border-blue-200 bg-white p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-blue-700">Routing context</div>
+                  <div className="mt-1 text-xs font-semibold text-slate-950">{selectedOperationsQueueItem.discipline}</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-600">{selectedOperationsQueueItem.requiredRole} · {selectedOperationsQueueItem.primaryOwner}</p>
+                </div>
+                <div className="rounded-md border border-blue-200 bg-white p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-blue-700">Next recorded action</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-700">{selectedOperationsQueueItem.nextAction}</p>
+                </div>
+                <div className="rounded-md border border-blue-200 bg-white p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-blue-700">Decision owner</div>
+                  <p className="mt-1 text-xs leading-5 text-slate-700">{selectedOperationsQueueItem.escalationOwner}</p>
+                  <p className="mt-1 text-[11px] leading-4 text-slate-500">Assignment changes remain unavailable.</p>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">

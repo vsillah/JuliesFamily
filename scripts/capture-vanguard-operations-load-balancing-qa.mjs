@@ -118,6 +118,39 @@ try {
     throw new Error(`Timed out waiting for selector: ${selector}`);
   }
 
+  async function click(selector) {
+    const point = await evaluate(`(() => {
+      const element = document.querySelector(${JSON.stringify(selector)});
+      if (!(element instanceof HTMLElement)) return null;
+      element.scrollIntoView({ block: "center" });
+      const rect = element.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    })()`);
+    if (!point.result?.value) throw new Error(`Click target not found: ${selector}`);
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", button: "left", clickCount: 1, ...point.result.value });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", button: "left", clickCount: 1, ...point.result.value });
+    await new Promise((resolveWait) => setTimeout(resolveWait, 200));
+  }
+
+  async function clickMatchingText(selector, text) {
+    const point = await evaluate(`(() => {
+      const element = [...document.querySelectorAll(${JSON.stringify(selector)})].find((candidate) => candidate.textContent?.trim() === ${JSON.stringify(text)});
+      if (!(element instanceof HTMLElement)) return null;
+      const rect = element.getBoundingClientRect();
+      return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    })()`);
+    if (!point.result?.value) throw new Error(`Text target not found: ${selector} -> ${text}`);
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", button: "left", clickCount: 1, ...point.result.value });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", button: "left", clickCount: 1, ...point.result.value });
+    await new Promise((resolveWait) => setTimeout(resolveWait, 200));
+  }
+
+  async function typeText(selector, value) {
+    await click(selector);
+    await send("Input.insertText", { text: value });
+    await new Promise((resolveWait) => setTimeout(resolveWait, 250));
+  }
+
   async function capture({ name, selector }) {
     await evaluate(`(() => {
       document.querySelectorAll(".sticky").forEach((element) => {
@@ -164,6 +197,15 @@ try {
   await navigate(adminUrl);
   await waitForSelector('[data-testid="section-kinflo-vanguard-operations-workbench"]');
   await capture({ name: "01-desktop-operations-workbench.png", selector: '[data-testid="section-kinflo-vanguard-operations-workbench"]' });
+  await click('[data-testid="kinflo-vanguard-operations-risk-filter"]');
+  await clickMatchingText('[role="option"]', "At risk");
+  await click('[data-testid="kinflo-vanguard-operations-state-filter"]');
+  await clickMatchingText('[role="option"]', "Blocked");
+  const combinedFilterCount = await evaluate('document.querySelector("[data-testid=section-kinflo-vanguard-operations-workbench]")?.querySelectorAll("[data-queue-card=true]").length ?? 0');
+  if (combinedFilterCount.result?.value !== 1) throw new Error(`Combined risk/state filter returned ${combinedFilterCount.result?.value} orders instead of 1.`);
+  await click('[data-testid="kinflo-vanguard-operations-clear-filters"]');
+  const clearedFilterCount = await evaluate('document.querySelector("[data-testid=section-kinflo-vanguard-operations-workbench]")?.querySelectorAll("[data-queue-card=true]").length ?? 0');
+  if (clearedFilterCount.result?.value !== 4) throw new Error(`Clear filters returned ${clearedFilterCount.result?.value} orders instead of 4.`);
 
   await setViewport(768, 900);
   await navigate(adminUrl);
@@ -173,9 +215,16 @@ try {
 
   await setViewport(390, 844);
   await navigate(adminUrl);
+  await waitForSelector('[data-testid="kinflo-vanguard-operations-search"]');
+  await capture({ name: "06-mobile-filters.png", selector: '[data-testid="section-kinflo-vanguard-operations-filters"]' });
+  await typeText('[data-testid="kinflo-vanguard-operations-search"]', "VE-DEMO-1033");
   await waitForSelector('[data-testid="kinflo-vanguard-operations-order-ve-demo-1033"]');
   await assertNoOverflow();
   await capture({ name: "03-mobile-blocked-order.png", selector: '[data-testid="kinflo-vanguard-operations-order-ve-demo-1033"]' });
+
+  await click('[data-testid="kinflo-vanguard-review-order-ve-demo-1033"]');
+  await waitForSelector('[data-testid="section-kinflo-vanguard-selected-order-review"]');
+  await capture({ name: "05-mobile-selected-order.png", selector: '[data-testid="section-kinflo-vanguard-selected-order-review"]' });
 
   await setViewport(1280, 900);
   await navigate(adminUrl);
@@ -188,6 +237,8 @@ try {
     "02-tablet-capacity-board.png",
     "03-mobile-blocked-order.png",
     "04-desktop-actions-gate.png",
+    "05-mobile-selected-order.png",
+    "06-mobile-filters.png",
   ];
   const ffmpegArgs = ["-y"];
   for (const frame of videoFrames) ffmpegArgs.push("-loop", "1", "-t", "4", "-i", join(outputDir, frame));

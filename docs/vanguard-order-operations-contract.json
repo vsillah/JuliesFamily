@@ -80,7 +80,7 @@
   "phase4Operations": {
     "status": "provider_light_fixture",
     "adminOnly": true,
-    "humanQaRequiredForThisSlice": false,
+    "humanQaRequiredForThisSlice": true,
     "queueStates": [
       "unassigned",
       "intake_review",
