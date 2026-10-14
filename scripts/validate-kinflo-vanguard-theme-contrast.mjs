@@ -31,6 +31,8 @@ if (existsSync(files.control)) {
   for (const marker of ['aria-label="Color theme"', 'testId: "vanguard-theme-light"', 'testId: "vanguard-theme-dark"', 'testId: "vanguard-theme-system"', "aria-pressed={active}"]) {
     check(control.includes(marker), `theme control includes ${marker}`, "Accessible theme control marker is missing.");
   }
+  check(!/(?:amber|orange|rose)-/.test(control), "theme control excludes conflicting warm accent utilities", "Use the Vanguard/ReversR blue active state in the page-wide theme control.");
+  check(control.includes("bg-blue-600") && control.includes("dark:bg-blue-500"), "theme control uses blue active states", "The page-wide theme control must follow the ReversR-compatible primary role.");
 }
 
 for (const path of [files.publicPage, files.intake, files.portal]) {
@@ -51,6 +53,21 @@ if (existsSync(files.publicPage)) {
   check(!source.includes('data-testid="vanguard-request-to-delivery-lifecycle"'), "duplicate build lifecycle is removed", "The public page still repeats the customer order journey.");
   check(!source.includes('data-testid="public-preview-vanguard-project-phases"'), "duplicate project lifecycle cards are removed", "The public page still presents a third competing lifecycle.");
   check(source.includes("<VanguardReversRIntake />"), "ReversR desktop embed remains mounted", "Theme changes must preserve the ReversR embed.");
+  check(source.includes('data-vanguard-brand-palette={isVanguard ? "reversr-compatible" : undefined}'), "Vanguard page declares the ReversR-compatible palette", "The public shell is missing its page-wide palette contract marker.");
+  for (const marker of ['"--primary": "221 83% 53%"', '"--primary-border": "hsl(221 83% 43%)"', '"--ring": "221 83% 53%"', "style={isVanguard ? VANGUARD_BRAND_STYLE"]) {
+    check(source.includes(marker), `Vanguard page overrides inherited interaction token: ${marker}`, "A global warm interaction token can still leak into the Vanguard page.");
+  }
+  check(!/(?:amber|orange|rose)-/.test(source), "Vanguard public page excludes conflicting warm accent utilities", "Replace warm accent utilities with blue primary or emerald active and success roles.");
+  check(source.includes("bg-blue-600") && source.includes("text-emerald-700"), "Vanguard public page carries blue and emerald role tokens", "The page-wide interaction palette is incomplete.");
+  for (const marker of [
+    'id="capabilities" className="border-y border-slate-200 bg-white',
+    'id="about" className="bg-slate-50',
+    'id="proof" className="border-y border-slate-200 bg-white',
+    'id="careers" className="bg-slate-50',
+    'id="contact-details" className="border-t border-slate-200 bg-white',
+  ]) {
+    check(source.includes(marker), `light-mode surface remains restrained: ${marker.split(' className=')[0]}`, "A Vanguard light-mode section acquired an unexpectedly dark surface.");
+  }
 }
 
 if (existsSync(files.publicData)) {
@@ -70,6 +87,10 @@ if (existsSync(files.publicData)) {
   check(positions.every((position) => position >= 0), "Vanguard public IA includes every required block", "A required Vanguard public block is missing.");
   check(positions.every((position, index) => index === 0 || position > positions[index - 1]), "Vanguard public IA puts information before conversion", "The ReversR conversion flow appears before Vanguard's informational content.");
   check(vanguard.includes('primaryCta: "Explore capabilities"'), "Vanguard hero leads to capabilities", "The hero still leads with the embedded order application.");
+  for (const marker of ['background: "#f4f6fb"', 'foreground: "#0f172a"', 'accent: "#2563eb"', 'secondary: "#007a55"', 'muted: "#e8edf5"']) {
+    check(vanguard.includes(marker), `Vanguard fixture palette includes ${marker}`, "The source fixture has drifted from the page-wide ReversR-compatible palette.");
+  }
+  check(!vanguard.includes("#b7791f"), "Vanguard fixture excludes its legacy warm accent", "The Vanguard fixture still contains the former clashing accent.");
 }
 
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\n");

@@ -10,6 +10,13 @@ This packet covers the Vanguard public website, ReversR request workspace, and o
 - Live persistence: disabled
 - Private file transfer: disabled
 
+The full public page now uses the ReversR-compatible interaction palette:
+blue primary actions and navigation, emerald/teal active or success states,
+near-black and navy dark-mode foundations, and white or cool-gray light-mode
+surfaces. Vanguard identity remains in the logo, industrial imagery, company
+content, and fulfillment language. Amber, burnt-orange, burgundy, and rose
+accents are excluded from the public page and theme control.
+
 The walkthrough follows the public website in reading order. Visitors first see Vanguard's services, capabilities, company context, customer proof, careers, and contact information. The ReversR order journey, operational checks, and embedded request workspace follow as the conversion path. The order portal remains a separate destination.
 
 The public-page information architecture is intentionally distinct:

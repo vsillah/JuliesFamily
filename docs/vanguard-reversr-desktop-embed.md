@@ -17,6 +17,50 @@ The five existing request stages remain intact: available materials, build requi
 
 Request state stays in React memory while the workspace is open. Only the explicit continue action places the existing receipt shape into browser session storage for the order portal. The interface identifies current capabilities and account-gated capabilities in customer language.
 
+## Website integration slice
+
+The Vanguard website now carries the same desktop wayfinding used by ReversR:
+Home, Projects, New Reconstruction, Tour, and More. The embedded workspace also
+shows the product's four phases: Input, Inventory, Design, and Build. The public
+request stays inside Input. Later product phases remain locked until account
+access and an approved saved-order path exist.
+
+The five request fields are an Input checklist rather than a second set of
+ReversR phases. A compact status panel names the current owner, the next
+decision, and the point where a Vanguard associate can join after the client
+chooses what to share. The public hero now opens the embedded request directly.
+
+The order portal carries the same ownership language into its tracking view.
+This is a presentation and browser-session continuity slice. It does not create
+an order, upload a file, assign an associate, send a notification, or enable a
+provider write.
+
+## ReversR brand rule
+
+The full Vanguard public page and embedded ReversR surfaces must use a shared,
+ReversR-compatible palette. The dark palette follows the product's near-black
+and navy panels with blue primary actions and green/teal active or success
+states. The light palette uses those same blue and green roles on white and
+cool-gray panels. Amber, burnt-orange, burgundy, and rose accents must not be
+used across the Vanguard public shell, theme control, or ReversR workspace.
+
+Vanguard keeps its identity through its logo, industrial photography, company
+copy, and fulfillment role. ReversR supplies the interaction color system so
+the order journey reads as one coherent product. In light mode, page sections
+remain white or cool gray; the embedded ReversR workspace is the intentional
+exception where its product framing may use a darker app surface.
+
+The embedded header uses a web-sized derivative of the existing ReversR asset:
+
+- Source: `/Users/vambahsillah/Documents/ReversR-Workspace/ReversR-Rebuild/assets/logo-transparent.png`
+- Source dimensions: 1024 x 1024 with transparency
+- Source SHA-256: `d9a590604f8f4000ea9dd2149de633425cc6e9c019079de81fbce339e61d270d`
+- Bundled derivative: `client/src/assets/reversrLogo.ts`
+
+The derivative keeps the current workspace self-contained and avoids a new
+network dependency. Replace it only when ReversR publishes a shared web asset
+package or canonical hosted brand bundle.
+
 ## Shared-package extraction boundary
 
 The implementation borrows the verified desktop information architecture from ReversR Rebuild: a bounded navigation rail, horizontal phase rail, flexible canvas, and context inspector. Direct component reuse was intentionally deferred because the ReversR implementation is React Native/Expo while KinFlo is a Vite web application with its own UI primitives and Tailwind system.

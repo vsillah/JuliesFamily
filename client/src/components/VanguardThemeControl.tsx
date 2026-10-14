@@ -34,7 +34,7 @@ export default function VanguardThemeControl({
             aria-pressed={active}
             aria-label={`Use ${option.label.toLowerCase()} theme`}
             title={`${option.label} theme`}
-            className={`h-8 gap-1.5 px-2.5 text-xs ${active ? "bg-slate-900 text-white hover:bg-slate-800 hover:text-white dark:bg-amber-400 dark:text-slate-950 dark:hover:bg-amber-300" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
+            className={`h-8 gap-1.5 px-2.5 text-xs ${active ? "bg-blue-600 text-white hover:bg-blue-700 hover:text-white dark:bg-blue-500 dark:hover:bg-blue-400" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
             onClick={() => onChange(option.mode)}
             data-testid={option.testId}
           >

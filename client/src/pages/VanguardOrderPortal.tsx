@@ -183,9 +183,15 @@ export default function VanguardOrderPortal() {
               <h2 className="mt-3 text-2xl font-semibold">{localReceipt ? "Your request will follow this path after it is saved" : "See how a Vanguard order moves"}</h2>
               <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{vanguardPortalOrderFixture.lastUpdatedLabel}</p>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-950 md:max-w-sm">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Next action</div>
-              <p className="mt-1 leading-5 text-slate-800 dark:text-slate-200">{vanguardPortalOrderFixture.nextAction}</p>
+            <div className="grid gap-3 md:max-w-md md:grid-cols-2" data-testid="vanguard-order-ownership-summary">
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-950">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Current owner</div>
+                <p className="mt-1 leading-5 text-slate-800 dark:text-slate-200">{vanguardPortalOrderFixture.currentOwner}</p>
+              </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm dark:border-slate-700 dark:bg-slate-950">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Next action</div>
+                <p className="mt-1 leading-5 text-slate-800 dark:text-slate-200">{vanguardPortalOrderFixture.nextAction}</p>
+              </div>
             </div>
           </div>
 

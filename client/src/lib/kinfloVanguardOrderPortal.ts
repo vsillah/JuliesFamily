@@ -26,6 +26,7 @@ export type VanguardPortalOrderFixture = {
   clientStatusLabel: string;
   dataMode: "synthetic_preview";
   lastUpdatedLabel: string;
+  currentOwner: string;
   nextAction: string;
   milestones: VanguardPortalMilestone[];
 };
@@ -844,6 +845,7 @@ export const vanguardPortalOrderFixture: VanguardPortalOrderFixture = {
   clientStatusLabel: "Vanguard is reviewing your request",
   dataMode: "synthetic_preview",
   lastUpdatedLabel: "Saved-order timeline is not live yet",
+  currentOwner: "Vanguard intake associate",
   nextAction: "Vanguard confirms the available materials and records any missing inputs.",
   milestones: [
     {
