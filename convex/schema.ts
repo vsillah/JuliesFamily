@@ -143,6 +143,75 @@ export const approvalStatus = v.union(
   v.literal("rejected"),
 );
 
+export const buildOrderStatus = v.union(
+  v.literal("draft"),
+  v.literal("submitted"),
+  v.literal("intake_review"),
+  v.literal("needs_client_input"),
+  v.literal("quote_ready"),
+  v.literal("quote_sent"),
+  v.literal("accepted"),
+  v.literal("planned"),
+  v.literal("in_progress"),
+  v.literal("blocked"),
+  v.literal("quality_review"),
+  v.literal("ready_for_delivery"),
+  v.literal("delivered"),
+  v.literal("client_accepted"),
+  v.literal("rework_requested"),
+  v.literal("closed"),
+  v.literal("cancelled"),
+);
+
+export const orderDraftSectionKey = v.union(
+  v.literal("build_goal"),
+  v.literal("discipline"),
+  v.literal("constraints"),
+  v.literal("acceptance"),
+  v.literal("source_manifest"),
+);
+
+export const orderSourceItemKind = v.union(
+  v.literal("browser_receipt_reference"),
+  v.literal("document"),
+  v.literal("drawing"),
+  v.literal("model"),
+  v.literal("image"),
+  v.literal("existing_part"),
+  v.literal("other"),
+);
+
+export const orderParticipantRole = v.union(
+  v.literal("client_owner"),
+  v.literal("operations_reviewer"),
+);
+
+export const orderParticipantStatus = v.union(
+  v.literal("active"),
+  v.literal("revoked"),
+);
+
+export const orderQuoteStatus = v.union(
+  v.literal("draft"),
+  v.literal("presented"),
+  v.literal("accepted"),
+  v.literal("rejected"),
+  v.literal("superseded"),
+);
+
+export const orderStatusEventType = v.union(
+  v.literal("order_created"),
+  v.literal("local_intake_promoted"),
+  v.literal("order_submitted"),
+);
+
+export const orderAuditOperation = v.union(
+  v.literal("create_draft"),
+  v.literal("promote_local_intake"),
+  v.literal("save_draft_section"),
+  v.literal("submit_order"),
+);
+
 export default defineSchema({
   ...authTables,
 
@@ -754,6 +823,128 @@ export default defineSchema({
     .index("by_lead_createdAt", ["leadId", "createdAt"])
     .index("by_rule_createdAt", ["ruleId", "createdAt"])
     .index("by_site_createdAt", ["siteId", "createdAt"]),
+
+  buildOrders: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    clientOwnerUserId: v.id("users"),
+    orderNumber: v.string(),
+    title: v.string(),
+    discipline: v.optional(v.string()),
+    status: buildOrderStatus,
+    source: v.union(v.literal("blank_draft"), v.literal("local_intake_promotion")),
+    revision: v.number(),
+    creationIdempotencyKey: v.string(),
+    creationRequestFingerprint: v.string(),
+    localReceiptId: v.optional(v.string()),
+    localReceiptVersion: v.optional(v.number()),
+    transferredFieldKeys: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    submittedAt: v.optional(v.number()),
+  })
+    .index("by_order_number", ["orderNumber"])
+    .index("by_site_and_owner_and_updated_at", ["siteId", "clientOwnerUserId", "updatedAt"])
+    .index("by_site_and_owner_and_creation_key", ["siteId", "clientOwnerUserId", "creationIdempotencyKey"]),
+
+  orderDraftSections: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    orderId: v.id("buildOrders"),
+    sectionKey: orderDraftSectionKey,
+    payload: v.any(),
+    sectionRevision: v.number(),
+    orderRevision: v.number(),
+    createdByUserId: v.id("users"),
+    updatedByUserId: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_order_and_key", ["orderId", "sectionKey"])
+    .index("by_order_and_order_revision", ["orderId", "orderRevision"])
+    .index("by_order_and_updated_at", ["orderId", "updatedAt"]),
+
+  orderSourceItems: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    orderId: v.id("buildOrders"),
+    sourceKey: v.string(),
+    kind: orderSourceItemKind,
+    label: v.string(),
+    mediaType: v.optional(v.string()),
+    byteSize: v.optional(v.number()),
+    checksumSha256: v.optional(v.string()),
+    declaredByUserId: v.id("users"),
+    createdAt: v.number(),
+  })
+    .index("by_order_and_source_key", ["orderId", "sourceKey"])
+    .index("by_order_and_created_at", ["orderId", "createdAt"]),
+
+  orderParticipants: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    orderId: v.id("buildOrders"),
+    userId: v.id("users"),
+    role: orderParticipantRole,
+    status: orderParticipantStatus,
+    transferConsentVersion: v.optional(v.string()),
+    transferConfirmedFieldKeys: v.array(v.string()),
+    transferConfirmedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index("by_order_and_user_and_role", ["orderId", "userId", "role"])
+    .index("by_user_and_site_and_status", ["userId", "siteId", "status"])
+    .index("by_order_and_status", ["orderId", "status"]),
+
+  orderQuotes: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    orderId: v.id("buildOrders"),
+    version: v.number(),
+    status: orderQuoteStatus,
+    currency: v.string(),
+    totalCents: v.number(),
+    scopeSummary: v.string(),
+    createdByUserId: v.id("users"),
+    createdAt: v.number(),
+    decidedAt: v.optional(v.number()),
+  })
+    .index("by_order_and_version", ["orderId", "version"])
+    .index("by_order_and_status_and_created_at", ["orderId", "status", "createdAt"]),
+
+  orderStatusEvents: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    orderId: v.id("buildOrders"),
+    eventType: orderStatusEventType,
+    fromStatus: v.optional(buildOrderStatus),
+    toStatus: buildOrderStatus,
+    orderRevision: v.number(),
+    actorUserId: v.id("users"),
+    idempotencyKey: v.string(),
+    occurredAt: v.number(),
+  })
+    .index("by_order_and_occurred_at", ["orderId", "occurredAt"])
+    .index("by_order_and_to_status_and_occurred_at", ["orderId", "toStatus", "occurredAt"]),
+
+  orderAuditEvents: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    orderId: v.id("buildOrders"),
+    operation: orderAuditOperation,
+    actorUserId: v.id("users"),
+    idempotencyKey: v.string(),
+    requestFingerprint: v.string(),
+    orderRevision: v.number(),
+    sectionKey: v.optional(orderDraftSectionKey),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index("by_order_and_created_at", ["orderId", "createdAt"])
+    .index("by_order_and_actor_and_idempotency_key", ["orderId", "actorUserId", "idempotencyKey"])
+    .index("by_site_and_created_at", ["siteId", "createdAt"]),
 
   auditEvents: defineTable({
     scopeType: v.union(v.literal("platform"), v.literal("tenant"), v.literal("site")),
