@@ -150,7 +150,7 @@ try {
   await click('[data-testid="vanguard-order-review-transfer"]');
   await capture("04-desktop-order-portal.png", '[data-testid="vanguard-order-portal-foundation"]');
   await capture("05-desktop-associate-support.png", '[data-testid="vanguard-order-assist-request"]');
-  await capture("06-desktop-example-order-path.png", '[data-testid="vanguard-order-tracking-preview"]');
+  await capture("06-desktop-saved-order-path.png", '[data-testid="vanguard-order-tracking-preview"]');
 
   const videoPath = join(outputDir, "vanguard-order-backbone-walkthrough.mp4");
   const frames = [
@@ -160,7 +160,7 @@ try {
     "03-desktop-order-request.png",
     "04-desktop-order-portal.png",
     "05-desktop-associate-support.png",
-    "06-desktop-example-order-path.png",
+    "06-desktop-saved-order-path.png",
   ];
   const args = ["-y"];
   for (const frame of frames) args.push("-loop", "1", "-t", "3", "-i", join(outputDir, frame));

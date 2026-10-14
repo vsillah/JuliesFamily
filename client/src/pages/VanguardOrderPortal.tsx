@@ -101,7 +101,7 @@ export default function VanguardOrderPortal() {
                 <h2 className="mt-3 text-xl font-semibold text-blue-950">Confirm the request details</h2>
                 <p className="mt-2 max-w-3xl text-sm leading-6 text-blue-900">These details stay in this browser until sign-in is available. Nothing has been sent to Vanguard.</p>
               </div>
-              <Badge variant="outline" className="w-fit border-blue-300 bg-white text-blue-800">{localReceipt.receiptId}</Badge>
+              <Badge variant="outline" className="w-fit border-blue-300 bg-white text-blue-800">Browser draft</Badge>
             </div>
             <div className="mt-5 grid gap-3 md:grid-cols-2">
               {[
@@ -171,11 +171,11 @@ export default function VanguardOrderPortal() {
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-violet-300 bg-violet-50 text-violet-800">Example order path</Badge>
+                <Badge variant="outline" className="border-violet-300 bg-violet-50 text-violet-800">Saved order path</Badge>
                 <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-800">{vanguardPortalOrderFixture.clientStatusLabel}</Badge>
               </div>
               <h2 className="mt-3 text-2xl font-semibold">{localReceipt ? "Your request will follow this path after it is saved" : "See how a Vanguard order moves"}</h2>
-              <p className="mt-1 text-sm text-slate-500">{vanguardPortalOrderFixture.orderNumber} · {vanguardPortalOrderFixture.lastUpdatedLabel}</p>
+              <p className="mt-1 text-sm text-slate-500">{vanguardPortalOrderFixture.lastUpdatedLabel}</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm md:max-w-sm">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Next action</div>
@@ -196,7 +196,7 @@ export default function VanguardOrderPortal() {
             ))}
           </ol>
           <p className="mt-4 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs leading-5 text-violet-900">
-            The order shown here is an example. {localReceipt ? "Your browser draft has not been saved or sent to Vanguard." : "Start a request to prepare your own browser draft."}
+            No saved Vanguard order has been created from this browser draft. {localReceipt ? "Your browser draft has not been sent to Vanguard." : "Start a request to prepare your own browser draft."}
           </p>
         </section>
 

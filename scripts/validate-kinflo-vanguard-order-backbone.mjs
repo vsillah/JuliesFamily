@@ -62,8 +62,9 @@ const workflow = requireIncludes(files.workflow, [
 const intake = requireIncludes(files.intake, ["ReversR order request", "Vanguard client journey", "Draft stays on this device"]);
 const portal = requireIncludes(files.portal, [
   'id="associate-support"',
-  "Example order path",
-  "Your browser draft has not been saved or sent to Vanguard.",
+  "Saved order path",
+  "Your browser draft has not been sent to Vanguard.",
+  "Browser draft",
 ]);
 
 requireIncludes(files.docs, [
@@ -89,6 +90,10 @@ const vanguardSlice = publicData.slice(publicData.indexOf('_id: "tenant_vanguard
 const runtimeCopy = [publicPage, intake, portal].join("\n");
 for (const pattern of [/\bprompt\b/i, /\bprovenance\b/i, /\bbranch\b/i, /\bpull request\b/i, /\bvalidator\b/i]) {
   check(!pattern.test(runtimeCopy), `runtime copy excludes ${pattern}`, "Technical provenance belongs in documentation and QA only.");
+}
+
+for (const marker of ["VE-RRB-PREVIEW", "VE-DEMO-1042", "source site", "source data", "synthetic preview", "synthetic_preview"]) {
+  check(!runtimeCopy.includes(marker), `runtime copy excludes ${marker}`, "Runtime UI must not expose fixture, provenance, or implementation identifiers.");
 }
 
 for (const marker of ['from "convex/_generated/api"', "useMutation(", "useAction(", 'fetch("/api/', 'type="file"']) {

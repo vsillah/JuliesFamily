@@ -2221,7 +2221,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
               The build request records available materials, the desired result, a starting discipline, constraints, and missing inputs. Private files and contact details are not collected here.
             </p>
           </div>
-          <Badge variant="outline" className="w-fit border-amber-300 bg-white text-amber-800">VE-RRB-PREVIEW</Badge>
+          <Badge variant="outline" className="w-fit border-amber-300 bg-white text-amber-800">Browser draft</Badge>
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {vanguardWorkflow.intakeStages.map((stage, index) => (
