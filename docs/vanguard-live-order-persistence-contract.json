@@ -5,10 +5,10 @@
   "systemOfRecord": "convex",
   "currentMode": "browser_local",
   "baseline": {
-    "mainCommit": "2f978137b144c2848ee0bd9c17a384f0ab376bd3c",
+    "mainCommit": "2f978137b144c2848ee0bd9c17a384f0ab376bd3",
     "publicSiteRoute": "/kinflo-sites/vanguard-enterprises",
     "orderPortalRoute": "/kinflo-sites/vanguard-enterprises/orders",
-    "adminRoute": "/admin/kinflo-os?tab=site-studio&site=vanguard-enterprises",
+    "adminRoute": "/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises",
     "localReceiptStorage": "sessionStorage",
     "liveOrderTablesPresent": false,
     "liveOrderFunctionsPresent": false,

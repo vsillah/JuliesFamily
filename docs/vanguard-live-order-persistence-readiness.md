@@ -2,7 +2,7 @@
 
 Status: source-only draft for captain review
 
-Date: October 13, 2026
+Date: October 14, 2026
 
 Machine-readable contract: `docs/vanguard-live-order-persistence-contract.json`
 

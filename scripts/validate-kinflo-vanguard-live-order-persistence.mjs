@@ -42,7 +42,9 @@ check(contract.schemaVersion === 1, "contract schema version is 1", "Unexpected 
 check(contract.status === "captain_review_required", "contract stops at captain review", "Source-only work cannot claim activation.");
 check(contract.systemOfRecord === "convex", "Convex remains the system of record", "A parallel data plane is not allowed.");
 check(contract.currentMode === "browser_local", "current mode remains browser-local", "Live order persistence must remain disabled.");
-check(contract.baseline.mainCommit === "2f978137b144c2848ee0bd9c17a384f0ab376bd3c", "merged Vanguard baseline is recorded", "Expected PR 36/37 baseline commit is missing.");
+check(contract.baseline.mainCommit === "2f978137b144c2848ee0bd9c17a384f0ab376bd3", "merged Vanguard baseline is recorded", "Expected PR 36/37 baseline commit is missing.");
+check(contract.baseline.mainCommit.length === 40, "baseline commit is a full 40-character SHA", "Baseline commit must be an exact Git object ID.");
+check(contract.baseline.adminRoute === "/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises", "admin route uses the Vanguard studioSite parameter", "Admin handoff route must target the Vanguard site-studio context.");
 
 for (const [boundary, expected] of Object.entries({
   browserLocalFallbackEnabled: true,
