@@ -3,6 +3,8 @@
 This evidence set also covers the Vanguard website integration slice: the
 ReversR desktop navigation, Input/Inventory/Design/Build phase rail, Input
 checklist, order-status panel, request receipt handoff, and responsive layouts.
+It also verifies the official ReversR logo derivative and the blue/green app
+palette in light and dark modes.
 
 Route: `/kinflo-sites/vanguard-enterprises#build-request`
 

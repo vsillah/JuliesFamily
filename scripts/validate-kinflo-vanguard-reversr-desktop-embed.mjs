@@ -14,6 +14,7 @@ function requireIncludes(path, patterns) {
 
 const files = {
   component: "client/src/components/VanguardReversRIntake.tsx",
+  logo: "client/src/assets/reversrLogo.ts",
   publicPage: "client/src/pages/KinfloPublicSitePreview.tsx",
   portal: "client/src/pages/VanguardOrderPortal.tsx",
   docs: "docs/vanguard-reversr-desktop-embed.md",
@@ -37,6 +38,9 @@ const component = requireIncludes(files.component, [
   'data-testid="vanguard-reversr-workspace-canvas"',
   'data-testid="vanguard-reversr-workspace-inspector"',
   'data-testid="vanguard-reversr-order-status"',
+  'data-testid="vanguard-reversr-logo-mark"',
+  'data-testid="vanguard-reversr-wordmark"',
+  'data-reversr-brand-palette="official-app"',
   'data-workspace-mode="browser-local"',
   "New Reconstruction",
   "Input",
@@ -53,6 +57,13 @@ const component = requireIncludes(files.component, [
   "Sign in to save",
   "Private upload is intentionally unavailable",
 ]);
+
+requireIncludes(files.logo, [
+  "data:image/png;base64,",
+  "d9a590604f8f4000ea9dd2149de633425cc6e9c019079de81fbce339e61d270d",
+]);
+check(!component.includes("amber-"), "ReversR workspace excludes Vanguard amber utility colors", "Use ReversR blue/green brand roles inside the embedded app region.");
+check(!component.includes("orange-"), "ReversR workspace excludes burnt-orange utility colors", "Use ReversR blue/green brand roles inside the embedded app region.");
 
 const publicPage = requireIncludes(files.publicPage, [
   'id="build-request"',
