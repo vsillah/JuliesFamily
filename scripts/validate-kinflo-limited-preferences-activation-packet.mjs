@@ -13,8 +13,9 @@ const packet = existsSync(packetPath) ? readFileSync(packetPath, "utf8") : "";
 for (const marker of [
   "Phase 177: limited preferences production activation packet",
   "Read-back verifier fix PR: `#33`",
-  "00ac071173dc8a0cc22eae6c47a0f578335141e0",
-  "dpl_3cUvmAXs6sfjm96UCZLmS5iUukTb",
+  "Gate B activation packet PR: `#34`",
+  "4e25339966f20dda6f96b33740c7a3cca0638be4",
+  "dpl_4zQZToyEHj14iqpf7ribTzsgyg2y",
   "https://kinflo-website.vercel.app",
   "preferences.getMyPreferences",
   "preferences.upsertMyPreferences",
@@ -42,13 +43,17 @@ for (const marker of [
   "VITE_KINFLO_PREFERENCES_GENERATED_API_AVAILABLE=true",
   "VITE_KINFLO_PREFERENCES_SMOKE_VERIFIED=true",
   "VITE_KINFLO_PREFERENCES_ADAPTER_MODE=live_verified",
-  "Gate B production activation",
-  "Production activation is not authorized by this packet.",
+  "Gate B production activation passed",
+  "Gate B production limited-preferences activation passed on October 13, 2026.",
   "Set only the eight approved browser-public KinFlo Production env flags",
-  "restore the exact prior actor preference state",
-  "Capture MP4 plus desktop and mobile images",
-  "Stop conditions",
-  "Exact next approval language",
+  "no unscoped preference row existed",
+  "Data density: Spacious",
+  "newly created row",
+  "provider-like audit events remained `0`",
+  "Temporary Convex ops functions",
+  "gate-b-production-smoke-cleanup.mp4",
+  "Gate B stop conditions used",
+  "strongest next candidates",
 ]) {
   check(`packet includes ${marker}`, packet.includes(marker), "Required binding, evidence, or safety language is missing.");
 }
@@ -74,17 +79,17 @@ for (const exclusion of [
 }
 
 check(
-  "packet requires fresh production binding before Gate B",
-  packet.includes("refresh the exact `origin/main` commit and production deployment id immediately before Gate B") &&
-    packet.includes("Current production deployment before Gate B must be refreshed and reported"),
-  "Gate B must refresh deployment binding before production changes.",
+  "packet requires fresh production binding before later activations",
+  packet.includes("refresh the exact `origin/main` commit and production deployment id before any later production activation") &&
+    packet.includes("Do not activate another mutation surface"),
+  "Later activation lanes must refresh deployment binding before production changes.",
 );
 
 check(
-  "packet keeps Gate B separately approved",
-  packet.includes("Production activation is not authorized by this packet.") &&
-    packet.includes("requires a separate explicit approval"),
-  "The planning packet must not self-authorize production activation.",
+  "packet closes Gate B without widening future authority",
+  packet.includes("Gate B is complete.") &&
+    packet.includes("without a new bounded approval"),
+  "The closeout packet must not self-authorize later activation.",
 );
 
 for (const result of checks) {
@@ -99,8 +104,9 @@ for (const result of checks) {
 const failed = checks.filter((result) => !result.ok);
 console.log("\nKinFlo limited preferences Gate B packet");
 console.log("Gate A preview smoke: passed");
-console.log("Production env changes authorized by packet: 0");
-console.log("Production mutation smoke authorized by packet: 0");
+console.log("Gate B production smoke: passed");
+console.log("Production env changes recorded: approved eight browser-public keys only");
+console.log("Production mutation smoke recorded: one preferences upsert only");
 console.log("Provider writes authorized by packet: 0");
 
 if (failed.length > 0) {
