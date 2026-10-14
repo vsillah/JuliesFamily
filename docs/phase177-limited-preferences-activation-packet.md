@@ -2,17 +2,17 @@
 
 This packet is the Gate B completion record after PR #33 fixed the limited preferences adapter read-back verifier, Gate A passed in preview, and Gate B passed in production.
 
-## Current observed state
+## Gate B observed state
 
 - Limited preferences adapter PR: `#29`
 - Read-back verifier fix PR: `#33`
 - Gate B activation packet PR: `#34`
-- Current `origin/main` commit verified after PR `#34`: `4e25339966f20dda6f96b33740c7a3cca0638be4`
-- Current production deployment after Gate B: `dpl_4zQZToyEHj14iqpf7ribTzsgyg2y`
+- Gate B `origin/main` commit verified after PR `#34`: `4e25339966f20dda6f96b33740c7a3cca0638be4`
+- Gate B production deployment after the bounded smoke: `dpl_4zQZToyEHj14iqpf7ribTzsgyg2y`
 - Production URL: `https://kinflo-website.vercel.app`
 - Deployment URL: `https://kinflo-website-8lkai7hbf-vsillahs-projects.vercel.app`
 - Production route checked: `/admin/kinflo-os?tab=experience&gateB=4e25339`
-- Current production behavior: route returns `200`; limited preferences are live-verified in production, while every non-preferences mutation and provider-write surface remains blocked.
+- Gate B observed production behavior: route returned `200`; limited preferences were live-verified in production, while every non-preferences mutation and provider-write surface remained blocked.
 
 This section is observational, not an execution binding. Vercel can redeploy `main`, so the captain must refresh the exact `origin/main` commit and production deployment id before any later production activation.
 
