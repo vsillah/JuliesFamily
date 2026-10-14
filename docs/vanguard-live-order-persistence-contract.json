@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "status": "captain_review_required",
+  "siteKey": "vanguard-enterprises",
+  "systemOfRecord": "convex",
+  "currentMode": "browser_local",
+  "baseline": {
+    "mainCommit": "2f978137b144c2848ee0bd9c17a384f0ab376bd3",
+    "publicSiteRoute": "/kinflo-sites/vanguard-enterprises",
+    "orderPortalRoute": "/kinflo-sites/vanguard-enterprises/orders",
+    "adminRoute": "/admin/kinflo-os?tab=site-studio&studioSite=vanguard-enterprises",
+    "localReceiptStorage": "sessionStorage",
+    "liveOrderTablesPresent": false,
+    "liveOrderFunctionsPresent": false,
+    "generatedOrderBindingsPresent": false
+  },
+  "preservedBoundaries": {
+    "browserLocalFallbackEnabled": true,
+    "liveReadsEnabled": false,
+    "liveWritesEnabled": false,
+    "privateUploadsEnabled": false,
+    "providerWritesEnabled": false,
+    "generatedApiImportApproved": false,
+    "convexCodegenApproved": false,
+    "schemaMigrationApproved": false,
+    "authGrantChangesApproved": false,
+    "environmentChangesApproved": false,
+    "productionSmokeApproved": false
+  },
+  "migrationBatches": [
+    {
+      "number": 1,
+      "name": "core_order_draft_and_tracking",
+      "tables": [
+        "buildOrders",
+        "orderDraftSections",
+        "orderSourceItems",
+        "orderParticipants",
+        "orderQuotes",
+        "orderStatusEvents",
+        "orderAuditEvents"
+      ],
+      "functions": [
+        "orders.createDraft",
+        "orders.promoteLocalIntake",
+        "orders.saveDraftSection",
+        "orders.getMyOrder",
+        "orders.listMyOrders",
+        "orders.submit",
+        "orders.getSubmissionReceipt"
+      ],
+      "activation": "blocked"
+    },
+    {
+      "number": 2,
+      "name": "associate_assist_and_co_edit",
+      "tables": [
+        "orderAccessGrants",
+        "orderMessages"
+      ],
+      "functions": [
+        "orders.requestAssistance",
+        "orders.grantAssistance",
+        "orders.revokeAssistance",
+        "orderOps.acceptAssistRequest",
+        "orderOps.saveAssistedSection"
+      ],
+      "activation": "blocked"
+    },
+    {
+      "number": 3,
+      "name": "operations_queue_and_load_balancing",
+      "tables": [
+        "orderAssignments",
+        "orderMilestones",
+        "orderBlockers"
+      ],
+      "functions": [
+        "orderOps.listQueue",
+        "orderOps.getOrderWorkspace",
+        "orderOps.listCapacity",
+        "orderOps.assign",
+        "orderOps.reassign",
+        "orderOps.transitionStatus"
+      ],
+      "activation": "blocked"
+    },
+    {
+      "number": 4,
+      "name": "inventory_paperwork_quality_and_delivery",
+      "tables": [
+        "inventoryItems",
+        "orderMaterialRequirements",
+        "manufacturingDocuments",
+        "qualityChecks",
+        "orderEvidenceItems",
+        "deliveryReceipts"
+      ],
+      "functions": [
+        "orderOps.recordMaterialRequirement",
+        "orderOps.reserveInventory",
+        "orderOps.addManufacturingDocumentVersion",
+        "orderOps.recordQualityCheck",
+        "orderOps.prepareDelivery",
+        "orderOps.recordDelivery"
+      ],
+      "activation": "blocked"
+    },
+    {
+      "number": 5,
+      "name": "metrics_and_throughput",
+      "tables": [],
+      "functions": [
+        "orderMetrics.getOperationsSnapshot",
+        "orderMetrics.getCycleTimeSeries",
+        "orderMetrics.getThroughputSeries"
+      ],
+      "activation": "blocked"
+    }
+  ],
+  "permissions": {
+    "clientOwner": [
+      "create_own_draft",
+      "read_own_order",
+      "save_own_draft",
+      "submit_own_order",
+      "grant_assist_access",
+      "revoke_assist_access",
+      "acknowledge_own_delivery"
+    ],
+    "associateGrantScopes": [
+      "view_draft",
+      "comment",
+      "edit_draft",
+      "submit_for_client",
+      "takeover_session"
+    ],
+    "operationsPermissions": [
+      "order:view_queue",
+      "order:view_detail",
+      "order:assist",
+      "order:assign",
+      "order:transition",
+      "order:manage_inventory",
+      "order:manage_paperwork",
+      "order:record_quality",
+      "order:prepare_delivery",
+      "order:view_metrics"
+    ],
+    "rules": {
+      "supplyingOrderIdIsAuthorization": false,
+      "tenantAndSiteScopeRequired": true,
+      "ownerOrActiveGrantRequiredForPrivateDraft": true,
+      "grantExpiryEnforcedServerSide": true,
+      "revocationStopsNewReadsAndWrites": true,
+      "clientConfirmationRequiredForSubmission": true,
+      "humanAssignmentDecisionRequired": true
+    }
+  },
+  "dataIntegrity": {
+    "revisionAwareWrites": true,
+    "idempotentPromotion": true,
+    "immutableStatusEvents": true,
+    "immutableAuditEvents": true,
+    "immutableEvidenceVersions": true,
+    "storageIdsNotUrls": true,
+    "directClientStatusWritesAllowed": false,
+    "unboundedCollectAllowed": false,
+    "filterInsteadOfIndexAllowed": false,
+    "paginatedListReadsRequired": true
+  },
+  "metrics": {
+    "contractVersion": 1,
+    "definitions": [
+      "throughput",
+      "median_cycle_time",
+      "blocked_order_aging",
+      "work_in_progress",
+      "load_balance",
+      "inventory_readiness",
+      "paperwork_completeness",
+      "quality_rework",
+      "on_time_delivery_readiness",
+      "associate_capacity"
+    ],
+    "hiddenEmployeeScoreAllowed": false,
+    "humanReadableInputsRequired": true,
+    "eventDerived": true
+  },
+  "rollback": {
+    "defaultAdapter": "browser_local",
+    "serverDraftPromotionRequiresReadBack": true,
+    "deleteBrowserReceiptBeforeReadBack": false,
+    "dualWriteAllowed": false,
+    "rollbackDeletesLiveOrders": false,
+    "schemaChangesAdditiveUntilCutover": true,
+    "smokeRecordsRequireExplicitNamespace": true,
+    "smokeCleanupRequired": true,
+    "rollbackOwnerRequired": true
+  },
+  "activationSequence": [
+    "captain_approves_schema_and_permission_contract",
+    "engineering_adds_additive_schema_and_server_functions",
+    "captain_approves_codegen_and_reviews_generated_bindings",
+    "engineering_runs_authenticated_read_only_smoke",
+    "captain_approves_bounded_mutation_smoke_with_cleanup",
+    "engineering_wires_preview_adapter_behind_default_off_gate",
+    "captain_completes_visual_and_behavioral_qa",
+    "human_qa_approves_client_and_associate_surfaces",
+    "captain_authorizes_production_activation_and_smoke"
+  ]
+}
