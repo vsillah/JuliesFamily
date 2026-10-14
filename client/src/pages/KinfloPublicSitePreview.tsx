@@ -94,7 +94,7 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
 function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
   return (
     <section id="build-request" className="scroll-mt-24 bg-white px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-[1500px]">
         <div className="max-w-3xl">
           <Badge variant="outline">ReversR order request</Badge>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">{block.title}</h2>
