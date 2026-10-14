@@ -1,18 +1,8 @@
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  CheckCircle2,
-  CircleDashed,
-  ClipboardCheck,
-  FileStack,
-  LockKeyhole,
-  PackageCheck,
-  ShieldCheck,
-  SlidersHorizontal,
-  Target,
-  Wrench,
+  ArrowLeft, ArrowRight, Boxes, Check, CheckCircle2, CircleDashed, ClipboardCheck,
+  FileStack, FolderKanban, HelpCircle, LayoutDashboard, LockKeyhole, PackageCheck,
+  PanelRight, Settings, ShieldCheck, SlidersHorizontal, Target, UserRound, Wrench,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +18,11 @@ import {
 } from "@/lib/kinfloVanguardOrderPortal";
 
 const stepIcons = [FileStack, Target, Wrench, SlidersHorizontal, ClipboardCheck];
+const workspaceTools = [
+  { label: "Workspace", icon: LayoutDashboard, active: true },
+  { label: "Builds", icon: FolderKanban, active: false },
+  { label: "Materials", icon: Boxes, active: false },
+];
 
 export default function VanguardReversRIntake() {
   const [step, setStep] = useState(0);
@@ -40,7 +35,7 @@ export default function VanguardReversRIntake() {
 
   const missingInputs = useMemo(() => {
     const missing: string[] = [];
-    if (sourcePackage.length === 0) missing.push("Select at least one available material");
+    if (sourcePackage.length === 0) missing.push("Choose at least one available material");
     if (goal.trim().length < 20) missing.push("Describe the build goal in at least 20 characters");
     if (!discipline) missing.push("Choose the discipline that should review the request");
     if (constraints.length === 0 && constraintNotes.trim().length === 0) missing.push("Name a constraint or record that none are known yet");
@@ -49,6 +44,7 @@ export default function VanguardReversRIntake() {
 
   const readyForQuoteReview = missingInputs.length === 0;
   const progress = ((step + 1) / vanguardWorkflow.intakeStages.length) * 100;
+  const currentStage = vanguardWorkflow.intakeStages[step];
 
   function toggleValue(value: string, values: string[], update: (next: string[]) => void) {
     update(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
@@ -71,240 +67,149 @@ export default function VanguardReversRIntake() {
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-950/5" data-testid="vanguard-reversr-intake-app">
-      <div className="border-b border-slate-200 bg-slate-950 px-4 py-4 text-white sm:px-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-amber-500 text-slate-950 hover:bg-amber-500">ReversR order request</Badge>
-              <Badge variant="outline" className="border-white/20 text-slate-200">Vanguard client journey</Badge>
+    <div className="overflow-hidden rounded-2xl border border-slate-300 bg-slate-100 shadow-2xl shadow-slate-950/10" data-testid="vanguard-reversr-intake-app" data-workspace-mode="browser-local">
+      <header className="border-b border-slate-200 bg-white" data-testid="vanguard-reversr-desktop-header">
+        <div className="flex min-h-16 flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-sm font-black tracking-tight text-white">RR</div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-black tracking-[0.16em] text-slate-950">REVERSR</span>
+                <Badge className="bg-amber-500 text-slate-950 hover:bg-amber-500">ReversR order request</Badge>
+                <Badge variant="outline">Vanguard client journey</Badge>
+              </div>
+              <p className="mt-0.5 text-[11px] text-slate-500">Machine reconstruction · Request to delivery</p>
             </div>
-            <p className="mt-2 text-xs leading-5 text-slate-300">Build a reviewable request package before an associate scopes the work.</p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <LockKeyhole className="h-4 w-4 text-amber-300" />
-            Draft stays on this device
+          <div className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-800 sm:flex"><ShieldCheck className="h-3.5 w-3.5" /> Draft stays on this device</div>
+            <Button type="button" variant="outline" size="sm" disabled className="bg-white"><UserRound className="mr-2 h-4 w-4" /> Sign in to save</Button>
           </div>
         </div>
-        <Progress value={progress} className="mt-4 h-1.5 bg-white/15" />
-      </div>
-
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] lg:grid-cols-[230px_minmax(0,1fr)]">
-        <nav className="min-w-0 max-w-full overflow-hidden border-b border-slate-200 bg-slate-50 p-3 lg:border-b-0 lg:border-r" aria-label="ReversR Rebuild intake steps">
-          <ol className="flex max-w-full gap-2 overflow-x-auto lg:flex-col">
+        <div className="border-t border-slate-100 px-4 py-2 sm:px-5" data-testid="vanguard-reversr-phase-rail">
+          <ol className="flex gap-2 overflow-x-auto pb-1" aria-label="ReversR order phases">
             {vanguardWorkflow.intakeStages.map((stage, index) => {
               const Icon = stepIcons[index];
               const isActive = step === index;
               const isComplete = index < step;
               return (
-                <li key={stage.key} className="min-w-[156px] lg:min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => goToStep(index)}
-                    className={`flex w-full items-start gap-3 rounded-lg border px-3 py-3 text-left transition ${isActive ? "border-amber-300 bg-amber-50 text-slate-950" : "border-transparent text-slate-600 hover:border-slate-200 hover:bg-white"}`}
-                    aria-current={isActive ? "step" : undefined}
-                    data-testid={`vanguard-intake-step-${stage.key}`}
-                  >
-                    <span className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isComplete ? "bg-emerald-600 text-white" : isActive ? "bg-amber-500 text-slate-950" : "bg-slate-200 text-slate-600"}`}>
-                      {isComplete ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                    </span>
-                    <span>
-                      <span className="block text-xs font-semibold">{index + 1}. {stage.label}</span>
-                      <span className="mt-1 block text-[11px] leading-4 text-slate-500">{stage.summary}</span>
-                    </span>
+                <li key={stage.key} className="min-w-[150px] flex-1">
+                  <button type="button" onClick={() => goToStep(index)} className={`flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left transition ${isActive ? "border-amber-400 bg-amber-50 text-slate-950" : "border-transparent text-slate-500 hover:border-slate-200 hover:bg-slate-50"}`} aria-current={isActive ? "step" : undefined} data-testid={`vanguard-intake-step-${stage.key}`}>
+                    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isComplete ? "bg-emerald-600 text-white" : isActive ? "bg-amber-500 text-slate-950" : "bg-slate-100 text-slate-500"}`}>{isComplete ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}</span>
+                    <span className="min-w-0"><span className="block text-[10px] font-semibold uppercase tracking-wide">Phase {index + 1}</span><span className="block truncate text-xs font-semibold">{stage.label}</span></span>
                   </button>
                 </li>
               );
             })}
           </ol>
+        </div>
+        <Progress value={progress} className="h-1 rounded-none bg-slate-100" />
+      </header>
+
+      <div className="grid min-w-0 xl:grid-cols-[184px_minmax(0,1fr)_320px]" data-testid="vanguard-reversr-desktop-workspace">
+        <nav className="hidden border-r border-slate-200 bg-white p-3 xl:flex xl:min-h-[660px] xl:flex-col" aria-label="ReversR workspace">
+          <div className="space-y-1">
+            {workspaceTools.map((item) => {
+              const Icon = item.icon;
+              return <button key={item.label} type="button" disabled={!item.active} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium ${item.active ? "bg-slate-950 text-white" : "text-slate-400"}`}><Icon className="h-4 w-4" /> {item.label}</button>;
+            })}
+          </div>
+          <div className="mt-5 border-t border-slate-200 pt-4">
+            <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">Current build</p>
+            <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3"><div className="text-xs font-semibold text-slate-950">Untitled request</div><div className="mt-1 text-[11px] leading-4 text-slate-600">Details remain here until you continue to the order portal.</div></div>
+          </div>
+          <div className="mt-auto space-y-1 border-t border-slate-200 pt-3">
+            <button type="button" disabled className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400"><HelpCircle className="h-4 w-4" /> Support</button>
+            <button type="button" disabled className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400"><Settings className="h-4 w-4" /> Settings</button>
+          </div>
         </nav>
 
-        <div className="min-w-0 p-4 sm:p-6">
-          {step === 0 ? (
-            <div data-testid="vanguard-intake-source-package">
-              <Badge variant="outline">Available materials</Badge>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-950">What do you have today?</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Select the materials you have. File uploads are not available yet.</p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {vanguardWorkflow.sourcePackageOptions.map((item) => {
-                  const selected = sourcePackage.includes(item.label);
-                  return (
-                    <button
-                      key={item.label}
-                      type="button"
-                      onClick={() => toggleValue(item.label, sourcePackage, setSourcePackage)}
-                      className={`rounded-xl border p-4 text-left ${selected ? "border-amber-400 bg-amber-50" : "border-slate-200 bg-white hover:border-slate-300"}`}
-                      aria-pressed={selected}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-semibold text-slate-950">{item.label}</span>
-                        <span className={`flex h-6 w-6 items-center justify-center rounded-full border ${selected ? "border-amber-500 bg-amber-500 text-slate-950" : "border-slate-300 text-transparent"}`}><Check className="h-4 w-4" /></span>
-                      </div>
-                      <p className="mt-2 text-xs leading-5 text-slate-600">{item.description}</p>
+        <main className="min-w-0 bg-slate-50 p-3 sm:p-5" data-testid="vanguard-reversr-workspace-canvas">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div><div className="text-xs font-semibold uppercase tracking-[0.14em] text-amber-700">{currentStage.label}</div><h3 className="mt-1 text-xl font-semibold text-slate-950">Assemble the request Vanguard can review</h3></div>
+            <Badge variant="outline" className="w-fit border-emerald-200 bg-emerald-50 text-emerald-800">Available now</Badge>
+          </div>
+
+          <section className="min-h-[515px] rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+            {step === 0 ? (
+              <div data-testid="vanguard-intake-source-package">
+                <Badge variant="outline">Materials package</Badge>
+                <h4 className="mt-3 text-2xl font-semibold text-slate-950">What do you have today?</h4>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Build an inventory of the drawings, measurements, images, or existing parts that can guide the work.</p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {vanguardWorkflow.sourcePackageOptions.map((item) => {
+                    const selected = sourcePackage.includes(item.label);
+                    return (
+                      <button key={item.label} type="button" onClick={() => toggleValue(item.label, sourcePackage, setSourcePackage)} className={`rounded-xl border p-4 text-left transition ${selected ? "border-amber-400 bg-amber-50 shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"}`} aria-pressed={selected}>
+                        <div className="flex items-center justify-between gap-3"><span className="font-semibold text-slate-950">{item.label}</span><span className={`flex h-6 w-6 items-center justify-center rounded-full border ${selected ? "border-amber-500 bg-amber-500 text-slate-950" : "border-slate-300 text-transparent"}`}><Check className="h-4 w-4" /></span></div>
+                        <p className="mt-2 text-xs leading-5 text-slate-600">{item.description}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 flex items-start gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-xs leading-5 text-slate-600"><LockKeyhole className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" /><span><strong>Private upload is intentionally unavailable.</strong> File transfer becomes available after account access, retention rules, and sharing controls are in place. For now, name what you have without attaching it.</span></div>
+              </div>
+            ) : null}
+
+            {step === 1 ? (
+              <div data-testid="vanguard-intake-request-goal">
+                <Badge variant="outline">Build requirement</Badge>
+                <h4 className="mt-3 text-2xl font-semibold text-slate-950">What should change when the work is done?</h4>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Name the current problem, the result you need, and the environment where the finished work must perform.</p>
+                <div className="mt-6 space-y-2"><Label htmlFor="vanguard-reversr-goal">Build goal</Label><Textarea id="vanguard-reversr-goal" value={goal} onChange={(event) => { setGoal(event.target.value); setReceiptReady(false); }} placeholder="Example: Rebuild this worn bracket from the available drawing and measurements so it can be manufactured in stainless steel." rows={10} /><div className="flex justify-between text-xs text-slate-500"><span>Include the desired outcome and working conditions.</span><span>{goal.trim().length} characters</span></div></div>
+              </div>
+            ) : null}
+
+            {step === 2 ? (
+              <div data-testid="vanguard-intake-discipline">
+                <Badge variant="outline">Work routing</Badge>
+                <h4 className="mt-3 text-2xl font-semibold text-slate-950">Which team should begin the review?</h4>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Choose a starting discipline. A Vanguard associate confirms the route before scope and pricing.</p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                  {vanguardWorkflow.disciplines.map((item) => (
+                    <button key={item.label} type="button" onClick={() => { setDiscipline(item.label); setReceiptReady(false); }} className={`rounded-xl border p-4 text-left transition ${discipline === item.label ? "border-amber-400 bg-amber-50 shadow-sm" : "border-slate-200 hover:border-slate-300"}`} aria-pressed={discipline === item.label}>
+                      <div className="flex items-start justify-between gap-3"><span><span className="block font-semibold text-slate-950">{item.label}</span><span className="mt-2 block text-xs leading-5 text-slate-600">{item.description}</span></span>{discipline === item.label ? <CheckCircle2 className="h-5 w-5 shrink-0 text-amber-700" /> : <CircleDashed className="h-5 w-5 shrink-0 text-slate-300" />}</div>
                     </button>
-                  );
-                })}
-              </div>
-              <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
-                Private upload is intentionally unavailable. A live release needs retention rules, access controls, and an approved attachment manifest first.
-              </div>
-            </div>
-          ) : null}
-
-          {step === 1 ? (
-            <div data-testid="vanguard-intake-request-goal">
-              <Badge variant="outline">Request goal</Badge>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-950">What should change when the work is done?</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Describe the result in plain language. Name the current problem, the desired outcome, and the environment where the build must work.</p>
-              <div className="mt-6 space-y-2">
-                <Label htmlFor="vanguard-reversr-goal">Build goal</Label>
-                <Textarea
-                  id="vanguard-reversr-goal"
-                  value={goal}
-                  onChange={(event) => { setGoal(event.target.value); setReceiptReady(false); }}
-                  placeholder="Example: Rebuild this worn bracket from the available drawing and measurements so it can be manufactured in stainless steel."
-                  rows={7}
-                />
-                <div className="text-right text-xs text-slate-500">{goal.trim().length} characters</div>
-              </div>
-            </div>
-          ) : null}
-
-          {step === 2 ? (
-            <div data-testid="vanguard-intake-discipline">
-              <Badge variant="outline">Discipline and type</Badge>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-950">Who should review this request?</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Choose one starting discipline. A Vanguard associate can adjust the route after reviewing the available materials.</p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {vanguardWorkflow.disciplines.map((item) => (
-                  <button
-                    key={item.label}
-                    type="button"
-                    onClick={() => { setDiscipline(item.label); setReceiptReady(false); }}
-                    className={`rounded-xl border p-4 text-left ${discipline === item.label ? "border-amber-400 bg-amber-50" : "border-slate-200 hover:border-slate-300"}`}
-                    aria-pressed={discipline === item.label}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <span>
-                        <span className="block font-semibold text-slate-950">{item.label}</span>
-                        <span className="mt-2 block text-xs leading-5 text-slate-600">{item.description}</span>
-                      </span>
-                      {discipline === item.label ? <CheckCircle2 className="h-5 w-5 shrink-0 text-amber-700" /> : <CircleDashed className="h-5 w-5 shrink-0 text-slate-300" />}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          {step === 3 ? (
-            <div data-testid="vanguard-intake-constraints">
-              <Badge variant="outline">Constraints</Badge>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-950">What can the build not ignore?</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Flag what will shape the quote, technical review, or delivery plan.</p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2">
-                {vanguardWorkflow.constraintOptions.map((item) => (
-                  <label key={item} className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-4 text-sm text-slate-700 hover:bg-slate-50">
-                    <Checkbox checked={constraints.includes(item)} onCheckedChange={() => toggleValue(item, constraints, setConstraints)} />
-                    <span>{item}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="mt-5 space-y-2">
-                <Label htmlFor="vanguard-reversr-constraint-notes">Constraint notes</Label>
-                <Textarea
-                  id="vanguard-reversr-constraint-notes"
-                  value={constraintNotes}
-                  onChange={(event) => { setConstraintNotes(event.target.value); setReceiptReady(false); }}
-                  placeholder="Add dimensions, materials, deadlines, target systems, known risks, or write 'No other constraints known yet.'"
-                  rows={4}
-                />
-              </div>
-            </div>
-          ) : null}
-
-          {step === 4 ? (
-            <div data-testid="vanguard-intake-readiness">
-              <Badge variant="outline">Readiness and quote</Badge>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-950">Review the package before handoff</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">ReversR checks whether the request is ready for Vanguard associate review. A complete request still needs scope and quote approval before work begins.</p>
-
-              <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-                <div className="space-y-3">
-                  {[
-                    ["Available materials", sourcePackage.join(", ") || "Missing"],
-                    ["Request goal", goal.trim() || "Missing"],
-                    ["Discipline", discipline || "Missing"],
-                    ["Constraints", [...constraints, constraintNotes.trim()].filter(Boolean).join(", ") || "Missing"],
-                  ].map(([label, value]) => (
-                    <div key={label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div>
-                      <div className="mt-2 break-words text-sm leading-6 text-slate-800">{value}</div>
-                    </div>
                   ))}
                 </div>
-                <aside className={`h-fit rounded-xl border p-4 ${readyForQuoteReview ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>
-                  {readyForQuoteReview ? <ShieldCheck className="h-6 w-6 text-emerald-700" /> : <LockKeyhole className="h-6 w-6 text-amber-700" />}
-                  <h4 className="mt-3 font-semibold text-slate-950">{readyForQuoteReview ? "Ready for associate review" : "More details needed"}</h4>
-                  <p className="mt-2 text-xs leading-5 text-slate-700">
-                    {readyForQuoteReview ? "The request has the minimum details a Vanguard associate needs to begin review." : "Complete the missing inputs before preparing a request receipt."}
-                  </p>
-                  {!readyForQuoteReview ? (
-                    <ul className="mt-3 space-y-2">
-                      {missingInputs.map((item) => <li key={item} className="flex gap-2 text-xs leading-5 text-slate-700"><CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0" />{item}</li>)}
-                    </ul>
-                  ) : null}
-                </aside>
               </div>
+            ) : null}
 
-              <Button
-                type="button"
-                disabled={!readyForQuoteReview}
-                onClick={() => setReceiptReady(true)}
-                className="mt-5 h-auto w-full whitespace-normal bg-amber-700 py-2.5 text-white hover:bg-amber-800"
-                data-testid="vanguard-generate-local-receipt"
-              >
-                <PackageCheck className="mr-2 h-4 w-4" /> Prepare request receipt
-              </Button>
+            {step === 3 ? (
+              <div data-testid="vanguard-intake-constraints">
+                <Badge variant="outline">Build constraints</Badge>
+                <h4 className="mt-3 text-2xl font-semibold text-slate-950">What can the build not ignore?</h4>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Flag the conditions that will shape technical review, pricing, or delivery planning.</p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">{vanguardWorkflow.constraintOptions.map((item) => <label key={item} className="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-200 p-4 text-sm text-slate-700 hover:bg-slate-50"><Checkbox checked={constraints.includes(item)} onCheckedChange={() => toggleValue(item, constraints, setConstraints)} /><span>{item}</span></label>)}</div>
+                <div className="mt-5 space-y-2"><Label htmlFor="vanguard-reversr-constraint-notes">Additional conditions</Label><Textarea id="vanguard-reversr-constraint-notes" value={constraintNotes} onChange={(event) => { setConstraintNotes(event.target.value); setReceiptReady(false); }} placeholder="Add dimensions, materials, deadlines, target systems, known risks, or write 'No other constraints known yet.'" rows={5} /></div>
+              </div>
+            ) : null}
 
-              {receiptReady ? (
-                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5" role="status" data-testid="vanguard-build-request-receipt">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 font-semibold text-emerald-950"><PackageCheck className="h-5 w-5" /> Request receipt ready</div>
-                      <p className="mt-2 text-sm leading-6 text-emerald-900">A Vanguard associate would review the available materials, identify missing inputs, and prepare a quote and scope decision.</p>
-                    </div>
-                    <Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">Browser draft</Badge>
-                  </div>
-                  <div className="mt-4 grid gap-2 text-xs sm:grid-cols-3">
-                    <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Discipline</span><span className="mt-1 block font-semibold text-emerald-950">{discipline}</span></div>
-                    <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Next owner</span><span className="mt-1 block font-semibold text-emerald-950">Vanguard intake associate</span></div>
-                    <div className="rounded-md bg-white/70 p-3"><span className="block text-emerald-700">Saved as an order</span><span className="mt-1 block font-semibold text-emerald-950">No · sign-in required</span></div>
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={continueToOrderPortal}
-                    className="mt-4 h-auto w-full whitespace-normal bg-slate-950 py-2.5 text-white hover:bg-slate-800"
-                    data-testid="vanguard-continue-to-order-portal"
-                  >
-                    <LockKeyhole className="mr-2 h-4 w-4" /> Continue to secure order portal
-                  </Button>
-                  <p className="mt-2 text-xs leading-5 text-emerald-800">Review the request in the order portal. Nothing is sent to Vanguard until account access and request saving are available.</p>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
+            {step === 4 ? (
+              <div data-testid="vanguard-intake-readiness">
+                <Badge variant="outline">Request review</Badge>
+                <h4 className="mt-3 text-2xl font-semibold text-slate-950">Check the package before handoff</h4>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">A complete request gives Vanguard enough context to begin an associate review. Scope, price, assignment, and production still require later decisions.</p>
+                <div className="mt-6 grid gap-3 sm:grid-cols-2">{[["Available materials", sourcePackage.join(", ") || "Missing"], ["Build goal", goal.trim() || "Missing"], ["Starting discipline", discipline || "Missing"], ["Constraints", [...constraints, constraintNotes.trim()].filter(Boolean).join(", ") || "Missing"]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4"><div className="text-xs font-semibold uppercase tracking-wide text-slate-500">{label}</div><div className="mt-2 break-words text-sm leading-6 text-slate-800">{value}</div></div>)}</div>
+                <Button type="button" disabled={!readyForQuoteReview} onClick={() => setReceiptReady(true)} className="mt-5 h-auto w-full whitespace-normal bg-amber-700 py-2.5 text-white hover:bg-amber-800" data-testid="vanguard-generate-local-receipt"><PackageCheck className="mr-2 h-4 w-4" /> Prepare request receipt</Button>
+                {receiptReady ? <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5" role="status" data-testid="vanguard-build-request-receipt"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2 font-semibold text-emerald-950"><PackageCheck className="h-5 w-5" /> Request receipt ready</div><p className="mt-2 text-sm leading-6 text-emerald-900">Continue to review this package beside the Vanguard order path. Nothing has been sent.</p></div><Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">Browser draft</Badge></div><Button type="button" onClick={continueToOrderPortal} className="mt-4 h-auto w-full whitespace-normal bg-slate-950 py-2.5 text-white hover:bg-slate-800" data-testid="vanguard-continue-to-order-portal"><LockKeyhole className="mr-2 h-4 w-4" /> Continue to secure order portal</Button></div> : null}
+              </div>
+            ) : null}
+          </section>
 
-          <div className="mt-8 flex items-center justify-between gap-3 border-t border-slate-200 pt-4">
-            <Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0}>
-              <ArrowLeft className="mr-2 h-4 w-4" /> Back
-            </Button>
-            <div className="text-xs text-slate-500">Step {step + 1} of {vanguardWorkflow.intakeStages.length}</div>
-            <Button type="button" onClick={() => goToStep(step + 1)} disabled={step === vanguardWorkflow.intakeStages.length - 1} className="bg-slate-950 hover:bg-slate-800">
-              Continue <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3"><Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button><div className="text-center text-xs text-slate-500">Phase {step + 1} of {vanguardWorkflow.intakeStages.length}</div><Button type="button" onClick={() => goToStep(step + 1)} disabled={step === vanguardWorkflow.intakeStages.length - 1} className="bg-slate-950 hover:bg-slate-800">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button></div>
+        </main>
+
+        <aside className="border-t border-slate-200 bg-white p-4 xl:min-h-[660px] xl:border-l xl:border-t-0" data-testid="vanguard-reversr-workspace-inspector">
+          <div className="flex items-center justify-between gap-2"><div className="flex items-center gap-2 font-semibold text-slate-950"><PanelRight className="h-4 w-4" /> Request package</div><Badge variant="outline">{readyForQuoteReview ? "Complete" : `${missingInputs.length} open`}</Badge></div>
+          <div className="mt-4 space-y-2">
+            {[["Materials", sourcePackage.length ? `${sourcePackage.length} selected` : "Not started", sourcePackage.length > 0], ["Build goal", goal.trim().length >= 20 ? "Recorded" : "Needs detail", goal.trim().length >= 20], ["Discipline", discipline || "Not selected", Boolean(discipline)], ["Constraints", constraints.length || constraintNotes.trim() ? "Recorded" : "Not recorded", Boolean(constraints.length || constraintNotes.trim())]].map(([label, value, complete]) => (
+              <button key={String(label)} type="button" onClick={() => goToStep(["Materials", "Build goal", "Discipline", "Constraints"].indexOf(String(label)))} className="flex w-full items-start justify-between gap-3 rounded-lg border border-slate-200 p-3 text-left hover:bg-slate-50"><span><span className="block text-xs font-semibold text-slate-900">{label}</span><span className="mt-1 block text-[11px] leading-4 text-slate-500">{String(value)}</span></span>{complete ? <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" /> : <CircleDashed className="h-4 w-4 shrink-0 text-amber-600" />}</button>
+            ))}
           </div>
-        </div>
+          <div className={`mt-5 rounded-xl border p-4 ${readyForQuoteReview ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"}`}>{readyForQuoteReview ? <ShieldCheck className="h-5 w-5 text-emerald-700" /> : <ClipboardCheck className="h-5 w-5 text-amber-700" />}<div className="mt-2 text-sm font-semibold text-slate-950">{readyForQuoteReview ? "Ready for request review" : "Complete the open items"}</div>{!readyForQuoteReview ? <ul className="mt-3 space-y-2">{missingInputs.map((item) => <li key={item} className="flex gap-2 text-[11px] leading-4 text-slate-700"><CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0" />{item}</li>)}</ul> : <p className="mt-2 text-xs leading-5 text-slate-700">The package has enough detail to prepare a receipt and move to the order portal.</p>}</div>
+          <div className="mt-5 border-t border-slate-200 pt-4"><div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Order handoff</div><ol className="mt-3 space-y-3">{["Request receipt", "Account and sharing", "Associate scope and quote", "Build and delivery"].map((label, index) => <li key={label} className="flex items-center gap-3 text-xs text-slate-600"><span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${index === 0 ? "bg-amber-500 text-slate-950" : "bg-slate-100 text-slate-400"}`}>{index + 1}</span><span>{label}</span>{index > 0 ? <LockKeyhole className="ml-auto h-3.5 w-3.5 text-slate-400" /> : null}</li>)}</ol></div>
+        </aside>
       </div>
     </div>
   );
