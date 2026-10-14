@@ -14,6 +14,7 @@ function requireIncludes(path, patterns) {
 
 const files = {
   component: "client/src/components/VanguardReversRIntake.tsx",
+  igesComponent: "client/src/components/VanguardIgesIntake.tsx",
   logo: "client/src/assets/reversrLogo.ts",
   publicPage: "client/src/pages/KinfloPublicSitePreview.tsx",
   portal: "client/src/pages/VanguardOrderPortal.tsx",
@@ -61,8 +62,8 @@ const component = requireIncludes(files.component, [
   "Order handoff",
   "Available now",
   "Sign in to save",
-  "Private upload is intentionally unavailable",
 ]);
+const igesComponent = requireIncludes(files.igesComponent, ["Browser-local IGES", "Engineering review only"]);
 
 requireIncludes(files.logo, [
   "data:image/png;base64,",
@@ -106,12 +107,12 @@ const packageJson = JSON.parse(readFileSync(files.package, "utf8"));
 check(packageJson.scripts["kinflo:validate-vanguard-reversr-desktop-embed"] === "node scripts/validate-kinflo-vanguard-reversr-desktop-embed.mjs", "package registers desktop embed validator", "Missing validator command.");
 check(packageJson.scripts["kinflo:capture-vanguard-reversr-desktop-embed-qa"] === "node scripts/capture-vanguard-reversr-desktop-embed-qa.mjs", "package registers desktop embed capture", "Missing capture command.");
 
-const customerRuntime = [component, publicPage, portal].join("\n");
-for (const marker of ['from "convex/_generated/api"', "useMutation(", "useAction(", "fetch(\"/api/", "fetch('/api/", 'type="file"', "XMLHttpRequest", "WebSocket("]) {
+const customerRuntime = [component, igesComponent, publicPage, portal].join("\n");
+for (const marker of ['from "convex/_generated/api"', "useMutation(", "useAction(", "fetch(\"/api/", "fetch('/api/", "XMLHttpRequest", "WebSocket("]) {
   check(!customerRuntime.includes(marker), `customer runtime excludes ${marker}`, "The embedded workspace must not add live writes, calls, or private transfer.");
 }
 
-const visibleComponentText = [...component.matchAll(/>([^<{][^<]*)</g)].map((match) => match[1].replace(/\s+/g, " ").trim()).filter(Boolean).join(" ");
+const visibleComponentText = [...`${component}\n${igesComponent}`.matchAll(/>([^<{][^<]*)</g)].map((match) => match[1].replace(/\s+/g, " ").trim()).filter(Boolean).join(" ");
 for (const word of ["prompt", "provenance", "fixture", "demo", "preview"]) {
   check(!new RegExp(`\\b${word}\\b`, "i").test(visibleComponentText), `workspace copy excludes ${word}`, "Internal implementation language cannot appear in the client workspace.");
 }

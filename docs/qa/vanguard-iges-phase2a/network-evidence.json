@@ -1,0 +1,15 @@
+{
+  "externalApplicationRequests": 0,
+  "externalWrites": 0,
+  "canvasEvidence": {
+    "width": 778,
+    "height": 420,
+    "distinctColors": 111,
+    "dataUrlLength": 62118
+  },
+  "orbitEvidence": {
+    "changed": true,
+    "before": "17.2655,12.2122,17.2655",
+    "after": "-8.3721,23.8970,10.2066"
+  }
+}
