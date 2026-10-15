@@ -624,6 +624,10 @@ export default function KinfloPublicSitePreview() {
   const navOverlayClass = composition.theme.navContrast === "dark"
     ? "bg-white/85 text-slate-950 backdrop-blur"
     : "bg-transparent text-white";
+  const useDarkLogo = preview.site.slug === VANGUARD_SITE_KEY && (resolvedMode === "dark" || !navSolid);
+  const logoImage = useDarkLogo
+    ? preview.theme.media.logoImageOnDark ?? preview.theme.media.logoImage
+    : preview.theme.media.logoImage;
 
   useEffect(() => {
     const rootStyle = document.documentElement.style;
@@ -663,11 +667,11 @@ export default function KinfloPublicSitePreview() {
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link href={`/kinflo-sites/${preview.site.slug}`} className={`flex min-w-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
-            {preview.theme.media.logoImage ? (
+            {logoImage ? (
               <img
-                src={preview.theme.media.logoImage}
+                src={logoImage}
                 alt={preview.theme.media.logoAlt ?? `${preview.site.name} logo`}
-                className={`h-10 w-auto max-w-[150px] object-contain transition-[filter] duration-300 sm:h-12 sm:max-w-[180px] ${preview.site.slug === VANGUARD_SITE_KEY && (resolvedMode === "dark" || !navSolid) ? "brightness-0 invert" : ""}`}
+                className="h-10 w-auto max-w-[150px] object-contain transition-opacity duration-300 sm:h-12 sm:max-w-[180px]"
                 data-testid="public-preview-brand-logo"
               />
             ) : preview.site.name}

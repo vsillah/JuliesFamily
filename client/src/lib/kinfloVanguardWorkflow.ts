@@ -1,4 +1,5 @@
 import vanguardLogo from "@assets/vanguard-enterprises-logo-transparent.png";
+import vanguardLogoOnDark from "@assets/vanguard-enterprises-logo-on-dark.png";
 
 export const VANGUARD_SITE_KEY = "vanguard-enterprises";
 
@@ -23,11 +24,14 @@ export const vanguardWorkflow = {
     sourcePosture: "Public website facts and service descriptions, adapted into a local KinFlo fixture.",
     logo: {
       image: vanguardLogo,
+      imageOnDark: vanguardLogoOnDark,
       alt: "Vanguard Enterprises",
       sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg",
       repositoryPath: "attached_assets/vanguard-enterprises-logo-transparent.png",
+      darkModeRepositoryPath: "attached_assets/vanguard-enterprises-logo-on-dark.png",
       dimensions: "356 x 138 pixels",
       sha256: "39a8f512ff62d15973a06ea8d80d71b57e9551c26e2b94d6437b48b12de88da8",
+      darkModeSha256: "d2be6e6cce3495469d66a27e5f3b26f26b77458dea53871f0b80243bc875248b",
     },
   },
   requestTypes: [
