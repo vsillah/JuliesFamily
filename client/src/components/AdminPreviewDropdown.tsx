@@ -248,9 +248,10 @@ function UnifiedVariantSelector({
 
 interface AdminPreviewDropdownProps {
   isScrolled?: boolean;
+  kinfloPalette?: boolean;
 }
 
-export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdownProps) {
+export function AdminPreviewDropdown({ isScrolled = false, kinfloPalette = false }: AdminPreviewDropdownProps) {
   const { isAdmin } = useUserRole();
   const { persona: appliedPersona } = usePersona();
   const isMobile = useIsMobile(768); // Runtime check for mobile viewport
@@ -362,6 +363,9 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   // Use the actually applied persona for the trigger display, not the pending selection
   const appliedPersonaConfig = personaConfigs.find(p => p.id === appliedPersona);
   const appliedFunnelConfig = funnelStageConfigs.find(f => f.id === currentFunnel);
+  const paletteActionClass = kinfloPalette ? "kinflo-accent-solid" : "";
+  const paletteIndicatorClass = kinfloPalette ? "kinflo-accent-text" : "text-primary";
+  const paletteSoftClass = kinfloPalette ? "kinflo-accent-soft" : "bg-primary/10 border-primary/20";
 
   // Determine if variant selection UI should be shown (both persona and funnel must be selected)
   const canShowVariants = activeTests && activeTests.length > 0 && 
@@ -371,7 +375,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
   // Mobile full-screen overlay - portaled to document.body to escape stacking context
   const mobileOverlay = showMobileOverlay && typeof document !== 'undefined' && createPortal(
     <div 
-      className="fixed inset-0 w-screen h-screen bg-background z-[99999]"
+      className={cn("fixed inset-0 w-screen h-screen bg-background z-[99999]", kinfloPalette && "kinflo-public-surface")}
       data-testid="menu-admin-preview"
     >
       {/* Close button - fixed position so it stays visible while scrolling */}
@@ -386,7 +390,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
       
       <div className="h-full overflow-y-auto px-4 pt-16 pb-8 relative z-[100000]">
         <div className="flex items-center gap-2 mb-4">
-          <Eye className="w-5 h-5 text-primary" />
+          <Eye className={cn("w-5 h-5", paletteIndicatorClass)} />
           <h2 className="font-semibold text-base">Admin Preview Mode</h2>
         </div>
         <div className="h-px bg-border mb-4" />
@@ -498,7 +502,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
         {/* Action Buttons */}
         <div className="py-2 space-y-3">
           <Button
-            className="w-full h-12 text-base"
+            className={cn("w-full h-12 text-base", paletteActionClass)}
             onClick={() => {
               setShowMobileOverlay(false);
               handleApply();
@@ -533,7 +537,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               <UserCog className="w-4 h-4" />
               Active Impersonation
             </label>
-            <div className="p-3 bg-primary/10 rounded-md border border-primary/20">
+            <div className={cn("p-3 rounded-md border", paletteSoftClass)}>
               <p className="text-sm font-medium">
                 Viewing as: {impersonatedUser.firstName} {impersonatedUser.lastName}
               </p>
@@ -600,7 +604,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
             </div>
             {impersonationUserId && (
               <Button
-                className="w-full h-11 text-base"
+                className={cn("w-full h-11 text-base", paletteActionClass)}
                 onClick={() => {
                   startImpersonationMutation.mutate(impersonationUserId, {
                     onSuccess: () => {
@@ -673,7 +677,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           className={cn(
             "gap-2 relative",
             !isScrolled && !impersonatedUser && "border-white/30 text-white hover:bg-white/10",
-            impersonatedUser && "bg-primary text-primary-foreground"
+            impersonatedUser && (kinfloPalette ? "kinflo-accent-solid" : "bg-primary text-primary-foreground")
           )}
           data-testid="button-admin-preview-dropdown"
           onClick={() => setShowMobileOverlay(true)}
@@ -683,7 +687,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           ) : (
             <Eye className={cn(
               "w-4 h-4",
-              isPreviewActive && "text-primary"
+              isPreviewActive && paletteIndicatorClass
             )} />
           )}
           {impersonatedUser ? (
@@ -710,7 +714,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               className={cn(
                 "gap-2 relative",
                 !isScrolled && !impersonatedUser && "border-white/30 text-white hover:bg-white/10",
-                impersonatedUser && "bg-primary text-primary-foreground"
+                impersonatedUser && (kinfloPalette ? "kinflo-accent-solid" : "bg-primary text-primary-foreground")
               )}
               data-testid="button-admin-preview-dropdown"
             >
@@ -719,7 +723,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
               ) : (
                 <Eye className={cn(
                   "w-4 h-4",
-                  isPreviewActive && "text-primary"
+                  isPreviewActive && paletteIndicatorClass
                 )} />
               )}
               {impersonatedUser ? (
@@ -739,11 +743,11 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
           </DropdownMenuTrigger>
           <DropdownMenuContent 
             align="end" 
-            className="w-80 z-[99999] max-h-[calc(100vh-100px)] overflow-y-auto" 
+            className={cn("w-80 z-[99999] max-h-[calc(100vh-100px)] overflow-y-auto", kinfloPalette && "kinflo-palette-surface")} 
             data-testid="menu-admin-preview"
           >
             <DropdownMenuLabel className="flex items-center gap-2">
-              <Eye className="w-4 h-4 text-primary" />
+              <Eye className={cn("w-4 h-4", paletteIndicatorClass)} />
               Admin Preview Mode
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -891,7 +895,7 @@ export function AdminPreviewDropdown({ isScrolled = false }: AdminPreviewDropdow
                   <UserCog className="w-3 h-3" />
                   Active Impersonation
                 </label>
-                <div className="p-2 bg-primary/10 rounded-md border border-primary/20">
+                <div className={cn("p-2 rounded-md border", paletteSoftClass)}>
                   <p className="text-xs font-medium">
                     Viewing as: {impersonatedUser.firstName} {impersonatedUser.lastName}
                   </p>

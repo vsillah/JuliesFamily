@@ -32,7 +32,7 @@ export default function KinfloPublicSiteAccountControls({
   return (
     <div className="flex items-center gap-1.5" data-testid="kinflo-public-account-controls">
       {!isAdmin && isAuthenticated && <DevAdminButton />}
-      {isAdmin && <AdminPreviewDropdown isScrolled={navSolid} />}
+      {isAdmin && <AdminPreviewDropdown isScrolled={navSolid} kinfloPalette />}
       {isAuthenticated && user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -47,13 +47,13 @@ export default function KinfloPublicSiteAccountControls({
             >
               <Avatar className="h-8 w-8 border border-current/30">
                 {user.profileImageUrl ? <AvatarImage src={user.profileImageUrl} alt={`${user.firstName ?? "User"} ${user.lastName ?? ""}`} /> : null}
-                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                <AvatarFallback className="kinflo-accent-solid text-xs">
                   {getInitials(user.firstName, user.lastName)}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="kinflo-palette-surface w-56">
             <DropdownMenuLabel>
               <div>{[user.firstName, user.lastName].filter(Boolean).join(" ") || "Your account"}</div>
               {user.email && <div className="mt-1 text-xs font-normal text-muted-foreground">{user.email}</div>}
@@ -89,7 +89,7 @@ export default function KinfloPublicSiteAccountControls({
           type="button"
           size="sm"
           variant={navSolid ? "outline" : "ghost"}
-          className={!navSolid ? "text-white hover:bg-white/15 hover:text-white" : undefined}
+          className={navSolid ? "kinflo-accent-solid" : "text-white hover:bg-white/15 hover:text-white"}
           onClick={() => { window.location.href = "/api/login"; }}
           data-testid="button-public-sign-in"
         >

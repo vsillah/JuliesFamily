@@ -43,7 +43,7 @@ export default function VanguardThemeControl({
           <ActiveIcon className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
+      <DropdownMenuContent align="end" className="kinflo-palette-surface w-44">
         <DropdownMenuLabel>Color theme</DropdownMenuLabel>
         <DropdownMenuRadioGroup value={mode} onValueChange={(value) => onChange(value as VanguardThemeMode)}>
           {options.map((option) => {

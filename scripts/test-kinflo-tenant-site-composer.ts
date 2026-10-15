@@ -68,6 +68,10 @@ test("public navigation uses compact theme and Julie account controls", () => {
   assert.match(accountControls, /useAuth/);
   assert.match(accountControls, /useUserRole/);
   assert.match(accountControls, /AdminPreviewDropdown/);
+  assert.match(accountControls, /kinfloPalette/);
+  assert.match(accountControls, /kinflo-accent-solid/);
+  assert.match(accountControls, /kinflo-palette-surface/);
+  assert.match(themeControl, /kinflo-palette-surface/);
   assert.match(accountControls, /menu-public-profile-settings/);
   assert.match(accountControls, /button-public-sign-in/);
 });
