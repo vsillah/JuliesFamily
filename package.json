@@ -71,6 +71,7 @@
     "kinflo:test-tenant-site-composer": "node --import tsx --test scripts/test-kinflo-tenant-site-composer.ts",
     "kinflo:validate-theme-write-contract": "node scripts/validate-kinflo-theme-write-contract.mjs",
     "kinflo:capture-tenant-palette-qa": "node scripts/capture-kinflo-tenant-palette-qa.mjs",
+    "kinflo:capture-home-recovery-qa": "node scripts/capture-kinflo-home-recovery-qa.mjs",
     "kinflo:validate-browser-safe-auth-aliases": "node scripts/validate-kinflo-browser-safe-auth-aliases.mjs",
     "kinflo:validate-convex-identity-cutover": "node scripts/validate-kinflo-convex-identity-cutover.mjs",
     "kinflo:serve-convex-identity-cutover-smoke": "node scripts/serve-kinflo-identity-cutover-smoke.mjs",

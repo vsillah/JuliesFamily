@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
@@ -34,6 +36,40 @@ const DEFAULT_SECTIONS: VisibleSections = {
   "student-dashboard": false,  // Only visible for enrolled students
   "volunteer-dashboard": false,  // Only visible for enrolled volunteers
 };
+
+function HomeLoadingState() {
+  return (
+    <main
+      className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground"
+      aria-busy="true"
+      aria-live="polite"
+      data-testid="home-loading-state"
+    >
+      <div className="flex max-w-md flex-col items-center gap-4 text-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        <div>
+          <h1 className="text-xl font-semibold">Loading the homepage</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            We're preparing the latest content and personalization for you.
+          </p>
+        </div>
+        <button
+          type="button"
+          className="text-sm font-medium text-primary underline underline-offset-4"
+          onClick={() => window.location.reload()}
+        >
+          Refresh page
+        </button>
+        <Link
+          href="/kinflo-sites/vanguard-enterprises"
+          className="text-sm font-medium text-muted-foreground underline underline-offset-4"
+        >
+          Open Vanguard Enterprises
+        </Link>
+      </div>
+    </main>
+  );
+}
 
 export default function Home() {
   const { persona, funnelStage, isPersonaLoading } = usePersona();
@@ -85,7 +121,7 @@ export default function Home() {
   const isContentReady = !isPersonaLoading && !heroLoading && (!heroImageLoading || !heroContent?.[0]);
   
   if (!isContentReady) {
-    return null;
+    return <HomeLoadingState />;
   }
 
   return (
