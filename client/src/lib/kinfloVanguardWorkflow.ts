@@ -30,8 +30,8 @@ export const vanguardWorkflow = {
       repositoryPath: "attached_assets/vanguard-enterprises-logo-transparent.png",
       darkModeRepositoryPath: "attached_assets/vanguard-enterprises-logo-on-dark.png",
       dimensions: "356 x 138 pixels",
-      sha256: "39a8f512ff62d15973a06ea8d80d71b57e9551c26e2b94d6437b48b12de88da8",
-      darkModeSha256: "d2be6e6cce3495469d66a27e5f3b26f26b77458dea53871f0b80243bc875248b",
+      sha256: "4adc4639175287a55574931c9bac6e25735fb8beb0a7fc9f1305980358e2da13",
+      darkModeSha256: "1fc651541ef5abf0f5070486408c185be8550bb3d4caa41e723b6d732f6c64e1",
     },
   },
   requestTypes: [

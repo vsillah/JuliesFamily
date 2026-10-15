@@ -227,7 +227,7 @@ requireIncludes(vanguardWorkflowPath, [
   'import vanguardLogoOnDark from "@assets/vanguard-enterprises-logo-on-dark.png";',
   'sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg"',
   'alt: "Vanguard Enterprises"',
-  'darkModeSha256: "d2be6e6cce3495469d66a27e5f3b26f26b77458dea53871f0b80243bc875248b"',
+  'darkModeSha256: "1fc651541ef5abf0f5070486408c185be8550bb3d4caa41e723b6d732f6c64e1"',
   'auditedAt: "2026-10-12"',
   'gsa: "GSA Contract Schedule 70, Special Item Number 132-51"',
 ]);
