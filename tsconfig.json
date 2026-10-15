@@ -18,7 +18,8 @@
     "paths": {
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"],
-      "@db/*": ["./shared/*"]
+      "@db/*": ["./shared/*"],
+      "@kinflo-phase174-generated-api": ["./client/src/lib/kinfloPhase174GeneratedApiBuildStub.ts"]
     }
   }
 }

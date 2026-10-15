@@ -74,6 +74,7 @@ if (trackedSecretFiles.length > 0) {
 
 for (const path of [
   "docs/phase174-hosted-read-only-smoke-qa-plan.md",
+  "docs/phase174-generated-read-only-harness.md",
   "docs/phase90-hosted-smoke-gap-backlog.md",
   "docs/phase91-hosted-smoke-execution-sequencer.md",
   "docs/phase92-hosted-smoke-evidence-ledger.md",
@@ -81,6 +82,7 @@ for (const path of [
   "docs/phase172-generated-api-cutover-readiness-scoreboard.md",
   "docs/phase173-generated-api-cutover-rollback-drill-matrix.md",
   "client/src/lib/kinfloShellData.ts",
+  "client/src/lib/kinfloPhase174GeneratedReadOnlyHarness.ts",
   "client/src/pages/AdminKinfloShell.tsx",
   "scripts/validate-kinflo-hosted-read-only-smoke-qa-plan.mjs",
   "package.json",
@@ -97,7 +99,7 @@ requireIncludes("docs/phase174-hosted-read-only-smoke-qa-plan.md", [
   "Provider-gated metadata gaps: 1",
   "Governance write gaps: 4",
   "Do not run `npm run kinflo:dry-run-live-smoke`",
-  "No generated Convex API files are committed or imported.",
+  "No generated Convex API files are committed. The development-only harness imports ignored generated bindings without changing a product adapter.",
   "No hosted smoke is executed.",
   "No live Convex query, mutation, or action is executed.",
   "No provider API is called.",
@@ -132,6 +134,8 @@ requireIncludes("package.json", [
 
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const shellPage = read("client/src/pages/AdminKinfloShell.tsx");
+const readOnlyHarness = read("client/src/lib/kinfloPhase174GeneratedReadOnlyHarness.ts");
+const viteConfig = read("vite.config.ts");
 const doc = read("docs/phase174-hosted-read-only-smoke-qa-plan.md");
 const backlogBlock = extractBlock(
   shellData,
@@ -242,9 +246,18 @@ const importsGeneratedApi =
   shellData.includes("from \"convex/_generated/api\"") ||
   shellData.includes("from 'convex/_generated/api'");
 if (importsGeneratedApi) {
-  fail("hosted read-only smoke QA plan does not import generated API", "Generated API imports remain gated until hosted activation approval.");
+  fail("product shell surfaces do not import generated API", "Generated API imports must remain isolated from product shell surfaces.");
 } else {
-  pass("hosted read-only smoke QA plan does not import generated API");
+  pass("product shell surfaces do not import generated API");
+}
+
+if (
+  readOnlyHarness.includes('from "@kinflo-phase174-generated-api"')
+  && viteConfig.includes('path.resolve(import.meta.dirname, "convex", "_generated", "api")')
+) {
+  pass("development-only read-only harness imports generated API");
+} else {
+  fail("development-only read-only harness imports generated API", "Expected the isolated harness to use reviewed generated references.");
 }
 
 if (shellPage.includes("useMutation(") || shellPage.includes("useAction(") || shellData.includes("useMutation(") || shellData.includes("useAction(")) {
@@ -271,7 +284,8 @@ console.log("Minimum read-only functions: 20");
 console.log("Mutation gaps held: 3");
 console.log("Provider metadata gaps held: 1");
 console.log("Governance write gaps held: 4");
-console.log("Generated API approved/imported: no");
+console.log("Product generated API adapter approved/imported: no");
+console.log("Development-only generated read harness present: yes");
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
 console.log("Codegen run: no");
