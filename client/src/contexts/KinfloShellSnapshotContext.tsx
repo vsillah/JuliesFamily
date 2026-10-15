@@ -89,6 +89,7 @@ type ActivationReadiness = {
   userSynced: boolean;
   platformRole: string | null;
   platformAdmin: boolean;
+  platformAdminExists: boolean;
   tenantCount: number;
   siteCount: number;
   publishedSiteCount: number;
