@@ -34,11 +34,11 @@ if (existsSync(files.vanguardHook)) {
 
 if (existsSync(files.control)) {
   const control = read(files.control);
-  for (const marker of ['aria-label="Color theme"', 'testId: "vanguard-theme-light"', 'testId: "vanguard-theme-dark"', 'testId: "vanguard-theme-system"', "aria-pressed={active}"]) {
+  for (const marker of ['aria-label={`Color theme:', 'testId: "vanguard-theme-light"', 'testId: "vanguard-theme-dark"', 'testId: "vanguard-theme-system"', "DropdownMenuRadioGroup"]) {
     check(control.includes(marker), `theme control includes ${marker}`, "Accessible theme control marker is missing.");
   }
   check(!/(?:amber|orange|rose)-/.test(control), "theme control excludes conflicting warm accent utilities", "Use the Vanguard/ReversR blue active state in the page-wide theme control.");
-  check(control.includes("bg-blue-600") && control.includes("dark:bg-blue-500"), "theme control uses blue active states", "The page-wide theme control must follow the ReversR-compatible primary role.");
+  check(control.includes("size=\"icon\"") && control.includes("DropdownMenuTrigger"), "theme control uses a compact menu trigger", "Keep the public header focused on the site navigation instead of a persistent three-button theme group.");
 }
 
 for (const path of [files.publicPage, files.intake, files.portal]) {

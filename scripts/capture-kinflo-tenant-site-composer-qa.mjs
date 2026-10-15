@@ -109,7 +109,21 @@ try {
   }
 
   async function setTheme(mode) {
-    await evaluate(`document.querySelector('[data-testid="vanguard-theme-${mode}"]')?.click()`);
+    await evaluate(`(() => {
+      const trigger = document.querySelector('[data-testid="vanguard-theme-control"]');
+      if (!(trigger instanceof HTMLElement)) return false;
+      trigger.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0, pointerType: "mouse" }));
+      trigger.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }));
+      return true;
+    })()`);
+    await wait(80);
+    await evaluate(`(() => {
+      const item = document.querySelector('[data-testid="vanguard-theme-${mode}"]');
+      if (!(item instanceof HTMLElement)) return false;
+      item.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0, pointerType: "mouse" }));
+      item.dispatchEvent(new MouseEvent("click", { bubbles: true, button: 0 }));
+      return true;
+    })()`);
     await wait(180);
     const state = await evaluate(`document.querySelector('.kinflo-public-surface[data-kinflo-theme]')?.dataset.kinfloTheme`);
     const resolved = state.result?.value;

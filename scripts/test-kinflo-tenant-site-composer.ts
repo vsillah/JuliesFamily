@@ -56,3 +56,18 @@ test("public renderer applies the tenant navigation contrast setting", () => {
   assert.match(renderer, /data-nav-contrast/);
   assert.match(renderer, /bg-white\/85 text-slate-950 backdrop-blur/);
 });
+
+test("public navigation uses compact theme and Julie account controls", () => {
+  const renderer = readFileSync("client/src/pages/KinfloPublicSitePreview.tsx", "utf8");
+  const themeControl = readFileSync("client/src/components/VanguardThemeControl.tsx", "utf8");
+  const accountControls = readFileSync("client/src/components/KinfloPublicSiteAccountControls.tsx", "utf8");
+
+  assert.match(renderer, /KinfloPublicSiteAccountControls/);
+  assert.match(themeControl, /DropdownMenuRadioGroup/);
+  assert.doesNotMatch(themeControl, /role="group"/);
+  assert.match(accountControls, /useAuth/);
+  assert.match(accountControls, /useUserRole/);
+  assert.match(accountControls, /AdminPreviewDropdown/);
+  assert.match(accountControls, /menu-public-profile-settings/);
+  assert.match(accountControls, /button-public-sign-in/);
+});

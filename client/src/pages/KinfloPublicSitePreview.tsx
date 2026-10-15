@@ -5,6 +5,7 @@ import LeadCaptureForm from "@/components/LeadCaptureForm";
 import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
 import VanguardReversRIntake from "@/components/VanguardReversRIntake";
 import VanguardThemeControl from "@/components/VanguardThemeControl";
+import KinfloPublicSiteAccountControls from "@/components/KinfloPublicSiteAccountControls";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -683,7 +684,10 @@ export default function KinfloPublicSitePreview() {
               </a>
             ))}
           </nav>
-          <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} />
+          <div className="flex items-center gap-1">
+            <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} navSolid={navSolid} />
+            <KinfloPublicSiteAccountControls navSolid={navSolid} />
+          </div>
         </div>
         <nav className={`mx-auto flex max-w-7xl flex-wrap gap-x-4 gap-y-2 px-4 py-2 text-xs md:hidden ${navSolid ? "text-muted-foreground" : "border-t border-white/20 text-white/90"}`} aria-label="Mobile page navigation">
           {headerNav.map((item) => (

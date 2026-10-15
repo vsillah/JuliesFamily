@@ -1,5 +1,13 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { VanguardThemeMode } from "@/hooks/useVanguardTheme";
 
 const options = [
@@ -11,38 +19,44 @@ const options = [
 export default function VanguardThemeControl({
   mode,
   onChange,
+  navSolid = false,
 }: {
   mode: VanguardThemeMode;
   onChange: (mode: VanguardThemeMode) => void;
+  navSolid?: boolean;
 }) {
+  const activeOption = options.find((option) => option.mode === mode) ?? options[2];
+  const ActiveIcon = activeOption.icon;
+
   return (
-    <div
-      role="group"
-      aria-label="Color theme"
-      className="flex w-fit items-center rounded-lg border border-slate-200 bg-white/90 p-1 shadow-sm dark:border-slate-700 dark:bg-slate-900/90"
-      data-testid="vanguard-theme-control"
-    >
-      {options.map((option) => {
-        const Icon = option.icon;
-        const active = mode === option.mode;
-        return (
-          <Button
-            key={option.mode}
-            type="button"
-            size="sm"
-            variant="ghost"
-            aria-pressed={active}
-            aria-label={`Use ${option.label.toLowerCase()} theme`}
-            title={`${option.label} theme`}
-            className={`h-8 gap-1.5 px-2.5 text-xs ${active ? "bg-blue-600 text-white hover:bg-blue-700 hover:text-white dark:bg-blue-500 dark:hover:bg-blue-400" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"}`}
-            onClick={() => onChange(option.mode)}
-            data-testid={option.testId}
-          >
-            <Icon className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">{option.label}</span>
-          </Button>
-        );
-      })}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          aria-label={`Color theme: ${activeOption.label}`}
+          title={`Color theme: ${activeOption.label}`}
+          className={`h-9 w-9 rounded-full ${navSolid ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/15 hover:text-white"}`}
+          data-testid="vanguard-theme-control"
+        >
+          <ActiveIcon className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuLabel>Color theme</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={mode} onValueChange={(value) => onChange(value as VanguardThemeMode)}>
+          {options.map((option) => {
+            const Icon = option.icon;
+            return (
+              <DropdownMenuRadioItem key={option.mode} value={option.mode} data-testid={option.testId}>
+                <Icon className="h-4 w-4" />
+                {option.label}
+              </DropdownMenuRadioItem>
+            );
+          })}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
