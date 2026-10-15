@@ -1,0 +1,64 @@
+{
+  "viewports": {
+    "desktop": {
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440
+    },
+    "tablet": {
+      "clientWidth": 1024,
+      "scrollWidth": 1024,
+      "bodyScrollWidth": 1024
+    },
+    "mobile": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390
+    },
+    "adminDesktop": {
+      "clientWidth": 1440,
+      "scrollWidth": 1440,
+      "bodyScrollWidth": 1440
+    },
+    "adminTablet": {
+      "clientWidth": 1024,
+      "scrollWidth": 1024,
+      "bodyScrollWidth": 1024
+    },
+    "adminMobile": {
+      "clientWidth": 390,
+      "scrollWidth": 390,
+      "bodyScrollWidth": 390
+    }
+  },
+  "themes": [
+    "light",
+    "dark",
+    "system"
+  ],
+  "navStates": [
+    "overlay",
+    "solid"
+  ],
+  "navContrast": "adaptive",
+  "reducedMotion": {
+    "matches": true,
+    "transform": "none"
+  },
+  "order": [
+    "public-preview-hero",
+    "public-preview-services",
+    "public-preview-vanguard-source-parity",
+    "public-preview-vanguard-order-backbone",
+    "public-preview-vanguard-workflow",
+    "public-preview-vanguard-build-request"
+  ],
+  "parallax": {
+    "transform": "matrix(1.04, 0, 0, 1.04, 0, 18)",
+    "heroBottom": 114,
+    "nextTop": 114,
+    "overlap": false
+  },
+  "debugCopy": [],
+  "externalApplicationRequests": 0
+}

@@ -98,6 +98,7 @@ import {
 import { useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
 import { useKinfloThemeWriteAdapter } from "@/contexts/KinfloThemeWriteAdapterContext";
+import TenantSiteComposer from "@/components/TenantSiteComposer";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import { isKinfloPaletteId } from "@/lib/kinfloPaletteRegistry";
 import {
@@ -2856,6 +2857,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Website sections", value: vanguardWorkflow.sourceSite.coverage.length },
+            { label: "Source pages", value: vanguardWorkflow.sourceSite.inventory.length },
             { label: "Service areas", value: vanguardWorkflow.services.length },
             { label: "Public website", value: "Available" },
             { label: "Request saving", value: "Not available" },
@@ -11535,6 +11537,15 @@ export default function AdminKinfloShell() {
           <TabsContent value="site-studio" className="mt-2">
             <section className="flex min-w-0 flex-col gap-2 overflow-x-clip" data-testid="section-kinflo-client-studio-compact-shell">
               {clientWebsiteStudioLaneRail}
+
+              <div className={`${shouldShowClientWebsiteStudioContext ? "block" : "hidden"} order-2`}>
+                <TenantSiteComposer
+                  siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
+                  siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
+                  previewPath={clientWebsiteStudioPreviewPath}
+                  onOpenControl={(control) => selectShellTab(control)}
+                />
+              </div>
 
               <div
                 className={`order-3 ${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}

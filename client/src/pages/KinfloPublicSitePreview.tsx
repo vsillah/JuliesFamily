@@ -1,5 +1,5 @@
 import { Link, useRoute } from "wouter";
-import { useEffect, type CSSProperties } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
@@ -20,6 +20,11 @@ import {
   type KinfloPublicBlock,
   type KinfloPublicSitePreview as KinfloPublicSitePreviewPayload,
 } from "@/lib/kinfloPublicSitePreview";
+import {
+  resolveTenantSiteComposition,
+  sortTenantSiteNavigation,
+  sortTenantSiteSections,
+} from "@/lib/kinfloTenantSiteComposition";
 
 const VANGUARD_SITE_KEY = "vanguard-enterprises";
 
@@ -404,9 +409,11 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
 function BlockSection({
   block,
   preview,
+  heroParallaxY,
 }: {
   block: KinfloPublicBlock;
   preview: KinfloPublicSitePreviewPayload;
+  heroParallaxY: number;
 }) {
   const accent = "var(--kinflo-accent)";
 
@@ -416,13 +423,16 @@ function BlockSection({
         <img
           src={preview.theme.media.heroImage}
           alt={preview.theme.media.heroAlt ?? `${preview.site.name} preview`}
-          className="absolute inset-0 h-full w-full object-cover"
-          style={{ objectPosition: preview.theme.media.heroPosition ?? "center" }}
+          className="kinflo-hero-media absolute inset-0 h-full w-full object-cover"
+          style={{
+            objectPosition: preview.theme.media.heroPosition ?? "center",
+            transform: `translate3d(0, ${heroParallaxY}px, 0) scale(1.04)`,
+          }}
         />
-        <div className="absolute inset-0 bg-black/55" />
-        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-center px-4 py-20 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/45 to-black/70" />
+        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-center px-4 pb-24 pt-32 sm:px-6 lg:px-8">
           <Badge className="w-fit bg-white/90 text-slate-950 hover:bg-white">
-            {preview.site.slug === VANGUARD_SITE_KEY ? "Engineering and technology services" : preview.site.templateKey}
+            {preview.site.slug === VANGUARD_SITE_KEY ? "Engineering and technology services" : preview.site.name}
           </Badge>
           <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
             {block.title}
@@ -452,7 +462,7 @@ function BlockSection({
       <section id="services" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-services">
         <div className="mx-auto max-w-7xl">
           <div className="max-w-3xl">
-            <Badge variant="outline">{preview.site.slug === VANGUARD_SITE_KEY ? "Services overview" : "Reusable content block"}</Badge>
+            <Badge variant="outline">Services overview</Badge>
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
           </div>
@@ -478,7 +488,7 @@ function BlockSection({
       <section id="impact" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-campaign">
         <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div>
-            <Badge variant="outline">Campaign block</Badge>
+            <Badge variant="outline">Campaign progress</Badge>
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
           </div>
@@ -575,20 +585,45 @@ export default function KinfloPublicSitePreview() {
         ? "desktop"
         : undefined,
   });
-  const headerNav = preview.navigationItems
-    .filter((item) => item.placement === "header")
-    .sort((a, b) => a.order - b.order);
-  const footerNav = preview.navigationItems
-    .filter((item) => item.placement === "footer")
-    .sort((a, b) => a.order - b.order);
-  const contextPersona = preview.context.persona ?? "anonymous";
-  const contextJourneyStage = preview.context.journeyStage ?? "default";
-  const contextDevice = preview.context.device ?? "responsive";
-  const contextReviewSource = preview.context.reviewSource ?? preview.context.source;
-  const isVanguard = preview.site.slug === VANGUARD_SITE_KEY;
+  const composition = resolveTenantSiteComposition(preview.site.slug);
+  const headerNav = sortTenantSiteNavigation(composition.navigation, "header");
+  const footerNav = sortTenantSiteNavigation(composition.navigation, "footer");
+  const orderedSections = sortTenantSiteSections(composition.sections);
+  const sectionOrder = new Map(orderedSections.map((section) => [section.blockId, section.order]));
+  const configuredSectionBlockIds = new Set(composition.sections.map((section) => section.blockId).filter((blockId): blockId is string => Boolean(blockId)));
+  const orderedBlocks = preview.blocks
+    .filter((block) => !configuredSectionBlockIds.has(block._id) || sectionOrder.has(block._id))
+    .slice()
+    .sort((left, right) => (sectionOrder.get(left._id) ?? left.order) - (sectionOrder.get(right._id) ?? right.order));
   const { mode: tenantThemeMode, resolvedMode, setMode: setTenantThemeMode } = useTenantTheme(preview.tenant.slug);
-  const tenantPalette = resolveKinfloPalette(preview.theme.paletteId);
+  const tenantPalette = resolveKinfloPalette(composition.theme.paletteId);
   const paletteVariables = getPaletteCssVariables(tenantPalette, resolvedMode);
+  const [scrollY, setScrollY] = useState(0);
+  const [navInteracted, setNavInteracted] = useState(false);
+  const [navFocused, setNavFocused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const applyMotionPreference = () => setReducedMotion(media.matches);
+    const handleScroll = () => setScrollY(window.scrollY);
+    applyMotionPreference();
+    handleScroll();
+    media.addEventListener("change", applyMotionPreference);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      media.removeEventListener("change", applyMotionPreference);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  const navSolid = scrollY > 24 || navInteracted || navFocused;
+  const heroParallaxY = reducedMotion || !composition.hero.parallax
+    ? 0
+    : Math.min(scrollY, 180) * composition.hero.parallaxStrength;
+  const navOverlayClass = composition.theme.navContrast === "dark"
+    ? "bg-white/85 text-slate-950 backdrop-blur"
+    : "bg-transparent text-white";
 
   useEffect(() => {
     const rootStyle = document.documentElement.style;
@@ -615,9 +650,19 @@ export default function KinfloPublicSitePreview() {
       data-kinflo-theme={resolvedMode}
       style={paletteVariables as CSSProperties}
     >
-      <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
+      <header
+        className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${navSolid ? "bg-background/95 shadow-sm backdrop-blur" : navOverlayClass}`}
+        data-nav-state={navSolid ? "solid" : "overlay"}
+        data-nav-contrast={composition.theme.navContrast}
+        onMouseEnter={() => setNavInteracted(true)}
+        onMouseLeave={() => setNavInteracted(false)}
+        onFocusCapture={() => setNavFocused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavFocused(false);
+        }}
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <Link href={`/kinflo-sites/${preview.site.slug}`} className="flex min-w-0 items-center text-sm font-semibold">
+          <Link href={`/kinflo-sites/${preview.site.slug}`} className={`flex min-w-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
             {preview.theme.media.logoImage ? (
               <img
                 src={preview.theme.media.logoImage}
@@ -627,29 +672,18 @@ export default function KinfloPublicSitePreview() {
               />
             ) : preview.site.name}
           </Link>
-          <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">
+          <nav className={`hidden items-center gap-5 text-sm md:flex ${navSolid ? "text-muted-foreground" : "text-white/90"}`}>
             {headerNav.map((item) => (
-              <a key={item._id} href={item.href} className="hover:text-foreground">
+              <a key={item.key} href={item.href} className="hover:text-foreground">
                 {item.label}
               </a>
             ))}
           </nav>
-          {isVanguard ? (
-            <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} />
-          ) : (
-            <>
-              <Badge variant="outline" className="hidden 2xl:inline-flex">
-                {preview.context.convexFunction}
-              </Badge>
-              <Badge variant="secondary" className="hidden whitespace-nowrap 2xl:inline-flex" data-testid="public-preview-context">
-                {contextPersona} / {contextJourneyStage} / {contextDevice} / {contextReviewSource}
-              </Badge>
-            </>
-          )}
+          <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} />
         </div>
-        <nav className="mx-auto flex max-w-7xl gap-4 overflow-x-auto border-t px-4 py-2 text-xs text-muted-foreground md:hidden" aria-label="Mobile page navigation">
+        <nav className={`mx-auto flex max-w-7xl flex-wrap gap-x-4 gap-y-2 px-4 py-2 text-xs md:hidden ${navSolid ? "text-muted-foreground" : "border-t border-white/20 text-white/90"}`} aria-label="Mobile page navigation">
           {headerNav.map((item) => (
-            <a key={item._id} href={item.href} className="shrink-0 whitespace-nowrap hover:text-foreground">
+            <a key={item.key} href={item.href} className="shrink-0 whitespace-nowrap hover:text-foreground">
               {item.label}
             </a>
           ))}
@@ -657,11 +691,8 @@ export default function KinfloPublicSitePreview() {
       </header>
 
       <main>
-        {preview.blocks
-          .slice()
-          .sort((a, b) => a.order - b.order)
-          .map((block) => (
-            <BlockSection key={block._id} block={block} preview={preview} />
+        {orderedBlocks.map((block) => (
+            <BlockSection key={block._id} block={block} preview={preview} heroParallaxY={heroParallaxY} />
           ))}
       </main>
 
@@ -672,12 +703,12 @@ export default function KinfloPublicSitePreview() {
             {preview.site.slug === VANGUARD_SITE_KEY ? (
               <div className="mt-2">{vanguardWorkflow.company.location} · {vanguardWorkflow.company.email} · {vanguardWorkflow.company.phone}</div>
             ) : (
-              <div>{preview.site.subdomain}.kinflo.preview · {preview.site.templateKey}</div>
+              <div>{preview.site.name}</div>
             )}
           </div>
           <div className="flex flex-wrap gap-4">
             {footerNav.map((item) => (
-              <a key={item._id} href={item.href} className="hover:text-foreground">
+              <a key={item.key} href={item.href} className="hover:text-foreground">
                 {item.label}
               </a>
             ))}

@@ -68,6 +68,7 @@
     "kinflo:validate-vanguard-theme-contrast": "node scripts/validate-kinflo-vanguard-theme-contrast.mjs",
     "kinflo:capture-vanguard-theme-contrast-qa": "node scripts/capture-vanguard-theme-contrast-qa.mjs",
     "kinflo:validate-tenant-palettes": "tsx scripts/validate-kinflo-tenant-palettes.ts",
+    "kinflo:test-tenant-site-composer": "node --import tsx --test scripts/test-kinflo-tenant-site-composer.ts",
     "kinflo:validate-theme-write-contract": "node scripts/validate-kinflo-theme-write-contract.mjs",
     "kinflo:capture-tenant-palette-qa": "node scripts/capture-kinflo-tenant-palette-qa.mjs",
     "kinflo:validate-browser-safe-auth-aliases": "node scripts/validate-kinflo-browser-safe-auth-aliases.mjs",

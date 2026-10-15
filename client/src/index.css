@@ -39,6 +39,17 @@
     background: var(--kinflo-surface-muted) !important;
     color: var(--kinflo-foreground) !important;
   }
+
+  .kinflo-hero-media {
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kinflo-hero-media {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* LIGHT MODE */
