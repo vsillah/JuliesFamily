@@ -1,0 +1,118 @@
+name: Deploy KinFlo Convex development functions
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type "deploy hallowed-manatee-765" to confirm the fixed development target
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: kinflo-convex-development
+  cancel-in-progress: false
+
+jobs:
+  deploy-development-functions:
+    name: Deploy functions to hallowed-manatee-765
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: kinflo-convex-development
+    env:
+      EXPECTED_CONVEX_DEPLOYMENT: hallowed-manatee-765
+      DISPATCH_CONFIRMATION: ${{ inputs.confirmation }}
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+    steps:
+      - name: Check out requested commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Verify manual development-only binding
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]]; then
+            echo "::error title=Unsupported trigger::This workflow may run only through workflow_dispatch."
+            exit 1
+          fi
+
+          if [[ "$DISPATCH_CONFIRMATION" != "deploy $EXPECTED_CONVEX_DEPLOYMENT" ]]; then
+            echo "::error title=Confirmation mismatch::Enter the exact development deployment confirmation shown in the workflow form."
+            exit 1
+          fi
+
+          if [[ -z "${CONVEX_DEPLOY_KEY:-}" ]]; then
+            echo "::error title=Missing development deploy key::Configure the protected environment secret CONVEX_DEPLOY_KEY before retrying."
+            exit 1
+          fi
+
+          deploy_key_binding="${CONVEX_DEPLOY_KEY%%|*}"
+          if [[ "$deploy_key_binding" != "dev:$EXPECTED_CONVEX_DEPLOYMENT" ]]; then
+            echo "::error title=Development binding rejected::The protected secret is not bound to the approved KinFlo development deployment."
+            exit 1
+          fi
+
+          if [[ -e .env.local ]]; then
+            echo "::error title=Local environment file rejected::.env.local must remain absent."
+            exit 1
+          fi
+
+          echo "Fixed development deployment binding verified."
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Deploy Convex functions once
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset CONVEX_DEPLOYMENT
+
+          deploy_log="$RUNNER_TEMP/kinflo-convex-development-${GITHUB_RUN_ID}.log"
+          trap 'rm -f "$deploy_log"' EXIT
+
+          if ! npx --no-install convex dev --once --typecheck enable --codegen enable --tail-logs disable >"$deploy_log" 2>&1; then
+            echo "::error title=Convex development deployment failed::The one-attempt Convex CLI run failed. Raw CLI output was withheld to preserve the sanitized evidence boundary."
+            exit 1
+          fi
+
+          if [[ -e .env.local ]]; then
+            echo "::error title=Environment-file policy failed::The Convex CLI created .env.local unexpectedly; the run is not valid evidence."
+            exit 1
+          fi
+
+      - name: Publish sanitized deployment receipt
+        shell: bash
+        run: |
+          {
+            echo "### KinFlo Convex development deployment"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Workflow run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo "- Deployment binding: \`dev:$EXPECTED_CONVEX_DEPLOYMENT\`"
+            echo "- Status: \`succeeded\`"
+            echo "- Production selectable: \`no\`"
+            echo "- Secret values printed: \`no\`"
+            echo "- \`.env.local\` written: \`no\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish sanitized failure receipt
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          {
+            echo "### KinFlo Convex development deployment"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Workflow run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo "- Deployment binding: \`dev:$EXPECTED_CONVEX_DEPLOYMENT\`"
+            echo "- Status: \`failed; no retry attempted\`"
+            echo "- Secret values printed: \`no\`"
+          } >> "$GITHUB_STEP_SUMMARY"
