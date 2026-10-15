@@ -24,6 +24,8 @@ import {
   DisabledKinfloThemeWriteAdapterProvider,
   LiveKinfloThemeWriteAdapterProvider,
 } from "@/contexts/KinfloThemeWriteAdapterContext";
+import { Phase174GeneratedReadOnlyHarness } from "@/components/Phase174GeneratedReadOnlyHarness";
+import { isPhase174GeneratedReadOnlyHarnessRequested } from "@/lib/kinfloPhase174GeneratedReadOnlyHarness";
 
 type ConvexViewer = {
   _id: string;
@@ -191,6 +193,16 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
           </Button>
         )}
       />
+    );
+  }
+
+  if (isPhase174GeneratedReadOnlyHarnessRequested(window.location.search)) {
+    return (
+      <KinfloAdminIdentityProvider
+        value={{ isLoading: false, isAdmin: true, source: "convex_auth" }}
+      >
+        <Phase174GeneratedReadOnlyHarness />
+      </KinfloAdminIdentityProvider>
     );
   }
 
