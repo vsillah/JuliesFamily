@@ -667,7 +667,7 @@ export default function KinfloPublicSitePreview() {
               <img
                 src={preview.theme.media.logoImage}
                 alt={preview.theme.media.logoAlt ?? `${preview.site.name} logo`}
-                className="h-10 w-auto max-w-[150px] object-contain sm:h-12 sm:max-w-[180px]"
+                className={`h-10 w-auto max-w-[150px] object-contain transition-[filter] duration-300 sm:h-12 sm:max-w-[180px] ${preview.site.slug === VANGUARD_SITE_KEY && (resolvedMode === "dark" || !navSolid) ? "brightness-0 invert" : ""}`}
                 data-testid="public-preview-brand-logo"
               />
             ) : preview.site.name}

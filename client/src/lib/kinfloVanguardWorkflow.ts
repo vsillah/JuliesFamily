@@ -1,4 +1,4 @@
-import vanguardLogo from "@assets/vanguard-enterprises-logo.jpg";
+import vanguardLogo from "@assets/vanguard-enterprises-logo-transparent.png";
 
 export const VANGUARD_SITE_KEY = "vanguard-enterprises";
 
@@ -25,9 +25,9 @@ export const vanguardWorkflow = {
       image: vanguardLogo,
       alt: "Vanguard Enterprises",
       sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg",
-      repositoryPath: "attached_assets/vanguard-enterprises-logo.jpg",
+      repositoryPath: "attached_assets/vanguard-enterprises-logo-transparent.png",
       dimensions: "356 x 138 pixels",
-      sha256: "30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02",
+      sha256: "39a8f512ff62d15973a06ea8d80d71b57e9551c26e2b94d6437b48b12de88da8",
     },
   },
   requestTypes: [
