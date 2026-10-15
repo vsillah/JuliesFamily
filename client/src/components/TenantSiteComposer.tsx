@@ -268,4 +268,3 @@ export default function TenantSiteComposer({ siteKey, siteLabel, previewPath, on
     </Card>
   );
 }
-

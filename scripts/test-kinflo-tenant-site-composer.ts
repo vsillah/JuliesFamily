@@ -56,4 +56,3 @@ test("public renderer applies the tenant navigation contrast setting", () => {
   assert.match(renderer, /data-nav-contrast/);
   assert.match(renderer, /bg-white\/85 text-slate-950 backdrop-blur/);
 });
-

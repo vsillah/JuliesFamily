@@ -199,4 +199,3 @@ export function sortTenantSiteSections(sections: TenantSiteSection[]) {
 export function sortTenantSiteNavigation(links: TenantSiteNavigationLink[], placement: "header" | "footer") {
   return links.filter((link) => link.visible && link.placement === placement).slice().sort((a, b) => a.order - b.order);
 }
-
