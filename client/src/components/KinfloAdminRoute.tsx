@@ -67,6 +67,11 @@ const activationReadinessQuery = makeFunctionReference<"query", Record<string, n
 const bootstrapPlatformAdminMutation = makeFunctionReference<"mutation", Record<string, never>, string>(
   "controlPlane:bootstrapPlatformAdmin",
 );
+const repairCurrentPlatformAdminMutation = makeFunctionReference<
+  "mutation",
+  Record<string, never>,
+  { userId: string; platformRole: "super_admin" }
+>("controlPlane:repairCurrentPlatformAdmin");
 
 function messageFromError(error: unknown) {
   return error instanceof Error ? error.message : "The request failed without an error message.";
@@ -176,11 +181,14 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
   const activationReadiness = useQuery(activationReadinessQuery, isAuthenticated ? {} : "skip");
   const upsertCurrentUser = useMutation(upsertCurrentUserMutation);
   const bootstrapPlatformAdmin = useMutation(bootstrapPlatformAdminMutation);
+  const repairCurrentPlatformAdmin = useMutation(repairCurrentPlatformAdminMutation);
   const [syncState, setSyncState] = useState<"idle" | "syncing" | "complete" | "failed">("idle");
   const [signInPending, setSignInPending] = useState(false);
   const [bootstrapState, setBootstrapState] = useState<"idle" | "running" | "succeeded" | "failed">("idle");
   const [bootstrapError, setBootstrapError] = useState("");
   const [bootstrapAcknowledged, setBootstrapAcknowledged] = useState(false);
+  const [repairState, setRepairState] = useState<"idle" | "running" | "succeeded" | "failed">("idle");
+  const [repairError, setRepairError] = useState("");
   const runtime = getKinfloIdentityRuntime();
   const approvedDevTarget = isApprovedKinfloDevActivationTarget(runtime.publicUrl);
 
@@ -290,6 +298,56 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
     const canBootstrap = approvedDevTarget
       && activationReadiness.nextRequiredAction === "bootstrap_platform_admin"
       && !activationReadiness.platformAdminExists;
+
+    const canRepair = approvedDevTarget && activationReadiness.platformAdminExists;
+
+    if (canRepair) {
+      return (
+        <IdentityGateCard
+          title={repairState === "succeeded" ? "KinFlo dev admin repaired" : "KinFlo admin access required"}
+          detail={repairState === "succeeded"
+            ? "Your signed-in identity is now the platform admin. Reloading the admin shell."
+            : "Your signed-in identity is valid, but its dev platform role is missing. The one-time repair promotes only this authenticated identity."}
+          busy={repairState === "running"}
+          action={repairState === "succeeded" ? (
+            <Button className="w-full" onClick={() => window.location.reload()}>
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Reload admin shell
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <Button
+                className="w-full"
+                disabled={repairState === "running"}
+                onClick={() => {
+                  setRepairState("running");
+                  setRepairError("");
+                  void repairCurrentPlatformAdmin({})
+                    .then(() => setRepairState("succeeded"))
+                    .catch((error) => {
+                      setRepairError(messageFromError(error));
+                      setRepairState("failed");
+                    });
+                }}
+                data-testid="button-kinflo-repair-platform-admin"
+              >
+                {repairState === "running" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+                Repair my dev admin role
+              </Button>
+              {repairState === "failed" ? (
+                <p className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm leading-5 text-rose-800" data-testid="text-kinflo-repair-error">
+                  Repair failed: {repairError}
+                </p>
+              ) : (
+                <p className="text-xs leading-5 text-slate-600">
+                  One dev-only role repair. No tenant, site, production, or provider changes.
+                </p>
+              )}
+            </div>
+          )}
+        />
+      );
+    }
 
     if (canBootstrap) {
       return (
