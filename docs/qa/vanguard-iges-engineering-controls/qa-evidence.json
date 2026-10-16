@@ -1,0 +1,135 @@
+{
+  "route": "http://127.0.0.1:5183/kinflo-sites/vanguard-enterprises?qa=khalid-iges-engineering-controls&rev=final-source&viewport=desktop#build-request",
+  "viewportWidths": [
+    1440,
+    820,
+    390
+  ],
+  "spatialEvidence": {
+    "sourceUnit": true,
+    "extents": true,
+    "boundsRows": 3,
+    "placedCenter": [
+      "0 mm",
+      "0 mm",
+      "0 mm"
+    ]
+  },
+  "buttonTransform": {
+    "translation": "1.000,1.000,-1.000",
+    "rotation": "5.000,-5.000,5.000",
+    "zoom": "110.0"
+  },
+  "numericTransform": {
+    "translation": "2.500,1.000,-1.000",
+    "rotation": "5.000,-5.000,15.000",
+    "zoom": "125.0"
+  },
+  "mobileControlLayout": {
+    "viewportWidth": 390,
+    "panel": {
+      "left": 59,
+      "right": 331
+    },
+    "controls": [
+      {
+        "testId": "vanguard-iges-translate-x-minus",
+        "left": 92,
+        "right": 124
+      },
+      {
+        "testId": "vanguard-iges-translate-x-plus",
+        "left": 286,
+        "right": 318
+      },
+      {
+        "testId": "vanguard-iges-translate-y-minus",
+        "left": 92,
+        "right": 124
+      },
+      {
+        "testId": "vanguard-iges-translate-y-plus",
+        "left": 286,
+        "right": 318
+      },
+      {
+        "testId": "vanguard-iges-translate-z-minus",
+        "left": 92,
+        "right": 124
+      },
+      {
+        "testId": "vanguard-iges-translate-z-plus",
+        "left": 286,
+        "right": 318
+      },
+      {
+        "testId": "vanguard-iges-rotate-x-minus",
+        "left": 92,
+        "right": 124
+      },
+      {
+        "testId": "vanguard-iges-rotate-x-plus",
+        "left": 286,
+        "right": 318
+      },
+      {
+        "testId": "vanguard-iges-rotate-y-minus",
+        "left": 92,
+        "right": 124
+      },
+      {
+        "testId": "vanguard-iges-rotate-y-plus",
+        "left": 286,
+        "right": 318
+      },
+      {
+        "testId": "vanguard-iges-rotate-z-minus",
+        "left": 92,
+        "right": 124
+      },
+      {
+        "testId": "vanguard-iges-rotate-z-plus",
+        "left": 286,
+        "right": 318
+      },
+      {
+        "testId": "vanguard-iges-zoom-out",
+        "left": 72,
+        "right": 108
+      },
+      {
+        "testId": "vanguard-iges-zoom-percent",
+        "left": 116,
+        "right": 274
+      },
+      {
+        "testId": "vanguard-iges-zoom-in",
+        "left": 282,
+        "right": 318
+      }
+    ]
+  },
+  "downloadEvidence": [
+    {
+      "fileName": "Cube 10x10.igs",
+      "bytes": 11562
+    },
+    {
+      "fileName": "Cube 10x10-inspection-mesh-mm.stl",
+      "bytes": 1539
+    },
+    {
+      "fileName": "Cube 10x10-inspection-mesh-mm.obj",
+      "bytes": 486
+    }
+  ],
+  "blockedExports": [
+    "STEP"
+  ],
+  "externalApplicationRequests": 0,
+  "externalWrites": 0,
+  "serverPersistence": "disabled",
+  "privateStorage": "disabled",
+  "providerCalls": 0,
+  "liveOrderWrites": 0
+}

@@ -30,6 +30,15 @@ export type KinfloIgesGeometry = {
   vertexCount: number;
   triangleCount: number;
   boundingBoxMm: [number, number, number];
+  boundsMm: {
+    min: [number, number, number];
+    max: [number, number, number];
+    center: [number, number, number];
+  };
+  units: {
+    coordinates: "mm";
+    sourceDeclared: "unknown";
+  };
 };
 
 export type KinfloEngineeringReview = {
@@ -162,7 +171,18 @@ export function normalizeKinfloIgesGeometry(result: unknown): KinfloIgesGeometry
     reject("INVALID_GEOMETRY", "The converted model has invalid millimeter bounds.");
   }
 
-  const geometry = { meshes, meshCount: meshes.length, vertexCount, triangleCount, boundingBoxMm };
+  const minTuple = min as [number, number, number];
+  const maxTuple = max as [number, number, number];
+  const center = min.map((value, axis) => value + boundingBoxMm[axis] / 2) as [number, number, number];
+  const geometry: KinfloIgesGeometry = {
+    meshes,
+    meshCount: meshes.length,
+    vertexCount,
+    triangleCount,
+    boundingBoxMm,
+    boundsMm: { min: minTuple, max: maxTuple, center },
+    units: { coordinates: "mm", sourceDeclared: "unknown" },
+  };
   if (new TextEncoder().encode(JSON.stringify(geometry)).byteLength > KINFLO_IGES_LIMITS.outputBytes) {
     reject("OUTPUT_LIMIT", "The converted geometry exceeds the 1 MiB browser-review output limit.");
   }
