@@ -245,6 +245,62 @@ An experiment can never reference a page, block, asset, metric profile, or varia
 
 ## Seven-Phase Delivery Roadmap
 
+## Deferred Universal Workstreams
+
+These capabilities are intentionally deferred from Phase 1, but remain part of the
+KinFlo platform contract. They must be designed as tenant/site-scoped capabilities,
+not reintroduced as Julie's Family-only screens or global Express routes.
+
+### Email communications and lifecycle messaging
+
+Carry forward Julie's campaign and personalization concepts as a governed communications
+layer:
+
+- tenant/site-scoped templates, campaigns, sequences, audiences, consent, and unsubscribe state;
+- persona, journey, segment, and event-aware message eligibility;
+- tenant-owned sender configuration and delivery-provider adapters behind an explicit gate;
+- preview, approval, scheduling, cancellation, delivery status, and message audit records;
+- suppression, rate limits, data minimization, and export/deletion boundaries.
+
+Dependency order: identity and scope integrity first, then audience/content definitions,
+then analytics and consent, and only afterward provider activation. No provider send is
+implied by this roadmap.
+
+### Kanban task routing and operational work queues
+
+Carry forward Julie's task and assignment patterns as a reusable operations surface:
+
+- tenant/site-scoped boards, stages, queues, tasks, ownership, capacity, priority, and SLA policy;
+- routing rules based on role, skill, workload, site, status, and escalation conditions;
+- drag-and-drop or explicit stage transitions with audit history and optimistic recovery;
+- associate workbench views for Vanguard and equivalent operational teams at other tenants;
+- read-only planning and fixture data before live assignment writes are enabled.
+
+This work must share the same membership and permission model as content, orders, and
+support access. It must not create a second identity or role system.
+
+### Analytics and operational reporting
+
+Carry forward Julie's funnel, experiment, cohort, and performance reporting as a
+tenant-safe reporting plane:
+
+- site-scoped public journey, content, conversion, experiment, task-throughput, and
+  fulfillment metrics;
+- tenant and site filters with bounded time windows, role-aware access, and drill-through
+  to permitted source records;
+- immutable event definitions, deduplication, retention, aggregation, and export policy;
+- dashboards for experiment decisions, queue load, SLA health, campaign performance,
+  and client-facing order progress;
+- clear separation between fixture/read-only metrics and live provider-backed metrics.
+
+Analytics is a dependency of safe experimentation, email measurement, task routing,
+and the second-tenant proof. It is not a license to expose raw cross-tenant events.
+
+Sequencing: define event and audit contracts during Phases 1-2; implement the first
+read-only analytics projections with Phase 3 experimentation; add task routing and
+communications operations after scoped support access; validate all three together in
+the Julie migration and second-tenant proof phases.
+
 ### Phase 0 — Architecture contract and source register
 
 Objective: establish one verified inventory, boundary model, and migration sequence.
