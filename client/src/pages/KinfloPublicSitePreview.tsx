@@ -666,36 +666,37 @@ export default function KinfloPublicSitePreview() {
           if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavFocused(false);
         }}
       >
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
-          <Link href={`/kinflo-sites/${preview.site.slug}`} className={`flex min-w-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
+        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:gap-4 sm:px-6 lg:px-8">
+          <Link href={`/kinflo-sites/${preview.site.slug}`} className={`flex shrink-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
             {logoImage ? (
               <img
                 src={logoImage}
                 alt={preview.theme.media.logoAlt ?? `${preview.site.name} logo`}
-                className="h-10 w-auto max-w-[150px] object-contain transition-opacity duration-300 sm:h-12 sm:max-w-[180px]"
+                className="h-9 w-auto max-w-[104px] object-contain transition-opacity duration-300 sm:h-12 sm:max-w-[180px]"
                 data-testid="public-preview-brand-logo"
               />
             ) : preview.site.name}
           </Link>
-          <nav className={`hidden items-center gap-5 text-sm md:flex ${navSolid ? "text-muted-foreground" : "text-white/90"}`}>
+          <nav
+            className={`flex min-w-0 flex-1 items-stretch gap-1 overflow-x-auto overscroll-x-contain text-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-2 md:justify-center md:overflow-visible md:text-sm ${navSolid ? "text-muted-foreground" : "text-white/90"}`}
+            aria-label="Primary page navigation"
+            data-testid="public-preview-primary-navigation"
+          >
             {headerNav.map((item) => (
-              <a key={item.key} href={item.href} className="hover:text-foreground">
+              <a
+                key={item.key}
+                href={item.href}
+                className="flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-md px-2 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+              >
                 {item.label}
               </a>
             ))}
           </nav>
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} navSolid={navSolid} />
             <KinfloPublicSiteAccountControls navSolid={navSolid} />
           </div>
         </div>
-        <nav className={`mx-auto flex max-w-7xl flex-wrap gap-x-4 gap-y-2 px-4 py-2 text-xs md:hidden ${navSolid ? "text-muted-foreground" : "border-t border-white/20 text-white/90"}`} aria-label="Mobile page navigation">
-          {headerNav.map((item) => (
-            <a key={item.key} href={item.href} className="shrink-0 whitespace-nowrap hover:text-foreground">
-              {item.label}
-            </a>
-          ))}
-        </nav>
       </header>
 
       <main>
