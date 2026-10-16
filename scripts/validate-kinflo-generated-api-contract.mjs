@@ -6,6 +6,7 @@ const convexModuleNames = new Set([
   "accessPolicy",
   "activation",
   "aiReview",
+  "audience",
   "campaigns",
   "controlPlane",
   "crm",

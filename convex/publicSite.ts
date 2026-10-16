@@ -1,6 +1,10 @@
 import { queryGeneric as query } from "convex/server";
 import { v } from "convex/values";
 import {
+  MAX_AUDIENCE_DEFINITIONS,
+  resolveConfiguredAudience,
+} from "./audiencePolicyCore";
+import {
   evaluateScopeIntegrity,
   recordMatchesResolvedScope,
 } from "./scopePolicyCore";
@@ -89,6 +93,27 @@ function publicBlock(block: any) {
   };
 }
 
+function publicAudienceDefinition(definition: any) {
+  return {
+    _id: definition._id,
+    key: definition.key,
+    label: definition.label,
+    description: definition.description,
+    order: definition.order,
+  };
+}
+
+async function takeSiteAudienceDefinitions(ctx: any, table: string, siteId: any): Promise<any[]> {
+  const definitions = await ctx.db
+    .query(table)
+    .withIndex("by_site_and_key", (q: any) => q.eq("siteId", siteId))
+    .take(MAX_AUDIENCE_DEFINITIONS + 1);
+  if (definitions.length > MAX_AUDIENCE_DEFINITIONS) {
+    throw new Error("Audience definition count exceeds the bounded site limit");
+  }
+  return definitions;
+}
+
 export const resolvePublishedSite = query({
   args: {
     hostname: v.optional(v.string()),
@@ -152,7 +177,7 @@ export const resolvePublishedSite = query({
       return null;
     }
 
-    const [theme, navigationItems, blocks] = await Promise.all([
+    const [theme, navigationItems, blocks, personaDefinitions, journeyStageDefinitions] = await Promise.all([
       ctx.db
         .query("themeTokens")
         .withIndex("by_site", (q) => q.eq("siteId", site._id))
@@ -167,7 +192,21 @@ export const resolvePublishedSite = query({
         .withIndex("by_page_order", (q) => q.eq("pageId", page._id))
         .filter((q) => q.eq(q.field("status"), "published"))
         .collect(),
+      takeSiteAudienceDefinitions(ctx, "personaDefinitions", site._id),
+      takeSiteAudienceDefinitions(ctx, "journeyStageDefinitions", site._id),
     ]);
+
+    const scopedPersonas = personaDefinitions.filter((definition: any) =>
+      recordMatchesResolvedScope(definition, scope)
+    );
+    const scopedJourneyStages = journeyStageDefinitions.filter((definition: any) =>
+      recordMatchesResolvedScope(definition, scope)
+    );
+    const audience = resolveConfiguredAudience(
+      { persona: args.persona, journeyStage: args.journeyStage },
+      scopedPersonas,
+      scopedJourneyStages,
+    );
 
     const scopedBlocks = blocks.filter(
       (block) => recordMatchesResolvedScope(block, scope) && block.pageId === page._id,
@@ -181,7 +220,7 @@ export const resolvePublishedSite = query({
         const scopedRules = rules.filter(
           (rule) => recordMatchesResolvedScope(rule, scope) && rule.blockId === block._id,
         );
-        return applyVisibility(block, scopedRules, args.persona, args.journeyStage);
+        return applyVisibility(block, scopedRules, audience.persona, audience.journeyStage);
       }),
     );
 
@@ -240,10 +279,21 @@ export const resolvePublishedSite = query({
         publishedAt: page.publishedAt,
       },
       blocks: visibleBlocks.map(publicBlock),
+      audienceDefinitions: {
+        personas: scopedPersonas
+          .filter((definition: any) => definition.status === "active")
+          .sort((a: any, b: any) => a.order - b.order)
+          .map(publicAudienceDefinition),
+        journeyStages: scopedJourneyStages
+          .filter((definition: any) => definition.status === "active")
+          .sort((a: any, b: any) => a.order - b.order)
+          .map(publicAudienceDefinition),
+      },
       context: {
         route,
-        persona: args.persona,
-        journeyStage: args.journeyStage,
+        persona: audience.persona,
+        journeyStage: audience.journeyStage,
+        audienceMode: audience.mode,
       },
     };
   },

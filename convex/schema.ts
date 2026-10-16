@@ -40,6 +40,34 @@ export const publishStatus = v.union(
   v.literal("archived"),
 );
 
+export const audienceDefinitionStatus = v.union(
+  v.literal("active"),
+  v.literal("inactive"),
+  v.literal("archived"),
+);
+
+export const audienceContextSource = v.union(
+  v.literal("user_selected"),
+  v.literal("legacy_migration"),
+);
+
+export const presentationProfileStatus = v.union(
+  v.literal("draft"),
+  v.literal("published"),
+  v.literal("archived"),
+);
+
+export const contentProvenance = v.object({
+  sourceType: v.union(
+    v.literal("authored"),
+    v.literal("legacy_migration"),
+    v.literal("template"),
+    v.literal("imported"),
+  ),
+  sourceRef: v.optional(v.string()),
+  reviewedAt: v.optional(v.number()),
+});
+
 export const leadStatus = v.union(
   v.literal("active"),
   v.literal("nurture"),
@@ -429,6 +457,75 @@ export default defineSchema({
     .index("by_site_route", ["siteId", "route"])
     .index("by_site_status", ["siteId", "status"]),
 
+  personaDefinitions: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    key: v.string(),
+    label: v.string(),
+    description: v.optional(v.string()),
+    iconToken: v.optional(v.string()),
+    status: audienceDefinitionStatus,
+    order: v.number(),
+    eligibilityRules: v.optional(v.any()),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_site_and_key", ["siteId", "key"])
+    .index("by_site_and_status_and_order", ["siteId", "status", "order"]),
+
+  journeyStageDefinitions: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    key: v.string(),
+    label: v.string(),
+    description: v.optional(v.string()),
+    entryMeaning: v.optional(v.string()),
+    exitMeaning: v.optional(v.string()),
+    status: audienceDefinitionStatus,
+    order: v.number(),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_site_and_key", ["siteId", "key"])
+    .index("by_site_and_status_and_order", ["siteId", "status", "order"]),
+
+  userAudienceContexts: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    userId: v.id("users"),
+    personaDefinitionId: v.optional(v.id("personaDefinitions")),
+    journeyStageDefinitionId: v.optional(v.id("journeyStageDefinitions")),
+    passionTags: v.array(v.string()),
+    source: audienceContextSource,
+    personalizationConsent: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user_and_site", ["userId", "siteId"])
+    .index("by_site_and_user", ["siteId", "userId"]),
+
+  presentationProfiles: defineTable({
+    tenantId: v.id("tenants"),
+    siteId: v.id("sites"),
+    key: v.string(),
+    label: v.string(),
+    revisionNumber: v.number(),
+    status: presentationProfileStatus,
+    composition: v.any(),
+    provenance: contentProvenance,
+    basedOnProfileId: v.optional(v.id("presentationProfiles")),
+    createdBy: v.id("users"),
+    createdAt: v.number(),
+    publishedAt: v.optional(v.number()),
+    archivedAt: v.optional(v.number()),
+  })
+    .index("by_site_and_key_and_revision", ["siteId", "key", "revisionNumber"])
+    .index("by_site_and_status_and_revision", ["siteId", "status", "revisionNumber"]),
+
   pageRevisions: defineTable({
     tenantId: v.id("tenants"),
     pageId: v.id("pages"),
@@ -453,6 +550,8 @@ export default defineSchema({
     title: v.optional(v.string()),
     body: v.optional(v.string()),
     metadata: v.optional(v.any()),
+    schemaVersion: v.optional(v.literal("kinflo-content-block-v1")),
+    provenance: v.optional(contentProvenance),
     order: v.number(),
     status: publishStatus,
     createdBy: v.id("users"),
@@ -469,6 +568,8 @@ export default defineSchema({
     tenantId: v.id("tenants"),
     siteId: v.id("sites"),
     blockId: v.id("contentBlocks"),
+    personaDefinitionId: v.optional(v.id("personaDefinitions")),
+    journeyStageDefinitionId: v.optional(v.id("journeyStageDefinitions")),
     persona: v.optional(v.string()),
     journeyStage: v.optional(v.string()),
     isVisible: v.boolean(),
