@@ -5,12 +5,20 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { defaultRoleDefinitions } from "./roleCatalog";
+import {
+  MAX_ROLE_DEFINITIONS,
+  MAX_SCOPE_MEMBERSHIPS,
+  evaluateScopeIntegrity,
+  membershipMatchesResolvedScope,
+  type RequestedScope,
+  type ResolvedScope,
+} from "./scopePolicyCore";
 
 type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
 type AnyCtx = QueryCtx | MutationCtx;
 
-type PermissionScope = {
+type PermissionScope = RequestedScope & {
   tenantId?: any;
   siteId?: any;
 };
@@ -44,13 +52,6 @@ function uniqueById(memberships: MembershipLike[]) {
   });
 }
 
-function activeOnly(memberships: Array<MembershipLike | null>) {
-  return memberships.filter(
-    (membership): membership is MembershipLike =>
-      Boolean(membership) && membership?.status === "active",
-  );
-}
-
 async function getCurrentUser(ctx: AnyCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
@@ -64,7 +65,10 @@ async function getCurrentUser(ctx: AnyCtx) {
 }
 
 async function loadRoleDefinitions(ctx: AnyCtx) {
-  const persistedRoles = await ctx.db.query("roles").collect();
+  const persistedRoles = await ctx.db.query("roles").take(MAX_ROLE_DEFINITIONS + 1);
+  if (persistedRoles.length > MAX_ROLE_DEFINITIONS) {
+    throw new Error("Role catalog exceeds the bounded authorization limit");
+  }
   const definitions = new Map(
     defaultRoleDefinitions.map((definition) => [definition.key, definition]),
   );
@@ -81,57 +85,64 @@ async function loadRoleDefinitions(ctx: AnyCtx) {
   return definitions;
 }
 
+export async function resolveActiveScope(
+  ctx: AnyCtx,
+  requested: PermissionScope,
+) {
+  const site = requested.siteId ? await ctx.db.get(requested.siteId) : null;
+  const tenantId = requested.tenantId ?? site?.tenantId;
+  const tenant = tenantId ? await ctx.db.get(tenantId) : null;
+  const result = evaluateScopeIntegrity({ requested, tenant, site });
+  if (!result.ok) {
+    throw new Error("Requested scope is unavailable");
+  }
+  return result.scope;
+}
+
 async function collectScopedMemberships(
   ctx: AnyCtx,
   userId: any,
-  scope: PermissionScope,
+  scope: ResolvedScope,
 ) {
-  if (scope.siteId) {
-    const site = await ctx.db.get(scope.siteId);
-    if (!site) {
-      return [];
+  if (scope.scopeType === "platform") {
+    return [];
+  }
+
+  const tenantMemberships = await ctx.db
+    .query("memberships")
+    .withIndex("by_tenant_user", (q: any) =>
+      q.eq("tenantId", scope.tenantId).eq("userId", userId),
+    )
+    .take(MAX_SCOPE_MEMBERSHIPS + 1);
+  if (tenantMemberships.length > MAX_SCOPE_MEMBERSHIPS) {
+    throw new Error("Membership scope exceeds the bounded authorization limit");
+  }
+
+  if (scope.scopeType === "site") {
+    const siteMemberships = await ctx.db
+      .query("memberships")
+      .withIndex("by_site_user", (q: any) =>
+        q.eq("siteId", scope.siteId).eq("userId", userId),
+      )
+      .take(MAX_SCOPE_MEMBERSHIPS + 1);
+    if (siteMemberships.length > MAX_SCOPE_MEMBERSHIPS) {
+      throw new Error("Membership scope exceeds the bounded authorization limit");
     }
 
-    const tenantMembership = await ctx.db
-      .query("memberships")
-      .withIndex("by_tenant_user", (q) =>
-        q.eq("tenantId", site.tenantId),
-      )
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-    const siteMembership = await ctx.db
-      .query("memberships")
-      .withIndex("by_site_user", (q) =>
-        q.eq("siteId", scope.siteId),
-      )
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-
-    return uniqueById(activeOnly([tenantMembership, siteMembership]));
+    return uniqueById([...tenantMemberships, ...siteMemberships].filter(
+      (membership) => membershipMatchesResolvedScope(membership, userId, scope),
+    ));
   }
 
-  if (scope.tenantId) {
-    const tenantMembership = await ctx.db
-      .query("memberships")
-      .withIndex("by_tenant_user", (q) =>
-        q.eq("tenantId", scope.tenantId),
-      )
-      .filter((q) => q.eq(q.field("userId"), userId))
-      .first();
-    return activeOnly([tenantMembership]);
-  }
-
-  const memberships = await ctx.db
-    .query("memberships")
-    .withIndex("by_user", (q) => q.eq("userId", userId))
-    .collect();
-  return activeOnly(memberships);
+  return tenantMemberships.filter(
+    (membership) => membershipMatchesResolvedScope(membership, userId, scope),
+  );
 }
 
 async function buildPermissionSnapshot(
   ctx: AnyCtx,
   user: any,
-  scope: PermissionScope,
+  scope: ResolvedScope,
 ) {
   const roleDefinitions = await loadRoleDefinitions(ctx);
   const memberships = await collectScopedMemberships(ctx, user._id, scope);
@@ -153,6 +164,7 @@ async function buildPermissionSnapshot(
     isPlatformAdmin: user.platformRole === "super_admin",
     permissions: Array.from(permissions).sort(),
     roleKeys: Array.from(new Set(roleKeys)).sort(),
+    scope,
     memberships: memberships.map((membership) => ({
       membershipId: membership._id,
       tenantId: membership.tenantId,
@@ -171,11 +183,17 @@ export async function hasPermission(
   if (!user) {
     return false;
   }
+  let scope: ResolvedScope;
+  try {
+    scope = await resolveActiveScope(ctx, args);
+  } catch {
+    return false;
+  }
   if (user.platformRole === "super_admin") {
     return true;
   }
 
-  const snapshot = await buildPermissionSnapshot(ctx, user, args);
+  const snapshot = await buildPermissionSnapshot(ctx, user, scope);
   return snapshot.permissions.includes(args.permission);
 }
 
@@ -188,11 +206,12 @@ export async function requirePermission(
     throw new Error("Authentication required");
   }
 
+  const scope = await resolveActiveScope(ctx, args);
   if (user.platformRole === "super_admin") {
     return user;
   }
 
-  const snapshot = await buildPermissionSnapshot(ctx, user, args);
+  const snapshot = await buildPermissionSnapshot(ctx, user, scope);
   if (!snapshot.permissions.includes(args.permission)) {
     throw new Error(`Permission required: ${args.permission}`);
   }
@@ -211,10 +230,11 @@ export const viewerPermissionSnapshot = query({
       return null;
     }
 
+    const scope = await resolveActiveScope(ctx, args);
     return {
       userId: user._id,
       platformRole: user.platformRole,
-      ...(await buildPermissionSnapshot(ctx, user, args)),
+      ...(await buildPermissionSnapshot(ctx, user, scope)),
     };
   },
 });
@@ -231,7 +251,13 @@ export const canPerform = query({
       return { allowed: false, reason: "not_authenticated" };
     }
 
-    const snapshot = await buildPermissionSnapshot(ctx, user, args);
+    let scope: ResolvedScope;
+    try {
+      scope = await resolveActiveScope(ctx, args);
+    } catch {
+      return { allowed: false, reason: "invalid_scope" };
+    }
+    const snapshot = await buildPermissionSnapshot(ctx, user, scope);
     return {
       allowed: snapshot.isPlatformAdmin || snapshot.permissions.includes(args.permission),
       reason: snapshot.isPlatformAdmin || snapshot.permissions.includes(args.permission)

@@ -76,7 +76,7 @@ requireIncludes("convex/publicSite.ts", [
   "const contextPersona = normalizeAudienceValue(persona)",
   "const personaMatches = !rulePersona || rulePersona === contextPersona",
   "const stageMatches = !ruleJourneyStage || ruleJourneyStage === contextJourneyStage",
-  "applyVisibility(block, rules, args.persona, args.journeyStage)",
+  "applyVisibility(block, scopedRules, args.persona, args.journeyStage)",
   "context: {",
   "persona: args.persona",
   "journeyStage: args.journeyStage",

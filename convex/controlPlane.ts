@@ -5,7 +5,7 @@ import {
   type GenericQueryCtx,
 } from "convex/server";
 import { v } from "convex/values";
-import { requirePermission } from "./accessPolicy";
+import { requirePermission, resolveActiveScope } from "./accessPolicy";
 import {
   defaultBillingPlanCatalog,
   defaultPlanForKey,
@@ -13,6 +13,10 @@ import {
   requireEntitlementLimit,
 } from "./entitlements";
 import { invitationStatus, recordStatus, siteStatus, tenantRole } from "./schema";
+import {
+  assertRecordMatchesResolvedScope,
+  invitationMatchesResolvedScope,
+} from "./scopePolicyCore";
 
 type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
@@ -569,6 +573,8 @@ export const updateThemeTokens = mutation({
     });
 
     if (existing) {
+      const scope = await resolveActiveScope(ctx, { siteId: site._id });
+      assertRecordMatchesResolvedScope(existing, scope);
       await ctx.db.patch(existing._id, patch);
     } else {
       await ctx.db.insert("themeTokens", {
@@ -856,11 +862,13 @@ export const acceptInvitation = mutation({
       throw new Error("Invitation has expired");
     }
 
-    if (invitation.siteId) {
-      const site = await ctx.db.get(invitation.siteId);
-      if (!site || site.tenantId !== invitation.tenantId) {
-        throw new Error("Invitation site scope is invalid");
-      }
+    const scope = await resolveActiveScope(ctx, {
+      tenantId: invitation.tenantId,
+      siteId: invitation.siteId,
+    });
+    assertRecordMatchesResolvedScope(invitation, scope);
+    if (!invitationMatchesResolvedScope(invitation, scope, timestamp)) {
+      throw new Error("Pending invitation not found");
     }
 
     const existingMembership = await ctx.db

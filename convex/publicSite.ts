@@ -1,5 +1,9 @@
 import { queryGeneric as query } from "convex/server";
 import { v } from "convex/values";
+import {
+  evaluateScopeIntegrity,
+  recordMatchesResolvedScope,
+} from "./scopePolicyCore";
 
 function normalizeHostname(hostname?: string) {
   return hostname?.trim().toLowerCase().replace(/:\d+$/, "");
@@ -122,7 +126,16 @@ export const resolvePublishedSite = query({
     }
 
     const tenant = await ctx.db.get(site.tenantId);
-    if (!tenant || tenant.status !== "active") {
+    const scopeResult = evaluateScopeIntegrity({
+      requested: { tenantId: site.tenantId, siteId: site._id },
+      tenant,
+      site,
+    });
+    if (!scopeResult.ok || scopeResult.scope.scopeType !== "site") {
+      return null;
+    }
+    const scope = scopeResult.scope;
+    if (domain && !recordMatchesResolvedScope(domain, scope)) {
       return null;
     }
 
@@ -131,7 +144,11 @@ export const resolvePublishedSite = query({
       .withIndex("by_site_route", (q) => q.eq("siteId", site._id))
       .filter((q) => q.eq(q.field("route"), route))
       .first();
-    if (!page || page.status !== "published") {
+    if (
+      !page ||
+      page.status !== "published" ||
+      !recordMatchesResolvedScope(page, scope)
+    ) {
       return null;
     }
 
@@ -152,13 +169,19 @@ export const resolvePublishedSite = query({
         .collect(),
     ]);
 
+    const scopedBlocks = blocks.filter(
+      (block) => recordMatchesResolvedScope(block, scope) && block.pageId === page._id,
+    );
     const blocksWithVisibility = await Promise.all(
-      blocks.map(async (block) => {
+      scopedBlocks.map(async (block) => {
         const rules = await ctx.db
           .query("contentVisibilityRules")
           .withIndex("by_block", (q) => q.eq("blockId", block._id))
           .collect();
-        return applyVisibility(block, rules, args.persona, args.journeyStage);
+        const scopedRules = rules.filter(
+          (rule) => recordMatchesResolvedScope(rule, scope) && rule.blockId === block._id,
+        );
+        return applyVisibility(block, scopedRules, args.persona, args.journeyStage);
       }),
     );
 
@@ -166,6 +189,10 @@ export const resolvePublishedSite = query({
       .filter((entry) => entry.visible)
       .sort((a, b) => a.order - b.order)
       .map((entry) => entry.block);
+    const scopedNavigationItems = navigationItems.filter(
+      (item) => recordMatchesResolvedScope(item, scope),
+    );
+    const scopedNavigationIds = new Set(scopedNavigationItems.map((item) => item._id));
 
     return {
       tenant: {
@@ -190,7 +217,7 @@ export const resolvePublishedSite = query({
             verifiedAt: domain.verifiedAt,
           }
         : null,
-      theme: theme
+      theme: theme && recordMatchesResolvedScope(theme, scope)
         ? {
             palette: theme.palette,
             typography: theme.typography,
@@ -200,7 +227,8 @@ export const resolvePublishedSite = query({
             media: theme.media,
           }
         : null,
-      navigationItems: navigationItems
+      navigationItems: scopedNavigationItems
+        .filter((item) => !item.parentId || scopedNavigationIds.has(item.parentId))
         .sort((a, b) => a.order - b.order)
         .map(publicNavigationItem),
       page: {
