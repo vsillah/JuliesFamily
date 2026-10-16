@@ -39,6 +39,7 @@ import {
   Workflow,
 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import KinfloHostedActivationControl from "@/components/KinfloHostedActivationControl";
 import { useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7783,6 +7784,9 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="hosted-activation" className="mt-6">
+            <div className="mb-4">
+              <KinfloHostedActivationControl />
+            </div>
             <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="min-w-0 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

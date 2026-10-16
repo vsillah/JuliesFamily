@@ -153,9 +153,33 @@ async function publishHomepage(
 
 export const readiness = query({
   args: {},
+  returns: v.object({
+    authenticated: v.boolean(),
+    userSynced: v.boolean(),
+    platformRole: v.union(v.literal("user"), v.literal("super_admin"), v.null()),
+    platformAdmin: v.boolean(),
+    platformAdminExists: v.boolean(),
+    tenantCount: v.number(),
+    siteCount: v.number(),
+    publishedSiteCount: v.number(),
+    starterTemplates: v.array(v.object({ key: v.string(), label: v.string() })),
+    nextRequiredAction: v.union(
+      v.literal("sign_in"),
+      v.literal("upsert_current_user"),
+      v.literal("bootstrap_platform_admin"),
+      v.literal("request_platform_admin_access"),
+      v.literal("run_activation_smoke_seed"),
+    ),
+  }),
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     const user = await getCurrentUser(ctx);
+    const existingPlatformAdmin = identity
+      ? await ctx.db
+        .query("users")
+        .withIndex("by_platform_role", (q) => q.eq("platformRole", "super_admin"))
+        .first()
+      : null;
     const tenants = user?.platformRole === "super_admin"
       ? await ctx.db.query("tenants").collect()
       : [];
@@ -163,12 +187,27 @@ export const readiness = query({
       ? await ctx.db.query("sites").collect()
       : [];
     const publishedSites = sites.filter((site) => site.status === "published");
+    const nextRequiredAction:
+      | "sign_in"
+      | "upsert_current_user"
+      | "bootstrap_platform_admin"
+      | "request_platform_admin_access"
+      | "run_activation_smoke_seed" = !identity
+        ? "sign_in"
+        : !user
+          ? "upsert_current_user"
+          : user.platformRole !== "super_admin"
+            ? existingPlatformAdmin
+              ? "request_platform_admin_access"
+              : "bootstrap_platform_admin"
+            : "run_activation_smoke_seed";
 
     return {
       authenticated: Boolean(identity),
       userSynced: Boolean(user),
       platformRole: user?.platformRole ?? null,
       platformAdmin: user?.platformRole === "super_admin",
+      platformAdminExists: Boolean(existingPlatformAdmin),
       tenantCount: tenants.length,
       siteCount: sites.length,
       publishedSiteCount: publishedSites.length,
@@ -176,13 +215,7 @@ export const readiness = query({
         key: template.key,
         label: template.label,
       })),
-      nextRequiredAction: !identity
-        ? "sign_in"
-        : !user
-          ? "upsert_current_user"
-          : user.platformRole !== "super_admin"
-            ? "bootstrap_platform_admin"
-            : "run_activation_smoke_seed",
+      nextRequiredAction,
     };
   },
 });
