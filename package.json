@@ -222,6 +222,8 @@
     "kinflo:validate-generated-api-live-mutation-cutover-plan": "node scripts/validate-kinflo-generated-api-live-mutation-cutover-plan.mjs",
     "kinflo:validate-phase177-ops-hardening": "node scripts/validate-kinflo-phase177-ops-hardening.mjs",
     "kinflo:validate-development-convex-remote-deployment": "node scripts/validate-kinflo-development-convex-remote-deployment.mjs",
+    "kinflo:test-scope-policy": "node --import tsx --test scripts/test-kinflo-scope-policy.ts",
+    "kinflo:validate-phase1-scope-integrity": "node scripts/validate-kinflo-phase1-scope-integrity.mjs",
     "kinflo:validate-generated-api": "node scripts/validate-kinflo-generated-api-contract.mjs",
     "kinflo:validate-live-smoke": "node scripts/validate-kinflo-live-smoke-manifest.mjs",
     "kinflo:dry-run-live-smoke": "node scripts/dry-run-kinflo-live-smoke.mjs",

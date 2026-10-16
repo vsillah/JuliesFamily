@@ -75,3 +75,15 @@ test("public navigation uses compact theme and Julie account controls", () => {
   assert.match(accountControls, /menu-public-profile-settings/);
   assert.match(accountControls, /button-public-sign-in/);
 });
+
+test("public primary navigation stays on the first header line at narrow widths", () => {
+  const renderer = readFileSync("client/src/pages/KinfloPublicSitePreview.tsx", "utf8");
+
+  assert.match(renderer, /aria-label="Primary page navigation"/);
+  assert.match(renderer, /data-testid="public-preview-primary-navigation"/);
+  assert.match(renderer, /min-w-0 flex-1 items-stretch/);
+  assert.match(renderer, /overflow-x-auto overscroll-x-contain/);
+  assert.match(renderer, /min-h-11 shrink-0 items-center whitespace-nowrap/);
+  assert.doesNotMatch(renderer, /aria-label="Mobile page navigation"/);
+  assert.doesNotMatch(renderer, /md:hidden[^\n]*Mobile page navigation/);
+});
