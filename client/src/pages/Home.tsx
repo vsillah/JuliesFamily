@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -37,7 +37,7 @@ const DEFAULT_SECTIONS: VisibleSections = {
   "volunteer-dashboard": false,  // Only visible for enrolled volunteers
 };
 
-function HomeLoadingState() {
+function HomeLoadingState({ isStalled }: { isStalled: boolean }) {
   return (
     <main
       className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground"
@@ -46,11 +46,15 @@ function HomeLoadingState() {
       data-testid="home-loading-state"
     >
       <div className="flex max-w-md flex-col items-center gap-4 text-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
+        {isStalled ? null : <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />}
         <div>
-          <h1 className="text-xl font-semibold">Loading the homepage</h1>
+          <h1 className="text-xl font-semibold">
+            {isStalled ? "Homepage content is unavailable" : "Loading the homepage"}
+          </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            We're preparing the latest content and personalization for you.
+            {isStalled
+              ? "This local preview could not finish the legacy homepage data request."
+              : "We're preparing the latest content and personalization for you."}
           </p>
         </div>
         <button
@@ -74,6 +78,7 @@ function HomeLoadingState() {
 export default function Home() {
   const { persona, funnelStage, isPersonaLoading } = usePersona();
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+  const [isLoadingStalled, setIsLoadingStalled] = useState(false);
   const { data: visibleSections } = useContentAvailability();
 
   // Use actual persona values - no fallback to prevent flash
@@ -119,9 +124,14 @@ export default function Home() {
   // Don't render anything until persona and hero content queries complete (to prevent flash)
   // Note: We wait for loading to finish, not for content to exist (it might not exist for some personas)
   const isContentReady = !isPersonaLoading && !heroLoading && (!heroImageLoading || !heroContent?.[0]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setIsLoadingStalled(true), 3000);
+    return () => window.clearTimeout(timeout);
+  }, []);
   
   if (!isContentReady) {
-    return <HomeLoadingState />;
+    return <HomeLoadingState isStalled={isLoadingStalled} />;
   }
 
   return (

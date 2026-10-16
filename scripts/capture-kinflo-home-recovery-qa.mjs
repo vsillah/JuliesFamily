@@ -7,6 +7,7 @@ const chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 const baseUrl = process.env.KINFLO_QA_BASE_URL ?? "http://127.0.0.1:5177";
 const outputDir = resolve("docs/qa/kinflo-home-recovery");
 const debugPort = 9272;
+const recoveryWaitMs = 4200;
 const userDataDir = await mkdtemp(join(tmpdir(), "kinflo-home-recovery-"));
 
 await mkdir(outputDir, { recursive: true });
@@ -97,6 +98,7 @@ try {
   await send("Runtime.enable");
   await setViewport(1440, 900);
   await navigate("/");
+  await new Promise((resolveWait) => setTimeout(resolveWait, recoveryWaitMs));
   await waitForSelector('[data-testid="home-loading-state"]');
   await capture("01-root-recovery-desktop.png");
 
@@ -110,6 +112,7 @@ try {
 
   await setViewport(390, 844);
   await navigate("/");
+  await new Promise((resolveWait) => setTimeout(resolveWait, recoveryWaitMs));
   await waitForSelector('[data-testid="home-loading-state"]');
   await capture("04-root-recovery-mobile.png");
 
