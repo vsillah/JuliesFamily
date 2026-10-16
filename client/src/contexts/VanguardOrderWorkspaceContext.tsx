@@ -9,6 +9,7 @@ import { getVanguardOrderRuntime } from "@/lib/kinfloVanguardOrderRuntime";
 import {
   VanguardOrderWorkspaceContext as WorkspaceContext,
   type VanguardOrderWorkspaceState as WorkspaceState,
+  type VanguardDraftCleanupResult as DraftCleanupResult,
   type VanguardSavedOrder as SavedOrder,
   type VanguardStoredSource as StoredSource,
 } from "@/contexts/VanguardOrderWorkspace";
@@ -35,6 +36,11 @@ type CancelUploadResult = {
   revision: number;
   cancelled: boolean;
   deduplicated: boolean;
+};
+type OrderListResult = {
+  page: Array<SavedOrder & { status: string }>;
+  isDone: boolean;
+  continueCursor: string;
 };
 type OrderReadback = {
   order: SavedOrder;
@@ -65,8 +71,14 @@ const attachStoredSourceMutation = makeFunctionReference<"mutation", Record<stri
 const cancelPreparedUploadMutation = makeFunctionReference<"mutation", Record<string, unknown>, CancelUploadResult>(
   "orders:cancelPreparedUpload",
 );
+const cancelDraftMutation = makeFunctionReference<"mutation", Record<string, unknown>, DraftCleanupResult>(
+  "orders:cancelDraft",
+);
 const getMyOrderQuery = makeFunctionReference<"query", { orderId: string }, OrderReadback>(
   "orders:getMyOrder",
+);
+const listMyOrdersQuery = makeFunctionReference<"query", Record<string, unknown>, OrderListResult>(
+  "orders:listMyOrders",
 );
 
 const unavailable = async () => {
@@ -93,10 +105,16 @@ function LiveWorkspaceProvider({ children, gate }: { children: ReactNode; gate: 
   const prepareUpload = useMutation(prepareUploadMutation);
   const attachStoredSource = useMutation(attachStoredSourceMutation);
   const cancelPreparedUpload = useMutation(cancelPreparedUploadMutation);
+  const cancelDraftMutationCall = useMutation(cancelDraftMutation);
   const [syncState, setSyncState] = useState<"idle" | "syncing" | "ready" | "failed">("idle");
   const [savedOrder, setSavedOrder] = useState<SavedOrder | null>(null);
   const [storedSource, setStoredSource] = useState<StoredSource | null>(null);
+  const [dismissedDraftId, setDismissedDraftId] = useState<string | null>(null);
   const readback = useQuery(getMyOrderQuery, savedOrder ? { orderId: savedOrder.orderId } : "skip");
+  const orderList = useQuery(
+    listMyOrdersQuery,
+    isAuthenticated && viewer ? { paginationOpts: { numItems: 10, cursor: null } } : "skip",
+  );
 
   useEffect(() => {
     if (!isAuthenticated || viewer !== null || syncState !== "idle") return;
@@ -105,6 +123,21 @@ function LiveWorkspaceProvider({ children, gate }: { children: ReactNode; gate: 
       .then(() => setSyncState("ready"))
       .catch(() => setSyncState("failed"));
   }, [isAuthenticated, syncState, upsertCurrentUser, viewer]);
+
+  useEffect(() => {
+    if (savedOrder || !orderList) return;
+    const latestDraft = orderList.page[0];
+    if (
+      !latestDraft
+      || latestDraft.status !== "draft"
+      || latestDraft.orderId === dismissedDraftId
+    ) return;
+    setSavedOrder({
+      orderId: latestDraft.orderId,
+      orderNumber: latestDraft.orderNumber,
+      revision: latestDraft.revision,
+    });
+  }, [dismissedDraftId, orderList, savedOrder]);
 
   const saveReceipt = useCallback(async (receipt: VanguardLocalReceipt) => {
     if (!isAuthenticated || syncState === "failed") {
@@ -215,6 +248,19 @@ function LiveWorkspaceProvider({ children, gate }: { children: ReactNode; gate: 
     return next;
   }, [attachStoredSource, cancelPreparedUpload, prepareUpload, readback, savedOrder]);
 
+  const cancelDraft = useCallback(async () => {
+    if (!savedOrder) throw new Error("No saved draft is available to cancel.");
+    const result = await cancelDraftMutationCall({
+      orderId: savedOrder.orderId,
+      expectedRevision: savedOrder.revision,
+      idempotencyKey: `vanguard:cancel-draft:${savedOrder.orderId}`,
+    });
+    setDismissedDraftId(savedOrder.orderId);
+    setSavedOrder(null);
+    setStoredSource(null);
+    return result;
+  }, [cancelDraftMutationCall, savedOrder]);
+
   const value = useMemo<WorkspaceState>(() => ({
     mode: "convex_auth",
     gate,
@@ -229,7 +275,8 @@ function LiveWorkspaceProvider({ children, gate }: { children: ReactNode; gate: 
     signOut: async () => { await signOut(); },
     saveReceipt,
     uploadPrivateSource,
-  }), [authLoading, gate, isAuthenticated, saveReceipt, savedOrder, signIn, signOut, storedSource, syncState, uploadPrivateSource, viewer]);
+    cancelDraft,
+  }), [authLoading, cancelDraft, gate, isAuthenticated, saveReceipt, savedOrder, signIn, signOut, storedSource, syncState, uploadPrivateSource, viewer]);
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }
 
@@ -270,6 +317,24 @@ function FixtureWorkspaceProvider({ children, gate }: { children: ReactNode; gat
       setStoredSource(next);
       return next;
     },
+    cancelDraft: async () => {
+      if (!savedOrder) throw new Error("No saved draft is available to cancel.");
+      const result = {
+        orderId: savedOrder.orderId,
+        orderNumber: savedOrder.orderNumber,
+        revision: savedOrder.revision + 1,
+        cancelledAt: Date.now(),
+        cleaned: {
+          draftSections: 4,
+          sourceItems: storedSource ? 1 : 0,
+          storedObjects: storedSource ? 1 : 0,
+        },
+        deduplicated: false,
+      };
+      setSavedOrder(null);
+      setStoredSource(null);
+      return result;
+    },
   }), [gate, savedOrder, storedSource]);
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 }
@@ -308,6 +373,7 @@ export function VanguardOrderWorkspaceProvider({ children }: { children: ReactNo
       signOut: async () => undefined,
       saveReceipt: unavailable,
       uploadPrivateSource: unavailable,
+      cancelDraft: unavailable,
     }}>
       {children}
     </WorkspaceContext.Provider>

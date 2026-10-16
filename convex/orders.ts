@@ -18,6 +18,11 @@ import {
   orderStatusEventType,
 } from "./schema";
 import {
+  buildDraftCleanupPlan,
+  evaluateDraftCleanupRequest,
+  VANGUARD_DRAFT_CLEANUP_LIMITS,
+} from "./orderDraftCleanupPolicy";
+import {
   validateVanguardPrivateIgesMetadata,
   validateVanguardStoredSource,
 } from "./orderUploadPolicy";
@@ -1097,6 +1102,132 @@ export const removeStoredSource = mutation({
       orderId: order._id,
       revision: nextRevision,
       removed: true,
+      deduplicated: false,
+    };
+  },
+});
+
+export const cancelDraft = mutation({
+  args: {
+    orderId: v.id("buildOrders"),
+    expectedRevision: v.number(),
+    idempotencyKey: v.string(),
+  },
+  returns: v.object({
+    orderId: v.id("buildOrders"),
+    orderNumber: v.string(),
+    status: v.literal("cancelled"),
+    revision: v.number(),
+    cancelledAt: v.number(),
+    cleaned: v.object({
+      draftSections: v.number(),
+      sourceItems: v.number(),
+      storedObjects: v.number(),
+    }),
+    deduplicated: v.boolean(),
+  }),
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const scope = await requireVanguardScope(ctx);
+    const order = await ctx.db.get(args.orderId);
+    const expectedRevision = requireRevision(args.expectedRevision);
+    const idempotencyKey = requireIdempotencyKey(args.idempotencyKey);
+    const fingerprint = requestFingerprint({
+      orderId: String(args.orderId),
+      expectedRevision,
+    });
+    const replay = order
+      ? await findAuditReplay(ctx, order._id, user._id, idempotencyKey)
+      : null;
+    const decision = evaluateDraftCleanupRequest({
+      order,
+      scope: {
+        tenantId: scope.tenant._id,
+        siteId: scope.site._id,
+        ownerUserId: user._id,
+      },
+      expectedRevision,
+      fingerprint,
+      replay,
+    });
+    if (!order) {
+      throw new Error("Order not found or unavailable");
+    }
+    if (decision.kind === "replay") {
+      return {
+        orderId: order._id,
+        orderNumber: order.orderNumber,
+        status: "cancelled" as const,
+        revision: decision.revision,
+        cancelledAt: decision.cancelledAt,
+        cleaned: decision.counts,
+        deduplicated: true,
+      };
+    }
+    const [sections, sources] = await Promise.all([
+      ctx.db
+        .query("orderDraftSections")
+        .withIndex("by_order_and_updated_at", (q) => q.eq("orderId", order._id))
+        .take(VANGUARD_DRAFT_CLEANUP_LIMITS.draftSections + 1),
+      ctx.db
+        .query("orderSourceItems")
+        .withIndex("by_order_and_created_at", (q) => q.eq("orderId", order._id))
+        .take(VANGUARD_DRAFT_CLEANUP_LIMITS.sourceItems + 1),
+    ]);
+    const cleanup = buildDraftCleanupPlan({ order, sections, sources });
+    const timestamp = Date.now();
+    for (const source of sources) {
+      if (source.storageId) {
+        await ctx.storage.delete(source.storageId);
+      }
+    }
+    for (const source of sources) {
+      await ctx.db.delete(source._id);
+    }
+    for (const section of sections) {
+      await ctx.db.delete(section._id);
+    }
+    await ctx.db.patch(order._id, {
+      status: "cancelled",
+      revision: decision.nextRevision,
+      updatedAt: timestamp,
+    });
+    await ctx.db.insert("orderStatusEvents", {
+      tenantId: scope.tenant._id,
+      siteId: scope.site._id,
+      orderId: order._id,
+      eventType: "order_cancelled",
+      fromStatus: "draft",
+      toStatus: "cancelled",
+      orderRevision: decision.nextRevision,
+      actorUserId: user._id,
+      idempotencyKey,
+      occurredAt: timestamp,
+    });
+    const counts = {
+      draftSections: cleanup.draftSections,
+      sourceItems: cleanup.sourceItems,
+      storedObjects: cleanup.storedObjects,
+    };
+    await ctx.db.insert("orderAuditEvents", {
+      tenantId: scope.tenant._id,
+      siteId: scope.site._id,
+      orderId: order._id,
+      operation: "cancel_draft",
+      actorUserId: user._id,
+      idempotencyKey,
+      requestFingerprint: fingerprint,
+      orderRevision: decision.nextRevision,
+      metadata: { outcome: "cancelled", ...counts },
+      createdAt: timestamp,
+    });
+    return {
+      orderId: order._id,
+      orderNumber: order.orderNumber,
+      status: "cancelled" as const,
+      revision: decision.nextRevision,
+      cancelledAt: timestamp,
+      cleaned: counts,
       deduplicated: false,
     };
   },

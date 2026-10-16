@@ -15,6 +15,19 @@ export type VanguardStoredSource = {
   checksumSha256: string;
 };
 
+export type VanguardDraftCleanupResult = {
+  orderId: string;
+  orderNumber: string;
+  revision: number;
+  cancelledAt: number;
+  cleaned: {
+    draftSections: number;
+    sourceItems: number;
+    storedObjects: number;
+  };
+  deduplicated: boolean;
+};
+
 export type VanguardOrderWorkspaceState = {
   mode: "browser_local" | "local_fixture" | "convex_auth";
   gate: string;
@@ -29,6 +42,7 @@ export type VanguardOrderWorkspaceState = {
     file: File,
     expectedReview: KinfloEngineeringReview | null,
   ) => Promise<VanguardStoredSource>;
+  cancelDraft: () => Promise<VanguardDraftCleanupResult>;
 };
 
 const unavailable = async () => {
@@ -46,6 +60,7 @@ export const VanguardOrderWorkspaceContext = createContext<VanguardOrderWorkspac
   signOut: async () => undefined,
   saveReceipt: unavailable,
   uploadPrivateSource: unavailable,
+  cancelDraft: unavailable,
 });
 
 export function useVanguardOrderWorkspace() {
