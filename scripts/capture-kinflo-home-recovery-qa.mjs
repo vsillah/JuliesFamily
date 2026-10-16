@@ -104,16 +104,21 @@ try {
   await waitForSelector('[data-kinflo-palette="reversr-vanguard"]');
   await capture("02-vanguard-destination-desktop.png");
 
+  await navigate("/admin/kinflo-os?tab=experience");
+  await waitForSelector('a[href="/kinflo-sites/julies-family"]');
+  await capture("03-admin-preview-breadcrumb-desktop.png");
+
   await setViewport(390, 844);
   await navigate("/");
   await waitForSelector('[data-testid="home-loading-state"]');
-  await capture("03-root-recovery-mobile.png");
+  await capture("04-root-recovery-mobile.png");
 
   const videoPath = join(outputDir, "kinflo-home-recovery-walkthrough.mp4");
   const shots = [
     "01-root-recovery-desktop.png",
     "02-vanguard-destination-desktop.png",
-    "03-root-recovery-mobile.png",
+    "03-admin-preview-breadcrumb-desktop.png",
+    "04-root-recovery-mobile.png",
   ];
   const args = ["-y"];
   for (const shot of shots) args.push("-loop", "1", "-t", "2.8", "-i", join(outputDir, shot));

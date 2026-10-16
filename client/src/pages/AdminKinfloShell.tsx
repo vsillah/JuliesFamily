@@ -6503,7 +6503,10 @@ export default function AdminKinfloShell() {
     <div className="min-h-screen overflow-x-clip bg-slate-50 text-slate-950">
       <div className="border-b border-slate-200 bg-white/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
-          <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]} />
+          <Breadcrumbs
+            items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]}
+            homeHref={clientWebsiteStudioPreviewPath}
+          />
           <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${activeTab === "site-studio" ? "gap-2" : "gap-4"}`}>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">

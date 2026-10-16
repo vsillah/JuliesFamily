@@ -9,9 +9,10 @@ interface BreadcrumbItem {
 interface BreadcrumbsProps {
   items: BreadcrumbItem[];
   variant?: 'light' | 'dark';
+  homeHref?: string;
 }
 
-export default function Breadcrumbs({ items, variant = 'light' }: BreadcrumbsProps) {
+export default function Breadcrumbs({ items, variant = 'light', homeHref = '/' }: BreadcrumbsProps) {
   const isDark = variant === 'dark';
   const baseColor = isDark ? "text-white/70" : "text-muted-foreground";
   const hoverColor = isDark ? "hover:text-white" : "hover:text-foreground";
@@ -20,7 +21,7 @@ export default function Breadcrumbs({ items, variant = 'light' }: BreadcrumbsPro
   return (
     <nav className="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
       <Link 
-        href="/" 
+        href={homeHref}
         className={`flex items-center gap-1 ${baseColor} ${hoverColor} transition-colors`}
         data-testid="breadcrumb-home"
       >
