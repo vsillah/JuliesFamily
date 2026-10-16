@@ -43,10 +43,11 @@ const runtimePath = "client/src/lib/kinfloConvexRuntime.ts";
 const leadCapturePath = "client/src/lib/kinfloLeadCapture.ts";
 const publicPreviewDataPath = "client/src/lib/kinfloPublicSitePreview.ts";
 const vanguardWorkflowPath = "client/src/lib/kinfloVanguardWorkflow.ts";
-const vanguardLogoAssetPath = "attached_assets/vanguard-enterprises-logo.jpg";
+const vanguardLogoAssetPath = "attached_assets/vanguard-enterprises-logo-transparent.png";
+const vanguardLogoOnDarkAssetPath = "attached_assets/vanguard-enterprises-logo-on-dark.png";
 const vanguardHeroAssetPath = "attached_assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
 
-for (const assetPath of [vanguardLogoAssetPath, vanguardHeroAssetPath]) {
+for (const assetPath of [vanguardLogoAssetPath, vanguardLogoOnDarkAssetPath, vanguardHeroAssetPath]) {
   if (existsSync(assetPath)) {
     pass(`${assetPath} exists`);
   } else {
@@ -222,10 +223,11 @@ requireIncludes(adminShellPath, [
 ]);
 
 requireIncludes(vanguardWorkflowPath, [
-  'import vanguardLogo from "@assets/vanguard-enterprises-logo.jpg";',
+  'import vanguardLogo from "@assets/vanguard-enterprises-logo-transparent.png";',
+  'import vanguardLogoOnDark from "@assets/vanguard-enterprises-logo-on-dark.png";',
   'sourceUrl: "http://www.vanguardenterprises.com/image/80076569.jpg"',
   'alt: "Vanguard Enterprises"',
-  'sha256: "30d17af6df43c14e6510e6cd0abc40d04064c74c8e0d6e167821b6bdf485eb02"',
+  'darkModeSha256: "1fc651541ef5abf0f5070486408c185be8550bb3d4caa41e723b6d732f6c64e1"',
   'auditedAt: "2026-10-12"',
   'gsa: "GSA Contract Schedule 70, Special Item Number 132-51"',
 ]);
@@ -269,6 +271,7 @@ requireIncludes(publicPreviewDataPath, [
   'slug: "vanguard-enterprises"',
   'slug: "campaign-microsite"',
   "logoImage: vanguardWorkflow.company.logo.image",
+  "logoImageOnDark: vanguardWorkflow.company.logo.imageOnDark",
   "logoAlt: vanguardWorkflow.company.logo.alt",
   "heroImage: vanguardIndustrialHero",
   'heroAlt: "Welders fabricating a structural steel assembly in an industrial workshop"',
