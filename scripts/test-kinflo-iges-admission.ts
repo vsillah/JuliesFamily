@@ -8,6 +8,12 @@ import {
   normalizeKinfloIgesGeometry,
 } from "../client/src/lib/kinfloIges.ts";
 import { createVanguardLocalReceipt, parseVanguardLocalReceipt } from "../client/src/lib/kinfloVanguardOrderPortal.ts";
+import {
+  KINFLO_IGES_EXPORT_CAPABILITIES,
+  createKinfloDerivedInspectionExport,
+  getKinfloPlacedCenter,
+  normalizeKinfloIgesTransform,
+} from "../client/src/lib/kinfloIgesWorkspace.ts";
 
 const encoder = new TextEncoder();
 
@@ -48,18 +54,50 @@ test("rejects oversized, non-ASCII, malformed, and external-reference sources", 
   expectCode("UNSUPPORTED", () => inspectKinfloIgesSource("part.igs", source(416)));
 });
 
-test("normalizes real triangle payload shape and reports millimeter bounds", () => {
+test("normalizes triangle geometry with extents, min, max, center, and explicit unit provenance", () => {
   const geometry = normalizeKinfloIgesGeometry({
     success: true,
     meshes: [{
-      attributes: { position: { array: [0, 0, 0, 10, 0, 0, 0, 20, 5] } },
+      attributes: { position: { array: [-5, 2, 10, 5, 2, 10, -5, 22, 15] } },
       index: { array: [0, 1, 2] },
     }],
   });
   assert.deepEqual(geometry.boundingBoxMm, [10, 20, 5]);
+  assert.deepEqual(geometry.boundsMm, { min: [-5, 2, 10], max: [5, 22, 15], center: [0, 12, 12.5] });
+  assert.deepEqual(geometry.units, { coordinates: "mm", sourceDeclared: "unknown" });
   assert.equal(geometry.meshCount, 1);
   assert.equal(geometry.vertexCount, 3);
   assert.equal(geometry.triangleCount, 1);
+});
+
+test("normalizes precise spatial transforms and reports the placed center", () => {
+  const normalized = normalizeKinfloIgesTransform({
+    translationMm: { x: 12.5, y: Number.NaN, z: 2_000_000 },
+    rotationDeg: { x: -450, y: 45, z: 999 },
+    zoomPercent: 900,
+  });
+  assert.deepEqual(normalized, {
+    translationMm: { x: 12.5, y: 0, z: 1_000_000 },
+    rotationDeg: { x: -360, y: 45, z: 360 },
+    zoomPercent: 400,
+  });
+  assert.deepEqual(getKinfloPlacedCenter(normalized), { x: 12.5, y: 0, z: 1_000_000 });
+});
+
+test("exports real STL and OBJ inspection meshes while keeping STEP unavailable", () => {
+  const geometry = normalizeKinfloIgesGeometry({
+    success: true,
+    meshes: [{ attributes: { position: { array: [0, 0, 0, 10, 0, 0, 0, 10, 5] } }, index: { array: [0, 1, 2] } }],
+  });
+  const stl = createKinfloDerivedInspectionExport(geometry, "Bracket.iges", "stl");
+  const obj = createKinfloDerivedInspectionExport(geometry, "Bracket.iges", "obj");
+  assert.equal(stl.fileName, "Bracket-inspection-mesh-mm.stl");
+  assert.match(stl.content, /facet normal/);
+  assert.match(stl.content, /vertex 10 0 0/);
+  assert.equal(obj.fileName, "Bracket-inspection-mesh-mm.obj");
+  assert.match(obj.content, /v 0 10 5/);
+  assert.match(obj.content, /f 1 2 3/);
+  assert.equal(KINFLO_IGES_EXPORT_CAPABILITIES.find((item) => item.format === "step")?.available, false);
 });
 
 test("rejects no-geometry and mesh-count overflow results", () => {
