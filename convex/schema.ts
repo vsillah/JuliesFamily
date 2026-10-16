@@ -208,6 +208,7 @@ export const orderStatusEventType = v.union(
   v.literal("order_created"),
   v.literal("local_intake_promoted"),
   v.literal("order_submitted"),
+  v.literal("order_cancelled"),
 );
 
 export const orderAuditOperation = v.union(
@@ -219,6 +220,7 @@ export const orderAuditOperation = v.union(
   v.literal("cancel_source_upload"),
   v.literal("attach_stored_source"),
   v.literal("remove_stored_source"),
+  v.literal("cancel_draft"),
 );
 
 export default defineSchema({

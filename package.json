@@ -67,6 +67,8 @@
     "kinflo:test-vanguard-private-upload-policy": "node --import tsx --test scripts/test-kinflo-vanguard-private-upload-policy.ts",
     "kinflo:validate-vanguard-private-uploads-phase2b": "node scripts/validate-kinflo-vanguard-private-uploads-phase2b.mjs",
     "kinflo:capture-vanguard-private-uploads-phase2b-qa": "node scripts/capture-vanguard-private-uploads-phase2b-qa.mjs",
+    "kinflo:test-vanguard-draft-cleanup": "node --import tsx --test scripts/test-kinflo-vanguard-draft-cleanup.ts",
+    "kinflo:validate-vanguard-draft-cleanup-phase2b": "node scripts/validate-kinflo-vanguard-draft-cleanup-phase2b.mjs",
     "kinflo:validate-vanguard-theme-contrast": "node scripts/validate-kinflo-vanguard-theme-contrast.mjs",
     "kinflo:capture-vanguard-theme-contrast-qa": "node scripts/capture-vanguard-theme-contrast-qa.mjs",
     "kinflo:validate-tenant-palettes": "tsx scripts/validate-kinflo-tenant-palettes.ts",
