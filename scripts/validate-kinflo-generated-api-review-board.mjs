@@ -116,12 +116,12 @@ requireIncludes("docs/phase88-generated-api-review-board.md", [
   "hostedActivationRunbook.generatedApiReviewBoard",
   "section-kinflo-generated-api-review-board",
   "section-kinflo-generated-api-review-scroll",
-  "Generated API bindings: 86",
-  "Query bindings: 48",
-  "Mutation bindings: 38",
+  "Generated API bindings: 93",
+  "Query bindings: 51",
+  "Mutation bindings: 42",
   "Live smoke manifest functions: 45",
-  "Smoke-manifest review gaps: 41",
-  "Surface groups: 14",
+  "Smoke-manifest review gaps: 48",
+  "Surface groups: 18",
   "No generated Convex API files are committed or imported.",
   "No live Convex query, mutation, or action is executed.",
 ]);
@@ -131,11 +131,18 @@ requireIncludes(shellDataPath, [
   "requiredFunctions?: string[]",
   "generatedApiReviewBoard: {",
   "provider_light_generated_api_review",
-  "totalBindings: 86",
-  "queryBindings: 48",
-  "mutationBindings: 38",
+  "totalBindings: 93",
+  "queryBindings: 51",
+  "mutationBindings: 42",
   "smokeManifestFunctions: 45",
-  "smokeManifestGaps: 41",
+  "smokeManifestGaps: 48",
+  "audience.listSiteDefinitions",
+  "audience.upsertPersonaDefinition",
+  "audience.upsertJourneyStageDefinition",
+  "audience.getMyAudienceContext",
+  "audience.saveMyAudienceContext",
+  "audience.createDraftPresentationProfileRevision",
+  "audience.resolveAdminPreviewContext",
   "siteFactory.listClientWebsiteConfigurationApprovalMatrices",
   "siteFactory.listClientWebsiteConfigurationAuditTimelines",
   "siteFactory.listClientWebsiteConfigurationChangeSets",
@@ -234,10 +241,10 @@ for (const [key, expected] of expectedNumbers) {
   }
 }
 
-if (bySurface.size === 14) {
-  pass("contract has fourteen surface groups");
+if (bySurface.size === 18) {
+  pass("contract has eighteen surface groups");
 } else {
-  fail("contract has fourteen surface groups", `Received ${bySurface.size}.`);
+  fail("contract has eighteen surface groups", `Received ${bySurface.size}.`);
 }
 
 for (const [surface, counts] of bySurface) {

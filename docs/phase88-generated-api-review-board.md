@@ -16,6 +16,7 @@ The hosted activation shell now shows the generated API review state before code
 - `hostedActivationRunbook.generatedApiReviewBoard` is visible inside Hosted Activation,
 - `section-kinflo-generated-api-review-board` summarizes the current contract totals,
 - `section-kinflo-generated-api-review-scroll` keeps the surface review cards bounded,
+- audience configuration, audience context, presentation profiles, and presentation preview are represented as distinct smoke-manifest review gaps,
 - `siteFactory.listClientWebsiteConfigurationPublishReadiness` is visible as a site-factory smoke-manifest review gap,
 - `siteFactory.listClientWebsiteDomainReadinessPackets` is visible as a site-factory smoke-manifest review gap,
 - `siteFactory.listClientWebsiteAdminInvitationReadinessPackets` is visible as a site-factory smoke-manifest review gap,
@@ -25,12 +26,12 @@ The hosted activation shell now shows the generated API review state before code
 
 ## Current Contract Counts
 
-- Generated API bindings: 86
-- Query bindings: 48
-- Mutation bindings: 38
+- Generated API bindings: 93
+- Query bindings: 51
+- Mutation bindings: 42
 - Live smoke manifest functions: 45
-- Smoke-manifest review gaps: 41
-- Surface groups: 14
+- Smoke-manifest review gaps: 48
+- Surface groups: 18
 - First fixture-to-live batch: `read-only-core`
 
 ## Provider Boundary
