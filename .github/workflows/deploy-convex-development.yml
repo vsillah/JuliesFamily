@@ -99,9 +99,108 @@ jobs:
           unset CONVEX_DEPLOYMENT
 
           deploy_log="$RUNNER_TEMP/kinflo-convex-development-${GITHUB_RUN_ID}.log"
-          trap 'rm -f "$deploy_log"' EXIT
+          transient_env_guard_armed="false"
+          transient_env_owned="false"
 
-          if ! npx --no-install convex dev --once --typecheck disable --codegen disable --tail-logs disable >"$deploy_log" 2>&1; then
+          cleanup() {
+            original_status=$?
+            trap - EXIT
+            cleanup_failure_classification=""
+
+            if ! rm -f -- "$deploy_log" || [[ -e "$deploy_log" ]]; then
+              echo "::error title=Ephemeral output cleanup failed::The captured Convex CLI output could not be removed from the runner."
+              cleanup_failure_classification="ephemeral_output_cleanup_failure"
+            fi
+
+            if [[ "$transient_env_guard_armed" == "true" && -e .env.local ]]; then
+              transient_env_owned="true"
+            fi
+
+            if [[ "$transient_env_owned" == "true" ]]; then
+              if ! rm -f -- .env.local || [[ -e .env.local ]]; then
+                echo "::error title=Transient environment cleanup failed::The workflow-created .env.local could not be removed from the runner."
+                cleanup_failure_classification="transient_environment_cleanup_failure"
+              fi
+            fi
+
+            if [[ -n "$cleanup_failure_classification" ]]; then
+              echo "CONVEX_FAILURE_CLASSIFICATION=$cleanup_failure_classification" >> "$GITHUB_ENV"
+              exit 1
+            fi
+
+            exit "$original_status"
+          }
+
+          validate_transient_env_keys() {
+            local line key
+            local saw_deployment="false"
+            local saw_url="false"
+            local saw_site_url="false"
+
+            while IFS= read -r line || [[ -n "$line" ]]; do
+              line="${line%$'\r'}"
+              if [[ -z "$line" || "$line" == \#* ]]; then
+                continue
+              fi
+              if [[ ! "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+                return 1
+              fi
+
+              key="${line%%=*}"
+              if [[ "$key" == "CONVEX_DEPLOY_KEY" ]]; then
+                return 1
+              fi
+
+              case "$key" in
+                CONVEX_DEPLOYMENT)
+                  [[ "$saw_deployment" == "false" ]] || return 1
+                  saw_deployment="true"
+                  ;;
+                VITE_CONVEX_URL)
+                  [[ "$saw_url" == "false" ]] || return 1
+                  saw_url="true"
+                  ;;
+                VITE_CONVEX_SITE_URL)
+                  [[ "$saw_site_url" == "false" ]] || return 1
+                  saw_site_url="true"
+                  ;;
+                *) return 1 ;;
+              esac
+            done < .env.local
+
+            [[ "$saw_deployment" == "true" && "$saw_url" == "true" && "$saw_site_url" == "true" ]]
+          }
+
+          trap cleanup EXIT
+
+          if [[ -e .env.local ]]; then
+            echo "CONVEX_FAILURE_CLASSIFICATION=preexisting_environment_file_rejected" >> "$GITHUB_ENV"
+            echo "::error title=Preexisting environment file rejected::.env.local appeared before the bounded Convex command and was left untouched."
+            exit 1
+          fi
+
+          transient_env_guard_armed="true"
+
+          cli_status=0
+          if npx --no-install convex dev --once --typecheck disable --codegen disable --tail-logs disable >"$deploy_log" 2>&1; then
+            cli_status=0
+          else
+            cli_status=$?
+          fi
+
+          if [[ -e .env.local ]]; then
+            transient_env_owned="true"
+            if [[ ! -f .env.local || -L .env.local ]] || ! validate_transient_env_keys; then
+              echo "CONVEX_FAILURE_CLASSIFICATION=transient_environment_policy_failure" >> "$GITHUB_ENV"
+              echo "::error title=Transient environment policy failed::The workflow-created .env.local did not contain exactly the approved non-secret key names. Values were not printed."
+              exit 1
+            fi
+            echo "CONVEX_TRANSIENT_ENV_STATUS=created_allowlisted_and_removed" >> "$GITHUB_ENV"
+          else
+            echo "CONVEX_TRANSIENT_ENV_STATUS=not_created" >> "$GITHUB_ENV"
+          fi
+
+          if [[ "$cli_status" -ne 0 ]]; then
             failure_classification="bundle_or_push_failure"
             if grep -Eiq "unauthorized|not authorized|permission denied|access denied|do not have access|don't have access|invalid (deploy )?key|deploy key.*(invalid|expired)|authentication" "$deploy_log"; then
               failure_classification="push_authentication_or_authorization"
@@ -121,12 +220,6 @@ jobs:
             exit 1
           fi
 
-          if [[ -e .env.local ]]; then
-            echo "CONVEX_FAILURE_CLASSIFICATION=environment_file_policy_failure" >> "$GITHUB_ENV"
-            echo "::error title=Environment-file policy failed::The Convex CLI created .env.local unexpectedly; the run is not valid evidence."
-            exit 1
-          fi
-
       - name: Publish sanitized deployment receipt
         shell: bash
         run: |
@@ -138,9 +231,10 @@ jobs:
             echo "- Status: \`succeeded\`"
             echo "- Credential-free local preflight: \`passed\`"
             echo "- Deployment attempts: \`1\`"
+            echo "- Transient environment file: \`$CONVEX_TRANSIENT_ENV_STATUS\`"
             echo "- Production selectable: \`no\`"
             echo "- Secret values printed: \`no\`"
-            echo "- \`.env.local\` written: \`no\`"
+            echo "- \`.env.local\` retained: \`no\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish sanitized failure receipt
