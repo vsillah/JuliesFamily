@@ -68,9 +68,19 @@ check(
   "Use one fail-closed Convex development push without retry.",
 );
 check(
-  "typecheck and quiet log settings are explicit",
-  workflow.includes("--typecheck enable") && workflow.includes("--tail-logs disable"),
-  "Typecheck functions and disable hosted log tailing.",
+  "non-deploying preflight isolates codegen and typecheck",
+  workflow.split("npx --no-install convex codegen --dry-run --typecheck enable").length === 2 &&
+    workflow.includes("Validate Convex codegen and typecheck without deploying") &&
+    workflow.indexOf("npx --no-install convex codegen --dry-run --typecheck enable") <
+      workflow.indexOf("npx --no-install convex dev --once") &&
+    workflow.includes('>"$preflight_log" 2>&1') &&
+    workflow.includes("trap 'rm -f \"$preflight_log\"' EXIT"),
+  "Run one ephemeral dry-run codegen and typecheck preflight before any deployment attempt.",
+);
+check(
+  "deployment attempt skips completed preflight work",
+  workflow.includes("convex dev --once --typecheck disable --codegen disable --tail-logs disable"),
+  "Keep the one deployment attempt separate from codegen and typecheck.",
 );
 check(
   "production selectors are absent",
@@ -86,8 +96,9 @@ check(
 );
 check(
   "environment file is guarded before and after deployment",
-  workflow.split("if [[ -e .env.local ]]").length === 3 && workflow.includes("unset CONVEX_DEPLOYMENT"),
-  "Reject .env.local and clear ambient CONVEX_DEPLOYMENT selection.",
+  workflow.split("if [[ -e .env.local ]]").length === 4 &&
+    workflow.split("unset CONVEX_DEPLOYMENT").length === 3,
+  "Reject .env.local and clear ambient CONVEX_DEPLOYMENT selection for preflight and deployment.",
 );
 check(
   "workflow never writes an environment file",
@@ -95,31 +106,37 @@ check(
   "Never create, append, or pass an environment file.",
 );
 check(
-  "raw Convex output is withheld and removed",
-  workflow.includes('>"$deploy_log" 2>&1') &&
+  "raw Convex outputs are withheld and removed",
+  workflow.includes('>"$preflight_log" 2>&1') &&
+    workflow.includes('>"$deploy_log" 2>&1') &&
     workflow.includes("Raw CLI output was withheld") &&
+    workflow.includes("trap 'rm -f \"$preflight_log\"' EXIT") &&
     workflow.includes("trap 'rm -f \"$deploy_log\"' EXIT"),
-  "Capture ephemeral CLI output without publishing or retaining it.",
+  "Capture both ephemeral CLI outputs without publishing or retaining them.",
 );
 check(
-  "CLI failure classification is coarse and allowlisted",
+  "preflight and deployment classifications are coarse and allowlisted",
   [
-    "authentication_or_authorization",
-    "source_validation_or_codegen",
-    "network_or_service_availability",
-    "configuration_or_deployment_binding",
-    "unclassified_cli_failure",
-    "not_available_before_cli_attempt",
+    "not_available_before_preflight",
+    "preflight_authentication_or_authorization",
+    "preflight_network_or_service_availability",
+    "preflight_codegen_typecheck_or_configuration",
+    "push_authentication_or_authorization",
+    "push_network_or_service_availability",
+    "push_configuration_or_deployment_binding",
+    "bundle_or_push_failure",
+    "environment_file_policy_failure",
   ].every((classification) => workflow.includes(classification)) &&
     workflow.includes('echo "CONVEX_FAILURE_CLASSIFICATION=$failure_classification" >> "$GITHUB_ENV"') &&
-    workflow.includes('*) failure_classification="unclassified_cli_failure" ;;'),
-  "Classify a failed CLI attempt using only fixed coarse labels.",
+    workflow.includes('*) failure_classification="preflight_codegen_typecheck_or_configuration" ;;') &&
+    workflow.includes('*) failure_classification="bundle_or_push_failure" ;;'),
+  "Classify failed preflight and deployment stages using only fixed coarse labels.",
 );
 check(
   "failure classification never publishes captured CLI content",
-  !/cat\s+[^\n]*deploy_log/.test(workflow) &&
-    !/echo\s+[^\n]*(?:deploy_log|\$\([^\n]*grep)/.test(workflow) &&
-    !/GITHUB_(?:STEP_SUMMARY|OUTPUT|ENV)[^\n]*(?:grep|sed|awk|tail|head)[^\n]*deploy_log/.test(workflow),
+  !/cat\s+[^\n]*(?:preflight_log|deploy_log)/.test(workflow) &&
+    !/echo\s+[^\n]*(?:preflight_log|deploy_log|\$\([^\n]*grep)/.test(workflow) &&
+    !/GITHUB_(?:STEP_SUMMARY|OUTPUT|ENV)[^\n]*(?:grep|sed|awk|tail|head)[^\n]*(?:preflight_log|deploy_log)/.test(workflow),
   "Never copy raw or extracted Convex CLI output into annotations, outputs, environment values, or summaries.",
 );
 check(
@@ -135,6 +152,8 @@ check(
     "Workflow run:",
     "Deployment binding:",
     "Status:",
+    "Non-deploying preflight:",
+    "Deployment attempts:",
     "Production selectable:",
     "Secret values printed:",
     ".env.local",
