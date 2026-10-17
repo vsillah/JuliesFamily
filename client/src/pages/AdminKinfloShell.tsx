@@ -95,7 +95,7 @@ import {
   type ShellLaunchReadinessSite,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
-import { useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
+import { useKinfloAdminScope, useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
 import { useKinfloThemeWriteAdapter } from "@/contexts/KinfloThemeWriteAdapterContext";
 import TenantSiteComposer from "@/components/TenantSiteComposer";
@@ -4487,6 +4487,7 @@ export default function AdminKinfloShell() {
   const { isLoading, isAdmin } = useKinfloAdminIdentity();
   const [location, navigate] = useLocation();
   const snapshot = useKinfloShellSnapshot();
+  const adminScope = useKinfloAdminScope();
   const preferencesAdapter = useKinfloPreferencesAdapter();
   const themeWriteAdapter = useKinfloThemeWriteAdapter();
   const activeExperiencePreferences = preferencesAdapter.preferences
@@ -6528,6 +6529,26 @@ export default function AdminKinfloShell() {
                 New Site
               </Button>
             </div>
+          </div>
+          <div
+            className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-950 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between"
+            data-testid="section-kinflo-active-admin-scope"
+          >
+            <div className="min-w-0">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Active tenant/site scope</div>
+              <div className="mt-1 truncate text-sm font-semibold" data-testid="text-kinflo-active-admin-scope">
+                {adminScope.tenant.name} / {adminScope.site.name}
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="shrink-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+              onClick={adminScope.changeScope}
+              data-testid="button-change-kinflo-admin-scope"
+            >
+              Change scope
+            </Button>
           </div>
           <div
             className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]`}
