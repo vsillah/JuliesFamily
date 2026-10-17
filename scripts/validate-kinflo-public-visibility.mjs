@@ -76,10 +76,11 @@ requireIncludes("convex/publicSite.ts", [
   "const contextPersona = normalizeAudienceValue(persona)",
   "const personaMatches = !rulePersona || rulePersona === contextPersona",
   "const stageMatches = !ruleJourneyStage || ruleJourneyStage === contextJourneyStage",
-  "applyVisibility(block, scopedRules, args.persona, args.journeyStage)",
+  "resolveConfiguredAudience",
+  "applyVisibility(block, scopedRules, audience.persona, audience.journeyStage)",
   "context: {",
-  "persona: args.persona",
-  "journeyStage: args.journeyStage",
+  "persona: audience.persona",
+  "journeyStage: audience.journeyStage",
 ]);
 
 requireIncludes("convex/siteBuilder.ts", [
@@ -103,7 +104,8 @@ requireIncludes("client/src/pages/KinfloPublicSitePreview.tsx", [
   "LeadCaptureForm",
   "preview.context.persona",
   "preview.context.journeyStage",
-  "Runtime fallback is `/api/leads`; Convex target is `crm.submitLead`.",
+  "defaultPersona={getPersona(block.metadata)}",
+  "defaultFunnelStage={getFunnelStage(block.metadata)}",
 ]);
 
 requireIncludes("package.json", [

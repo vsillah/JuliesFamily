@@ -7,6 +7,7 @@ export type KinfloGeneratedApiModule =
   | "aiReview"
   | "accessPolicy"
   | "activation"
+  | "audience"
   | "campaigns"
   | "controlPlane"
   | "crm"
@@ -69,6 +70,13 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("roleCatalogSyncDefaultRoles", "mutation", "access", "role catalog sync writes audit event"),
   binding("accessPolicyViewerPermissionSnapshot", "query", "access", "viewer permissions are scoped by tenant and site"),
   binding("accessPolicyCanPerform", "query", "access", "permission check returns expected allow/deny result"),
+  binding("audienceListSiteDefinitions", "query", "audience configuration", "site viewer reads only active same-site persona and journey definitions"),
+  binding("audienceUpsertPersonaDefinition", "mutation", "audience configuration", "content editor creates or updates one site-scoped canonical persona definition"),
+  binding("audienceUpsertJourneyStageDefinition", "mutation", "audience configuration", "content editor creates or updates one site-scoped canonical journey definition"),
+  binding("audienceGetMyContext", "query", "audience context", "signed-in user reads only their own consented audience selection for the resolved site"),
+  binding("audienceSaveMyContext", "mutation", "audience context", "signed-in user stores or removes only their own consented site audience selection"),
+  binding("audienceCreateDraftPresentationProfileRevision", "mutation", "presentation profiles", "content editor creates a numbered draft revision without changing published state"),
+  binding("audienceResolveAdminPreviewContext", "query", "presentation preview", "site viewer resolves same-site audience and presentation references without writes"),
   binding("controlPlaneListTenants", "query", "tenant control plane", "super admin can list tenants"),
   binding("controlPlaneCreateTenant", "mutation", "tenant control plane", "super admin can create tenant"),
   binding("controlPlaneCreateSite", "mutation", "tenant control plane", "site limit is enforced before site creation"),
