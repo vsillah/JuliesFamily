@@ -6,6 +6,7 @@ const convexModuleNames = new Set([
   "accessPolicy",
   "activation",
   "aiReview",
+  "audience",
   "campaigns",
   "controlPlane",
   "crm",
@@ -233,7 +234,7 @@ console.log(`Runtime functions: ${runtimePaths.length}`);
 console.log(`Generated API bindings: ${contractBindings.length}`);
 console.log("External writes: 0");
 console.log("Hosted deployment touched: no");
-console.log("Generated API imported: no");
+console.log("Generated API imported by product contract/seam: no");
 console.log("Live Convex execution: no");
 
 if (failed.length > 0) {

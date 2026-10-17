@@ -6,8 +6,25 @@ import {
 } from "convex/server";
 import { v } from "convex/values";
 import { requirePermission } from "./accessPolicy";
+import {
+  assertContentMetadata,
+  definitionMatchesSite,
+  normalizeAudienceKey,
+} from "./audiencePolicyCore";
 import { requireEntitlementLimit } from "./entitlements";
-import { assetStatus, contentBlockType, domainStatus, navPlacement, publishStatus } from "./schema";
+import {
+  assetStatus,
+  contentBlockType,
+  contentProvenance,
+  domainStatus,
+  navPlacement,
+  publishStatus,
+} from "./schema";
+import {
+  assertRecordMatchesResolvedScope,
+  recordMatchesResolvedScope,
+  type ResolvedScope,
+} from "./scopePolicyCore";
 
 type QueryCtx = GenericQueryCtx<any>;
 type MutationCtx = GenericMutationCtx<any>;
@@ -35,11 +52,59 @@ async function requireSitePermission(ctx: AnyCtx, siteId: any, permission: strin
     throw new Error("Site not found");
   }
   const user = await requirePermission(ctx, { siteId, permission });
-  return { user, site };
+  const scope: Extract<ResolvedScope, { scopeType: "site" }> = {
+    scopeType: "site",
+    tenantId: site.tenantId,
+    siteId: site._id,
+  };
+  return { user, site, scope };
 }
 
 async function requireTenantPermission(ctx: AnyCtx, tenantId: any, permission: string) {
   return await requirePermission(ctx, { tenantId, permission });
+}
+
+async function resolveVisibilityDefinition(
+  ctx: AnyCtx,
+  table: "personaDefinitions" | "journeyStageDefinitions",
+  definitionId: any,
+  legacyKey: string | undefined,
+  scope: Extract<ResolvedScope, { scopeType: "site" }>,
+) {
+  if (definitionId) {
+    const definition = await ctx.db.get(definitionId);
+    if (!definitionMatchesSite(definition, scope.tenantId, scope.siteId, { requireActive: true })) {
+      throw new Error("Audience definition is unavailable");
+    }
+    if (legacyKey && definition.key !== normalizeAudienceKey(legacyKey)) {
+      throw new Error("Audience definition is unavailable");
+    }
+    return definition;
+  }
+
+  if (!legacyKey) {
+    return null;
+  }
+  const key = normalizeAudienceKey(legacyKey);
+  const definition = await ctx.db
+    .query(table)
+    .withIndex("by_site_and_key", (q: any) => q.eq("siteId", scope.siteId).eq("key", key))
+    .unique();
+  if (definition) {
+    if (!definitionMatchesSite(definition, scope.tenantId, scope.siteId, { requireActive: true })) {
+      throw new Error("Audience definition is unavailable");
+    }
+    return definition;
+  }
+
+  const siteHasDefinitions = await ctx.db
+    .query(table)
+    .withIndex("by_site_and_key", (q: any) => q.eq("siteId", scope.siteId))
+    .first();
+  if (siteHasDefinitions) {
+    throw new Error("Audience definition is unavailable");
+  }
+  return { _id: undefined, key };
 }
 
 async function writeAuditEvent(
@@ -73,7 +138,7 @@ export const getSiteDraft = query({
     siteId: v.id("sites"),
   },
   handler: async (ctx, args) => {
-    const { site } = await requireSitePermission(ctx, args.siteId, "site:view");
+    const { site, scope } = await requireSitePermission(ctx, args.siteId, "site:view");
     const theme = await ctx.db
       .query("themeTokens")
       .withIndex("by_site", (q) => q.eq("siteId", args.siteId))
@@ -89,9 +154,11 @@ export const getSiteDraft = query({
 
     return {
       site,
-      theme,
-      navigationItems,
-      pages,
+      theme: theme && recordMatchesResolvedScope(theme, scope) ? theme : null,
+      navigationItems: navigationItems.filter((item) =>
+        recordMatchesResolvedScope(item, scope)
+      ),
+      pages: pages.filter((page) => recordMatchesResolvedScope(page, scope)),
     };
   },
 });
@@ -105,7 +172,7 @@ export const createPage = mutation({
     templateKey: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { user, site } = await requireSitePermission(ctx, args.siteId, "content:edit");
+    const { user, site, scope } = await requireSitePermission(ctx, args.siteId, "content:edit");
     const route = normalizeRoute(args.route);
     const existing = await ctx.db
       .query("pages")
@@ -113,6 +180,7 @@ export const createPage = mutation({
       .filter((q) => q.eq(q.field("route"), route))
       .first();
     if (existing) {
+      assertRecordMatchesResolvedScope(existing, scope);
       throw new Error(`Page route already exists for site: ${route}`);
     }
 
@@ -159,7 +227,8 @@ export const updatePage = mutation({
       throw new Error("Page not found");
     }
     const permission = args.status === "published" ? "content:publish" : "content:edit";
-    const { user, site } = await requireSitePermission(ctx, page.siteId, permission);
+    const { user, site, scope } = await requireSitePermission(ctx, page.siteId, permission);
+    assertRecordMatchesResolvedScope(page, scope);
     const route = args.route ? normalizeRoute(args.route) : undefined;
 
     if (route && route !== page.route) {
@@ -169,6 +238,7 @@ export const updatePage = mutation({
         .filter((q) => q.eq(q.field("route"), route))
         .first();
       if (existing) {
+        assertRecordMatchesResolvedScope(existing, scope);
         throw new Error(`Page route already exists for site: ${route}`);
       }
     }
@@ -206,14 +276,20 @@ export const upsertNavigationItem = mutation({
     isVisible: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { user, site } = await requireSitePermission(ctx, args.siteId, "site:update");
+    const { user, site, scope } = await requireSitePermission(ctx, args.siteId, "site:update");
     const timestamp = now();
+
+    if (args.parentId) {
+      const parent = await ctx.db.get(args.parentId);
+      assertRecordMatchesResolvedScope(parent, scope);
+    }
 
     if (args.itemId) {
       const item = await ctx.db.get(args.itemId);
       if (!item || item.siteId !== args.siteId) {
         throw new Error("Navigation item not found for site");
       }
+      assertRecordMatchesResolvedScope(item, scope);
       await ctx.db.patch(item._id, definedFields({
         parentId: args.parentId,
         placement: args.placement,
@@ -260,6 +336,7 @@ export const createContentBlock = mutation({
     title: v.optional(v.string()),
     body: v.optional(v.string()),
     metadata: v.optional(v.any()),
+    provenance: v.optional(contentProvenance),
     order: v.number(),
   },
   handler: async (ctx, args) => {
@@ -267,8 +344,12 @@ export const createContentBlock = mutation({
     if (!page) {
       throw new Error("Page not found");
     }
-    const { user, site } = await requireSitePermission(ctx, page.siteId, "content:edit");
+    const { user, site, scope } = await requireSitePermission(ctx, page.siteId, "content:edit");
+    assertRecordMatchesResolvedScope(page, scope);
     const timestamp = now();
+    const metadata = args.metadata === undefined
+      ? undefined
+      : assertContentMetadata(args.metadata);
     const blockId = await ctx.db.insert("contentBlocks", {
       tenantId: site.tenantId,
       siteId: page.siteId,
@@ -276,7 +357,9 @@ export const createContentBlock = mutation({
       type: args.type,
       title: args.title,
       body: args.body,
-      metadata: args.metadata,
+      metadata,
+      schemaVersion: "kinflo-content-block-v1",
+      provenance: args.provenance ?? { sourceType: "authored" },
       order: args.order,
       status: "draft",
       createdBy: user._id,
@@ -304,6 +387,7 @@ export const updateContentBlock = mutation({
     title: v.optional(v.string()),
     body: v.optional(v.string()),
     metadata: v.optional(v.any()),
+    provenance: v.optional(contentProvenance),
     order: v.optional(v.number()),
     status: v.optional(publishStatus),
   },
@@ -313,13 +397,21 @@ export const updateContentBlock = mutation({
       throw new Error("Content block not found");
     }
     const permission = args.status === "published" ? "content:publish" : "content:edit";
-    const { user, site } = await requireSitePermission(ctx, block.siteId, permission);
+    const { user, site, scope } = await requireSitePermission(ctx, block.siteId, permission);
+    assertRecordMatchesResolvedScope(block, scope);
+    const page = await ctx.db.get(block.pageId);
+    assertRecordMatchesResolvedScope(page, scope);
     const timestamp = now();
+    const metadata = args.metadata === undefined
+      ? undefined
+      : assertContentMetadata(args.metadata);
 
     await ctx.db.patch(block._id, definedFields({
       title: args.title,
       body: args.body,
-      metadata: args.metadata,
+      metadata,
+      schemaVersion: "kinflo-content-block-v1",
+      provenance: args.provenance,
       order: args.order,
       status: args.status,
       updatedAt: timestamp,
@@ -342,6 +434,8 @@ export const upsertVisibilityRule = mutation({
   args: {
     blockId: v.id("contentBlocks"),
     ruleId: v.optional(v.id("contentVisibilityRules")),
+    personaDefinitionId: v.optional(v.id("personaDefinitions")),
+    journeyStageDefinitionId: v.optional(v.id("journeyStageDefinitions")),
     persona: v.optional(v.string()),
     journeyStage: v.optional(v.string()),
     isVisible: v.boolean(),
@@ -353,17 +447,39 @@ export const upsertVisibilityRule = mutation({
     if (!block) {
       throw new Error("Content block not found");
     }
-    const { user, site } = await requireSitePermission(ctx, block.siteId, "content:edit");
+    const { user, site, scope } = await requireSitePermission(ctx, block.siteId, "content:edit");
+    assertRecordMatchesResolvedScope(block, scope);
+    const page = await ctx.db.get(block.pageId);
+    assertRecordMatchesResolvedScope(page, scope);
     const timestamp = now();
+    const personaDefinition = await resolveVisibilityDefinition(
+      ctx,
+      "personaDefinitions",
+      args.personaDefinitionId,
+      args.persona,
+      scope,
+    );
+    const journeyStageDefinition = await resolveVisibilityDefinition(
+      ctx,
+      "journeyStageDefinitions",
+      args.journeyStageDefinitionId,
+      args.journeyStage,
+      scope,
+    );
+    const persona = personaDefinition?.key;
+    const journeyStage = journeyStageDefinition?.key;
 
     if (args.ruleId) {
       const rule = await ctx.db.get(args.ruleId);
       if (!rule || rule.blockId !== args.blockId) {
         throw new Error("Visibility rule not found for block");
       }
+      assertRecordMatchesResolvedScope(rule, scope);
       await ctx.db.patch(rule._id, definedFields({
-        persona: args.persona,
-        journeyStage: args.journeyStage,
+        personaDefinitionId: personaDefinition?._id,
+        journeyStageDefinitionId: journeyStageDefinition?._id,
+        persona,
+        journeyStage,
         isVisible: args.isVisible,
         order: args.order,
         overrides: args.overrides,
@@ -376,8 +492,10 @@ export const upsertVisibilityRule = mutation({
       tenantId: site.tenantId,
       siteId: block.siteId,
       blockId: block._id,
-      persona: args.persona,
-      journeyStage: args.journeyStage,
+      personaDefinitionId: personaDefinition?._id,
+      journeyStageDefinitionId: journeyStageDefinition?._id,
+      persona,
+      journeyStage,
       isVisible: args.isVisible,
       order: args.order,
       overrides: args.overrides,
@@ -393,7 +511,7 @@ export const upsertVisibilityRule = mutation({
       action: "visibility_rule_upserted",
       resourceType: "contentVisibilityRule",
       resourceId: ruleId,
-      metadata: { blockId: block._id, persona: args.persona, journeyStage: args.journeyStage },
+      metadata: { blockId: block._id, persona, journeyStage },
     });
 
     return ruleId;
@@ -467,7 +585,7 @@ export const upsertDomain = mutation({
     verificationToken: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { user, site } = await requireSitePermission(ctx, args.siteId, "site:update");
+    const { user, site, scope } = await requireSitePermission(ctx, args.siteId, "site:update");
     const hostname = args.hostname.trim().toLowerCase();
     if (!hostname || hostname.includes("/") || hostname.includes(":")) {
       throw new Error("Hostname must be a bare domain such as example.com");
@@ -483,6 +601,7 @@ export const upsertDomain = mutation({
       if (!domain || domain.siteId !== args.siteId) {
         throw new Error("Domain not found for site");
       }
+      assertRecordMatchesResolvedScope(domain, scope);
       if (existingForHostname && existingForHostname._id !== domain._id) {
         throw new Error(`Domain already exists: ${hostname}`);
       }
@@ -593,7 +712,8 @@ export const publishPage = mutation({
     if (!page) {
       throw new Error("Page not found");
     }
-    const { user, site } = await requireSitePermission(ctx, page.siteId, "content:publish");
+    const { user, site, scope } = await requireSitePermission(ctx, page.siteId, "content:publish");
+    assertRecordMatchesResolvedScope(page, scope);
     const blocks = await ctx.db
       .query("contentBlocks")
       .withIndex("by_page_order", (q) => q.eq("pageId", page._id))
@@ -603,6 +723,16 @@ export const publishPage = mutation({
       .withIndex("by_page", (q) => q.eq("pageId", page._id))
       .order("desc")
       .first();
+
+    for (const block of blocks) {
+      assertRecordMatchesResolvedScope(block, scope);
+      if (block.pageId !== page._id) {
+        throw new Error("Scoped record is unavailable");
+      }
+    }
+    if (priorRevision) {
+      assertRecordMatchesResolvedScope(priorRevision, scope);
+    }
 
     const timestamp = now();
     const revisionNumber = (priorRevision?.revisionNumber ?? 0) + 1;

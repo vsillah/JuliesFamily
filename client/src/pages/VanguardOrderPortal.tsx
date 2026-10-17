@@ -14,6 +14,7 @@ import {
   LogIn,
   PackageCheck,
   ShieldCheck,
+  Trash2,
   UploadCloud,
   UsersRound,
 } from "lucide-react";
@@ -50,8 +51,9 @@ function VanguardOrderPortalContent() {
     return parseVanguardLocalReceipt(window.sessionStorage.getItem(VANGUARD_LOCAL_RECEIPT_STORAGE_KEY));
   });
   const [showTransferReview, setShowTransferReview] = useState(() => Boolean(localReceipt));
-  const [actionState, setActionState] = useState<"idle" | "saving" | "uploading" | "success" | "error">("idle");
+  const [actionState, setActionState] = useState<"idle" | "saving" | "uploading" | "cancelling" | "success" | "error">("idle");
   const [actionMessage, setActionMessage] = useState("");
+  const [showCleanupConfirmation, setShowCleanupConfirmation] = useState(false);
 
   async function saveBrowserReceipt() {
     if (!localReceipt) return;
@@ -78,6 +80,24 @@ function VanguardOrderPortalContent() {
     } catch (error) {
       setActionState("error");
       setActionMessage(error instanceof Error ? error.message : "The private source could not be attached.");
+    }
+  }
+
+  async function cancelSavedDraft() {
+    const orderNumber = workspace.savedOrder?.orderNumber;
+    if (!orderNumber) return;
+    setActionState("cancelling");
+    setActionMessage(`Cancelling ${orderNumber} and removing its private draft sources…`);
+    try {
+      const result = await workspace.cancelDraft();
+      setShowCleanupConfirmation(false);
+      setActionState("success");
+      setActionMessage(
+        `${result.orderNumber} was cancelled. Removed ${result.cleaned.sourceItems} source record${result.cleaned.sourceItems === 1 ? "" : "s"} and ${result.cleaned.storedObjects} stored private object${result.cleaned.storedObjects === 1 ? "" : "s"}.`,
+      );
+    } catch (error) {
+      setActionState("error");
+      setActionMessage(error instanceof Error ? error.message : "The saved draft could not be cancelled.");
     }
   }
 
@@ -255,6 +275,39 @@ function VanguardOrderPortalContent() {
                       onChange={(event) => void uploadPrivateSource(event.currentTarget.files?.[0])}
                     />
                   </label>
+                )}
+              </div>
+            ) : null}
+            {workspace.savedOrder ? (
+              <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30" data-testid="vanguard-order-draft-cleanup">
+                <div className="font-semibold text-red-950 dark:text-red-100">Cancel this saved draft</div>
+                <p className="mt-1 text-xs leading-5 text-red-900 dark:text-red-200">
+                  This cancels {workspace.savedOrder.orderNumber} and removes its draft details, source records, and stored private files. The cancellation audit record remains.
+                </p>
+                {showCleanupConfirmation ? (
+                  <div className="mt-3 flex flex-wrap gap-2" data-testid="vanguard-order-draft-cleanup-confirmation">
+                    <Button
+                      type="button"
+                      onClick={() => void cancelSavedDraft()}
+                      disabled={actionState === "cancelling"}
+                      className="bg-red-700 text-white hover:bg-red-800"
+                      data-testid="vanguard-order-draft-cleanup-confirm"
+                    >
+                      {actionState === "cancelling" ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                      Cancel draft and remove sources
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setShowCleanupConfirmation(false)} disabled={actionState === "cancelling"}>Keep draft</Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowCleanupConfirmation(true)}
+                    className="mt-3 border-red-300 bg-white text-red-800 hover:bg-red-100 hover:text-red-900"
+                    data-testid="vanguard-order-draft-cleanup-open"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Cancel saved draft
+                  </Button>
                 )}
               </div>
             ) : null}

@@ -1,6 +1,6 @@
 # Phase 174: Hosted Read-Only Smoke QA Plan
 
-Phase 174 prepares the minimum hosted read-only smoke lane after generated API approval. It does not run hosted Convex, codegen, generated API imports, provider calls, writes, campaigns, AI calls, public publish, transcript capture, adapter switch, or client sharing.
+Phase 174 defines the minimum hosted read-only smoke lane. The isolated development harness imports ignored generated bindings for this sequence, but committed product adapters remain unchanged. This source change does not run hosted Convex, codegen, provider calls, writes, campaigns, AI calls, public publish, transcript capture, adapter switch, or client sharing.
 
 Command:
 
@@ -14,7 +14,7 @@ Generated API cutover is not approved in committed repo truth.
 
 The current owner-review scoreboard keeps:
 
-- Generated API import: blocked
+- Product adapter generated API import: blocked
 - Hosted smoke execution: blocked
 - Fixture adapter switch: blocked
 - Provider writes: blocked
@@ -91,7 +91,7 @@ No hosted Convex deployment is created.
 
 No Convex codegen is run.
 
-No generated Convex API files are committed or imported.
+No generated Convex API files are committed. The development-only harness imports ignored generated bindings without changing a product adapter.
 
 No fixture adapter switch is performed.
 

@@ -101,7 +101,7 @@ requireIncludes(files.publicPage, [
   'data-testid="public-preview-vanguard-contact-location"',
   "Online applications are not available here.",
   "Leadership team",
-  'aria-label="Mobile page navigation"',
+  'aria-label="Primary page navigation"',
 ]);
 
 requireIncludes(files.adminPage, [

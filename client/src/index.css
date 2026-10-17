@@ -39,6 +39,23 @@
     background: var(--kinflo-surface-muted) !important;
     color: var(--kinflo-foreground) !important;
   }
+
+  .kinflo-palette-surface [data-highlighted],
+  .kinflo-palette-surface [data-state="checked"] {
+    background: var(--kinflo-accent-soft) !important;
+    color: var(--kinflo-accent-soft-foreground) !important;
+  }
+
+  .kinflo-hero-media {
+    will-change: transform;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kinflo-hero-media {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* LIGHT MODE */

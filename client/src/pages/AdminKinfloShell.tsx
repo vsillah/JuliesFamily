@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import KinfloHostedActivationControl from "@/components/KinfloHostedActivationControl";
-import { useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
+import { canAccessKinfloAdmin, useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,9 +96,10 @@ import {
   type ShellLaunchReadinessSite,
   type ShellMetricIconKey,
 } from "@/lib/kinfloShellData";
-import { useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
+import { useKinfloAdminScope, useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
 import { useKinfloThemeWriteAdapter } from "@/contexts/KinfloThemeWriteAdapterContext";
+import TenantSiteComposer from "@/components/TenantSiteComposer";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import { isKinfloPaletteId } from "@/lib/kinfloPaletteRegistry";
 import {
@@ -2857,6 +2858,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {[
             { label: "Website sections", value: vanguardWorkflow.sourceSite.coverage.length },
+            { label: "Source pages", value: vanguardWorkflow.sourceSite.inventory.length },
             { label: "Service areas", value: vanguardWorkflow.services.length },
             { label: "Public website", value: "Available" },
             { label: "Request saving", value: "Not available" },
@@ -4483,9 +4485,12 @@ function MobileInspectionMode({
 }
 
 export default function AdminKinfloShell() {
-  const { isLoading, isAdmin } = useKinfloAdminIdentity();
+  const adminIdentity = useKinfloAdminIdentity();
+  const { isLoading } = adminIdentity;
+  const canAccessAdmin = canAccessKinfloAdmin(adminIdentity);
   const [location, navigate] = useLocation();
   const snapshot = useKinfloShellSnapshot();
+  const adminScope = useKinfloAdminScope();
   const preferencesAdapter = useKinfloPreferencesAdapter();
   const themeWriteAdapter = useKinfloThemeWriteAdapter();
   const activeExperiencePreferences = preferencesAdapter.preferences
@@ -5582,10 +5587,10 @@ export default function AdminKinfloShell() {
   };
 
   useEffect(() => {
-    if (!isLoading && !isAdmin) {
+    if (!isLoading && !canAccessAdmin) {
       navigate("/");
     }
-  }, [isAdmin, isLoading, navigate]);
+  }, [canAccessAdmin, isLoading, navigate]);
 
   useEffect(() => {
     const nextTab = readInitialShellTab();
@@ -6438,7 +6443,7 @@ export default function AdminKinfloShell() {
     );
   }
 
-  if (!isAdmin) {
+  if (!canAccessAdmin) {
     return null;
   }
 
@@ -6502,7 +6507,10 @@ export default function AdminKinfloShell() {
     <div className="min-h-screen overflow-x-clip bg-slate-50 text-slate-950">
       <div className="border-b border-slate-200 bg-white/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
-          <Breadcrumbs items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]} />
+          <Breadcrumbs
+            items={[{ label: "Admin Dashboard", href: "/admin" }, { label: "KinFlo OS" }]}
+            homeHref={clientWebsiteStudioPreviewPath}
+          />
           <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${activeTab === "site-studio" ? "gap-2" : "gap-4"}`}>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
@@ -6524,6 +6532,26 @@ export default function AdminKinfloShell() {
                 New Site
               </Button>
             </div>
+          </div>
+          <div
+            className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-950 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between"
+            data-testid="section-kinflo-active-admin-scope"
+          >
+            <div className="min-w-0">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Active tenant/site scope</div>
+              <div className="mt-1 truncate text-sm font-semibold" data-testid="text-kinflo-active-admin-scope">
+                {adminScope.tenant.name} / {adminScope.site.name}
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              className="shrink-0 border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white"
+              onClick={adminScope.changeScope}
+              data-testid="button-change-kinflo-admin-scope"
+            >
+              Change scope
+            </Button>
           </div>
           <div
             className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]`}
@@ -11539,6 +11567,15 @@ export default function AdminKinfloShell() {
           <TabsContent value="site-studio" className="mt-2">
             <section className="flex min-w-0 flex-col gap-2 overflow-x-clip" data-testid="section-kinflo-client-studio-compact-shell">
               {clientWebsiteStudioLaneRail}
+
+              <div className={`${shouldShowClientWebsiteStudioContext ? "block" : "hidden"} order-2`}>
+                <TenantSiteComposer
+                  siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
+                  siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
+                  previewPath={clientWebsiteStudioPreviewPath}
+                  onOpenControl={(control) => selectShellTab(control)}
+                />
+              </div>
 
               <div
                 className={`order-3 ${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}

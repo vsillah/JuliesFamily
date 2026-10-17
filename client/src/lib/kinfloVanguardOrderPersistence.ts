@@ -10,6 +10,7 @@ export const VANGUARD_ORDER_PERSISTENCE_FUNCTIONS = {
   cancelPreparedUpload: "orders.cancelPreparedUpload",
   attachStoredSource: "orders.attachStoredSource",
   removeStoredSource: "orders.removeStoredSource",
+  cancelDraft: "orders.cancelDraft",
   getStoredSourceDownloadUrl: "orders.getStoredSourceDownloadUrl",
   requestAssistance: "orders.requestAssistance",
   grantAssistance: "orders.grantAssistance",

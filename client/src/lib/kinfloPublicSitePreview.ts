@@ -79,6 +79,7 @@ export type KinfloPublicSitePreview = {
       heroPosition?: string;
       treatment: string;
       logoImage?: string;
+      logoImageOnDark?: string;
       logoAlt?: string;
     };
   };
@@ -294,6 +295,7 @@ const previews: KinfloPublicSitePreview[] = [
         heroPosition: "68% center",
         treatment: "industrial-welding-fabrication-build",
         logoImage: vanguardWorkflow.company.logo.image,
+        logoImageOnDark: vanguardWorkflow.company.logo.imageOnDark,
         logoAlt: vanguardWorkflow.company.logo.alt,
       },
     },
