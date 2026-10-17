@@ -102,6 +102,27 @@ check(
   "Capture ephemeral CLI output without publishing or retaining it.",
 );
 check(
+  "CLI failure classification is coarse and allowlisted",
+  [
+    "authentication_or_authorization",
+    "source_validation_or_codegen",
+    "network_or_service_availability",
+    "configuration_or_deployment_binding",
+    "unclassified_cli_failure",
+    "not_available_before_cli_attempt",
+  ].every((classification) => workflow.includes(classification)) &&
+    workflow.includes('echo "CONVEX_FAILURE_CLASSIFICATION=$failure_classification" >> "$GITHUB_ENV"') &&
+    workflow.includes('*) failure_classification="unclassified_cli_failure" ;;'),
+  "Classify a failed CLI attempt using only fixed coarse labels.",
+);
+check(
+  "failure classification never publishes captured CLI content",
+  !/cat\s+[^\n]*deploy_log/.test(workflow) &&
+    !/echo\s+[^\n]*(?:deploy_log|\$\([^\n]*grep)/.test(workflow) &&
+    !/GITHUB_(?:STEP_SUMMARY|OUTPUT|ENV)[^\n]*(?:grep|sed|awk|tail|head)[^\n]*deploy_log/.test(workflow),
+  "Never copy raw or extracted Convex CLI output into annotations, outputs, environment values, or summaries.",
+);
+check(
   "secret is never echoed",
   !/echo[^\n]*(?:\$CONVEX_DEPLOY_KEY|\$\{CONVEX_DEPLOY_KEY)/.test(workflow) &&
     !/GITHUB_STEP_SUMMARY[^\n]*(?:\$CONVEX_DEPLOY_KEY|\$\{CONVEX_DEPLOY_KEY)/.test(workflow),
@@ -122,7 +143,10 @@ check(
 );
 check(
   "sanitized failure evidence stops without retry",
-  workflow.includes("failed; no retry attempted") && workflow.includes("if: ${{ failure() }}"),
+  workflow.includes("failed; no retry attempted") &&
+    workflow.includes("Failure classification:") &&
+    workflow.includes("Raw CLI output printed:") &&
+    workflow.includes("if: ${{ failure() }}"),
   "A failure must leave a clear, sanitized stop receipt.",
 );
 check(

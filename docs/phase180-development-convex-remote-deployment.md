@@ -17,8 +17,10 @@ The workflow is source-only until the credential gate below is completed. Creati
 - Repository permission: read-only contents.
 - Concurrency: one KinFlo development deployment at a time; an active run is never cancelled by a newer run.
 - Target selection: there is no deployment input, no `CONVEX_DEPLOYMENT`, no `--prod`, and no `convex deploy` command.
-- Evidence: commit SHA, workflow run link, fixed development binding, and success/failure status only.
+- Evidence: commit SHA, workflow run link, fixed development binding, success/failure status, and one coarse allowlisted failure classification.
 - Secret values, raw Convex output, deployment URLs, environment values, and `.env.local` contents are never emitted.
+
+If the single Convex CLI attempt fails, the workflow inspects its ephemeral captured output without printing it and reports only one fixed category: `authentication_or_authorization`, `source_validation_or_codegen`, `network_or_service_availability`, `configuration_or_deployment_binding`, or `unclassified_cli_failure`. A failure before the CLI attempt reports `not_available_before_cli_attempt`. These categories are routing hints, not root-cause proof, and they never authorize a retry.
 
 Convex documents that `CONVEX_DEPLOY_KEY` binds CLI commands to the deployment represented by the key. For a development backend, its supported push command is `npx convex dev --once`. A deploy key used only by this workflow should allow only `deployment:deploy`.
 
@@ -56,8 +58,8 @@ After this branch is reviewed and merged to the default branch, an authorized ma
 3. Enter `deploy hallowed-manatee-765`.
 4. Select **Run workflow** once.
 5. If an environment review is configured, approve only after verifying the commit and fixed target.
-6. Copy only the sanitized job summary: commit, workflow run, `dev:hallowed-manatee-765`, and status.
-7. If the run fails or its result is unknown, stop. Do not retry until the failure is reviewed and a new run is explicitly authorized.
+6. Copy only the sanitized job summary: commit, workflow run, `dev:hallowed-manatee-765`, status, and coarse failure classification when present.
+7. If the run fails or its result is unknown, stop. Treat the classification only as a review-routing hint. Do not retry until the failure is reviewed and a new run is explicitly authorized.
 
 ## Hard exclusions
 
@@ -84,4 +86,4 @@ npm run check
 git diff --check
 ```
 
-The source validation proves the fixed manual trigger, fixed deployment name, dev-key prefix check, least-privilege workflow permissions, single-attempt command, sanitized evidence fields, absent production selectors, absent secret-output patterns, and `.env.local` prohibition. It is not proof that the protected secret exists or that a deployment ran.
+The source validation proves the fixed manual trigger, fixed deployment name, dev-key prefix check, least-privilege workflow permissions, single-attempt command, allowlisted coarse failure classification, sanitized evidence fields, absent production selectors, absent secret-output patterns, and `.env.local` prohibition. It is not proof that the protected secret exists, that a classification identifies the root cause, or that a deployment ran.
