@@ -39,7 +39,7 @@ import {
   Workflow,
 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
+import { canAccessKinfloAdmin, useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -4484,7 +4484,9 @@ function MobileInspectionMode({
 }
 
 export default function AdminKinfloShell() {
-  const { isLoading, isAdmin } = useKinfloAdminIdentity();
+  const adminIdentity = useKinfloAdminIdentity();
+  const { isLoading } = adminIdentity;
+  const canAccessAdmin = canAccessKinfloAdmin(adminIdentity);
   const [location, navigate] = useLocation();
   const snapshot = useKinfloShellSnapshot();
   const adminScope = useKinfloAdminScope();
@@ -5584,10 +5586,10 @@ export default function AdminKinfloShell() {
   };
 
   useEffect(() => {
-    if (!isLoading && !isAdmin) {
+    if (!isLoading && !canAccessAdmin) {
       navigate("/");
     }
-  }, [isAdmin, isLoading, navigate]);
+  }, [canAccessAdmin, isLoading, navigate]);
 
   useEffect(() => {
     const nextTab = readInitialShellTab();
@@ -6440,7 +6442,7 @@ export default function AdminKinfloShell() {
     );
   }
 
-  if (!isAdmin) {
+  if (!canAccessAdmin) {
     return null;
   }
 

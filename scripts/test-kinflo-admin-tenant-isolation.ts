@@ -5,6 +5,7 @@ import {
   resolveKinfloAdminScope,
   scopeFixtureKinfloShellSnapshot,
 } from "../client/src/lib/kinfloAdminScope.ts";
+import { canAccessKinfloAdmin } from "../client/src/contexts/KinfloAdminIdentityContext.tsx";
 import { getFixtureKinfloShellSnapshotForValidation } from "../client/src/lib/kinfloShellData.ts";
 
 const fixture = getFixtureKinfloShellSnapshotForValidation();
@@ -29,6 +30,16 @@ test("snapshot provider requires explicit scope instead of selecting tenants[0]"
   assert.doesNotMatch(provider, /tenants\?\.\[0\]/);
   assert.match(provider, /section-kinflo-admin-scope-gate/);
   assert.match(policy, /site\.tenantId !== tenant\.id/);
+});
+
+test("local fixture identity remains on the KinFlo admin route without a Julie role", () => {
+  assert.equal(canAccessKinfloAdmin({ isLoading: false, isAdmin: false, source: "local_fixture" }), true);
+  assert.equal(canAccessKinfloAdmin({ isLoading: false, isAdmin: false, source: "convex_auth" }), false);
+  assert.equal(canAccessKinfloAdmin({ isLoading: false, isAdmin: true, source: "convex_auth" }), true);
+
+  const shell = readFileSync("client/src/pages/AdminKinfloShell.tsx", "utf8");
+  assert.match(shell, /canAccessKinfloAdmin\(adminIdentity\)/);
+  assert.doesNotMatch(shell, /if \(!isLoading && !isAdmin\)/);
 });
 test("admin scope fails closed until tenant and site are explicit", () => {
   assert.equal(
