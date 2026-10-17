@@ -25,6 +25,7 @@ jobs:
       EXPECTED_CONVEX_DEPLOYMENT: hallowed-manatee-765
       DISPATCH_CONFIRMATION: ${{ inputs.confirmation }}
       CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      CONVEX_FAILURE_CLASSIFICATION: not_available_before_cli_attempt
     steps:
       - name: Check out requested commit
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -81,7 +82,24 @@ jobs:
           trap 'rm -f "$deploy_log"' EXIT
 
           if ! npx --no-install convex dev --once --typecheck enable --codegen enable --tail-logs disable >"$deploy_log" 2>&1; then
-            echo "::error title=Convex development deployment failed::The one-attempt Convex CLI run failed. Raw CLI output was withheld to preserve the sanitized evidence boundary."
+            failure_classification="unclassified_cli_failure"
+            if grep -Eiq "unauthorized|not authorized|permission denied|access denied|do not have access|don't have access|invalid (deploy )?key|deploy key.*(invalid|expired)|authentication" "$deploy_log"; then
+              failure_classification="authentication_or_authorization"
+            elif grep -Eiq 'typecheck|type check|typescript|codegen|code generation|failed to compile|compilation failed|schema validation|validation error' "$deploy_log"; then
+              failure_classification="source_validation_or_codegen"
+            elif grep -Eiq 'network|timed out|timeout|connection (refused|reset)|socket hang up|temporary failure|service unavailable|bad gateway|gateway timeout|econnreset|econnrefused|enotfound' "$deploy_log"; then
+              failure_classification="network_or_service_availability"
+            elif grep -Eiq 'deployment.*(not found|mismatch|invalid)|project.*(not found|mismatch|invalid)|invalid deployment|deployment configuration|missing environment variable|environment variable.*missing' "$deploy_log"; then
+              failure_classification="configuration_or_deployment_binding"
+            fi
+
+            case "$failure_classification" in
+              authentication_or_authorization|source_validation_or_codegen|network_or_service_availability|configuration_or_deployment_binding|unclassified_cli_failure) ;;
+              *) failure_classification="unclassified_cli_failure" ;;
+            esac
+
+            echo "CONVEX_FAILURE_CLASSIFICATION=$failure_classification" >> "$GITHUB_ENV"
+            echo "::error title=Convex development deployment failed::The one-attempt Convex CLI run failed with sanitized classification: $failure_classification. Raw CLI output was withheld to preserve the sanitized evidence boundary."
             exit 1
           fi
 
@@ -114,5 +132,7 @@ jobs:
             echo "- Workflow run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
             echo "- Deployment binding: \`dev:$EXPECTED_CONVEX_DEPLOYMENT\`"
             echo "- Status: \`failed; no retry attempted\`"
+            echo "- Failure classification: \`$CONVEX_FAILURE_CLASSIFICATION\`"
             echo "- Secret values printed: \`no\`"
+            echo "- Raw CLI output printed: \`no\`"
           } >> "$GITHUB_STEP_SUMMARY"
