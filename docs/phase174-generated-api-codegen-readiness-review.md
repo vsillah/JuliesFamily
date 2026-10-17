@@ -10,11 +10,11 @@ Codegen is not run in this phase. The committed gate state still blocks the code
 
 ## Review Result
 
-- Runtime contract functions: 86
-- Generated API bindings: 86
-- Query bindings: 48
-- Mutation bindings: 38
-- Convex modules covered: 14
+- Runtime contract functions: 93
+- Generated API bindings: 93
+- Query bindings: 51
+- Mutation bindings: 42
+- Convex modules covered: 15
 - Missing Convex exports found: 0
 - Generated API files tracked: 0
 - Generated API imported: no
@@ -26,6 +26,7 @@ Codegen is not run in this phase. The committed gate state still blocks the code
 - `accessPolicy`
 - `activation`
 - `aiReview`
+- `audience`
 - `campaigns`
 - `controlPlane`
 - `crm`
